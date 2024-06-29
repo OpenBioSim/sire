@@ -52,6 +52,8 @@ namespace bp = boost::python;
 
 SireMM::InterGroupFF __copy__(const SireMM::InterGroupFF &other){ return SireMM::InterGroupFF(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -627,9 +629,9 @@ void register_InterGroupFF_class(){
         
         }
         InterGroupFF_exposer.staticmethod( "typeName" );
-        InterGroupFF_exposer.def( "__copy__", &__copy__);
-        InterGroupFF_exposer.def( "__deepcopy__", &__copy__);
-        InterGroupFF_exposer.def( "clone", &__copy__);
+        InterGroupFF_exposer.def( "__copy__", &__copy__<SireMM::InterGroupFF>);
+        InterGroupFF_exposer.def( "__deepcopy__", &__copy__<SireMM::InterGroupFF>);
+        InterGroupFF_exposer.def( "clone", &__copy__<SireMM::InterGroupFF>);
         InterGroupFF_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::InterGroupFF >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         InterGroupFF_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::InterGroupFF >,

@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 SireMM::CLJAtom __copy__(const SireMM::CLJAtom &other){ return SireMM::CLJAtom(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -208,9 +210,9 @@ void register_CLJAtom_class(){
         }
         CLJAtom_exposer.staticmethod( "buildFrom" );
         CLJAtom_exposer.staticmethod( "typeName" );
-        CLJAtom_exposer.def( "__copy__", &__copy__);
-        CLJAtom_exposer.def( "__deepcopy__", &__copy__);
-        CLJAtom_exposer.def( "clone", &__copy__);
+        CLJAtom_exposer.def( "__copy__", &__copy__<SireMM::CLJAtom>);
+        CLJAtom_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJAtom>);
+        CLJAtom_exposer.def( "clone", &__copy__<SireMM::CLJAtom>);
         CLJAtom_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJAtom >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJAtom_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJAtom >,

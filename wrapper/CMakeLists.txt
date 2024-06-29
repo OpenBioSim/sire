@@ -283,6 +283,8 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio")  # MSBuild
 
   message(STATUS "Turning on bigobj")  # needed to link _Mol.pyd
   add_compile_options("/bigobj")
+  message(STATUS "Silencing deprecation warning: D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING")
+  add_compile_definitions("/D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING")
 endif()
 
 # Conda can mess up our include paths. This makes sure that every

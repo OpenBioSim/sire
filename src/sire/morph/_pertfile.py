@@ -26,6 +26,7 @@ def create_from_pertfile(mol, pertfile, map=None):
     from ..legacy.IO import PerturbationsLibrary
 
     from ..base import create_map
+    from ..mol import Element
 
     map = create_map(map)
 
@@ -65,6 +66,7 @@ def create_from_pertfile(mol, pertfile, map=None):
     chg_prop = map["charge"].source()
     lj_prop = map["LJ"].source()
     typ_prop = map["ambertype"].source()
+    elem_prop = map["element"].source()
 
     c["charge0"] = c[chg_prop]
     c["charge1"] = c[chg_prop]
@@ -74,6 +76,9 @@ def create_from_pertfile(mol, pertfile, map=None):
 
     c["ambertype0"] = c[typ_prop]
     c["ambertype1"] = c[typ_prop]
+
+    c["element0"] = c[elem_prop]
+    c["element1"] = c[elem_prop]
 
     for atom in c.atoms():
         atomname = atom.name
@@ -96,6 +101,8 @@ def create_from_pertfile(mol, pertfile, map=None):
 
         atom["ambertype0"] = typ0
         atom["ambertype1"] = typ1
+
+        atom["element1"] = Element.biological_element(typ1)
 
     # now update all of the internals
     bond_prop = map["bond"].source()
@@ -251,8 +258,8 @@ def create_from_pertfile(mol, pertfile, map=None):
     c["improper0"] = impropers0
     c["improper1"] = impropers1
 
-    # duplicate the coordinates, mass, and element properties
-    for prop in ["coordinates", "mass", "element", "forcefield", "intrascale"]:
+    # duplicate unperturbed properties
+    for prop in ["coordinates", "mass", "forcefield", "intrascale"]:
         orig_prop = map[prop].source()
         c[prop + "0"] = c[orig_prop]
         c[prop + "1"] = c[orig_prop]
@@ -262,6 +269,7 @@ def create_from_pertfile(mol, pertfile, map=None):
     del c[chg_prop]
     del c[lj_prop]
     del c[typ_prop]
+    del c[elem_prop]
     del c[bond_prop]
     del c[ang_prop]
     del c[dih_prop]

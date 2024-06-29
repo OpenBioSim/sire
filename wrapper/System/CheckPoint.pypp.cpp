@@ -17,6 +17,8 @@ namespace bp = boost::python;
 
 SireSystem::CheckPoint __copy__(const SireSystem::CheckPoint &other){ return SireSystem::CheckPoint(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -72,9 +74,9 @@ void register_CheckPoint_class(){
         
         }
         CheckPoint_exposer.staticmethod( "typeName" );
-        CheckPoint_exposer.def( "__copy__", &__copy__);
-        CheckPoint_exposer.def( "__deepcopy__", &__copy__);
-        CheckPoint_exposer.def( "clone", &__copy__);
+        CheckPoint_exposer.def( "__copy__", &__copy__<SireSystem::CheckPoint>);
+        CheckPoint_exposer.def( "__deepcopy__", &__copy__<SireSystem::CheckPoint>);
+        CheckPoint_exposer.def( "clone", &__copy__<SireSystem::CheckPoint>);
         CheckPoint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::CheckPoint >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CheckPoint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::CheckPoint >,

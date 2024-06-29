@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireMM::ImproperParameterName __copy__(const SireMM::ImproperParameterName &other){ return SireMM::ImproperParameterName(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::ImproperParameterName&){ return "SireMM::ImproperParameterName";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -71,9 +73,9 @@ void register_ImproperParameterName_class(){
                 , "" );
         
         }
-        ImproperParameterName_exposer.def( "__copy__", &__copy__);
-        ImproperParameterName_exposer.def( "__deepcopy__", &__copy__);
-        ImproperParameterName_exposer.def( "clone", &__copy__);
+        ImproperParameterName_exposer.def( "__copy__", &__copy__<SireMM::ImproperParameterName>);
+        ImproperParameterName_exposer.def( "__deepcopy__", &__copy__<SireMM::ImproperParameterName>);
+        ImproperParameterName_exposer.def( "clone", &__copy__<SireMM::ImproperParameterName>);
         ImproperParameterName_exposer.def( "__str__", &pvt_get_name);
         ImproperParameterName_exposer.def( "__repr__", &pvt_get_name);
     }

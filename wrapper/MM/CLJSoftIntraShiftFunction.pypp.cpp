@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 SireMM::CLJSoftIntraShiftFunction __copy__(const SireMM::CLJSoftIntraShiftFunction &other){ return SireMM::CLJSoftIntraShiftFunction(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -108,9 +110,9 @@ void register_CLJSoftIntraShiftFunction_class(){
         }
         CLJSoftIntraShiftFunction_exposer.staticmethod( "defaultShiftFunction" );
         CLJSoftIntraShiftFunction_exposer.staticmethod( "typeName" );
-        CLJSoftIntraShiftFunction_exposer.def( "__copy__", &__copy__);
-        CLJSoftIntraShiftFunction_exposer.def( "__deepcopy__", &__copy__);
-        CLJSoftIntraShiftFunction_exposer.def( "clone", &__copy__);
+        CLJSoftIntraShiftFunction_exposer.def( "__copy__", &__copy__<SireMM::CLJSoftIntraShiftFunction>);
+        CLJSoftIntraShiftFunction_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJSoftIntraShiftFunction>);
+        CLJSoftIntraShiftFunction_exposer.def( "clone", &__copy__<SireMM::CLJSoftIntraShiftFunction>);
         CLJSoftIntraShiftFunction_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJSoftIntraShiftFunction >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJSoftIntraShiftFunction_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJSoftIntraShiftFunction >,

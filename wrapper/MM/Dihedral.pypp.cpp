@@ -42,6 +42,8 @@ namespace bp = boost::python;
 
 SireMM::Dihedral __copy__(const SireMM::Dihedral &other){ return SireMM::Dihedral(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -483,9 +485,9 @@ void register_Dihedral_class(){
         
         }
         Dihedral_exposer.staticmethod( "typeName" );
-        Dihedral_exposer.def( "__copy__", &__copy__);
-        Dihedral_exposer.def( "__deepcopy__", &__copy__);
-        Dihedral_exposer.def( "clone", &__copy__);
+        Dihedral_exposer.def( "__copy__", &__copy__<SireMM::Dihedral>);
+        Dihedral_exposer.def( "__deepcopy__", &__copy__<SireMM::Dihedral>);
+        Dihedral_exposer.def( "clone", &__copy__<SireMM::Dihedral>);
         Dihedral_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::Dihedral >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Dihedral_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::Dihedral >,

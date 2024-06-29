@@ -73,6 +73,8 @@ namespace bp = boost::python;
 
 SireMM::AmberNB14 __copy__(const SireMM::AmberNB14 &other){ return SireMM::AmberNB14(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -190,9 +192,9 @@ void register_AmberNB14_class(){
         
         }
         AmberNB14_exposer.staticmethod( "typeName" );
-        AmberNB14_exposer.def( "__copy__", &__copy__);
-        AmberNB14_exposer.def( "__deepcopy__", &__copy__);
-        AmberNB14_exposer.def( "clone", &__copy__);
+        AmberNB14_exposer.def( "__copy__", &__copy__<SireMM::AmberNB14>);
+        AmberNB14_exposer.def( "__deepcopy__", &__copy__<SireMM::AmberNB14>);
+        AmberNB14_exposer.def( "clone", &__copy__<SireMM::AmberNB14>);
         AmberNB14_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::AmberNB14 >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AmberNB14_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::AmberNB14 >,

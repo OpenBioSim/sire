@@ -124,6 +124,9 @@ namespace SireMol
 
         QString toString() const;
 
+        QByteArray toByteArray() const;
+        static Frame fromByteArray(const QByteArray &data);
+
         bool isEmpty() const;
 
         bool hasCoordinates() const;
@@ -226,6 +229,8 @@ namespace SireMol
 
         virtual QStringList filenames() const = 0;
 
+        virtual bool isLive() const;
+
         virtual Frame getFrame(int i) const = 0;
         virtual Frame getFrame(int i, const LazyEvaluator &evaluator) const = 0;
 
@@ -323,9 +328,11 @@ namespace SireMol
         Trajectory();
 
         Trajectory(const TrajectoryData &trajectory);
+        Trajectory(const TrajectoryDataPtr &trajectory);
         Trajectory(const QList<TrajectoryDataPtr> &trajectories);
 
         Trajectory(const TrajectoryData &trajectory, int start_atom, int natoms);
+        Trajectory(const TrajectoryDataPtr &trajectory, int start_atom, int natoms);
 
         Trajectory(const QList<TrajectoryDataPtr> &trajectories, int start_atom, int natoms);
 
@@ -370,6 +377,9 @@ namespace SireMol
         void appendFrame(const Frame &frame);
         void insertFrame(int i, const Frame &frame);
         void deleteFrame(int i);
+
+        void append(const TrajectoryData &data);
+        void append(const TrajectoryDataPtr &data);
 
         bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
 

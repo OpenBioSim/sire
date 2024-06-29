@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 SireSystem::SysName __copy__(const SireSystem::SysName &other){ return SireSystem::SysName(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -118,9 +120,9 @@ void register_SysName_class(){
         
         }
         SysName_exposer.staticmethod( "typeName" );
-        SysName_exposer.def( "__copy__", &__copy__);
-        SysName_exposer.def( "__deepcopy__", &__copy__);
-        SysName_exposer.def( "clone", &__copy__);
+        SysName_exposer.def( "__copy__", &__copy__<SireSystem::SysName>);
+        SysName_exposer.def( "__deepcopy__", &__copy__<SireSystem::SysName>);
+        SysName_exposer.def( "clone", &__copy__<SireSystem::SysName>);
         SysName_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::SysName >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SysName_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::SysName >,

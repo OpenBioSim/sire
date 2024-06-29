@@ -25,6 +25,8 @@ namespace bp = boost::python;
 
 SireMM::BoreschRestraint __copy__(const SireMM::BoreschRestraint &other){ return SireMM::BoreschRestraint(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -201,9 +203,9 @@ void register_BoreschRestraint_class(){
         
         }
         BoreschRestraint_exposer.staticmethod( "typeName" );
-        BoreschRestraint_exposer.def( "__copy__", &__copy__);
-        BoreschRestraint_exposer.def( "__deepcopy__", &__copy__);
-        BoreschRestraint_exposer.def( "clone", &__copy__);
+        BoreschRestraint_exposer.def( "__copy__", &__copy__<SireMM::BoreschRestraint>);
+        BoreschRestraint_exposer.def( "__deepcopy__", &__copy__<SireMM::BoreschRestraint>);
+        BoreschRestraint_exposer.def( "clone", &__copy__<SireMM::BoreschRestraint>);
         BoreschRestraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::BoreschRestraint >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         BoreschRestraint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::BoreschRestraint >,

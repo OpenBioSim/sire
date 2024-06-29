@@ -37,6 +37,8 @@ namespace bp = boost::python;
 
 SireMM::CLJBoxIndex __copy__(const SireMM::CLJBoxIndex &other){ return SireMM::CLJBoxIndex(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -336,9 +338,9 @@ void register_CLJBoxIndex_class(){
         CLJBoxIndex_exposer.staticmethod( "createWithInverseBoxLength" );
         CLJBoxIndex_exposer.staticmethod( "null" );
         CLJBoxIndex_exposer.staticmethod( "typeName" );
-        CLJBoxIndex_exposer.def( "__copy__", &__copy__);
-        CLJBoxIndex_exposer.def( "__deepcopy__", &__copy__);
-        CLJBoxIndex_exposer.def( "clone", &__copy__);
+        CLJBoxIndex_exposer.def( "__copy__", &__copy__<SireMM::CLJBoxIndex>);
+        CLJBoxIndex_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJBoxIndex>);
+        CLJBoxIndex_exposer.def( "clone", &__copy__<SireMM::CLJBoxIndex>);
         CLJBoxIndex_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJBoxIndex >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJBoxIndex_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJBoxIndex >,

@@ -1,4 +1,11 @@
-__all__ = ["create_map", "wrap", "PropertyMap", "ProgressBar", "Properties"]
+__all__ = [
+    "create_map",
+    "wrap",
+    "PageCache",
+    "PropertyMap",
+    "ProgressBar",
+    "Properties",
+]
 
 from ..legacy import Base as _Base
 
@@ -7,6 +14,8 @@ from .. import use_new_api as _use_new_api
 from ..legacy.Base import PropertyMap, Properties
 
 from ._progressbar import ProgressBar
+
+from ._pagecache import PageCache
 
 _use_new_api(is_base=True)
 

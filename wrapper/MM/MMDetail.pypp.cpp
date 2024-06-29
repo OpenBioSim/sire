@@ -21,6 +21,8 @@ namespace bp = boost::python;
 
 SireMM::MMDetail __copy__(const SireMM::MMDetail &other){ return SireMM::MMDetail(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -330,9 +332,9 @@ void register_MMDetail_class(){
         }
         MMDetail_exposer.staticmethod( "guessFrom" );
         MMDetail_exposer.staticmethod( "typeName" );
-        MMDetail_exposer.def( "__copy__", &__copy__);
-        MMDetail_exposer.def( "__deepcopy__", &__copy__);
-        MMDetail_exposer.def( "clone", &__copy__);
+        MMDetail_exposer.def( "__copy__", &__copy__<SireMM::MMDetail>);
+        MMDetail_exposer.def( "__deepcopy__", &__copy__<SireMM::MMDetail>);
+        MMDetail_exposer.def( "clone", &__copy__<SireMM::MMDetail>);
         MMDetail_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::MMDetail >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         MMDetail_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::MMDetail >,

@@ -39,6 +39,7 @@
 #include "SireMol/mgnum.h"
 #include "SireMol/moleculegroup.h"
 #include "SireMol/moleculegroups.h"
+#include "SireMol/trajectory.h"
 
 #include "SireFF/forcefields.h"
 
@@ -422,21 +423,29 @@ namespace SireSystem
 
         void loadFrame(int frame);
         void loadFrame(int frame, const SireBase::LazyEvaluator &evaluator);
+
         void saveFrame(int frame);
         void saveFrame();
+
         void deleteFrame(int frame);
         void deleteAllFrames();
 
         void loadFrame(int frame, const SireBase::PropertyMap &map);
         void loadFrame(int frame, const SireBase::LazyEvaluator &evaluator,
                        const SireBase::PropertyMap &map);
+
         void saveFrame(int frame, const SireBase::PropertyMap &map);
         void saveFrame(const SireBase::PropertyMap &map);
+
         void deleteFrame(int frame, const SireBase::PropertyMap &map);
         void deleteAllFrames(const SireBase::PropertyMap &map);
 
         void makeWhole();
         void makeWhole(const SireBase::PropertyMap &map);
+
+        void makeWhole(const SireMaths::Vector &center);
+        void makeWhole(const SireMaths::Vector &center,
+                       const SireBase::PropertyMap &map);
 
         static const System &null();
 
@@ -527,6 +536,11 @@ namespace SireSystem
             will be added and kept up-to-date in contained molecules.
             By default, these are the "space" and "time" properties */
         QStringList shared_properties;
+
+        /** Shared pointer to the current active SystemTrajectory.
+         *  This will either be null or a valid pointer to a
+         *  SystemTrajectory object */
+        SireMol::TrajectoryDataPtr system_trajectory;
 
         /** The subversion of this system - this is incremented when
             delta updates are being applied. A system with non-zero

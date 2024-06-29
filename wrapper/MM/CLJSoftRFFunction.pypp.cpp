@@ -35,6 +35,8 @@ namespace bp = boost::python;
 
 SireMM::CLJSoftRFFunction __copy__(const SireMM::CLJSoftRFFunction &other){ return SireMM::CLJSoftRFFunction(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -198,9 +200,9 @@ void register_CLJSoftRFFunction_class(){
         }
         CLJSoftRFFunction_exposer.staticmethod( "defaultRFFunction" );
         CLJSoftRFFunction_exposer.staticmethod( "typeName" );
-        CLJSoftRFFunction_exposer.def( "__copy__", &__copy__);
-        CLJSoftRFFunction_exposer.def( "__deepcopy__", &__copy__);
-        CLJSoftRFFunction_exposer.def( "clone", &__copy__);
+        CLJSoftRFFunction_exposer.def( "__copy__", &__copy__<SireMM::CLJSoftRFFunction>);
+        CLJSoftRFFunction_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJSoftRFFunction>);
+        CLJSoftRFFunction_exposer.def( "clone", &__copy__<SireMM::CLJSoftRFFunction>);
         CLJSoftRFFunction_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJSoftRFFunction >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJSoftRFFunction_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJSoftRFFunction >,

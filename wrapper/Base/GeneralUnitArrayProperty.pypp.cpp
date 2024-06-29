@@ -21,6 +21,8 @@ namespace bp = boost::python;
 
 SireBase::GeneralUnitArrayProperty __copy__(const SireBase::GeneralUnitArrayProperty &other){ return SireBase::GeneralUnitArrayProperty(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -90,9 +92,9 @@ void register_GeneralUnitArrayProperty_class(){
         
         }
         GeneralUnitArrayProperty_exposer.staticmethod( "typeName" );
-        GeneralUnitArrayProperty_exposer.def( "__copy__", &__copy__);
-        GeneralUnitArrayProperty_exposer.def( "__deepcopy__", &__copy__);
-        GeneralUnitArrayProperty_exposer.def( "clone", &__copy__);
+        GeneralUnitArrayProperty_exposer.def( "__copy__", &__copy__<SireBase::GeneralUnitArrayProperty>);
+        GeneralUnitArrayProperty_exposer.def( "__deepcopy__", &__copy__<SireBase::GeneralUnitArrayProperty>);
+        GeneralUnitArrayProperty_exposer.def( "clone", &__copy__<SireBase::GeneralUnitArrayProperty>);
         GeneralUnitArrayProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::GeneralUnitArrayProperty >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         GeneralUnitArrayProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::GeneralUnitArrayProperty >,

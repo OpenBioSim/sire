@@ -18,6 +18,8 @@ namespace bp = boost::python;
 
 SireFF::Intra2BFF<SireMM::LJPotentialInterface<SireMM::IntraLJPotential> > __copy__(const SireFF::Intra2BFF<SireMM::LJPotentialInterface<SireMM::IntraLJPotential> > &other){ return SireFF::Intra2BFF<SireMM::LJPotentialInterface<SireMM::IntraLJPotential> >(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -158,9 +160,9 @@ void register_IntraLJFFBase_class(){
         
         }
         IntraLJFFBase_exposer.staticmethod( "typeName" );
-        IntraLJFFBase_exposer.def( "__copy__", &__copy__);
-        IntraLJFFBase_exposer.def( "__deepcopy__", &__copy__);
-        IntraLJFFBase_exposer.def( "clone", &__copy__);
+        IntraLJFFBase_exposer.def( "__copy__", &__copy__<SireFF::Intra2BFF<SireMM::LJPotentialInterface<SireMM::IntraLJPotential> >>);
+        IntraLJFFBase_exposer.def( "__deepcopy__", &__copy__<SireFF::Intra2BFF<SireMM::LJPotentialInterface<SireMM::IntraLJPotential> >>);
+        IntraLJFFBase_exposer.def( "clone", &__copy__<SireFF::Intra2BFF<SireMM::LJPotentialInterface<SireMM::IntraLJPotential> >>);
         IntraLJFFBase_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireFF::Intra2BFF<SireMM::LJPotentialInterface<SireMM::IntraLJPotential> > >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         IntraLJFFBase_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireFF::Intra2BFF<SireMM::LJPotentialInterface<SireMM::IntraLJPotential> > >,

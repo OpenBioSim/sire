@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 SireBase::Incremint __copy__(const SireBase::Incremint &other){ return SireBase::Incremint(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireBase::Incremint&){ return "SireBase::Incremint";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -36,9 +38,9 @@ void register_Incremint_class(){
                 , "" );
         
         }
-        Incremint_exposer.def( "__copy__", &__copy__);
-        Incremint_exposer.def( "__deepcopy__", &__copy__);
-        Incremint_exposer.def( "clone", &__copy__);
+        Incremint_exposer.def( "__copy__", &__copy__<SireBase::Incremint>);
+        Incremint_exposer.def( "__deepcopy__", &__copy__<SireBase::Incremint>);
+        Incremint_exposer.def( "clone", &__copy__<SireBase::Incremint>);
         Incremint_exposer.def( "__str__", &pvt_get_name);
         Incremint_exposer.def( "__repr__", &pvt_get_name);
     }

@@ -58,10 +58,38 @@ void register_Trajectory_class(){
         Trajectory_exposer_t Trajectory_exposer = Trajectory_exposer_t( "Trajectory", "This is a molecular property that holds the handle to the\ntrajectory data for that molecule. In addition to the\nhandle, this also holds the index of the first atom\nin the underlying trajectory data (trajectory data is a\nvector of coordinates in atom index order for each molecule)\n", bp::init< >("") );
         bp::scope Trajectory_scope( Trajectory_exposer );
         Trajectory_exposer.def( bp::init< SireMol::TrajectoryData const & >(( bp::arg("trajectory") ), "") );
+        Trajectory_exposer.def( bp::init< SireMol::TrajectoryDataPtr const & >(( bp::arg("trajectory") ), "") );
         Trajectory_exposer.def( bp::init< QList< SireBase::SharedPolyPointer< SireMol::TrajectoryData > > const & >(( bp::arg("trajectories") ), "") );
         Trajectory_exposer.def( bp::init< SireMol::TrajectoryData const &, int, int >(( bp::arg("trajectory"), bp::arg("start_atom"), bp::arg("natoms") ), "") );
+        Trajectory_exposer.def( bp::init< SireMol::TrajectoryDataPtr const &, int, int >(( bp::arg("trajectory"), bp::arg("start_atom"), bp::arg("natoms") ), "") );
         Trajectory_exposer.def( bp::init< QList< SireBase::SharedPolyPointer< SireMol::TrajectoryData > > const &, int, int >(( bp::arg("trajectories"), bp::arg("start_atom"), bp::arg("natoms") ), "") );
         Trajectory_exposer.def( bp::init< SireMol::Trajectory const & >(( bp::arg("other") ), "") );
+        { //::SireMol::Trajectory::append
+        
+            typedef void ( ::SireMol::Trajectory::*append_function_type)( ::SireMol::TrajectoryData const & ) ;
+            append_function_type append_function_value( &::SireMol::Trajectory::append );
+            
+            Trajectory_exposer.def( 
+                "append"
+                , append_function_value
+                , ( bp::arg("data") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Trajectory::append
+        
+            typedef void ( ::SireMol::Trajectory::*append_function_type)( ::SireMol::TrajectoryDataPtr const & ) ;
+            append_function_type append_function_value( &::SireMol::Trajectory::append );
+            
+            Trajectory_exposer.def( 
+                "append"
+                , append_function_value
+                , ( bp::arg("data") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::Trajectory::appendFrame
         
             typedef void ( ::SireMol::Trajectory::*appendFrame_function_type)( ::SireMol::Frame const & ) ;

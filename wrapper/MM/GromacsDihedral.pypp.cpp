@@ -35,6 +35,8 @@ namespace bp = boost::python;
 
 SireMM::GromacsDihedral __copy__(const SireMM::GromacsDihedral &other){ return SireMM::GromacsDihedral(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -358,9 +360,9 @@ void register_GromacsDihedral_class(){
         GromacsDihedral_exposer.staticmethod( "construct" );
         GromacsDihedral_exposer.staticmethod( "constructImproper" );
         GromacsDihedral_exposer.staticmethod( "typeName" );
-        GromacsDihedral_exposer.def( "__copy__", &__copy__);
-        GromacsDihedral_exposer.def( "__deepcopy__", &__copy__);
-        GromacsDihedral_exposer.def( "clone", &__copy__);
+        GromacsDihedral_exposer.def( "__copy__", &__copy__<SireMM::GromacsDihedral>);
+        GromacsDihedral_exposer.def( "__deepcopy__", &__copy__<SireMM::GromacsDihedral>);
+        GromacsDihedral_exposer.def( "clone", &__copy__<SireMM::GromacsDihedral>);
         GromacsDihedral_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::GromacsDihedral >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         GromacsDihedral_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::GromacsDihedral >,

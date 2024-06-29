@@ -85,6 +85,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMM::SelectorImproper> __copy__(const SireMol::Mover<SireMM::SelectorImproper> &other){ return SireMol::Mover<SireMM::SelectorImproper>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -476,9 +478,9 @@ void register_Mover_SelectorImproper__class(){
         
         }
         Mover_SelectorImproper__exposer.staticmethod( "typeName" );
-        Mover_SelectorImproper__exposer.def( "__copy__", &__copy__);
-        Mover_SelectorImproper__exposer.def( "__deepcopy__", &__copy__);
-        Mover_SelectorImproper__exposer.def( "clone", &__copy__);
+        Mover_SelectorImproper__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMM::SelectorImproper>>);
+        Mover_SelectorImproper__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMM::SelectorImproper>>);
+        Mover_SelectorImproper__exposer.def( "clone", &__copy__<SireMol::Mover<SireMM::SelectorImproper>>);
         Mover_SelectorImproper__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMM::SelectorImproper> > );
         Mover_SelectorImproper__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMM::SelectorImproper> > );
         Mover_SelectorImproper__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMM::SelectorImproper> > );

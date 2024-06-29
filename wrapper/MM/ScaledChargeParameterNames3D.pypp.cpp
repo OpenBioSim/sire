@@ -41,6 +41,8 @@ namespace bp = boost::python;
 
 SireMM::ScaledChargeParameterNames3D __copy__(const SireMM::ScaledChargeParameterNames3D &other){ return SireMM::ScaledChargeParameterNames3D(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::ScaledChargeParameterNames3D&){ return "SireMM::ScaledChargeParameterNames3D";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -51,9 +53,9 @@ void register_ScaledChargeParameterNames3D_class(){
         typedef bp::class_< SireMM::ScaledChargeParameterNames3D, bp::bases< SireMM::ChargeParameterName3D, SireMM::ChargeParameterName > > ScaledChargeParameterNames3D_exposer_t;
         ScaledChargeParameterNames3D_exposer_t ScaledChargeParameterNames3D_exposer = ScaledChargeParameterNames3D_exposer_t( "ScaledChargeParameterNames3D", "This class provides the default name of the properties\nthat contain the charge and intramolecular NB scale parameters and\n3D coordinates properties", bp::init< >("") );
         bp::scope ScaledChargeParameterNames3D_scope( ScaledChargeParameterNames3D_exposer );
-        ScaledChargeParameterNames3D_exposer.def( "__copy__", &__copy__);
-        ScaledChargeParameterNames3D_exposer.def( "__deepcopy__", &__copy__);
-        ScaledChargeParameterNames3D_exposer.def( "clone", &__copy__);
+        ScaledChargeParameterNames3D_exposer.def( "__copy__", &__copy__<SireMM::ScaledChargeParameterNames3D>);
+        ScaledChargeParameterNames3D_exposer.def( "__deepcopy__", &__copy__<SireMM::ScaledChargeParameterNames3D>);
+        ScaledChargeParameterNames3D_exposer.def( "clone", &__copy__<SireMM::ScaledChargeParameterNames3D>);
         ScaledChargeParameterNames3D_exposer.def( "__str__", &pvt_get_name);
         ScaledChargeParameterNames3D_exposer.def( "__repr__", &pvt_get_name);
     }

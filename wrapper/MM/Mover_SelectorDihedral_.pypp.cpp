@@ -85,6 +85,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMM::SelectorDihedral> __copy__(const SireMol::Mover<SireMM::SelectorDihedral> &other){ return SireMol::Mover<SireMM::SelectorDihedral>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -476,9 +478,9 @@ void register_Mover_SelectorDihedral__class(){
         
         }
         Mover_SelectorDihedral__exposer.staticmethod( "typeName" );
-        Mover_SelectorDihedral__exposer.def( "__copy__", &__copy__);
-        Mover_SelectorDihedral__exposer.def( "__deepcopy__", &__copy__);
-        Mover_SelectorDihedral__exposer.def( "clone", &__copy__);
+        Mover_SelectorDihedral__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMM::SelectorDihedral>>);
+        Mover_SelectorDihedral__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMM::SelectorDihedral>>);
+        Mover_SelectorDihedral__exposer.def( "clone", &__copy__<SireMol::Mover<SireMM::SelectorDihedral>>);
         Mover_SelectorDihedral__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMM::SelectorDihedral> > );
         Mover_SelectorDihedral__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMM::SelectorDihedral> > );
         Mover_SelectorDihedral__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMM::SelectorDihedral> > );

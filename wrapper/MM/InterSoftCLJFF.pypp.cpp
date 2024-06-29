@@ -17,6 +17,8 @@ namespace bp = boost::python;
 
 SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> > __copy__(const SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> > &other){ return SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -270,9 +272,9 @@ void register_InterSoftCLJFF_class(){
         
         }
         InterSoftCLJFF_exposer.staticmethod( "typeName" );
-        InterSoftCLJFF_exposer.def( "__copy__", &__copy__);
-        InterSoftCLJFF_exposer.def( "__deepcopy__", &__copy__);
-        InterSoftCLJFF_exposer.def( "clone", &__copy__);
+        InterSoftCLJFF_exposer.def( "__copy__", &__copy__<SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >>);
+        InterSoftCLJFF_exposer.def( "__deepcopy__", &__copy__<SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >>);
+        InterSoftCLJFF_exposer.def( "clone", &__copy__<SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >>);
         InterSoftCLJFF_exposer.def( "__str__", &__str__< ::SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> > > );
         InterSoftCLJFF_exposer.def( "__repr__", &__str__< ::SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> > > );
         InterSoftCLJFF_exposer.def( "__len__", &__len_count< ::SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> > > );

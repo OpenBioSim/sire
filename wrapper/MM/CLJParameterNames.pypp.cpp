@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 SireMM::CLJParameterNames __copy__(const SireMM::CLJParameterNames &other){ return SireMM::CLJParameterNames(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::CLJParameterNames&){ return "SireMM::CLJParameterNames";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -53,9 +55,9 @@ void register_CLJParameterNames_class(){
         typedef bp::class_< SireMM::CLJParameterNames, bp::bases< SireMM::LJParameterName, SireMM::ChargeParameterName > > CLJParameterNames_exposer_t;
         CLJParameterNames_exposer_t CLJParameterNames_exposer = CLJParameterNames_exposer_t( "CLJParameterNames", "This class provides the default name of the properties\nthat contain the charge and LJ parameters", bp::init< >("") );
         bp::scope CLJParameterNames_scope( CLJParameterNames_exposer );
-        CLJParameterNames_exposer.def( "__copy__", &__copy__);
-        CLJParameterNames_exposer.def( "__deepcopy__", &__copy__);
-        CLJParameterNames_exposer.def( "clone", &__copy__);
+        CLJParameterNames_exposer.def( "__copy__", &__copy__<SireMM::CLJParameterNames>);
+        CLJParameterNames_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJParameterNames>);
+        CLJParameterNames_exposer.def( "clone", &__copy__<SireMM::CLJParameterNames>);
         CLJParameterNames_exposer.def( "__str__", &pvt_get_name);
         CLJParameterNames_exposer.def( "__repr__", &pvt_get_name);
     }

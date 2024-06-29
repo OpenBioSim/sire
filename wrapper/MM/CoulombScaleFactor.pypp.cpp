@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMM::CoulombScaleFactor __copy__(const SireMM::CoulombScaleFactor &other){ return SireMM::CoulombScaleFactor(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireMM::CoulombScaleFactor&){ return "SireMM::CoulombScaleFactor";}
@@ -84,9 +86,9 @@ void register_CoulombScaleFactor_class(){
         
         }
         CoulombScaleFactor_exposer.staticmethod( "typeName" );
-        CoulombScaleFactor_exposer.def( "__copy__", &__copy__);
-        CoulombScaleFactor_exposer.def( "__deepcopy__", &__copy__);
-        CoulombScaleFactor_exposer.def( "clone", &__copy__);
+        CoulombScaleFactor_exposer.def( "__copy__", &__copy__<SireMM::CoulombScaleFactor>);
+        CoulombScaleFactor_exposer.def( "__deepcopy__", &__copy__<SireMM::CoulombScaleFactor>);
+        CoulombScaleFactor_exposer.def( "clone", &__copy__<SireMM::CoulombScaleFactor>);
         CoulombScaleFactor_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CoulombScaleFactor >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CoulombScaleFactor_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CoulombScaleFactor >,

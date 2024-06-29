@@ -436,3 +436,52 @@ and all of the water molecules.
 498    498   99.800003 -12.226096 -35.170080 -47.396176
 499    499  100.000000  -7.356142 -41.265345 -48.621487
 [500 rows x 5 columns]
+
+Trajectories and PageCache
+--------------------------
+
+When you run a molecular dynamics simulation, you will typically generate
+a lot of frames, which will become too large to fit in memory. To handle
+this, a :class:`sire.base.PageCache` is used. This class provides a
+:class:`~sire.base.PageCache` to which objects can be stored and fetched.
+The memory for those objects is automatically paged back to disk, meaning
+that it doesn't need to stay resident in memory.
+
+The :class:`~sire.system.System` class automatically uses a
+:class:`~sire.base.PageCache` to manage the frames involved in its
+:meth:`~sire.system.System.save_frame` and
+:meth:`~sire.system.System.load_frame` function calls. This page cache
+will page data larger than ~256MB to disk, into a directory called
+``temp_trajectory_XXXXXX`` in the current working directory
+(where ``XXXXXX`` is replaced with a random string). This directory
+will be automatically cleaned up when the program exits, and potentially
+earlier when the system is deleted and then garbage collected by python.
+
+You can change the location of the page cache in two ways. Either,
+you can set the environment variable ``SIRE_PAGECACHE_ROOT`` to the directory
+where you want the page cache to be stored, or you can call the
+:meth:`~sire.base.PageCache.set_root_directory` function to set the
+root directory in your script.
+
+You can also use the :class:`~sire.base.PageCache` class directly to
+create caches for your own objects. For example, here we will create a
+cache into which we will place some data.
+
+>>> import sire as sr
+>>> cache = sr.base.PageCache()
+>>> handle1 = cache.store("Hello World")
+>>> mols = sr.load_test_files("ala.top", "ala.crd")
+>>> handle2 = cache.store(mols)
+>>> print(handle1.fetch())
+Hello World
+>>> print(handle2.fetch())
+System( name=ACE num_molecules=631 num_residues=633 num_atoms=1912 )
+>>> print(sr.base.PageCache.get_statistics())
+Cache: /path/to/cache_root/temp_XXXXXX
+  Current Page: 977.279 KB : is_resident 1
+  Total size: 977.279 KB
+
+.. note::
+
+   The :class:`~sire.base.PageCache` class can hold any object that is
+   picklable.

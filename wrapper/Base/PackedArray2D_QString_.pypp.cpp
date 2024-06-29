@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 SireBase::PackedArray2D<QString> __copy__(const SireBase::PackedArray2D<QString> &other){ return SireBase::PackedArray2D<QString>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -404,9 +406,9 @@ void register_PackedArray2D_QString__class(){
         
         }
         PackedArray2D_QString__exposer.staticmethod( "fromVariant" );
-        PackedArray2D_QString__exposer.def( "__copy__", &__copy__);
-        PackedArray2D_QString__exposer.def( "__deepcopy__", &__copy__);
-        PackedArray2D_QString__exposer.def( "clone", &__copy__);
+        PackedArray2D_QString__exposer.def( "__copy__", &__copy__<SireBase::PackedArray2D<QString>>);
+        PackedArray2D_QString__exposer.def( "__deepcopy__", &__copy__<SireBase::PackedArray2D<QString>>);
+        PackedArray2D_QString__exposer.def( "clone", &__copy__<SireBase::PackedArray2D<QString>>);
         PackedArray2D_QString__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::PackedArray2D<QString> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         PackedArray2D_QString__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::PackedArray2D<QString> >,

@@ -26,6 +26,8 @@ namespace bp = boost::python;
 
 SireMM::BondRestraints __copy__(const SireMM::BondRestraints &other){ return SireMM::BondRestraints(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -296,9 +298,9 @@ void register_BondRestraints_class(){
         
         }
         BondRestraints_exposer.staticmethod( "typeName" );
-        BondRestraints_exposer.def( "__copy__", &__copy__);
-        BondRestraints_exposer.def( "__deepcopy__", &__copy__);
-        BondRestraints_exposer.def( "clone", &__copy__);
+        BondRestraints_exposer.def( "__copy__", &__copy__<SireMM::BondRestraints>);
+        BondRestraints_exposer.def( "__deepcopy__", &__copy__<SireMM::BondRestraints>);
+        BondRestraints_exposer.def( "clone", &__copy__<SireMM::BondRestraints>);
         BondRestraints_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::BondRestraints >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         BondRestraints_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::BondRestraints >,

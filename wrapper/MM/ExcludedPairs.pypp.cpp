@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMM::ExcludedPairs __copy__(const SireMM::ExcludedPairs &other){ return SireMM::ExcludedPairs(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -199,9 +201,9 @@ void register_ExcludedPairs_class(){
         
         }
         ExcludedPairs_exposer.staticmethod( "typeName" );
-        ExcludedPairs_exposer.def( "__copy__", &__copy__);
-        ExcludedPairs_exposer.def( "__deepcopy__", &__copy__);
-        ExcludedPairs_exposer.def( "clone", &__copy__);
+        ExcludedPairs_exposer.def( "__copy__", &__copy__<SireMM::ExcludedPairs>);
+        ExcludedPairs_exposer.def( "__deepcopy__", &__copy__<SireMM::ExcludedPairs>);
+        ExcludedPairs_exposer.def( "clone", &__copy__<SireMM::ExcludedPairs>);
         ExcludedPairs_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::ExcludedPairs >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ExcludedPairs_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::ExcludedPairs >,

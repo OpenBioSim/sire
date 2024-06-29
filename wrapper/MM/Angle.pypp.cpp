@@ -42,6 +42,8 @@ namespace bp = boost::python;
 
 SireMM::Angle __copy__(const SireMM::Angle &other){ return SireMM::Angle(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -471,9 +473,9 @@ void register_Angle_class(){
         
         }
         Angle_exposer.staticmethod( "typeName" );
-        Angle_exposer.def( "__copy__", &__copy__);
-        Angle_exposer.def( "__deepcopy__", &__copy__);
-        Angle_exposer.def( "clone", &__copy__);
+        Angle_exposer.def( "__copy__", &__copy__<SireMM::Angle>);
+        Angle_exposer.def( "__deepcopy__", &__copy__<SireMM::Angle>);
+        Angle_exposer.def( "clone", &__copy__<SireMM::Angle>);
         Angle_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::Angle >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Angle_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::Angle >,

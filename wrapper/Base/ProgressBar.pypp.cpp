@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 SireBase::ProgressBar __copy__(const SireBase::ProgressBar &other){ return SireBase::ProgressBar(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -328,9 +330,9 @@ void register_ProgressBar_class(){
         ProgressBar_exposer.staticmethod( "setSilent" );
         ProgressBar_exposer.staticmethod( "setTheme" );
         ProgressBar_exposer.staticmethod( "typeName" );
-        ProgressBar_exposer.def( "__copy__", &__copy__);
-        ProgressBar_exposer.def( "__deepcopy__", &__copy__);
-        ProgressBar_exposer.def( "clone", &__copy__);
+        ProgressBar_exposer.def( "__copy__", &__copy__<SireBase::ProgressBar>);
+        ProgressBar_exposer.def( "__deepcopy__", &__copy__<SireBase::ProgressBar>);
+        ProgressBar_exposer.def( "clone", &__copy__<SireBase::ProgressBar>);
         ProgressBar_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::ProgressBar >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ProgressBar_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::ProgressBar >,

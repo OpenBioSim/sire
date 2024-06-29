@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 SireMM::LJParameterName __copy__(const SireMM::LJParameterName &other){ return SireMM::LJParameterName(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::LJParameterName&){ return "SireMM::LJParameterName";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -67,9 +69,9 @@ void register_LJParameterName_class(){
                 , "" );
         
         }
-        LJParameterName_exposer.def( "__copy__", &__copy__);
-        LJParameterName_exposer.def( "__deepcopy__", &__copy__);
-        LJParameterName_exposer.def( "clone", &__copy__);
+        LJParameterName_exposer.def( "__copy__", &__copy__<SireMM::LJParameterName>);
+        LJParameterName_exposer.def( "__deepcopy__", &__copy__<SireMM::LJParameterName>);
+        LJParameterName_exposer.def( "clone", &__copy__<SireMM::LJParameterName>);
         LJParameterName_exposer.def( "__str__", &pvt_get_name);
         LJParameterName_exposer.def( "__repr__", &pvt_get_name);
     }

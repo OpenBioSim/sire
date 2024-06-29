@@ -375,6 +375,7 @@ def call_with_released_gil(c, func_name):
 
 all_exported_classes = {}
 
+
 def export_class(
     mb, classname, aliases, includes, special_code, auto_str_function=True
 ):
@@ -508,10 +509,17 @@ def export_class(
                             % (class_name, class_name, class_name)
                         )
 
-                        c.add_registration_code('def( "__copy__", &__copy__)')
+                        c.add_declaration_code('#include "Helpers/copy.hpp"')
+                        c.add_registration_code(
+                            'def( "__copy__", &__copy__<%s>)' % class_name
+                        )
 
-                        c.add_registration_code('def( "__deepcopy__", &__copy__)')
-                        c.add_registration_code('def( "clone", &__copy__)')
+                        c.add_registration_code(
+                            'def( "__deepcopy__", &__copy__<%s>)' % class_name
+                        )
+                        c.add_registration_code(
+                            'def( "clone", &__copy__<%s>)' % class_name
+                        )
 
                         # only do this once for the class
                         break
@@ -820,6 +828,7 @@ if __name__ == "__main__":
             define_symbols=[
                 "GCCXML_PARSE",
                 "__PIC__",
+                "QT_NO_SIGNALS_SLOTS_KEYWORDS=1",
                 "SIRE_ALWAYS_INLINE=inline",
                 "SIRE_SKIP_INLINE_FUNCTIONS",
                 "SIREN_SKIP_INLINE_FUNCTIONS",
@@ -846,6 +855,7 @@ if __name__ == "__main__":
             define_symbols=[
                 "GCCXML_PARSE",
                 "__PIC__",
+                "QT_NO_SIGNALS_SLOTS_KEYWORDS=1",
                 "SIRE_USE_OPENMM",
                 "SIRE_ALWAYS_INLINE=inline",
                 "SIRE_SKIP_INLINE_FUNCTIONS",

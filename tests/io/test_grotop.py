@@ -33,3 +33,9 @@ def test_grospace(tmpdir, kigaki_mols):
     mols = sr.load(f, show_warnings=False)
 
     assert energy.value() == pytest.approx(mols.energy().value())
+
+
+def test_posre():
+    # Make sure we can parse a file with BioSimSpace position restraint include
+    # directives.
+    mols = sr.load_test_files("posre.top")

@@ -34,6 +34,8 @@ namespace bp = boost::python;
 
 SireMM::DihedralSymbols __copy__(const SireMM::DihedralSymbols &other){ return SireMM::DihedralSymbols(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::DihedralSymbols&){ return "SireMM::DihedralSymbols";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -56,9 +58,9 @@ void register_DihedralSymbols_class(){
                 , "Return the symbol representing the torsion (phi)" );
         
         }
-        DihedralSymbols_exposer.def( "__copy__", &__copy__);
-        DihedralSymbols_exposer.def( "__deepcopy__", &__copy__);
-        DihedralSymbols_exposer.def( "clone", &__copy__);
+        DihedralSymbols_exposer.def( "__copy__", &__copy__<SireMM::DihedralSymbols>);
+        DihedralSymbols_exposer.def( "__deepcopy__", &__copy__<SireMM::DihedralSymbols>);
+        DihedralSymbols_exposer.def( "clone", &__copy__<SireMM::DihedralSymbols>);
         DihedralSymbols_exposer.def( "__str__", &pvt_get_name);
         DihedralSymbols_exposer.def( "__repr__", &pvt_get_name);
     }

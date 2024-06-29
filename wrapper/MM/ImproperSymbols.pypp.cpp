@@ -34,6 +34,8 @@ namespace bp = boost::python;
 
 SireMM::ImproperSymbols __copy__(const SireMM::ImproperSymbols &other){ return SireMM::ImproperSymbols(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::ImproperSymbols&){ return "SireMM::ImproperSymbols";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -68,9 +70,9 @@ void register_ImproperSymbols_class(){
                 , "Return the symbol representing the angle between the improper\nand the plane formed by atoms 1-3" );
         
         }
-        ImproperSymbols_exposer.def( "__copy__", &__copy__);
-        ImproperSymbols_exposer.def( "__deepcopy__", &__copy__);
-        ImproperSymbols_exposer.def( "clone", &__copy__);
+        ImproperSymbols_exposer.def( "__copy__", &__copy__<SireMM::ImproperSymbols>);
+        ImproperSymbols_exposer.def( "__deepcopy__", &__copy__<SireMM::ImproperSymbols>);
+        ImproperSymbols_exposer.def( "clone", &__copy__<SireMM::ImproperSymbols>);
         ImproperSymbols_exposer.def( "__str__", &pvt_get_name);
         ImproperSymbols_exposer.def( "__repr__", &pvt_get_name);
     }

@@ -52,6 +52,8 @@ namespace bp = boost::python;
 
 SireSystem::IDAssigner __copy__(const SireSystem::IDAssigner &other){ return SireSystem::IDAssigner(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -206,9 +208,9 @@ void register_IDAssigner_class(){
         
         }
         IDAssigner_exposer.staticmethod( "typeName" );
-        IDAssigner_exposer.def( "__copy__", &__copy__);
-        IDAssigner_exposer.def( "__deepcopy__", &__copy__);
-        IDAssigner_exposer.def( "clone", &__copy__);
+        IDAssigner_exposer.def( "__copy__", &__copy__<SireSystem::IDAssigner>);
+        IDAssigner_exposer.def( "__deepcopy__", &__copy__<SireSystem::IDAssigner>);
+        IDAssigner_exposer.def( "clone", &__copy__<SireSystem::IDAssigner>);
         IDAssigner_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::IDAssigner >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         IDAssigner_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::IDAssigner >,

@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireBase::UnitTest __copy__(const SireBase::UnitTest &other){ return SireBase::UnitTest(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireBase::UnitTest&){ return "SireBase::UnitTest";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -129,9 +131,9 @@ void register_UnitTest_class(){
         UnitTest_exposer.staticmethod( "runAll" );
         UnitTest_exposer.staticmethod( "tests" );
         bp::register_ptr_to_python< std::shared_ptr< SireBase::UnitTest > >();
-        UnitTest_exposer.def( "__copy__", &__copy__);
-        UnitTest_exposer.def( "__deepcopy__", &__copy__);
-        UnitTest_exposer.def( "clone", &__copy__);
+        UnitTest_exposer.def( "__copy__", &__copy__<SireBase::UnitTest>);
+        UnitTest_exposer.def( "__deepcopy__", &__copy__<SireBase::UnitTest>);
+        UnitTest_exposer.def( "clone", &__copy__<SireBase::UnitTest>);
         UnitTest_exposer.def( "__str__", &pvt_get_name);
         UnitTest_exposer.def( "__repr__", &pvt_get_name);
     }

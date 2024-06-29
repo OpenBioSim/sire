@@ -87,6 +87,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMM::Dihedral> __copy__(const SireMol::Mover<SireMM::Dihedral> &other){ return SireMol::Mover<SireMM::Dihedral>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -478,9 +480,9 @@ void register_Mover_Dihedral__class(){
         
         }
         Mover_Dihedral__exposer.staticmethod( "typeName" );
-        Mover_Dihedral__exposer.def( "__copy__", &__copy__);
-        Mover_Dihedral__exposer.def( "__deepcopy__", &__copy__);
-        Mover_Dihedral__exposer.def( "clone", &__copy__);
+        Mover_Dihedral__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMM::Dihedral>>);
+        Mover_Dihedral__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMM::Dihedral>>);
+        Mover_Dihedral__exposer.def( "clone", &__copy__<SireMol::Mover<SireMM::Dihedral>>);
         Mover_Dihedral__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMM::Dihedral> > );
         Mover_Dihedral__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMM::Dihedral> > );
         Mover_Dihedral__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMM::Dihedral> > );

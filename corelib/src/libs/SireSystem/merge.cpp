@@ -390,11 +390,25 @@ namespace SireSystem
 
                 auto res = mol.residue(residx);
 
+                // get the AtomIdx of the last atom in this residue
+                AtomIdx last_atomidx(0);
+
+                if (res.nAtoms() > 0)
+                {
+                    last_atomidx = res.atom(res.nAtoms() - 1).index();
+                }
+
                 // add the atom - it has the name "Xxx" as it doesn't exist
                 // in the reference state
                 auto atom = res.add(AtomName("Xxx"));
                 largest_atomnum = AtomNum(largest_atomnum.value() + 1);
                 atom.renumber(largest_atomnum);
+
+                // ensure that its index follows on from the index of the
+                // last atom in the residue - this is so that we keep
+                // the AtomIdx and CGAtomIdx orders in sync, and don't
+                // force a complex reordering of the atoms when we commit
+                atom.reindex(last_atomidx + 1);
 
                 // reparent this atom to the CutGroup for this residue
                 atom.reparent(cgidx);

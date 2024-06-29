@@ -34,6 +34,8 @@ namespace bp = boost::python;
 
 SireMM::ThreeAtomPerturbation __copy__(const SireMM::ThreeAtomPerturbation &other){ return SireMM::ThreeAtomPerturbation(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -152,9 +154,9 @@ void register_ThreeAtomPerturbation_class(){
         
         }
         ThreeAtomPerturbation_exposer.staticmethod( "typeName" );
-        ThreeAtomPerturbation_exposer.def( "__copy__", &__copy__);
-        ThreeAtomPerturbation_exposer.def( "__deepcopy__", &__copy__);
-        ThreeAtomPerturbation_exposer.def( "clone", &__copy__);
+        ThreeAtomPerturbation_exposer.def( "__copy__", &__copy__<SireMM::ThreeAtomPerturbation>);
+        ThreeAtomPerturbation_exposer.def( "__deepcopy__", &__copy__<SireMM::ThreeAtomPerturbation>);
+        ThreeAtomPerturbation_exposer.def( "clone", &__copy__<SireMM::ThreeAtomPerturbation>);
         ThreeAtomPerturbation_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::ThreeAtomPerturbation >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ThreeAtomPerturbation_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::ThreeAtomPerturbation >,
