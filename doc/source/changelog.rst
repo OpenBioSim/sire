@@ -75,8 +75,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   ``origin`` and ``zero`` as arguments, meaning you can write
   ``cursor.make_whole(center="origin")``. This fixes issue #199.
 
-* Please add an item to this changelog when you create your PR
-
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.2...2024.1.0>`__ - April 2024
 ------------------------------------------------------------------------------------------
 
