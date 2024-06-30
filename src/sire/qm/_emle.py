@@ -151,10 +151,22 @@ def emle(
             raise TypeError("'map' must be of type 'dict'")
     map = _create_map(map)
 
+    # Determine the callback name. Use an optimised version of the callback
+    # if the user has specified "torchani" as the backend and is using
+    # "electrostatic" embedding.
+    if calculator._backend == "torchani" and calculator._method == "electrostatic":
+        try:
+            from emle.models import ANI2xEMLE as _ANI2xEMLE
+            callback = "_sire_callback_optimised"
+        except:
+            callback = "_sire_callback"
+    else:
+        callback = "_sire_callback"
+
     # Create the EMLE engine.
     engine = EMLEEngine(
         calculator,
-        "_sire_callback",
+        callback,
         cutoff,
         neighbourlist_update_frequency,
         False,
