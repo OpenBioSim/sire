@@ -55,13 +55,13 @@ an engine to perform the calculation:
 >>> ...     mols[0],
 >>> ...     calculator,
 >>> ...     cutoff="7.5A",
->>> ...     neighbour_list_update_frequency=20
+>>> ...     neighbour_list_frequency=20
 >>> )
 
 Here the first argument is the molecules that we are simulating, the second
 selection coresponding to the QM region (here this is the first molecule), and
 the third is calculator that was created above. The fourth and fifth arguments
-are optional, and specify the QM cutoff distance and the neigbour list update
+are optional, and specify the QM cutoff distance and the neighbour list update
 frequency respectively. (Shown are the default values.) The function returns a
 modified version of the molecules containing a "merged" dipeptide that can be
 interpolated between MM and QM levels of theory, along with an engine. The

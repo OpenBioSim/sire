@@ -54,7 +54,7 @@ def emle(
     qm_atoms,
     calculator,
     cutoff="7.5A",
-    neighbourlist_update_frequency=20,
+    neighbour_list_frequency=20,
     redistribute_charge=False,
     map=None,
 ):
@@ -78,8 +78,8 @@ def emle(
     cutoff : str or sire.legacy.Units.GeneralUnit, optional, default="7.5A"
         The cutoff to use for the QM/MM calculation.
 
-    neighbourlist_update_frequency : int, optional, default=20
-        The frequency with which to update the neighbourlist.
+    neighbour_list_frequency : int, optional, default=20
+        The frequency with which to update the neighbour list.
 
     redistribute_charge : bool
         Whether to redistribute charge of the QM atoms to ensure that the total
@@ -137,11 +137,11 @@ def emle(
     if not cutoff.has_same_units(_angstrom):
         raise ValueError("'cutoff' must be in units of length")
 
-    if not isinstance(neighbourlist_update_frequency, int):
-        raise TypeError("'neighbourlist_update_frequency' must be of type 'int'")
+    if not isinstance(neighbour_list_frequency, int):
+        raise TypeError("'neighbour_list_frequency' must be of type 'int'")
 
-    if neighbourlist_update_frequency < 0:
-        raise ValueError("'neighbourlist_update_frequency' must be >= 0")
+    if neighbour_list_frequency < 0:
+        raise ValueError("'neighbour_list_frequency' must be >= 0")
 
     if not isinstance(redistribute_charge, bool):
         raise TypeError("'redistribute_charge' must be of type 'bool'")
@@ -157,6 +157,7 @@ def emle(
     if calculator._backend == "torchani" and calculator._method == "electrostatic":
         try:
             from emle.models import ANI2xEMLE as _ANI2xEMLE
+
             callback = "_sire_callback_optimised"
         except:
             callback = "_sire_callback"
@@ -168,7 +169,7 @@ def emle(
         calculator,
         callback,
         cutoff,
-        neighbourlist_update_frequency,
+        neighbour_list_frequency,
         False,
     )
 

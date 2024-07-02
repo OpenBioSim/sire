@@ -16,7 +16,7 @@ def create_engine(
     py_object,
     callback=None,
     cutoff="7.5A",
-    neighbourlist_update_frequency=20,
+    neighbour_list_frequency=20,
     mechanical_embedding=False,
     redistribute_charge=False,
     map=None,
@@ -55,8 +55,8 @@ def create_engine(
     cutoff : str or sire.legacy.Units.GeneralUnit, optional, default="7.5A"
         The cutoff to use for the QM/MM calculation.
 
-    neighbourlist_update_frequency : int, optional, default=20
-        The frequency with which to update the neighbourlist.
+    neighbour_list_frequency : int, optional, default=20
+        The frequency with which to update the neighbour list.
 
     mechanical_embedding: bool, optional, default=False
         Whether to use mechanical embedding. If True, then electrostatics will
@@ -117,11 +117,11 @@ def create_engine(
     if not cutoff.has_same_units(_angstrom):
         raise ValueError("'cutoff' must be in units of length")
 
-    if not isinstance(neighbourlist_update_frequency, int):
-        raise TypeError("'neighbourlist_update_frequency' must be of type 'int'")
+    if not isinstance(neighbour_list_frequency, int):
+        raise TypeError("'neighbour_list_frequency' must be of type 'int'")
 
-    if neighbourlist_update_frequency < 0:
-        raise ValueError("'neighbourlist_update_frequency' must be >= 0")
+    if neighbour_list_frequency < 0:
+        raise ValueError("'neighbour_list_frequency' must be >= 0")
 
     if not isinstance(mechanical_embedding, bool):
         raise TypeError("'mechanical_embedding' must be of type 'bool'")
@@ -139,7 +139,7 @@ def create_engine(
         py_object,
         callback,
         cutoff,
-        neighbourlist_update_frequency,
+        neighbour_list_frequency,
         mechanical_embedding,
     )
 

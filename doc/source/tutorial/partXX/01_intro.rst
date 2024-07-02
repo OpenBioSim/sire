@@ -35,7 +35,7 @@ an engine to perform the calculation:
 >>> ...     py_object,
 >>> ...     callback="callback",
 >>> ...     cutoff="7.5A",
->>> ...     neighbour_list_update_frequency=20,
+>>> ...     neighbour_list_frequency=20,
 >>> ...     mechanical_embedding=False,
 >>> ... )
 
@@ -68,7 +68,7 @@ atoms in mod electron charge, the coordinates of the QM atoms in Angstrom, and
 the coordinates of the MM atoms in Angstrom. It should return the calculated
 energy in kJ/mol, the forces on the QM atoms in kJ/mol/nm, and the forces
 on the MM atoms in kJ/mol/nm. The remaining arguments are optional and specify
-the QM cutoff distance, the neigbour list update frequency, and whether the
+the QM cutoff distance, the neighbour list update frequency, and whether the
 electrostatics should be treated with mechanical embedding. When mechanical
 embedding is used, the electrostatics are treated at the MM level by ``OpenMM``.
 Note that this doesn't change the signature of the callback function, i.e. it
