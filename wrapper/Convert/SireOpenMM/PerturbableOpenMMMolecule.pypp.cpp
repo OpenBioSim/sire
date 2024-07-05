@@ -113,6 +113,8 @@ namespace bp = boost::python;
 
 SireOpenMM::PerturbableOpenMMMolecule __copy__(const SireOpenMM::PerturbableOpenMMMolecule &other){ return SireOpenMM::PerturbableOpenMMMolecule(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -123,8 +125,8 @@ void register_PerturbableOpenMMMolecule_class(){
         typedef bp::class_< SireOpenMM::PerturbableOpenMMMolecule > PerturbableOpenMMMolecule_exposer_t;
         PerturbableOpenMMMolecule_exposer_t PerturbableOpenMMMolecule_exposer = PerturbableOpenMMMolecule_exposer_t( "PerturbableOpenMMMolecule", "This class holds all of the information of an OpenMM molecule\nthat can be perturbed using a LambdaSchedule. The data is held\nin easy-to-access arrays, with guarantees that the arrays are\ncompatible and the data is aligned.\n", bp::init< >("Null constructor") );
         bp::scope PerturbableOpenMMMolecule_scope( PerturbableOpenMMMolecule_exposer );
-        PerturbableOpenMMMolecule_exposer.def( bp::init< SireOpenMM::OpenMMMolecule const & >(( bp::arg("mol") ), "Construct from the passed OpenMMMolecule") );
-        PerturbableOpenMMMolecule_exposer.def( bp::init< SireMol::Molecule const &, SireBase::PropertyMap const & >(( bp::arg("mol"), bp::arg("map") ), "Construct from a passed molecule and map") );
+        PerturbableOpenMMMolecule_exposer.def( bp::init< SireOpenMM::OpenMMMolecule const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("mol"), bp::arg("map")=SireBase::PropertyMap() ), "Construct from the passed OpenMMMolecule") );
+        PerturbableOpenMMMolecule_exposer.def( bp::init< SireMol::Molecule const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("mol"), bp::arg("map")=SireBase::PropertyMap() ), "Construct from a passed molecule and map") );
         PerturbableOpenMMMolecule_exposer.def( bp::init< SireOpenMM::PerturbableOpenMMMolecule const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireOpenMM::PerturbableOpenMMMolecule::angles
         
@@ -698,9 +700,9 @@ void register_PerturbableOpenMMMolecule_class(){
         
         }
         PerturbableOpenMMMolecule_exposer.staticmethod( "typeName" );
-        PerturbableOpenMMMolecule_exposer.def( "__copy__", &__copy__);
-        PerturbableOpenMMMolecule_exposer.def( "__deepcopy__", &__copy__);
-        PerturbableOpenMMMolecule_exposer.def( "clone", &__copy__);
+        PerturbableOpenMMMolecule_exposer.def( "__copy__", &__copy__<SireOpenMM::PerturbableOpenMMMolecule>);
+        PerturbableOpenMMMolecule_exposer.def( "__deepcopy__", &__copy__<SireOpenMM::PerturbableOpenMMMolecule>);
+        PerturbableOpenMMMolecule_exposer.def( "clone", &__copy__<SireOpenMM::PerturbableOpenMMMolecule>);
         PerturbableOpenMMMolecule_exposer.def( "__str__", &__str__< ::SireOpenMM::PerturbableOpenMMMolecule > );
         PerturbableOpenMMMolecule_exposer.def( "__repr__", &__str__< ::SireOpenMM::PerturbableOpenMMMolecule > );
     }

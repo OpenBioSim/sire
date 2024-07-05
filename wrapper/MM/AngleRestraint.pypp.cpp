@@ -36,6 +36,8 @@ namespace bp = boost::python;
 
 SireMM::AngleRestraint __copy__(const SireMM::AngleRestraint &other){ return SireMM::AngleRestraint(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -357,9 +359,9 @@ void register_AngleRestraint_class(){
         AngleRestraint_exposer.staticmethod( "harmonic" );
         AngleRestraint_exposer.staticmethod( "theta" );
         AngleRestraint_exposer.staticmethod( "typeName" );
-        AngleRestraint_exposer.def( "__copy__", &__copy__);
-        AngleRestraint_exposer.def( "__deepcopy__", &__copy__);
-        AngleRestraint_exposer.def( "clone", &__copy__);
+        AngleRestraint_exposer.def( "__copy__", &__copy__<SireMM::AngleRestraint>);
+        AngleRestraint_exposer.def( "__deepcopy__", &__copy__<SireMM::AngleRestraint>);
+        AngleRestraint_exposer.def( "clone", &__copy__<SireMM::AngleRestraint>);
         AngleRestraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::AngleRestraint >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AngleRestraint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::AngleRestraint >,

@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireMM::AngleParameterName __copy__(const SireMM::AngleParameterName &other){ return SireMM::AngleParameterName(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::AngleParameterName&){ return "SireMM::AngleParameterName";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -71,9 +73,9 @@ void register_AngleParameterName_class(){
                 , "" );
         
         }
-        AngleParameterName_exposer.def( "__copy__", &__copy__);
-        AngleParameterName_exposer.def( "__deepcopy__", &__copy__);
-        AngleParameterName_exposer.def( "clone", &__copy__);
+        AngleParameterName_exposer.def( "__copy__", &__copy__<SireMM::AngleParameterName>);
+        AngleParameterName_exposer.def( "__deepcopy__", &__copy__<SireMM::AngleParameterName>);
+        AngleParameterName_exposer.def( "clone", &__copy__<SireMM::AngleParameterName>);
         AngleParameterName_exposer.def( "__str__", &pvt_get_name);
         AngleParameterName_exposer.def( "__repr__", &pvt_get_name);
     }

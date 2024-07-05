@@ -89,6 +89,8 @@
 
 #include "PackedArray2D_int_Array.pypp.hpp"
 
+#include "PageCache.pypp.hpp"
+
 #include "Process.pypp.hpp"
 
 #include "ProgressBar.pypp.hpp"
@@ -235,6 +237,8 @@ BOOST_PYTHON_MODULE(_Base){
     register_PackedArray2D_double__class();
 
     register_PackedArray2D_int__class();
+
+    register_PageCache_class();
 
     register_Process_class();
 

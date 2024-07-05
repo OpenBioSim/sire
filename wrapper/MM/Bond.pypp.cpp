@@ -42,6 +42,8 @@ namespace bp = boost::python;
 
 SireMM::Bond __copy__(const SireMM::Bond &other){ return SireMM::Bond(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -459,9 +461,9 @@ void register_Bond_class(){
         
         }
         Bond_exposer.staticmethod( "typeName" );
-        Bond_exposer.def( "__copy__", &__copy__);
-        Bond_exposer.def( "__deepcopy__", &__copy__);
-        Bond_exposer.def( "clone", &__copy__);
+        Bond_exposer.def( "__copy__", &__copy__<SireMM::Bond>);
+        Bond_exposer.def( "__deepcopy__", &__copy__<SireMM::Bond>);
+        Bond_exposer.def( "clone", &__copy__<SireMM::Bond>);
         Bond_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::Bond >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Bond_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::Bond >,

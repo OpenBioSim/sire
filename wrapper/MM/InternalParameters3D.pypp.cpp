@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 SireMM::InternalParameters3D __copy__(const SireMM::InternalParameters3D &other){ return SireMM::InternalParameters3D(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireMM::InternalParameters3D&){ return "SireMM::InternalParameters3D";}
@@ -188,9 +190,9 @@ void register_InternalParameters3D_class(){
         
         }
         InternalParameters3D_exposer.staticmethod( "typeName" );
-        InternalParameters3D_exposer.def( "__copy__", &__copy__);
-        InternalParameters3D_exposer.def( "__deepcopy__", &__copy__);
-        InternalParameters3D_exposer.def( "clone", &__copy__);
+        InternalParameters3D_exposer.def( "__copy__", &__copy__<SireMM::InternalParameters3D>);
+        InternalParameters3D_exposer.def( "__deepcopy__", &__copy__<SireMM::InternalParameters3D>);
+        InternalParameters3D_exposer.def( "clone", &__copy__<SireMM::InternalParameters3D>);
         InternalParameters3D_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::InternalParameters3D >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         InternalParameters3D_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::InternalParameters3D >,

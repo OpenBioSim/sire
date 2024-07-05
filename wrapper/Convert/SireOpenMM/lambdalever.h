@@ -124,7 +124,8 @@ namespace SireOpenMM
         void addRestraintIndex(const QString &force, int index);
 
         int addPerturbableMolecule(const OpenMMMolecule &molecule,
-                                   const QHash<QString, qint32> &start_indices);
+                                   const QHash<QString, qint32> &start_indicies,
+                                   const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         void setExceptionIndicies(int idx, const QString &ff,
                                   const QVector<boost::tuple<int, int>> &exception_idxs);

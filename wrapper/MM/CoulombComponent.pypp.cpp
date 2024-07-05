@@ -16,6 +16,8 @@ namespace bp = boost::python;
 
 SireMM::CoulombComponent __copy__(const SireMM::CoulombComponent &other){ return SireMM::CoulombComponent(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -106,9 +108,9 @@ void register_CoulombComponent_class(){
         
         }
         CoulombComponent_exposer.staticmethod( "typeName" );
-        CoulombComponent_exposer.def( "__copy__", &__copy__);
-        CoulombComponent_exposer.def( "__deepcopy__", &__copy__);
-        CoulombComponent_exposer.def( "clone", &__copy__);
+        CoulombComponent_exposer.def( "__copy__", &__copy__<SireMM::CoulombComponent>);
+        CoulombComponent_exposer.def( "__deepcopy__", &__copy__<SireMM::CoulombComponent>);
+        CoulombComponent_exposer.def( "clone", &__copy__<SireMM::CoulombComponent>);
         CoulombComponent_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CoulombComponent >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CoulombComponent_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CoulombComponent >,

@@ -1972,10 +1972,11 @@ QList<OpenMM::Force *> LambdaLever::getRestraints(const QString &name,
  *  its index in the list of perturbable molecules
  */
 int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
-                                        const QHash<QString, qint32> &starts)
+                                        const QHash<QString, qint32> &starts,
+                                        const PropertyMap &map)
 {
     // should add in some sanity checks for these inputs
-    this->perturbable_mols.append(PerturbableOpenMMMolecule(molecule));
+    this->perturbable_mols.append(PerturbableOpenMMMolecule(molecule, map));
     this->start_indices.append(starts);
     this->perturbable_maps.insert(molecule.number, molecule.perturtable_map);
     this->lambda_cache.clear();

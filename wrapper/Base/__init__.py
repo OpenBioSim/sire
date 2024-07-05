@@ -1,9 +1,22 @@
 from ..Units import _Units  # Need to import so that we have GeneralUnit
 from ._Base import *
 
+import atexit as _atexit
+
 _wrap_functions = []
 
 _base_wrap = wrap
+
+
+@_atexit.register
+def _cleanup():
+    """
+    This function is called when Python exits - this will call the
+    clean_up() function in the C++ code to ensure that all memory is
+    freed up and all temporary files deleted, threads stopped,
+    network connections closed etc
+    """
+    clean_up()
 
 
 def wrap(value):

@@ -17,6 +17,8 @@ namespace bp = boost::python;
 
 SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> > __copy__(const SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> > &other){ return SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -270,9 +272,9 @@ void register_InterCoulombFF_class(){
         
         }
         InterCoulombFF_exposer.staticmethod( "typeName" );
-        InterCoulombFF_exposer.def( "__copy__", &__copy__);
-        InterCoulombFF_exposer.def( "__deepcopy__", &__copy__);
-        InterCoulombFF_exposer.def( "clone", &__copy__);
+        InterCoulombFF_exposer.def( "__copy__", &__copy__<SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >>);
+        InterCoulombFF_exposer.def( "__deepcopy__", &__copy__<SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >>);
+        InterCoulombFF_exposer.def( "clone", &__copy__<SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >>);
         InterCoulombFF_exposer.def( "__str__", &__str__< ::SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> > > );
         InterCoulombFF_exposer.def( "__repr__", &__str__< ::SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> > > );
         InterCoulombFF_exposer.def( "__len__", &__len_count< ::SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> > > );

@@ -145,18 +145,30 @@ class System:
         """Return the numbers of all of the molecules in this System"""
         return self.molecules().numbers()
 
-    def make_whole(self, map=None):
+    def make_whole(self, center=None, map=None):
         """
         Make all of the molecules in this system whole. This
         maps each molecule into the current space, such that no
         molecule is broken across a periodic box boundary
         """
-        if map is None:
-            self._system.make_whole()
-        else:
-            from ..base import create_map
+        if center is None:
+            if map is None:
+                self._system.make_whole()
+            else:
+                from ..base import create_map
 
-            self._system.make_whole(map=create_map(map))
+                self._system.make_whole(map=create_map(map))
+        else:
+            from ..maths import Vector
+
+            center = Vector(center)
+
+            if map is None:
+                self._system.make_whole(center=center)
+            else:
+                from ..base import create_map
+
+                self._system.make_whole(center=center, map=create_map(map))
 
         self._molecules = None
 

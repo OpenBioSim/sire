@@ -41,6 +41,8 @@ namespace bp = boost::python;
 
 SireMM::SelectorAngle __copy__(const SireMM::SelectorAngle &other){ return SireMM::SelectorAngle(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -677,9 +679,9 @@ void register_SelectorAngle_class(){
         
         }
         SelectorAngle_exposer.staticmethod( "typeName" );
-        SelectorAngle_exposer.def( "__copy__", &__copy__);
-        SelectorAngle_exposer.def( "__deepcopy__", &__copy__);
-        SelectorAngle_exposer.def( "clone", &__copy__);
+        SelectorAngle_exposer.def( "__copy__", &__copy__<SireMM::SelectorAngle>);
+        SelectorAngle_exposer.def( "__deepcopy__", &__copy__<SireMM::SelectorAngle>);
+        SelectorAngle_exposer.def( "clone", &__copy__<SireMM::SelectorAngle>);
         SelectorAngle_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::SelectorAngle >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SelectorAngle_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::SelectorAngle >,

@@ -12,10 +12,73 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2024.3.0 <https://github.com/openbiosim/sire/compare/2024.2.0...2024.3.0>`__ - September 2024
+----------------------------------------------------------------------------------------------
+
+* Please add an item to this changelog when you create your PR
+
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
 -----------------------------------------------------------------------------------------
 
-* Please add an item to this changelog when you create your PR
+* Correctly set the ``element1`` property in ``sire.morph.create_from_pertfile``.
+
+* Added mising :meth:`~sire.vol.TriclinicBox.maximum_cutoff` method so that
+  the cutoff is set correctly when creating a :obj:`~sire.system.ForceFieldInfo`
+  object.
+
+* Added a :class:`sire.base.PageCache` class which can be used to cache and
+  restore objects to memory pages which are automatically paged to and from
+  disk as needed. This lets you work on data that can't fit in memory.
+
+* Updated the way that :class:`sire.system.System` objects hold the
+  set of temporary frames in a trajectory. Rather than each molecule holding
+  its own temporary frame, now the :class:`~sire.system.System` object holds
+  a ``SystemTrajectory`` object. This holds the frame data for all molecules
+  in the :class:`~sire.system.System` in a single binary array. The data
+  for this array is paged to disk as needed via the above
+  :class:`sire.base.PageCache` class. This both significantly speeds up
+  processing of these temporary frames, and ensures that long simulations
+  do not fill memory, causing the system to crash. In addition, the
+  ``SystemTrajectory`` object is NOT streamed to a S3 file. This means that
+  the S3 file (used normally for restarts) won't grow unbounded with
+  temporary frames, meaning that it is safe to create restarts of
+  long-running simulations. Note that this does mean that the temporary
+  directory is lost. You **must** save the trajectory to a file at the
+  end of your simulation or it will be lost. You can do this using the
+  standard trajectory save functions, e.g.
+  ``sire.save(mols.trajectory(), "output", format=["PRMTOP", "RST"])``.
+
+* Added code that automatically excludes non-bonded interactions between
+  from_ghost and to_ghost atoms in the OpenMM layer. This is to prevent
+  crashes caused by poor interactions between from_ghost atoms appearing
+  over the top of to_ghost atoms during a perturbation where one group
+  is grown over another.
+
+* Ignore BioSimSpace format position restraint include directives when
+  parsing GROMACS topology files.
+
+* Added a map option (fix_perturbable_zero_sigmas) to prevent perturbation of
+  the Lennard-Jones sigma parameter for ghost atoms during alchemical free energy simulations.
+
+* [CHANGE IN BEHAVIOUR] - added code that ensures that, when editing molecules,
+  the CGAtomIdx order will always follow the AtomIdx order of atoms. This is
+  because a lot of code had implicitly assumed this, and so it was a cause
+  of bugs when this wasn't the case. Now, when you edit a molecule, on committing,
+  the orders will be checked. If they don't agree, then the CutGroups will be
+  reordered, with atoms reordered as necessary to make the CGAtomIdx order match
+  the AtomIdx order. If this isn't possible (e.g. because atoms in CutGroups
+  are not contiguous), then the molecule will be converted to a single-cutgroup
+  molecule, with the atoms placed in AtomIdx order. As part of this change,
+  the merge code will now also ensure that added atoms are added with the
+  correct AtomIdx, rather than added as the last atoms in the molecule. This
+  is also more natural. This fixes issue #202.
+
+* Added the "center" keyword argument to the ``make_whole`` functions of
+  :class:`~sire.mol.Cursors`, :class:`~sire.mol.CursorsM` and
+  :class:`~sire.system.System` (as well as to the legacy System class).
+  Also allowed the constructor of :class:`~sire.maths.Vector` to recognise
+  ``origin`` and ``zero`` as arguments, meaning you can write
+  ``cursor.make_whole(center="origin")``. This fixes issue #199.
 
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.2...2024.1.0>`__ - April 2024
 ------------------------------------------------------------------------------------------

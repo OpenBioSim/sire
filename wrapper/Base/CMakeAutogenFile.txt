@@ -43,6 +43,7 @@ set ( PYPP_SOURCES
        Properties.pypp.cpp
        PropertyList.pypp.cpp
        TrigArray2D_double_.pypp.cpp
+       PageCache.pypp.cpp
        PackedArray2D_StringArrayProperty.pypp.cpp
        VariantProperty.pypp.cpp
        ArrayProperty_QString_.pypp.cpp

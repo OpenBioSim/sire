@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireBase::Version __copy__(const SireBase::Version &other){ return SireBase::Version(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -108,9 +110,9 @@ void register_Version_class(){
         
         }
         Version_exposer.staticmethod( "typeName" );
-        Version_exposer.def( "__copy__", &__copy__);
-        Version_exposer.def( "__deepcopy__", &__copy__);
-        Version_exposer.def( "clone", &__copy__);
+        Version_exposer.def( "__copy__", &__copy__<SireBase::Version>);
+        Version_exposer.def( "__deepcopy__", &__copy__<SireBase::Version>);
+        Version_exposer.def( "clone", &__copy__<SireBase::Version>);
         Version_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::Version >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Version_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::Version >,

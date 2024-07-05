@@ -31,6 +31,7 @@
 #include "delta.h"
 #include "monitorname.h"
 #include "system.h"
+#include "systemtrajectory.h"
 
 #include "SireFF/energytable.h"
 #include "SireFF/ff.h"
@@ -279,6 +280,7 @@ System::System(const System &other)
       sysversion(other.sysversion), sysmonitors(other.sysmonitors), cons(other.cons),
       mgroups_by_num(other.mgroups_by_num),
       shared_properties(other.shared_properties),
+      system_trajectory(other.system_trajectory),
       subversion(other.subversion)
 {
     molgroups[0] = other.molgroups[0];
@@ -304,6 +306,7 @@ System &System::operator=(const System &other)
         cons = other.cons;
         mgroups_by_num = other.mgroups_by_num;
         shared_properties = other.shared_properties;
+        system_trajectory = other.system_trajectory;
         subversion = other.subversion;
 
         MolGroupsBase::operator=(other);
@@ -3883,16 +3886,197 @@ void System::loadFrame(int frame, const LazyEvaluator &evaluator,
 
 void System::saveFrame(int frame, const SireBase::PropertyMap &map)
 {
+    if (frame == this->nFrames(map))
+    {
+        this->saveFrame(map);
+        return;
+    }
+
     this->accept();
     this->mustNowRecalculateFromScratch();
     MolGroupsBase::saveFrame(frame, map);
+    system_trajectory = 0;
 }
 
 void System::saveFrame(const SireBase::PropertyMap &map)
 {
+    auto traj_prop = map["trajectory"];
+
+    if (not traj_prop.hasSource())
+        return;
+
     this->accept();
     this->mustNowRecalculateFromScratch();
-    MolGroupsBase::saveFrame(map);
+
+    // get all of the molecules in the system
+    auto molnums = this->molNums();
+    auto mols = this->molecules();
+
+    // get the space and time values
+    const auto space_property = map["space"];
+    const auto time_property = map["time"];
+
+    QString time_property_source("time");
+    QString space_property_source("space");
+
+    if (time_property.hasSource())
+        time_property_source = QString(time_property.source());
+
+    if (space_property.hasSource())
+        space_property_source = QString(space_property.source());
+
+    // we must get the space property and a time property
+    SpacePtr space;
+    SireUnits::Dimension::Time time;
+    bool found_space = false;
+    bool found_time = false;
+
+    try
+    {
+        space = this->property(space_property_source).asA<Space>();
+        found_space = true;
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        time = get_time_from_property(this->property(time_property_source));
+        found_time = true;
+    }
+    catch (...)
+    {
+    }
+
+    if (not found_space)
+    {
+        if (space_property.hasValue())
+        {
+            try
+            {
+                space = space_property.value().asA<Space>();
+                found_space = true;
+            }
+            catch (...)
+            {
+            }
+        }
+
+        if (not found_space)
+        {
+            for (const auto &mol : mols)
+            {
+                try
+                {
+                    space = mol.data().property(space_property_source).asA<Space>();
+                    found_space = true;
+                    break;
+                }
+                catch (...)
+                {
+                }
+            }
+        }
+    }
+
+    if (not found_time)
+    {
+        if (time_property.hasValue())
+        {
+            try
+            {
+                time = get_time_from_property(time_property.value());
+                found_time = true;
+            }
+            catch (...)
+            {
+            }
+        }
+
+        if (not found_time)
+        {
+            for (const auto &mol : mols)
+            {
+                try
+                {
+                    time = get_time_from_property(mol.data().property(time_property_source));
+                    found_time = true;
+                    break;
+                }
+                catch (...)
+                {
+                }
+            }
+        }
+    }
+
+    if (not found_space)
+    {
+        space = Cartesian();
+    }
+
+    if (not found_time)
+    {
+        time = SireUnits::Dimension::Time(0);
+    }
+
+    // do we have an active SystemTrajectory?
+    bool must_create = false;
+
+    if (system_trajectory.constData() == 0)
+    {
+        must_create = true;
+    }
+
+    SystemTrajectory *traj = dynamic_cast<SystemTrajectory *>(system_trajectory.data());
+
+    if (traj == 0)
+    {
+        must_create = true;
+    }
+    else
+    {
+        must_create = not traj->isCompatibleWith(molnums, mols, map);
+    }
+
+    if (must_create)
+    {
+        traj = new SystemTrajectory(molnums, mols, map);
+        system_trajectory = traj;
+    }
+
+    // save the frame into the system_trajectory - this will automatically
+    // update all molecules containing this trajectory
+    traj->saveFrame(mols, space, time, Properties(), map);
+
+    if (must_create)
+    {
+        // add this trajectory onto all of the molecules...
+        auto mols2 = mols;
+
+        for (auto it = mols.constBegin(); it != mols.constEnd(); ++it)
+        {
+            auto mol = it->molecule().data();
+
+            Trajectory moltraj;
+
+            if (mol.hasProperty(traj_prop))
+            {
+                moltraj = mol.property(traj_prop).asA<Trajectory>();
+                moltraj.append(traj->getTrajectory(mol.number()));
+            }
+            else
+            {
+                moltraj = Trajectory(traj->getTrajectory(mol.number()));
+            }
+
+            mol.setProperty(traj_prop.source(), moltraj);
+            mols2.update(mol);
+        }
+
+        this->update(mols2);
+    }
 }
 
 void System::deleteFrame(int frame, const SireBase::PropertyMap &map)
@@ -3976,6 +4160,65 @@ void System::makeWhole(const PropertyMap &map)
 void System::makeWhole()
 {
     this->makeWhole(PropertyMap());
+}
+
+void System::makeWhole(const Vector &center, const PropertyMap &map)
+{
+    if (this->needsAccepting())
+    {
+        this->accept();
+    }
+
+    if (not this->containsProperty(map["space"]))
+        return;
+
+    if (not this->property(map["space"]).isA<Space>())
+        return;
+
+    const auto &space = this->property(map["space"]).asA<Space>();
+
+    if (not space.isPeriodic())
+        return;
+
+    PropertyMap m = map;
+    m.set("space", space);
+
+    // get a list of all molecules in the system
+    const SelectorMol mols(*this);
+
+    SelectorMol changed_mols;
+
+    for (const auto &mol : mols)
+    {
+        auto new_mol = mol.move().makeWhole(center, m).commit();
+
+        if (new_mol.data().version() != mol.data().version())
+        {
+            changed_mols.append(new_mol);
+        }
+    }
+
+    if (not changed_mols.isEmpty())
+    {
+        Delta delta(*this, true);
+
+        // this ensures that only a single copy of System is used - prevents
+        // unnecessary copying
+        this->operator=(System());
+        delta.update(changed_mols.toMolecules());
+        this->operator=(delta.apply());
+
+        if (this->needsAccepting())
+        {
+            delta = Delta();
+            this->accept();
+        }
+    }
+}
+
+void System::makeWhole(const Vector &center)
+{
+    this->makeWhole(center, PropertyMap());
 }
 
 const char *System::typeName()

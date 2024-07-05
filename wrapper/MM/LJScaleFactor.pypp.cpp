@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMM::LJScaleFactor __copy__(const SireMM::LJScaleFactor &other){ return SireMM::LJScaleFactor(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireMM::LJScaleFactor&){ return "SireMM::LJScaleFactor";}
@@ -84,9 +86,9 @@ void register_LJScaleFactor_class(){
         
         }
         LJScaleFactor_exposer.staticmethod( "typeName" );
-        LJScaleFactor_exposer.def( "__copy__", &__copy__);
-        LJScaleFactor_exposer.def( "__deepcopy__", &__copy__);
-        LJScaleFactor_exposer.def( "clone", &__copy__);
+        LJScaleFactor_exposer.def( "__copy__", &__copy__<SireMM::LJScaleFactor>);
+        LJScaleFactor_exposer.def( "__deepcopy__", &__copy__<SireMM::LJScaleFactor>);
+        LJScaleFactor_exposer.def( "clone", &__copy__<SireMM::LJScaleFactor>);
         LJScaleFactor_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::LJScaleFactor >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         LJScaleFactor_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::LJScaleFactor >,

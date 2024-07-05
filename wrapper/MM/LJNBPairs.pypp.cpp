@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMM::LJNBPairs __copy__(const SireMM::LJNBPairs &other){ return SireMM::LJNBPairs(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -76,9 +78,9 @@ void register_LJNBPairs_class(){
         
         }
         LJNBPairs_exposer.staticmethod( "typeName" );
-        LJNBPairs_exposer.def( "__copy__", &__copy__);
-        LJNBPairs_exposer.def( "__deepcopy__", &__copy__);
-        LJNBPairs_exposer.def( "clone", &__copy__);
+        LJNBPairs_exposer.def( "__copy__", &__copy__<SireMM::LJNBPairs>);
+        LJNBPairs_exposer.def( "__deepcopy__", &__copy__<SireMM::LJNBPairs>);
+        LJNBPairs_exposer.def( "clone", &__copy__<SireMM::LJNBPairs>);
         LJNBPairs_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::LJNBPairs >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         LJNBPairs_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::LJNBPairs >,

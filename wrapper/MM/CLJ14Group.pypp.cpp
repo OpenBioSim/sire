@@ -36,6 +36,8 @@ namespace bp = boost::python;
 
 SireMM::CLJ14Group __copy__(const SireMM::CLJ14Group &other){ return SireMM::CLJ14Group(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -378,9 +380,9 @@ void register_CLJ14Group_class(){
         
         }
         CLJ14Group_exposer.staticmethod( "typeName" );
-        CLJ14Group_exposer.def( "__copy__", &__copy__);
-        CLJ14Group_exposer.def( "__deepcopy__", &__copy__);
-        CLJ14Group_exposer.def( "clone", &__copy__);
+        CLJ14Group_exposer.def( "__copy__", &__copy__<SireMM::CLJ14Group>);
+        CLJ14Group_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJ14Group>);
+        CLJ14Group_exposer.def( "clone", &__copy__<SireMM::CLJ14Group>);
         CLJ14Group_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJ14Group >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJ14Group_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJ14Group >,

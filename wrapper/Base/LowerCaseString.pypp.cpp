@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireBase::LowerCaseString __copy__(const SireBase::LowerCaseString &other){ return SireBase::LowerCaseString(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -73,9 +75,9 @@ void register_LowerCaseString_class(){
         
         }
         LowerCaseString_exposer.staticmethod( "typeName" );
-        LowerCaseString_exposer.def( "__copy__", &__copy__);
-        LowerCaseString_exposer.def( "__deepcopy__", &__copy__);
-        LowerCaseString_exposer.def( "clone", &__copy__);
+        LowerCaseString_exposer.def( "__copy__", &__copy__<SireBase::LowerCaseString>);
+        LowerCaseString_exposer.def( "__deepcopy__", &__copy__<SireBase::LowerCaseString>);
+        LowerCaseString_exposer.def( "clone", &__copy__<SireBase::LowerCaseString>);
         LowerCaseString_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::LowerCaseString >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         LowerCaseString_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::LowerCaseString >,

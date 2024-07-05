@@ -50,6 +50,7 @@
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
+#include "SireStream/magic_error.h"
 
 using namespace SireMol;
 using namespace SireVol;
@@ -120,6 +121,15 @@ int TrajectoryData::nFiles() const
 bool TrajectoryData::isEmpty() const
 {
     return this->nFrames() == 0;
+}
+
+/** Return whether or not this trajectory is live - live trajectories
+ *  are capable of being actively updated during new frame data,
+ *  e.g. during a dynamics simulation.
+ */
+bool TrajectoryData::isLive() const
+{
+    return false;
 }
 
 QList<Frame> TrajectoryData::getFrames() const
@@ -539,14 +549,23 @@ Trajectory::Trajectory() : ConcreteProperty<Trajectory, MoleculeProperty>(), sta
 {
 }
 
+Trajectory::Trajectory(const TrajectoryDataPtr &data)
+    : ConcreteProperty<Trajectory, MoleculeProperty>(), start_atom(0), natoms(0)
+{
+    if (data.constData() != 0)
+    {
+        start_atom = 0;
+        natoms = data->nAtoms();
+
+        if (data->isLive() or data->nFrames() > 0)
+            d.append(data);
+    }
+}
+
 Trajectory::Trajectory(const TrajectoryData &data)
     : ConcreteProperty<Trajectory, MoleculeProperty>(), start_atom(0), natoms(0)
 {
-    start_atom = 0;
-    natoms = data.nAtoms();
-
-    if (data.nFrames() > 0)
-        d.append(TrajectoryDataPtr(data));
+    this->operator=(Trajectory(TrajectoryDataPtr(data)));
 }
 
 Trajectory::Trajectory(const QList<TrajectoryDataPtr> &data)
@@ -559,7 +578,7 @@ Trajectory::Trajectory(const QList<TrajectoryDataPtr> &data)
     {
         if (ptr.constData() != 0)
         {
-            if (ptr->nFrames() > 0)
+            if (ptr->isLive() or ptr->nFrames() > 0)
             {
                 if (natoms == 0)
                 {
@@ -580,21 +599,31 @@ Trajectory::Trajectory(const QList<TrajectoryDataPtr> &data)
     }
 }
 
-Trajectory::Trajectory(const TrajectoryData &data, int s, int n)
+Trajectory::Trajectory(const TrajectoryDataPtr &data, int s, int n)
     : ConcreteProperty<Trajectory, MoleculeProperty>(), start_atom(s), natoms(n)
 {
-    if (natoms <= 0 or data.nFrames() <= 0)
+    if (natoms <= 0 or data.constData() == 0)
+    {
+        start_atom = 0;
+        natoms = 0;
         return;
+    }
 
-    if (start_atom < 0 or (start_atom + natoms) > data.nAtoms())
+    if (start_atom < 0 or (start_atom + natoms) > data->nAtoms())
         throw SireError::incompatible_error(
             QObject::tr("Cannot use start_atom %1 and natoms %2 for a trajectory with %3 atoms.")
                 .arg(start_atom)
                 .arg(natoms)
-                .arg(data.nAtoms()),
+                .arg(data->nAtoms()),
             CODELOC);
 
-    d.append(TrajectoryDataPtr(data));
+    d.append(data);
+}
+
+Trajectory::Trajectory(const TrajectoryData &data, int s, int n)
+    : ConcreteProperty<Trajectory, MoleculeProperty>(), start_atom(0), natoms(0)
+{
+    this->operator=(Trajectory(TrajectoryDataPtr(data), s, n));
 }
 
 Trajectory::Trajectory(const QList<TrajectoryDataPtr> &data, int s, int n)
@@ -609,7 +638,7 @@ Trajectory::Trajectory(const QList<TrajectoryDataPtr> &data, int s, int n)
     {
         if (ptr.constData() != 0)
         {
-            if (ptr->nFrames() > 0)
+            if (ptr->isLive() or ptr->nFrames() > 0)
             {
                 if (n == 0)
                 {
@@ -951,6 +980,32 @@ void Trajectory::setFrame(int i, const Frame &frame)
     {
         this->_makeEditable(i).setFrame(i, this->_subset(frame));
     }
+}
+
+void Trajectory::append(const TrajectoryDataPtr &data)
+{
+    if (data.constData() == 0)
+        return;
+
+    // check that the start and number of atoms would be compatible
+    // with this trajectory
+    if (natoms != data->nAtoms() and (start_atom + natoms > data->nAtoms()))
+    {
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot append a trajectory with %1 atoms to a trajectory with %2 atoms "
+                        "and start_atom %3.")
+                .arg(data->nAtoms())
+                .arg(natoms)
+                .arg(start_atom),
+            CODELOC);
+    }
+
+    d.append(data);
+}
+
+void Trajectory::append(const TrajectoryData &data)
+{
+    this->append(TrajectoryDataPtr(data));
 }
 
 void Trajectory::appendFrame(const Frame &frame)
@@ -1296,6 +1351,233 @@ bool Frame::operator==(const Frame &other) const
 bool Frame::operator!=(const Frame &other) const
 {
     return not operator==(other);
+}
+
+QByteArray Frame::toByteArray() const
+{
+    // calculate the size we need...
+    int nbytes = 0;
+
+    // magic and version
+    nbytes += 2 * sizeof(quint32);
+
+    // coordinates
+    nbytes += sizeof(quint32);
+    nbytes += coords.count() * sizeof(Vector);
+
+    // velocities
+    nbytes += sizeof(quint32);
+    nbytes += vels.count() * sizeof(Velocity3D);
+
+    // forces
+    nbytes += sizeof(quint32);
+    nbytes += frcs.count() * sizeof(Force3D);
+
+    // append the space, time and properties
+    QByteArray extra;
+    QDataStream ds(&extra, QIODevice::WriteOnly);
+
+    ds << spc << t.to(picosecond) << props;
+
+    nbytes += sizeof(quint32);
+    nbytes += extra.count();
+
+    QByteArray data("\0", nbytes);
+
+    auto data_ptr = data.data();
+
+    // magic and version
+    quint32 val = r_frame.magicID();
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    val = 1;
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    val = coords.count();
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    if (val != 0)
+    {
+        std::memcpy(data_ptr, coords.constData(), val * sizeof(Vector));
+        data_ptr += val * sizeof(Vector);
+    }
+
+    val = vels.count();
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    if (val != 0)
+    {
+        std::memcpy(data_ptr, vels.constData(), val * sizeof(Velocity3D));
+        data_ptr += val * sizeof(Velocity3D);
+    }
+
+    val = frcs.count();
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    if (val != 0)
+    {
+        std::memcpy(data_ptr, frcs.constData(), val * sizeof(Force3D));
+        data_ptr += val * sizeof(Force3D);
+    }
+
+    val = extra.count();
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    if (val != 0)
+    {
+        std::memcpy(data_ptr, extra.constData(), val);
+        data_ptr += val;
+    }
+
+    if (data_ptr - data.constData() != data.count())
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "Memory corruption? %1 versus %2")
+                                         .arg(data_ptr - data.constData())
+                                         .arg(data.count()),
+                                     CODELOC);
+    }
+
+    return data;
+}
+
+Frame Frame::fromByteArray(const QByteArray &data)
+{
+    if (data.count() < 4)
+    {
+        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+                                            CODELOC);
+    }
+
+    auto data_ptr = data.constData();
+
+    quint32 val;
+    std::memcpy(&val, data_ptr, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    if (val != r_frame.magicID())
+    {
+        throw SireStream::magic_error(QObject::tr("The data is not a frame! %1").arg(val), CODELOC);
+    }
+
+    std::memcpy(&val, data_ptr, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    if (val != 1)
+    {
+        throw SireStream::version_error(val, "1", r_frame, CODELOC);
+    }
+
+    if (data_ptr + sizeof(quint32) > data.constData() + data.count())
+    {
+        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+                                            CODELOC);
+    }
+
+    std::memcpy(&val, data_ptr, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    QVector<Vector> coords;
+
+    if (val != 0)
+    {
+        if (data_ptr + val * sizeof(Vector) > data.constData() + data.count())
+        {
+            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+                                                CODELOC);
+        }
+
+        coords.resize(val);
+        std::memcpy(coords.data(), data_ptr, val * sizeof(Vector));
+        data_ptr += val * sizeof(Vector);
+    }
+
+    if (data_ptr + sizeof(quint32) > data.constData() + data.count())
+    {
+        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+                                            CODELOC);
+    }
+
+    std::memcpy(&val, data_ptr, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    QVector<Velocity3D> vels;
+
+    if (val != 0)
+    {
+        if (data_ptr + val * sizeof(Velocity3D) > data.constData() + data.count())
+        {
+            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+                                                CODELOC);
+        }
+
+        vels.resize(val);
+        std::memcpy(vels.data(), data_ptr, val * sizeof(Velocity3D));
+        data_ptr += val * sizeof(Velocity3D);
+    }
+
+    if (data_ptr + sizeof(quint32) > data.constData() + data.count())
+    {
+        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+                                            CODELOC);
+    }
+
+    std::memcpy(&val, data_ptr, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    QVector<Force3D> frcs;
+
+    if (val != 0)
+    {
+        if (data_ptr + val * sizeof(Force3D) > data.constData() + data.count())
+        {
+            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+                                                CODELOC);
+        }
+
+        frcs.resize(val);
+        std::memcpy(frcs.data(), data_ptr, val * sizeof(Force3D));
+        data_ptr += val * sizeof(Force3D);
+    }
+
+    if (data_ptr + sizeof(quint32) > data.constData() + data.count())
+    {
+        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+                                            CODELOC);
+    }
+
+    std::memcpy(&val, data_ptr, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    SpacePtr spc;
+    Time t;
+    Properties props;
+
+    if (val != 0)
+    {
+        if (data_ptr + val > data.constData() + data.count())
+        {
+            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+                                                CODELOC);
+        }
+
+        QByteArray extra(data_ptr, val);
+        QDataStream ds(extra);
+
+        double time;
+
+        ds >> spc >> time >> props;
+
+        t = time * picosecond;
+    }
+
+    return Frame(coords, vels, frcs, spc, t, props);
 }
 
 const char *Frame::typeName()

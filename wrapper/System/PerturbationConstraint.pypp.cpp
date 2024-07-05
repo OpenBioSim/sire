@@ -36,6 +36,8 @@ namespace bp = boost::python;
 
 SireSystem::PerturbationConstraint __copy__(const SireSystem::PerturbationConstraint &other){ return SireSystem::PerturbationConstraint(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -114,9 +116,9 @@ void register_PerturbationConstraint_class(){
         
         }
         PerturbationConstraint_exposer.staticmethod( "typeName" );
-        PerturbationConstraint_exposer.def( "__copy__", &__copy__);
-        PerturbationConstraint_exposer.def( "__deepcopy__", &__copy__);
-        PerturbationConstraint_exposer.def( "clone", &__copy__);
+        PerturbationConstraint_exposer.def( "__copy__", &__copy__<SireSystem::PerturbationConstraint>);
+        PerturbationConstraint_exposer.def( "__deepcopy__", &__copy__<SireSystem::PerturbationConstraint>);
+        PerturbationConstraint_exposer.def( "clone", &__copy__<SireSystem::PerturbationConstraint>);
         PerturbationConstraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::PerturbationConstraint >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         PerturbationConstraint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::PerturbationConstraint >,

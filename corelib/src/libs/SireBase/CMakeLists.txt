@@ -21,6 +21,7 @@ set ( SIREBASE_HEADERS
       array2d.hpp
       array2d.h
       arrayproperty.hpp
+      atexit.h
       booleanproperty.h
       chunkedhash.hpp
       chunkedvector.hpp
@@ -46,6 +47,7 @@ set ( SIREBASE_HEADERS
       packedarray2d.h
       packedarray2d.hpp
       packedarrays.h
+      pagecache.h
       pairmatrix.hpp
       range.h
       ranges.h
@@ -84,6 +86,7 @@ set ( SIREBASE_SOURCES
 
       array2d.cpp
       arrayproperty.cpp
+      atexit.cpp
       booleanproperty.cpp
       chunkedhash.cpp
       chunkedvector.cpp
@@ -103,6 +106,7 @@ set ( SIREBASE_SOURCES
       meminfo.cpp
       numberproperty.cpp
       packedarray2d.cpp
+      pagecache.cpp
       parallel.cpp
       process.cpp
       progressbar.cpp

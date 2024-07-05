@@ -91,7 +91,7 @@ if "PREFIX" in os.environ and "BUILD_PREFIX" in os.environ:
     conda_base = os.path.abspath(os.environ["PREFIX"])
     print(f"Setting conda-base to {conda_base}")
 else:
-    # Find the path to the conda or mamba executable
+    # Find the path to the conda executable
     conda_base = os.path.abspath(os.path.dirname(sys.executable))
 
     if os.path.basename(conda_base) == "bin":
@@ -132,21 +132,6 @@ else:
     )
     sys.exit(-1)
 
-
-def find_mamba():
-    """Find mamba"""
-    if conda.endswith(".exe"):
-        m = os.path.join(os.path.dirname(conda), "mamba.exe")
-    else:
-        m = os.path.join(os.path.dirname(conda), "mamba")
-
-    if os.path.exists(m):
-        return m
-    else:
-        return None
-
-
-mamba = find_mamba()
 
 # Get the build operating system and processor
 is_linux = False
@@ -284,6 +269,13 @@ def parse_args():
         "that they are already installed)",
     )
     parser.add_argument(
+        "--skip-dep",
+        action="append",
+        help="List of dependencies to skip when installing. This is useful when "
+        "you know that a particular dependency is already installed or "
+        "it is uninstallable on your system.",
+    )
+    parser.add_argument(
         "--skip-build",
         action="store_true",
         default=False,
@@ -337,8 +329,12 @@ def _add_to_dependencies(dependencies, lines):
 
 _is_conda_prepped = False
 
+dependencies_to_skip = []
 
-def conda_install(dependencies, install_bss_reqs=False, install_emle_reqs=False):
+
+def conda_install(
+    dependencies, install_bss_reqs=False, install_emle_reqs=False, yes=True
+):
     """Install the passed list of dependencies using conda"""
 
     conda_exe = conda
@@ -371,31 +367,55 @@ def conda_install(dependencies, install_bss_reqs=False, install_emle_reqs=False)
 
         _is_conda_prepped = True
 
-    if mamba is None:
-        conda_install = [conda, "install", "--yes"]
-    else:
-        conda_install = [mamba, "install", "--yes"]
+    conda_install = [conda, "install"]
 
-    dependencies = [f'"{dep}"' for dep in dependencies]
+    if yes:
+        conda_install.append("--yes")
+
+    deps = []
+
+    global dependencies_to_skip
+
+    try:
+        if len(dependencies_to_skip) > 0:
+            print(f"Skipping the following dependencies: {dependencies_to_skip}")
+    except Exception:
+        dependencies_to_skip = []
+
+    for dependency in dependencies:
+        if dependency == "python" or is_installed(dependency, conda_exe):
+            # no need to install again
+            continue
+
+        skip_dep = False
+
+        for skip in dependencies_to_skip:
+            if dependency.find(skip) != -1:
+                skip_dep = True
+                break
+
+        if skip_dep:
+            print(f"Skipping {dependency}")
+            continue
+
+        # remove duplicates
+        dep = f'"{dependency}"'
+
+        if dep not in deps:
+            deps.append(dep)
+
+    dependencies = deps
 
     cmd = [*conda_install, *dependencies]
-    print("\nInstalling packages using: '%s'" % " ".join(cmd))
+    print("\nInstalling packages using:\n\n%s\n\n" % " ".join(cmd))
     status = subprocess.run(cmd)
 
     if status.returncode != 0:
-        if mamba is not None:
-            # try with conda, as mamba was broken?
-            conda_install = [conda, "install", "--yes"]
-            cmd = [*conda_install, *dependencies]
-            print("\nTrying again using: '%s'" % " ".join(cmd))
-            status = subprocess.run(cmd)
-
-        if status.returncode != 0:
-            print("Something went wrong installing dependencies!")
-            print("If the python or conda/mamba executables were updated")
-            print("in the last install, then this can prevent them")
-            print("from running again. Please re-execute this script.")
-            sys.exit(-1)
+        print("Something went wrong installing dependencies!")
+        print("If the python or conda executables were updated")
+        print("in the last install, then this can prevent them")
+        print("from running again. Please re-execute this script.")
+        sys.exit(-1)
 
     # Install additional requirements for EMLE.
     if install_emle_reqs:
@@ -422,7 +442,7 @@ def conda_install(dependencies, install_bss_reqs=False, install_emle_reqs=False)
             sys.exit(-1)
 
 
-def install_requires(install_bss_reqs=False, install_emle_reqs=False):
+def install_requires(install_bss_reqs=False, install_emle_reqs=False, yes=True):
     """Installs all of the dependencies. This can safely be called
     multiple times, as it will cache the result to prevent future
     installs taking too long
@@ -438,14 +458,6 @@ def install_requires(install_bss_reqs=False, install_emle_reqs=False):
         )
         sys.exit(-1)
 
-    # install mamba if it doesn't exist already
-    global mamba
-
-    if mamba is None:
-        # install mamba first!
-        conda_install(["mamba"], install_bss_reqs, install_emle_reqs)
-        mamba = find_mamba()
-
     try:
         import pip_requirements_parser as _pip_requirements_parser
         from parse_requirements import parse_requirements
@@ -453,7 +465,10 @@ def install_requires(install_bss_reqs=False, install_emle_reqs=False):
         # this didn't import - maybe we are missing pip-requirements-parser
         print("Installing pip-requirements-parser")
         conda_install(
-            ["pip-requirements-parser"], install_bss_reqs, install_emle_reqs=False
+            ["pip-requirements-parser"],
+            install_bss_reqs,
+            install_emle_reqs=False,
+            yes=yes,
         )
         try:
             from parse_requirements import parse_requirements
@@ -474,7 +489,8 @@ def install_requires(install_bss_reqs=False, install_emle_reqs=False):
         reqs = reqs + emle_reqs
 
     dependencies = build_reqs + reqs
-    conda_install(dependencies, install_bss_reqs, install_emle_reqs)
+    conda_install(dependencies, install_bss_reqs, install_emle_reqs, yes=yes)
+    conda_install(dependencies, install_bss_reqs, yes=yes)
 
 
 def add_default_cmake_defs(cmake_defs, ncores):
@@ -582,7 +598,7 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
             CXX = glob.glob(os.path.join(bindir, "clang++"))[0]
             CC = glob.glob(os.path.join(bindir, "clang"))[0]
         except Exception:
-            conda_install(["clang", "clangxx"], False)
+            conda_install(["clang", "clangxx"], False, yes=True)
             try:
                 CXX = glob.glob(os.path.join(bindir, "clang++"))[0]
                 CC = glob.glob(os.path.join(bindir, "clang"))[0]
@@ -597,9 +613,9 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
             CXX = glob.glob(os.path.join(bindir, "*-g++"))[0]
             CC = glob.glob(os.path.join(bindir, "*-gcc"))[0]
         except Exception:
-            # Need this version of gcc to stay compatible with conda-forge
+            # Need this version of gcc to stay compatible with conda-forge
             # (i.e. gemmi needs the exact same compiler version)
-            conda_install(["gcc==12.3.0", "gxx==12.3.0"], False)
+            conda_install(["gcc==12.3.0", "gxx==12.3.0"], False, yes=True)
             try:
                 CXX = glob.glob(os.path.join(bindir, "*-g++"))[0]
                 CC = glob.glob(os.path.join(bindir, "*-gcc"))[0]
@@ -909,6 +925,9 @@ if __name__ == "__main__":
     if install_emle and is_windows:
         raise NotImplementedError("EMLE is current not supported on Windows")
 
+    if args.skip_dep is not None:
+        dependencies_to_skip = args.skip_dep
+
     action = args.action[0]
 
     if is_windows and (args.generator is None or len(args.generator) == 0):
@@ -947,7 +966,9 @@ if __name__ == "__main__":
         )
 
     elif action == "install_requires":
-        install_requires(install_bss_reqs=install_bss, install_emle_reqs=install_emle)
+        install_requires(
+            install_bss_reqs=install_bss, install_emle_reqs=install_emle, yes=False
+        )
 
     elif action == "install_module":
         install_module(ncores=args.ncores[0])

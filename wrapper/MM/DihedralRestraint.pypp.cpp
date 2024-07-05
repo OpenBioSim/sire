@@ -36,6 +36,8 @@ namespace bp = boost::python;
 
 SireMM::DihedralRestraint __copy__(const SireMM::DihedralRestraint &other){ return SireMM::DihedralRestraint(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -369,9 +371,9 @@ void register_DihedralRestraint_class(){
         DihedralRestraint_exposer.staticmethod( "harmonic" );
         DihedralRestraint_exposer.staticmethod( "phi" );
         DihedralRestraint_exposer.staticmethod( "typeName" );
-        DihedralRestraint_exposer.def( "__copy__", &__copy__);
-        DihedralRestraint_exposer.def( "__deepcopy__", &__copy__);
-        DihedralRestraint_exposer.def( "clone", &__copy__);
+        DihedralRestraint_exposer.def( "__copy__", &__copy__<SireMM::DihedralRestraint>);
+        DihedralRestraint_exposer.def( "__deepcopy__", &__copy__<SireMM::DihedralRestraint>);
+        DihedralRestraint_exposer.def( "clone", &__copy__<SireMM::DihedralRestraint>);
         DihedralRestraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::DihedralRestraint >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         DihedralRestraint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::DihedralRestraint >,

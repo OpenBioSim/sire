@@ -29,10 +29,6 @@ jobs:
           - { name: "windows", os: "windows-latest", shell: "pwsh" }
           - { name: "linux", os: "ubuntu-latest", shell: "bash -l {0}" }
           - { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
-        exclude:
-          - platform:
-              { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
-            python-version: "3.12"  # MacOS can't run 3.12 yet...
     environment:
       name: sire-build
     defaults:
@@ -50,14 +46,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           activate-environment: sire_build
           miniforge-version: latest
-          miniforge-variant: Mambaforge
-          use-mamba: true
       #
       - name: Clone the main branch (push to main)
         run: git clone -b main https://github.com/openbiosim/sire sire
       #
       - name: Setup Conda
-        run: mamba install -y -c conda-forge boa anaconda-client packaging pip-requirements-parser
+        run: conda install -y -c conda-forge conda-build boa anaconda-client packaging pip-requirements-parser
       #
       - name: Update Conda recipe
         run: python ${{ github.workspace }}/sire/actions/update_recipe.py
@@ -65,8 +59,8 @@ jobs:
       - name: Prepare build location
         run: mkdir ${{ github.workspace }}/build
       #
-      - name: Build Conda package using mamba build
-        run: conda mambabuild -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
+      - name: Build Conda package using conda build
+        run: conda build -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
       #
       - name: Upload Conda package
         # upload to the 'test' channel

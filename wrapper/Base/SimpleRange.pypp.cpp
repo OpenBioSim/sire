@@ -21,6 +21,8 @@ namespace bp = boost::python;
 
 SireBase::SimpleRange __copy__(const SireBase::SimpleRange &other){ return SireBase::SimpleRange(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -125,9 +127,9 @@ void register_SimpleRange_class(){
         
         }
         SimpleRange_exposer.staticmethod( "typeName" );
-        SimpleRange_exposer.def( "__copy__", &__copy__);
-        SimpleRange_exposer.def( "__deepcopy__", &__copy__);
-        SimpleRange_exposer.def( "clone", &__copy__);
+        SimpleRange_exposer.def( "__copy__", &__copy__<SireBase::SimpleRange>);
+        SimpleRange_exposer.def( "__deepcopy__", &__copy__<SireBase::SimpleRange>);
+        SimpleRange_exposer.def( "clone", &__copy__<SireBase::SimpleRange>);
         SimpleRange_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::SimpleRange >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SimpleRange_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::SimpleRange >,

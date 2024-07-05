@@ -79,6 +79,9 @@ namespace SireOpenMM
 
         bool isGhostAtom(int atom) const;
 
+        int nAtoms() const;
+        int nGhostAtoms() const;
+
         boost::tuple<int, int, double, double, double>
         getException(int atom0, int atom1,
                      int start_index,
@@ -204,10 +207,11 @@ namespace SireOpenMM
     public:
         PerturbableOpenMMMolecule();
 
-        PerturbableOpenMMMolecule(const OpenMMMolecule &mol);
+        PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
+                                  const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         PerturbableOpenMMMolecule(const SireMol::Molecule &mol,
-                                  const SireBase::PropertyMap &map);
+                                  const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         PerturbableOpenMMMolecule(const PerturbableOpenMMMolecule &other);
 

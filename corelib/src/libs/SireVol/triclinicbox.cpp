@@ -565,6 +565,21 @@ Matrix TriclinicBox::boxMatrix() const
     return this->cellMatrix();
 }
 
+SireUnits::Dimension::Length TriclinicBox::maximumCutoff() const
+{
+    // If the box is reduced, then use half the minimum diagonal element.
+    if (this->isReduced())
+    {
+        QList<double> diagonals = {this->v0.x(), this->v1.y(), this->v2.z()};
+        return SireUnits::Dimension::Length(*std::min_element(diagonals.begin(), diagonals.end())/2.0);
+    }
+    // Otherwise, use half the norm of the smallest box vector.
+    else
+    {
+        return SireUnits::Dimension::Length(this->dist_max);
+    }
+}
+
 /** Return the volume of the central box of this space. */
 SireUnits::Dimension::Volume TriclinicBox::volume() const
 {

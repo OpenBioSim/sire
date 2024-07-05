@@ -3210,6 +3210,134 @@ const MoleculeInfoData &StructureEditor::commitInfo()
             }
         }
 
+        // make sure that the AtomIdx order matches the CGAtomIdx order
+        // This is needed to remove confusion in code that assumes
+        // AtomIdx order is always correct. This is a big change in code
+        // behaviour, but it is necessary to make the code more robust,
+        // and also recognises the reality that CutGroups are now "under
+        // the hood" in the code and not really visible or known about by
+        // end users.
+        int atom_count = 0;
+        bool in_atomidx_order = true;
+
+        for (int i = 0; i < this->nCutGroupsInMolecule(); ++i)
+        {
+            const auto cgdata = this->getCGData(CGIdx(i));
+
+            for (const auto &atomidx : cgdata.get<1>())
+            {
+                if (atomidx != AtomIdx(atom_count))
+                {
+                    in_atomidx_order = false;
+                    break;
+                }
+
+                ++atom_count;
+            }
+        }
+
+        if (atom_count != this->nAtomsInMolecule())
+        {
+            in_atomidx_order = false;
+        }
+
+        if (not in_atomidx_order)
+        {
+            SireBase::Console::warning(QObject::tr(
+                "The atoms in the CutGroups are not in the same order as the atoms in the molecule. "
+                "Rebuilding CutGroups so that the CGAtomIdx order matches the AtomIdx order."));
+
+            // are the atoms contiguous in residues?
+            bool contiguous_residues = true;
+            QSet<ResIdx> seen_residues;
+            seen_residues.reserve(this->nResiduesInMolecule());
+            ResIdx prev_residx = ResIdx::null();
+
+            for (int i = 0; i < this->nAtomsInMolecule(); ++i)
+            {
+                const auto info = this->getAtomData(AtomIdx(i));
+
+                if (prev_residx.isNull())
+                {
+                    prev_residx = info.get<4>();
+                    seen_residues.insert(prev_residx);
+                }
+                else
+                {
+                    if (info.get<4>() != prev_residx)
+                    {
+                        prev_residx = info.get<4>();
+
+                        if (seen_residues.contains(prev_residx))
+                        {
+                            contiguous_residues = false;
+                            break;
+                        }
+                        else
+                        {
+                            seen_residues.insert(prev_residx);
+                        }
+                    }
+                }
+            }
+
+            // delete all existing CutGroups
+            this->removeAllCutGroups();
+
+            if (contiguous_residues)
+            {
+                prev_residx = ResIdx::null();
+                int cgcount = 0;
+
+                for (int i = 0; i < this->nAtomsInMolecule(); ++i)
+                {
+                    const auto info = this->getAtomData(AtomIdx(i));
+
+                    if (prev_residx.isNull() or info.get<4>() != prev_residx)
+                    {
+                        prev_residx = info.get<4>();
+                        this->addCutGroup().rename(CGName(QString::number(cgcount)));
+                        cgcount += 1;
+                    }
+
+                    this->reparentAtom(this->getUID(AtomIdx(i)), CGIdx(cgcount - 1));
+                }
+
+                if (cgcount != this->nResiduesInMolecule())
+                {
+                    SireBase::Console::warning(QObject::tr(
+                                                   "The number of CutGroups created (%1) does not match "
+                                                   "the number of residues in the molecule (%2)! Rebuilding "
+                                                   "into a single CutGroup.")
+                                                   .arg(cgcount)
+                                                   .arg(this->nResiduesInMolecule()));
+
+                    this->removeAllCutGroups();
+
+                    this->addCutGroup().rename(CGName("0"));
+
+                    for (int i = 0; i < this->nAtomsInMolecule(); ++i)
+                    {
+                        this->reparentAtom(this->getUID(AtomIdx(i)), CGIdx(0));
+                    }
+                }
+            }
+            else
+            {
+                // create a new CutGroup and add all atoms to it
+                SireBase::Console::warning(QObject::tr(
+                    "The atoms in the molecule are not contiguous in residues. "
+                    "Rebuilding into a single CutGroup."));
+
+                this->addCutGroup().rename(CGName("0"));
+
+                for (int i = 0; i < this->nAtomsInMolecule(); ++i)
+                {
+                    this->reparentAtom(this->getUID(AtomIdx(i)), CGIdx(0));
+                }
+            }
+        }
+
         d->cached_molinfo = new MoleculeInfoData(*this);
     }
 

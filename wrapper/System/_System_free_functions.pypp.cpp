@@ -721,9 +721,15 @@ namespace bp = boost::python;
 
 #include "create_test_molecule.h"
 
+#include "SireMM/cljnbpairs.h"
+
 #include "SireMM/mmdetail.h"
 
 #include "SireMol/atomidxmapping.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/connectivity.h"
 
 #include "SireMol/core.h"
 

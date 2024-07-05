@@ -28,6 +28,8 @@ namespace bp = boost::python;
 
 SireSystem::CloseMols __copy__(const SireSystem::CloseMols &other){ return SireSystem::CloseMols(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireSystem::CloseMols&){ return "SireSystem::CloseMols";}
@@ -207,9 +209,9 @@ void register_CloseMols_class(){
         
         }
         CloseMols_exposer.staticmethod( "typeName" );
-        CloseMols_exposer.def( "__copy__", &__copy__);
-        CloseMols_exposer.def( "__deepcopy__", &__copy__);
-        CloseMols_exposer.def( "clone", &__copy__);
+        CloseMols_exposer.def( "__copy__", &__copy__<SireSystem::CloseMols>);
+        CloseMols_exposer.def( "__deepcopy__", &__copy__<SireSystem::CloseMols>);
+        CloseMols_exposer.def( "clone", &__copy__<SireSystem::CloseMols>);
         CloseMols_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::CloseMols >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CloseMols_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::CloseMols >,

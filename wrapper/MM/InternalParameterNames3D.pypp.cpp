@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireMM::InternalParameterNames3D __copy__(const SireMM::InternalParameterNames3D &other){ return SireMM::InternalParameterNames3D(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::InternalParameterNames3D&){ return "SireMM::InternalParameterNames3D";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -59,9 +61,9 @@ void register_InternalParameterNames3D_class(){
         typedef bp::class_< SireMM::InternalParameterNames3D, bp::bases< SireMM::InternalParameterNames, SireMM::StretchBendTorsionParameterName, SireMM::BendBendParameterName, SireMM::StretchBendParameterName, SireMM::StretchStretchParameterName, SireMM::UreyBradleyParameterName, SireMM::ImproperParameterName, SireMM::DihedralParameterName, SireMM::AngleParameterName, SireMM::BondParameterName > > InternalParameterNames3D_exposer_t;
         InternalParameterNames3D_exposer_t InternalParameterNames3D_exposer = InternalParameterNames3D_exposer_t( "InternalParameterNames3D", "This class provides the default name of the properties\nthat contain the internal and 3D coordinates properties", bp::init< >("") );
         bp::scope InternalParameterNames3D_scope( InternalParameterNames3D_exposer );
-        InternalParameterNames3D_exposer.def( "__copy__", &__copy__);
-        InternalParameterNames3D_exposer.def( "__deepcopy__", &__copy__);
-        InternalParameterNames3D_exposer.def( "clone", &__copy__);
+        InternalParameterNames3D_exposer.def( "__copy__", &__copy__<SireMM::InternalParameterNames3D>);
+        InternalParameterNames3D_exposer.def( "__deepcopy__", &__copy__<SireMM::InternalParameterNames3D>);
+        InternalParameterNames3D_exposer.def( "clone", &__copy__<SireMM::InternalParameterNames3D>);
         InternalParameterNames3D_exposer.def( "__str__", &pvt_get_name);
         InternalParameterNames3D_exposer.def( "__repr__", &pvt_get_name);
     }

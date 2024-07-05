@@ -34,6 +34,8 @@ namespace bp = boost::python;
 
 SireMM::StretchBendTorsionSymbols __copy__(const SireMM::StretchBendTorsionSymbols &other){ return SireMM::StretchBendTorsionSymbols(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::StretchBendTorsionSymbols&){ return "SireMM::StretchBendTorsionSymbols";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -128,9 +130,9 @@ void register_StretchBendTorsionSymbols_class(){
                 , "Return the symbol representing the angle between atoms 3-2-1, theta_\n{321}" );
         
         }
-        StretchBendTorsionSymbols_exposer.def( "__copy__", &__copy__);
-        StretchBendTorsionSymbols_exposer.def( "__deepcopy__", &__copy__);
-        StretchBendTorsionSymbols_exposer.def( "clone", &__copy__);
+        StretchBendTorsionSymbols_exposer.def( "__copy__", &__copy__<SireMM::StretchBendTorsionSymbols>);
+        StretchBendTorsionSymbols_exposer.def( "__deepcopy__", &__copy__<SireMM::StretchBendTorsionSymbols>);
+        StretchBendTorsionSymbols_exposer.def( "clone", &__copy__<SireMM::StretchBendTorsionSymbols>);
         StretchBendTorsionSymbols_exposer.def( "__str__", &pvt_get_name);
         StretchBendTorsionSymbols_exposer.def( "__repr__", &pvt_get_name);
     }

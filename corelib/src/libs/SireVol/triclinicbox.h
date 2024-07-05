@@ -153,6 +153,9 @@ namespace SireVol
 
         QString toString() const;
 
+        /** Get the maximum cutoff distance for the triclinic box. */
+        SireUnits::Dimension::Length maximumCutoff() const;
+
         /** Get the volume of the triclinic box. */
         SireUnits::Dimension::Volume volume() const;
 

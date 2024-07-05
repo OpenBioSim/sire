@@ -73,6 +73,8 @@ namespace bp = boost::python;
 
 SireMM::AmberBond __copy__(const SireMM::AmberBond &other){ return SireMM::AmberBond(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -217,9 +219,9 @@ void register_AmberBond_class(){
         
         }
         AmberBond_exposer.staticmethod( "typeName" );
-        AmberBond_exposer.def( "__copy__", &__copy__);
-        AmberBond_exposer.def( "__deepcopy__", &__copy__);
-        AmberBond_exposer.def( "clone", &__copy__);
+        AmberBond_exposer.def( "__copy__", &__copy__<SireMM::AmberBond>);
+        AmberBond_exposer.def( "__deepcopy__", &__copy__<SireMM::AmberBond>);
+        AmberBond_exposer.def( "clone", &__copy__<SireMM::AmberBond>);
         AmberBond_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::AmberBond >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AmberBond_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::AmberBond >,

@@ -34,6 +34,8 @@ namespace bp = boost::python;
 
 SireMM::BendBendSymbols __copy__(const SireMM::BendBendSymbols &other){ return SireMM::BendBendSymbols(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::BendBendSymbols&){ return "SireMM::BendBendSymbols";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -80,9 +82,9 @@ void register_BendBendSymbols_class(){
                 , "Return the symbol representing the angle between atoms 3-1-0, theta_\n{310}" );
         
         }
-        BendBendSymbols_exposer.def( "__copy__", &__copy__);
-        BendBendSymbols_exposer.def( "__deepcopy__", &__copy__);
-        BendBendSymbols_exposer.def( "clone", &__copy__);
+        BendBendSymbols_exposer.def( "__copy__", &__copy__<SireMM::BendBendSymbols>);
+        BendBendSymbols_exposer.def( "__deepcopy__", &__copy__<SireMM::BendBendSymbols>);
+        BendBendSymbols_exposer.def( "clone", &__copy__<SireMM::BendBendSymbols>);
         BendBendSymbols_exposer.def( "__str__", &pvt_get_name);
         BendBendSymbols_exposer.def( "__repr__", &pvt_get_name);
     }

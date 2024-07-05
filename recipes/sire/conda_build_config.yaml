@@ -1,3 +1,13 @@
+c_compiler:
+  - gcc     # [linux]
+  - clang   # [osx]
+  - vs2019  # [win]
+
+cxx_compiler:
+  - gxx     # [linux]
+  - clangxx # [osx]
+  - vs2019  # [win]
+
 c_compiler_version:
   - 12.3.0 # [linux]
 

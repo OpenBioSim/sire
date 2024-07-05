@@ -52,6 +52,8 @@ namespace bp = boost::python;
 
 SireMM::IntraFF __copy__(const SireMM::IntraFF &other){ return SireMM::IntraFF(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -417,9 +419,9 @@ void register_IntraFF_class(){
         
         }
         IntraFF_exposer.staticmethod( "typeName" );
-        IntraFF_exposer.def( "__copy__", &__copy__);
-        IntraFF_exposer.def( "__deepcopy__", &__copy__);
-        IntraFF_exposer.def( "clone", &__copy__);
+        IntraFF_exposer.def( "__copy__", &__copy__<SireMM::IntraFF>);
+        IntraFF_exposer.def( "__deepcopy__", &__copy__<SireMM::IntraFF>);
+        IntraFF_exposer.def( "clone", &__copy__<SireMM::IntraFF>);
         IntraFF_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::IntraFF >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         IntraFF_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::IntraFF >,

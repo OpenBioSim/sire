@@ -1193,15 +1193,22 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
         {
             if (is_ghost(clj0))
             {
-                from_ghost_idxs.insert(i);
+                // ghost atoms are only ghosts is they are real in at
+                // least one end state (cannot be both a to_ghost and
+                // a from_ghost atom - this is also implicitly tested
+                // for above in the clj0 != clj1)
+                if (not is_ghost(clj1))
+                {
+                    from_ghost_idxs.insert(i);
 
-                // alpha is 1 for the reference state for ghost atoms
-                // (and will be 0 for the perturbed state)
-                this->alphas[i] = 1.0;
+                    // alpha is 1 for the reference state for ghost atoms
+                    // (and will be 0 for the perturbed state)
+                    this->alphas[i] = 1.0;
 
-                // kappa is 1 for both end states for ghost atoms
-                this->kappas[i] = 1.0;
-                this->perturbed->kappas[i] = 1.0;
+                    // kappa is 1 for both end states for ghost atoms
+                    this->kappas[i] = 1.0;
+                    this->perturbed->kappas[i] = 1.0;
+                }
             }
             else if (is_ghost(clj1))
             {
@@ -1795,6 +1802,18 @@ void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v)
     }
 }
 
+/** Return the number of atoms in this molecule */
+int OpenMMMolecule::nAtoms() const
+{
+    return this->coords.count();
+}
+
+/** Return the number of ghost atoms (sum of to_ghosts and from_ghosts) */
+int OpenMMMolecule::nGhostAtoms() const
+{
+    return from_ghost_idxs.count() + to_ghost_idxs.count();
+}
+
 /** Return the alpha parameters of all atoms in atom order for
  *  this molecule
  */
@@ -2073,7 +2092,7 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const Molecule &mol,
                                                      const PropertyMap &map)
     : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
 {
-    this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, map)));
+    this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, map), map));
 }
 
 /** Return whether or not this is null */
@@ -2085,7 +2104,8 @@ bool PerturbableOpenMMMolecule::isNull() const
 }
 
 /** Construct from the passed OpenMMMolecule */
-PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
+PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
+                                                     const PropertyMap &map)
     : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
 {
     if (mol.perturbed.get() == 0)
@@ -2175,6 +2195,45 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
     from_ghost_idxs = mol.from_ghost_idxs;
 
     perturbable_constraints = mol.perturbable_constraints;
+
+    bool fix_perturbable_zero_sigmas = false;
+
+    if (map.specified("fix_perturbable_zero_sigmas"))
+    {
+        fix_perturbable_zero_sigmas = map["fix_perturbable_zero_sigmas"].value().asABoolean();
+    }
+
+    if (fix_perturbable_zero_sigmas)
+    {
+        const int nats = sig0.count();
+
+        if (sig1.count() != nats)
+        {
+            throw SireError::program_bug(QObject::tr(
+                                             "The number of atoms in the reference (%1) and perturbed (%2) "
+                                             "states do not match.")
+                                             .arg(nats)
+                                             .arg(sig1.count()),
+                                         CODELOC);
+        }
+
+        const auto *sig0_data = sig0.constData();
+        const auto *sig1_data = sig1.constData();
+
+        for (int i = 0; i < nats; ++i)
+        {
+            if (std::abs(sig0_data[i]) <= 1e-9)
+            {
+                sig0[i] = sig1_data[i];
+                sig0_data = sig0.constData();
+            }
+            else if (std::abs(sig1_data[i] <= 1e-9))
+            {
+                sig1[i] = sig0_data[i];
+                sig1_data = sig1.constData();
+            }
+        }
+    }
 }
 
 /** Copy constructor */

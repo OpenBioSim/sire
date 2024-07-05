@@ -16,6 +16,8 @@ namespace bp = boost::python;
 
 SireMM::CLJComponent __copy__(const SireMM::CLJComponent &other){ return SireMM::CLJComponent(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -130,9 +132,9 @@ void register_CLJComponent_class(){
         
         }
         CLJComponent_exposer.staticmethod( "typeName" );
-        CLJComponent_exposer.def( "__copy__", &__copy__);
-        CLJComponent_exposer.def( "__deepcopy__", &__copy__);
-        CLJComponent_exposer.def( "clone", &__copy__);
+        CLJComponent_exposer.def( "__copy__", &__copy__<SireMM::CLJComponent>);
+        CLJComponent_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJComponent>);
+        CLJComponent_exposer.def( "clone", &__copy__<SireMM::CLJComponent>);
         CLJComponent_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJComponent >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJComponent_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJComponent >,
