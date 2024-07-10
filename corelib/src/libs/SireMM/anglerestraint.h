@@ -28,56 +28,49 @@
 #ifndef SIREMM_ANGLERESTRAINT_H
 #define SIREMM_ANGLERESTRAINT_H
 
-#include "SireFF/point.h"
+// #include "SireFF/point.h"
 
-#include "restraint.h"
+#include "restraints.h"
 
-#include "SireCAS/expression.h"
-#include "SireCAS/symbol.h"
+// #include "SireCAS/expression.h"
+// #include "SireCAS/symbol.h"
 
 #include "SireUnits/dimensions.h"
+#include "SireUnits/generalunit.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
     class AngleRestraint;
+    class AngleRestraints;
 }
 
 SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::AngleRestraint &);
 SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::AngleRestraint &);
 
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::AngleRestraints &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::AngleRestraints &);
+
 namespace SireMM
 {
 
-    using SireFF::Point;
-    using SireFF::PointRef;
-
-    using SireCAS::Expression;
-    using SireCAS::Symbol;
-    using SireCAS::Symbols;
-
-    // typedef the unit of a harmonic force constant ( MolarEnergy / Angle^2 )
-    typedef SireUnits::Dimension::PhysUnit<1, 2, -2, 0, 0, -1, -2> HarmonicAngleForceConstant;
-
-    /** This is a restraint that operates on the angle between
-        three SireMM::Point objects (e.g. three atoms in a molecule)
-
-        @author Christopher Woods
-    */
-    class SIREMM_EXPORT AngleRestraint : public SireBase::ConcreteProperty<AngleRestraint, ExpressionRestraint3D>
+    /** This class represents a single angle restraint between any three
+     *  atoms in a system
+     * @author Christopher Woods
+     */
+    class SIREMM_EXPORT AngleRestraint
+        : public SireBase::ConcreteProperty<AngleRestraint, SireBase::Property>
     {
 
-        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const AngleRestraint &);
-        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, AngleRestraint &);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const SireMM::AngleRestraint &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, SireMM::AngleRestraint &);
 
     public:
         AngleRestraint();
-
-        AngleRestraint(const PointRef &point0, const PointRef &point1, const PointRef &point2, const Expression &restraint);
-
-        AngleRestraint(const PointRef &point0, const PointRef &point1, const PointRef &point2, const Expression &restraint,
-                       const Values &values);
+        AngleRestraint(const QList<qint64> &atoms,
+                       const SireUnits::Dimension::Angle &theta0,
+                       const SireUnits::Dimension::HarmonicAngleConstant &ktheta);
 
         AngleRestraint(const AngleRestraint &other);
 
@@ -88,72 +81,102 @@ namespace SireMM
         bool operator==(const AngleRestraint &other) const;
         bool operator!=(const AngleRestraint &other) const;
 
+        AngleRestraints operator+(const AngleRestraint &other) const;
+        AngleRestraints operator+(const AngleRestraints &other) const;
+
         static const char *typeName();
+        const char *what() const;
 
-        const Point &point(int i) const;
+        AngleRestraint *clone() const;
 
-        const Point &point0() const;
-        const Point &point1() const;
-        const Point &point2() const;
+        QString toString() const;
 
-        int nPoints() const;
+        bool isNull() const;
 
-        static const Symbol &theta();
+        QVector<qint64> atoms() const;
 
-        Symbols builtinSymbols() const;
-        Values builtinValues() const;
-
-        RestraintPtr differentiate(const Symbol &symbol) const;
-
-        void setSpace(const Space &space);
-
-        const Expression &differentialRestraintFunction() const;
-
-        void force(MolForceTable &forcetable, double scale_force = 1) const;
-        void force(ForceTable &forcetable, double scale_force = 1) const;
-
-        void update(const MoleculeData &moldata);
-
-        void update(const Molecules &molecules);
-
-        Molecules molecules() const;
-
-        bool contains(MolNum molnum) const;
-        bool contains(const MolID &molid) const;
-
-        bool usesMoleculesIn(const ForceTable &forcetable) const;
-        bool usesMoleculesIn(const Molecules &molecules) const;
-
-        static AngleRestraint harmonic(const PointRef &point0, const PointRef &point1, const PointRef &point2,
-                                       const HarmonicAngleForceConstant &force_constant);
-
-        static AngleRestraint halfHarmonic(const PointRef &point0, const PointRef &point1, const PointRef &point2,
-                                           const SireUnits::Dimension::Angle &angle,
-                                           const HarmonicAngleForceConstant &force_constant);
-
-    protected:
-        AngleRestraint(const PointRef &point0, const PointRef &point1, const PointRef &point2,
-                       const Expression &nrg_restraint, const Expression &force_restraint);
+        SireUnits::Dimension::Angle theta0() const;
+        SireUnits::Dimension::HarmonicAngleConstant ktheta() const;
 
     private:
-        void calculateTheta();
+        /** Atoms involved in the angle restraint */
+        QVector<qint64> atms;
 
-        /** The three points between which the restraint is calculated */
-        SireFF::PointPtr p[3];
+        /** Equilibrium angle */
+        SireUnits::Dimension::Angle _theta0;
 
-        /** The expression used to calculate the force */
-        Expression force_expression;
-
-        /** Whether or not all three points are within the same molecule */
-        bool intra_molecule_points;
+        /** Harmonic angle constant */
+        SireUnits::Dimension::HarmonicAngleConstant _ktheta;
     };
 
-} // namespace SireMM
+    /** This class represents a collection of angle restraints */
+    class SIREMM_EXPORT AngleRestraints
+        : public SireBase::ConcreteProperty<AngleRestraints, Restraints>
+    {
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const SireMM::AngleRestraints &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, SireMM::AngleRestraints &);
+
+    public:
+        AngleRestraints();
+        AngleRestraints(const QString &name);
+
+        AngleRestraints(const AngleRestraint &restraint);
+        AngleRestraints(const QList<AngleRestraint> &restraints);
+
+        AngleRestraints(const QString &name,
+                        const AngleRestraint &restraint);
+
+        AngleRestraints(const QString &name,
+                        const QList<AngleRestraint> &restraints);
+
+        AngleRestraints(const AngleRestraints &other);
+
+        ~AngleRestraints();
+
+        AngleRestraints &operator=(const AngleRestraints &other);
+
+        bool operator==(const AngleRestraints &other) const;
+        bool operator!=(const AngleRestraints &other) const;
+
+        static const char *typeName();
+        const char *what() const;
+
+        AngleRestraints *clone() const;
+
+        QString toString() const;
+
+        bool isEmpty() const;
+        bool isNull() const;
+
+        int count() const;
+        int size() const;
+        int nRestraints() const;
+
+        const AngleRestraint &at(int i) const;
+        const AngleRestraint &operator[](int i) const;
+
+        QList<AngleRestraint> restraints() const;
+
+        void add(const AngleRestraint &restraint);
+        void add(const AngleRestraints &restraints);
+
+        AngleRestraints &operator+=(const AngleRestraint &restraint);
+        AngleRestraints &operator+=(const AngleRestraints &restraints);
+
+        AngleRestraints operator+(const AngleRestraint &restraint) const;
+        AngleRestraints operator+(const AngleRestraints &restraints) const;
+
+    private:
+        /** List of restraints */
+        QList<AngleRestraint> r;
+    };
+}
 
 Q_DECLARE_METATYPE(SireMM::AngleRestraint)
+Q_DECLARE_METATYPE(SireMM::AngleRestraints)
 
 SIRE_EXPOSE_CLASS(SireMM::AngleRestraint)
-
+SIRE_EXPOSE_CLASS(SireMM::AngleRestraints)
 SIRE_END_HEADER
 
 #endif
