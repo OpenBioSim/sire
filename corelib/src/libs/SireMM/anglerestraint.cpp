@@ -770,7 +770,7 @@ AngleRestraints AngleRestraints::operator+(const AngleRestraints &restraints) co
 //                 p[i].edit().setSpace(new_space);
 //             }
 
-//             Restraint3D::setSpace(new_space);
+//             Restraint::setSpace(new_space);
 
 //             this->calculateTheta();
 //         }
