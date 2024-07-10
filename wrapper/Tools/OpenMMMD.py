@@ -2505,6 +2505,7 @@ def selectWatersForPerturbation(system, charge_diff):
         # FIXME: select waters according to distance criterion
         # if mol.residue().name() == water_resname and cnt < nions:
         if mol.residues()[0].name() == water_resname and cnt < nions:
+            print ("Selected water %s for perturbation into ion" % mol)
             cnt += 1
 
             perturbed_water = mol.edit()
