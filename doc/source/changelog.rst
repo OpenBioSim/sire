@@ -16,6 +16,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 ----------------------------------------------------------------------------------------------
 
 * Please add an item to this changelog when you create your PR
+* Print residue indices of perturbed water molecules to SOMD1 log.
+* Add support for creating Na+ and Cl- ions.
 
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
 -----------------------------------------------------------------------------------------
