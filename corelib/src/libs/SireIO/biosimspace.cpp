@@ -1589,6 +1589,68 @@ namespace SireIO
         return retval;
     }
 
+    Molecule createSodiumIon(const Vector &coords, const QString model, const PropertyMap &map)
+    {
+		// Strip all whitespace from the model name and convert to upper case.
+        auto _model = model.simplified().replace(" ", "").toUpper();
+
+        // Create a hash between the allowed model names and their templace files.
+        QHash<QString, QString> models;
+        models["TIP3P"] = getShareDir() + "/templates/ions/na_tip3p";
+        models["TIP4P"] = getShareDir() + "/templates/ions/na_tip4p";
+
+        // Make sure the user has passed a valid water model.
+        if (not models.contains(_model))
+        {
+            throw SireError::incompatible_error(QObject::tr("Unsupported AMBER ion model '%1'").arg(model), CODELOC);
+        }
+
+        // Extract the water model template path.
+        auto path = models[_model];
+
+        // Load the ion template.
+        auto ion_template = MoleculeParser::read(path + ".prm7", map);
+
+        // Extract the ion the template.
+        auto ion = ion_template[MolIdx(0)].molecule();
+
+        // Set the coordinates of the ion.
+        ion = ion.edit().atom(AtomIdx(0)).setProperty(map["coordinates"], coords).molecule().commit();
+
+        return ion;
+    }
+
+    Molecule createChlorineIon(const Vector &coords, const QString model, const PropertyMap &map)
+    {
+		// Strip all whitespace from the model name and convert to upper case.
+        auto _model = model.simplified().replace(" ", "").toUpper();
+
+        // Create a hash between the allowed model names and their templace files.
+        QHash<QString, QString> models;
+        models["TIP3P"] = getShareDir() + "/templates/ions/cl_tip3p";
+        models["TIP4P"] = getShareDir() + "/templates/ions/cl_tip4p";
+
+        // Make sure the user has passed a valid water model.
+        if (not models.contains(_model))
+        {
+            throw SireError::incompatible_error(QObject::tr("Unsupported AMBER ion model '%1'").arg(model), CODELOC);
+        }
+
+        // Extract the water model template path.
+        auto path = models[_model];
+
+        // Load the ion template.
+        auto ion_template = MoleculeParser::read(path + ".prm7");
+
+        // Extract the ion the template.
+        auto ion = ion_template[MolIdx(0)].molecule();
+
+        // Set the coordinates of the ion.
+        ion = ion.edit().atom(AtomIdx(0)).setProperty(map["coordinates"], coords).molecule().commit();
+
+        return ion;
+    }
+
     Vector cross(const Vector &v0, const Vector &v1)
     {
         double nx = v0.y() * v1.z() - v0.z() * v1.y();
