@@ -202,3 +202,22 @@ def test_merge_neopentane_methane(neopentane_methane, openmm_platform):
     # These energies aren't correct - extra ghost atom internals?
     assert nrg_neo.value() == pytest.approx(nrg_merged_0.value(), abs=1e-3)
     # assert nrg_met.value() == pytest.approx(nrg_merged_1.value(), abs=1e-3)
+
+
+def test_ion_merge(ala_mols):
+    water = ala_mols[-1]
+    ion = sr.legacy.IO.createSodiumIon(water.atoms()[-1].coordinates(), "tip3p")
+
+    merged = sr.morph.merge(water, ion)
+
+    coords0 = merged.property("coordinates0").to_vector()[0]
+    coords1 = merged.property("coordinates1").to_vector()[0]
+
+    assert coords0 == coords1
+
+    merged = sr.morph.merge(ion, water)
+
+    coords0 = merged.property("coordinates0").to_vector()[0]
+    coords1 = merged.property("coordinates1").to_vector()[0]
+
+    assert coords0 == coords1
