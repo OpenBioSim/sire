@@ -823,44 +823,29 @@ double PyQMForceImpl::computeForce(
     // Now update the force vector.
 
     // First the QM atoms.
-    i = 0;
-    for (const auto &force : forces_qm)
+    for (int i=0; i<qm_atoms.size(); i++)
     {
         // Get the index of the atom.
         const auto idx = qm_atoms[i];
 
         // Convert to OpenMM format.
-        OpenMM::Vec3 omm_force(force[0], force[1], force[2]);
+        OpenMM::Vec3 omm_force(forces_qm[i][0], forces_qm[i][1], forces_qm[i][2]);
 
         // Update the force vector.
         forces[idx] = lambda * omm_force;
-
-        // Update the atom index.
-        i++;
     }
 
     // Now the MM atoms.
-    i = 0;
-    for (const auto &force : forces_mm)
+    for (int i=0; i<num_mm; i++)
     {
         // Get the index of the atom.
         const auto idx = idx_mm[i];
 
         // Convert to OpenMM format.
-        OpenMM::Vec3 omm_force(force[0], force[1], force[2]);
+        OpenMM::Vec3 omm_force(forces_mm[i][0], forces_mm[i][1], forces_mm[i][2]);
 
         // Update the force vector.
         forces[idx] = lambda * omm_force;
-
-        // Update the atom index.
-        i++;
-
-        // Exit if we have reached the end of the MM atoms, i.e. ignore virtual
-        // point charges.
-        if (i == num_mm)
-        {
-            break;
-        }
     }
 
     // Update the step count.
