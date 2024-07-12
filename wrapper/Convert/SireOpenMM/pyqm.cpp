@@ -426,7 +426,7 @@ namespace OpenMM
                 // Set the version.
                 node.setIntProperty("version", 0);
 
-                // Set the note attributer.
+                // Set the note attribute.
                 node.setStringProperty("note",
                  "This force only supports partial serialization, so can only be used "
                  "within the same session and memory space.");
