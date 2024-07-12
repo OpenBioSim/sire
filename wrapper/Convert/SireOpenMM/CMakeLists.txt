@@ -50,6 +50,9 @@ if (${SIRE_USE_OPENMM})
     #if (CAN_USE_CUSTOMCPPFORCE)
       message(STATUS "OpenMM version supports CustomCPPForce")
       add_definitions("-DSIRE_USE_CUSTOMCPPFORCE")
+
+      find_package(Torch REQUIRED)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
       #else()
       #message(STATUS "OpenMM version does not support CustomCPPForce")
       #endif()
@@ -80,6 +83,7 @@ if (${SIRE_USE_OPENMM})
     set ( SIREOPENMM_SOURCES
 
           pyqm.cpp
+          torchqm.cpp
           lambdalever.cpp
           openmmminimise.cpp
           openmmmolecule.cpp
@@ -120,6 +124,7 @@ if (${SIRE_USE_OPENMM})
                           SIRE_SireStream
                           SIRE_SireError
                           ${OpenMM_LIBRARIES}
+                          ${TORCH_LIBRARIES}
                           )
 
     include( LimitSirePythonExportSymbols )

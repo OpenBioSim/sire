@@ -5,6 +5,8 @@ set ( PYPP_SOURCES
        PyQMCallback.pypp.cpp
        PyQMForce.pypp.cpp
        PyQMEngine.pypp.cpp
+       TorchQMForce.pypp.cpp
+       TorchQMEngine.pypp.cpp
        QMEngine.pypp.cpp
        _SireOpenMM_free_functions.pypp.cpp
        QMForce.pypp.cpp

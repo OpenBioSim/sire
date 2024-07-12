@@ -25,6 +25,10 @@
 
 #include "QMForce.pypp.hpp"
 
+#include "TorchQMEngine.pypp.hpp"
+
+#include "TorchQMForce.pypp.hpp"
+
 #include "_SireOpenMM_free_functions.pypp.hpp"
 
 #include "vector_less__OpenMM_scope_Vec3__greater_.pypp.hpp"
@@ -56,9 +60,13 @@ BOOST_PYTHON_MODULE(_SireOpenMM){
 
     register_PyQMEngine_class();
 
+    register_TorchQMEngine_class();
+
     register_QMForce_class();
 
     register_PyQMForce_class();
+
+    register_TorchQMForce_class();
 
     register_SireOpenMM_properties();
 

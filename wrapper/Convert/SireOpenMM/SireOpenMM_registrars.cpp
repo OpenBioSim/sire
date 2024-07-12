@@ -7,6 +7,7 @@
 #include "pyqm.h"
 #include "lambdalever.h"
 #include "openmmmolecule.h"
+#include "torchqm.h"
 
 #include "Helpers/objectregistry.hpp"
 
@@ -25,6 +26,8 @@ void register_SireOpenMM_objects()
     ObjectRegistry::registerConverterFor< SireOpenMM::LambdaLever >();
     ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
     ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::TorchQMForce >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::TorchQMEngine >();
 
 }
 

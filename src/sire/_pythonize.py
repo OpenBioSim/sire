@@ -242,6 +242,8 @@ def _load_new_api_modules(delete_old: bool = True, is_base: bool = False):
     _pythonize(Convert._SireOpenMM.PyQMCallback, delete_old=delete_old)
     _pythonize(Convert._SireOpenMM.PyQMEngine, delete_old=delete_old)
     _pythonize(Convert._SireOpenMM.PyQMForce, delete_old=delete_old)
+    _pythonize(Convert._SireOpenMM.TorchQMEngine, delete_old=delete_old)
+    _pythonize(Convert._SireOpenMM.TorchQMForce, delete_old=delete_old)
 
     try:
         import lazy_import

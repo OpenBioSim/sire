@@ -3,8 +3,6 @@
 
 #ifdef GCCXML_PARSE
 
-#define QT_NO_SIGNALS_SLOTS_KEYWORDS = 1
-
 #include "lambdalever.h"
 #include "openmmminimise.h"
 #include "openmmmolecule.h"

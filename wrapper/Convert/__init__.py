@@ -21,6 +21,7 @@ __all__ = [
     "QMEngine",
     "PyQMCallback",
     "PyQMEngine",
+    "TorchQMEngine",
 ]
 
 try:
@@ -102,6 +103,7 @@ try:
         QMEngine,
         PyQMCallback,
         PyQMEngine,
+        TorchQMEngine,
     )
 
     from ..._pythonize import _pythonize
@@ -114,6 +116,7 @@ try:
             QMEngine,
             PyQMCallback,
             PyQMEngine,
+            TorchQMEngine,
         ],
         delete_old=True,
     )

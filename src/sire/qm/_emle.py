@@ -49,6 +49,52 @@ class EMLEEngine(_Convert._SireOpenMM.PyQMEngine):
         return emle_force, interpolation_force
 
 
+class TorchEMLEEngine(_Convert._SireOpenMM.TorchQMEngine):
+    """A class to enable use of EMLE as a QM engine using C++ Torch."""
+
+    def get_forces(self):
+        """
+        Get the OpenMM forces for this engine. The first force is the actual
+        EMLE force, which uses a CustomCPPForceImpl to calculate the electrostatic
+        embedding force. The second is a null CustomBondForce that can be used to
+        add a "lambda_emle" global parameter to a context to allow the force to be
+        scaled.
+
+        Returns
+        -------
+
+        emle_force : openmm.Force
+            The EMLE force object to compute the electrostatic embedding force.
+
+        interpolation_force : openmm.CustomBondForce
+            A null CustomBondForce object that can be used to add a "lambda_emle"
+            global parameter to an OpenMM context. This allows the electrostatic
+            embedding force to be scaled.
+        """
+
+        from copy import deepcopy as _deepcopy
+        from openmm import CustomBondForce as _CustomBondForce
+
+        # Create a dynamics object for the QM region.
+        d = self._mols["property is_perturbable"].dynamics(
+            timestep="1fs",
+            constraint="none",
+            platform="cpu",
+            qm_engine=self,
+        )
+
+        # Get the OpenMM EMLE force.
+        emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
+
+        # Create a null CustomBondForce to add the EMLE interpolation
+        # parameter.
+        interpolation_force = _CustomBondForce("")
+        interpolation_force.addGlobalParameter("lambda_emle", 1.0)
+
+        # Return the forces.
+        return emle_force, interpolation_force
+
+
 def emle(
     mols,
     qm_atoms,
@@ -72,8 +118,9 @@ def emle(
         or molecule view/container that can be used to select
         qm_atoms from 'mols'.
 
-    calculator : emle.calculator.EMLECalculator
-        The EMLECalculator object to use for elecotrostatic embedding calculations.
+    calculator : emle.calculator.EMLECalculator, emle.models.EMLE
+        The EMLE calculator or model to use for elecotrostatic embedding
+        calculations.
 
     cutoff : str or sire.legacy.Units.GeneralUnit, optional, default="7.5A"
         The cutoff to use for the QM/MM calculation.
@@ -95,6 +142,7 @@ def emle(
 
     try:
         from emle.calculator import EMLECalculator as _EMLECalculator
+        from emle.models import EMLE as _EMLE
     except:
         raise ImportError(
             "Could not import emle. Please install emle-engine and try again."
@@ -118,9 +166,9 @@ def emle(
     except:
         raise ValueError("Unable to select 'qm_atoms' from 'mols'")
 
-    if not isinstance(calculator, _EMLECalculator):
+    if not isinstance(calculator, (_EMLECalculator, _EMLE)):
         raise TypeError(
-            "'calculator' must be a of type 'emle.calculator.EMLECalculator'"
+            "'calculator' must be a of type 'emle.calculator.EMLECalculator' or 'emle.models.EMLE'"
         )
 
     if not isinstance(cutoff, (str, _Units.GeneralUnit)):
@@ -151,27 +199,52 @@ def emle(
             raise TypeError("'map' must be of type 'dict'")
     map = _create_map(map)
 
-    # Determine the callback name. Use an optimised version of the callback
-    # if the user has specified "torchani" as the backend and is using
-    # "electrostatic" embedding.
-    if calculator._backend == "torchani" and calculator._method == "electrostatic":
-        try:
-            from emle.models import ANI2xEMLE as _ANI2xEMLE
+    # Create an engine from an EMLE calculator.
+    if isinstance(calculator, _EMLECalculator):
+        # Determine the callback name. Use an optimised version of the callback
+        # if the user has specified "torchani" as the backend and is using
+        # "electrostatic" embedding.
+        if calculator._backend == "torchani" and calculator._method == "electrostatic":
+            try:
+                from emle.models import ANI2xEMLE as _ANI2xEMLE
 
-            callback = "_sire_callback_optimised"
-        except:
+                callback = "_sire_callback_optimised"
+            except:
+                callback = "_sire_callback"
+        else:
             callback = "_sire_callback"
-    else:
-        callback = "_sire_callback"
 
-    # Create the EMLE engine.
-    engine = EMLEEngine(
-        calculator,
-        callback,
-        cutoff,
-        neighbour_list_frequency,
-        False,
-    )
+        # Create the EMLE engine.
+        engine = EMLEEngine(
+            calculator,
+            callback,
+            cutoff,
+            neighbour_list_frequency,
+            False,
+        )
+
+    # Create an engine from an EMLE model.
+    else:
+        import torch as _torch
+
+        try:
+            script_module = _torch.jit.script(calculator)
+        except:
+            raise ValueError(
+                "Unable to compile the EMLE model to a TorchScript module."
+            )
+
+        # Save the script module to a file.
+        module_path = calculator.__class__.__name__ + ".pt"
+        _torch.jit.save(script_module, calculator.__class__.__name__ + ".pt")
+
+        # Create the EMLE engine.
+        engine = TorchEMLEEngine(
+            module_path,
+            cutoff,
+            neighbour_list_frequency,
+            False,
+        )
 
     from ._utils import (
         _check_charge,
