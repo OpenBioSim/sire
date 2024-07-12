@@ -204,6 +204,7 @@ def test_merge_neopentane_methane(neopentane_methane, openmm_platform):
     # assert nrg_met.value() == pytest.approx(nrg_merged_1.value(), abs=1e-3)
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Not supported on Windows")
 def test_ion_merge(ala_mols):
     water = ala_mols[-1]
     ion = sr.legacy.IO.createSodiumIon(water.atoms()[-1].coordinates(), "tip3p")
