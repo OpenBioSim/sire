@@ -26,8 +26,8 @@
   *
 \*********************************************/
 
-#ifndef SIREOPENMM_EMLE_H
-#define SIREOPENMM_EMLE_H
+#ifndef SIREOPENMM_PYQM_H
+#define SIREOPENMM_PYQM_H
 
 #include "OpenMM.h"
 #include "openmm/Force.h"
