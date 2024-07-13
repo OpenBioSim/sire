@@ -29,6 +29,8 @@
 #include "openmm/serialization/SerializationNode.h"
 #include "openmm/serialization/SerializationProxy.h"
 
+#include <torch/csrc/autograd/autograd.h>
+
 #include "SireError/errors.h"
 #include "SireMaths/vector.h"
 #include "SireStream/datastream.h"
@@ -712,11 +714,11 @@ double TorchQMForceImpl::computeForce(
     const auto energy = energies.sum().item<double>() * HARTREE_TO_KJ_MOL;
 
     // Compute the gradients.
-    energies.sum().backward();
+    const auto gradients = torch::autograd::grad({energies.sum()}, {xyz_qm_torch, xyz_mm_torch});
 
     // Compute the forces, converting from Hatree/Anstrom to kJ/mol/nm.
-    const auto forces_qm = (-xyz_qm_torch.grad() * HARTREE_TO_KJ_MOL * 10).cpu();;
-    const auto forces_mm = (-xyz_mm_torch.grad() * HARTREE_TO_KJ_MOL * 10).cpu();;
+    const auto forces_qm = -(gradients[0] * HARTREE_TO_KJ_MOL * 10).cpu();
+    const auto forces_mm = -(gradients[1] * HARTREE_TO_KJ_MOL * 10).cpu();
 
     // The current interpolation (weighting) parameter.
     double lambda;
