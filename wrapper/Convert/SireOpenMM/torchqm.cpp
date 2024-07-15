@@ -472,7 +472,7 @@ double TorchQMForceImpl::computeForce(
     {
         // Initialise a vector to hold the current positions and charges for the virtual
         // point charges.
-        std::vector<float> xyz_virtual_flat;
+        std::vector<float> xyz_virtual;
         QVector<double> charges_virtual;
 
         // Manually work out the MM point charges and build the neigbour list.
@@ -635,16 +635,16 @@ double TorchQMForceImpl::computeForce(
 
                 // Positive direction. (Away from MM1 atom.)
                 auto xyz = mm2_vec + VIRTUAL_PC_DELTA*normal;
-                xyz_virtual_flat.push_back(xyz[0]);
-                xyz_virtual_flat.push_back(xyz[1]);
-                xyz_virtual_flat.push_back(xyz[2]);
+                xyz_virtual.push_back(xyz[0]);
+                xyz_virtual.push_back(xyz[1]);
+                xyz_virtual.push_back(xyz[2]);
                 charges_virtual.append(-frac_charge);
 
                 // Negative direction (Towards MM1 atom.)
                 xyz = mm2_vec - VIRTUAL_PC_DELTA*normal;
-                xyz_virtual_flat.push_back(xyz[0]);
-                xyz_virtual_flat.push_back(xyz[1]);
-                xyz_virtual_flat.push_back(xyz[2]);
+                xyz_virtual.push_back(xyz[0]);
+                xyz_virtual.push_back(xyz[1]);
+                xyz_virtual.push_back(xyz[2]);
                 charges_virtual.append(frac_charge);
             }
         }
@@ -654,10 +654,10 @@ double TorchQMForceImpl::computeForce(
 
         // If there are any virtual point charges, then add to the MM positions
         // and charges.
-        if (xyz_virtual_flat.size() > 0)
+        if (xyz_virtual.size() > 0)
         {
-            xyz_mm.reserve(xyz_mm.size() + xyz_virtual_flat.size());
-            xyz_mm.insert(xyz_mm.end(), xyz_virtual_flat.begin(), xyz_virtual_flat.end());
+            xyz_mm.reserve(xyz_mm.size() + xyz_virtual.size());
+            xyz_mm.insert(xyz_mm.end(), xyz_virtual.begin(), xyz_virtual.end());
             charges_mm.append(charges_virtual);
         }
 
