@@ -418,15 +418,24 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
     // TODO: Add support for multiple dihedral restraints
 
     const auto energy_expression = QString(
-                                       "rho*k*delta*delta;"
-                                       "delta=(phi-phi0)")
+                                       "rho*k*min(dtheta, 2*pi-dtheta)^2;"
+                                       "dtheta = abs(theta-theta0);"
+                                       "pi = 3.1415926535;")
                                        .toStdString();
 
     auto *restraintff = new OpenMM::CustomTorsionForce(energy_expression);
 
+    // OLD CODE
+    // restraintff->addPerTorsionParameter("rho");
+    // restraintff->addPerTorsionParameter("k");
+    // restraintff->addPerTorsionParameter("phi0");
+
+    // it seems that OpenMM wants to call the torsion angle theta rather than phi
+    // we need to rename our parameters accordingly
+    // NEW CODE
     restraintff->addPerTorsionParameter("rho");
     restraintff->addPerTorsionParameter("k");
-    restraintff->addPerTorsionParameter("phi0");
+    restraintff->addPerTorsionParameter("theta0");
 
     restraintff->setUsesPeriodicBoundaryConditions(true);
 
@@ -450,7 +459,7 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
         std::vector<double> parameters;
         parameters.resize(3);
 
-        parameters[0] = 1.0;                                              // rho
+        parameters[0] = 1.0;                                           // rho
         parameters[1] = restraint.kphi().value() * internal_to_ktheta; // kphi
         parameters[2] = restraint.phi0().value();                      // phi0 (already in radians)
 
