@@ -8,37 +8,38 @@
 
 #include "SireSystem/forcefieldinfo.h"
 
-#include "SireMol/core.h"
-#include "SireMol/moleditor.h"
-#include "SireMol/atomelements.h"
 #include "SireMol/atomcharges.h"
 #include "SireMol/atomcoords.h"
+#include "SireMol/atomelements.h"
 #include "SireMol/atommasses.h"
 #include "SireMol/atomproperty.hpp"
-#include "SireMol/connectivity.h"
+#include "SireMol/atomvelocities.h"
 #include "SireMol/bondid.h"
 #include "SireMol/bondorder.h"
-#include "SireMol/atomvelocities.h"
+#include "SireMol/connectivity.h"
+#include "SireMol/core.h"
+#include "SireMol/moleditor.h"
 
-#include "SireMM/atomljs.h"
-#include "SireMM/selectorbond.h"
 #include "SireMM/amberparams.h"
+#include "SireMM/atomljs.h"
 #include "SireMM/bondrestraints.h"
-#include "SireMM/positionalrestraints.h"
 #include "SireMM/boreschrestraints.h"
+#include "SireMM/dihedralrestraint.h"
+#include "SireMM/positionalrestraints.h"
+#include "SireMM/selectorbond.h"
 
 #include "SireVol/periodicbox.h"
 #include "SireVol/triclinicbox.h"
 
 #include "SireCAS/lambdaschedule.h"
 
-#include "SireMaths/vector.h"
 #include "SireMaths/maths.h"
+#include "SireMaths/vector.h"
 
+#include "SireBase/generalunitproperty.h"
+#include "SireBase/lengthproperty.h"
 #include "SireBase/parallel.h"
 #include "SireBase/propertylist.h"
-#include "SireBase/lengthproperty.h"
-#include "SireBase/generalunitproperty.h"
 
 #include "SireUnits/units.h"
 
@@ -390,6 +391,71 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
         }
 
         restraintff->addBond(anchor_index, atom_index, custom_params);
+    }
+}
+
+/** Add all of the dihedral restraints from 'restraints' to the passed
+ *  system, which is acted on by the passed LambdaLever. The number
+ *  of real (non-anchor) atoms in the OpenMM::System is 'natoms'
+ */
+void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
+                              OpenMM::System &system, LambdaLever &lambda_lever,
+                              int natoms)
+{
+    if (restraints.isEmpty())
+        return;
+
+    // energy expression of the dihedral restraint, which acts over four atoms
+    //
+    // phi = dihedral(P1, P2, P3, P4)
+    //
+    // The energies are
+    //
+    // e_restraint = rho * (e_torsion)
+    // e_torsion = k_phi(dphi)^2 where
+    // dphi = abs(phi - phi0)
+
+    // TODO: Add support for multiple dihedral restraints
+
+    const auto energy_expression = QString(
+                                       "rho*k*delta*delta;"
+                                       "delta=(phi-phi0)")
+                                       .toStdString();
+
+    auto *restraintff = new OpenMM::CustomTorsionForce(energy_expression);
+
+    restraintff->addPerTorsionParameter("rho");
+    restraintff->addPerTorsionParameter("k");
+    restraintff->addPerTorsionParameter("phi0");
+
+    restraintff->setUsesPeriodicBoundaryConditions(true);
+
+    lambda_lever.addRestraintIndex(restraints.name(),
+                                   system.addForce(restraintff));
+
+    const double internal_to_ktheta = (1 * SireUnits::kcal_per_mol / (SireUnits::radian2)).to(SireUnits::kJ_per_mol / SireUnits::radian2);
+
+    const auto atom_restraints = restraints.restraints();
+
+    for (const auto &restraint : atom_restraints)
+    {
+        std::vector<int> particles;
+        particles.resize(4);
+
+        for (int i = 0; i < 3; ++i)
+        {
+            particles[i] = restraint.atoms()[i];
+        }
+
+        std::vector<double> parameters;
+        parameters.resize(3);
+
+        parameters[0] = 1.0;                                              // rho
+        parameters[1] = restraint.kphi().value() * internal_to_ktheta; // kphi
+        parameters[2] = restraint.phi0().value();                      // phi0 (already in radians)
+
+        // restraintff->addTorsion(particles, parameters);
+        restraintff->addTorsion(particles[0], particles[1], particles[2], particles[3], parameters);
     }
 }
 
@@ -1625,7 +1691,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                               CODELOC);
 
             // we now need to choose what to do based on the type of restraint...
-            if (prop.read().isA<SireMM::PositionalRestraints>())
+            if (prop.read().isA<SireMM::DihedralRestraints>())
+            {
+                _add_dihedral_restraints(prop.read().asA<SireMM::DihedralRestraints>(),
+                                         system, lambda_lever, start_index);
+            }
+            else if (prop.read().isA<SireMM::PositionalRestraints>())
             {
                 _add_positional_restraints(prop.read().asA<SireMM::PositionalRestraints>(),
                                            system, lambda_lever, anchor_coords, start_index);
