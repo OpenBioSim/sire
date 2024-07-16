@@ -417,20 +417,8 @@ def conda_install(
         print("from running again. Please re-execute this script.")
         sys.exit(-1)
 
-    # Install additional requirements for EMLE.
+    # Install emle-engine.
     if install_emle_reqs:
-        # librascal.
-        cmd = [
-            "pip",
-            "install",
-            "git+https://github.com/lab-cosmo/librascal.git",
-        ]
-        status = subprocess.run(cmd)
-        if status.returncode != 0:
-            print("Something went wrong installing librascal!")
-            sys.exit(-1)
-
-        # emle-engine.
         cmd = [
             "pip",
             "install",
