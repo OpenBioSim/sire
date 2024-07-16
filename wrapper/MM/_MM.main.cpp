@@ -27,6 +27,8 @@
 
 #include "AngleRestraint.pypp.hpp"
 
+#include "AngleRestraints.pypp.hpp"
+
 #include "AngleSymbols.pypp.hpp"
 
 #include "AtomFunction.pypp.hpp"
@@ -160,6 +162,8 @@
 #include "DihedralParameterName.pypp.hpp"
 
 #include "DihedralRestraint.pypp.hpp"
+
+#include "DihedralRestraints.pypp.hpp"
 
 #include "DihedralSymbols.pypp.hpp"
 
@@ -546,11 +550,11 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_AngleParameterName_class();
 
-    register_Restraint_class();
-
-    register_Restraint3D_class();
-
     register_AngleRestraint_class();
+
+    register_Restraints_class();
+
+    register_AngleRestraints_class();
 
     register_InternalSymbolsBase_class();
 
@@ -585,8 +589,6 @@ BOOST_PYTHON_MODULE(_MM){
     register_BondParameterName_class();
 
     register_BondRestraint_class();
-
-    register_Restraints_class();
 
     register_BondRestraints_class();
 
@@ -646,6 +648,14 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_CLJParameterNames3D_class();
 
+    register_CLJPotentialInterface_InterCLJPotential__class();
+
+    register_CLJPotentialInterface_InterSoftCLJPotential__class();
+
+    register_CLJPotentialInterface_IntraCLJPotential__class();
+
+    register_CLJPotentialInterface_IntraSoftCLJPotential__class();
+
     register_CLJProbe_class();
 
     register_CLJRFFunction_class();
@@ -672,6 +682,10 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_CoulombNBPairs_class();
 
+    register_CoulombPotentialInterface_InterCoulombPotential__class();
+
+    register_CoulombPotentialInterface_IntraCoulombPotential__class();
+
     register_CoulombProbe_class();
 
     register_Dihedral_class();
@@ -682,7 +696,13 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_DihedralRestraint_class();
 
+    register_DihedralRestraints_class();
+
     register_DihedralSymbols_class();
+
+    register_Restraint_class();
+
+    register_Restraint3D_class();
 
     register_DistanceRestraint_class();
 
@@ -776,6 +796,10 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_LJPerturbation_class();
 
+    register_LJPotentialInterface_InterLJPotential__class();
+
+    register_LJPotentialInterface_IntraLJPotential__class();
+
     register_LJProbe_class();
 
     register_MMDetail_class();
@@ -819,6 +843,10 @@ BOOST_PYTHON_MODULE(_MM){
     register_SelectorMImproper_class();
 
     register_SoftCLJComponent_class();
+
+    register_SoftCLJPotentialInterface_InterSoftCLJPotential__class();
+
+    register_SoftCLJPotentialInterface_IntraSoftCLJPotential__class();
 
     register_StretchBendComponent_class();
 

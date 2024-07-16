@@ -3,7 +3,6 @@
 // (C) Christopher Woods, GPL >= 3 License
 
 #include "boost/python.hpp"
-#include "Helpers/clone_const_reference.hpp"
 #include "AngleRestraint.pypp.hpp"
 
 namespace bp = boost::python;
@@ -32,6 +31,8 @@ namespace bp = boost::python;
 
 #include "anglerestraint.h"
 
+#include <QDebug>
+
 #include "anglerestraint.h"
 
 SireMM::AngleRestraint __copy__(const SireMM::AngleRestraint &other){ return SireMM::AngleRestraint(other); }
@@ -47,162 +48,50 @@ SireMM::AngleRestraint __copy__(const SireMM::AngleRestraint &other){ return Sir
 void register_AngleRestraint_class(){
 
     { //::SireMM::AngleRestraint
-        typedef bp::class_< SireMM::AngleRestraint, bp::bases< SireMM::Restraint3D, SireMM::Restraint, SireBase::Property > > AngleRestraint_exposer_t;
-        AngleRestraint_exposer_t AngleRestraint_exposer = AngleRestraint_exposer_t( "AngleRestraint", "This is a restraint that operates on the angle between\nthree SireMM::Point objects (e.g. three atoms in a molecule)\n\nAuthor: Christopher Woods\n", bp::init< >("Constructor") );
+        typedef bp::class_< SireMM::AngleRestraint, bp::bases< SireBase::Property > > AngleRestraint_exposer_t;
+        AngleRestraint_exposer_t AngleRestraint_exposer = AngleRestraint_exposer_t( "AngleRestraint", "This class represents a single angle restraint between any three\natoms in a system\nAuthor: Christopher Woods\n", bp::init< >("Null constructor") );
         bp::scope AngleRestraint_scope( AngleRestraint_exposer );
-        AngleRestraint_exposer.def( bp::init< SireFF::PointRef const &, SireFF::PointRef const &, SireFF::PointRef const &, SireCAS::Expression const & >(( bp::arg("point0"), bp::arg("point1"), bp::arg("point2"), bp::arg("restraint") ), "Construct a restraint that acts on the angle within the\nthree points point0, point1 and point2 (theta == a(012)),\nrestraining the angle within these points using the expression\nrestraint") );
-        AngleRestraint_exposer.def( bp::init< SireFF::PointRef const &, SireFF::PointRef const &, SireFF::PointRef const &, SireCAS::Expression const &, SireCAS::Values const & >(( bp::arg("point0"), bp::arg("point1"), bp::arg("point2"), bp::arg("restraint"), bp::arg("values") ), "Construct a restraint that acts on the angle within the\nthree points point0, point1 and point2 (theta == a(012)),\nrestraining the angle within these points using the expression\nrestraint") );
+        AngleRestraint_exposer.def( bp::init< QList< long long > const &, SireUnits::Dimension::Angle const &, SireUnits::Dimension::HarmonicAngleConstant const & >(( bp::arg("atoms"), bp::arg("theta0"), bp::arg("ktheta") ), "Construct a restraint that acts on the angle within the\nthree atoms atom0, atom1 and atom2 (theta == a(012)),\nrestraining the angle within these atoms") );
         AngleRestraint_exposer.def( bp::init< SireMM::AngleRestraint const & >(( bp::arg("other") ), "Copy constructor") );
-        { //::SireMM::AngleRestraint::builtinSymbols
+        { //::SireMM::AngleRestraint::atoms
         
-            typedef ::SireCAS::Symbols ( ::SireMM::AngleRestraint::*builtinSymbols_function_type)(  ) const;
-            builtinSymbols_function_type builtinSymbols_function_value( &::SireMM::AngleRestraint::builtinSymbols );
+            typedef ::QVector< long long > ( ::SireMM::AngleRestraint::*atoms_function_type)(  ) const;
+            atoms_function_type atoms_function_value( &::SireMM::AngleRestraint::atoms );
             
             AngleRestraint_exposer.def( 
-                "builtinSymbols"
-                , builtinSymbols_function_value
+                "atoms"
+                , atoms_function_value
                 , bp::release_gil_policy()
-                , "Return the built-in symbols of this restraint" );
+                , "Return the atoms involved in the restraint" );
         
         }
-        { //::SireMM::AngleRestraint::builtinValues
+        { //::SireMM::AngleRestraint::isNull
         
-            typedef ::SireCAS::Values ( ::SireMM::AngleRestraint::*builtinValues_function_type)(  ) const;
-            builtinValues_function_type builtinValues_function_value( &::SireMM::AngleRestraint::builtinValues );
+            typedef bool ( ::SireMM::AngleRestraint::*isNull_function_type)(  ) const;
+            isNull_function_type isNull_function_value( &::SireMM::AngleRestraint::isNull );
             
             AngleRestraint_exposer.def( 
-                "builtinValues"
-                , builtinValues_function_value
+                "isNull"
+                , isNull_function_value
                 , bp::release_gil_policy()
-                , "Return the values of the built-in symbols of this restraint" );
+                , "" );
         
         }
-        { //::SireMM::AngleRestraint::contains
+        { //::SireMM::AngleRestraint::ktheta
         
-            typedef bool ( ::SireMM::AngleRestraint::*contains_function_type)( ::SireMol::MolNum ) const;
-            contains_function_type contains_function_value( &::SireMM::AngleRestraint::contains );
+            typedef ::SireUnits::Dimension::HarmonicAngleConstant ( ::SireMM::AngleRestraint::*ktheta_function_type)(  ) const;
+            ktheta_function_type ktheta_function_value( &::SireMM::AngleRestraint::ktheta );
             
             AngleRestraint_exposer.def( 
-                "contains"
-                , contains_function_value
-                , ( bp::arg("molnum") )
+                "ktheta"
+                , ktheta_function_value
                 , bp::release_gil_policy()
-                , "Return whether or not this restraint affects the molecule\nwith number molnum" );
-        
-        }
-        { //::SireMM::AngleRestraint::contains
-        
-            typedef bool ( ::SireMM::AngleRestraint::*contains_function_type)( ::SireMol::MolID const & ) const;
-            contains_function_type contains_function_value( &::SireMM::AngleRestraint::contains );
-            
-            AngleRestraint_exposer.def( 
-                "contains"
-                , contains_function_value
-                , ( bp::arg("molid") )
-                , bp::release_gil_policy()
-                , "Return whether or not this restraint affects the molecule\nwith ID molid" );
-        
-        }
-        { //::SireMM::AngleRestraint::differentialRestraintFunction
-        
-            typedef ::SireCAS::Expression const & ( ::SireMM::AngleRestraint::*differentialRestraintFunction_function_type)(  ) const;
-            differentialRestraintFunction_function_type differentialRestraintFunction_function_value( &::SireMM::AngleRestraint::differentialRestraintFunction );
-            
-            AngleRestraint_exposer.def( 
-                "differentialRestraintFunction"
-                , differentialRestraintFunction_function_value
-                , bp::return_value_policy< bp::copy_const_reference >()
-                , "Return the function used to calculate the restraint force" );
-        
-        }
-        { //::SireMM::AngleRestraint::differentiate
-        
-            typedef ::SireMM::RestraintPtr ( ::SireMM::AngleRestraint::*differentiate_function_type)( ::SireCAS::Symbol const & ) const;
-            differentiate_function_type differentiate_function_value( &::SireMM::AngleRestraint::differentiate );
-            
-            AngleRestraint_exposer.def( 
-                "differentiate"
-                , differentiate_function_value
-                , ( bp::arg("symbol") )
-                , bp::release_gil_policy()
-                , "Return the differential of this restraint with respect to\nthe symbol symbol\nThrow: SireCAS::unavailable_differential\n" );
-        
-        }
-        { //::SireMM::AngleRestraint::force
-        
-            typedef void ( ::SireMM::AngleRestraint::*force_function_type)( ::SireFF::MolForceTable &,double ) const;
-            force_function_type force_function_value( &::SireMM::AngleRestraint::force );
-            
-            AngleRestraint_exposer.def( 
-                "force"
-                , force_function_value
-                , ( bp::arg("forcetable"), bp::arg("scale_force")=1 )
-                , "Calculate the force acting on the molecule in the forcetable forcetable\ncaused by this restraint, and add it on to the forcetable scaled by\nscale_force" );
-        
-        }
-        { //::SireMM::AngleRestraint::force
-        
-            typedef void ( ::SireMM::AngleRestraint::*force_function_type)( ::SireFF::ForceTable &,double ) const;
-            force_function_type force_function_value( &::SireMM::AngleRestraint::force );
-            
-            AngleRestraint_exposer.def( 
-                "force"
-                , force_function_value
-                , ( bp::arg("forcetable"), bp::arg("scale_force")=1 )
-                , "Calculate the force acting on the molecules in the forcetable forcetable\ncaused by this restraint, and add it on to the forcetable scaled by\nscale_force" );
-        
-        }
-        { //::SireMM::AngleRestraint::halfHarmonic
-        
-            typedef ::SireMM::AngleRestraint ( *halfHarmonic_function_type )( ::SireFF::PointRef const &,::SireFF::PointRef const &,::SireFF::PointRef const &,::SireUnits::Dimension::Angle const &,::SireMM::HarmonicAngleForceConstant const & );
-            halfHarmonic_function_type halfHarmonic_function_value( &::SireMM::AngleRestraint::halfHarmonic );
-            
-            AngleRestraint_exposer.def( 
-                "halfHarmonic"
-                , halfHarmonic_function_value
-                , ( bp::arg("point0"), bp::arg("point1"), bp::arg("point2"), bp::arg("angle"), bp::arg("force_constant") )
-                , bp::release_gil_policy()
-                , "Return a distance restraint that applied a half-harmonic potential\nbetween the points point0 and point1 above a distance distance\nusing a force constant force_constant" );
-        
-        }
-        { //::SireMM::AngleRestraint::harmonic
-        
-            typedef ::SireMM::AngleRestraint ( *harmonic_function_type )( ::SireFF::PointRef const &,::SireFF::PointRef const &,::SireFF::PointRef const &,::SireMM::HarmonicAngleForceConstant const & );
-            harmonic_function_type harmonic_function_value( &::SireMM::AngleRestraint::harmonic );
-            
-            AngleRestraint_exposer.def( 
-                "harmonic"
-                , harmonic_function_value
-                , ( bp::arg("point0"), bp::arg("point1"), bp::arg("point2"), bp::arg("force_constant") )
-                , bp::release_gil_policy()
-                , "Return a distance restraint that applies a harmonic potential between\nthe points point0 and point1 using a force constant force_constant" );
-        
-        }
-        { //::SireMM::AngleRestraint::molecules
-        
-            typedef ::SireMol::Molecules ( ::SireMM::AngleRestraint::*molecules_function_type)(  ) const;
-            molecules_function_type molecules_function_value( &::SireMM::AngleRestraint::molecules );
-            
-            AngleRestraint_exposer.def( 
-                "molecules"
-                , molecules_function_value
-                , bp::release_gil_policy()
-                , "Return the molecules used in this restraint" );
-        
-        }
-        { //::SireMM::AngleRestraint::nPoints
-        
-            typedef int ( ::SireMM::AngleRestraint::*nPoints_function_type)(  ) const;
-            nPoints_function_type nPoints_function_value( &::SireMM::AngleRestraint::nPoints );
-            
-            AngleRestraint_exposer.def( 
-                "nPoints"
-                , nPoints_function_value
-                , bp::release_gil_policy()
-                , "This restraint involves three points" );
+                , "Return the force constant for the restraint" );
         
         }
         AngleRestraint_exposer.def( bp::self != bp::self );
+        AngleRestraint_exposer.def( bp::self + bp::self );
+        AngleRestraint_exposer.def( bp::self + bp::other< SireMM::AngleRestraints >() );
         { //::SireMM::AngleRestraint::operator=
         
             typedef ::SireMM::AngleRestraint & ( ::SireMM::AngleRestraint::*assign_function_type)( ::SireMM::AngleRestraint const & ) ;
@@ -217,78 +106,28 @@ void register_AngleRestraint_class(){
         
         }
         AngleRestraint_exposer.def( bp::self == bp::self );
-        { //::SireMM::AngleRestraint::point
+        { //::SireMM::AngleRestraint::theta0
         
-            typedef ::SireFF::Point const & ( ::SireMM::AngleRestraint::*point_function_type)( int ) const;
-            point_function_type point_function_value( &::SireMM::AngleRestraint::point );
+            typedef ::SireUnits::Dimension::Angle ( ::SireMM::AngleRestraint::*theta0_function_type)(  ) const;
+            theta0_function_type theta0_function_value( &::SireMM::AngleRestraint::theta0 );
             
             AngleRestraint_exposer.def( 
-                "point"
-                , point_function_value
-                , ( bp::arg("i") )
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the ith point" );
-        
-        }
-        { //::SireMM::AngleRestraint::point0
-        
-            typedef ::SireFF::Point const & ( ::SireMM::AngleRestraint::*point0_function_type)(  ) const;
-            point0_function_type point0_function_value( &::SireMM::AngleRestraint::point0 );
-            
-            AngleRestraint_exposer.def( 
-                "point0"
-                , point0_function_value
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the first point" );
-        
-        }
-        { //::SireMM::AngleRestraint::point1
-        
-            typedef ::SireFF::Point const & ( ::SireMM::AngleRestraint::*point1_function_type)(  ) const;
-            point1_function_type point1_function_value( &::SireMM::AngleRestraint::point1 );
-            
-            AngleRestraint_exposer.def( 
-                "point1"
-                , point1_function_value
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the second point" );
-        
-        }
-        { //::SireMM::AngleRestraint::point2
-        
-            typedef ::SireFF::Point const & ( ::SireMM::AngleRestraint::*point2_function_type)(  ) const;
-            point2_function_type point2_function_value( &::SireMM::AngleRestraint::point2 );
-            
-            AngleRestraint_exposer.def( 
-                "point2"
-                , point2_function_value
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the third point" );
-        
-        }
-        { //::SireMM::AngleRestraint::setSpace
-        
-            typedef void ( ::SireMM::AngleRestraint::*setSpace_function_type)( ::SireVol::Space const & ) ;
-            setSpace_function_type setSpace_function_value( &::SireMM::AngleRestraint::setSpace );
-            
-            AngleRestraint_exposer.def( 
-                "setSpace"
-                , setSpace_function_value
-                , ( bp::arg("space") )
+                "theta0"
+                , theta0_function_value
                 , bp::release_gil_policy()
-                , "Set the space used to evaluate the energy of this restraint\nThrow: SireVol::incompatible_space\n" );
+                , "Return the equilibrium angle for the restraint" );
         
         }
-        { //::SireMM::AngleRestraint::theta
+        { //::SireMM::AngleRestraint::toString
         
-            typedef ::SireCAS::Symbol const & ( *theta_function_type )(  );
-            theta_function_type theta_function_value( &::SireMM::AngleRestraint::theta );
+            typedef ::QString ( ::SireMM::AngleRestraint::*toString_function_type)(  ) const;
+            toString_function_type toString_function_value( &::SireMM::AngleRestraint::toString );
             
             AngleRestraint_exposer.def( 
-                "theta"
-                , theta_function_value
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the symbol that represents the angle between the points (theta)" );
+                "toString"
+                , toString_function_value
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireMM::AngleRestraint::typeName
@@ -303,69 +142,26 @@ void register_AngleRestraint_class(){
                 , "" );
         
         }
-        { //::SireMM::AngleRestraint::update
+        { //::SireMM::AngleRestraint::what
         
-            typedef void ( ::SireMM::AngleRestraint::*update_function_type)( ::SireMol::MoleculeData const & ) ;
-            update_function_type update_function_value( &::SireMM::AngleRestraint::update );
+            typedef char const * ( ::SireMM::AngleRestraint::*what_function_type)(  ) const;
+            what_function_type what_function_value( &::SireMM::AngleRestraint::what );
             
             AngleRestraint_exposer.def( 
-                "update"
-                , update_function_value
-                , ( bp::arg("moldata") )
+                "what"
+                , what_function_value
                 , bp::release_gil_policy()
-                , "Update the points of this restraint using new molecule data from moldata\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
+                , "" );
         
         }
-        { //::SireMM::AngleRestraint::update
-        
-            typedef void ( ::SireMM::AngleRestraint::*update_function_type)( ::SireMol::Molecules const & ) ;
-            update_function_type update_function_value( &::SireMM::AngleRestraint::update );
-            
-            AngleRestraint_exposer.def( 
-                "update"
-                , update_function_value
-                , ( bp::arg("molecules") )
-                , bp::release_gil_policy()
-                , "Update the points of this restraint using new molecule data from molecules\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-        
-        }
-        { //::SireMM::AngleRestraint::usesMoleculesIn
-        
-            typedef bool ( ::SireMM::AngleRestraint::*usesMoleculesIn_function_type)( ::SireFF::ForceTable const & ) const;
-            usesMoleculesIn_function_type usesMoleculesIn_function_value( &::SireMM::AngleRestraint::usesMoleculesIn );
-            
-            AngleRestraint_exposer.def( 
-                "usesMoleculesIn"
-                , usesMoleculesIn_function_value
-                , ( bp::arg("forcetable") )
-                , bp::release_gil_policy()
-                , "Return whether or not this restraint involves any of the molecules\nthat are in the forcetable forcetable" );
-        
-        }
-        { //::SireMM::AngleRestraint::usesMoleculesIn
-        
-            typedef bool ( ::SireMM::AngleRestraint::*usesMoleculesIn_function_type)( ::SireMol::Molecules const & ) const;
-            usesMoleculesIn_function_type usesMoleculesIn_function_value( &::SireMM::AngleRestraint::usesMoleculesIn );
-            
-            AngleRestraint_exposer.def( 
-                "usesMoleculesIn"
-                , usesMoleculesIn_function_value
-                , ( bp::arg("molecules") )
-                , bp::release_gil_policy()
-                , "Return whether or not this restraint involves any of the molecules\nin molecules" );
-        
-        }
-        AngleRestraint_exposer.staticmethod( "halfHarmonic" );
-        AngleRestraint_exposer.staticmethod( "harmonic" );
-        AngleRestraint_exposer.staticmethod( "theta" );
         AngleRestraint_exposer.staticmethod( "typeName" );
         AngleRestraint_exposer.def( "__copy__", &__copy__<SireMM::AngleRestraint>);
         AngleRestraint_exposer.def( "__deepcopy__", &__copy__<SireMM::AngleRestraint>);
         AngleRestraint_exposer.def( "clone", &__copy__<SireMM::AngleRestraint>);
         AngleRestraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::AngleRestraint >,
-                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+                                bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AngleRestraint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::AngleRestraint >,
-                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+                                bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AngleRestraint_exposer.def_pickle(sire_pickle_suite< ::SireMM::AngleRestraint >());
         AngleRestraint_exposer.def( "__str__", &__str__< ::SireMM::AngleRestraint > );
         AngleRestraint_exposer.def( "__repr__", &__str__< ::SireMM::AngleRestraint > );
