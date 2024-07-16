@@ -11,6 +11,8 @@ __all__ = [
     "Improper",
     "PositionRestraint",
     "PositionRestraints",
+    "DihedralRestraint",
+    "DihedralRestraints",
     "SelectorAngle",
     "SelectorBond",
     "SelectorDihedral",
@@ -39,6 +41,9 @@ BoreschRestraints = _MM.BoreschRestraints
 
 PositionalRestraint = _MM.PositionalRestraint
 PositionalRestraints = _MM.PositionalRestraints
+
+DihedralRestraint = _MM.DihedralRestraint
+DihedralRestraints = _MM.DihedralRestraints
 
 AmberBond = _MM.AmberBond
 AmberAngle = _MM.AmberAngle
