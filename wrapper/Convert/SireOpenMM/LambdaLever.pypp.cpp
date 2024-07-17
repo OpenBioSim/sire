@@ -199,7 +199,7 @@ void register_LambdaLever_class(){
         }
         { //::SireOpenMM::LambdaLever::setExceptionIndicies
         
-            typedef void ( ::SireOpenMM::LambdaLever::*setExceptionIndicies_function_type)( int,::QString const &,::QVector< boost::tuples::tuple< int, int, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > > const & ) ;
+            typedef void ( ::SireOpenMM::LambdaLever::*setExceptionIndicies_function_type)( int,::QString const &,::QVector< boost::tuples::tuple< int, int > > const & ) ;
             setExceptionIndicies_function_type setExceptionIndicies_function_value( &::SireOpenMM::LambdaLever::setExceptionIndicies );
             
             LambdaLever_exposer.def( 

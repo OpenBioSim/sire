@@ -451,7 +451,7 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
         std::vector<int> particles;
         particles.resize(4);
 
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < 4; ++i)
         {
             particles[i] = restraint.atoms()[i];
         }
