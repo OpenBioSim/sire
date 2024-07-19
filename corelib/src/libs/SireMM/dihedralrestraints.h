@@ -25,15 +25,10 @@
   *
 \*********************************************/
 
-#ifndef SIREMM_DIHEDRALRESTRAINT_H
-#define SIREMM_DIHEDRALRESTRAINT_H
-
-// #include "SireFF/point.h"
+#ifndef SIREMM_DIHEDRALRESTRAINTS_H
+#define SIREMM_DIHEDRALRESTRAINTS_H
 
 #include "restraints.h"
-
-// #include "SireCAS/expression.h"
-// #include "SireCAS/symbol.h"
 
 #include "SireUnits/dimensions.h"
 #include "SireUnits/generalunit.h"

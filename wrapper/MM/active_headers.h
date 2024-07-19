@@ -5,7 +5,7 @@
 
 #include "amberparams.h"
 #include "angle.h"
-#include "anglerestraint.h"
+#include "anglerestraints.h"
 #include "atomfunctions.h"
 #include "atomljs.h"
 #include "bond.h"
@@ -30,7 +30,7 @@
 #include "cljworkspace.h"
 #include "coulombpotential.h"
 #include "dihedral.h"
-#include "dihedralrestraint.h"
+#include "dihedralrestraints.h"
 #include "distancerestraint.h"
 #include "excludedpairs.h"
 #include "fouratomfunctions.h"

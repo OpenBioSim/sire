@@ -1825,6 +1825,53 @@ void _update_restraint_in_context(OpenMM::CustomCompoundBondForce *ff, double rh
     ff->updateParametersInContext(context);
 }
 
+/** Update the parameters for a CustomAngleForce for scale factor 'rho'
+ *  in the passed context */
+void _update_restraint_in_context(OpenMM::CustomAngleForce *ff, double rho,
+                                  OpenMM::Context &context)
+{
+    if (ff == 0)
+        throw SireError::invalid_cast(QObject::tr(
+                                          "Unable to cast the restraint force to an OpenMM::CustomAngleForce, "
+                                          "despite it reporting that is was an object of this type..."),
+                                      CODELOC);
+
+    const int nangles = ff->getNumAngles();
+
+    if (nangles == 0)
+        // nothing to update
+        return;
+
+    const int nparams = ff->getNumPerAngleParameters();
+
+    if (nparams == 0)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "Unable to set 'rho' for this restraint as it has no custom parameters!"),
+                                            CODELOC);
+
+    // we set the first parameter - we can see what the current value
+    // is from the first restraint. This is because rho should be the
+    // first parameter and have the same value for all restraints
+    std::vector<double> custom_params;
+    custom_params.resize(nparams);
+    int atom0, atom1, atom2;
+
+    ff->getAngleParameters(0, atom0, atom1, atom2, custom_params);
+
+    if (custom_params[0] == rho)
+        // nothing to do - it is already equal to this value
+        return;
+
+    for (int i = 0; i < nangles; ++i)
+    {
+        ff->getAngleParameters(i, atom0, atom1, atom2, custom_params);
+        custom_params[0] = rho;
+        ff->setAngleParameters(i, atom0, atom1, atom2, custom_params);
+    }
+
+    ff->updateParametersInContext(context);
+}
+
 /** Update the parameters for a CustomTorsionForce for scale factor 'rho'
  *  in the passed context */
 void _update_restraint_in_context(OpenMM::CustomTorsionForce *ff, double rho,
@@ -1931,6 +1978,12 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomBondForce *>(&ff),
+            rho, context);
+    }
+    else if (ff_type == "CustomAngleForce")
+    {
+        _update_restraint_in_context(
+            dynamic_cast<OpenMM::CustomAngleForce *>(&ff),
             rho, context);
     }
     else if (ff_type == "CustomTorsionForce")

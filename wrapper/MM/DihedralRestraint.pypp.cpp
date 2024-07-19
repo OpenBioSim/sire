@@ -7,17 +7,7 @@
 
 namespace bp = boost::python;
 
-#include "SireCAS/conditional.h"
-
 #include "SireCAS/errors.h"
-
-#include "SireCAS/power.h"
-
-#include "SireCAS/symbols.h"
-
-#include "SireCAS/values.h"
-
-#include "SireFF/forcetable.h"
 
 #include "SireID/index.h"
 
@@ -25,15 +15,13 @@ namespace bp = boost::python;
 
 #include "SireStream/shareddatastream.h"
 
-#include "SireUnits/angle.h"
-
 #include "SireUnits/units.h"
 
-#include "dihedralrestraint.h"
+#include "dihedralrestraints.h"
 
 #include <QDebug>
 
-#include "dihedralrestraint.h"
+#include "dihedralrestraints.h"
 
 SireMM::DihedralRestraint __copy__(const SireMM::DihedralRestraint &other){ return SireMM::DihedralRestraint(other); }
 

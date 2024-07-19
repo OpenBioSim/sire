@@ -25,20 +25,10 @@
   *
 \*********************************************/
 
-#include "dihedralrestraint.h"
-
-// #include "SireFF/forcetable.h"
-
-// #include "SireCAS/conditional.h"
-// #include "SireCAS/power.h"
-// #include "SireCAS/symbols.h"
-// #include "SireCAS/values.h"
+#include "dihedralrestraints.h"
 
 #include "SireID/index.h"
-
-// #include "SireUnits/angle.h"
 #include "SireUnits/units.h"
-
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
@@ -47,11 +37,8 @@
 #include <QDebug>
 
 using namespace SireMM;
-// using namespace SireMol;
-// using namespace SireFF;
 using namespace SireID;
 using namespace SireBase;
-// using namespace SireCAS;
 using namespace SireMaths;
 using namespace SireStream;
 using namespace SireUnits;

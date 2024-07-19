@@ -4,6 +4,8 @@ __all__ = [
     "AmberDihPart",
     "AmberDihedral",
     "Angle",
+    "AngleRestraint",
+    "AngleRestraints",
     "Bond",
     "BondRestraint",
     "BondRestraints",
@@ -30,6 +32,9 @@ from ..legacy import MM as _MM
 from .. import use_new_api as _use_new_api
 
 _use_new_api()
+
+AngleRestraint = _MM.AngleRestraint
+AngleRestraints = _MM.AngleRestraints
 
 # It would be better if these were called "DistanceRestraints",
 # but there is already a legacy Sire.MM class with this name

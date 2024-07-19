@@ -21,10 +21,11 @@
 #include "SireMol/moleditor.h"
 
 #include "SireMM/amberparams.h"
+#include "SireMM/anglerestraints.h"
 #include "SireMM/atomljs.h"
 #include "SireMM/bondrestraints.h"
 #include "SireMM/boreschrestraints.h"
-#include "SireMM/dihedralrestraint.h"
+#include "SireMM/dihedralrestraints.h"
 #include "SireMM/positionalrestraints.h"
 #include "SireMM/selectorbond.h"
 
@@ -394,10 +395,68 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     }
 }
 
-/** Add all of the dihedral restraints from 'restraints' to the passed
+/** Add all of the angle restraints from 'restraints' to the passed
  *  system, which is acted on by the passed LambdaLever. The number
  *  of real (non-anchor) atoms in the OpenMM::System is 'natoms'
  */
+
+void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
+                           OpenMM::System &system, LambdaLever &lambda_lever,
+                           int natoms)
+{
+    if (restraints.isEmpty())
+        return;
+
+    // energy expression of the angle restraint, which acts over three atoms
+    //
+    // theta = angle(P1, P2, P3)
+    //
+    // The energies are
+    //
+    // e_restraint = rho * (e_angle)
+    // e_angle = ktheta(theta - theta0)^2
+
+    const auto energy_expression = QString(
+                                       "rho*k*(theta-theta0)^2;")
+                                       .toStdString();
+
+    auto *restraintff = new OpenMM::CustomAngleForce(energy_expression);
+
+    restraintff->addPerAngleParameter("rho");
+    restraintff->addPerAngleParameter("k");
+    restraintff->addPerAngleParameter("theta0");
+
+    restraintff->setUsesPeriodicBoundaryConditions(true);
+
+    lambda_lever.addRestraintIndex(restraints.name(),
+                                   system.addForce(restraintff));
+
+    const double internal_to_ktheta = (1 * SireUnits::kcal_per_mol / (SireUnits::radian2)).to(SireUnits::kJ_per_mol / SireUnits::radian2);
+
+    const auto atom_restraints = restraints.restraints();
+
+    for (const auto &restraint : atom_restraints)
+    {
+        std::vector<int> particles;
+        particles.resize(3);
+
+        for (int i = 0; i < 3; ++i)
+        {
+            particles[i] = restraint.atoms()[i];
+        }
+
+        std::vector<double> parameters;
+        parameters.resize(3);
+
+        parameters[0] = 1.0;                                             // rho
+        parameters[1] = restraint.ktheta().value() * internal_to_ktheta; // k
+        parameters[2] = restraint.theta0().value();                      // theta0 (already in radians)
+
+        // restraintff->addTorsion(particles, parameters);
+        restraintff->addAngle(particles[0], particles[1], particles[2], parameters);
+    }
+}
+
 void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
                               OpenMM::System &system, LambdaLever &lambda_lever,
                               int natoms)
@@ -415,24 +474,16 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
     // e_torsion = k_phi(dphi)^2 where
     // dphi = abs(phi - phi0)
 
-    // TODO: Add support for multiple dihedral restraints
-
     const auto energy_expression = QString(
-                                       "rho*k*min(dtheta, 2*pi-dtheta)^2;"
+                                       "rho*k*min(dtheta, two_pi-dtheta)^2;"
                                        "dtheta = abs(theta-theta0);"
-                                       "pi = 3.1415926535;")
+                                       "two_pi=6.283185307179586;")
                                        .toStdString();
 
     auto *restraintff = new OpenMM::CustomTorsionForce(energy_expression);
 
-    // OLD CODE
-    // restraintff->addPerTorsionParameter("rho");
-    // restraintff->addPerTorsionParameter("k");
-    // restraintff->addPerTorsionParameter("phi0");
-
     // it seems that OpenMM wants to call the torsion angle theta rather than phi
     // we need to rename our parameters accordingly
-    // NEW CODE
     restraintff->addPerTorsionParameter("rho");
     restraintff->addPerTorsionParameter("k");
     restraintff->addPerTorsionParameter("theta0");
@@ -460,8 +511,8 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
         parameters.resize(3);
 
         parameters[0] = 1.0;                                           // rho
-        parameters[1] = restraint.kphi().value() * internal_to_ktheta; // kphi
-        parameters[2] = restraint.phi0().value();                      // phi0 (already in radians)
+        parameters[1] = restraint.kphi().value() * internal_to_ktheta; // k
+        parameters[2] = restraint.phi0().value();                      // phi0 (already in radians) --> theta0
 
         // restraintff->addTorsion(particles, parameters);
         restraintff->addTorsion(particles[0], particles[1], particles[2], particles[3], parameters);
@@ -1704,6 +1755,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             {
                 _add_dihedral_restraints(prop.read().asA<SireMM::DihedralRestraints>(),
                                          system, lambda_lever, start_index);
+            }
+            else if (prop.read().isA<SireMM::AngleRestraints>())
+            {
+                _add_angle_restraints(prop.read().asA<SireMM::AngleRestraints>(),
+                                      system, lambda_lever, start_index);
             }
             else if (prop.read().isA<SireMM::PositionalRestraints>())
             {
