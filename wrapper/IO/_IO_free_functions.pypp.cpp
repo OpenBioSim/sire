@@ -7,6 +7,70 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/getinstalldir.h"
+
+#include "SireError/errors.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/mgname.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/molidx.h"
+
+#include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "biosimspace.h"
+
+#include "moleculeparser.h"
+
+#include "biosimspace.h"
+
+#include "SireBase/getinstalldir.h"
+
+#include "SireError/errors.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/mgname.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/molidx.h"
+
+#include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "biosimspace.h"
+
+#include "moleculeparser.h"
+
+#include "biosimspace.h"
+
 #include "SireBase/parallel.h"
 
 #include "SireMol/core.h"
@@ -492,6 +556,32 @@ namespace bp = boost::python;
 #include "biosimspace.h"
 
 void register_free_functions(){
+
+    { //::SireIO::createChlorineIon
+    
+        typedef ::SireMol::Molecule ( *createChlorineIon_function_type )( ::SireMaths::Vector const &,::QString const,::SireBase::PropertyMap const & );
+        createChlorineIon_function_type createChlorineIon_function_value( &::SireIO::createChlorineIon );
+        
+        bp::def( 
+            "createChlorineIon"
+            , createChlorineIon_function_value
+            , ( bp::arg("coords"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap() )
+            , "Create a chlorine ion at the specified position.\nPar:am position\nThe position of the chlorine ion.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: chlorine\nThe chlorine ion.\n" );
+    
+    }
+
+    { //::SireIO::createSodiumIon
+    
+        typedef ::SireMol::Molecule ( *createSodiumIon_function_type )( ::SireMaths::Vector const &,::QString const,::SireBase::PropertyMap const & );
+        createSodiumIon_function_type createSodiumIon_function_value( &::SireIO::createSodiumIon );
+        
+        bp::def( 
+            "createSodiumIon"
+            , createSodiumIon_function_value
+            , ( bp::arg("coords"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap() )
+            , "Create a sodium ion at the specified position.\nPar:am position\nThe position of the sodium ion.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: sodium\nThe sodium ion.\n" );
+    
+    }
 
     { //::SireIO::getCoordsArray
     
