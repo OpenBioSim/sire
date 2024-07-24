@@ -3,4 +3,5 @@ set ( SIRE_OPENMM_WRAPPERS
     NoOpenMM/OpenMMFrEnergyST.pypp.cpp
     NoOpenMM/OpenMMFrEnergyDT.pypp.cpp
     NoOpenMM/OpenMMMDIntegrator.pypp.cpp
+    NoOpenMM/OpenMMPMEFEP.pypp.cpp
     )
