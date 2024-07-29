@@ -142,11 +142,17 @@ def emle(
 
     try:
         from emle.calculator import EMLECalculator as _EMLECalculator
-        from emle.models import EMLE as _EMLE
     except:
         raise ImportError(
             "Could not import emle. Please install emle-engine and try again."
         )
+
+    try:
+        from emle.models import EMLE as _EMLE
+
+        has_model = True
+    except:
+        has_model = False
 
     from ..base import create_map as _create_map
     from ..mol import selection_to_atoms as _selection_to_atoms
@@ -166,10 +172,16 @@ def emle(
     except:
         raise ValueError("Unable to select 'qm_atoms' from 'mols'")
 
-    if not isinstance(calculator, (_EMLECalculator, _EMLE)):
-        raise TypeError(
-            "'calculator' must be a of type 'emle.calculator.EMLECalculator' or 'emle.models.EMLE'"
-        )
+    if has_model:
+        if not isinstance(calculator, (_EMLECalculator, _EMLE)):
+            raise TypeError(
+                "'calculator' must be a of type 'emle.calculator.EMLECalculator' or 'emle.models.EMLE'"
+            )
+    else:
+        if not isinstance(calculator, _EMLECalculator):
+            raise TypeError(
+                "'calculator' must be a of type 'emle.calculator.EMLECalculator'"
+            )
 
     if not isinstance(cutoff, (str, _Units.GeneralUnit)):
         raise TypeError(
