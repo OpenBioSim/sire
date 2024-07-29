@@ -21,6 +21,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fix ``sire.morph.merge`` function when one molecule is a monatomic ion.
 * Remove ``sire.move.OpenMMPMEFEP`` wrappers from build when OpenMM is not available.
 * Set ``IFBOX`` pointer to 3 for general triclinic boxes in ``sire.IO.AmberPrm`` parser.
+* Only excluded nonbonded interactions between from_ghost and to_ghost atoms if they are in the same molecule.
+
 
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
 -----------------------------------------------------------------------------------------
