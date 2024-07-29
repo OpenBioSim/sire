@@ -240,7 +240,7 @@ QDataStream &operator>>(QDataStream &ds, PyQMForce &pyqmforce)
         SharedDataStream sds(ds);
 
         sds >> pyqmforce.callback >> pyqmforce.cutoff >> pyqmforce.neighbour_list_frequency
-            >> pyqmforce.is_mechanical >> >> pyqmforce.lambda >> pyqmforce.atoms 
+            >> pyqmforce.is_mechanical >> pyqmforce.lambda >> pyqmforce.atoms 
             >> pyqmforce.mm1_to_qm >> pyqmforce.mm1_to_mm2 >> pyqmforce.bond_scale_factors 
             >> pyqmforce.mm2_atoms >> pyqmforce.numbers >> pyqmforce.charges;
     }
