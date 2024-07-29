@@ -1576,14 +1576,29 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // between from_ghosts and to_ghosts
     for (const auto &from_ghost_idx : from_ghost_idxs)
     {
+        // work out the molecule index for the from ghost atom
+        int mol_from = 0;
+        while (start_indexes[mol_from] <= from_ghost_idx)
+            mol_from++;
+
         for (const auto &to_ghost_idx : to_ghost_idxs)
         {
+            // work out the molecule index for the to ghost atom
+            int mol_to = 0;
+            while (start_indexes[mol_to] <= to_ghost_idx)
+                mol_to++;
+
             if (not excluded_ghost_pairs.contains(IndexPair(from_ghost_idx, to_ghost_idx)))
             {
-                ghost_ghostff->addExclusion(from_ghost_idx, to_ghost_idx);
-                ghost_nonghostff->addExclusion(from_ghost_idx, to_ghost_idx);
-                cljff->addException(from_ghost_idx, to_ghost_idx,
-                                    0.0, 1e-9, 1e-9, true);
+                // only exclude if we haven't already excluded this pair
+                // and if the two atoms are in the same molecule
+                if (mol_from == mol_to)
+                {
+                    ghost_ghostff->addExclusion(from_ghost_idx, to_ghost_idx);
+                    ghost_nonghostff->addExclusion(from_ghost_idx, to_ghost_idx);
+                    cljff->addException(from_ghost_idx, to_ghost_idx,
+                                        0.0, 1e-9, 1e-9, true);
+                }
             }
         }
     }
