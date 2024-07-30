@@ -64,9 +64,9 @@ QDataStream &operator<<(QDataStream &ds, const TorchQMForce &torchqmforce)
     SharedDataStream sds(ds);
 
     sds << torchqmforce.module_path << torchqmforce.cutoff << torchqmforce.neighbour_list_frequency
-        << torchqmforce.lambda << torchqmforce.atoms << torchqmforce.mm1_to_qm
-        << torchqmforce.mm1_to_mm2 << torchqmforce.bond_scale_factors << torchqmforce.mm2_atoms
-        << torchqmforce.numbers << torchqmforce.charges;
+        << torchqmforce.is_mechanical << torchqmforce.lambda << torchqmforce.atoms
+        << torchqmforce.mm1_to_qm << torchqmforce.mm1_to_mm2 << torchqmforce.bond_scale_factors
+        << torchqmforce.mm2_atoms << torchqmforce.numbers << torchqmforce.charges;
 
     return ds;
 }
@@ -80,9 +80,9 @@ QDataStream &operator>>(QDataStream &ds, TorchQMForce &torchqmforce)
         SharedDataStream sds(ds);
 
         sds >> torchqmforce.module_path >> torchqmforce.cutoff >> torchqmforce.neighbour_list_frequency
-            >> torchqmforce.lambda >> torchqmforce.atoms >> torchqmforce.mm1_to_qm
-            >> torchqmforce.mm1_to_mm2 >> torchqmforce.bond_scale_factors >> torchqmforce.mm2_atoms
-            >> torchqmforce.numbers >> torchqmforce.charges;
+            >> torchqmforce.is_mechanical >> torchqmforce.lambda >> torchqmforce.atoms
+            >> torchqmforce.mm1_to_qm >> torchqmforce.mm1_to_mm2 >> torchqmforce.bond_scale_factors
+            >> torchqmforce.mm2_atoms >> torchqmforce.numbers >> torchqmforce.charges;
 
         // Re-load the Torch module.
         torchqmforce.setModulePath(torchqmforce.getModulePath());
