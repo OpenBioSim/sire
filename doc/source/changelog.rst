@@ -15,8 +15,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2024.3.0 <https://github.com/openbiosim/sire/compare/2024.2.0...2024.3.0>`__ - September 2024
 ----------------------------------------------------------------------------------------------
 
-* Fixed missing `is_mechanical`` from (de)serialization and assignment operators.
-
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
 -----------------------------------------------------------------------------------------
 
