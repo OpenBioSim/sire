@@ -224,9 +224,9 @@ QDataStream &operator<<(QDataStream &ds, const PyQMForce &pyqmforce)
     SharedDataStream sds(ds);
 
     sds << pyqmforce.callback << pyqmforce.cutoff << pyqmforce.neighbour_list_frequency
-        << pyqmforce.lambda << pyqmforce.atoms << pyqmforce.mm1_to_qm
-        << pyqmforce.mm1_to_mm2 << pyqmforce.bond_scale_factors << pyqmforce.mm2_atoms
-        << pyqmforce.numbers << pyqmforce.charges;
+        << pyqmforce.is_mechanical <<  pyqmforce.lambda << pyqmforce.atoms 
+        << pyqmforce.mm1_to_qm << pyqmforce.mm1_to_mm2 << pyqmforce.bond_scale_factors 
+        << pyqmforce.mm2_atoms << pyqmforce.numbers << pyqmforce.charges;
 
     return ds;
 }
@@ -240,9 +240,9 @@ QDataStream &operator>>(QDataStream &ds, PyQMForce &pyqmforce)
         SharedDataStream sds(ds);
 
         sds >> pyqmforce.callback >> pyqmforce.cutoff >> pyqmforce.neighbour_list_frequency
-            >> pyqmforce.lambda >> pyqmforce.atoms >> pyqmforce.mm1_to_qm
-            >> pyqmforce.mm1_to_mm2 >> pyqmforce.bond_scale_factors >> pyqmforce.mm2_atoms
-            >> pyqmforce.numbers >> pyqmforce.charges;
+            >> pyqmforce.is_mechanical >> pyqmforce.lambda >> pyqmforce.atoms 
+            >> pyqmforce.mm1_to_qm >> pyqmforce.mm1_to_mm2 >> pyqmforce.bond_scale_factors 
+            >> pyqmforce.mm2_atoms >> pyqmforce.numbers >> pyqmforce.charges;
     }
     else
         throw version_error(v, "1", r_pyqmforce, CODELOC);
@@ -303,6 +303,7 @@ PyQMForce &PyQMForce::operator=(const PyQMForce &other)
     this->callback = other.callback;
     this->cutoff = other.cutoff;
     this->neighbour_list_frequency = other.neighbour_list_frequency;
+    this->is_mechanical = other.is_mechanical;
     this->lambda = other.lambda;
     this->atoms = other.atoms;
     this->mm1_to_qm = other.mm1_to_qm;
@@ -918,6 +919,7 @@ PyQMEngine &PyQMEngine::operator=(const PyQMEngine &other)
     this->callback = other.callback;
     this->cutoff = other.cutoff;
     this->neighbour_list_frequency = other.neighbour_list_frequency;
+    this->is_mechanical = other.is_mechanical;
     this->lambda = other.lambda;
     this->atoms = other.atoms;
     this->mm1_to_qm = other.mm1_to_qm;
