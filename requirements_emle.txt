@@ -2,6 +2,7 @@ ambertools
 ase
 deepmd-kit
 loguru
+pygit2
 pytorch
 python
 pyyaml
