@@ -47,6 +47,16 @@ class DynamicsData:
                         "'qm_engine' must be an instance of 'sire.legacy.Convert.QMEngine'"
                     )
 
+                # If a QM/MM engine is specified, then we need to check that there is a
+                # perturbable molecule.
+                try:
+                    pert_mol = mols["property is_perturbable"]
+                except:
+                    raise ValueError(
+                        "You are trying to run QM/MM dynamics for a system without "
+                        "a QM/MM enabled molecule!"
+                    )
+
                 # Check the constraints and raise a warning if the perturbable_constraint
                 # is not "none".
 
@@ -135,8 +145,8 @@ class DynamicsData:
 
                 self._is_interpolate = True
                 self._lambda_interpolate = lambda_interpolate
-                self._work = 0*kcal_per_mol
-                self._nrg_prev = 0*kcal_per_mol
+                self._work = 0 * kcal_per_mol
+                self._nrg_prev = 0 * kcal_per_mol
 
             else:
                 self._is_interpolate = False
@@ -321,7 +331,7 @@ class DynamicsData:
                 nrg = nrgs["potential"]
 
                 if sim_lambda_value != 0.0:
-                    self._work += delta_lambda*(nrg - self._nrg_prev)
+                    self._work += delta_lambda * (nrg - self._nrg_prev)
                 self._nrg_prev = nrg
                 nrgs["work"] = self._work
             else:
