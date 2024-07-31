@@ -714,12 +714,24 @@ double TorchQMForceImpl::computeForce(
     // Store the sum of the energy in kJ.
     const auto energy = energies.sum().item<double>() * HARTREE_TO_KJ_MOL;
 
+    // If there are no MM atoms, then we need to allow unused tensors.
+    bool allow_unused = num_mm == 0;
+
     // Compute the gradients.
-    const auto gradients = torch::autograd::grad({energies.sum()}, {xyz_qm_torch, xyz_mm_torch});
+    const auto gradients = torch::autograd::grad(
+        {energies.sum()}, {xyz_qm_torch, xyz_mm_torch}, {}, c10::nullopt, false, allow_unused);
 
     // Compute the forces, converting from Hatree/Anstrom to kJ/mol/nm.
     const auto forces_qm = -(gradients[0] * HARTREE_TO_KJ_MOL * 10).detach().cpu();
-    const auto forces_mm = -(gradients[1] * HARTREE_TO_KJ_MOL * 10).detach().cpu();
+    torch::Tensor forces_mm;
+    if (num_mm > 0)
+    {
+        forces_mm = -(gradients[1] * HARTREE_TO_KJ_MOL * 10).detach().cpu();
+    }
+    else
+    {
+        forces_mm = torch::zeros({0, 3}, torch::TensorOptions().dtype(torch::kFloat32));
+    }
 
     // The current interpolation (weighting) parameter.
     double lambda;
