@@ -14,7 +14,7 @@ sysroot_linux-64==2.17 ; sys_platform == "linux"
 # These packages are needed to compile
 # the SireRDKit plugin
 # TODO(skearnes): Remove this pin; see https://github.com/conda-forge/rdkit-feedstock/issues/167.
-rdkit-dev ==2024.03.04
+rdkit-dev <=2024.03.04
 
 # These packages are needed to compile
 # the SireGemmi plugin
