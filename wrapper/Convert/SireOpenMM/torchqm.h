@@ -29,6 +29,8 @@
 #ifndef SIREOPENMM_TORCHQM_H
 #define SIREOPENMM_TORCHQM_H
 
+#ifdef SIRE_USE_TORCH
+
 #include "OpenMM.h"
 #include "openmm/Force.h"
 #ifdef SIRE_USE_CUSTOMCPPFORCE
@@ -503,4 +505,5 @@ SIRE_EXPOSE_CLASS(SireOpenMM::TorchQMEngine)
 
 SIRE_END_HEADER
 
+#endif
 #endif

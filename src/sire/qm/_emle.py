@@ -49,50 +49,58 @@ class EMLEEngine(_Convert._SireOpenMM.PyQMEngine):
         return emle_force, interpolation_force
 
 
-class TorchEMLEEngine(_Convert._SireOpenMM.TorchQMEngine):
-    """A class to enable use of EMLE as a QM engine using C++ Torch."""
+# Conditionally create a TorchEMLEEngine class if Torch is available.
+try:
 
-    def get_forces(self):
-        """
-        Get the OpenMM forces for this engine. The first force is the actual
-        EMLE force, which uses a CustomCPPForceImpl to calculate the electrostatic
-        embedding force. The second is a null CustomBondForce that can be used to
-        add a "lambda_emle" global parameter to a context to allow the force to be
-        scaled.
+    class TorchEMLEEngine(_Convert._SireOpenMM.TorchQMEngine):
+        """A class to enable use of EMLE as a QM engine using C++ Torch."""
 
-        Returns
-        -------
+        def get_forces(self):
+            """
+            Get the OpenMM forces for this engine. The first force is the actual
+            EMLE force, which uses a CustomCPPForceImpl to calculate the electrostatic
+            embedding force. The second is a null CustomBondForce that can be used to
+            add a "lambda_emle" global parameter to a context to allow the force to be
+            scaled.
 
-        emle_force : openmm.Force
-            The EMLE force object to compute the electrostatic embedding force.
+            Returns
+            -------
 
-        interpolation_force : openmm.CustomBondForce
-            A null CustomBondForce object that can be used to add a "lambda_emle"
-            global parameter to an OpenMM context. This allows the electrostatic
-            embedding force to be scaled.
-        """
+            emle_force : openmm.Force
+                The EMLE force object to compute the electrostatic embedding force.
 
-        from copy import deepcopy as _deepcopy
-        from openmm import CustomBondForce as _CustomBondForce
+            interpolation_force : openmm.CustomBondForce
+                A null CustomBondForce object that can be used to add a "lambda_emle"
+                global parameter to an OpenMM context. This allows the electrostatic
+                embedding force to be scaled.
+            """
 
-        # Create a dynamics object for the QM region.
-        d = self._mols["property is_perturbable"].dynamics(
-            timestep="1fs",
-            constraint="none",
-            platform="cpu",
-            qm_engine=self,
-        )
+            from copy import deepcopy as _deepcopy
+            from openmm import CustomBondForce as _CustomBondForce
 
-        # Get the OpenMM EMLE force.
-        emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
+            # Create a dynamics object for the QM region.
+            d = self._mols["property is_perturbable"].dynamics(
+                timestep="1fs",
+                constraint="none",
+                platform="cpu",
+                qm_engine=self,
+            )
 
-        # Create a null CustomBondForce to add the EMLE interpolation
-        # parameter.
-        interpolation_force = _CustomBondForce("")
-        interpolation_force.addGlobalParameter("lambda_emle", 1.0)
+            # Get the OpenMM EMLE force.
+            emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
 
-        # Return the forces.
-        return emle_force, interpolation_force
+            # Create a null CustomBondForce to add the EMLE interpolation
+            # parameter.
+            interpolation_force = _CustomBondForce("")
+            interpolation_force.addGlobalParameter("lambda_emle", 1.0)
+
+            # Return the forces.
+            return emle_force, interpolation_force
+
+    _has_torchqmengine = True
+except:
+    _has_torchqmengine = False
+    pass
 
 
 def emle(
@@ -237,6 +245,12 @@ def emle(
 
     # Create an engine from an EMLE model.
     else:
+        if not _has_torchqmengine:
+            raise ValueError(
+                "Sire hasn't been compiled with support for TorchQMEngine. "
+                "Please install libtorch and recompile."
+            )
+
         import torch as _torch
 
         try:

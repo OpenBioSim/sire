@@ -25,9 +25,10 @@
 
 #include "QMForce.pypp.hpp"
 
+#ifdef SIRE_USE_TORCH
 #include "TorchQMEngine.pypp.hpp"
-
 #include "TorchQMForce.pypp.hpp"
+#endif
 
 #include "_SireOpenMM_free_functions.pypp.hpp"
 
@@ -60,18 +61,19 @@ BOOST_PYTHON_MODULE(_SireOpenMM){
 
     register_PyQMEngine_class();
 
-    register_TorchQMEngine_class();
-
     register_QMForce_class();
 
     register_PyQMForce_class();
-
-    register_TorchQMForce_class();
 
     register_SireOpenMM_properties();
 
     SireOpenMM::register_extras();
 
     register_free_functions();
+
+#ifdef SIRE_USE_TORCH
+    register_TorchQMEngine_class();
+    register_TorchQMForce_class();
+#endif
 }
 

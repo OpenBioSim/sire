@@ -51,8 +51,16 @@ if (${SIRE_USE_OPENMM})
       message(STATUS "OpenMM version supports CustomCPPForce")
       add_definitions("-DSIRE_USE_CUSTOMCPPFORCE")
 
-      find_package(Torch REQUIRED)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+      if (NOT DEFINED ENV{SIRE_NO_TORCH})
+        find_package(Torch)
+        if (TORCH_FOUND)
+            message(STATUS "Torch found")
+            add_definitions("-DSIRE_USE_TORCH")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+        else()
+            message(STATUS "Torch not found")
+        endif()
+      endif()
       #else()
       #message(STATUS "OpenMM version does not support CustomCPPForce")
       #endif()
@@ -101,6 +109,13 @@ if (${SIRE_USE_OPENMM})
 
           ${PYPP_SOURCES}
       )
+
+    # Remove any Torch specific files if Torch is not found.
+    if (NOT TORCH_FOUND)
+      list(REMOVE_ITEM SIREOPENMM_SOURCES torchqm.cpp)
+      list(REMOVE_ITEM SIREOPENMM_SOURCES TorchQMEngine.pypp.cpp)
+      list(REMOVE_ITEM SIREOPENMM_SOURCES TorchQMForce.pypp.cpp)
+    endif()
 
     # Create the library that holds all of the class wrappers
     add_library (SireOpenMM ${SIREOPENMM_SOURCES})

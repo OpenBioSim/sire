@@ -26,6 +26,8 @@
   *
 \*********************************************/
 
+#ifdef SIRE_USE_TORCH
+
 #include "openmm/serialization/SerializationNode.h"
 #include "openmm/serialization/SerializationProxy.h"
 
@@ -1036,3 +1038,5 @@ QMForce* TorchQMEngine::createForce() const
         this->charges
     );
 }
+
+#endif

@@ -21,7 +21,6 @@ __all__ = [
     "QMEngine",
     "PyQMCallback",
     "PyQMEngine",
-    "TorchQMEngine",
 ]
 
 try:
@@ -103,8 +102,13 @@ try:
         QMEngine,
         PyQMCallback,
         PyQMEngine,
-        TorchQMEngine,
     )
+
+    try:
+        from ._SireOpenMM import TorchQMEngine
+        __all__.append("TorchQMEngine")
+    except:
+        pass
 
     from ..._pythonize import _pythonize
 
@@ -116,10 +120,14 @@ try:
             QMEngine,
             PyQMCallback,
             PyQMEngine,
-            TorchQMEngine,
         ],
         delete_old=True,
     )
+
+    try:
+        _pythonize(TorchQMEngine, delete_old=True)
+    except:
+        pass
 
     PerturbableOpenMMMolecule.changed_atoms = _changed_atoms
     PerturbableOpenMMMolecule.changed_bonds = _changed_bonds

@@ -9,6 +9,7 @@
 #include "pyqm.h"
 #include "qmmm.h"
 #include "sire_openmm.h"
+#include "torchqm.h"
 
 #endif
 
