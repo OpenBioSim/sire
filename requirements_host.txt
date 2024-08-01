@@ -5,6 +5,7 @@ gsl
 lazy_import
 libcblas
 libnetcdf
+librdkit-dev >=2023.0.0
 openmm
 pandas
 python
@@ -12,7 +13,6 @@ qt-main
 rich
 tbb
 tbb-devel
-librdkit-dev >=2023.0.0
 gemmi >=0.6.4
 
 # kartograf on Windows pulls in an openfe that has an old / incompatble
