@@ -7,7 +7,7 @@ pytorch
 python
 pyyaml
 torchani
-xtb-python
+xtb-python ; sys_platform != "win32"
 
 gcc< 13 ; sys_platform == "linux"
 gxx< 13 ; sys_platform == "linux"
