@@ -31,6 +31,7 @@
 #include "SireMaths/align.h"
 
 #include "SireMol/core.h"
+#include "SireMol/moleditor.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -723,19 +724,39 @@ AtomMapping AtomMapping::alignTo0() const
     QVector<Vector> coords0 = this->atms0.property<Vector>(map0["coordinates"]).toVector();
     QVector<Vector> coords1 = this->atms1.property<Vector>(map1["coordinates"]).toVector();
 
-    // calculate the transform to do a RMSD aligment of the two sets of coordinates
-    auto transform = SireMaths::getAlignment(coords0, coords1, true);
-
-    auto mols1 = this->orig_atms1.molecules();
-
     AtomMapping ret(*this);
 
-    for (int i = 0; i < mols1.count(); ++i)
+    if ((this->count() == 1) and ((coords0.count() == 1) or (coords1.count() == 1)))
     {
-        auto mol = mols1[i].move().transform(transform, map1).commit();
+        // if we've only mapped a single atom and one molecule is a monatomic ion,
+        // then simply replace the coordinates of the mapped atom.
+
+        auto atom0 = this->atms0[0];
+        auto atom1 = this->atms1[0];
+
+        auto mol = this->orig_atms1.molecules()[0];
+
+        mol = mol.edit().atom(atom1.index())
+                 .setProperty(map1["coordinates"].source(), coords0[0])
+                 .molecule().commit();
 
         ret.atms1.update(mol);
         ret.orig_atms1.update(mol);
+    }
+    else
+    {
+        // calculate the transform to do a RMSD aligment of the two sets of coordinates
+        auto transform = SireMaths::getAlignment(coords0, coords1, true);
+
+        auto mols1 = this->orig_atms1.molecules();
+
+        for (int i = 0; i < mols1.count(); ++i)
+        {
+            auto mol = mols1[i].move().transform(transform, map1).commit();
+
+            ret.atms1.update(mol);
+            ret.orig_atms1.update(mol);
+        }
     }
 
     return ret;
@@ -754,19 +775,39 @@ AtomMapping AtomMapping::alignTo1() const
     QVector<Vector> coords0 = this->atms0.property<Vector>(map0["coordinates"]).toVector();
     QVector<Vector> coords1 = this->atms1.property<Vector>(map1["coordinates"]).toVector();
 
-    // calculate the transform to do a RMSD aligment of the two sets of coordinates
-    auto transform = SireMaths::getAlignment(coords1, coords0, true);
-
-    auto mols0 = this->orig_atms0.molecules();
-
     AtomMapping ret(*this);
 
-    for (int i = 0; i < mols0.count(); ++i)
+    if ((this->count() == 1) and ((coords0.count() == 1) or (coords1.count() == 1)))
     {
-        auto mol = mols0[i].move().transform(transform, map0).commit();
+        // if we've only mapped a single atom and one molecule is a monatomic ion,
+        // then simply replace the coordinates of the mapped atom.
+
+        auto atom0 = this->atms0[0];
+        auto atom1 = this->atms1[0];
+
+        auto mol = this->orig_atms0.molecules()[0];
+
+        mol = mol.edit().atom(atom0.index())
+                 .setProperty(map0["coordinates"].source(), coords0[0])
+                 .molecule().commit();
 
         ret.atms0.update(mol);
         ret.orig_atms0.update(mol);
+    }
+    else
+    {
+        // calculate the transform to do a RMSD aligment of the two sets of coordinates
+        auto transform = SireMaths::getAlignment(coords1, coords0, true);
+
+        auto mols0 = this->orig_atms0.molecules();
+
+        for (int i = 0; i < mols0.count(); ++i)
+        {
+            auto mol = mols0[i].move().transform(transform, map0).commit();
+
+            ret.atms0.update(mol);
+            ret.orig_atms0.update(mol);
+        }
     }
 
     return ret;

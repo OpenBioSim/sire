@@ -5,7 +5,7 @@ gsl
 lazy_import
 libcblas
 libnetcdf
-librdkit-dev >=2023.0.0
+librdkit-dev
 openmm
 pandas
 python

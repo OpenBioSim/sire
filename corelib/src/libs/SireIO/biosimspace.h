@@ -319,6 +319,38 @@ namespace SireIO
         const QHash<MolIdx, MolIdx> &molecule_mapping, const bool is_lambda1 = false,
         const PropertyMap &map0 = PropertyMap(), const PropertyMap &map1 = PropertyMap());
 
+    //! Create a sodium ion at the specified position.
+    /*! \param position
+            The position of the sodium ion.
+
+        \param model
+            The name of the water model.
+
+        \param map
+            A dictionary of user-defined molecular property names.
+
+        \retval sodium
+            The sodium ion.
+     */
+    SIREIO_EXPORT Molecule createSodiumIon(
+        const Vector &coords, const QString model, const PropertyMap &map = PropertyMap());
+
+    //! Create a chlorine ion at the specified position.
+    /*! \param position
+            The position of the chlorine ion.
+
+        \param model
+            The name of the water model.
+
+        \param map
+            A dictionary of user-defined molecular property names.
+
+        \retval chlorine
+            The chlorine ion.
+     */
+    SIREIO_EXPORT Molecule createChlorineIon(
+        const Vector &coords, const QString model, const PropertyMap &map = PropertyMap());
+
     Vector cross(const Vector &v0, const Vector &v1);
 } // namespace SireIO
 
@@ -332,6 +364,8 @@ SIRE_EXPOSE_FUNCTION(SireIO::setAmberWater)
 SIRE_EXPOSE_FUNCTION(SireIO::setGromacsWater)
 SIRE_EXPOSE_FUNCTION(SireIO::updateAndPreserveOrder)
 SIRE_EXPOSE_FUNCTION(SireIO::updateCoordinatesAndVelocities)
+SIRE_EXPOSE_FUNCTION(SireIO::createSodiumIon)
+SIRE_EXPOSE_FUNCTION(SireIO::createChlorineIon)
 
 SIRE_END_HEADER
 
