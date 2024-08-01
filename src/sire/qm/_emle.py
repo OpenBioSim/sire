@@ -251,6 +251,13 @@ def emle(
                 "Please install libtorch and recompile."
             )
 
+        try:
+            from emle.models import EMLE as _EMLE
+        except:
+            raise ImportError(
+                "Could not import emle.models. Please reinstall emle-engine and try again."
+            )
+
         import torch as _torch
 
         try:
