@@ -81,9 +81,9 @@ calculation:
 
 >>> qm_mols, engine = sr.qm.emle(
 ...     mols,
-        "atomnum 1804:1822,2083:2132",
-        calculator,
-        redistribute_charge=True
+...     "atomnum 1804:1822,2083:2132",
+...     calculator,
+...     redistribute_charge=True
 ... )
 
 Here the selection for the QM region includes tryptophan side-chain atoms

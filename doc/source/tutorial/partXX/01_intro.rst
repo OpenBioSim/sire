@@ -30,14 +30,14 @@ We now need to set up the molecular system for the QM/MM simulation and create
 an engine to perform the calculation:
 
 >>> qm_mols, engine = sr.qm.create_engine(
->>> ...     mols,
->>> ...     mols[0],
->>> ...     py_object,
->>> ...     callback="callback",
->>> ...     cutoff="7.5A",
->>> ...     neighbour_list_frequency=20,
->>> ...     mechanical_embedding=False,
->>> ... )
+...     mols,
+...     mols[0],
+...     py_object,
+...     callback="callback",
+...     cutoff="7.5A",
+...     neighbour_list_frequency=20,
+...     mechanical_embedding=False,
+... )
 
 Here the first argument is the molecules that we are simulating, the second
 selection coresponding to the QM region (here this is the first molecule).
