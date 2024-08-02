@@ -194,7 +194,9 @@ computes the electrostatic embedding:
 
 Next we create a new engine bound to the calculator:
 
->>> qm_mols, engine = sr.qm.emle(mols, mols[0], calculator, "7.5A", 20)
+>>> qm_mols, engine = sr.qm.emle(
+>>> ... mols, mols[0], calculator, cutoff="7.5A", neighbour_list_frequency=20
+>>> ... )
 
 Rather than using this engine with a ``sire`` dynamics object, we can instead
 extract the underlying ``OpenMM`` force object and add it to an existing
@@ -279,3 +281,146 @@ And finally the context:
 
 >>> context = openmm.Context(ml_system, integrator)
 >>> context.setPositions(inpcrd.positions)
+
+Creating an EMLE torch module
+-----------------------------
+
+As well as the ``EMLECalculator``, the ``emle-engine`` package provides Torch
+modules for the calculation of the electrostatic embedding. These can be used
+to create derived modules for the calculation of in vacuo and electrostatic
+embedding energies for different backends. For example, we provide an optimised
+``ANI2xEMLE`` module that can be used to add electrostatic embedding to the
+existing ``ANI2x`` model from `TorchANI <https://aiqm.github.io/torchani/>`_.
+
+As an example for how to use the module, let's again use the example alanine
+dipeptide system. First, let's reload the system and center the solute within
+the simulation box:
+
+>>> mols = sr.load_test_files("ala.crd", "ala.top")
+>>> center = mols[0].coordinates()
+>>> mols.make_whole(center=center)
+
+To obtain the point charges around the QM region we can take advantage of
+Sire's powerful search syntax, e.g:
+
+>>> mols["mols within 7.5 of molidx 0"].view()
+
+.. image:: images/ala.png
+   :target: images/ala.png
+   :alt: Alanine-dipeptide in water.
+
+Next we will set the device and dtype for our Torch tensors:
+
+>>> import torch
+>>> device = torch.device("cuda")
+>>> dtype = torch.float32
+
+Now we can create the input tensors for our calculation. First the coordinates
+of the QM region:
+
+>>> coords_qm = torch.tensor(
+>>> ... sr.io.get_coords_array(mols[0]),
+>>> ... device=device,
+>>> ... dtype=dtype,
+>>> ... requires_grad=True,
+>>> )
+
+Next the coordinates of the MM region, which can be obtained using the search
+term above:
+
+>>> mm_atoms = mols["water within 7.5 of molidx 0"].atoms()
+>>> coords_mm = torch.tensor(
+>>> ... sr.io.get_coords_array(mm_atoms),
+>>> ... device=device,
+>>> ... dtype=dtype,
+>>> ... requires_grad=True,
+>>> ... )
+
+Now the atomic numbers for the atoms within the QM region:
+
+>>> atomic_numbers = torch.tensor(
+>>> ... [element.num_protons() for element in mols[0].property("element")],
+>>> ... device=device,
+>>> ... dtype=torch.int64,
+>>> ... )
+
+And finally the charges of the MM atoms:
+
+>>> charges_mm = torch.tensor([atom.property("charge").value() for atom in mm_atoms],
+>>> ... device=device,
+>>> ... dtype=dtype
+>>> ... )
+
+In order to perform a calculation we need to create an instance of the
+``ANI2xEMLE`` module:
+
+>>> from emle.models import ANI2xEMLE
+>>> model = ANI2xEMLE().to(device)
+
+.. note::
+
+    The ``ANI2xEMLE`` model currently requires the ``feature_aev`` branch of
+    ``emle-engine``, which can be installed with the following command:
+    ``pip install git+https://github.com/chemle/emle-engine.git@feature_aev``
+
+We can now calculate the in vacuo and electrostatic embedding energies:
+
+>>> energies = model(atomic_numbers, charges_mm, coords_qm, coords_mm)
+>>> print(energies)
+tensor([-4.9570e+02, -4.2597e-02, -1.2952e-02], device='cuda:0',
+       dtype=torch.float64, grad_fn=<StackBackward0>)
+
+The first element of the tensor is the in vacuo energy of the QM region, the
+second is the static electrostatic embedding energy, and the third is the
+induced electrostatic embedding energy.
+
+Then we can use ``autograd`` to compute the gradients of the energies with respect
+to the QM and MM coordinates:
+
+>>> grad_qm, grad_mm = torch.autograd.grad(energies.sum(), (coords_qm, coords_mm))
+>>> print(grad_qm)
+>>> print(grad_mm)
+tensor([[-2.4745e-03, -1.2421e-02,  1.1079e-02],
+        [-7.0100e-03, -2.9659e-02, -6.8182e-03],
+        [-1.8393e-03,  1.1682e-02,  1.1509e-02],
+        [-3.4777e-03,  1.5750e-03, -1.9650e-02],
+        [-3.4737e-02,  7.3493e-02,  3.7996e-02],
+        [-9.3575e-03, -3.7101e-02, -2.0774e-02],
+        [ 9.2816e-02, -7.5343e-03, -5.0656e-02],
+        [ 4.9443e-03,  1.1114e-02, -4.0737e-04],
+        [-1.6362e-03,  3.0464e-03,  3.0192e-02],
+        [-6.2813e-03, -1.3678e-02, -3.4606e-03],
+        [ 4.5878e-03,  3.0234e-02, -2.9871e-02],
+        [-3.8999e-03, -1.3376e-02, -2.6382e-03],
+        [ 4.4184e-03, -7.4247e-03,  5.1742e-04],
+        [ 8.8851e-05, -8.5786e-03,  1.2712e-02],
+        [-5.9939e-02,  1.1648e-01,  1.6692e-01],
+        [-6.4231e-03, -4.4771e-02,  3.0655e-03],
+        [ 1.1274e-01, -6.4833e-02, -1.5494e-01],
+        [ 1.8500e-03,  5.5206e-03, -7.0060e-03],
+        [-6.3634e-02, -1.5340e-02, -2.7031e-03],
+        [ 7.7061e-03,  3.7852e-02,  6.0927e-03],
+        [-2.9915e-03, -3.5084e-02,  2.3909e-02],
+        [-1.5018e-02,  8.6911e-03, -2.5789e-03]], device='cuda:0')
+tensor([[ 1.8065e-03, -1.4048e-03, -6.0694e-04],
+        [-9.0640e-04,  5.1307e-04,  9.6374e-06],
+        [-8.4827e-04,  9.5815e-04,  1.7164e-04],
+        ...,
+        [-5.7833e-04, -1.9125e-04,  2.0395e-03],
+        [ 3.2311e-04,  2.1525e-04, -7.8029e-04],
+        [ 3.5424e-04,  4.0781e-04, -1.5014e-03]], device='cuda:0')
+
+The model is serialisable, so can be saved and loaded using the standard
+``torch.jit`` functions, e.g.:
+
+>>> script_model = torch.jit.script(model)
+>>> torch.jit.save(script_model, "ani2xemle.pt")
+
+It is also possible to use the model with Sire when performing QM/MM dynamics:
+
+>>> qm_mols, engine = sr.qm.emle(
+>>> ... mols, mols[0], model, cutoff="7.5A", neighbour_list_frequency=20
+>>> ... )
+
+The model will be serialised and loaded into a C++ ``TorchQMEngine`` object,
+bypassing the need for a Python callback.
