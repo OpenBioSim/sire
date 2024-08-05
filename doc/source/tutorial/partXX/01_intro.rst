@@ -56,6 +56,8 @@ signature:
 
 .. code-block:: python
 
+    from typing import List, Tuple
+
     def callback(
         numbers_qm: List[int],
         charges_mm: List[float],
