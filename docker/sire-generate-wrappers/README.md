@@ -29,8 +29,8 @@ this;
 
 ```
 Unable to find image 'openbiosim/sire-generate-wrappers:arm64' locally
-Trying to pull repository docker.io/siremol/sire-generate-wrappers ...
-latest: Pulling from docker.io/siremol/sire-generate-wrappers
+Trying to pull repository docker.io/openbiosim/sire-generate-wrappers ...
+latest: Pulling from docker.io/openbiosim/sire-generate-wrappers
 a2abf6c4d29d: Pull complete
 c256cb8a03f5: Pull complete
 96470ebef4ad: Pull complete
@@ -43,7 +43,7 @@ d719333d5423: Pull complete
 4642f7c70ef4: Pull complete
 b70e0e58d6c8: Pull complete
 Digest: sha256:a8a4513655dd43cebac306f77ac85a3fd953802759029bc771fe51db058eea95
-Status: Downloaded newer image for siremol/sire-generate-wrappers:latest
+Status: Downloaded newer image for openbiosim/sire-generate-wrappers:latest
 (base) root:~#
 ```
 
@@ -186,14 +186,14 @@ Create the `includes.tar.bz2` file by running the
 Next, create the container via, e.g:
 
 ```
-docker build -t siremol/sire-generate-wrappers -f Dockerfile_x86
+docker build -t openbiosim/sire-generate-wrappers -f Dockerfile_x86
 ```
 
 Assuming this worked, you can run the container via
 the same command as at the top, e.g.
 
 ```
-docker run -it siremol/sire-generate-wrappers
+docker run -it openbiosim/sire-generate-wrappers
 ```
 
 and the follow the rest of the instructions.
