@@ -66,6 +66,15 @@ would type
 This will run in parallel, but be aware that this can take
 a long time!
 
+If you only wish to build the wrappers for a specificy library, this can
+be done by passing the ``--lib`` argument, e.g.:
+
+```
+(base) root:~# generate_wrappers --lib IO
+```
+
+would only generate the wrappers for the `IO` library.
+
 ## Checking the wrappers
 
 The `generate_wrappers` command will check out your branch
@@ -174,10 +183,10 @@ Create the `includes.tar.bz2` file by running the
 ./create_includes_tarball --sire $HOME/sire.app
 ```
 
-Next, create the container via
+Next, create the container via, e.g:
 
 ```
-docker build -t siremol/sire-generate-wrappers .
+docker build -t siremol/sire-generate-wrappers -f Dockerfile_x86
 ```
 
 Assuming this worked, you can run the container via
