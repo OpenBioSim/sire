@@ -319,10 +319,10 @@ Now we can create the input tensors for our calculation. First the coordinates
 of the QM region:
 
 >>> coords_qm = torch.tensor(
-... sr.io.get_coords_array(mols[0]),
-... device=device,
-... dtype=dtype,
-... requires_grad=True,
+...     sr.io.get_coords_array(mols[0]),
+...     device=device,
+...     dtype=dtype,
+...     requires_grad=True,
 ... )
 
 Next the coordinates of the MM region, which can be obtained using the search
@@ -330,25 +330,25 @@ term above:
 
 >>> mm_atoms = mols["water within 7.5 of molidx 0"].atoms()
 >>> coords_mm = torch.tensor(
-... sr.io.get_coords_array(mm_atoms),
-... device=device,
-... dtype=dtype,
-... requires_grad=True,
+...     sr.io.get_coords_array(mm_atoms),
+...     device=device,
+...     dtype=dtype,
+...     requires_grad=True,
 ... )
 
 Now the atomic numbers for the atoms within the QM region:
 
 >>> atomic_numbers = torch.tensor(
-... [element.num_protons() for element in mols[0].property("element")],
-... device=device,
-... dtype=torch.int64,
+...     [element.num_protons() for element in mols[0].property("element")],
+...     device=device,
+...     dtype=torch.int64,
 ... )
 
 And finally the charges of the MM atoms:
 
 >>> charges_mm = torch.tensor([atom.property("charge").value() for atom in mm_atoms],
-... device=device,
-... dtype=dtype
+...     device=device,
+...     dtype=dtype
 ... )
 
 In order to perform a calculation we need to create an instance of the
@@ -419,7 +419,7 @@ The model is serialisable, so can be saved and loaded using the standard
 It is also possible to use the model with Sire when performing QM/MM dynamics:
 
 >>> qm_mols, engine = sr.qm.emle(
-... mols, mols[0], model, cutoff="7.5A", neighbour_list_frequency=20
+...     mols, mols[0], model, cutoff="7.5A", neighbour_list_frequency=20
 ... )
 
 The model will be serialised and loaded into a C++ ``TorchQMEngine`` object,
