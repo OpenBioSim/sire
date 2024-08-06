@@ -169,7 +169,6 @@ void TorchQMForce::setModulePath(QString module_path)
     try
     {
         torch::jit::getProfilingMode() = false;
-        torch::jit::setGraphExecutorOptimize(false);
         this->torch_module = torch::jit::load(module_path.toStdString());
         this->torch_module.eval();
     }
