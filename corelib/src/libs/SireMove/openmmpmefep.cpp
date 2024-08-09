@@ -1853,7 +1853,7 @@ void OpenMMPMEFEP::initialise(bool fullPME)
 
                         dihedral_pert_list.append(DihedralID(four.atom0(), four.atom1(), four.atom2(), four.atom3()));
                         dihedral_pert_swap_list.append(
-                            DihedralID(four.atom3(), four.atom1(), four.atom2(), four.atom0()));
+                            DihedralID(four.atom3(), four.atom2(), four.atom1(), four.atom0()));
 
                         improper_pert_list.append(ImproperID(four.atom0(), four.atom1(), four.atom2(), four.atom3()));
                         improper_pert_swap_list.append(
