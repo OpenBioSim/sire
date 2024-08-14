@@ -194,9 +194,14 @@ computes the electrostatic embedding:
 
 Next we create a new engine bound to the calculator:
 
->>> qm_mols, engine = sr.qm.emle(
+>>> _, engine = sr.qm.emle(
 >>> ... mols, mols[0], calculator, cutoff="7.5A", neighbour_list_frequency=20
 >>> ... )
+
+.. note::
+
+    ``qm_mols`` is not needed when using ``OpenMM-ML``, since it will perform
+    its own internal modifications for performing interpolation.
 
 Rather than using this engine with a ``sire`` dynamics object, we can instead
 extract the underlying ``OpenMM`` force object and add it to an existing
@@ -215,23 +220,16 @@ this is set to 1, but can be set to any value between 0 and 1.)
     The ``interpolation_force`` has no energy contribution. It is only required
     as there is currently no way to add global parameters to the ``EMLEForce``.
 
-Since we want to use electrostatic embedding, we will also need to zero the charges
-on the atoms within the QM region before creating an ``OpenMM`` system. If not,
-then we would also calculate the mechanical embedding interaction. This can be
-done by passing the molecules through the ``sr.qm.zero_charge`` function along with
-the selection for the QM region:
+Next we need to save the original molecular system to disk so that we can load it
+with ``OpenMM``. Here we will use AMBER format files, but any format supported by
+``OpenMM`` can be used.
 
->>> qm_mols = sr.qm.zero_charge(qm_mols, qm_mols[0])
-
-We now write the modified system to an AMBER format topology and coordinate file
-so that we can load them with ``OpenMM``:
-
->>> sr.save(qm_mols, "ala_qm", ["prm7", "rst7"])
+>>> sr.save(qm_mols, "ala", ["prm7", "rst7"])
 
 We can now read them back in with ``OpenMM``:
 
->>> prmtop = openmm.app.AmberPrmtopFile("ala_qm.prm7")
->>> inpcrd = openmm.app.AmberInpcrdFile("ala_qm.rst7")
+>>> prmtop = openmm.app.AmberPrmtopFile("ala.prm7")
+>>> inpcrd = openmm.app.AmberInpcrdFile("ala.rst7")
 
 Next we use the ``prmtop`` to create the MM system:
 
