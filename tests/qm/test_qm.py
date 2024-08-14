@@ -256,18 +256,10 @@ def test_emle_openmm_ml(ala_mols):
         # Create an EMLE engine bound to the calculator.
         emle_mols, engine = sr.qm.emle(mols, mols[0], calculator)
 
-        # The first molecule (the dipeptide) is the QM region. This is
-        # perturbable and can be interpolated between MM (the reference state)
-        # and QM (the perturbed state). Here we want the QM state, which has
-        # zeroed charges for the QM region. This means that the entire
-        # intermolecular electrostatic interaction will be computed by
-        # EMLE, rather than using the MM charges for mechanical embedding.
-        omm_mols = sr.qm.zero_charge(mols, mols[0])
-
         # Write the sytem to an AMBER coordinate and topology file.
         files = sr.expand(tmpdir, ["ala.rst7", "ala.prm7"])
         for file in files:
-            sr.save(omm_mols, file)
+            sr.save(mols, file)
 
         # Load back the files and create an OpenMM topology.
         inpcrd = openmm.app.AmberInpcrdFile(f"{tmpdir}/ala.rst7")
