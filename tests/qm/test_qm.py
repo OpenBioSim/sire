@@ -289,7 +289,7 @@ def test_emle_openmm_ml(ala_mols):
         ml_system.addForce(emle_force)
 
         # Turn off the dispersion correction to match Sire's calculation
-        # Set the MM charges to zero
+        # and set the QM atoms to have zero charge.
         for force in ml_system.getForces():
             if isinstance(force, openmm.NonbondedForce):
                 for i in ml_atoms:
