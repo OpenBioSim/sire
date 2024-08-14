@@ -224,7 +224,7 @@ Next we need to save the original molecular system to disk so that we can load i
 with ``OpenMM``. Here we will use AMBER format files, but any format supported by
 ``OpenMM`` can be used.
 
->>> sr.save(qm_mols, "ala", ["prm7", "rst7"])
+>>> sr.save(mols, "ala", ["prm7", "rst7"])
 
 We can now read them back in with ``OpenMM``:
 
