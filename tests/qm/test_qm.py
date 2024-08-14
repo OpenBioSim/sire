@@ -288,6 +288,15 @@ def test_emle_openmm_ml(ala_mols):
         # Add the EMLE force to the system.
         ml_system.addForce(emle_force)
 
+        # Turn off the dispersion correction to match Sire's calculation
+        # Set the MM charges to zero
+        for force in ml_system.getForces():
+            if isinstance(force, openmm.NonbondedForce):
+                for i in ml_atoms:
+                    _, sigma, epsilon = force.getParticleParameters(i)
+                    force.setParticleParameters(i, 0, sigma, epsilon)
+                force.setUseDispersionCorrection(False)
+
         # Create the integrator.
         integrator = openmm.LangevinMiddleIntegrator(
             300 * openmm.unit.kelvin,
@@ -308,7 +317,7 @@ def test_emle_openmm_ml(ala_mols):
         )
 
         # Make sure the energies are close.
-        assert np.isclose(nrg_openmm, nrg_sire, rtol=1e-3)
+        assert np.isclose(nrg_openmm, nrg_sire, rtol=1e-6)
 
 
 @pytest.mark.skipif(not has_emle, reason="emle-engine is not installed")

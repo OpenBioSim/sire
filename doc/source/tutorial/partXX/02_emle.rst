@@ -266,6 +266,15 @@ We can now add the ``emle`` forces to the system:
 >>> ml_system.addForce(emle_force)
 >>> ml_system.addForce(interpolation_force)
 
+In order to ensure that ``OpenMM-ML`` doesn't perform mechanical embedding, we
+next need to zero the charges of the QM atoms in the MM system:
+
+>>> for force in ml_system.getForces():
+...     if isinstance(force, mm.NonbondedForce):
+...         for i in ml_atoms:
+...             _, sigma, epsilon = force.getParticleParameters(i)
+...             force.setParticleParameters(i, 0, sigma, epsilon)
+
 In order to run a simulation we need to create an integrator and context. First
 we create the integrator:
 
