@@ -83,6 +83,11 @@ containing a "merged" dipeptide that can be interpolated between MM and QM
 levels of theory, along with the QM engine. This approach is extremely flexible
 and allows the user to easily create a QM engine for a wide variety of QM packages.
 
+Note that while the callback interface described above is designed to be used
+for QM/MM, it is completely general so could be used to apply *any* external
+force based on the local environment around a subset of atoms. For example, you
+could apply a biasing potential on top of the regular MM force field.
+
 Running a QM/MM simulation
 --------------------------
 
@@ -103,6 +108,13 @@ constraints. The simulation can then be run as usual:
 
 This will run 100 picoseconds of dynamics, recording the energy and coordinates
 every picosecond.
+
+If you are using the callback interface and wish to apply a force on top of the
+existing MM force field, rather than perform QM/MM, then you can pass
+``swap_end_states=True`` to the ``dynamics`` function. This will swap the QM and
+MM end states of all *perturbable* molecules within ``qm_mols``, so that the MM
+state corresponds to λ = 1. More details on on λ interpolation can be found in
+the `next section <https://github.com/chemle/emle-engine>`_.
 
 In next section we will show how to use `emle-engine <https://github.com/chemle/emle-engine>`_
 package as QM engine via a simple specialisation of the interface shown above.
