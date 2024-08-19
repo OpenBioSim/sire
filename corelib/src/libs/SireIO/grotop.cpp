@@ -3217,14 +3217,6 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
                     elem1 = Element::elementWithMass(mol.property("mass1").asA<AtomMasses>()[cgatomidx]);
                 }
 
-                // Update the atom types.
-
-                if (elem0.nProtons() == 0)
-                    atomtype0 += "_du";
-
-                if (elem1.nProtons() == 0)
-                    atomtype1 += "_du";
-
                 QString resnum = QString::number(atom0.residueNumber().value());
 
                 if (not atom0.chainName().isNull())
