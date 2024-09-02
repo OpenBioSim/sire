@@ -857,8 +857,8 @@ void OpenMMPMEFEP::initialise(bool fullPME)
     /*** BOND LINK FORCE FIELD ***/
     /* FC 12/21 CustomBondForce now (OpenMM 7.4.0) allows application of PBC checks*/
 
-    OpenMM::CustomBondForce * custom_link_bond = new OpenMM::CustomBondForce("lamrest*kl*max(0,d-dl*dl);"
-                                                                             "d=(r-reql)*(r-reql)");
+    OpenMM::CustomBondForce * custom_link_bond = new OpenMM::CustomBondForce("delta(min(0, r_eff))*(lamrest^5)*kl*r_eff^2;"
+                                                                             "r_eff=abs(r-reql)-dl");
     custom_link_bond->addPerBondParameter("reql");
     custom_link_bond->addPerBondParameter("kl");
     custom_link_bond->addPerBondParameter("dl");
