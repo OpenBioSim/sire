@@ -23,6 +23,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Set ``IFBOX`` pointer to 3 for general triclinic boxes in ``sire.IO.AmberPrm`` parser.
 * Only excluded nonbonded interactions between from_ghost and to_ghost atoms if they are in the same molecule.
 * Add Docker support for building wrappers on Linux x86.
+* Add support for boresch restraints to PME.
+* Port SOMD torsion fix to PME code.
+* Fix issues with ``atomtype`` and ``atom`` records for dummy atoms in GROMACS topology files.
 
 
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
