@@ -26,6 +26,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Add support for boresch restraints to PME.
 * Port SOMD torsion fix to PME code.
 * Fix issues with ``atomtype`` and ``atom`` records for dummy atoms in GROMACS topology files.
+* Fixes issue with runnning ``sire.morph.replica_exchange`` on systems in an NPT ensemble.
 
 
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
