@@ -1503,7 +1503,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                               boost::get<2>(p), 1e-9,
                                               1e-9, true);
 
-                    if (coul_14_scl != 0 or lj_14_scl != 0)
+                    // Whether this is a to/from ghost interaction.
+                    auto to_from_ghost = (from_ghost_idxs.contains(atom0) and to_ghost_idxs.contains(atom1)) or
+                                         (from_ghost_idxs.contains(atom1) and to_ghost_idxs.contains(atom0));
+
+                    if (not to_from_ghost and (coul_14_scl != 0 or lj_14_scl != 0))
                     {
                         // this is a 1-4 interaction that should be added
                         // to the ghost-14 forcefield

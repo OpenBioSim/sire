@@ -1438,12 +1438,23 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     // don't set LJ terms for ghost atoms
                     if (atom0_is_ghost or atom1_is_ghost)
                     {
+                        // are the atoms perturbing from ghosts?
+                        const auto from_ghost0 = perturbable_mol.getFromGhostIdxs().contains(atom0);
+                        const auto from_ghost1 = perturbable_mol.getFromGhostIdxs().contains(atom1);
+                        // are the atoms perturbing to ghosts?
+                        const auto to_ghost0 = perturbable_mol.getToGhostIdxs().contains(atom0);
+                        const auto to_ghost1 = perturbable_mol.getToGhostIdxs().contains(atom1);
+
+                        // is this interaction between an to/from ghost atom?
+                        const auto to_from_ghost = (from_ghost0 and to_ghost1) or (from_ghost1 and to_ghost0);
+
                         cljff->setExceptionParameters(
                             boost::get<0>(idxs[j]),
                             boost::get<0>(p), boost::get<1>(p),
                             boost::get<2>(p), 1e-9, 1e-9);
 
-                        if (ghost_14ff != 0)
+                        // exclude 14s for to/from ghost interactions
+                        if (not to_from_ghost and ghost_14ff != 0)
                         {
                             // this is a 1-4 parameter - need to update
                             // the ghost 1-4 forcefield
