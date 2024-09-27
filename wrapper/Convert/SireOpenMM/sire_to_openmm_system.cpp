@@ -1578,14 +1578,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     {
         // work out the molecule index for the from ghost atom
         int mol_from = 0;
-        while (start_indexes[mol_from] <= from_ghost_idx)
+        while (start_indexes[mol_from] <= from_ghost_idx and mol_from < nmols)
             mol_from++;
 
         for (const auto &to_ghost_idx : to_ghost_idxs)
         {
             // work out the molecule index for the to ghost atom
             int mol_to = 0;
-            while (start_indexes[mol_to] <= to_ghost_idx)
+            while (start_indexes[mol_to] <= to_ghost_idx and mol_to < nmols)
                 mol_to++;
 
             if (not excluded_ghost_pairs.contains(IndexPair(from_ghost_idx, to_ghost_idx)))
