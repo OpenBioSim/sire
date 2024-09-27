@@ -6,8 +6,12 @@ import pytest
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_positional_restraints(kigaki_mols, openmm_platform):
-    mols = kigaki_mols
+@pytest.mark.parametrize("molecules", ["kigaki_mols", "merged_ethane_methanol"])
+def test_openmm_positional_restraints(molecules, openmm_platform, request):
+    mols = request.getfixturevalue(molecules)
+
+    if mols[0].is_perturbable():
+        mols = sr.morph.link_to_reference(mols)
 
     mol = mols[0]
 
