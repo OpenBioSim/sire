@@ -25,8 +25,14 @@ def evaluate_xml_force(mols, xml, force):
     Returns
     -------
 
-    [((sire.mol.Atom, sr.mol.Atom), (sr.units.GeneralUnit, sr.units.GeneralUnit))]
-        The atom pairs and pairwise Coulomb and Lennard-Jones energies.
+    pairs : [(sire.mol.Atom, sire.mol.Atom)]
+        The atom pairs that interacted.
+
+    nrg_coul : [sr.units.GeneralUnit]
+        The Coulomb energies for each atom pair.
+
+    nrg_lj : [sr.units.GeneralUnit]
+        The Lennard-Jones energies for each atom pair.
     """
 
     from math import sqrt
@@ -103,7 +109,9 @@ def evaluate_xml_force(mols, xml, force):
     terms = list(reversed(force.get("energy").split(";")[1:-1]))
 
     # Create a list to store the results.
-    results = []
+    pairs = []
+    nrg_coul_list = []
+    nrg_lj_list = []
 
     # CustomNonbondedForce: ghost-ghost or ghost-nonghost.
     if name == "CustomNonbondedForce":
@@ -205,7 +213,9 @@ def evaluate_xml_force(mols, xml, force):
                     lj_nrg = module.lj_nrg * kJ_per_mol
 
                     # Append the results for this pair.
-                    results.append(((atom_i, atom_j), (coul_nrg, lj_nrg)))
+                    pairs.append((atom_i, atom_j))
+                    nrg_coul_list.append(coul_nrg)
+                    nrg_lj_list.append(lj_nrg)
 
     # CustomBondForce: ghost-14.
     else:
@@ -250,7 +260,9 @@ def evaluate_xml_force(mols, xml, force):
             lj_nrg = module.lj_nrg * kJ_per_mol
 
             # Append the results for this bond.
-            results.append(((atom_i, atom_j), (coul_nrg, lj_nrg)))
+            pairs.append((atom_i, atom_j))
+            nrg_coul_list.append(coul_nrg)
+            nrg_lj_list.append(lj_nrg)
 
     # Return the results.
-    return results
+    return pairs, nrg_coul_list, nrg_lj_list
