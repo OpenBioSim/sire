@@ -95,7 +95,7 @@ def replica_exchange(
     beta1 = 1.0 / (k_boltz * temperature1)
 
     if not ensemble0.is_constant_pressure():
-        delta = beta1 * (nrgs1[0] - nrgs1[1]) + beta0 * (nrgs0[0] - nrgs0[1])
+        delta = beta1 * (nrgs1[1] - nrgs1[0]) + beta0 * (nrgs0[0] - nrgs0[1])
     else:
         volume0 = replica0.current_space().volume()
         volume1 = replica1.current_space().volume()
@@ -103,9 +103,10 @@ def replica_exchange(
         pressure0 = ensemble0.pressure()
         pressure1 = ensemble1.pressure()
 
-        delta = beta1 * (
-            nrgs1[0] - nrgs1[1] + (pressure1 * (volume1 - volume0) * N_A)
-        ) + beta0 * (nrgs0[0] - nrgs0[1] + (pressure0 * (volume0 - volume1) * N_A))
+        delta = -1.0 * (
+            beta1 * (nrgs1[0] - nrgs1[1] + (pressure1 * (volume1 - volume0) * N_A))
+            + beta0 * (nrgs0[1] - nrgs0[0] + (pressure0 * (volume0 - volume1) * N_A))
+        )
 
     from math import exp
 
