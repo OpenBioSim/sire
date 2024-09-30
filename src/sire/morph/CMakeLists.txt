@@ -16,6 +16,7 @@ set ( SCRIPTS
         _pertfile.py
         _perturbation.py
         _repex.py
+        _xml.py
     )
 
 # installation
