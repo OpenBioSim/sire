@@ -29,6 +29,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed buffer overflow when computing molecule indices to excluded to/from ghost atom interactions.
 * Fixed calculation of ``delta^2`` in soft-core Couloumb potential.
 * Excluded to/from ghost atom interactions from ``ghost_14ff``.
+* Fixed description of soft-core alpha parameter in tutorial.
+* Added debugging function to evaluate custom forces in OpenMM XML files.
 
 
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
