@@ -1095,7 +1095,6 @@ namespace SireOpenMM
         {
             data.addLog("Minimisation failed!");
             bar.failure("Minimisation failed! Could not satisfy constraints!");
-            qDebug() << data.getLog().join("\n");
             throw SireError::invalid_state(QObject::tr(
                                                "Despite repeated attempts, the minimiser could not minimise the system "
                                                "while simultaneously satisfying the constraints."),
