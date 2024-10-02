@@ -35,6 +35,8 @@ SireOpenMM::LambdaLever __copy__(const SireOpenMM::LambdaLever &other){ return S
 
 #include "Helpers/release_gil_policy.hpp"
 
+#include "Qt/qdatastream.hpp"
+
 void register_LambdaLever_class(){
 
     { //::SireOpenMM::LambdaLever
@@ -275,6 +277,7 @@ void register_LambdaLever_class(){
         LambdaLever_exposer.staticmethod( "typeName" );
         LambdaLever_exposer.def( "__copy__", &__copy__<SireOpenMM::LambdaLever>);
         LambdaLever_exposer.def( "__deepcopy__", &__copy__<SireOpenMM::LambdaLever>);
+        LambdaLever_exposer.def_pickle(sire_pickle_suite< ::SireOpenMM::LambdaLever >());
         LambdaLever_exposer.def( "clone", &__copy__<SireOpenMM::LambdaLever>);
         LambdaLever_exposer.def( "__str__", &__str__< ::SireOpenMM::LambdaLever > );
         LambdaLever_exposer.def( "__repr__", &__str__< ::SireOpenMM::LambdaLever > );
