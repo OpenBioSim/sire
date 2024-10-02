@@ -586,6 +586,7 @@ class DynamicsData:
         starting_k: float = 100.0,
         ratchet_scale: float = 2.0,
         max_constraint_error: float = 0.001,
+        timeout: str = "60s",
     ):
         """
         Internal method that runs minimisation on the molecules.
@@ -619,11 +620,23 @@ class DynamicsData:
         - starting_k (float): The starting value of k for the minimisation
         - ratchet_scale (float): The amount to scale k at each ratchet
         - max_constraint_error (float): The maximum error in the constraint in nm
+        - timeout (float): The maximum time to run the minimisation for in seconds.
+                           A value of <=0 will disable the timeout.
         """
         from ..legacy.Convert import minimise_openmm_context
 
         if max_iterations <= 0:
             max_iterations = 0
+
+        try:
+            from ..units import second
+            from .. import u
+
+            timeout = u(timeout)
+            if not timeout.has_same_units(second):
+                raise ValueError("'timeout' must have units of time")
+        except:
+            raise ValueError("Unable to parse 'timeout' as a time")
 
         self._minimisation_log = minimise_openmm_context(
             self._omm_mols,
@@ -635,6 +648,7 @@ class DynamicsData:
             starting_k=starting_k,
             ratchet_scale=ratchet_scale,
             max_constraint_error=max_constraint_error,
+            timeout=timeout.to(second),
         )
 
     def _rebuild_and_minimise(self):
