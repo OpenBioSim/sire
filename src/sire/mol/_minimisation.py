@@ -96,7 +96,7 @@ class Minimisation:
         starting_k: float = 400.0,
         ratchet_scale: float = 10.0,
         max_constraint_error: float = 0.001,
-        timeout: str = "60s",
+        timeout: str = "300s",
     ):
         """
         Internal method that runs minimisation on the molecules.

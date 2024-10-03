@@ -492,7 +492,7 @@ try:
         starting_k: float = 100.0,
         ratchet_scale: float = 2.0,
         max_constraint_error: float = 0.01,
-        timeout: str = "60s",
+        timeout: str = "300s",
     ):
         return _minimise_openmm_context(
             context,
