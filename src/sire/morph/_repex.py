@@ -103,10 +103,9 @@ def replica_exchange(
         pressure0 = ensemble0.pressure()
         pressure1 = ensemble1.pressure()
 
-        delta = -1.0 * (
-            beta1 * (nrgs1[0] - nrgs1[1] + (pressure1 * (volume1 - volume0) * N_A))
-            + beta0 * (nrgs0[1] - nrgs0[0] + (pressure0 * (volume0 - volume1) * N_A))
-        )
+        delta = beta1 * (
+            nrgs1[1] - nrgs1[0] - (pressure1 * (volume1 - volume0) * N_A)
+        ) + beta0 * (nrgs0[0] - nrgs0[1] - (pressure0 * (volume0 - volume1) * N_A))
 
     from math import exp
 
