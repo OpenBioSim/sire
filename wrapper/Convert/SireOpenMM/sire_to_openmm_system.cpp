@@ -315,7 +315,8 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     auto ghost_nonghostff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
 
     std::vector<double> custom_params = {1.0, 0.0, 0.0};
-    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0, 0.0};
+    // Define null parameters used to add these particles to the ghost forces (5 total)
+    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     // we need to add all of the positions as anchor particles
     for (const auto &restraint : atom_restraints)

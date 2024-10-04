@@ -33,6 +33,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added debugging function to evaluate custom forces in OpenMM XML files.
 * Added a timeout to the OpenMM minimiser function.
 * Exposed the pickle operator on the LambdaLever class.
+* Fix issues with positionally restrained atoms in perturbable systems.
 
 
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
