@@ -1025,6 +1025,10 @@ namespace SireOpenMM
                     // to the full precision requested by the user.
                     context.applyConstraints(working_constraint_tol);
 
+                    // Recalculate the energy after the constraints have been applied.
+                    energy_before = energy_after;
+                    energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+
                     const auto delta_energy = energy_after - energy_before;
 
                     data.addLog(QString("Change in energy: %1 kJ mol-1").arg(delta_energy));
