@@ -1031,7 +1031,7 @@ namespace SireOpenMM
 
                     const auto delta_energy = energy_after - energy_before;
 
-                    data.addLog(QString("Change in energy: %1 kJ mol-1").arg(delta_energy));
+                    data.addLog(QString("Change in energy following constraint projection: %1 kJ mol-1").arg(delta_energy));
 
                     if (std::abs(delta_energy) < 1000.0)
                     {
