@@ -27,6 +27,10 @@ import subprocess
 import shutil
 import glob
 
+# Disable Torch support if using Windows.
+if platform.system() == "Windows":
+    os.environ["SIRE_NO_TORCH"] = 1
+
 try:
     # We have to check the version, but we can't do this by
     # importing sire (this will block installing of files on
