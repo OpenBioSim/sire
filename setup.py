@@ -27,8 +27,8 @@ import subprocess
 import shutil
 import glob
 
-# Disable Torch support if using Windows.
-if platform.system() == "Windows":
+# Disable Torch support for Windows during CI builds.
+if "SIRE_CI" in os.environ and platform.system() == "Windows":
     os.environ["SIRE_NO_TORCH"] = "1"
 
 try:
