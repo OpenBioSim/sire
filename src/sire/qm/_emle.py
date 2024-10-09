@@ -108,7 +108,7 @@ def emle(
     qm_atoms,
     calculator,
     cutoff="7.5A",
-    neighbour_list_frequency=20,
+    neighbour_list_frequency=0,
     redistribute_charge=False,
     map=None,
 ):
@@ -133,8 +133,9 @@ def emle(
     cutoff : str or sire.legacy.Units.GeneralUnit, optional, default="7.5A"
         The cutoff to use for the QM/MM calculation.
 
-    neighbour_list_frequency : int, optional, default=20
-        The frequency with which to update the neighbour list.
+    neighbour_list_frequency : int, optional, default=0
+        The frequency with which to update the neighbour list. A value of
+        zero means that no neighbour list will be used.
 
     redistribute_charge : bool
         Whether to redistribute charge of the QM atoms to ensure that the total

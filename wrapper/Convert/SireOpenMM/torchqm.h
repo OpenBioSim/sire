@@ -318,7 +318,7 @@ namespace SireOpenMM
         TorchQMEngine(
             QString module_path,
             SireUnits::Dimension::Length cutoff=7.5*SireUnits::angstrom,
-            int neighbour_list_frequency=20,
+            int neighbour_list_frequency=0,
             bool is_mechanical=false,
             double lambda=1.0
         );

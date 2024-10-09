@@ -16,7 +16,7 @@ def create_engine(
     py_object,
     callback=None,
     cutoff="7.5A",
-    neighbour_list_frequency=20,
+    neighbour_list_frequency=0,
     mechanical_embedding=False,
     redistribute_charge=False,
     map=None,
@@ -55,8 +55,9 @@ def create_engine(
     cutoff : str or sire.legacy.Units.GeneralUnit, optional, default="7.5A"
         The cutoff to use for the QM/MM calculation.
 
-    neighbour_list_frequency : int, optional, default=20
-        The frequency with which to update the neighbour list.
+    neighbour_list_frequency : int, optional, default=0
+        The frequency with which to update the neighbour list. A value of
+        zero means that no neighbour list will be used.
 
     mechanical_embedding: bool, optional, default=False
         Whether to use mechanical embedding. If True, then electrostatics will

@@ -76,7 +76,12 @@ embedding is used, the electrostatics are treated at the MM level by ``OpenMM``.
 Note that this doesn't change the signature of the callback function, i.e. it
 will be passed empty lists for the MM specific arguments and should return an
 empty list for the MM forces. Atomic positions passed to the callback function
-will already be unwrapped with the QM region in the center.
+will already be unwrapped with the QM region in the center. By default, no
+neighbour list will be used. (The same thing can be achieved by passing
+``neighbour_list_frequency=0``.) This is useful when using the engine as
+a calculator for different input structures, where there may be no correlation
+between coordinates. For regular molecular dynamics simulations, setting a
+non-zero neighbour list frequency can improve performance.
 
 The ``create_engine`` function returns a modified version of the molecules
 containing a "merged" dipeptide that can be interpolated between MM and QM
