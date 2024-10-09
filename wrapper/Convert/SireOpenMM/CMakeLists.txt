@@ -25,33 +25,11 @@ if (${SIRE_USE_OPENMM})
     # Other python wrapping directories
     include_directories(${CMAKE_SOURCE_DIR})
 
-    #include(CheckCXXSourceRuns)
+    # We're only building against OpenMM 8.1+, so include CustomCPPForce support.
+    add_definitions("-DSIRE_USE_CUSTOMCPPFORCE")
 
-    # Temporarily add OpenMM include directory to CMAKE_REQUIRED_INCLUDES.
-    #set(CMAKE_OLD_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
-    #set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${OpenMM_INCLUDE_DIR})
-
-    # Whether or not we have CustomCPPForceImpl (OpenMM 8.1+)
-    #CHECK_CXX_SOURCE_RUNS("
-          #include \"openmm/internal/ContextImpl.h\"
-          #include \"openmm/internal/CustomCPPForceImpl.h\"
-
-          #      int main()
-          #{
-          #    OpenMM::ContextImpl* context = NULL;
-          #    OpenMM::CustomCPPForceImpl* force = NULL;
-          #    return 0;
-          #}"
-          #CAN_USE_CUSTOMCPPFORCE)
-
-    # Restore CMAKE_REQUIRED_INCLUDES.
-    #set(CMAKE_REQUIRED_INCLUDES ${CMAKE_OLD_REQUIRED_INCLUDES})
-
-    #if (CAN_USE_CUSTOMCPPFORCE)
-      message(STATUS "OpenMM version supports CustomCPPForce")
-      add_definitions("-DSIRE_USE_CUSTOMCPPFORCE")
-
-      if (NOT DEFINED ENV{SIRE_NO_TORCH})
+    # Check to see if Torch support has been disabled.
+    if (NOT DEFINED ENV{SIRE_NO_TORCH})
         find_package(Torch)
         if (TORCH_FOUND)
             message(STATUS "Torch found")
@@ -60,10 +38,7 @@ if (${SIRE_USE_OPENMM})
         else()
             message(STATUS "Torch not found")
         endif()
-      endif()
-      #else()
-      #message(STATUS "OpenMM version does not support CustomCPPForce")
-      #endif()
+    endif()
 
     # Check to see if we have support for updating some parameters in context
     include(CheckCXXSourceCompiles)
