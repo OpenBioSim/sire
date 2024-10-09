@@ -42,6 +42,7 @@
 
 // COPIED FROM SO POST - https://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c
 
+#include <chrono>
 #include <cmath> // std::isnan, std::fpclassify
 #include <iostream>
 #include <iomanip> // std::setw
@@ -616,11 +617,16 @@ namespace SireOpenMM
                                     int max_restarts, int max_ratchets,
                                     int ratchet_frequency,
                                     double starting_k, double ratchet_scale,
-                                    double max_constraint_error)
+                                    double max_constraint_error, double timeout)
     {
         if (max_iterations < 0)
         {
             max_iterations = std::numeric_limits<int>::max();
+        }
+
+        if (timeout <= 0)
+        {
+            timeout = std::numeric_limits<double>::max();
         }
 
         auto gil = SireBase::release_gil();
@@ -650,6 +656,7 @@ namespace SireOpenMM
 
         data.addLog(QString("Minimising with a tolerance of %1").arg(tolerance));
         data.addLog(QString("Minimising with constraint tolerance %1").arg(working_constraint_tol));
+        data.addLog(QString("Minimising with a timeout of %1 seconds").arg(timeout));
         data.addLog(QString("Minimising with k = %1").arg(k));
         data.addLog(QString("Minimising with %1 particles").arg(num_particles));
         data.addLog(QString("Minimising with a maximum of %1 iterations").arg(max_iterations));
@@ -679,6 +686,9 @@ namespace SireOpenMM
         int max_linesearch = 100;
         const int max_linesearch_delta = 100;
 
+        // Store the starting time.
+        auto start_time = std::chrono::high_resolution_clock::now();
+
         while (data.getIteration() < data.getMaxIterations())
         {
             if (not is_success)
@@ -686,6 +696,16 @@ namespace SireOpenMM
                 // try one more time with the real starting positions
                 if (not have_hard_reset)
                 {
+                    // Check the current time and see if we've exceeded the timeout.
+                    auto current_time = std::chrono::high_resolution_clock::now();
+                    auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time).count();
+
+                    if (elapsed_time > timeout)
+                    {
+                        data.addLog("Minimisation timed out!");
+                        break;
+                    }
+
                     data.hardReset();
 
                     context.setPositions(starting_pos);
@@ -708,6 +728,7 @@ namespace SireOpenMM
                     break;
                 }
             }
+
 
             data.addLog(QString("Minimisation loop - %1 steps from %2").arg(data.getIteration()).arg(data.getMaxIterations()));
 
@@ -762,6 +783,17 @@ namespace SireOpenMM
                 // Repeatedly minimize, steadily increasing the strength of the springs until all constraints are satisfied.
                 while (data.getIteration() < data.getMaxIterations())
                 {
+                    // Check the current time and see if we've exceeded the timeout.
+                    auto current_time = std::chrono::high_resolution_clock::now();
+                    auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time).count();
+
+                    if (elapsed_time > timeout)
+                    {
+                        data.addLog("Minimisation timed out!");
+                        is_success = false;
+                        break;
+                    }
+
                     param.max_iterations = data.getMaxIterations() - data.getIteration();
                     lbfgsfloatval_t fx; // final energy
                     auto last_it = data.getIteration();
@@ -993,9 +1025,13 @@ namespace SireOpenMM
                     // to the full precision requested by the user.
                     context.applyConstraints(working_constraint_tol);
 
+                    // Recalculate the energy after the constraints have been applied.
+                    energy_before = energy_after;
+                    energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+
                     const auto delta_energy = energy_after - energy_before;
 
-                    data.addLog(QString("Change in energy: %1 kJ mol-1").arg(delta_energy));
+                    data.addLog(QString("Change in energy following constraint projection: %1 kJ mol-1").arg(delta_energy));
 
                     if (std::abs(delta_energy) < 1000.0)
                     {
@@ -1063,7 +1099,6 @@ namespace SireOpenMM
         {
             data.addLog("Minimisation failed!");
             bar.failure("Minimisation failed! Could not satisfy constraints!");
-            qDebug() << data.getLog().join("\n");
             throw SireError::invalid_state(QObject::tr(
                                                "Despite repeated attempts, the minimiser could not minimise the system "
                                                "while simultaneously satisfying the constraints."),

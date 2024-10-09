@@ -11,6 +11,16 @@ while (( "$#" )); do
         exit 1
       fi
       ;;
+    -l|--lib)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        LIB=$2
+        shift 2
+      else
+        echo "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
+      ;;
+
     -*|--*=) # unsupported flags
       echo "Error: Unsupported flag $1" >&2
       exit 1
@@ -50,7 +60,14 @@ cd sire/wrapper
 echo "Running scanheaders..."
 python AutoGenerate/scanheaders.py $HOME/sire/corelib/src/libs .
 
-echo "Now generating all of the headers..."
-python create_all_wrappers.py
+if [ -z "$LIB" ]
+then
+    echo "No library specified, generating all wrappers..."
+    python create_all_wrappers.py
+else
+    echo "Generating wrappers for $LIB..."
+    cd $LIB
+    python ../AutoGenerate/create_wrappers.py
+fi
 
 echo "Complete"

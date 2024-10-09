@@ -33,7 +33,8 @@ namespace SireOpenMM
                                     int ratchet_frequency = 500,
                                     double starting_k = 100.0,
                                     double ratchet_scale = 2.0,
-                                    double max_constraint_error = 0.01);
+                                    double max_constraint_error = 0.01,
+                                    double timeout = 300.0);
 
 }
 
