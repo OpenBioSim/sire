@@ -315,7 +315,8 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     auto ghost_nonghostff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
 
     std::vector<double> custom_params = {1.0, 0.0, 0.0};
-    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0, 0.0};
+    // Define null parameters used to add these particles to the ghost forces (5 total)
+    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     // we need to add all of the positions as anchor particles
     for (const auto &restraint : atom_restraints)
@@ -916,7 +917,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r_safe^2))-(kappa/r_safe));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha*alpha)+r_safe^2))-(kappa/r_safe));"
                                   "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                   "sig6=(sigma^6)/(%3*sigma^6 + r_safe^6);"
                                   "r_safe=max(r, 0.001);")
@@ -929,7 +930,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r_safe^2))-(kappa/r_safe));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha*alpha)+r_safe^2))-(kappa/r_safe));"
                                   "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                   "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
                                   "r_safe=max(r, 0.001);"
@@ -976,7 +977,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
                                      "sig6=(sigma^6)/(%3*sigma^6 + r_safe^6);"
                                      "r_safe=max(r, 0.001);"
@@ -1014,7 +1015,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
                                      "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
                                      "delta=%3*max_alpha;"
@@ -1503,7 +1504,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                               boost::get<2>(p), 1e-9,
                                               1e-9, true);
 
-                    if (coul_14_scl != 0 or lj_14_scl != 0)
+                    // Whether this is a to/from ghost interaction.
+                    auto to_from_ghost = (from_ghost_idxs.contains(atom0) and to_ghost_idxs.contains(atom1)) or
+                                         (from_ghost_idxs.contains(atom1) and to_ghost_idxs.contains(atom0));
+
+                    if (not to_from_ghost and (coul_14_scl != 0 or lj_14_scl != 0))
                     {
                         // this is a 1-4 interaction that should be added
                         // to the ghost-14 forcefield
@@ -1578,14 +1583,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     {
         // work out the molecule index for the from ghost atom
         int mol_from = 0;
-        while (start_indexes[mol_from] <= from_ghost_idx)
+        while (start_indexes[mol_from] <= from_ghost_idx and mol_from < nmols)
             mol_from++;
 
         for (const auto &to_ghost_idx : to_ghost_idxs)
         {
             // work out the molecule index for the to ghost atom
             int mol_to = 0;
-            while (start_indexes[mol_to] <= to_ghost_idx)
+            while (start_indexes[mol_to] <= to_ghost_idx and mol_to < nmols)
                 mol_to++;
 
             if (not excluded_ghost_pairs.contains(IndexPair(from_ghost_idx, to_ghost_idx)))

@@ -87,13 +87,15 @@ def replica_exchange(
     # delta = beta_b * [ H_b_i - H_b_j + P_b (V_b_i - V_b_j) ] +
     #         beta_a * [ H_a_i - H_a_j + P_a (V_a_i - V_a_j) ]
 
-    from ..units import k_boltz
+    from ..units import k_boltz, mole
+
+    N_A = 6.02214076e23 / mole
 
     beta0 = 1.0 / (k_boltz * temperature0)
     beta1 = 1.0 / (k_boltz * temperature1)
 
     if not ensemble0.is_constant_pressure():
-        delta = beta1 * (nrgs1[0] - nrgs1[1]) + beta0 * (nrgs0[0] - nrgs0[1])
+        delta = beta1 * (nrgs1[1] - nrgs1[0]) + beta0 * (nrgs0[0] - nrgs0[1])
     else:
         volume0 = replica0.current_space().volume()
         volume1 = replica1.current_space().volume()
@@ -102,8 +104,8 @@ def replica_exchange(
         pressure1 = ensemble1.pressure()
 
         delta = beta1 * (
-            nrgs1[0] - nrgs1[1] + pressure1 * (volume1 - volume0)
-        ) + beta0 * (nrgs0[0] - nrgs0[1] + pressure0 * (volume0 - volume1))
+            (nrgs1[1] - nrgs1[0]) + (pressure1 * (volume1 - volume0) * N_A)
+        ) + beta0 * ((nrgs0[0] - nrgs0[1]) + (pressure0 * (volume0 - volume1) * N_A))
 
     from math import exp
 
@@ -118,12 +120,8 @@ def replica_exchange(
             replica1.set_lambda(lam0)
 
         if ensemble0 != ensemble1:
-            replica0.set_ensemble(
-                ensemble1, rescale_velocities=rescale_velocities
-            )
-            replica1.set_ensemble(
-                ensemble0, rescale_velocities=rescale_velocities
-            )
+            replica0.set_ensemble(ensemble1, rescale_velocities=rescale_velocities)
+            replica1.set_ensemble(ensemble0, rescale_velocities=rescale_velocities)
 
         return (replica1, replica0, True)
     else:

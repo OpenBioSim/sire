@@ -492,6 +492,7 @@ try:
         starting_k: float = 100.0,
         ratchet_scale: float = 2.0,
         max_constraint_error: float = 0.01,
+        timeout: str = "300s",
     ):
         return _minimise_openmm_context(
             context,
@@ -503,6 +504,7 @@ try:
             starting_k=starting_k,
             ratchet_scale=ratchet_scale,
             max_constraint_error=max_constraint_error,
+            timeout=timeout,
         )
 
 except Exception as e:

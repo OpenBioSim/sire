@@ -26,7 +26,17 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Add support for boresch restraints to PME.
 * Port SOMD torsion fix to PME code.
 * Fix issues with ``atomtype`` and ``atom`` records for dummy atoms in GROMACS topology files.
-
+* Fixed buffer overflow when computing molecule indices to excluded to/from ghost atom interactions.
+* Fixed calculation of ``delta^2`` in soft-core Couloumb potential.
+* Excluded to/from ghost atom interactions from ``ghost_14ff``.
+* Fixed description of soft-core alpha parameter in tutorial.
+* Added debugging function to evaluate custom forces in OpenMM XML files.
+* Added a timeout to the OpenMM minimiser function.
+* Exposed the pickle operator on the LambdaLever class.
+* Fix issues with positionally restrained atoms in perturbable systems.
+* Fix exchange probability equations in ``sire.morph.replica_exchange`` function.
+* Fix calculation of energy change following final constraint projection after energy minimisation.
+* Clear internal OpenMM state from dynamics object following a successful minimisation.
 
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
 -----------------------------------------------------------------------------------------

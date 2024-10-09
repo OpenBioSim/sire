@@ -16,6 +16,7 @@ __all__ = [
     "zero_ghost_bonds",
     "zero_ghost_angles",
     "zero_ghost_torsions",
+    "evaluate_xml_force",
     "Perturbation",
 ]
 
@@ -48,3 +49,5 @@ from ._merge import merge
 from ._mutate import mutate
 
 from ._decouple import annihilate, decouple
+
+from ._xml import evaluate_xml_force

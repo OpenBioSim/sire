@@ -99,8 +99,7 @@ class DynamicsData:
             from ..convert import to
 
             self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
-            self._omm_state = None
-            self._omm_state_has_cv = (False, False)
+            self._clear_state()
 
             if self._ffinfo.space().is_periodic():
                 self._enforce_periodic_box = True
@@ -174,8 +173,7 @@ class DynamicsData:
             raise SystemError("Cannot start dynamics while it is already running!")
 
         self._is_running = True
-        self._omm_state = None
-        self._omm_state_has_cv = (False, False)
+        self._clear_state()
 
     def _exit_dynamics_block(
         self,
@@ -559,8 +557,7 @@ class DynamicsData:
         if self._is_running:
             raise SystemError("Cannot step dynamics while it is already running!")
 
-        self._omm_state = None
-        self._omm_state_has_cv = (False, False)
+        self._clear_state()
 
         self._omm_mols.getIntegrator().step(num_steps)
 
@@ -586,6 +583,7 @@ class DynamicsData:
         starting_k: float = 100.0,
         ratchet_scale: float = 2.0,
         max_constraint_error: float = 0.001,
+        timeout: str = "300s",
     ):
         """
         Internal method that runs minimisation on the molecules.
@@ -619,11 +617,25 @@ class DynamicsData:
         - starting_k (float): The starting value of k for the minimisation
         - ratchet_scale (float): The amount to scale k at each ratchet
         - max_constraint_error (float): The maximum error in the constraint in nm
+        - timeout (float): The maximum time to run the minimisation for in seconds.
+                           A value of <=0 will disable the timeout.
         """
         from ..legacy.Convert import minimise_openmm_context
 
         if max_iterations <= 0:
             max_iterations = 0
+
+        try:
+            from ..units import second
+            from .. import u
+
+            timeout = u(timeout)
+            if not timeout.has_same_units(second):
+                raise ValueError("'timeout' must have units of time")
+        except:
+            raise ValueError("Unable to parse 'timeout' as a time")
+
+        self._clear_state()
 
         self._minimisation_log = minimise_openmm_context(
             self._omm_mols,
@@ -635,6 +647,7 @@ class DynamicsData:
             starting_k=starting_k,
             ratchet_scale=ratchet_scale,
             max_constraint_error=max_constraint_error,
+            timeout=timeout.to(second),
         )
 
     def _rebuild_and_minimise(self):
@@ -962,8 +975,7 @@ class DynamicsData:
             # try to fix this problem by minimising,
             # then running again
             self._is_running = False
-            self._omm_state = None
-            self._omm_state_has_cv = (False, False)
+            self._clear_state()
             self._rebuild_and_minimise()
             orig_args["auto_fix_minimise"] = False
             self.run(**orig_args)

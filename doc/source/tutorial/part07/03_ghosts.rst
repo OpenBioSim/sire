@@ -97,10 +97,10 @@ The soft-core parameters are:
 * ``α_i`` and ``α_j`` control the amount of "softening" of the
   electrostatic and LJ interactions. A value of 0 means no softening
   (fully hard), while a value of 1 means fully soft. Ghost atoms which
-  disappear as a function of λ have a value of α of 0 in the
-  reference state, and 1 in the perturbed state. Ghost atoms which appear
-  as a function of λ have a value of α of 1 in the reference
-  state, and 0 in the perturbed state. These values can be perturbed
+  disappear as a function of λ have a value of α of 1 in the
+  reference state, and 0 in the perturbed state. Ghost atoms which appear
+  as a function of λ have a value of α of 0 in the reference
+  state, and 1 in the perturbed state. These values can be perturbed
   via the ``alpha`` lever in the λ-schedule.
 
 * ``n`` is the "coulomb power", and is set to 0 by default. It can be
@@ -159,10 +159,10 @@ The soft-core parameters are:
 * ``α_i`` and ``α_j`` control the amount of "softening" of the
   electrostatic and LJ interactions. A value of 0 means no softening
   (fully hard), while a value of 1 means fully soft. Ghost atoms which
-  disappear as a function of λ have a value of α of 0 in the
-  reference state, and 1 in the perturbed state. Ghost atoms which appear
-  as a function of λ have a value of α of 1 in the reference
-  state, and 0 in the perturbed state. These values can be perturbed
+  disappear as a function of λ have a value of α of 1 in the
+  reference state, and 0 in the perturbed state. Ghost atoms which appear
+  as a function of λ have a value of α of 0 in the reference
+  state, and 1 in the perturbed state. These values can be perturbed
   via the ``alpha`` lever in the λ-schedule.
 
 * ``m`` is the "taylor power", and is set to 1 by default. It can be
