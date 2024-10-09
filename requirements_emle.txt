@@ -1,14 +1,14 @@
-ambertools
+ambertools >= 22 ; sys_platform != "win32"
 ase
-deepmd-kit
+deepmd-kit ; platform_machine != "aarch64" and sys_platform != "win32"
 loguru
-nnpops
+nnpops ; platform_machine != "aarch64" and sys_platform != "win32"
 pygit2
 pytorch
 python
 pyyaml
-torchani
-xtb-python
+torchani ; sys_platform != "win32" and (sys_platform != "linux" and platform_machine != "aarch64")
+xtb-python ; sys_platform != "win32"
 
 gcc< 13 ; sys_platform == "linux"
 gxx< 13 ; sys_platform == "linux"
