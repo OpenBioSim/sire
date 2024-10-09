@@ -99,8 +99,7 @@ class DynamicsData:
             from ..convert import to
 
             self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
-            self._omm_state = None
-            self._omm_state_has_cv = (False, False)
+            self._clear_state()
 
             if self._ffinfo.space().is_periodic():
                 self._enforce_periodic_box = True
@@ -174,8 +173,7 @@ class DynamicsData:
             raise SystemError("Cannot start dynamics while it is already running!")
 
         self._is_running = True
-        self._omm_state = None
-        self._omm_state_has_cv = (False, False)
+        self._clear_state()
 
     def _exit_dynamics_block(
         self,
@@ -559,8 +557,7 @@ class DynamicsData:
         if self._is_running:
             raise SystemError("Cannot step dynamics while it is already running!")
 
-        self._omm_state = None
-        self._omm_state_has_cv = (False, False)
+        self._clear_state()
 
         self._omm_mols.getIntegrator().step(num_steps)
 
@@ -637,6 +634,8 @@ class DynamicsData:
                 raise ValueError("'timeout' must have units of time")
         except:
             raise ValueError("Unable to parse 'timeout' as a time")
+
+        self._clear_state()
 
         self._minimisation_log = minimise_openmm_context(
             self._omm_mols,
@@ -976,8 +975,7 @@ class DynamicsData:
             # try to fix this problem by minimising,
             # then running again
             self._is_running = False
-            self._omm_state = None
-            self._omm_state_has_cv = (False, False)
+            self._clear_state()
             self._rebuild_and_minimise()
             orig_args["auto_fix_minimise"] = False
             self.run(**orig_args)
