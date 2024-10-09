@@ -453,6 +453,10 @@ def test_auto_constraints(ala_mols, openmm_platform):
                 assert bond in constrained
 
 
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
 @pytest.mark.xfail(reason="Unresolved bug.")
 def test_asymmetric_constraints():
     # This test is for debugging a peculiar issue with one of the perturbations
