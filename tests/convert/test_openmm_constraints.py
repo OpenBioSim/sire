@@ -470,6 +470,8 @@ def test_asymmetric_constraints():
     # or OpenMM.
 
     from math import isclose
+    from openmm import XmlSerializer
+    from tempfile import NamedTemporaryFile
 
     # Load the MCL1 perturbation. (Perturbable ligand is the last molecule.)
     mol = sr.load_test_files("mcl1_60_61.s3")[-1]
@@ -519,9 +521,27 @@ def test_asymmetric_constraints():
     # Check the final energies from the logs are the same.
     assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-3)
 
+    # Serialise the systems in the contexts.
+    xml0 = NamedTemporaryFile()
+    xml1 = NamedTemporaryFile()
+    with open(xml0.name, "w") as f:
+        f.write(XmlSerializer.serialize(d_forwards._d._omm_mols.getSystem()))
+    with open(xml1.name, "w") as f:
+        f.write(XmlSerializer.serialize(d_backwards._d._omm_mols.getSystem()))
+
+    # Load the serialised systems and sort.
+    with open(xml0.name, "r") as f:
+        xml0_lines = sorted(f.readlines())
+    with open(xml1.name, "r") as f:
+        xml1_lines = sorted(f.readlines())
+
+    # Check the serialised systems are the same.
+    assert xml0_lines == xml1_lines
+
     # Now get the final potential energies. (Post constraint projection.)
     nrg_forwards = d_forwards.current_potential_energy().value()
     nrg_backwards = d_backwards.current_potential_energy().value()
 
-    # Check the minimised potential energies are the same.
+    # Check the minimised potential energies are the same. (Post constraint projection.)
+    # This currently fails, which is inexplicable given evertyhing else above agrees.
     assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-3)
