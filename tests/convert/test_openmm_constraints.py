@@ -543,5 +543,5 @@ def test_asymmetric_constraints():
     nrg_backwards = d_backwards.current_potential_energy().value()
 
     # Check the minimised potential energies are the same. (Post constraint projection.)
-    # This currently fails, which is inexplicable given evertyhing else above agrees.
+    # This currently fails, which is inexplicable given everything else above agrees.
     assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-3)
