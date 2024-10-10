@@ -27,10 +27,6 @@ import subprocess
 import shutil
 import glob
 
-# Disable Torch support for Windows during CI builds.
-if "SIRE_CI" in os.environ and platform.system() == "Windows":
-    os.environ["SIRE_NO_TORCH"] = "1"
-
 try:
     # We have to check the version, but we can't do this by
     # importing sire (this will block installing of files on

@@ -26,10 +26,8 @@ void register_SireOpenMM_objects()
     ObjectRegistry::registerConverterFor< SireOpenMM::LambdaLever >();
     ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
     ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
-#ifdef SIRE_USE_TORCH
     ObjectRegistry::registerConverterFor< SireOpenMM::TorchQMForce >();
     ObjectRegistry::registerConverterFor< SireOpenMM::TorchQMEngine >();
-#endif
 
 }
 

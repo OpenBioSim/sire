@@ -48,7 +48,6 @@ jobs:
       SIRE_DONT_PHONEHOME: 1
       SIRE_SILENT_PHONEHOME: 1
       SIRE_EMLE: 1
-      SIRE_CI: 1
       REPO: "${{ github.event.pull_request.head.repo.full_name || github.repository }}"
     steps:
       #

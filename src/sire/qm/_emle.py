@@ -49,58 +49,50 @@ class EMLEEngine(_Convert._SireOpenMM.PyQMEngine):
         return emle_force, interpolation_force
 
 
-# Conditionally create a TorchEMLEEngine class if Torch is available.
-try:
+class TorchEMLEEngine(_Convert._SireOpenMM.TorchQMEngine):
+    """A class to enable use of EMLE as a QM engine using C++ Torch."""
 
-    class TorchEMLEEngine(_Convert._SireOpenMM.TorchQMEngine):
-        """A class to enable use of EMLE as a QM engine using C++ Torch."""
+    def get_forces(self):
+        """
+        Get the OpenMM forces for this engine. The first force is the actual
+        EMLE force, which uses a CustomCPPForceImpl to calculate the electrostatic
+        embedding force. The second is a null CustomBondForce that can be used to
+        add a "lambda_emle" global parameter to a context to allow the force to be
+        scaled.
 
-        def get_forces(self):
-            """
-            Get the OpenMM forces for this engine. The first force is the actual
-            EMLE force, which uses a CustomCPPForceImpl to calculate the electrostatic
-            embedding force. The second is a null CustomBondForce that can be used to
-            add a "lambda_emle" global parameter to a context to allow the force to be
-            scaled.
+        Returns
+        -------
 
-            Returns
-            -------
+        emle_force : openmm.Force
+            The EMLE force object to compute the electrostatic embedding force.
 
-            emle_force : openmm.Force
-                The EMLE force object to compute the electrostatic embedding force.
+        interpolation_force : openmm.CustomBondForce
+            A null CustomBondForce object that can be used to add a "lambda_emle"
+            global parameter to an OpenMM context. This allows the electrostatic
+            embedding force to be scaled.
+        """
 
-            interpolation_force : openmm.CustomBondForce
-                A null CustomBondForce object that can be used to add a "lambda_emle"
-                global parameter to an OpenMM context. This allows the electrostatic
-                embedding force to be scaled.
-            """
+        from copy import deepcopy as _deepcopy
+        from openmm import CustomBondForce as _CustomBondForce
 
-            from copy import deepcopy as _deepcopy
-            from openmm import CustomBondForce as _CustomBondForce
+        # Create a dynamics object for the QM region.
+        d = self._mols["property is_perturbable"].dynamics(
+            timestep="1fs",
+            constraint="none",
+            platform="cpu",
+            qm_engine=self,
+        )
 
-            # Create a dynamics object for the QM region.
-            d = self._mols["property is_perturbable"].dynamics(
-                timestep="1fs",
-                constraint="none",
-                platform="cpu",
-                qm_engine=self,
-            )
+        # Get the OpenMM EMLE force.
+        emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
 
-            # Get the OpenMM EMLE force.
-            emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
+        # Create a null CustomBondForce to add the EMLE interpolation
+        # parameter.
+        interpolation_force = _CustomBondForce("")
+        interpolation_force.addGlobalParameter("lambda_emle", 1.0)
 
-            # Create a null CustomBondForce to add the EMLE interpolation
-            # parameter.
-            interpolation_force = _CustomBondForce("")
-            interpolation_force.addGlobalParameter("lambda_emle", 1.0)
-
-            # Return the forces.
-            return emle_force, interpolation_force
-
-    _has_torchqmengine = True
-except:
-    _has_torchqmengine = False
-    pass
+        # Return the forces.
+        return emle_force, interpolation_force
 
 
 def emle(
@@ -257,12 +249,6 @@ def emle(
 
     # Create an engine from an EMLE model.
     else:
-        if not _has_torchqmengine:
-            raise ValueError(
-                "Sire hasn't been compiled with support for TorchQMEngine. "
-                "Please install libtorch and recompile."
-            )
-
         try:
             from emle.models import EMLE as _EMLE
         except:
@@ -283,13 +269,16 @@ def emle(
         module_path = calculator.__class__.__name__ + ".pt"
         _torch.jit.save(script_module, calculator.__class__.__name__ + ".pt")
 
-        # Create the EMLE engine.
-        engine = TorchEMLEEngine(
-            module_path,
-            cutoff,
-            neighbour_list_frequency,
-            False,
-        )
+        try:
+            # Create the EMLE engine.
+            engine = TorchEMLEEngine(
+                module_path,
+                cutoff,
+                neighbour_list_frequency,
+                False,
+            )
+        except Exception as e:
+            raise ValueError("Unable to create a TorchEMLEEngine: " + str(e))
 
     from ._utils import (
         _check_charge,

@@ -26,12 +26,12 @@
   *
 \*********************************************/
 
-#ifdef SIRE_USE_TORCH
-
 #include "openmm/serialization/SerializationNode.h"
 #include "openmm/serialization/SerializationProxy.h"
 
+#ifdef SIRE_USE_TORCH
 #include <torch/csrc/autograd/autograd.h>
+#endif
 
 #include "SireError/errors.h"
 #include "SireMaths/vector.h"
@@ -165,6 +165,7 @@ TorchQMForce &TorchQMForce::operator=(const TorchQMForce &other)
 
 void TorchQMForce::setModulePath(QString module_path)
 {
+#ifdef SIRE_USE_TORCH
     // Try to load the Torch module.
     try
     {
@@ -180,6 +181,7 @@ void TorchQMForce::setModulePath(QString module_path)
                     .arg(module_path).arg(e.what()),
                     CODELOC);
     }
+#endif
 
     this->module_path = module_path;
 }
@@ -189,7 +191,11 @@ QString TorchQMForce::getModulePath() const
     return this->module_path;
 }
 
+#ifdef SIRE_USE_TORCH
 torch::jit::script::Module TorchQMForce::getTorchModule() const
+#else
+void* TorchQMForce::getTorchModule() const
+#endif
 {
     return this->torch_module;
 }
@@ -342,7 +348,7 @@ namespace OpenMM
 
 OpenMM::ForceImpl *TorchQMForce::createImpl() const
 {
-#ifdef SIRE_USE_CUSTOMCPPFORCE
+#if defined(SIRE_USE_CUSTOMCPPFORCE) and defined(SIRE_USE_TORCH)
     return new TorchQMForceImpl(*this);
 #else
     throw SireError::unsupported(QObject::tr(
@@ -353,6 +359,7 @@ OpenMM::ForceImpl *TorchQMForce::createImpl() const
 #endif
 }
 
+#if defined(SIRE_USE_CUSTOMCPPFORCE) and defined(SIRE_USE_TORCH)
 TorchQMForceImpl::TorchQMForceImpl(const TorchQMForce &owner) :
     OpenMM::CustomCPPForceImpl(owner),
     owner(owner)
@@ -374,7 +381,6 @@ double TorchQMForceImpl::computeForce(
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
 {
-#ifdef SIRE_USE_CUSTOMCPPFORCE
     // Get the platform name from the context.
     const auto platform = context.getPlatform().getName();
 
@@ -813,8 +819,8 @@ double TorchQMForceImpl::computeForce(
 
     // Finally, return the energy.
     return lambda * energy;
-#endif
 }
+#endif
 
 /////////
 ///////// Implementation of TorchQMEngine
@@ -839,6 +845,13 @@ TorchQMEngine::TorchQMEngine(
     is_mechanical(is_mechanical),
     lambda(lambda)
 {
+#ifndef SIRE_USE_TORCH
+    throw SireError::unsupported(QObject::tr(
+            "Unable to create an TorchQMEngine because Sire has been compiled "
+            "without Torch support."),
+        CODELOC);
+#endif
+
     // Register the serialization proxies.
     OpenMM::registerTorchQMSerializationProxies();
 
@@ -1037,5 +1050,3 @@ QMForce* TorchQMEngine::createForce() const
         this->charges
     );
 }
-
-#endif

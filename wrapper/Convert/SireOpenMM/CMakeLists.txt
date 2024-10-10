@@ -85,13 +85,6 @@ if (${SIRE_USE_OPENMM})
           ${PYPP_SOURCES}
       )
 
-    # Remove any Torch specific files if Torch is not found.
-    if (NOT TORCH_FOUND)
-      list(REMOVE_ITEM SIREOPENMM_SOURCES torchqm.cpp)
-      list(REMOVE_ITEM SIREOPENMM_SOURCES TorchQMEngine.pypp.cpp)
-      list(REMOVE_ITEM SIREOPENMM_SOURCES TorchQMForce.pypp.cpp)
-    endif()
-
     # Create the library that holds all of the class wrappers
     add_library (SireOpenMM ${SIREOPENMM_SOURCES})
 

@@ -29,8 +29,6 @@
 #ifndef SIREOPENMM_TORCHQM_H
 #define SIREOPENMM_TORCHQM_H
 
-#ifdef SIRE_USE_TORCH
-
 #include "OpenMM.h"
 #include "openmm/Force.h"
 #ifdef SIRE_USE_CUSTOMCPPFORCE
@@ -41,7 +39,9 @@
 #include "boost/python.hpp"
 #include <boost/tuple/tuple.hpp>
 
+#ifdef SIRE_USE_TORCH
 #include <torch/script.h>
+#endif
 
 #include <QMap>
 #include <QVector>
@@ -161,7 +161,11 @@ namespace SireOpenMM
         /*! \returns
                 The TorchScript module.
          */
+#ifdef SIRE_USE_TORCH
         torch::jit::script::Module getTorchModule() const;
+#else
+        void* getTorchModule() const;
+#endif
 
         //! Get the lambda weighting factor.
         /*! \returns
@@ -250,7 +254,11 @@ namespace SireOpenMM
 
     private:
         QString module_path;
+#ifdef SIRE_USE_TORCH
         torch::jit::script::Module torch_module;
+#else
+        void *torch_module;
+#endif
         SireUnits::Dimension::Length cutoff;
         int neighbour_list_frequency;
         bool is_mechanical;
@@ -264,7 +272,7 @@ namespace SireOpenMM
         QVector<double> charges;
     };
 
-#ifdef SIRE_USE_CUSTOMCPPFORCE
+#if defined(SIRE_USE_CUSTOMCPPFORCE) && defined(SIRE_USE_TORCH)
     class TorchQMForceImpl : public OpenMM::CustomCPPForceImpl
     {
     public:
@@ -505,5 +513,4 @@ SIRE_EXPOSE_CLASS(SireOpenMM::TorchQMEngine)
 
 SIRE_END_HEADER
 
-#endif
 #endif

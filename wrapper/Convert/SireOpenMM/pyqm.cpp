@@ -224,8 +224,8 @@ QDataStream &operator<<(QDataStream &ds, const PyQMForce &pyqmforce)
     SharedDataStream sds(ds);
 
     sds << pyqmforce.callback << pyqmforce.cutoff << pyqmforce.neighbour_list_frequency
-        << pyqmforce.is_mechanical <<  pyqmforce.lambda << pyqmforce.atoms 
-        << pyqmforce.mm1_to_qm << pyqmforce.mm1_to_mm2 << pyqmforce.bond_scale_factors 
+        << pyqmforce.is_mechanical <<  pyqmforce.lambda << pyqmforce.atoms
+        << pyqmforce.mm1_to_qm << pyqmforce.mm1_to_mm2 << pyqmforce.bond_scale_factors
         << pyqmforce.mm2_atoms << pyqmforce.numbers << pyqmforce.charges;
 
     return ds;
@@ -240,8 +240,8 @@ QDataStream &operator>>(QDataStream &ds, PyQMForce &pyqmforce)
         SharedDataStream sds(ds);
 
         sds >> pyqmforce.callback >> pyqmforce.cutoff >> pyqmforce.neighbour_list_frequency
-            >> pyqmforce.is_mechanical >> pyqmforce.lambda >> pyqmforce.atoms 
-            >> pyqmforce.mm1_to_qm >> pyqmforce.mm1_to_mm2 >> pyqmforce.bond_scale_factors 
+            >> pyqmforce.is_mechanical >> pyqmforce.lambda >> pyqmforce.atoms
+            >> pyqmforce.mm1_to_qm >> pyqmforce.mm1_to_mm2 >> pyqmforce.bond_scale_factors
             >> pyqmforce.mm2_atoms >> pyqmforce.numbers >> pyqmforce.charges;
     }
     else
@@ -494,6 +494,7 @@ OpenMM::ForceImpl *PyQMForce::createImpl() const
 #endif
 }
 
+#ifdef SIRE_USE_CUSTOMCPPFORCE
 PyQMForceImpl::PyQMForceImpl(const PyQMForce &owner) :
     OpenMM::CustomCPPForceImpl(owner),
     owner(owner)
@@ -514,7 +515,6 @@ double PyQMForceImpl::computeForce(
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
 {
-#ifdef SIRE_USE_CUSTOMCPPFORCE
     // If this is the first step, then setup information for the neighbour list.
     if (this->step_count == 0)
     {
@@ -854,8 +854,8 @@ double PyQMForceImpl::computeForce(
 
     // Finally, return the energy.
     return lambda * energy;
-#endif
 }
+#endif
 
 /////////
 ///////// Implementation of PyQMEngine
