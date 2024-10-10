@@ -372,12 +372,6 @@ In order to perform a calculation we need to create an instance of the
 >>> from emle.models import ANI2xEMLE
 >>> model = ANI2xEMLE().to(device)
 
-.. note::
-
-    The ``ANI2xEMLE`` model currently requires the ``feature_aev`` branch of
-    ``emle-engine``, which can be installed with the following command:
-    ``pip install git+https://github.com/chemle/emle-engine.git@feature_aev``
-
 We can now calculate the in vacuo and electrostatic embedding energies:
 
 >>> energies = model(atomic_numbers, charges_mm, coords_qm, coords_mm)
