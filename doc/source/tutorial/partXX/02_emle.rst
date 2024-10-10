@@ -299,6 +299,14 @@ embedding energies for different backends. For example, we provide an optimised
 ``ANI2xEMLE`` module that can be used to add electrostatic embedding to the
 existing ``ANI2x`` model from `TorchANI <https://aiqm.github.io/torchani/>`_.
 
+.. note::
+
+    Torch support is currently not available for our Windows conda pacakge
+    since ``pytorch`` is not available for Windows on the ``conda-forge``.
+    It is possible to compile Sire from source using a local ``pytorch``
+    installation, or using the pacakge from the official ``pytorch`` conda
+    channel.
+
 As an example for how to use the module, let's again use the example alanine
 dipeptide system. First, let's reload the system and center the solute within
 the simulation box:
