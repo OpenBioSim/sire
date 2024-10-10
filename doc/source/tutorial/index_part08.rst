@@ -1,5 +1,5 @@
 ===============
-Part XX - QM/MM
+Part 08 - QM/MM
 ===============
 
 QM/MM is a method that combines the accuracy of quantum mechanics with the
@@ -15,7 +15,7 @@ QM/MM simulations using ``sire``.
 .. toctree::
    :maxdepth: 1
 
-   partXX/01_intro
-   partXX/02_emle
-   partXX/03_adp_pmf
-   partXX/04_diels_alder
+   part08/01_intro
+   part08/02_emle
+   part08/03_adp_pmf
+   part08/04_diels_alder
