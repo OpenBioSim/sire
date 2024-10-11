@@ -457,17 +457,9 @@ def test_auto_constraints(ala_mols, openmm_platform):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-@pytest.mark.xfail(reason="Unresolved bug.")
 def test_asymmetric_constraints():
-    # This test is for debugging a peculiar issue with one of the perturbations
-    # from the MCL1 test suite. Here there are no ghost atoms and a single atom
-    # changes type during the perturbation, from H to Cl. The constraints are
-    # different for the two end states. Currently, the minimised energy at
-    # lambda=1 does not match the minimised energy at lambda=0 when the end
-    # states are swapped. From debugging, it seems that this is the caused by
-    # calling context.applyConstraints() for the final constraint projection
-    # following succesful minimisation. It's not clear if the bug lies in Sire,
-    # or OpenMM.
+    # Test that constraints are updated correctly when the end states have
+    # different constraints.
 
     from math import isclose
     from openmm import XmlSerializer
@@ -492,6 +484,18 @@ def test_asymmetric_constraints():
     # Set lambda so the dynamics states are equivalent.
     d_forwards.set_lambda(1.0, update_constraints=True)
     d_backwards.set_lambda(0.0, update_constraints=True)
+
+    # We need to reinitialise the forwards context for the constraints to be
+    # updated.
+
+    # Store the positions.
+    pos = d_forwards._d._omm_mols.getState(getPositions=True).getPositions()
+
+    # Reinitialise the context.
+    d_forwards._d._omm_mols.reinitialize()
+
+    # Set the positions.
+    d_forwards._d._omm_mols.setPositions(pos)
 
     # Get the initial potential energies.
     nrg_forwards = d_forwards.current_potential_energy().value()
@@ -543,5 +547,4 @@ def test_asymmetric_constraints():
     nrg_backwards = d_backwards.current_potential_energy().value()
 
     # Check the minimised potential energies are the same. (Post constraint projection.)
-    # This currently fails, which is inexplicable given everything else above agrees.
     assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-3)
