@@ -473,12 +473,14 @@ def test_asymmetric_constraints():
         perturbable_constraint="h_bonds_not_heavy_perturbed",
         dynamic_constraints=True,
         include_constrained_energies=False,
+        platform="CPU",
     )
     d_backwards = mol.dynamics(
         perturbable_constraint="h_bonds_not_heavy_perturbed",
         include_constrained_energies=False,
         dynamic_constraints=True,
         swap_end_states=True,
+        platform="CPU",
     )
 
     # Set lambda so the dynamics states are equivalent.
