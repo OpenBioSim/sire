@@ -1,5 +1,6 @@
 import sire as sr
 import pytest
+import platform
 
 
 @pytest.mark.skipif(
@@ -457,6 +458,7 @@ def test_auto_constraints(ala_mols, openmm_platform):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+@pytest.mark.skipif(platform.system() != "Linux", reason="Minimisation is platform dependent")
 def test_asymmetric_constraints():
     # Test that constraints are updated correctly when the end states have
     # different constraints.
