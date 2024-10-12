@@ -1152,6 +1152,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // we know if we have peturbable ghost atoms if we have the ghost forcefields
     const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
 
+    // whether the constraints have changed
+    bool have_constraints_changed = false;
+
     std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     if (qmff != 0)
@@ -1552,6 +1555,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     if (orig_distance != constraint_length)
                     {
                         system.setConstraintParameters(idx, particle1, particle2, constraint_length);
+                        have_constraints_changed = true;
                     }
                 }
             }
@@ -1790,6 +1794,28 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 this->updateRestraintInContext(*ff, rho, context);
             }
         }
+    }
+
+    // reinitialize the context if the constraints have changed
+    if (have_constraints_changed)
+    {
+        // we need to reinitialize the context if the constraints have changed
+        // since updating the parameters in the system will not update the context
+        // itself
+
+        // get the current state
+        const auto state = context.getState(OpenMM::State::Positions | OpenMM::State::Velocities);
+
+        // store the current positions and velocities
+        const auto positions = state.getPositions();
+        const auto velocities = state.getVelocities();
+
+        // reinitialize the context
+        context.reinitialize();
+
+        // set the positions and velocities back to what they were
+        context.setPositions(positions);
+        context.setVelocities(velocities);
     }
 
     return lambda_value;
