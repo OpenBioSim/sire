@@ -38,6 +38,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fix calculation of energy change following final constraint projection after energy minimisation.
 * Clear internal OpenMM state from dynamics object following a successful minimisation.
 * Add support for QM/MM simulations using OpenMM.
+* Reinitialise OpenMM context if constraints change when setting lambda.
 
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
 -----------------------------------------------------------------------------------------
