@@ -458,8 +458,12 @@ def test_auto_constraints(ala_mols, openmm_platform):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+@pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="XMLSerializer doesn't preserve precision on Windows and macOS",
+)
 def test_asymmetric_constraints(merged_ethane_methanol):
-    # Test that constraints are updated correctly when the end states have
+    # Check that constraints are updated correctly when the end states have
     # different constraints.
 
     from math import isclose
