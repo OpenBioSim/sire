@@ -25,7 +25,7 @@ def test_callback_method():
     """Makes sure that a callback method works correctly"""
 
     class Test:
-        def callback(self, a, b, c, d):
+        def callback(self, a, b, c, d, e=None):
             return (42, d, c)
 
     # Instantiate the class.
@@ -39,9 +39,10 @@ def test_callback_method():
     b = [3, 4]
     c = [a, b]
     d = [b, a]
+    e = [4, 5]
 
     # Call the callback.
-    result = cb.call(a, b, c, d)
+    result = cb.call(a, b, c, d, e)
 
     # Make sure the result is correct.
     assert result == (42, d, c) == test.callback(a, b, c, d)
@@ -50,7 +51,7 @@ def test_callback_method():
 def test_callback_function():
     """Makes sure that a callback function works correctly"""
 
-    def callback(a, b, c, d):
+    def callback(a, b, c, d, e=None):
         return (42, d, c)
 
     # Create a callback object.
@@ -61,9 +62,10 @@ def test_callback_function():
     b = [3, 4]
     c = [a, b]
     d = [b, a]
+    e = [4, 5]
 
     # Call the callback.
-    result = cb.call(a, b, c, d)
+    result = cb.call(a, b, c, d, e)
 
     # Make sure the result is correct.
     assert result == (42, d, c) == callback(a, b, c, d)
@@ -359,7 +361,7 @@ def test_create_engine(ala_mols):
     """
 
     # A test callback function. Returns a known energy and dummy forces.
-    def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm):
+    def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm, idx_mm=None):
         return (42, xyz_qm, xyz_mm)
 
     # Create a local copy of the test system.
