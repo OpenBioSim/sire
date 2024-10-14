@@ -56,18 +56,22 @@ signature:
 
 .. code-block:: python
 
-    from typing import List, Tuple
+    from typing import List, Optional, Tuple
 
     def callback(
         numbers_qm: List[int],
         charges_mm: List[float],
         xyz_qm: List[List[float]],
         xyz_mm: List[List[float]],
+        idx_mm: Optional[List[int]] = None,
     ) -> Tuple[float, List[List[float]], List[List[float]]]:
 
 The function takes the atomic numbers of the QM atoms, the charges of the MM
 atoms in mod electron charge, the coordinates of the QM atoms in Angstrom, and
-the coordinates of the MM atoms in Angstrom. It should return the calculated
+the coordinates of the MM atoms in Angstrom. Optionally, it should also take the
+indices of the true MM atoms (not link atoms or virtual charges) within the
+QM/MM region. This is useful for obtaining any additional atomic properties
+that may be required by the callback. The function should return the calculated
 energy in kJ/mol, the forces on the QM atoms in kJ/mol/nm, and the forces
 on the MM atoms in kJ/mol/nm. The remaining arguments are optional and specify
 the QM cutoff distance, the neighbour list update frequency, and whether the

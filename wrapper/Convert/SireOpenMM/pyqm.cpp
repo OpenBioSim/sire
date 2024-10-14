@@ -152,7 +152,8 @@ PyQMCallback::call(
     QVector<int> numbers_qm,
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
-    QVector<QVector<double>> xyz_mm) const
+    QVector<QVector<double>> xyz_mm,
+    QVector<int> idx_mm) const
 {
 
     // Acquire GIL before calling Python code.
@@ -168,7 +169,8 @@ PyQMCallback::call(
                 numbers_qm,
                 charges_mm,
                 xyz_qm,
-                xyz_mm
+                xyz_mm,
+                idx_mm
             );
         }
         catch (const bp::error_already_set &)
@@ -188,7 +190,8 @@ PyQMCallback::call(
                 numbers_qm,
                 charges_mm,
                 xyz_qm,
-                xyz_mm
+                xyz_mm,
+                idx_mm
             );
         }
         catch (const bp::error_already_set &)
@@ -399,9 +402,10 @@ PyQMForce::call(
     QVector<int> numbers_qm,
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
-    QVector<QVector<double>> xyz_mm) const
+    QVector<QVector<double>> xyz_mm,
+    QVector<int> idx_mm) const
 {
-    return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm);
+    return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm, idx_mm);
 }
 
 /////////
@@ -781,7 +785,8 @@ double PyQMForceImpl::computeForce(
         numbers,
         charges_mm,
         xyz_qm,
-        xyz_mm
+        xyz_mm,
+        idx_mm
     );
 
     // Extract the results. These will automatically be returned in OpenMM units.
@@ -1067,9 +1072,10 @@ PyQMEngine::call(
     QVector<int> numbers_qm,
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
-    QVector<QVector<double>> xyz_mm) const
+    QVector<QVector<double>> xyz_mm,
+    QVector<int> idx_mm) const
 {
-    return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm);
+    return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm, idx_mm);
 }
 
 QMForce* PyQMEngine::createForce() const
