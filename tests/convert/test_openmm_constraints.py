@@ -458,8 +458,7 @@ def test_auto_constraints(ala_mols, openmm_platform):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-@pytest.mark.skipif(platform.system() != "Linux", reason="Minimisation is platform dependent")
-def test_asymmetric_constraints():
+def test_asymmetric_constraints(merged_ethane_methanol):
     # Test that constraints are updated correctly when the end states have
     # different constraints.
 
@@ -467,22 +466,23 @@ def test_asymmetric_constraints():
     from openmm import XmlSerializer
     from tempfile import NamedTemporaryFile
 
-    # Load the MCL1 perturbation. (Perturbable ligand is the last molecule.)
-    mol = sr.load_test_files("mcl1_60_61.s3")[-1]
+    # Extract the molecule.
+    mol = merged_ethane_methanol.clone()[0]
+    mol = sr.morph.link_to_reference(mol)
 
     # Create dynamics objects for the forward and backward perturbations.
     d_forwards = mol.dynamics(
         perturbable_constraint="h_bonds_not_heavy_perturbed",
         dynamic_constraints=True,
         include_constrained_energies=False,
-        platform="CPU",
+        platform="Reference",
     )
     d_backwards = mol.dynamics(
         perturbable_constraint="h_bonds_not_heavy_perturbed",
         include_constrained_energies=False,
         dynamic_constraints=True,
         swap_end_states=True,
-        platform="CPU",
+        platform="Reference",
     )
 
     # Set lambda so the dynamics states are equivalent.
@@ -521,4 +521,4 @@ def test_asymmetric_constraints():
     nrg_backwards = d_backwards.current_potential_energy().value()
 
     # Check the minimised potential energies are the same. (Post constraint projection.)
-    assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-1)
+    assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-4)
