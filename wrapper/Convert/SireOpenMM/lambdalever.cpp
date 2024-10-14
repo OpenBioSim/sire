@@ -1796,26 +1796,13 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         }
     }
 
-    // reinitialize the context if the constraints have changed
+    // we need to reinitialize the context if the constraints have changed
+    // since updating the parameters in the system will not update the context
+    // itself
     if (have_constraints_changed)
     {
-        // we need to reinitialize the context if the constraints have changed
-        // since updating the parameters in the system will not update the context
-        // itself
-
-        // get the current state
-        const auto state = context.getState(OpenMM::State::Positions | OpenMM::State::Velocities);
-
-        // store the current positions and velocities
-        const auto positions = state.getPositions();
-        const auto velocities = state.getVelocities();
-
-        // reinitialize the context
-        context.reinitialize();
-
-        // set the positions and velocities back to what they were
-        context.setPositions(positions);
-        context.setVelocities(velocities);
+        // reinitialize the context, preserving the state
+        context.reinitialize(true);
     }
 
     return lambda_value;
