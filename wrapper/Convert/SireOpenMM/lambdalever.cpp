@@ -1912,13 +1912,13 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
     // what is the type of this force...?
     const auto ff_type = ff.getName();
 
-    if (ff_type == "CustomBondForce")
+    if (ff_type == "BondRestraintForce" or ff_type == "PositionalRestraintForce")
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomBondForce *>(&ff),
             rho, context);
     }
-    else if (ff_type == "CustomCompoundBondForce")
+    else if (ff_type == "BoreschRestraintForce")
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomCompoundBondForce *>(&ff),
@@ -1929,7 +1929,7 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
         throw SireError::unknown_type(QObject::tr(
                                           "Unable to update the restraints for the passed force as it has "
                                           "an unknown type (%1). We currently only support a limited number "
-                                          "of force types, e.g. CustomBondForce etc")
+                                          "of force types, e.g. BondRestraintForce etc")
                                           .arg(QString::fromStdString(ff_type)),
                                       CODELOC);
     }
