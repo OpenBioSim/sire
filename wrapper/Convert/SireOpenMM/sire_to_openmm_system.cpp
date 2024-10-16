@@ -113,6 +113,7 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
                                        .toStdString();
 
     auto *restraintff = new OpenMM::CustomCompoundBondForce(6, energy_expression);
+    restraintff->setName("BoreschRestraintForce");
 
     restraintff->addPerBondParameter("rho");
     restraintff->addPerBondParameter("kr");
@@ -209,6 +210,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
                                        .toStdString();
 
     auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
+    restraintff->setName("BondRestraintForce");
 
     restraintff->addPerBondParameter("rho");
     restraintff->addPerBondParameter("k");
@@ -283,6 +285,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
                                        .toStdString();
 
     auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
+    restraintff->setName("PositionalRestraintForce");
 
     restraintff->addPerBondParameter("rho");
     restraintff->addPerBondParameter("k");
@@ -755,6 +758,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             auto &engine = map["qm_engine"].value().asA<QMEngine>();
             qmff = engine.createForce();
+            qmff->setName("QMForce");
         }
         catch (...)
         {
@@ -966,6 +970,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
 
         ghost_14ff = new OpenMM::CustomBondForce(nb14_expression);
+        ghost_14ff->setName("Ghost14BondForce");
 
         ghost_14ff->addPerBondParameter("q");
         ghost_14ff->addPerBondParameter("sigma");
@@ -1054,7 +1059,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
 
         ghost_ghostff = new OpenMM::CustomNonbondedForce(clj_expression);
+        ghost_ghostff->setName("GhostGhostNonbondedForce");
         ghost_nonghostff = new OpenMM::CustomNonbondedForce(clj_expression);
+        ghost_nonghostff->setName("GhostNonGhostNonbondedForce");
 
         ghost_ghostff->addPerParticleParameter("q");
         ghost_ghostff->addPerParticleParameter("half_sigma");
