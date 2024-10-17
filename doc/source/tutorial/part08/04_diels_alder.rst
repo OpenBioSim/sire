@@ -29,7 +29,7 @@ to create a sphere around the reaction site:
 
 .. note::
 
-    Here we choose a sphere of radius 22 Å around atom 3 in the first molecule.
+    Here we choose a sphere of radius 22 Å around atom 3 in the second molecule.
     This is the reaction site in the AbyU system. In the simulation we will fix
     all atoms more than 20 Å from this site.
 
