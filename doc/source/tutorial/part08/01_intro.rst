@@ -17,7 +17,7 @@ Creating a QM engine
 --------------------
 
 In order to run QM/MM with ``sire``, we first need to create a QM engine. This
-is passed as a keword argument to the ``dynamics`` function and is used to
+is passed as a keyword argument to the ``dynamics`` function and is used to
 perform the QM part of the calculation at each timestep.
 
 As an example, we will consider the case of running a QM/MM simulation of alanine
