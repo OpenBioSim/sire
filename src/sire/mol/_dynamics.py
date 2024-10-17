@@ -1531,6 +1531,13 @@ class Dynamics:
         """
         return self._d.integrator()
 
+    def context(self):
+        """
+        Return the underlying OpenMM context that is being driven by this
+        dynamics object.
+        """
+        return self._d._omm_mols
+
     def info(self):
         """
         Return the information that describes the forcefield that will

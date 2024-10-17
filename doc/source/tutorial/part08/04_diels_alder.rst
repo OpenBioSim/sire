@@ -119,7 +119,7 @@ reaction site:
 
 Now we will extract the context from the dynamics object:
 
->>> context = d._d._omm_mols
+>>> context = d.context()
 
 Creating a reaction coordinate
 ------------------------------

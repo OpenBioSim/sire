@@ -74,7 +74,7 @@ We can now extract the underlying ``OpenMM`` context from the dynamics object,
 then create a copy of the integrator and system.
 
 >>> from copy import deepcopy
->>> context = d._d._omm_mols
+>>> context = d.context()
 >>> omm_system = context.getSystem()
 >>> integrator = deepcopy(context.getIntegrator())
 
