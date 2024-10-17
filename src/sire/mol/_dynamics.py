@@ -1144,7 +1144,7 @@ class DynamicsData:
             from ..system import System
 
             if System.is_system(self._orig_mols):
-                return self._sire_mols
+                return self._sire_mols.clone()
             else:
                 r = self._orig_mols.clone()
                 r.update(self._sire_mols.molecules())
