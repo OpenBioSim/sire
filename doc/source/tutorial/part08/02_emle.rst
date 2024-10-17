@@ -95,25 +95,8 @@ at which the λ value is updated.
 
 .. note::
 
-    Updating λ requires the updating of force field parameters in the ``OpenMM``
-    context. For large systems, this can be quite slow so it isn't recommended
-    to set the ``energy_frequency`` to a value that is too small. We have a custom
-    `fork <https://github.com/chryswoods/openmm>`_ of ``OpenMM`` that provides a
-    significant speedup for this operation by only updating a subset of the parameters.
-    Installation instructions can be provided on request.
-
-.. note::
-
     If you don't require a trajectory file, then better performance can be achieved
     leaving the ``frame_frequency`` keyword argument unset.
-
-.. note::
-
-    ``emle-engine`` currently requires the use of `librascal <https://lab-cosmo.github.io/librascal/#/>`_
-    for the calculation of SOAP (Smooth Overlap of Atomic Positions) descriptors.
-    This is a serial code, so you may see better performance by restricting the
-    number of ``OpenMP`` threads to 1, e.g. by setting the ``OMP_NUM_THREADS``
-    environment variable.
 
 Once the simulation has finished we can get back the trajectory of energy values.
 This can be obtained as a `pandas <https://pandas.pydata.org/>`_ ``DataFrame``,
