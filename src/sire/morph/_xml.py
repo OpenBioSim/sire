@@ -85,25 +85,25 @@ def evaluate_xml_force(mols, xml, force):
 
     # Create the name and index based on the force type.
     if force == "ghostghost":
-        name = "CustomNonbondedForce"
-        index = 0
+        name = "GhostGhostNonbondedForce"
     elif force == "ghostnonghost":
-        name = "CustomNonbondedForce"
-        index = 1
+        name = "GhostNonGhostNonbondedForce"
     elif force == "ghost14":
-        name = "CustomBondForce"
-        index = 0
+        name = "Ghost14BondForce"
 
     # Get the root of the XML tree.
     root = tree.getroot()
 
     # Loop over the forces until we find the first CustomNonbondedForce.
-    force_index = 0
+    is_found = False
     for force in tree.find("Forces"):
         if force.get("name") == name:
-            if force_index == index:
-                break
-            force_index += 1
+            is_found = True
+            break
+
+    # Raise an error if the force was not found.
+    if not is_found:
+        raise ValueError(f"Could not find the force: {name}")
 
     # Get the energy terms.
     terms = list(reversed(force.get("energy").split(";")[1:-1]))
@@ -114,7 +114,7 @@ def evaluate_xml_force(mols, xml, force):
     nrg_lj_list = []
 
     # CustomNonbondedForce: ghost-ghost or ghost-nonghost.
-    if name == "CustomNonbondedForce":
+    if name != "Ghost14BondForce":
         # Get the parameters for this force.
         parameters = [p.get("name") for p in force.find("PerParticleParameters")]
 

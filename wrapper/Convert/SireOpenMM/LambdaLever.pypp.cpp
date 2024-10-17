@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "lambdalever.h"
 
+#include "pyqm.h"
+
 #include "tostring.h"
 
 #include "SireBase/arrayproperty.hpp"
@@ -24,6 +26,8 @@ namespace bp = boost::python;
 #include "SireCAS/values.h"
 
 #include "lambdalever.h"
+
+#include "pyqm.h"
 
 #include "tostring.h"
 

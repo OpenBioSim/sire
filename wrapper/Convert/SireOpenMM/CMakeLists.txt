@@ -17,12 +17,28 @@ if (${SIRE_USE_OPENMM})
     # Third Party dependencies of this module
     include_directories( ${OpenMM_INCLUDE_DIR} )
     add_definitions("-DSIRE_USE_OPENMM")
+    add_definitions("-DQT_NO_SIGNALS_SLOTS_KEYWORDS")
 
     # Sire include paths
     include_directories( BEFORE ${SIRE_INCLUDE_DIR} )
 
     # Other python wrapping directories
     include_directories(${CMAKE_SOURCE_DIR})
+
+    # We're only building against OpenMM 8.1+, so include CustomCPPForce support.
+    add_definitions("-DSIRE_USE_CUSTOMCPPFORCE")
+
+    # Check to see if Torch support has been disabled.
+    if (NOT DEFINED ENV{SIRE_NO_TORCH})
+        find_package(Torch)
+        if (TORCH_FOUND)
+            message(STATUS "Torch found")
+            add_definitions("-DSIRE_USE_TORCH")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+        else()
+            message(STATUS "Torch not found")
+        endif()
+    endif()
 
     # Check to see if we have support for updating some parameters in context
     include(CheckCXXSourceCompiles)
@@ -49,6 +65,12 @@ if (${SIRE_USE_OPENMM})
     # Define the sources in SireOpenMM
     set ( SIREOPENMM_SOURCES
 
+          pyqm.cpp
+          torchqm.cpp
+          lambdalever.cpp
+          openmmminimise.cpp
+          openmmmolecule.cpp
+          qmmm.cpp
           lambdalever.cpp
           openmmminimise.cpp
           openmmmolecule.cpp
@@ -85,6 +107,7 @@ if (${SIRE_USE_OPENMM})
                           SIRE_SireStream
                           SIRE_SireError
                           ${OpenMM_LIBRARIES}
+                          ${TORCH_LIBRARIES}
                           )
 
     include( LimitSirePythonExportSymbols )

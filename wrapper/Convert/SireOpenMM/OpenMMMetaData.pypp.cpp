@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
+#include "SireMol/selectorm.hpp"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/shareddatastream.h"
@@ -104,6 +106,8 @@ namespace bp = boost::python;
 #include "SireMol/core.h"
 
 #include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 

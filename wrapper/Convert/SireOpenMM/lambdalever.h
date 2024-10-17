@@ -30,6 +30,7 @@
 #define SIREOPENMM_LAMBDALEVER_H
 
 #include "openmmmolecule.h"
+#include "qmmm.h"
 
 #include "SireCAS/lambdaschedule.h"
 
@@ -168,9 +169,9 @@ namespace SireOpenMM
         /** The list of perturbable molecules */
         QVector<PerturbableOpenMMMolecule> perturbable_mols;
 
-        /** The start indicies of the parameters in each named
-            forcefield for each perturbable moleucle */
-        QVector<QHash<QString, qint32>> start_indicies;
+        /** The start indices of the parameters in each named
+            forcefield for each perturbable molecule */
+        QVector<QHash<QString, qint32>> start_indices;
 
         /** All of the property maps for the perturbable molecules */
         QHash<SireMol::MolNum, SireBase::PropertyMap> perturbable_maps;
@@ -199,13 +200,11 @@ namespace SireOpenMM
         return "OpenMM::CustomBondForce";
     }
 
-    // LESTER - UNCOMMENT BELOW FOR FEATURE_EMLE
-
-    /*template <>
-    inline QString _get_typename<SireOpenMM::QMMMForce>()
+    template <>
+    inline QString _get_typename<SireOpenMM::QMForce>()
     {
-        return "SireOpenMM::QMMMForce";
-    }*/
+        return "SireOpenMM::QMForce";
+    }
 
     /** Return the OpenMM::Force (of type T) that is called 'name'
      *  from the passed OpenMM::System. This returns 0 if the force

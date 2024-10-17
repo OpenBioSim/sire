@@ -45,6 +45,9 @@ class SOMMContext(_Context):
                 lambda_value = map["lambda"].value().as_double()
             elif map.specified("lambda_value"):
                 lambda_value = map["lambda_value"].value().as_double()
+            elif map.specified("qm_engine"):
+                # Default to full QM.
+                lambda_value = 1.0
             else:
                 lambda_value = 0.0
 

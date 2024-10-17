@@ -256,6 +256,12 @@ def parse_args():
         "compatibility between Sire's and BioSimSpace's dependencies.",
     )
     parser.add_argument(
+        "--install-emle-deps",
+        action="store_true",
+        default=False,
+        help="Install emle-engine's dependencies too.",
+    )
+    parser.add_argument(
         "--skip-deps",
         action="store_true",
         default=False,
@@ -326,7 +332,9 @@ _is_conda_prepped = False
 dependencies_to_skip = []
 
 
-def conda_install(dependencies, install_bss_reqs=False, yes=True):
+def conda_install(
+    dependencies, install_bss_reqs=False, install_emle_reqs=False, yes=True
+):
     """Install the passed list of dependencies using conda"""
 
     conda_exe = conda
@@ -409,10 +417,21 @@ def conda_install(dependencies, install_bss_reqs=False, yes=True):
         print("from running again. Please re-execute this script.")
         sys.exit(-1)
 
+    # Install emle-engine.
+    if install_emle_reqs:
+        cmd = [
+            "pip",
+            "install",
+            "git+https://github.com/chemle/emle-engine.git",
+        ]
+        status = subprocess.run(cmd)
+        if status.returncode != 0:
+            print("Something went wrong installing emle-engine!")
+            sys.exit(-1)
 
-def install_requires(install_bss_reqs=False, yes=True):
-    """
-    Installs all of the dependencies. This can safely be called
+
+def install_requires(install_bss_reqs=False, install_emle_reqs=False, yes=True):
+    """Installs all of the dependencies. This can safely be called
     multiple times, as it will cache the result to prevent future
     installs taking too long
     """
@@ -433,7 +452,12 @@ def install_requires(install_bss_reqs=False, yes=True):
     except Exception:
         # this didn't import - maybe we are missing pip-requirements-parser
         print("Installing pip-requirements-parser")
-        conda_install(["pip-requirements-parser"], install_bss_reqs, yes=yes)
+        conda_install(
+            ["pip-requirements-parser"],
+            install_bss_reqs,
+            install_emle_reqs=False,
+            yes=yes,
+        )
         try:
             from parse_requirements import parse_requirements
         except ImportError as e:
@@ -448,7 +472,12 @@ def install_requires(install_bss_reqs=False, yes=True):
         bss_reqs = parse_requirements("requirements_bss.txt")
         reqs = reqs + bss_reqs
 
+    if install_emle_reqs:
+        emle_reqs = parse_requirements("requirements_emle.txt")
+        reqs = reqs + emle_reqs
+
     dependencies = build_reqs + reqs
+    conda_install(dependencies, install_bss_reqs, install_emle_reqs, yes=yes)
     conda_install(dependencies, install_bss_reqs, yes=yes)
 
 
@@ -879,6 +908,10 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     install_bss = args.install_bss_deps
+    install_emle = args.install_emle_deps
+
+    if install_emle and is_windows:
+        raise NotImplementedError("EMLE is current not supported on Windows")
 
     if args.skip_dep is not None:
         dependencies_to_skip = args.skip_dep
@@ -895,7 +928,9 @@ if __name__ == "__main__":
 
     if action == "install":
         if not (args.skip_deps or args.skip_build):
-            install_requires(install_bss_reqs=install_bss)
+            install_requires(
+                install_bss_reqs=install_bss, install_emle_reqs=install_emle
+            )
 
         if not args.skip_build:
             build(
@@ -919,7 +954,9 @@ if __name__ == "__main__":
         )
 
     elif action == "install_requires":
-        install_requires(install_bss_reqs=install_bss, yes=False)
+        install_requires(
+            install_bss_reqs=install_bss, install_emle_reqs=install_emle, yes=False
+        )
 
     elif action == "install_module":
         install_module(ncores=args.ncores[0])

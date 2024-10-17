@@ -9,9 +9,25 @@
 
 #include "LambdaLever.pypp.hpp"
 
+#include "NullQMEngine.pypp.hpp"
+
 #include "OpenMMMetaData.pypp.hpp"
 
 #include "PerturbableOpenMMMolecule.pypp.hpp"
+
+#include "PyQMCallback.pypp.hpp"
+
+#include "PyQMEngine.pypp.hpp"
+
+#include "PyQMForce.pypp.hpp"
+
+#include "QMEngine.pypp.hpp"
+
+#include "QMForce.pypp.hpp"
+
+#include "TorchQMEngine.pypp.hpp"
+
+#include "TorchQMForce.pypp.hpp"
 
 #include "_SireOpenMM_free_functions.pypp.hpp"
 
@@ -20,6 +36,8 @@
 namespace bp = boost::python;
 
 #include "SireOpenMM_registrars.h"
+
+#include "SireOpenMM_properties.h"
 
 #include "./register_extras.h"
 
@@ -30,12 +48,30 @@ BOOST_PYTHON_MODULE(_SireOpenMM){
 
     register_LambdaLever_class();
 
+    register_QMEngine_class();
+
+    register_NullQMEngine_class();
+
     register_OpenMMMetaData_class();
 
     register_PerturbableOpenMMMolecule_class();
 
+    register_PyQMCallback_class();
+
+    register_PyQMEngine_class();
+
+    register_QMForce_class();
+
+    register_PyQMForce_class();
+
+    register_SireOpenMM_properties();
+
     SireOpenMM::register_extras();
 
     register_free_functions();
+
+    register_TorchQMEngine_class();
+
+    register_TorchQMForce_class();
 }
 

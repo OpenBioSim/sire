@@ -9,6 +9,9 @@ sys.path.insert(0, os.path.dirname(script))
 
 from parse_requirements import parse_requirements
 
+# Check whether we are building a sire-emle package.
+is_emle = os.environ.get("SIRE_EMLE", "False")
+
 # has the user supplied an environment.yml file?
 if len(sys.argv) > 1:
     from pathlib import Path
@@ -46,6 +49,11 @@ run_reqs = parse_requirements(os.path.join(srcdir, "requirements_run.txt"))
 print(run_reqs)
 bss_reqs = parse_requirements(os.path.join(srcdir, "requirements_bss.txt"))
 print(bss_reqs)
+if is_emle:
+    emle_reqs = parse_requirements(os.path.join(srcdir, "requirements_emle.txt"))
+    print(emle_reqs)
+else:
+    emle_reqs = []
 test_reqs = parse_requirements(os.path.join(srcdir, "requirements_test.txt"))
 
 
@@ -222,6 +230,7 @@ def check_reqs(reqs0, reqs1):
 
 build_reqs = dep_lines(check_reqs(build_reqs, env_reqs))
 host_reqs = combine(host_reqs, bss_reqs)
+host_reqs = combine(host_reqs, emle_reqs)
 host_reqs = dep_lines(combine(host_reqs, env_reqs))
 run_reqs = dep_lines(check_reqs(run_reqs, env_reqs))
 test_reqs = dep_lines(check_reqs(test_reqs, env_reqs))
