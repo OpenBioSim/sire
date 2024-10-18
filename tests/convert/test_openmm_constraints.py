@@ -1,5 +1,6 @@
 import sire as sr
 import pytest
+import platform
 
 
 @pytest.mark.skipif(
@@ -457,41 +458,55 @@ def test_auto_constraints(ala_mols, openmm_platform):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-@pytest.mark.xfail(reason="Unresolved bug.")
-def test_asymmetric_constraints():
-    # This test is for debugging a peculiar issue with one of the perturbations
-    # from the MCL1 test suite. Here there are no ghost atoms and a single atom
-    # changes type during the perturbation, from H to Cl. The constraints are
-    # different for the two end states. Currently, the minimised energy at
-    # lambda=1 does not match the minimised energy at lambda=0 when the end
-    # states are swapped. From debugging, it seems that this is the caused by
-    # calling context.applyConstraints() for the final constraint projection
-    # following succesful minimisation. It's not clear if the bug lies in Sire,
-    # or OpenMM.
+@pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="XMLSerializer doesn't preserve precision on Windows and macOS",
+)
+def test_asymmetric_constraints(merged_ethane_methanol):
+    # Check that constraints are updated correctly when the end states have
+    # different constraints.
 
     from math import isclose
+    from openmm import XmlSerializer
+    from tempfile import NamedTemporaryFile
 
-    # Load the MCL1 perturbation. (Perturbable ligand is the last molecule.)
-    mol = sr.load_test_files("mcl1_60_61.s3")[-1]
+    # Extract the molecule.
+    mol = merged_ethane_methanol.clone()[0]
+    mol = sr.morph.link_to_reference(mol)
 
     # Create dynamics objects for the forward and backward perturbations.
     d_forwards = mol.dynamics(
         perturbable_constraint="h_bonds_not_heavy_perturbed",
         dynamic_constraints=True,
         include_constrained_energies=False,
+        platform="Reference",
     )
     d_backwards = mol.dynamics(
         perturbable_constraint="h_bonds_not_heavy_perturbed",
         include_constrained_energies=False,
         dynamic_constraints=True,
         swap_end_states=True,
+        platform="Reference",
     )
 
     # Set lambda so the dynamics states are equivalent.
     d_forwards.set_lambda(1.0, update_constraints=True)
     d_backwards.set_lambda(0.0, update_constraints=True)
 
-    # Get the initial potential energies.
+    # Serialise the systems in the contexts.
+    xml0 = NamedTemporaryFile()
+    xml1 = NamedTemporaryFile()
+    with open(xml0.name, "w") as f:
+        f.write(XmlSerializer.serialize(d_forwards._d._omm_mols.getSystem()))
+    with open(xml1.name, "w") as f:
+        f.write(XmlSerializer.serialize(d_backwards._d._omm_mols.getSystem()))
+
+    # Load the serialised systems and sort.
+    with open(xml0.name, "r") as f:
+        xml0_lines = sorted(f.readlines())
+    with open(xml1.name, "r") as f:
+        xml1_lines = sorted(f.readlines())
+
     nrg_forwards = d_forwards.current_potential_energy().value()
     nrg_backwards = d_backwards.current_potential_energy().value()
 
@@ -502,26 +517,12 @@ def test_asymmetric_constraints():
     d_forwards.minimise()
     d_backwards.minimise()
 
-    # Get the minimisation logs.
-    log_forwards = d_forwards._d.get_minimisation_log()
-    log_backwards = d_backwards._d.get_minimisation_log()
-
-    lines_forward = log_forwards.split("\n")
-    for line in lines_forward:
-        if "Final energy" in line:
-            nrg_forwards = float(line.split()[2])
-
-    lines_backward = log_backwards.split("\n")
-    for line in lines_backward:
-        if "Final energy" in line:
-            nrg_backwards = float(line.split()[2])
-
-    # Check the final energies from the logs are the same.
-    assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-3)
+    # Check the serialised systems are the same.
+    assert xml0_lines == xml1_lines
 
     # Now get the final potential energies. (Post constraint projection.)
     nrg_forwards = d_forwards.current_potential_energy().value()
     nrg_backwards = d_backwards.current_potential_energy().value()
 
-    # Check the minimised potential energies are the same.
-    assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-3)
+    # Check the minimised potential energies are the same. (Post constraint projection.)
+    assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-4)

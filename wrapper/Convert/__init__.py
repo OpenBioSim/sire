@@ -18,6 +18,10 @@ __all__ = [
     "PerturbableOpenMMMolecule",
     "OpenMMMetaData",
     "SOMMContext",
+    "QMEngine",
+    "PyQMCallback",
+    "PyQMEngine",
+    "TorchQMEngine",
 ]
 
 try:
@@ -92,12 +96,29 @@ try:
         _get_lever_values,
     )
 
-    from ._SireOpenMM import LambdaLever, PerturbableOpenMMMolecule, OpenMMMetaData
+    from ._SireOpenMM import (
+        LambdaLever,
+        PerturbableOpenMMMolecule,
+        OpenMMMetaData,
+        QMEngine,
+        PyQMCallback,
+        PyQMEngine,
+        TorchQMEngine,
+    )
 
     from ..._pythonize import _pythonize
 
     _pythonize(
-        [LambdaLever, PerturbableOpenMMMolecule, OpenMMMetaData], delete_old=True
+        [
+            LambdaLever,
+            PerturbableOpenMMMolecule,
+            OpenMMMetaData,
+            QMEngine,
+            PyQMCallback,
+            PyQMEngine,
+            TorchQMEngine,
+        ],
+        delete_old=True,
     )
 
     PerturbableOpenMMMolecule.changed_atoms = _changed_atoms

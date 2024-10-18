@@ -6,7 +6,7 @@ lazy_import
 libcblas
 libnetcdf
 librdkit-dev
-openmm
+openmm >= 8.1
 pandas
 python
 qt-main

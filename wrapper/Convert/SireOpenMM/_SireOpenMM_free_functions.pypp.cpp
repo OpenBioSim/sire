@@ -45,65 +45,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -165,65 +107,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -285,65 +169,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -405,65 +231,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -525,65 +293,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -645,65 +355,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -765,65 +417,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -885,6 +479,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
+#include "SireMol/selectorm.hpp"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/shareddatastream.h"
@@ -944,6 +540,938 @@ namespace bp = boost::python;
 #include "SireMol/core.h"
 
 #include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -1165,65 +1693,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -1285,65 +1755,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -1405,65 +1817,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -1525,65 +1879,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -1645,65 +1941,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -1765,65 +2003,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -1885,65 +2065,7 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -2005,6 +2127,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleditor.h"
 
+#include "SireMol/selectorm.hpp"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/shareddatastream.h"
@@ -2064,6 +2188,442 @@ namespace bp = boost::python;
 #include "SireMol/core.h"
 
 #include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
+#include "SireSystem/forcefieldinfo.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "openmmmolecule.h"
+
+#include "sire_openmm.h"
+
+#include "tostring.h"
+
+#include <OpenMM.h>
+
+#include <QDebug>
+
+#include "SireBase/parallel.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireCAS/lambdaschedule.h"
+
+#include "SireError/errors.h"
+
+#include "SireMM/amberparams.h"
+
+#include "SireMM/atomljs.h"
+
+#include "SireMM/selectorbond.h"
+
+#include "SireMaths/vector.h"
+
+#include "SireMol/atomcharges.h"
+
+#include "SireMol/atomcoords.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/atomproperty.hpp"
+
+#include "SireMol/atomvelocities.h"
+
+#include "SireMol/bondid.h"
+
+#include "SireMol/bondorder.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/selectorm.hpp"
 
 #include "SireStream/datastream.h"
 
@@ -2091,12 +2651,38 @@ void register_free_functions(){
 
     { //::SireOpenMM::extract_coordinates
     
+        typedef ::SireMol::SelectorM< SireMol::Atom > ( *extract_coordinates_function_type )( ::OpenMM::State const &,::SireMol::SelectorM< SireMol::Atom > const &,::QHash< SireMol::MolNum, SireBase::PropertyMap > const &,::SireBase::PropertyMap const & );
+        extract_coordinates_function_type extract_coordinates_function_value( &::SireOpenMM::extract_coordinates );
+        
+        bp::def( 
+            "extract_coordinates"
+            , extract_coordinates_function_value
+            , ( bp::arg("state"), bp::arg("mols"), bp::arg("perturbable_maps"), bp::arg("map") )
+            , "" );
+    
+    }
+
+    { //::SireOpenMM::extract_coordinates
+    
         typedef ::SireMol::SelectorMol ( *extract_coordinates_function_type )( ::OpenMM::State const &,::SireMol::SelectorMol const &,::QHash< SireMol::MolNum, SireBase::PropertyMap > const &,::SireBase::PropertyMap const & );
         extract_coordinates_function_type extract_coordinates_function_value( &::SireOpenMM::extract_coordinates );
         
         bp::def( 
             "extract_coordinates"
             , extract_coordinates_function_value
+            , ( bp::arg("state"), bp::arg("mols"), bp::arg("perturbable_maps"), bp::arg("map") )
+            , "" );
+    
+    }
+
+    { //::SireOpenMM::extract_coordinates_and_velocities
+    
+        typedef ::SireMol::SelectorM< SireMol::Atom > ( *extract_coordinates_and_velocities_function_type )( ::OpenMM::State const &,::SireMol::SelectorM< SireMol::Atom > const &,::QHash< SireMol::MolNum, SireBase::PropertyMap > const &,::SireBase::PropertyMap const & );
+        extract_coordinates_and_velocities_function_type extract_coordinates_and_velocities_function_value( &::SireOpenMM::extract_coordinates_and_velocities );
+        
+        bp::def( 
+            "extract_coordinates_and_velocities"
+            , extract_coordinates_and_velocities_function_value
             , ( bp::arg("state"), bp::arg("mols"), bp::arg("perturbable_maps"), bp::arg("map") )
             , "" );
     
