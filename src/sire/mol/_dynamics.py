@@ -338,7 +338,9 @@ class DynamicsData:
                 if lambda_windows is not None:
                     for lambda_value in lambda_windows:
                         if lambda_value != sim_lambda_value:
-                            self._omm_mols.set_lambda(lambda_value)
+                            self._omm_mols.set_lambda(
+                                lambda_value, update_constraints=False
+                            )
                             nrgs[str(lambda_value)] = (
                                 self._omm_mols.get_potential_energy(
                                     to_sire_units=False
