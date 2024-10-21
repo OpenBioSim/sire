@@ -6,7 +6,10 @@ def annihilate(mol, as_new_molecule: bool = True, map=None):
     Return a merged molecule that represents the perturbation that
     completely annihilates the molecule. The returned merged molecule
     will be suitable for using in a double-annihilation free energy
-    simulation, e.g. to calculate absolute binding free energies.
+    simulation, e.g. to calculate absolute binding free energies. Note that
+    this perturbation will remove all intramolecular interactions, not just
+    nonbonded intramolecular interactions. You should add positional restraints
+    to all atoms in the molecule to prevent to prevent it drifting apart.
 
     Parameters
     ----------
