@@ -1,5 +1,6 @@
 import sire as sr
 import pytest
+import platform
 
 
 @pytest.mark.skipif(
@@ -451,3 +452,77 @@ def test_auto_constraints(ala_mols, openmm_platform):
                     constraint[0].atom(0).index(), constraint[0].atom(1).index()
                 )
                 assert bond in constrained
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+@pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="XMLSerializer doesn't preserve precision on Windows and macOS",
+)
+def test_asymmetric_constraints(merged_ethane_methanol):
+    # Check that constraints are updated correctly when the end states have
+    # different constraints.
+
+    from math import isclose
+    from openmm import XmlSerializer
+    from tempfile import NamedTemporaryFile
+
+    # Extract the molecule.
+    mol = merged_ethane_methanol.clone()[0]
+    mol = sr.morph.link_to_reference(mol)
+
+    # Create dynamics objects for the forward and backward perturbations.
+    d_forwards = mol.dynamics(
+        perturbable_constraint="h_bonds_not_heavy_perturbed",
+        dynamic_constraints=True,
+        include_constrained_energies=False,
+        platform="Reference",
+    )
+    d_backwards = mol.dynamics(
+        perturbable_constraint="h_bonds_not_heavy_perturbed",
+        include_constrained_energies=False,
+        dynamic_constraints=True,
+        swap_end_states=True,
+        platform="Reference",
+    )
+
+    # Set lambda so the dynamics states are equivalent.
+    d_forwards.set_lambda(1.0, update_constraints=True)
+    d_backwards.set_lambda(0.0, update_constraints=True)
+
+    # Serialise the systems in the contexts.
+    xml0 = NamedTemporaryFile()
+    xml1 = NamedTemporaryFile()
+    with open(xml0.name, "w") as f:
+        f.write(XmlSerializer.serialize(d_forwards._d._omm_mols.getSystem()))
+    with open(xml1.name, "w") as f:
+        f.write(XmlSerializer.serialize(d_backwards._d._omm_mols.getSystem()))
+
+    # Load the serialised systems and sort.
+    with open(xml0.name, "r") as f:
+        xml0_lines = sorted(f.readlines())
+    with open(xml1.name, "r") as f:
+        xml1_lines = sorted(f.readlines())
+
+    nrg_forwards = d_forwards.current_potential_energy().value()
+    nrg_backwards = d_backwards.current_potential_energy().value()
+
+    # Check the potential energies are the same.
+    assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-5)
+
+    # Minimise both dynamics objects.
+    d_forwards.minimise()
+    d_backwards.minimise()
+
+    # Check the serialised systems are the same.
+    assert xml0_lines == xml1_lines
+
+    # Now get the final potential energies. (Post constraint projection.)
+    nrg_forwards = d_forwards.current_potential_energy().value()
+    nrg_backwards = d_backwards.current_potential_energy().value()
+
+    # Check the minimised potential energies are the same. (Post constraint projection.)
+    assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-4)

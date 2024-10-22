@@ -6,7 +6,10 @@
 #include "lambdalever.h"
 #include "openmmminimise.h"
 #include "openmmmolecule.h"
+#include "pyqm.h"
+#include "qmmm.h"
 #include "sire_openmm.h"
+#include "torchqm.h"
 
 #endif
 

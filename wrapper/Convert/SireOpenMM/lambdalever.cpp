@@ -26,6 +26,7 @@
   *
 \*********************************************/
 
+#include "pyqm.h"
 #include "lambdalever.h"
 
 #include "SireBase/propertymap.h"
@@ -213,7 +214,7 @@ LambdaLever::LambdaLever(const LambdaLever &other)
       name_to_restraintidx(other.name_to_restraintidx),
       lambda_schedule(other.lambda_schedule),
       perturbable_mols(other.perturbable_mols),
-      start_indicies(other.start_indicies),
+      start_indices(other.start_indices),
       perturbable_maps(other.perturbable_maps),
       lambda_cache(other.lambda_cache)
 {
@@ -231,7 +232,7 @@ LambdaLever &LambdaLever::operator=(const LambdaLever &other)
         name_to_restraintidx = other.name_to_restraintidx;
         lambda_schedule = other.lambda_schedule;
         perturbable_mols = other.perturbable_mols;
-        start_indicies = other.start_indicies;
+        start_indices = other.start_indices;
         perturbable_maps = other.perturbable_maps;
         lambda_cache = other.lambda_cache;
         Property::operator=(other);
@@ -246,7 +247,7 @@ bool LambdaLever::operator==(const LambdaLever &other) const
            name_to_restraintidx == other.name_to_restraintidx and
            lambda_schedule == other.lambda_schedule and
            perturbable_mols == other.perturbable_mols and
-           start_indicies == other.start_indicies and
+           start_indices == other.start_indices and
            perturbable_maps == other.perturbable_maps;
 }
 
@@ -1139,6 +1140,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     OpenMM::System &system = const_cast<OpenMM::System &>(context.getSystem());
 
     // get copies of the forcefields in which the parameters will be changed
+    auto qmff = this->getForce<QMForce>("qmff", system);
     auto cljff = this->getForce<OpenMM::NonbondedForce>("clj", system);
     auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
     auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
@@ -1150,9 +1152,18 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // we know if we have peturbable ghost atoms if we have the ghost forcefields
     const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
 
+    // whether the constraints have changed
+    bool have_constraints_changed = false;
+
     std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
-    // record the range of indicies of the atoms, bonds, angles,
+    if (qmff != 0)
+    {
+        double lam = this->lambda_schedule.morph("qmff", "*", 0.0, 1.0, lambda_value);
+        qmff->setLambda(lam);
+    }
+
+    // record the range of indices of the atoms, bonds, angles,
     // torsions which change
     int start_change_atom = -1;
     int end_change_atom = -1;
@@ -1169,7 +1180,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
     {
         const auto &perturbable_mol = this->perturbable_mols[i];
-        const auto &start_idxs = this->start_indicies[i];
+        const auto &start_idxs = this->start_indices[i];
 
         const auto &cache = this->lambda_cache.get(i, lambda_value);
         const auto &schedule = this->lambda_schedule.getMoleculeSchedule(i);
@@ -1438,12 +1449,23 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     // don't set LJ terms for ghost atoms
                     if (atom0_is_ghost or atom1_is_ghost)
                     {
+                        // are the atoms perturbing from ghosts?
+                        const auto from_ghost0 = perturbable_mol.getFromGhostIdxs().contains(atom0);
+                        const auto from_ghost1 = perturbable_mol.getFromGhostIdxs().contains(atom1);
+                        // are the atoms perturbing to ghosts?
+                        const auto to_ghost0 = perturbable_mol.getToGhostIdxs().contains(atom0);
+                        const auto to_ghost1 = perturbable_mol.getToGhostIdxs().contains(atom1);
+
+                        // is this interaction between an to/from ghost atom?
+                        const auto to_from_ghost = (from_ghost0 and to_ghost1) or (from_ghost1 and to_ghost0);
+
                         cljff->setExceptionParameters(
                             boost::get<0>(idxs[j]),
                             boost::get<0>(p), boost::get<1>(p),
                             boost::get<2>(p), 1e-9, 1e-9);
 
-                        if (ghost_14ff != 0)
+                        // exclude 14s for to/from ghost interactions
+                        if (not to_from_ghost and ghost_14ff != 0)
                         {
                             // this is a 1-4 parameter - need to update
                             // the ghost 1-4 forcefield
@@ -1451,8 +1473,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
                             if (nbidx < 0)
                                 throw SireError::program_bug(QObject::tr(
-                                                                 "Unset NB14 index for a ghost atom?"),
-                                                             CODELOC);
+                                                                "Unset NB14 index for a ghost atom?"),
+                                                            CODELOC);
 
                             coul_14_scale = morphed_ghost14_charge_scale[j];
                             lj_14_scale = morphed_ghost14_lj_scale[j];
@@ -1533,6 +1555,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     if (orig_distance != constraint_length)
                     {
                         system.setConstraintParameters(idx, particle1, particle2, constraint_length);
+                        have_constraints_changed = true;
                     }
                 }
             }
@@ -1579,11 +1602,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double length, k;
 
                 bondff->getBondParameters(index, particle1, particle2,
-                                          length, k);
+                                        length, k);
 
                 bondff->setBondParameters(index, particle1, particle2,
-                                          morphed_bond_length[j],
-                                          morphed_bond_k[j]);
+                                        morphed_bond_length[j],
+                                        morphed_bond_k[j]);
             }
         }
 
@@ -1628,13 +1651,13 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double size, k;
 
                 angff->getAngleParameters(index,
-                                          particle1, particle2, particle3,
-                                          size, k);
+                                        particle1, particle2, particle3,
+                                        size, k);
 
                 angff->setAngleParameters(index,
-                                          particle1, particle2, particle3,
-                                          morphed_angle_size[j],
-                                          morphed_angle_k[j]);
+                                        particle1, particle2, particle3,
+                                        morphed_angle_size[j],
+                                        morphed_angle_k[j]);
             }
         }
 
@@ -1773,6 +1796,15 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         }
     }
 
+    // we need to reinitialize the context if the constraints have changed
+    // since updating the parameters in the system will not update the context
+    // itself
+    if (have_constraints_changed)
+    {
+        // reinitialize the context, preserving the state
+        context.reinitialize(true);
+    }
+
     return lambda_value;
 }
 
@@ -1880,13 +1912,13 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
     // what is the type of this force...?
     const auto ff_type = ff.getName();
 
-    if (ff_type == "CustomBondForce")
+    if (ff_type == "BondRestraintForce" or ff_type == "PositionalRestraintForce")
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomBondForce *>(&ff),
             rho, context);
     }
-    else if (ff_type == "CustomCompoundBondForce")
+    else if (ff_type == "BoreschRestraintForce")
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomCompoundBondForce *>(&ff),
@@ -1897,7 +1929,7 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
         throw SireError::unknown_type(QObject::tr(
                                           "Unable to update the restraints for the passed force as it has "
                                           "an unknown type (%1). We currently only support a limited number "
-                                          "of force types, e.g. CustomBondForce etc")
+                                          "of force types, e.g. BondRestraintForce etc")
                                           .arg(QString::fromStdString(ff_type)),
                                       CODELOC);
     }
@@ -1969,11 +2001,12 @@ int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
 {
     // should add in some sanity checks for these inputs
     this->perturbable_mols.append(PerturbableOpenMMMolecule(molecule, map));
-    this->start_indicies.append(starts);
+    this->start_indices.append(starts);
     this->perturbable_maps.insert(molecule.number, molecule.perturtable_map);
     this->lambda_cache.clear();
     return this->perturbable_mols.count() - 1;
 }
+
 
 /** Set the exception indices for the perturbable molecule at
  *  index 'mol_idx'
@@ -1983,7 +2016,6 @@ void LambdaLever::setExceptionIndicies(int mol_idx,
                                        const QVector<boost::tuple<int, int>> &exception_idxs)
 {
     mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
-
     this->perturbable_mols[mol_idx].setExceptionIndicies(name, exception_idxs);
 }
 

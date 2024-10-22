@@ -32,7 +32,7 @@ jobs:
         exclude:
           - platform:
               { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
-            python-version: "3.12"  # MacOS can't run 3.12 yet...
+            python-version: "3.12"  # MacOS can't run 3.12 yet...
     environment:
       name: sire-build
     defaults:
@@ -41,6 +41,7 @@ jobs:
     env:
       SIRE_DONT_PHONEHOME: 1
       SIRE_SILENT_PHONEHOME: 1
+      SIRE_EMLE: 1
       REPO: "${{ github.event.pull_request.head.repo.full_name || github.repository }}"
     steps:
       #

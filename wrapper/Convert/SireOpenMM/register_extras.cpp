@@ -5,6 +5,12 @@
 
 #include <OpenMM.h>
 
+#include <QMap>
+#include <QVector>
+
+#include "Helpers/convertdict.hpp"
+#include "Helpers/tuples.hpp"
+
 namespace bp = boost::python;
 
 using namespace SireOpenMM;
@@ -44,5 +50,16 @@ namespace SireOpenMM
         bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::Context>());
         bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::State>());
         bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::Integrator>());
+
+		// A tuple return type container for the PyQMCallback. (Energy, QM forces, MM forces)
+        bp::register_tuple<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>();
+
+		// Dictionary for mapping link atoms to QM and MM2 atoms.
+        register_dict<QMap<int, int>>();
+        register_dict<QMap<int, double>>();
+        register_dict<QMap<int, QVector<int>>>();
+
+        // A tuple for passing link atom information to PyQMEngine.
+        bp::register_tuple<boost::tuple<QMap<int, int>, QMap<int, QVector<int>>>>();
     }
 }

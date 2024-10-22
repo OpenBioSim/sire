@@ -12,6 +12,83 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2024.3.0 <https://github.com/openbiosim/sire/compare/2024.2.0...2024.3.0>`__ - October 2024
+--------------------------------------------------------------------------------------------
+
+* Print residue indices of perturbed water molecules to SOMD1 log to allow
+  for easier debugging.
+
+* Add support for creating Na+ and Cl- ions as a means of generating templates for
+  uses as alchemical ions.
+
+* Fix ``sire.morph.merge`` function when one molecule is a monatomic ion. This prevents
+  the attempted rigid-body alignment, which would fail due to there being too few
+  degrees of freedom.
+
+* Remove ``sire.move.OpenMMPMEFEP`` wrappers from build when OpenMM is not available.
+
+* Set ``IFBOX`` pointer to 3 for general triclinic boxes in ``sire.IO.AmberPrm`` parser.
+
+* Only exclude nonbonded interactions between ``from_ghost`` and ``to_ghost`` atoms
+  if they are in the same molecule. This prevents spurious intermolcular interactions
+  between molecules containing ghost atoms, e.g. a ligand and an alchemical water.
+
+* Add Docker support for building wrappers on Linux x86.
+
+* Port SOMD1 Boresch restraint implementation to PME code. (This feature was present
+  in the reaction field implementation, but not for PME.)
+
+* Port SOMD1 torsion fix to PME code. (This had been fixed for the reaction field implementation,
+  but not for PME.)
+
+* Fix issues with ``atomtype`` and ``atom`` records for dummy atoms in GROMACS topology files.
+
+* Fixed buffer overflow when computing molecule indices to excluded to/from
+  ghost atom interactions which caused corruption of the exclusion list.
+
+* Fixed calculation of ``delta^2`` in soft-core Couloumb potential.
+
+* Exclude to/from ghost atom interactions from the ``ghost_14ff``. Exclusions were
+  already added to the ``ghost_ghostff``, but not the ``ghost_14ff``.
+
+* Fixed description of soft-core alpha parameter in :doc:`tutorial <tutorial/part07/03_ghosts>`.
+
+* Added debugging function to evaluate custom forces in OpenMM XML files. This
+  allows a user to decompose the pair-wise contribtions to the custom OpenMM
+  forces created by :mod:`sire`.
+
+* Added a timeout to the OpenMM minimiser function. This gives the user a single tunable
+  parameter to control roughly how long a minimisation should last before being aborted.
+
+* Exposed missing pickle operator on the ``LambdaLever`` class.
+
+* Fix bug setting custom nonbonded parameters for ghost atoms used in
+  positional restraints in OpenMM.
+
+* Fix exchange probability equations in ``sire.morph.replica_exchange`` function.
+
+* Fix calculation of energy change following final constraint projection
+  after energy minimisation. Previously the energy change was calculated from
+  the final step of the minimisation, rather than the change in energy
+  following the application of the constraints.
+
+* Clear internal OpenMM state from dynamics object during minimisation,
+  preventing the previous, pre-minimisation, state from being used when
+  ``get_state()`` is called.
+
+* Add support for QM/MM simulations using OpenMM. This uses the recent ``CustomCPPForceImpl``
+  introduced in OpenMM 8.1 to allow an interface between OpenMM and external
+  QM or ML codes. We support a generic Python callback interface and a ``Torch``
+  based interface for ML models. This is documented in the new :doc:`tutorial <tutorial/part08>`.
+
+* Reinitialise OpenMM context if constraints change when setting lambda. Updating
+  constraints in an OpenMM system does not update the associated data structures
+  in the context. A full reinitialiasation is required.
+
+* Give custom OpenMM forces meaningful names. This makes it easier to parse OpenMM
+  XML files and debug custom forces, particularly when multiple forces of the same
+  type are present.
+
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
 -----------------------------------------------------------------------------------------
 

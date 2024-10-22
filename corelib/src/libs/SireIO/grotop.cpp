@@ -2869,6 +2869,7 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
 
             QString particle_type = "A"; // A is for Atom
 
+            // This is a dummy atom.
             if (elem.nProtons() == 0 and lj.isDummy())
             {
                 if (is_perturbable)
@@ -2877,6 +2878,9 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
                 // Only label dummies for regular simulations.
                 else if (not was_perturbable)
                     particle_type = "D";
+
+                // Flag that we need to update the atoms.
+                update_atoms0 = true;
             }
 
             // This is a new atom type.
@@ -2893,6 +2897,15 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
 
                 // Hash the atom type against its parameter string, minus the type.
                 param_hash.insert(atomtypes[atomtype].mid(6), atomtype);
+
+                if (update_atoms0)
+                {
+                    // Set the type.
+                    atom.setAtomType(atomtype);
+
+                    // Update the atoms in the vector.
+                    atoms[i] = atom;
+                }
             }
             // This type has been seen before.
             else
@@ -2977,6 +2990,17 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
                         update_atoms0 = true;
                     }
                 }
+                else
+                {
+                    if (update_atoms0)
+                    {
+                        // Set the type.
+                        atom.setAtomType(atomtype);
+
+                        // Update the atoms in the vector.
+                        atoms[i] = atom;
+                    }
+                }
             }
         }
 
@@ -3019,8 +3043,14 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
 
                 QString particle_type = "A"; // A is for Atom
 
+                // This is a dummy atom.
                 if (elem.nProtons() == 0 and lj.isDummy())
+                {
                     atomtype += "_du";
+
+                    // Flag that we need to update the atoms.
+                    update_atoms1 = true;
+                }
 
                 // This is a new atom type.
                 if (not atomtypes.contains(atomtype))
@@ -3036,6 +3066,15 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
 
                     // Hash the atom type against its parameter string, minus the type.
                     param_hash.insert(atomtypes[atomtype].mid(6), atomtype);
+
+                    if (update_atoms1)
+                    {
+                        // Set the type.
+                        atom.setAtomType(atomtype);
+
+                        // Update the atoms in the vector.
+                        atoms[i] = atom;
+                    }
                 }
 
                 // This type has been seen before.
@@ -3119,6 +3158,17 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
 
                             // Flag that the atoms need to be updated.
                             update_atoms1 = true;
+                        }
+                    }
+                    else
+                    {
+                        if (update_atoms1)
+                        {
+                            // Set the type.
+                            atom.setAtomType(atomtype);
+
+                            // Update the atoms in the vector.
+                            atoms[i] = atom;
                         }
                     }
                 }
@@ -3216,14 +3266,6 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
                 {
                     elem1 = Element::elementWithMass(mol.property("mass1").asA<AtomMasses>()[cgatomidx]);
                 }
-
-                // Update the atom types.
-
-                if (elem0.nProtons() == 0)
-                    atomtype0 += "_du";
-
-                if (elem1.nProtons() == 0)
-                    atomtype1 += "_du";
 
                 QString resnum = QString::number(atom0.residueNumber().value());
 

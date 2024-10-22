@@ -86,10 +86,20 @@ namespace SireOpenMM
 
     SireUnits::Dimension::MolarEnergy get_potential_energy(OpenMM::Context &context);
 
+    SireMol::SelectorM<SireMol::Atom> extract_coordinates(const OpenMM::State &state,
+                                                          const SireMol::SelectorM<SireMol::Atom> &mols,
+                                                          const QHash<SireMol::MolNum, SireBase::PropertyMap> &perturbable_maps,
+                                                          const SireBase::PropertyMap &map);
+
     SireMol::SelectorMol extract_coordinates(const OpenMM::State &state,
                                              const SireMol::SelectorMol &mols,
                                              const QHash<SireMol::MolNum, SireBase::PropertyMap> &perturbable_maps,
                                              const SireBase::PropertyMap &map);
+
+    SireMol::SelectorM<SireMol::Atom> extract_coordinates_and_velocities(const OpenMM::State &state,
+                                                                         const SireMol::SelectorM<SireMol::Atom> &mols,
+                                                                         const QHash<SireMol::MolNum, SireBase::PropertyMap> &perturbable_maps,
+                                                                         const SireBase::PropertyMap &map);
 
     SireMol::SelectorMol extract_coordinates_and_velocities(const OpenMM::State &state,
                                                             const SireMol::SelectorMol &mols,
