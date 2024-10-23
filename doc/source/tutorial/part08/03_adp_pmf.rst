@@ -2,7 +2,7 @@
 Alanine-dipeptide conformational landscape
 ==========================================
 
-..note::
+.. note::
 
     The code in this tutorial was adapted from `FastMBAR <https://fastmbar.readthedocs.io/en/latest/dialanine_PMF.html>`_.
 
@@ -158,7 +158,7 @@ of 100 cycles of 100 steps each, saving trajectory after each cycle:
 ...     dcd_file.writeModel(positions)
 ... file_handle.close()
 
-..note::
+.. note::
 
     This is not a particulary efficient way to perform the sampling. In practice,
     since it's possible to get good single core performance it is better to run
