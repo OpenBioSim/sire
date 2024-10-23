@@ -1,6 +1,6 @@
-===============
-Part 08 - QM/MM
-===============
+==============
+Part 8 - QM/MM
+==============
 
 QM/MM is a method that combines the accuracy of quantum mechanics with the
 speed of molecular mechanics. In QM/MM, a small region of the system is treated
