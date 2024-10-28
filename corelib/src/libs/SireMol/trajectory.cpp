@@ -1380,9 +1380,9 @@ QByteArray Frame::toByteArray() const
     ds << spc << t.to(picosecond) << props;
 
     nbytes += sizeof(quint32);
-    nbytes += extra.count();
+    nbytes += extra.size();
 
-    QByteArray data("\0", nbytes);
+    QByteArray data(nbytes, '\0');
 
     auto data_ptr = data.data();
 
@@ -1425,7 +1425,7 @@ QByteArray Frame::toByteArray() const
         data_ptr += val * sizeof(Force3D);
     }
 
-    val = extra.count();
+    val = extra.size();
     std::memcpy(data_ptr, &val, sizeof(quint32));
     data_ptr += sizeof(quint32);
 
@@ -1435,12 +1435,12 @@ QByteArray Frame::toByteArray() const
         data_ptr += val;
     }
 
-    if (data_ptr - data.constData() != data.count())
+    if (data_ptr - data.constData() != data.size())
     {
         throw SireError::program_bug(QObject::tr(
                                          "Memory corruption? %1 versus %2")
                                          .arg(data_ptr - data.constData())
-                                         .arg(data.count()),
+                                         .arg(data.size()),
                                      CODELOC);
     }
 
@@ -1449,9 +1449,9 @@ QByteArray Frame::toByteArray() const
 
 Frame Frame::fromByteArray(const QByteArray &data)
 {
-    if (data.count() < 4)
+    if (data.size() < 4)
     {
-        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.size()),
                                             CODELOC);
     }
 
@@ -1474,9 +1474,9 @@ Frame Frame::fromByteArray(const QByteArray &data)
         throw SireStream::version_error(val, "1", r_frame, CODELOC);
     }
 
-    if (data_ptr + sizeof(quint32) > data.constData() + data.count())
+    if (data_ptr + sizeof(quint32) > data.constData() + data.size())
     {
-        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.size()),
                                             CODELOC);
     }
 
@@ -1487,9 +1487,9 @@ Frame Frame::fromByteArray(const QByteArray &data)
 
     if (val != 0)
     {
-        if (data_ptr + val * sizeof(Vector) > data.constData() + data.count())
+        if (data_ptr + val * sizeof(Vector) > data.constData() + data.size())
         {
-            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.size()),
                                                 CODELOC);
         }
 
@@ -1498,9 +1498,9 @@ Frame Frame::fromByteArray(const QByteArray &data)
         data_ptr += val * sizeof(Vector);
     }
 
-    if (data_ptr + sizeof(quint32) > data.constData() + data.count())
+    if (data_ptr + sizeof(quint32) > data.constData() + data.size())
     {
-        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.size()),
                                             CODELOC);
     }
 
@@ -1511,9 +1511,9 @@ Frame Frame::fromByteArray(const QByteArray &data)
 
     if (val != 0)
     {
-        if (data_ptr + val * sizeof(Velocity3D) > data.constData() + data.count())
+        if (data_ptr + val * sizeof(Velocity3D) > data.constData() + data.size())
         {
-            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.size()),
                                                 CODELOC);
         }
 
@@ -1522,9 +1522,9 @@ Frame Frame::fromByteArray(const QByteArray &data)
         data_ptr += val * sizeof(Velocity3D);
     }
 
-    if (data_ptr + sizeof(quint32) > data.constData() + data.count())
+    if (data_ptr + sizeof(quint32) > data.constData() + data.size())
     {
-        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.size()),
                                             CODELOC);
     }
 
@@ -1535,9 +1535,9 @@ Frame Frame::fromByteArray(const QByteArray &data)
 
     if (val != 0)
     {
-        if (data_ptr + val * sizeof(Force3D) > data.constData() + data.count())
+        if (data_ptr + val * sizeof(Force3D) > data.constData() + data.size())
         {
-            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.size()),
                                                 CODELOC);
         }
 
@@ -1546,9 +1546,9 @@ Frame Frame::fromByteArray(const QByteArray &data)
         data_ptr += val * sizeof(Force3D);
     }
 
-    if (data_ptr + sizeof(quint32) > data.constData() + data.count())
+    if (data_ptr + sizeof(quint32) > data.constData() + data.size())
     {
-        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+        throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.size()),
                                             CODELOC);
     }
 
@@ -1561,9 +1561,9 @@ Frame Frame::fromByteArray(const QByteArray &data)
 
     if (val != 0)
     {
-        if (data_ptr + val > data.constData() + data.count())
+        if (data_ptr + val > data.constData() + data.size())
         {
-            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.count()),
+            throw SireError::incompatible_error(QObject::tr("The data is too short to be a frame! %1").arg(data.size()),
                                                 CODELOC);
         }
 
