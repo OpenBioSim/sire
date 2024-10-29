@@ -700,8 +700,8 @@ class DynamicsData:
         max_restarts: int = 10,
         max_ratchets: int = 20,
         ratchet_frequency: int = 500,
-        starting_k: float = 100.0,
-        ratchet_scale: float = 2.0,
+        starting_k: float = 400.0,
+        ratchet_scale: float = 10.0,
         max_constraint_error: float = 0.001,
         timeout: str = "300s",
     ):
@@ -1254,8 +1254,8 @@ class Dynamics:
         max_restarts: int = 10,
         max_ratchets: int = 20,
         ratchet_frequency: int = 500,
-        starting_k: float = 100.0,
-        ratchet_scale: float = 2.0,
+        starting_k: float = 400.0,
+        ratchet_scale: float = 10.0,
         max_constraint_error: float = 0.001,
         timeout: str = "300s",
     ):
