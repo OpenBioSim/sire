@@ -662,7 +662,7 @@ void CacheData::cleanUpOnExit()
         {
             if (QThread::currentThread() != c.get())
             {
-                if (not c->wait(50))
+                if (not c->wait(100))
                 {
                     // kill it
                     c->terminate();
