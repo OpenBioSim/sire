@@ -662,9 +662,28 @@ void CacheData::cleanUpOnExit()
         {
             if (QThread::currentThread() != c.get())
             {
-                if (not c->wait(50))
+                bool is_finished = false;
+
+                // give the thread a maximum of 10 attempts to finish
+                for (int i = 0; i < 10; i++)
                 {
-                    // kill it
+                    // the thread didn't finish
+                    if (not c->wait(100))
+                    {
+                        qDebug() << "Waiting for cache thread to finish:" << c->cacheDir();
+                    }
+                    // the thread finished
+                    else
+                    {
+                        is_finished = true;
+                        break;
+                    }
+                }
+
+                // the thread still didn't finish, so kill it
+                if (not is_finished)
+                {
+                    qDebug() << "Terminating cache thread:" << c->cacheDir();
                     c->terminate();
                 }
             }
