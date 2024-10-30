@@ -209,6 +209,8 @@ class DynamicsData:
         if self.is_null():
             return
 
+        self._current_step = nsteps_completed
+
         if not state_has_cv[0]:
             # there is no information to update
             return
@@ -246,8 +248,6 @@ class DynamicsData:
                 perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),  # noqa: E501
                 map=self._map,
             )
-
-        self._current_step = nsteps_completed
 
         self._sire_mols.update(mols_to_update.molecules())
 
@@ -924,50 +924,6 @@ class DynamicsData:
                     }
                 )
 
-        def get_steps_till_save(completed: int, total: int):
-            """Internal function to calculate the number of steps
-            to run before the next save. This returns a tuple
-            of number of steps, and then if a frame should be
-            saved and if the energy should be saved
-            """
-            if completed < 0:
-                completed = 0
-
-            if completed >= total:
-                return (
-                    0,
-                    frame_frequency_steps > 0,
-                    energy_frequency_steps > 0,
-                )
-
-            elif frame_frequency_steps <= 0 and energy_frequency_steps <= 0:
-                return (total, False, False)
-
-            n_to_end = total - completed
-
-            if frame_frequency_steps > 0:
-                n_to_frame = min(
-                    frame_frequency_steps - (completed % frame_frequency_steps),
-                    n_to_end,
-                )
-            else:
-                n_to_frame = total - completed
-
-            if energy_frequency_steps > 0:
-                n_to_energy = min(
-                    energy_frequency_steps - (completed % energy_frequency_steps),
-                    n_to_end,
-                )
-            else:
-                n_to_energy = total - completed
-
-            if n_to_frame == n_to_energy:
-                return (n_to_frame, True, True)
-            elif n_to_frame < n_to_energy:
-                return (n_to_frame, True, False)
-            else:
-                return (n_to_energy, False, True)
-
         block_size = 50
 
         state = None
@@ -978,6 +934,9 @@ class DynamicsData:
             pass
 
         nsteps_before_run = self._current_step
+        if nsteps_before_run == 0:
+            self._next_save_frame = frame_frequency_steps
+            self._next_save_energy = energy_frequency_steps
 
         from ..base import ProgressBar
         from ..units import second
@@ -992,13 +951,27 @@ class DynamicsData:
 
                 with ThreadPoolExecutor() as pool:
                     while completed < steps_to_run:
-                        (
-                            nrun_till_save,
-                            save_frame,
-                            save_energy,
-                        ) = get_steps_till_save(completed, steps_to_run)
+                        steps_till_frame = self._next_save_frame - (
+                            completed + nsteps_before_run
+                        )
+                        if steps_till_frame <= 0 or steps_till_frame == steps_to_run:
+                            save_frame = True
+                            self._next_save_frame += frame_frequency_steps
+                        else:
+                            save_frame = False
 
-                        assert nrun_till_save > 0
+                        steps_till_energy = self._next_save_energy - (
+                            completed + nsteps_before_run
+                        )
+                        if steps_till_energy <= 0 or steps_till_energy == steps_to_run:
+                            save_energy = True
+                            self._next_save_energy += energy_frequency_steps
+                        else:
+                            save_energy = False
+
+                        nrun_till_save = min(steps_till_frame, steps_till_energy)
+
+                        assert nrun_till_save >= 0
 
                         self._enter_dynamics_block()
 
