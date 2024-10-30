@@ -18,6 +18,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 * Fixed instantiaton of ``QByteArray`` in ``Sire::Mol::Frame::toByteArray`` and count bytes with ``QByteArray::size``.
 * Increase timeout before terminating ``QThread`` objects during ``PageCache`` cleanup.
+* Expose missing ``timeout`` kwarg in :meth:`dynamics.minimise()` method.
+* Expose missing ``include_constrained_energies`` kwarg in minimisation function.
+* Make minimisation function settings consistent across API.
 
 `2024.3.0 <https://github.com/openbiosim/sire/compare/2024.2.0...2024.3.0>`__ - October 2024
 --------------------------------------------------------------------------------------------
