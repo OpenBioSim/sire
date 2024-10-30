@@ -2156,6 +2156,9 @@ def _minimisation(
     if platform is not None:
         map.set("platform", str(platform))
 
+    if include_constrained_energies is not None:
+        map.set("include_constrained_energies", include_constrained_energies)
+
     return Minimisation(
         view,
         cutoff=cutoff,

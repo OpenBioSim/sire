@@ -700,8 +700,8 @@ class DynamicsData:
         max_restarts: int = 10,
         max_ratchets: int = 20,
         ratchet_frequency: int = 500,
-        starting_k: float = 100.0,
-        ratchet_scale: float = 2.0,
+        starting_k: float = 400.0,
+        ratchet_scale: float = 10.0,
         max_constraint_error: float = 0.001,
         timeout: str = "300s",
     ):
@@ -1254,9 +1254,10 @@ class Dynamics:
         max_restarts: int = 10,
         max_ratchets: int = 20,
         ratchet_frequency: int = 500,
-        starting_k: float = 100.0,
-        ratchet_scale: float = 2.0,
+        starting_k: float = 400.0,
+        ratchet_scale: float = 10.0,
         max_constraint_error: float = 0.001,
+        timeout: str = "300s",
     ):
         """
         Internal method that runs minimisation on the molecules.
@@ -1290,6 +1291,8 @@ class Dynamics:
         - starting_k (float): The starting value of k for the minimisation
         - ratchet_scale (float): The amount to scale k at each ratchet
         - max_constraint_error (float): The maximum error in the constraints in nm
+        - timeout (float): The maximum time to run the minimisation for in seconds.
+                           A value of <=0 will disable the timeout.
         """
         if not self._d.is_null():
             self._d.run_minimisation(
@@ -1301,6 +1304,7 @@ class Dynamics:
                 starting_k=starting_k,
                 ratchet_scale=ratchet_scale,
                 max_constraint_error=max_constraint_error,
+                timeout=timeout,
             )
 
         return self
