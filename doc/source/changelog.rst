@@ -16,6 +16,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 ---------------------------------------------------------------------------------------------
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
+* Fixed :func:`sire.restraints.get_standard_state_correction` to be consistent with the definition of
+  the "force constanst" as ``F = 2 ** k ** x`` (rather than ``F = k ** x``). Updated docstrings and
+  restraints documentation to make it clear how the force constants are defined.
 * Fixed instantiaton of ``QByteArray`` in ``Sire::Mol::Frame::toByteArray`` and count bytes with ``QByteArray::size``.
 * Increase timeout before terminating ``QThread`` objects during ``PageCache`` cleanup.
 * Expose missing ``timeout`` kwarg in :meth:`dynamics.minimise()` method.
