@@ -92,7 +92,6 @@ inline auto is_ieee754_nan(double const x)
 #include <algorithm>
 
 #include "SireError/errors.h"
-#include "SireBase/releasegil.h"
 
 #include "SireBase/progressbar.h"
 #include "SireUnits/units.h"
