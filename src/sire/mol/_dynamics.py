@@ -777,13 +777,11 @@ class DynamicsData:
         from ..utils import Console
 
         Console.warning(
-            "Something went wrong when running dynamics. Since no steps "
-            "were completed, it is likely that the system needs minimising. "
-            "The system will be minimised, and then dynamics will be "
-            "attempted again. If an error still occurs, then it is likely "
-            "that the step size is too large, the molecules are "
-            "over-constrained, or there is something more fundemental "
-            "going wrong..."
+            "Something went wrong when running dynamics. The system will be "
+            "minimised, and then dynamics will be attempted again. If an "
+            "error still occurs, then it is likely that the step size is too "
+            "large, the molecules are over-constrained, or there is something "
+            "more fundemental going wrong..."
         )
 
         # rebuild the molecules
@@ -930,6 +928,10 @@ class DynamicsData:
         state_has_cv = (False, False)
         saved_last_frame = False
 
+        # whether the energy or frame were saved after the current block
+        have_saved_frame = False
+        have_saved_energy = False
+
         class NeedsMinimiseError(Exception):
             pass
 
@@ -1000,8 +1002,14 @@ class DynamicsData:
                             while not run_promise.done():
                                 try:
                                     result = run_promise.result(timeout=1.0)
-                                except Exception:
-                                    pass
+                                except Exception as e:
+                                    if (
+                                        "NaN" in str(e)
+                                        and not have_saved_frame
+                                        and not have_saved_energy
+                                        and auto_fix_minimise
+                                    ):
+                                        raise NeedsMinimiseError()
 
                             # catch rare edge case where the promise timed
                             # out, but then completed before the .done()
@@ -1019,10 +1027,20 @@ class DynamicsData:
                                 if process_promise is not None:
                                     try:
                                         process_promise.result()
-                                    except Exception:
-                                        pass
+                                    except Exception as e:
+                                        if (
+                                            "NaN" in str(e)
+                                            and not have_saved_frame
+                                            and not have_saved_energy
+                                            and auto_fix_minimise
+                                        ):
+                                            raise NeedsMinimiseError()
 
-                                if completed == 0 and auto_fix_minimise:
+                                if (
+                                    not have_saved_frame
+                                    and not have_saved_energy
+                                    and auto_fix_minimise
+                                ):
                                     raise NeedsMinimiseError()
 
                                 # something went wrong - re-raise the exception
@@ -1045,6 +1063,9 @@ class DynamicsData:
 
                         saved_last_frame = False
 
+                        have_saved_frame = save_frame
+                        have_saved_energy = save_energy
+
                         kinetic_energy = state.getKineticEnergy().value_in_unit(
                             openmm.unit.kilocalorie_per_mole
                         )
@@ -1056,7 +1077,11 @@ class DynamicsData:
                             state = None
                             saved_last_frame = True
 
-                            if completed == 0 and auto_fix_minimise:
+                            if (
+                                not have_saved_frame
+                                and not have_saved_energy
+                                and auto_fix_minimise
+                            ):
                                 raise NeedsMinimiseError()
 
                             raise RuntimeError(
