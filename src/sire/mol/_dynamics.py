@@ -179,6 +179,59 @@ class DynamicsData:
             self._is_running = False
             self._schedule_changed = False
 
+            # Check for a REST2 scaling factor.
+            if map.specified("rest2_scale"):
+                try:
+                    rest2_scale = map["rest2_scale"].value().as_double()
+                except:
+                    raise ValueError("'rest2_scale' must be of type 'float'")
+                if rest2_scale < 1.0:
+                    raise ValueError("'rest2_scale' must be >= 1.0")
+
+                # Check for an additional REST2 selection.
+                if map.specified("rest2_selection"):
+                    try:
+                        rest2_selection = str(map["rest2_selection"])
+                    except:
+                        raise ValueError("'rest2_selection' must be of type 'str'")
+
+                    try:
+                        from . import selection_to_atoms
+
+                        # Try to find the REST2 selection.
+                        atoms = selection_to_atoms(mols, rest2_selection)
+                    except:
+                        raise ValueError(
+                            "Invalid 'rest2_selection' string. Please check the selection syntax."
+                        )
+
+                    # Store all the perturbable molecules associated with the selection.
+                    pert_mols = {}
+                    for atom in atoms:
+                        mol = atom.molecule()
+                        if mol.has_property("is_perturbable"):
+                            if mol not in pert_mols:
+                                pert_mols[mol] = [atom]
+                            else:
+                                pert_mols[mol].append(atom)
+
+                    # Now create a boolean is_rest2 mask for the atoms in the perturbable molecules.
+                    for mol in pert_mols:
+                        is_rest2 = [False] * mol.num_atoms()
+                        for atom in pert_mols[mol]:
+                            is_rest2[atom.index().value()] = True
+
+                        # Set the is_rest2 property for each perturbable molecule.
+                        mol = (
+                            mol.edit()
+                            .set_property("is_rest2", is_rest2)
+                            .molecule()
+                            .commit()
+                        )
+
+                        # Update the system.
+                        self._sire_mols.update(mol)
+
             from ..convert import to
 
             self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
@@ -194,6 +247,9 @@ class DynamicsData:
             else:
                 self._enforce_periodic_box = False
 
+            # Prepare the OpenMM REST2 data structures.
+            if map.specified("rest2_scale") and map.specified("rest2_selection"):
+                self._omm_mols._prepare_rest2(self._sire_mols, atoms)
         else:
             self._sire_mols = None
             self._energy_trajectory = None

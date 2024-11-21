@@ -665,20 +665,28 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     QVector<OpenMMMolecule> openmm_mols(nmols);
     auto openmm_mols_data = openmm_mols.data();
 
+    // Create a vector containing the start index for the atoms in each molecule.
+    QVector<int> start_atom_index(nmols);
+    start_atom_index[0] = 0;
+    for (int i = 1; i < nmols; ++i)
+    {
+        start_atom_index[i] = start_atom_index[i-1] + mols[i-1].nAtoms();
+    }
+
     if (SireBase::should_run_in_parallel(nmols, map))
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, mols.count()), [&](const tbb::blocked_range<int> &r)
                           {
                 for (int i=r.begin(); i<r.end(); ++i)
                 {
-                    openmm_mols_data[i] = OpenMMMolecule(mols[i], map);
+                    openmm_mols_data[i] = OpenMMMolecule(mols[i], start_atom_index[i], map);
                 } });
     }
     else
     {
         for (int i = 0; i < nmols; ++i)
         {
-            openmm_mols_data[i] = OpenMMMolecule(mols[i], map);
+            openmm_mols_data[i] = OpenMMMolecule(mols[i], start_atom_index[i], map);
         }
     }
 

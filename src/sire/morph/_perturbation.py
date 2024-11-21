@@ -840,7 +840,7 @@ class Perturbation:
         from ..convert.openmm import PerturbableOpenMMMolecule
 
         try:
-            return PerturbableOpenMMMolecule(self._mol.molecule(), map=map)
+            return PerturbableOpenMMMolecule(self._mol.molecule(), 0, map=map)
         except KeyError:
             # probably need to choose an end-state - default to reference
             return PerturbableOpenMMMolecule(

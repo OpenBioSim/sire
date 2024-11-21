@@ -69,8 +69,28 @@ class SOMMContext(_Context):
             # place the coordinates and velocities into the context
             set_openmm_coordinates_and_velocities(self, metadata)
 
+            # Check for a REST2 scaling factor.
+            if map.specified("rest2_scale"):
+                try:
+                    rest2_scale = map["rest2_scale"].value().as_double()
+                except:
+                    raise ValueError("'rest2_scale' must be of type 'float'")
+                if rest2_scale < 1.0:
+                    raise ValueError("'rest2_scale' must be >= 1.0")
+                self._rest2_scale = rest2_scale
+
+                if map.specified("rest2_selection"):
+                    self._has_rest2_selection = True
+                else:
+                    self._has_rest2_selection = False
+            else:
+                self._rest2_scale = 1.0
+                self._has_rest2_selection = False
+
             self._lambda_value = self._lambda_lever.set_lambda(
-                self, lambda_value=lambda_value, update_constraints=True
+                self,
+                lambda_value=lambda_value,
+                update_constraints=True,
             )
 
             self._map = map
@@ -227,15 +247,22 @@ class SOMMContext(_Context):
     def set_lambda(self, lambda_value: float, update_constraints: bool = True):
         """
         Update the parameters in the context to set the lambda value
-        to 'lamval'. If update_constraints is True then the constraints
-        will be updated to match the new value of lambda
+        to 'lambda_value'. If update_constraints is True then the constraints
+        will be updated to match the new value of lambda.
         """
         if self._lambda_lever is None:
             return
 
         self._lambda_value = self._lambda_lever.set_lambda(
-            self, lambda_value=lambda_value, update_constraints=update_constraints
+            self,
+            lambda_value=lambda_value,
+            rest2_scale=self._rest2_scale,
+            update_constraints=update_constraints,
         )
+
+        # Update any additional parameters in the REST2 region.
+        if self._has_rest2_selection:
+            self._update_rest2(lambda_value, self._rest2_scale)
 
     def set_temperature(self, temperature, rescale_velocities=True):
         """
@@ -314,3 +341,149 @@ class SOMMContext(_Context):
                 handle.write(_XmlSerializer.serialize(self.getSystem()))
         else:
             f.write(_XmlSerializer.serialize(self.getSystem()))
+
+    def _prepare_rest2(self, system, atoms):
+        """
+        Internal method to prepare the REST2 data structures.
+        """
+
+        # Adapted from code in meld: https://github.com/maccallumlab/meld
+
+        import openmm
+        from ..Mol import AtomIdx, Connectivity
+
+        # Work out the molecules to which the atoms belong.
+        mols = []
+        for atom in atoms:
+            mol = atom.molecule()
+            # Perturbable molecules are handled separately.
+            if mol not in mols and not mol.has_property("is_perturbable"):
+                mols.append(mol)
+
+        # Store the OpenMM system.
+        omm_system = self.getSystem()
+
+        # Get the NonBonded force.
+        nonbonded_force = None
+        for force in omm_system.getForces():
+            if isinstance(force, openmm.NonbondedForce):
+                nonbonded_force = force
+                break
+        if nonbonded_force is None:
+            raise ValueError("No NonbondedForce found in the OpenMM system.")
+        self._nonbonded_force = nonbonded_force
+
+        # Get the PeriodicTorsionForce.
+        periodic_torsion_force = None
+        for force in omm_system.getForces():
+            if isinstance(force, openmm.PeriodicTorsionForce):
+                periodic_torsion_force = force
+                break
+        if periodic_torsion_force is None:
+            raise ValueError("No PeriodicTorsionForce found in the OpenMM system.")
+        self._periodic_torsion_force = periodic_torsion_force
+
+        # Initialise the parameter dictionaries.
+        self._nonbonded_params = {}
+        self._exception_params = {}
+        self._torsion_params = {}
+
+        # Process each of the molecules.
+        for mol in mols:
+            # Create the connectivity object for the molecule.
+            connectivity = Connectivity(mol.info()).edit()
+
+            # Loop over the bonds in the molecule and connect the atoms.
+            for bond in mol.bonds():
+                connectivity.connect(bond.atom0().index(), bond.atom1().index())
+            connectivity = connectivity.commit()
+
+            # Find the index of the molecule in the system.
+            mol_idx = system._system.mol_nums().index(mol.number())
+
+            # Work out the offset to apply to the atom indices to convert to system indices.
+            num_atoms = 0
+            for mol in system.molecules()[:mol_idx]:
+                num_atoms += mol.num_atoms()
+
+            # Create a list of atom indices.
+            atom_idxs = [atom.index().value() + num_atoms for atom in atoms]
+
+            # Gather the nonbonded parameters for the atoms in the selection.
+            for idx in atom_idxs:
+                self._nonbonded_params[idx] = nonbonded_force.getParticleParameters(idx)
+
+            # Store the exception parameters.
+            for param_index in range(nonbonded_force.getNumExceptions()):
+                params = nonbonded_force.getExceptionParameters(param_index)
+                if params[0] in atom_idxs and params[1] in atom_idxs:
+                    self._exception_params[param_index] = params
+
+            # Gather the torsion parameters for the atoms in the selection.
+            for param_index in range(periodic_torsion_force.getNumTorsions()):
+                params = periodic_torsion_force.getTorsionParameters(param_index)
+                i, j, k, l, _, _, _ = params
+
+                # Don't modify non-REST2 torsions.
+                if (
+                    i not in atom_idxs
+                    or j not in atom_idxs
+                    or k not in atom_idxs
+                    or l not in atom_idxs
+                ):
+                    continue
+
+                # Convert to AtomIdx objects.
+                idx_i = AtomIdx(i - num_atoms)
+                idx_l = AtomIdx(l - num_atoms)
+
+                if connectivity.are_dihedraled(idx_i, idx_l):
+                    self._torsion_params[param_index] = params
+
+    def _update_rest2(self, lambda_value, rest2_scale):
+        """
+        Internal method to update the REST2 parameters.
+        """
+
+        # Adapted from code in meld: https://github.com/maccallumlab/meld
+
+        from math import sqrt
+
+        # Work out the actual REST scaling factor. The passed value is the ratio of
+        # the REST temperature to the simulation temperature. The full scaling factor
+        # is used at lambda = 0.5 and is scaled to 1.0 at lambda = 0 and lambda = 1.
+        scale = 1.0 + (rest2_scale - 1.0) * (1.0 - 2.0 * abs(lambda_value - 0.5))
+
+        # This is the temperature scale factor, so we need to invert to get the energy
+        # scale factor.
+        scale = 1.0 / scale
+
+        # Store the REST2 charge scaling factor for non-bonded interactions.
+        sqrt_scale = sqrt(scale)
+
+        # Update the non-bonded parameters.
+        for index, params in self._nonbonded_params.items():
+            q, sigma, epsilon = params
+            self._nonbonded_force.setParticleParameters(
+                index, q * sqrt_scale, sigma, epsilon * scale
+            )
+
+        # Update the exception parameters.
+        for index, params in self._exception_params.items():
+            i, j, q, sigma, epsilon = params
+            self._nonbonded_force.setExceptionParameters(
+                index, i, j, q * scale, sigma, epsilon * scale
+            )
+
+        # Update the parameters in the context.
+        self._nonbonded_force.updateParametersInContext(self)
+
+        # Update the torsion parameters.
+        for index, params in self._torsion_params.items():
+            i, j, k, l, periodicity, phase, k = params
+            self._periodic_torsion_force.setTorsionParameters(
+                index, i, j, k, l, periodicity, phase, k * scale
+            )
+
+        # Update the parameters in the context.
+        self._periodic_torsion_force.updateParametersInContext(self)

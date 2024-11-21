@@ -1567,6 +1567,8 @@ def _dynamics(
     ignore_perturbations=None,
     temperature=None,
     pressure=None,
+    rest2_scale=None,
+    rest2_selection=None,
     vacuum=None,
     shift_delta=None,
     shift_coulomb=None,
@@ -1685,6 +1687,34 @@ def _dynamics(
         The pressure at which to run the simulation. A
         microcanonical (NVE) or canonical (NVT) simulation will be
         run if the pressure is not set.
+
+    rest2_scale: float
+        The scaling factor to apply when running a REST2 simulation
+        (Replica Exchange with Solute Tempering). This defaults to 1.0.
+        This specifies the ratio of the temperature of the solute to
+        the temperature of the solvent. The scaling factor is linearly
+        interpolated between the two temperatures so that the solute has
+        a temperature of rest2_scale * temperature in the intermediate,
+        lambda = 0.5 state, and the end states are at the original
+        temperature.
+
+    rest2_selection: str
+        A selection string for atoms to include in the REST2 region
+        in addition to any perturbable molecules. For example,
+        "molidx 0 and residx 0,1,2" would select atoms from the first
+        three residues of the first molecule. If None, then all atoms
+        within perturbable molecules will be included in the REST2
+        region. When atoms within a perturbable molecule are also
+        included in the selection, then only those atoms will be
+        considered as part of the REST2 region. This allows REST2 to
+        be applied to protein mutations.
+
+        A selection string for atoms to include in the REST2 region in
+        addition to the perturbable molecule. For example,
+        "molidx 0 and residx 0,1,2" would select atoms from the first
+        three residues of the first molecule. Selected atoms should be
+        within the same molecule. If None, then only the perturbable
+        molecule will be used for the REST2 region.
 
     vacuum: bool (optional)
         Whether or not to run the simulation in vacuum. If this is
@@ -1851,6 +1881,12 @@ def _dynamics(
     if pressure is not None:
         pressure = u(pressure)
         map.set("pressure", pressure)
+
+    if rest2_scale is not None:
+        map.set("rest2_scale", rest2_scale)
+
+    if rest2_selection is not None:
+        map.set("rest2_selection", rest2_selection)
 
     if device is not None:
         map.set("device", str(device))

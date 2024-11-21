@@ -592,6 +592,27 @@ class System:
             microcanonical (NVE) or canonical (NVT) simulation will be
             run if the pressure is not set.
 
+        rest2_scale: float
+            The scaling factor to apply when running a REST2 simulation
+            (Replica Exchange with Solute Tempering). This defaults to 1.0.
+            This specifies the ratio of the temperature of the solute to
+            the temperature of the solvent. The scaling factor is linearly
+            interpolated between the two temperatures so that the solute has
+            a temperature of rest2_scale * temperature in the intermediate,
+            lambda = 0.5 state, and the end states are at the original
+            temperature.
+
+        rest2_selection: str
+            A selection string for atoms to include in the REST2 region
+            in addition to any perturbable molecules. For example,
+            "molidx 0 and residx 0,1,2" would select atoms from the first
+            three residues of the first molecule. If None, then all atoms
+            within perturbable molecules will be included in the REST2
+            region. When atoms within a perturbable molecule are also
+            included in the selection, then only those atoms will be
+            considered as part of the REST2 region. This allows REST2 to
+            be applied to protein mutations.
+
         vacuum: bool
             Whether or not to run the simulation in vacuum. If this is
             set to `True`, then the simulation space automatically be
