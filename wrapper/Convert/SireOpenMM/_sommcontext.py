@@ -244,25 +244,56 @@ class SOMMContext(_Context):
 
         self._lambda_lever.set_schedule(schedule)
 
-    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
+    def set_lambda(
+        self,
+        lambda_value: float,
+        rest2_scale: float = None,
+        update_constraints: bool = True,
+    ):
         """
         Update the parameters in the context to set the lambda value
-        to 'lambda_value'. If update_constraints is True then the constraints
-        will be updated to match the new value of lambda.
+        to 'lambda_value'. The 'rest2_scale' defines the temperature of
+        the REST2 region relative to the rest of the system. If
+        'update_constraints' is True then the constraints will be updated
+        to match the new value of lambda.
         """
         if self._lambda_lever is None:
             return
 
+        # If not provided, use the REST2 scaling factor used to initalise
+        # the context.
+        if rest2_scale is None:
+            rest2_scale = self._rest2_scale
+
         self._lambda_value = self._lambda_lever.set_lambda(
             self,
             lambda_value=lambda_value,
-            rest2_scale=self._rest2_scale,
+            rest2_scale=rest2_scale,
             update_constraints=update_constraints,
         )
 
         # Update any additional parameters in the REST2 region.
         if self._has_rest2_selection:
-            self._update_rest2(lambda_value, self._rest2_scale)
+            self._update_rest2(lambda_value, rest2_scale)
+
+    def get_rest2_scale(self):
+        """
+        Return the temperature scale factor for the REST2 region.
+        """
+        return self._rest2_scale
+
+    def set_rest2_scale(self, rest2_scale):
+        """
+        Set the temperature scale factor for the REST2 region.
+        """
+        if rest2_scale < 1.0:
+            raise ValueError("'rest2_scale' must be >= 1.0")
+
+        if self._rest2_scale != rest2_scale:
+            self._set_lambda(self._lambda_value, rest2_scale=rest2_scale)
+            self._update_rest2(self._lambda_value, rest2_scale)
+
+        self._rest2_scale = rest2_scale
 
     def set_temperature(self, temperature, rescale_velocities=True):
         """
@@ -445,18 +476,11 @@ class SOMMContext(_Context):
         Internal method to update the REST2 parameters.
         """
 
-        # Adapted from code in meld: https://github.com/maccallumlab/meld
-
         from math import sqrt
-
-        # Work out the actual REST scaling factor. The passed value is the ratio of
-        # the REST temperature to the simulation temperature. The full scaling factor
-        # is used at lambda = 0.5 and is scaled to 1.0 at lambda = 0 and lambda = 1.
-        scale = 1.0 + (rest2_scale - 1.0) * (1.0 - 2.0 * abs(lambda_value - 0.5))
 
         # This is the temperature scale factor, so we need to invert to get the energy
         # scale factor.
-        scale = 1.0 / scale
+        scale = 1.0 / rest2_scale
 
         # Store the REST2 charge scaling factor for non-bonded interactions.
         sqrt_scale = sqrt(scale)

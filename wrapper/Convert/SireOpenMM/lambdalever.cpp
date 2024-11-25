@@ -1136,11 +1136,6 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     lambda_value = this->lambda_schedule.clamp(lambda_value);
 
-    // Work out the actual REST scaling factor. The passed value is the ratio of
-    // the REST temperature to the simulation temperature. The full scaling factor
-    // is used at lambda = 0.5 and is scaled to 1.0 at lambda = 0 and lambda = 1.
-    rest2_scale = 1.0 + (rest2_scale - 1.0)*(1.0 - 2.0 * std::abs(lambda_value - 0.5));
-
     // This is the temperature scale factor, so we need to invert to get the energy
     // scale factor.
     rest2_scale = 1.0 / rest2_scale;

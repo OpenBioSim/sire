@@ -1691,12 +1691,8 @@ def _dynamics(
     rest2_scale: float
         The scaling factor to apply when running a REST2 simulation
         (Replica Exchange with Solute Tempering). This defaults to 1.0.
-        This specifies the ratio of the temperature of the solute to
-        the temperature of the solvent. The scaling factor is linearly
-        interpolated between the two temperatures so that the solute has
-        a temperature of rest2_scale * temperature in the intermediate,
-        lambda = 0.5 state, and the end states are at the original
-        temperature.
+        This specifies the ratio of the temperature of the REST2 region
+        to the temperature of the rest of the system.
 
     rest2_selection: str
         A selection string for atoms to include in the REST2 region

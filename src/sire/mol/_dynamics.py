@@ -329,6 +329,7 @@ class DynamicsData:
         save_frame: bool = False,
         save_energy: bool = False,
         lambda_windows=[],
+        rest2_scale_factors=[],
         save_velocities: bool = False,
         delta_lambda: float = None,
     ):
@@ -379,6 +380,7 @@ class DynamicsData:
             )
 
             sim_lambda_value = self._omm_mols.get_lambda()
+            sim_rest2_scale = self._omm_mols.get_rest2_scale()
 
             # Store the potential energy and accumulated non-equilibrium work.
             if self._is_interpolate:
@@ -392,10 +394,14 @@ class DynamicsData:
                 nrgs[str(sim_lambda_value)] = nrgs["potential"]
 
                 if lambda_windows is not None:
-                    for lambda_value in lambda_windows:
+                    for lambda_value, rest2_scale in zip(
+                        lambda_windows, rest2_scale_factors
+                    ):
                         if lambda_value != sim_lambda_value:
                             self._omm_mols.set_lambda(
-                                lambda_value, update_constraints=False
+                                lambda_value,
+                                rest2_scale=rest2_scale,
+                                update_constraints=False,
                             )
                             nrgs[str(lambda_value)] = (
                                 self._omm_mols.get_potential_energy(
@@ -598,7 +604,10 @@ class DynamicsData:
         if not self.is_null():
             self._omm_mols.set_lambda_schedule(schedule)
             self._schedule_changed = True
-            self.set_lambda(self._omm_mols.get_lambda())
+            self.set_lambda(
+                self._omm_mols.get_lambda(),
+                rest2_scale=self._omm_mols.get_rest2_scale(),
+            )
 
     def get_lambda(self):
         if self.is_null():
@@ -606,7 +615,12 @@ class DynamicsData:
         else:
             return self._omm_mols.get_lambda()
 
-    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
+    def set_lambda(
+        self,
+        lambda_value: float,
+        rest2_scale: float = 1.0,
+        update_constraints: bool = True,
+    ):
         if not self.is_null():
             s = self.get_schedule()
 
@@ -622,7 +636,9 @@ class DynamicsData:
                 return
 
             self._omm_mols.set_lambda(
-                lambda_value=lambda_value, update_constraints=update_constraints
+                lambda_value=lambda_value,
+                rest2_scale=rest2_scale,
+                update_constraints=update_constraints,
             )
             self._schedule_changed = False
             self._clear_state()
@@ -854,6 +870,7 @@ class DynamicsData:
         frame_frequency=None,
         energy_frequency=None,
         lambda_windows=None,
+        rest2_scale_factors=None,
         save_velocities: bool = None,
         auto_fix_minimise: bool = True,
     ):
@@ -866,6 +883,7 @@ class DynamicsData:
             "frame_frequency": frame_frequency,
             "energy_frequency": energy_frequency,
             "lambda_windows": lambda_windows,
+            "rest2_scale_factors": rest2_scale_factors,
             "save_velocities": save_velocities,
             "auto_fix_minimise": auto_fix_minimise,
         }
@@ -950,6 +968,9 @@ class DynamicsData:
             # Fixed lambda value.
             else:
                 delta_lambda = None
+
+            # Set the REST2 scaling factors.
+            rest2_scale_factors = [1.0, 1.0]
         else:
             delta_lambda = None
             if lambda_windows is not None:
@@ -958,6 +979,14 @@ class DynamicsData:
             else:
                 if self._map.specified("lambda_windows"):
                     lambda_windows = self._map["lambda_windows"].value()
+
+            if rest2_scale_factors is not None:
+                if len(rest2_scale_factors) != len(lambda_windows):
+                    raise ValueError(
+                        "len(rest2_scale_factors) must be equal to len(lambda_windows)"
+                    )
+            else:
+                rest2_scale_factors = [1.0] * len(lambda_windows)
 
         def runfunc(num_steps):
             try:
@@ -1113,6 +1142,7 @@ class DynamicsData:
                             save_frame=save_frame,
                             save_energy=save_energy,
                             lambda_windows=lambda_windows,
+                            rest2_scale_factors=rest2_scale_factors,
                             save_velocities=save_velocities,
                             delta_lambda=delta_lambda,
                         )
@@ -1382,6 +1412,7 @@ class Dynamics:
         frame_frequency=None,
         energy_frequency=None,
         lambda_windows=None,
+        rest2_scale_factors=None,
         save_velocities: bool = None,
         auto_fix_minimise: bool = True,
     ):
@@ -1440,6 +1471,10 @@ class Dynamics:
             we always save the potential energy of the simulated lambda
             value, even if it is not in the list of lambda windows.
 
+        rest2_scale_factors: list[float]
+            The scaling factors for the REST2 region for each lambda
+            window.
+
         save_velocities: bool
             Whether or not to save the velocities when running dynamics.
             By default this is False. Set this to True if you are
@@ -1465,6 +1500,7 @@ class Dynamics:
                 frame_frequency=frame_frequency,
                 energy_frequency=energy_frequency,
                 lambda_windows=lambda_windows,
+                rest2_scale_factors=rest2_scale_factors,
                 save_velocities=save_velocities,
                 auto_fix_minimise=auto_fix_minimise,
             )
@@ -1495,12 +1531,21 @@ class Dynamics:
         """
         return self._d.get_lambda()
 
-    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
+    def set_lambda(
+        self,
+        lambda_value: float,
+        rest2_scale: float = 1.0,
+        update_constraints: bool = True,
+    ):
         """
         Set the current value of lambda for this system. This will
         update the forcefield parameters in the context according
         to the data in the LambdaSchedule. This does nothing if
         this isn't a perturbable system.
+
+        The `rest2_scale` parameter specifies the temperature of the
+        REST2 region relative to the rest of the system at the specified
+        lambda value.
 
         If `update_constraints` is True, then this will also update
         the constraint length of any constrained perturbable bonds.
@@ -1509,8 +1554,24 @@ class Dynamics:
         the constraint will not be changed.
         """
         self._d.set_lambda(
-            lambda_value=lambda_value, update_constraints=update_constraints
+            lambda_value=lambda_value,
+            rest2_scale=rest2_scale,
+            update_constraints=update_constraints,
         )
+
+    def get_rest2_scale(self):
+        """
+        Return the current REST2 scaling factor.
+        """
+        if self.is_null():
+            return None
+        return self._d.get_rest2_scale()
+
+    def set_rest2_scale(self, rest2_scale: float):
+        """
+        Set the current REST2 scaling factor.
+        """
+        self._d.set_rest2_scale(rest2_scale=rest2_scale)
 
     def ensemble(self):
         """
@@ -1697,35 +1758,56 @@ class Dynamics:
         """
         return self._d.current_energy()
 
-    def current_potential_energy(self, lambda_values=None):
+    def current_potential_energy(self, lambda_values=None, rest2_scale_factors=None):
         """
         Return the current potential energy.
 
         If `lambda_values` is passed (which should be a list of
         lambda values) then this will return the energies
         (as a list) at the requested lambda values
+
+        If `rest2_scale_factors` is passed, then these will be
+        used to scale the temperature of the REST2 region at each
+        lambda value.
         """
         if lambda_values is None:
             return self._d.current_potential_energy()
         else:
             if not isinstance(lambda_values, list):
                 lambda_values = [lambda_values]
+            if rest2_scale_factors is None:
+                rest2_scale_factors = [1.0] * len(lambda_values)
+            else:
+                if not isinstance(rest2_scale_factors, list):
+                    rest2_scale_factors = [rest2_scale_factors]
+                else:
+                    if len(rest2_scale_factors) != len(lambda_values):
+                        raise ValueError(
+                            "len(rest2_scale_factors) must be equal to len(lambda_values)"
+                        )
 
             # save the current value of lambda so we
             # can restore it
             old_lambda = self.get_lambda()
+            old_rest2_scale = self.get_rest2_scale()
 
             nrgs = []
 
             try:
-                for lambda_value in lambda_values:
-                    self.set_lambda(lambda_value, update_constraints=False)
+                for lambda_value, rest2_scale in zip(
+                    lambda_values, rest2_scale_factors
+                ):
+                    self.set_lambda(
+                        lambda_value, rest2_scale=rest2_scale, update_constraints=False
+                    )
                     nrgs.append(self._d.current_potential_energy())
             except Exception:
-                self.set_lambda(old_lambda, update_constraints=False)
+                self.set_lambda(old_lambda, old_rest2_scale, update_constraints=False)
                 raise
 
-            self.set_lambda(old_lambda, update_constraints=False)
+            self.set_lambda(
+                old_lambda, rest2_scale=old_rest2_scale, update_constraints=False
+            )
 
             return nrgs
 

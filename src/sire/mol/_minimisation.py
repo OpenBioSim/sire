@@ -17,6 +17,7 @@ class Minimisation:
         cutoff_type=None,
         schedule=None,
         lambda_value=None,
+        rest2_scale=None,
         swap_end_states=None,
         ignore_perturbations=None,
         shift_delta=None,
@@ -37,6 +38,7 @@ class Minimisation:
         _add_extra(extras, "lambda", lambda_value)
         _add_extra(extras, "swap_end_states", swap_end_states)
         _add_extra(extras, "ignore_perturbations", ignore_perturbations)
+        _add_extra(extras, "rest2_scale", rest2_scale)
 
         if shift_delta is not None:
             _add_extra(extras, "shift_delta", u(shift_delta))
