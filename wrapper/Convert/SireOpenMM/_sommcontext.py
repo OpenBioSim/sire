@@ -504,9 +504,9 @@ class SOMMContext(_Context):
 
         # Update the torsion parameters.
         for index, params in self._torsion_params.items():
-            i, j, k, l, periodicity, phase, k = params
+            i, j, k, l, periodicity, phase, fc = params
             self._periodic_torsion_force.setTorsionParameters(
-                index, i, j, k, l, periodicity, phase, k * scale
+                index, i, j, k, l, periodicity, phase, fc * scale
             )
 
         # Update the parameters in the context.
