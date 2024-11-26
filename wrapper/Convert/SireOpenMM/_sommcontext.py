@@ -419,6 +419,9 @@ class SOMMContext(_Context):
         self._exception_params = {}
         self._torsion_params = {}
 
+        # Store the molecules in the system.
+        system_mols = system.molecules()
+
         # Process each of the molecules.
         for mol in mols:
             # Create the connectivity object for the molecule.
@@ -434,8 +437,8 @@ class SOMMContext(_Context):
 
             # Work out the offset to apply to the atom indices to convert to system indices.
             num_atoms = 0
-            for mol in system.molecules()[:mol_idx]:
-                num_atoms += mol.num_atoms()
+            for i in range(mol_idx):
+                num_atoms += system_mols[i].num_atoms()
 
             # Create a list of atom indices.
             atom_idxs = [atom.index().value() + num_atoms for atom in atoms]
