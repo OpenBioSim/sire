@@ -1505,7 +1505,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                         cljff->setExceptionParameters(
                             boost::get<0>(idxs[j]),
                             boost::get<0>(p), boost::get<1>(p),
-                            boost::get<2>(p), 1e-9, 1e-9);
+                            boost::get<2>(p) * scale, 1e-9, 1e-9);
 
                         // exclude 14s for to/from ghost interactions
                         if (not to_from_ghost and ghost_14ff != 0)
