@@ -391,12 +391,20 @@ double TorchQMForceImpl::computeForce(
         device = torch::kCPU;
     }
 
+    // Move the Torch module to the correct device. Annoyingly, we have to
+    // re-load the module if the device has changed. This is because it
+    // appears that the overloaded .to() method isn't called via C++.
+    if (device != this->device)
+    {
+        this->torch_module = torch::jit::load(this->getOwner().getModulePath().toStdString());
+        this->torch_module.eval();
+        this->torch_module.to(device);
+        this->device = device;
+    }
+
     // If this is the first step, then setup information for the neighbour list.
     if (this->step_count == 0)
     {
-        // Move the Torch module to the correct device.
-        this->torch_module.to(device);
-
         // Store the cutoff as a double in Angstom.
         this->cutoff = this->owner.getCutoff().value();
 
