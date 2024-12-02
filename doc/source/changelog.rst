@@ -21,6 +21,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Expose missing ``timeout`` kwarg in :meth:`dynamics.minimise()` method.
 * Expose missing ``include_constrained_energies`` kwarg in minimisation function.
 * Make minimisation function settings consistent across API.
+* Reload TorchQMForce module if OpenMM platform changes.
+* Fix calculation of non-equilibrium work when starting from QM state.
 
 `2024.3.0 <https://github.com/openbiosim/sire/compare/2024.2.0...2024.3.0>`__ - October 2024
 --------------------------------------------------------------------------------------------
