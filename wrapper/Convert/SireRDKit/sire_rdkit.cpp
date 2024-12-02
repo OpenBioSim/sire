@@ -711,7 +711,7 @@ namespace SireRDKit
                 bondtype = string_to_bondtype(bond.property(map["order"]).asA<SireMol::BondOrder>().toRDKit());
 
                 // one bond has bond info, so assume that all do
-                has_bond_info = false;
+                has_bond_info = true;
             }
             catch (...)
             {
