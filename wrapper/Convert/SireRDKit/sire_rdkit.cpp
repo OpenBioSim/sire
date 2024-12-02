@@ -748,6 +748,7 @@ namespace SireRDKit
             molecule.addBond(bond.atom0().index().value(),
                              bond.atom1().index().value(),
                              bondtype);
+            molecule.getBondWithIdx(i)->setStereo(stereo);
         }
 
         if (has_coords)
