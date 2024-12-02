@@ -640,9 +640,6 @@ namespace SireRDKit
 
             a->setAtomicNum(element.nProtons());
 
-            // don't automatically add hydrogens to this atom
-            a->setNoImplicit(true);
-
             elements.append(element);
 
             try
