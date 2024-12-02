@@ -853,6 +853,19 @@ namespace SireRDKit
         {
         }
 
+        // try assigning stereochemistry from 3D coordinates as it is the most
+        // reliable way to do it
+        if (has_coords)
+        {
+            try
+            {
+                RDKit::MolOps::assignStereochemistryFrom3D(molecule);
+            }
+            catch (...)
+            {
+            }
+        }
+
         return ROMOL_SPTR(new RDKit::ROMol(molecule));
     }
 
