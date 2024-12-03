@@ -36,7 +36,9 @@ def boresch(
     Create a set of Boresch restraints that will restrain the 6
     external degrees of freedom of the ligand relative to the receptor.
     All of the atoms in both 'ligand' and 'receptor' must be contained in
-    'mols'.
+    'mols'. Note that restraint energies are defined as k*x**2 (so forces
+    are defined as 2*k*x) and hence the 'kr', 'ktheta' and 'kphi' values are
+    half the force constants for the distance, angle and torsion restraints.
 
     The BoreschRestraint will be a set of six restraints between
     three identified ligand atoms, and three identified receptor
@@ -47,7 +49,7 @@ def boresch(
     2. Two angle restraints, with specified force constants (ktheta)
        and equilibrium angles (theta0) parameters.
     3. Three torsion restraints, with specified force constants (kphi)
-         and equilibrium angles (phi0) parameters.
+       and equilibrium angles (phi0) parameters.
 
     This will create a single BoreschRestraint, which will be passed
     back in a BoreschRestraints object.
@@ -64,20 +66,20 @@ def boresch(
         The ligand atoms to restrain.
 
     kr : str or SireUnits::Dimension::GeneralUnit, optional
-        The force constant for the distance restraint. If None, this will
-        default to 10 kcal mol-1 A-2. Default is None.
+        Half the force constant for the distance restraint. If None, this will
+        default to 5 kcal mol-1 A-2. Default is None.
 
     ktheta : str or SireUnits::Dimension::GeneralUnit or list of str or SireUnits::Dimension::GeneralUnit, optional
-        The force constants for the angle restraints, in the order kthetaA,
-        kthetaB If None, this will default to 100 kcal mol-1 rad-2 for
+        Half the force constants for the angle restraints, in the order kthetaA,
+        kthetaB If None, this will default to 50 kcal mol-1 rad-2 for
         both angle restraints.  If a list, then this should be a list of
         length 2 containing the force constants for the two angle
         restraints. If a single value, then this will be used for both
         angle restraints. Default is None.
 
     kphi : str or SireUnits::Dimension::GeneralUnit or list of str or SireUnits::Dimension::GeneralUnit, optional
-        The force constants for the torsion restraints, in the order kthetaA,
-        kthetaB, kthetaC. If None, this will default to 100 kcal mol-1 rad-2
+        Half the force constants for the torsion restraints, in the order kthetaA,
+        kthetaB, kthetaC. If None, this will default to 50 kcal mol-1 rad-2
         for all three torsion restraints.  If a list, then this should be a
         list of length 3 containing the force constants for the three
         torsion restraints. If a single value, then this will be used for
@@ -173,8 +175,8 @@ def boresch(
 
     from .. import measure
 
-    default_distance_k = u("10 kcal mol-1 A-2")
-    default_angle_k = u("100 kcal mol-1 rad-2")
+    default_distance_k = u("5 kcal mol-1 A-2")
+    default_angle_k = u("50 kcal mol-1 rad-2")
 
     # Use the user-specified equilibrium values if they are provided.
     distance = [[ligand[0], receptor[0]]]
@@ -380,8 +382,10 @@ def distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):
     Create a set of distance restraints from all of the atoms in 'atoms0'
     to all of the atoms in 'atoms1' where all atoms are
     contained in the container 'mols', using the
-    passed values of the force constant 'k' and equilibrium
-    bond length r0.
+    passed values of 'k' and equilibrium bond length r0.
+    Note that 'k' corresponds to half the force constant, because
+    the restraint energy is defined as k*(r - r0)**2 (hence the force is
+    defined as 2*k*(r-r0)).
 
     These restraints will be per atom-atom distance. If a list of k and/or r0
     values are passed, then different values could be used for
@@ -489,8 +493,11 @@ def positional(mols, atoms, k=None, r0=None, position=None, name=None, map=None)
     """
     Create a set of position restraints for the atoms specified in
     'atoms' that are contained in the container 'mols', using the
-    passed values of the force constant 'k' and flat-bottom potential
-    well-width 'r0' for the restraints.
+    passed values of 'k' and flat-bottom potential
+    well-width 'r0' for the restraints. Note that 'k' values
+    correspond to half the force constants for the harmonic
+    restraints, because the harmonic restraint energy is defined as
+    k*(r - r0)**2 (hence the force is defined as 2*(r - r0)).
 
     These restraints will be per atom. If a list of k and/or r0
     values are passed, then different values could be used for
