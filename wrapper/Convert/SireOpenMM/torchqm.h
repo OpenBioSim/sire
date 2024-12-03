@@ -296,6 +296,7 @@ namespace SireOpenMM
         double neighbour_list_cutoff;
         QSet<int> neighbour_list;
         int max_num_mm=0;
+        c10::DeviceType device;
     };
 #endif
 
