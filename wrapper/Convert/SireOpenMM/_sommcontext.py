@@ -264,6 +264,8 @@ class SOMMContext(_Context):
         # the context.
         if rest2_scale is None:
             rest2_scale = self._rest2_scale
+        else:
+            self._rest2_scale = rest2_scale
 
         self._lambda_value = self._lambda_lever.set_lambda(
             self,
