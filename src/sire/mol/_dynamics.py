@@ -634,8 +634,10 @@ class DynamicsData:
 
             lambda_value = s.clamp(lambda_value)
 
-            if (not self._schedule_changed) and (
-                lambda_value == self._omm_mols.get_lambda()
+            if (
+                (not self._schedule_changed)
+                and (lambda_value == self._omm_mols.get_lambda())
+                and (rest2_scale == self._omm_mols.get_rest2_scale())
             ):
                 # nothing to do
                 return
