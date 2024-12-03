@@ -235,11 +235,6 @@ class DynamicsData:
             from ..convert import to
 
             self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
-
-            # Reset the lambda value to the initial value so that any REST2
-            # scaling can be applied.
-            self._omm_mols.set_lambda(self._omm_mols.get_lambda())
-
             self._clear_state()
 
             if self._ffinfo.space().is_periodic():

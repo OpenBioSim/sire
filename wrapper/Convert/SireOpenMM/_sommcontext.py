@@ -90,6 +90,7 @@ class SOMMContext(_Context):
             self._lambda_value = self._lambda_lever.set_lambda(
                 self,
                 lambda_value=lambda_value,
+                rest2_scale=self._rest2_scale,
                 update_constraints=True,
             )
 
