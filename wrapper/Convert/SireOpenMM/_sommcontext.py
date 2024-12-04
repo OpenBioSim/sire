@@ -266,7 +266,12 @@ class SOMMContext(_Context):
         if rest2_scale is None:
             rest2_scale = self._rest2_scale
         else:
-            self._rest2_scale = rest2_scale
+            if rest2_scale < 1.0:
+                raise ValueError("'rest2_scale' must be >= 1.0")
+
+        if (lambda_value == self._lambda_value) and (rest2_scale == self._rest2_scale):
+            # Nothing to do.
+            return
 
         self._lambda_value = self._lambda_lever.set_lambda(
             self,
@@ -276,8 +281,9 @@ class SOMMContext(_Context):
         )
 
         # Update any additional parameters in the REST2 region.
-        if self._has_rest2_selection:
+        if self._has_rest2_selection and rest2_scale != self._rest2_scale:
             self._update_rest2(lambda_value, rest2_scale)
+            self._rest2_scale = rest2_scale
 
     def get_rest2_scale(self):
         """
@@ -289,14 +295,7 @@ class SOMMContext(_Context):
         """
         Set the temperature scale factor for the REST2 region.
         """
-        if rest2_scale < 1.0:
-            raise ValueError("'rest2_scale' must be >= 1.0")
-
-        if self._rest2_scale != rest2_scale:
-            self._set_lambda(self._lambda_value, rest2_scale=rest2_scale)
-            self._update_rest2(self._lambda_value, rest2_scale)
-
-        self._rest2_scale = rest2_scale
+        self._set_lambda(self._lambda_value, rest2_scale=rest2_scale)
 
     def set_temperature(self, temperature, rescale_velocities=True):
         """
