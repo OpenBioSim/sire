@@ -101,7 +101,7 @@ keyword argument. This specifies a selection for the atoms that should be
 fixed during simulation. Here we will fix all atoms more than 20 Å from the
 reaction site:
 
->>> d = mols.dynamics(
+>>> d = qm_mols.dynamics(
 ...     timestep="1fs",
 ...     constraint="none",
 ...     perturbable_constraint="none",
