@@ -86,6 +86,10 @@ energy calculations.
 ...     platform="cpu",
 ... )
 
+Next we will minimise the system ready for simulation:
+
+>>> d.minimise()
+
 We can now run the simulation. The options below specify the run time, the
 frequency at which trajectory frames are saved, and the frequency at which
 energies are recorded. The ``energy_frequency`` also specifies the frequency

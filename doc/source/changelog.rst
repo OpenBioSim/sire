@@ -22,8 +22,14 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Expose missing ``include_constrained_energies`` kwarg in minimisation function.
 * Make minimisation function settings consistent across API.
 * Don't automatically save energies and frames when ``dynamics.run()`` returns.
-* Fix thread safety issue in Sire OpenMM minimiser.
 * Improved handling of NaN errors during dynamics.
+* Reload TorchQMForce module if OpenMM platform changes.
+* Fix calculation of non-equilibrium work when starting from QM state.
+* Fix stereochemistry in RDKit molecule conversion.
+* Fixed :func:`sire.restraints.get_standard_state_correction` to be consistent with the definition of
+  the "force constanst" as ``F = 2 ** k ** x`` (rather than ``F = k ** x``). Updated docstrings and
+  restraints documentation to make it clear how the force constants are defined.
+* Fix thread safety issue in Sire OpenMM minimiser.
 
 `2024.3.0 <https://github.com/openbiosim/sire/compare/2024.2.0...2024.3.0>`__ - October 2024
 --------------------------------------------------------------------------------------------

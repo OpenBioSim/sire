@@ -13,6 +13,13 @@ in the :mod:`sire.restraints` module. These functions return
 :class:`~sire.mm.Restraints` objects that contain all of the information that
 needs to be passed to OpenMM to add the restraints to the system.
 
+.. note::
+
+   For all harmonic restraints, the restraint energy is defined as ``E = k * x ** 2``,
+   and not as ``E = 0.5 * k * x ** 2``. Hence, the force is ``F = 2 * k * x`` and all
+   ``k`` values supplied to the restraints functions are half the value of the force
+   constants.
+
 Positional Restraints
 ---------------------
 
@@ -65,11 +72,11 @@ PositionalRestraints( size=3
 2: PositionalRestraint( 14 => ( 15.3698, 4.19397, 16.434 ), k=150 kcal mol-1 Å-2 : r0=0 Å )
 )
 
-The default force constant is 150 kcal mol-1 Å-2. By default, the
+The default half force constant is 150 kcal mol-1 Å-2. By default, the
 atoms are restrained to their current positions, and are held exactly in
 those positions (hence why the ``r0=0 Å`` in the output above).
 
-You can set the force constant and width of the half-harmonic restraint
+You can set the half force constant and width of the half-harmonic restraint
 used to hold the atoms in position using the ``k`` and ``r0`` arguments, e.g.
 
 >>> restraints = sr.restraints.positional(mols, atoms="resname ALA and element C",
@@ -177,7 +184,7 @@ BondRestraints( size=1
 
 creates a single harmonic distance (or bond) restraint that acts between
 atoms 0 and 1. By default, the equilibrium distance (r0) is the current
-distance between the atoms (1.09 Å), and the force constant (k) is
+distance between the atoms (1.09 Å), and the half force constant (k) is
 150 kcal mol-1 Å-2.
 
 You can set these via the ``k`` and ``r0`` arguments, e.g.
@@ -243,9 +250,9 @@ in the ligand. For more detail, please see J. Phys. Chem. B 2003, 107, 35, 9535�
 To create a Boresch restraint, you need to specify the receptor and ligand anchor
 atoms (note that the order of the atoms is important). Like the distance restraints,
 the atoms can be specified using a search string, passing lists of atom indexes, or 
-molecule views holding the atoms. You can also specify the force constants and equilibrium
-values for the restraints. If not supplied, default force constants of 10 kcal mol-1 Å-2
-and 100 kcal mol-1 rad-2 are used for the distance and angle restraints, respectively,
+molecule views holding the atoms. You can also specify the half force constants and equilibrium
+values for the restraints. If not supplied, default half force constants of 5 kcal mol-1 Å-2
+and 50 kcal mol-1 rad-2 are used for the distance and angle restraints, respectively,
 and the equilibrium values are set to the current values of the distances and angles in
 the system supplied. For example,
 
@@ -253,13 +260,13 @@ the system supplied. For example,
 >>> boresch_restraint = boresch_restraints[0]
 >>> print(boresch_restraint)
 BoreschRestraint( [1574, 1554, 1576] => [4, 3, 5],
-                  k=[10 kcal mol-1 Å-2, 0.0304617 kcal mol-1 °-2, 0.0304617 kcal mol-1 °-2,
-                   0.0304617 kcal mol-1 °-2, 0.0304617 kcal mol-1 °-2, 0.0304617 kcal mol-1 °-2]
+                  k=[5 kcal mol-1 Å-2, 0.0152309 kcal mol-1 °-2, 0.0152309 kcal mol-1 °-2, 
+                  0.0152309 kcal mol-1 °-2, 0.0152309 kcal mol-1 °-2, 0.0152309 kcal mol-1 °-2]
                   r0=15.1197 Å, theta0=[80.5212°, 59.818°],
                   phi0=[170.562°Ⱐ128.435°Ⱐ192.21°] )
 
 creates a Boresch restraint where the receptor anchor atoms are r1 = 1574, r2 = 1554, and r3 = 1576,
-and the ligand anchor atoms are l1 = 4, l2 = 3, and l3 = 5. The default force constants have been set
+and the ligand anchor atoms are l1 = 4, l2 = 3, and l3 = 5. The default half force constants have been set
 and the equilibrium values have been set to the current values of the distances and angles in the
 system supplied.
 
@@ -268,10 +275,10 @@ system supplied.
    Boresch restraints can be subject to instabilities if any three contiguous anchor points
    approach collinearity (J. Chem. Theory Comput. 2023, 19, 12, 3686–3704). It is important to
    prevent this by ensuring the associated angles are sufficiently far from 0 or 180 degrees,
-   and that the `ktheta` force constants are high enough. Sire will raise a warning if the 
-   `theta0` values are too close to 0 or 180 degrees for the given temperature and force constants.
+   and that the `ktheta` half force constants are high enough. Sire will raise a warning if the 
+   `theta0` values are too close to 0 or 180 degrees for the given temperature and half force constants.
 
-Alternatively, we could have explicitly set the force constants and equilibrium values, e.g.
+Alternatively, we could have explicitly set the half force constants and equilibrium values, e.g.
 
 >>> boresch_restraints = sr.restraints.boresch(mols, receptor=[1574, 1554, 1576], ligand=[4,3,5],
                                                kr = "6.2012 kcal mol-1 A-2",

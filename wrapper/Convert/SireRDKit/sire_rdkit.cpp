@@ -640,9 +640,6 @@ namespace SireRDKit
 
             a->setAtomicNum(element.nProtons());
 
-            // don't automatically add hydrogens to this atom
-            a->setNoImplicit(true);
-
             elements.append(element);
 
             try
@@ -711,7 +708,7 @@ namespace SireRDKit
                 bondtype = string_to_bondtype(bond.property(map["order"]).asA<SireMol::BondOrder>().toRDKit());
 
                 // one bond has bond info, so assume that all do
-                has_bond_info = false;
+                has_bond_info = true;
             }
             catch (...)
             {
@@ -748,6 +745,7 @@ namespace SireRDKit
             molecule.addBond(bond.atom0().index().value(),
                              bond.atom1().index().value(),
                              bondtype);
+            molecule.getBondWithIdx(i)->setStereo(stereo);
         }
 
         if (has_coords)
@@ -853,6 +851,19 @@ namespace SireRDKit
         }
         catch (...)
         {
+        }
+
+        // try assigning stereochemistry from 3D coordinates as it is the most
+        // reliable way to do it
+        if (has_coords)
+        {
+            try
+            {
+                RDKit::MolOps::assignStereochemistryFrom3D(molecule);
+            }
+            catch (...)
+            {
+            }
         }
 
         return ROMOL_SPTR(new RDKit::ROMol(molecule));
