@@ -112,8 +112,12 @@ QM engine when creating a dynamics object, for example:
 ...     platform="cpu",
 ... )
 
-For QM/MM simulations it is recommended to use a 1 femtosecond timestep and no
-constraints. The simulation can then be run as usual:
+Next we will minimise the system ready for simulation:
+
+>>> d.minimise()
+
+When runinng QM/MM simulations it is recommended to use a 1 femtosecond timestep
+and no constraints. The simulation can then be run as usual:
 
 >>> d.run("100ps", energy_frequency="1ps", frame_frequency="1ps")
 

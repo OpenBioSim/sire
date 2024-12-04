@@ -50,6 +50,7 @@
 #include <limits.h> // CHAR_BIT
 #include <sstream>
 #include <stdint.h> // uint64_t
+#include <Python.h>
 
 inline auto is_ieee754_nan(double const x)
     -> bool
@@ -91,7 +92,6 @@ inline auto is_ieee754_nan(double const x)
 #include <algorithm>
 
 #include "SireError/errors.h"
-#include "SireBase/releasegil.h"
 
 #include "SireBase/progressbar.h"
 #include "SireUnits/units.h"
@@ -619,6 +619,8 @@ namespace SireOpenMM
                                     double starting_k, double ratchet_scale,
                                     double max_constraint_error, double timeout)
     {
+        PyThreadState *_save = PyEval_SaveThread();
+
         if (max_iterations < 0)
         {
             max_iterations = std::numeric_limits<int>::max();
@@ -628,8 +630,6 @@ namespace SireOpenMM
         {
             timeout = std::numeric_limits<double>::max();
         }
-
-        auto gil = SireBase::release_gil();
 
         const OpenMM::System &system = context.getSystem();
 
@@ -1104,6 +1104,8 @@ namespace SireOpenMM
                                                "while simultaneously satisfying the constraints."),
                                            CODELOC);
         }
+
+        PyEval_RestoreThread(_save);
 
         return data.getLog().join("\n");
     }
