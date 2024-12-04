@@ -413,7 +413,11 @@ class DynamicsData:
                                 * kcal_per_mol
                             )
 
-                self._omm_mols.set_lambda(sim_lambda_value, update_constraints=False)
+                self._omm_mols.set_lambda(
+                    sim_lambda_value,
+                    rest2_scale=sim_rest2_scale,
+                    update_constraints=False,
+                )
 
             if self._is_interpolate:
                 self._energy_trajectory.set(
