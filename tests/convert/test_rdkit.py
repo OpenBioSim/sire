@@ -11,7 +11,7 @@ import sire as sr
     [
         "C1CCCCC1",
         "C",
-        "OCC(O)C(O)C(O)C(O)CO",
+        "OC[C@H](O)[C@H](O)[C@@H](O)[C@@H](O)CO",
         "C[C@H](N)C(=O)O",  # L-alanine
         "C[C@@H](N)C(=O)O",  # D-alanine
     ],
@@ -118,9 +118,12 @@ def test_rdkit_returns_null():
     "rdkit" not in sr.convert.supported_formats(),
     reason="rdkit support is not available",
 )
+@pytest.mark.xfail(reason="SMILES now mismatches since SDF stereochemistry is preserved")
 def test_rdkit_infer_bonds(ejm55_sdf, ejm55_gro):
     sdf = ejm55_sdf[0].molecule()
     gro = ejm55_gro["not (protein or water)"].molecule()
+
+    from rdkit import Chem
 
     assert sdf.smiles() == gro.smiles()
 

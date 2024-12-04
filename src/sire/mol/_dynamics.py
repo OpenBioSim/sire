@@ -328,7 +328,10 @@ class DynamicsData:
             if self._is_interpolate:
                 nrg = nrgs["potential"]
 
-                if sim_lambda_value != 0.0:
+                if (
+                    len(self._lambda_interpolate) == 2
+                    and sim_lambda_value != self._lambda_interpolate[0]
+                ):
                     self._work += delta_lambda * (nrg - self._nrg_prev)
                 self._nrg_prev = nrg
                 nrgs["work"] = self._work

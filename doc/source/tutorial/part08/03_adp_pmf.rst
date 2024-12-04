@@ -55,10 +55,10 @@ calculation.
 We can now create a ``dynamics`` that will create an ``OpenMM`` context for us
 and can be used to run a simulation:
 
->>> d = mols.dynamics(
+>>> d = qm_mols.dynamics(
 ...     timestep="1fs",
 ...     constraint="none",
-...     engine=engine,
+...     qm_engine=engine,
 ...     platform="cpu",
 ... )
 
