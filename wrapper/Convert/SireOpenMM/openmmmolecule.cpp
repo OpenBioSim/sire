@@ -1475,6 +1475,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
 
     perturbed->dih_params = dih_params_1;
     perturbed->is_improper = is_improper_1;
+    is_improper = is_improper_1;
 
     // now align all of the exceptions - this should allow the bonding
     // to change during the perturbation
@@ -2234,6 +2235,7 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
     perturbable_constraints = mol.perturbable_constraints;
 
     is_improper = mol.is_improper;
+    is_rest2 = mol.is_rest2;
 
     bool fix_perturbable_zero_sigmas = false;
 
@@ -2301,7 +2303,9 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMole
       exception_atoms(other.exception_atoms), exception_idxs(other.exception_idxs),
       perturbable_constraints(other.perturbable_constraints),
       constraint_idxs(other.constraint_idxs),
-      start_atom_idx(other.start_atom_idx)
+      start_atom_idx(other.start_atom_idx),
+      is_improper(other.is_improper),
+      is_rest2(other.is_rest2)
 {
 }
 
