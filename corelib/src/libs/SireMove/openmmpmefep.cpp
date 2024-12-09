@@ -2954,10 +2954,6 @@ void OpenMMPMEFEP::createContext(IntegratorWorkspace &workspace, SireUnits::Dime
         system_openmm->setDefaultPeriodicBoxVectors(OpenMM::Vec3(Box_x_Edge_Length, 0, 0),
                                                     OpenMM::Vec3(0, Box_y_Edge_Length, 0),
                                                     OpenMM::Vec3(0, 0, Box_z_Edge_Length));
-
-        openmm_context->setPeriodicBoxVectors(OpenMM::Vec3(Box_x_Edge_Length, 0, 0),
-                                              OpenMM::Vec3(0, Box_y_Edge_Length, 0),
-                                              OpenMM::Vec3(0, 0, Box_z_Edge_Length));
     }
     // TriclinicBox
     else if (ptr_sys.property(space_property).isA<TriclinicBox>())
@@ -2983,9 +2979,6 @@ void OpenMMPMEFEP::createContext(IntegratorWorkspace &workspace, SireUnits::Dime
 
         system_openmm->setDefaultPeriodicBoxVectors(OpenMM::Vec3(xx, xy, xz), OpenMM::Vec3(yx, yy, yz),
                                                     OpenMM::Vec3(zx, zy, zz));
-
-        openmm_context->setPeriodicBoxVectors(OpenMM::Vec3(xx, xy, xz), OpenMM::Vec3(yx, yy, yz),
-                                              OpenMM::Vec3(zx, zy, zz));
     }
 
     openmm_context->reinitialize();
