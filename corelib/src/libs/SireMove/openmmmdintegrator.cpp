@@ -1157,9 +1157,9 @@ void OpenMMMDIntegrator::createContext(IntegratorWorkspace &workspace, SireUnits
 
             // Set Periodic Box Condition
 
-            openmm_context->setPeriodicBoxVectors(OpenMM::Vec3(Box_x_Edge_Length, 0, 0),
-                                                  OpenMM::Vec3(0, Box_y_Edge_Length, 0),
-                                                  OpenMM::Vec3(0, 0, Box_z_Edge_Length));
+            system_openmm->setDefaultPeriodicBoxVectors(OpenMM::Vec3(Box_x_Edge_Length, 0, 0),
+                                                        OpenMM::Vec3(0, Box_y_Edge_Length, 0),
+                                                        OpenMM::Vec3(0, 0, Box_z_Edge_Length));
         }
         // TriclinicBox.
         else if (ptr_sys.property(space_property).isA<TriclinicBox>())
@@ -1182,11 +1182,12 @@ void OpenMMMDIntegrator::createContext(IntegratorWorkspace &workspace, SireUnits
             const double zy = v2.y() * OpenMM::NmPerAngstrom;
             const double zz = v2.z() * OpenMM::NmPerAngstrom;
 
-            openmm_context->setPeriodicBoxVectors(OpenMM::Vec3(xx, xy, xz), OpenMM::Vec3(yx, yy, yz),
-                                                  OpenMM::Vec3(zx, zy, zz));
+            system_openmm->setDefaultPeriodicBoxVectors(OpenMM::Vec3(xx, xy, xz), OpenMM::Vec3(yx, yy, yz),
+                                                        OpenMM::Vec3(zx, zy, zz));
         }
 
         is_periodic = true;
+        openmm_context->reinitialize();
     }
 
     double AKMAPerPs = 0.04888821;

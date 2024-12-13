@@ -16,19 +16,36 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 ---------------------------------------------------------------------------------------------
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
-* Fixed instantiaton of ``QByteArray`` in ``Sire::Mol::Frame::toByteArray`` and count bytes with ``QByteArray::size``.
-* Increase timeout before terminating ``QThread`` objects during ``PageCache`` cleanup.
-* Expose missing ``timeout`` kwarg in :meth:`dynamics.minimise()` method.
-* Expose missing ``include_constrained_energies`` kwarg in minimisation function.
-* Make minimisation function settings consistent across API.
+
+* Fixed update of triclinic box vectors in ``SOMD`` following ``OpenMM`` bug fix.
+
 * Don't automatically save energies and frames when ``dynamics.run()`` returns.
+
 * Improved handling of NaN errors during dynamics.
+
+`2024.3.1 <https://github.com/openbiosim/sire/compare/2024.3.0...2024.3.1>`__ - December 2024
+--------------------------------------------------------------------------------------------
+
+* Fixed instantiaton of ``QByteArray`` in ``Sire::Mol::Frame::toByteArray`` and count bytes with ``QByteArray::size``.
+
+* Increase timeout before terminating ``QThread`` objects during ``PageCache`` cleanup.
+
+* Expose missing ``timeout`` kwarg in :meth:`dynamics.minimise()` method.
+
+* Expose missing ``include_constrained_energies`` kwarg in minimisation function.
+
+* Make minimisation function settings consistent across API.
+
 * Reload TorchQMForce module if OpenMM platform changes.
+
 * Fix calculation of non-equilibrium work when starting from QM state.
+
 * Fix stereochemistry in RDKit molecule conversion.
+
 * Fixed :func:`sire.restraints.get_standard_state_correction` to be consistent with the definition of
   the "force constanst" as ``F = 2 ** k ** x`` (rather than ``F = k ** x``). Updated docstrings and
   restraints documentation to make it clear how the force constants are defined.
+
 * Fix thread safety issue in Sire OpenMM minimiser.
 
 `2024.3.0 <https://github.com/openbiosim/sire/compare/2024.2.0...2024.3.0>`__ - October 2024
