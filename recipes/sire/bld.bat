@@ -1,4 +1,4 @@
 :: Sire build script for Windows.
 
 :: Build and install Sire.
-python setup.py install --skip-deps
+python setup.py install --skip-deps --npycores 1
