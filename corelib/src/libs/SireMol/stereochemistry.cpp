@@ -75,6 +75,8 @@ Stereochemistry::Stereochemistry(const QString &str) : ConcreteProperty<Stereoch
 
     if (s == "up")
         this->stereo_type = 1;
+    else if (s == "cis or trans")
+        this->stereo_type = 3;
     else if (s == "down")
         this->stereo_type = 6;
     else if (s == "not stereo")
@@ -90,14 +92,14 @@ Stereochemistry Stereochemistry::fromSDF(int value)
 {
     Stereochemistry ret;
 
-    if (value == 0 or value == 1 or value == -1 or value == 6)
+    if (value == 0 or value == 1 or value == -1 or value == 3 or value == 6)
     {
         ret.stereo_type = value;
     }
     else
     {
         throw SireError::invalid_arg(QObject::tr("Invalid stereo type '%1'. Should be an integer in "
-                                                 "[-1, 0, 1, 6]")
+                                                 "[-1, 0, 1, 3, 6]")
                                          .arg(value),
                                      CODELOC);
     }
@@ -194,6 +196,8 @@ QString Stereochemistry::toString() const
         return "not stereo";
     case 1:
         return "up";
+    case 3:
+        return "cis or trans";
     case 6:
         return "down";
     case -1:
@@ -220,6 +224,8 @@ int Stereochemistry::toSDF() const
     {
     case 1:
         return 1;
+    case 3:
+        return 3;
     case 6:
         return 6;
     default:
@@ -256,6 +262,12 @@ Stereochemistry Stereochemistry::up()
     return Stereochemistry::fromSDF(1);
 }
 
+/** Return a cis or trans Stereochemistry */
+Stereochemistry Stereochemistry::cisOrTrans()
+{
+    return Stereochemistry::fromSDF(3);
+}
+
 /** Return a down Stereochemistry */
 Stereochemistry Stereochemistry::down()
 {
@@ -284,6 +296,12 @@ bool Stereochemistry::isDefined() const
 bool Stereochemistry::isUp() const
 {
     return this->stereo_type == 1;
+}
+
+/** Return whether or not this is a cis or trans bond */
+bool Stereochemistry::isCisOrTrans() const
+{
+    return this->stereo_type == 3;
 }
 
 /** Return whether or not this is a down bond */

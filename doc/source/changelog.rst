@@ -19,6 +19,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed update of triclinic box vectors in ``SOMD`` following ``OpenMM`` bug fix.
 
+* Handle cis/trans double bond stereochemistry values in SDF bond blocks.
+
 `2024.3.1 <https://github.com/openbiosim/sire/compare/2024.3.0...2024.3.1>`__ - December 2024
 --------------------------------------------------------------------------------------------
 
