@@ -49,6 +49,7 @@
 #include "tostring.h"
 
 #include "openmmmolecule.h"
+#include "pyqm.h"
 
 #include <QDebug>
 
@@ -114,6 +115,7 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
                                        .toStdString();
 
     auto *restraintff = new OpenMM::CustomCompoundBondForce(6, energy_expression);
+    restraintff->setName("BoreschRestraintForce");
 
     restraintff->addPerBondParameter("rho");
     restraintff->addPerBondParameter("kr");
@@ -210,6 +212,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
                                        .toStdString();
 
     auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
+    restraintff->setName("BondRestraintForce");
 
     restraintff->addPerBondParameter("rho");
     restraintff->addPerBondParameter("k");
@@ -284,6 +287,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
                                        .toStdString();
 
     auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
+    restraintff->setName("PositionalRestraintForce");
 
     restraintff->addPerBondParameter("rho");
     restraintff->addPerBondParameter("k");
@@ -317,7 +321,8 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     auto ghost_nonghostff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
 
     std::vector<double> custom_params = {1.0, 0.0, 0.0};
-    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0, 0.0};
+    // Define null parameters used to add these particles to the ghost forces (5 total)
+    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     // we need to add all of the positions as anchor particles
     for (const auto &restraint : atom_restraints)
@@ -870,6 +875,23 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
     OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
 
+    // now create the engine for computing QM forces on atoms
+    QMForce *qmff = 0;
+
+    if (map.specified("qm_engine"))
+    {
+        try
+        {
+            auto &engine = map["qm_engine"].value().asA<QMEngine>();
+            qmff = engine.createForce();
+            qmff->setName("QMForce");
+        }
+        catch (...)
+        {
+            throw SireError::incompatible_error(QObject::tr("Invalid QM engine!"), CODELOC);
+        }
+    }
+
     // end of stage 2 - we now have the base forces
 
     ///
@@ -892,9 +914,16 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     }
     else if (any_perturbable)
     {
-        // use a standard morph if we have an alchemical perturbation
+        // use a standard morph if we have an alchemical or QM perturbation
         lambda_lever.setSchedule(
             LambdaSchedule::standard_morph());
+    }
+
+    // Add any QM force first so that we can guarantee that it is index zero.
+    if (qmff != 0)
+    {
+        lambda_lever.setForceIndex("qmff", system.addForce(qmff));
+        lambda_lever.addLever("qm_scale");
     }
 
     // We can now add the standard forces to the OpenMM::System.
@@ -1042,7 +1071,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r_safe^2))-(kappa/r_safe));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha*alpha)+r_safe^2))-(kappa/r_safe));"
                                   "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                   "sig6=(sigma^6)/(%3*sigma^6 + r_safe^6);"
                                   "r_safe=max(r, 0.001);")
@@ -1055,7 +1084,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r_safe^2))-(kappa/r_safe));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha*alpha)+r_safe^2))-(kappa/r_safe));"
                                   "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                   "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
                                   "r_safe=max(r, 0.001);"
@@ -1067,6 +1096,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
 
         ghost_14ff = new OpenMM::CustomBondForce(nb14_expression);
+        ghost_14ff->setName("Ghost14BondForce");
 
         ghost_14ff->addPerBondParameter("q");
         ghost_14ff->addPerBondParameter("sigma");
@@ -1102,7 +1132,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
                                      "sig6=(sigma^6)/(%3*sigma^6 + r_safe^6);"
                                      "r_safe=max(r, 0.001);"
@@ -1140,7 +1170,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
                                      "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
                                      "delta=%3*max_alpha;"
@@ -1155,7 +1185,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
 
         ghost_ghostff = new OpenMM::CustomNonbondedForce(clj_expression);
+        ghost_ghostff->setName("GhostGhostNonbondedForce");
         ghost_nonghostff = new OpenMM::CustomNonbondedForce(clj_expression);
+        ghost_nonghostff->setName("GhostNonGhostNonbondedForce");
 
         ghost_ghostff->addPerParticleParameter("q");
         ghost_ghostff->addPerParticleParameter("half_sigma");
@@ -1216,6 +1248,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // start_index keeps track of the index of the first atom in each molecule
     int start_index = 0;
 
+    // this is the list of atoms added, in atom order
+    QList<SireMol::Selector<SireMol::Atom>> order_of_added_atoms;
+
     // get the 1-4 scaling factors from the first molecule
     const double coul_14_scl = openmm_mols_data[0].ffinfo.electrostatic14ScaleFactor();
     const double lj_14_scl = openmm_mols_data[0].ffinfo.vdw14ScaleFactor();
@@ -1224,9 +1259,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // particle in that molecule
     QVector<int> start_indexes(nmols);
 
-    // the index to the perturbable molecule for the specified molecule
+    // the index to the perturbable or QM molecule for the specified molecule
     // (i.e. the 5th perturbable molecule is the 10th molecule in the System)
     QHash<int, int> idx_to_pert_idx;
+    QHash<int, int> idx_to_qm_idx;
 
     // just a holder for all of the custom parameters for the
     // ghost forces (prevents us having to continually re-allocate it)
@@ -1268,6 +1304,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         start_indexes[i] = start_index;
         const auto &mol = openmm_mols_data[i];
 
+        order_of_added_atoms.append(mol.atoms);
+
         // double-check that the molecule has a compatible forcefield with
         // the other molecules in this system
         if (std::abs(mol.ffinfo.electrostatic14ScaleFactor() - coul_14_scl) > 0.001 or
@@ -1284,14 +1322,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                                 CODELOC);
         }
 
-        // this hash holds the start indicies for the various
-        // parameters for this molecule (e.g. bond, angle, CLJ parameters)
-        // We only need to record this if this is a perturbable molecule
-        QHash<QString, qint32> start_indicies;
-
         // is this a perturbable molecule (and we haven't disabled perturbations)?
         if (any_perturbable and mol.isPerturbable())
         {
+            // this hash holds the start indicies for the various
+            // parameters for this molecule (e.g. bond, angle, CLJ parameters)
+            QHash<QString, qint32> start_indicies;
+
             // add a perturbable molecule, recording the start index
             // for each of the forcefields
             start_indicies.reserve(7);
@@ -1345,6 +1382,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // masses is used
                 const int atom_index = start_index + j;
 
+                // NEED TO UPDATE FIXED ATOMS WITH FIELD ATOMS INDEXES!!!
                 if (fixed_atoms.contains(atom_index))
                 {
                     // this is a fixed (zero mass) atom
@@ -1424,6 +1462,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // Add the particle to the system
                 const int atom_index = start_index + j;
 
+                // NEED TO UPDATE FIXED ATOMS WITH FIELD ATOMS INDEXES!!!
                 if (fixed_atoms.contains(atom_index))
                 {
                     // this is a fixed (zero mass) atom
@@ -1629,7 +1668,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                               boost::get<2>(p), 1e-9,
                                               1e-9, true);
 
-                    if (coul_14_scl != 0 or lj_14_scl != 0)
+                    // Whether this is a to/from ghost interaction.
+                    auto to_from_ghost = (from_ghost_idxs.contains(atom0) and to_ghost_idxs.contains(atom1)) or
+                                         (from_ghost_idxs.contains(atom1) and to_ghost_idxs.contains(atom0));
+
+                    if (not to_from_ghost and (coul_14_scl != 0 or lj_14_scl != 0))
                     {
                         // this is a 1-4 interaction that should be added
                         // to the ghost-14 forcefield
@@ -1691,8 +1734,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             auto pert_idx = idx_to_pert_idx.value(i, openmm_mols.count() + 1);
             lambda_lever.setExceptionIndicies(pert_idx,
-                                              "clj", exception_idxs);
-
+                                             "clj", exception_idxs);
             lambda_lever.setConstraintIndicies(pert_idx,
                                                constraint_idxs);
         }
@@ -1702,14 +1744,29 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // between from_ghosts and to_ghosts
     for (const auto &from_ghost_idx : from_ghost_idxs)
     {
+        // work out the molecule index for the from ghost atom
+        int mol_from = 0;
+        while (start_indexes[mol_from] <= from_ghost_idx and mol_from < nmols)
+            mol_from++;
+
         for (const auto &to_ghost_idx : to_ghost_idxs)
         {
+            // work out the molecule index for the to ghost atom
+            int mol_to = 0;
+            while (start_indexes[mol_to] <= to_ghost_idx and mol_to < nmols)
+                mol_to++;
+
             if (not excluded_ghost_pairs.contains(IndexPair(from_ghost_idx, to_ghost_idx)))
             {
-                ghost_ghostff->addExclusion(from_ghost_idx, to_ghost_idx);
-                ghost_nonghostff->addExclusion(from_ghost_idx, to_ghost_idx);
-                cljff->addException(from_ghost_idx, to_ghost_idx,
-                                    0.0, 1e-9, 1e-9, true);
+                // only exclude if we haven't already excluded this pair
+                // and if the two atoms are in the same molecule
+                if (mol_from == mol_to)
+                {
+                    ghost_ghostff->addExclusion(from_ghost_idx, to_ghost_idx);
+                    ghost_nonghostff->addExclusion(from_ghost_idx, to_ghost_idx);
+                    cljff->addException(from_ghost_idx, to_ghost_idx,
+                                        0.0, 1e-9, 1e-9, true);
+                }
             }
         }
     }
@@ -1836,7 +1893,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
     }
 
-    // All done - we can return the metadata (atoms are always added in
-    // molidx/atomidx order)
-    return OpenMMMetaData(mols.atoms(), coords, vels, boxvecs, lambda_lever);
+    // All done - we can return the metadata
+    return OpenMMMetaData(SireMol::SelectorM<SireMol::Atom>(order_of_added_atoms),
+                          coords, vels, boxvecs, lambda_lever);
 }

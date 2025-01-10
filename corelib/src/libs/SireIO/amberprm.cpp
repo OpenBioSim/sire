@@ -2181,7 +2181,16 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
 
     if (has_periodic_box)
     {
-        pointers[27] = 1;
+        // Orthorhombic box.
+        if (space.isA<PeriodicBox>())
+        {
+            pointers[27] = 1;
+        }
+        // General triclinic box.
+        else if (space.isA<TriclinicBox>())
+        {
+            pointers[27] = 3;
+        }
     }
 
     // here is the number of solvent molecules, and the index of the last

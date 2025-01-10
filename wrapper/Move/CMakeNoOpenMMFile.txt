@@ -3,6 +3,7 @@ set ( PYPP_OPENMM_SOURCES
     NoOpenMM/OpenMMFrEnergyST.pypp.cpp
     NoOpenMM/OpenMMFrEnergyDT.pypp.cpp
     NoOpenMM/OpenMMMDIntegrator.pypp.cpp
+    NoOpenMM/OpenMMPMEFEP.pypp.cpp
     )
 
 set( SIRE_OPENMM_LIBRARIES "" )

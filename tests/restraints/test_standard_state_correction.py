@@ -1,16 +1,16 @@
 import pytest
 
 # Boresch parameters from old test_boresch_corr SOMD test so we can compare
-# to previous results.
+# to previous results. Note that the force constants are 
 BORESCH_PARAMS_DEFAULT = {
     "receptor_selection": "atomidx 1538 or atomidx 1518 or atomidx 1540",
     "ligand_selection": "atomidx 4 or atomidx 3 or atomidx 5",
-    "kr": "50.98 kcal mol-1 A-2",
-    "ktheta": ["133.48 kcal mol-1 rad-2", "76.78 kcal mol-1 rad-2"],
+    "kr": "25.49 kcal mol-1 A-2",
+    "ktheta": ["66.74 kcal mol-1 rad-2", "38.39 kcal mol-1 rad-2"],
     "kphi": [
-        "430.72 kcal mol-1 rad-2",
-        "98.46 kcal mol-1 rad-2",
-        "99.58 kcal mol-1 rad-2",
+        "215.36 kcal mol-1 rad-2",
+        "49.23 kcal mol-1 rad-2",
+        "49.79 kcal mol-1 rad-2",
     ],
     "r0": "5.92 A",
     "theta0": ["1.85 rad", "1.59 rad"],

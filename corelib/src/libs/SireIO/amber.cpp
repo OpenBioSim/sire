@@ -2151,7 +2151,7 @@ tuple<MoleculeGroup, SpacePtr> Amber::readCrdTop(const QString &crdfile, const Q
     // Now the box information
     SpacePtr spce;
 
-    if (pointers[IFBOX] == 1)
+    if (pointers[IFBOX] == 1 or pointers[IFBOX] == 2 or pointers[IFBOX] == 3)
     {
         /** Rectangular box, dimensions read from the crd file */
         Vector dimensions(crd_box[0], crd_box[1], crd_box[2]);
@@ -2172,12 +2172,6 @@ tuple<MoleculeGroup, SpacePtr> Amber::readCrdTop(const QString &crdfile, const Q
         }
         // spce = PeriodicBox( Vector ( crdBox[0], crdBox[1], crdBox[2] ) ).asA<Space>() ;
         // qDebug() << " periodic box " << spce.toString() ;
-    }
-    else if (pointers[IFBOX] == 2)
-    {
-        /** Truncated Octahedral box*/
-        throw SireError::incompatible_error(QObject::tr("Sire does not yet support a truncated octahedral box"),
-                                            CODELOC);
     }
     else
     {

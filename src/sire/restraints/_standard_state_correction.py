@@ -150,6 +150,10 @@ def _get_boresch_standard_state_correction(restraint, temperature):
             ).value()
             force_constants.append(force_const)
 
+    # Correct "force constants" by factor of two, because the force is defined as 2kx,
+    # rather than kx.
+    force_constants = [2 * k for k in force_constants]
+
     n_nonzero_k = len(force_constants)
 
     # Calculation

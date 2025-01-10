@@ -3,18 +3,31 @@
 
 #include "SireOpenMM_registrars.h"
 
-#include "openmmmolecule.h"
+#include "qmmm.h"
+#include "pyqm.h"
 #include "lambdalever.h"
+#include "openmmmolecule.h"
+#include "torchqm.h"
 
 #include "Helpers/objectregistry.hpp"
 
 void register_SireOpenMM_objects()
 {
 
-    ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
-    ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::NullQMEngine >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::NullQMEngine >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMCallback >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMForce >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMEngine >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMCallback >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMForce >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMEngine >();
     ObjectRegistry::registerConverterFor< SireOpenMM::LambdaLever >();
     ObjectRegistry::registerConverterFor< SireOpenMM::LambdaLever >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::TorchQMForce >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::TorchQMEngine >();
 
 }
 

@@ -1579,6 +1579,8 @@ def _dynamics(
     com_reset_frequency=None,
     barostat_frequency=None,
     dynamic_constraints: bool = True,
+    qm_engine=None,
+    lambda_interpolate=None,
     map=None,
 ):
     """
@@ -1746,6 +1748,18 @@ def _dynamics(
         on a perturbable bond to equal to the value of r0 at
         that lambda value. If this is false, then the constraint
         is set based on the current length.
+
+    qm_engine:
+        A sire.qm.QMMMEngine object to used to compute QM/MM forces
+        and energies on a subset of the atoms in the system.
+
+    lambda_interpolate: float
+        The lambda value at which to interpolate the QM/MM forces and
+        energies, which can be used to perform end-state correction
+        simulations. A value of 1.0 is full QM, whereas a value of 0.0 is
+        full MM. If two values are specified, then lambda will be linearly
+        interpolated between the two values over the course of the
+        simulation, which lambda updated at the energy_frequency.
 
     map: dict
         A dictionary of additional options. Note that any options
@@ -1927,6 +1941,8 @@ def _dynamics(
         ignore_perturbations=ignore_perturbations,
         restraints=restraints,
         fixed=fixed,
+        qm_engine=qm_engine,
+        lambda_interpolate=lambda_interpolate,
         map=map,
     )
 
@@ -2139,6 +2155,9 @@ def _minimisation(
 
     if platform is not None:
         map.set("platform", str(platform))
+
+    if include_constrained_energies is not None:
+        map.set("include_constrained_energies", include_constrained_energies)
 
     return Minimisation(
         view,

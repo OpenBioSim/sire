@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "lambdalever.h"
 
+#include "pyqm.h"
+
 #include "tostring.h"
 
 #include "SireBase/arrayproperty.hpp"
@@ -25,6 +27,8 @@ namespace bp = boost::python;
 
 #include "lambdalever.h"
 
+#include "pyqm.h"
+
 #include "tostring.h"
 
 SireOpenMM::LambdaLever __copy__(const SireOpenMM::LambdaLever &other){ return SireOpenMM::LambdaLever(other); }
@@ -34,6 +38,8 @@ SireOpenMM::LambdaLever __copy__(const SireOpenMM::LambdaLever &other){ return S
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
+
+#include "Qt/qdatastream.hpp"
 
 void register_LambdaLever_class(){
 
@@ -275,6 +281,7 @@ void register_LambdaLever_class(){
         LambdaLever_exposer.staticmethod( "typeName" );
         LambdaLever_exposer.def( "__copy__", &__copy__<SireOpenMM::LambdaLever>);
         LambdaLever_exposer.def( "__deepcopy__", &__copy__<SireOpenMM::LambdaLever>);
+        LambdaLever_exposer.def_pickle(sire_pickle_suite< ::SireOpenMM::LambdaLever >());
         LambdaLever_exposer.def( "clone", &__copy__<SireOpenMM::LambdaLever>);
         LambdaLever_exposer.def( "__str__", &__str__< ::SireOpenMM::LambdaLever > );
         LambdaLever_exposer.def( "__repr__", &__str__< ::SireOpenMM::LambdaLever > );

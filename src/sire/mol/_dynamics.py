@@ -35,6 +35,56 @@ class DynamicsData:
                     mols.atoms().find(selection_to_atoms(mols, fixed_atoms)),
                 )
 
+            # see if there is a QM/MM engine
+            if map.specified("qm_engine"):
+                qm_engine = map["qm_engine"].value()
+
+                from ..legacy.Convert import QMEngine
+                from warnings import warn
+
+                if qm_engine and not isinstance(qm_engine, QMEngine):
+                    raise ValueError(
+                        "'qm_engine' must be an instance of 'sire.legacy.Convert.QMEngine'"
+                    )
+
+                # If a QM/MM engine is specified, then we need to check that there is a
+                # perturbable molecule.
+                try:
+                    pert_mol = mols["property is_perturbable"]
+                except:
+                    raise ValueError(
+                        "You are trying to run QM/MM dynamics for a system without "
+                        "a QM/MM enabled molecule!"
+                    )
+
+                # Check the constraints and raise a warning if the perturbable_constraint
+                # is not "none".
+
+                if map.specified("perturbable_constraint"):
+                    perturbable_constraint = map["perturbable_constraint"].source()
+                    if perturbable_constraint.lower() != "none":
+                        warn(
+                            "Running a QM/MM simulation with constraints on the QM "
+                            "region is not recommended."
+                        )
+                else:
+                    # The perturbable constraint is unset, so will follow the constraint.
+                    # Make sure this is "none".
+                    if map.specified("constraint"):
+                        constraint = map["constraint"].source()
+                        if constraint.lower() != "none":
+                            warn(
+                                "Running a QM/MM simulation with constraints on the QM "
+                                "region is not recommended."
+                            )
+                    # Constraints will be automatically applied, so we can't guarantee that
+                    # the constraint is "none".
+                    else:
+                        warn(
+                            "Running a QM/MM simulation with constraints on the QM "
+                            "region is not recommended."
+                        )
+
             if map.specified("cutoff"):
                 cutoff = map["cutoff"]
 
@@ -68,6 +118,39 @@ class DynamicsData:
                 self._sire_mols._system.add(mols.molecules().to_molecule_group())
                 self._sire_mols._system.set_property("space", self._ffinfo.space())
 
+            # see if this is an interpolation simulation
+            if map.specified("lambda_interpolate"):
+                if map["lambda_interpolate"].has_value():
+                    lambda_interpolate = map["lambda_interpolate"].value()
+                else:
+                    lambda_interpolate = map["lambda_interpolate"].source()
+
+                # Single lambda value.
+                try:
+                    lambda_interpolate = float(lambda_interpolate)
+                    map.set("lambda_value", lambda_interpolate)
+                # Two lambda values.
+                except:
+                    try:
+                        if not len(lambda_interpolate) == 2:
+                            raise
+                        lambda_interpolate = [float(x) for x in lambda_interpolate]
+                        map.set("lambda_value", lambda_interpolate[0])
+                    except:
+                        raise ValueError(
+                            "'lambda_interpolate' must be a float or a list of two floats"
+                        )
+
+                from ..units import kcal_per_mol
+
+                self._is_interpolate = True
+                self._lambda_interpolate = lambda_interpolate
+                self._work = 0 * kcal_per_mol
+                self._nrg_prev = 0 * kcal_per_mol
+
+            else:
+                self._is_interpolate = False
+
             # find the existing energy trajectory - we will build on this
             self._energy_trajectory = self._sire_mols.energy_trajectory(
                 to_pandas=False, map=self._map
@@ -99,8 +182,7 @@ class DynamicsData:
             from ..convert import to
 
             self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
-            self._omm_state = None
-            self._omm_state_has_cv = (False, False)
+            self._clear_state()
 
             if self._ffinfo.space().is_periodic():
                 self._enforce_periodic_box = True
@@ -137,19 +219,29 @@ class DynamicsData:
             openmm_extract_space,
         )
 
+        if self._sire_mols.num_atoms() == self._omm_mols.get_atom_index().count():
+            # all of the atoms in all molecules are in the context,
+            # and we can assume they are in atom index order
+            mols_to_update = self._sire_mols.molecules()
+        else:
+            # some of the atoms aren't in the context, and they may be
+            # in a different order
+            mols_to_update = self._omm_mols.get_atom_index().atoms()
+            mols_to_update.update(self._sire_mols.molecules())
+
         if state_has_cv[1]:
             # get velocities too
-            mols = openmm_extract_coordinates_and_velocities(
+            mols_to_update = openmm_extract_coordinates_and_velocities(
                 state,
-                self._sire_mols.molecules(),
+                mols_to_update,
                 # black auto-formats this to a long line
                 perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),  # noqa: E501
                 map=self._map,
             )
         else:
-            mols = openmm_extract_coordinates(
+            mols_to_update = openmm_extract_coordinates(
                 state,
-                self._sire_mols.molecules(),
+                mols_to_update,
                 # black auto-formats this to a long line
                 perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),  # noqa: E501
                 map=self._map,
@@ -157,7 +249,7 @@ class DynamicsData:
 
         self._current_step = nsteps_completed
 
-        self._sire_mols.update(mols.to_molecules())
+        self._sire_mols.update(mols_to_update.molecules())
 
         if self._ffinfo.space().is_periodic():
             # don't change the space if it is infinite - this
@@ -174,8 +266,7 @@ class DynamicsData:
             raise SystemError("Cannot start dynamics while it is already running!")
 
         self._is_running = True
-        self._omm_state = None
-        self._omm_state_has_cv = (False, False)
+        self._clear_state()
 
     def _exit_dynamics_block(
         self,
@@ -183,6 +274,7 @@ class DynamicsData:
         save_energy: bool = False,
         lambda_windows=[],
         save_velocities: bool = False,
+        delta_lambda: float = None,
     ):
         if not self._is_running:
             raise SystemError("Cannot stop dynamics that is not running!")
@@ -231,26 +323,55 @@ class DynamicsData:
             )
 
             sim_lambda_value = self._omm_mols.get_lambda()
-            nrgs[str(sim_lambda_value)] = nrgs["potential"]
 
-            if lambda_windows is not None:
-                for lambda_value in lambda_windows:
-                    if lambda_value != sim_lambda_value:
-                        self._omm_mols.set_lambda(
-                            lambda_value, update_constraints=False
-                        )
-                        nrgs[str(lambda_value)] = (
-                            self._omm_mols.get_potential_energy(
-                                to_sire_units=False
-                            ).value_in_unit(openmm.unit.kilocalorie_per_mole)
-                            * kcal_per_mol
-                        )
+            # Store the potential energy and accumulated non-equilibrium work.
+            if self._is_interpolate:
+                nrg = nrgs["potential"]
+
+                if (
+                    len(self._lambda_interpolate) == 2
+                    and sim_lambda_value != self._lambda_interpolate[0]
+                ):
+                    self._work += delta_lambda * (nrg - self._nrg_prev)
+                self._nrg_prev = nrg
+                nrgs["work"] = self._work
+            else:
+                nrgs[str(sim_lambda_value)] = nrgs["potential"]
+
+                if lambda_windows is not None:
+                    for lambda_value in lambda_windows:
+                        if lambda_value != sim_lambda_value:
+                            self._omm_mols.set_lambda(
+                                lambda_value, update_constraints=False
+                            )
+                            nrgs[str(lambda_value)] = (
+                                self._omm_mols.get_potential_energy(
+                                    to_sire_units=False
+                                ).value_in_unit(openmm.unit.kilocalorie_per_mole)
+                                * kcal_per_mol
+                            )
 
                 self._omm_mols.set_lambda(sim_lambda_value, update_constraints=False)
 
-            self._energy_trajectory.set(
-                self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
-            )
+            if self._is_interpolate:
+                self._energy_trajectory.set(
+                    self._current_time, nrgs, {"lambda": f"{sim_lambda_value:.8f}"}
+                )
+            else:
+                self._energy_trajectory.set(
+                    self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
+                )
+
+            # update the interpolation lambda value
+            if self._is_interpolate:
+                if delta_lambda:
+                    sim_lambda_value += delta_lambda
+                    # clamp to [0, 1]
+                    if sim_lambda_value < 0.0:
+                        sim_lambda_value = 0.0
+                    elif sim_lambda_value > 1.0:
+                        sim_lambda_value = 1.0
+                self._omm_mols.set_lambda(sim_lambda_value)
 
         self._is_running = False
 
@@ -559,8 +680,7 @@ class DynamicsData:
         if self._is_running:
             raise SystemError("Cannot step dynamics while it is already running!")
 
-        self._omm_state = None
-        self._omm_state_has_cv = (False, False)
+        self._clear_state()
 
         self._omm_mols.getIntegrator().step(num_steps)
 
@@ -583,9 +703,10 @@ class DynamicsData:
         max_restarts: int = 10,
         max_ratchets: int = 20,
         ratchet_frequency: int = 500,
-        starting_k: float = 100.0,
-        ratchet_scale: float = 2.0,
+        starting_k: float = 400.0,
+        ratchet_scale: float = 10.0,
         max_constraint_error: float = 0.001,
+        timeout: str = "300s",
     ):
         """
         Internal method that runs minimisation on the molecules.
@@ -619,11 +740,25 @@ class DynamicsData:
         - starting_k (float): The starting value of k for the minimisation
         - ratchet_scale (float): The amount to scale k at each ratchet
         - max_constraint_error (float): The maximum error in the constraint in nm
+        - timeout (float): The maximum time to run the minimisation for in seconds.
+                           A value of <=0 will disable the timeout.
         """
         from ..legacy.Convert import minimise_openmm_context
 
         if max_iterations <= 0:
             max_iterations = 0
+
+        try:
+            from ..units import second
+            from .. import u
+
+            timeout = u(timeout)
+            if not timeout.has_same_units(second):
+                raise ValueError("'timeout' must have units of time")
+        except:
+            raise ValueError("Unable to parse 'timeout' as a time")
+
+        self._clear_state()
 
         self._minimisation_log = minimise_openmm_context(
             self._omm_mols,
@@ -635,6 +770,7 @@ class DynamicsData:
             starting_k=starting_k,
             ratchet_scale=ratchet_scale,
             max_constraint_error=max_constraint_error,
+            timeout=timeout.to(second),
         )
 
     def _rebuild_and_minimise(self):
@@ -700,10 +836,6 @@ class DynamicsData:
         if energy_frequency is not None:
             energy_frequency = u(energy_frequency)
 
-        if lambda_windows is not None:
-            if type(lambda_windows) is not list:
-                lambda_windows = [lambda_windows]
-
         try:
             steps_to_run = int(time.to(picosecond) / self.timestep().to(picosecond))
         except Exception:
@@ -748,9 +880,33 @@ class DynamicsData:
             else:
                 frame_frequency = frame_frequency.to(picosecond)
 
-        if lambda_windows is None:
-            if self._map.specified("lambda_windows"):
-                lambda_windows = self._map["lambda_windows"].value()
+        completed = 0
+
+        frame_frequency_steps = int(frame_frequency / self.timestep().to(picosecond))
+
+        energy_frequency_steps = int(energy_frequency / self.timestep().to(picosecond))
+
+        # If performing QM/MM lambda interpolation, then we just compute energies
+        # for the pure MM (0.0) and QM (1.0) potentials.
+        if self._is_interpolate:
+            lambda_windows = [0.0, 1.0]
+            # Work out the lambda increment.
+            if isinstance(self._lambda_interpolate, list):
+                divisor = (steps_to_run / energy_frequency_steps) - 1.0
+                delta_lambda = (
+                    self._lambda_interpolate[1] - self._lambda_interpolate[0]
+                ) / divisor
+            # Fixed lambda value.
+            else:
+                delta_lambda = None
+        else:
+            delta_lambda = None
+            if lambda_windows is not None:
+                if not isinstance(lambda_windows, list):
+                    lambda_windows = [lambda_windows]
+            else:
+                if self._map.specified("lambda_windows"):
+                    lambda_windows = self._map["lambda_windows"].value()
 
         def runfunc(num_steps):
             try:
@@ -770,12 +926,6 @@ class DynamicsData:
                         "time": self.current_time(),
                     }
                 )
-
-        completed = 0
-
-        frame_frequency_steps = int(frame_frequency / self.timestep().to(picosecond))
-
-        energy_frequency_steps = int(energy_frequency / self.timestep().to(picosecond))
 
         def get_steps_till_save(completed: int, total: int):
             """Internal function to calculate the number of steps
@@ -920,6 +1070,7 @@ class DynamicsData:
                             save_energy=save_energy,
                             lambda_windows=lambda_windows,
                             save_velocities=save_velocities,
+                            delta_lambda=delta_lambda,
                         )
 
                         saved_last_frame = False
@@ -962,8 +1113,7 @@ class DynamicsData:
             # try to fix this problem by minimising,
             # then running again
             self._is_running = False
-            self._omm_state = None
-            self._omm_state_has_cv = (False, False)
+            self._clear_state()
             self._rebuild_and_minimise()
             orig_args["auto_fix_minimise"] = False
             self.run(**orig_args)
@@ -999,7 +1149,7 @@ class DynamicsData:
             from ..system import System
 
             if System.is_system(self._orig_mols):
-                return self._sire_mols
+                return self._sire_mols.clone()
             else:
                 r = self._orig_mols.clone()
                 r.update(self._sire_mols.molecules())
@@ -1039,6 +1189,8 @@ class Dynamics:
         coulomb_power=None,
         restraints=None,
         fixed=None,
+        qm_engine=None,
+        lambda_interpolate=None,
     ):
         from ..base import create_map
         from .. import u
@@ -1067,6 +1219,8 @@ class Dynamics:
         _add_extra(extras, "coulomb_power", coulomb_power)
         _add_extra(extras, "restraints", restraints)
         _add_extra(extras, "fixed", fixed)
+        _add_extra(extras, "qm_engine", qm_engine)
+        _add_extra(extras, "lambda_interpolate", lambda_interpolate)
 
         map = create_map(map, extras)
 
@@ -1103,9 +1257,10 @@ class Dynamics:
         max_restarts: int = 10,
         max_ratchets: int = 20,
         ratchet_frequency: int = 500,
-        starting_k: float = 100.0,
-        ratchet_scale: float = 2.0,
+        starting_k: float = 400.0,
+        ratchet_scale: float = 10.0,
         max_constraint_error: float = 0.001,
+        timeout: str = "300s",
     ):
         """
         Internal method that runs minimisation on the molecules.
@@ -1139,6 +1294,8 @@ class Dynamics:
         - starting_k (float): The starting value of k for the minimisation
         - ratchet_scale (float): The amount to scale k at each ratchet
         - max_constraint_error (float): The maximum error in the constraints in nm
+        - timeout (float): The maximum time to run the minimisation for in seconds.
+                           A value of <=0 will disable the timeout.
         """
         if not self._d.is_null():
             self._d.run_minimisation(
@@ -1150,6 +1307,7 @@ class Dynamics:
                 starting_k=starting_k,
                 ratchet_scale=ratchet_scale,
                 max_constraint_error=max_constraint_error,
+                timeout=timeout,
             )
 
         return self
@@ -1382,6 +1540,13 @@ class Dynamics:
         """
         return self._d.integrator()
 
+    def context(self):
+        """
+        Return the underlying OpenMM context that is being driven by this
+        dynamics object.
+        """
+        return self._d._omm_mols
+
     def info(self):
         """
         Return the information that describes the forcefield that will
@@ -1492,7 +1657,7 @@ class Dynamics:
         if lambda_values is None:
             return self._d.current_potential_energy()
         else:
-            if not type(lambda_values) is list:
+            if not isinstance(lambda_values, list):
                 lambda_values = [lambda_values]
 
             # save the current value of lambda so we
