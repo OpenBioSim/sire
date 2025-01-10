@@ -1,4 +1,5 @@
 __all__ = [
+    "angle",
     "boresch",
     "bond",
     "dihedral",
@@ -71,7 +72,7 @@ def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
     if len(atoms) != 3:
         raise ValueError(
             "You need to provide 3 atoms to create an angle restraint"
-            f"but only {len(atoms)} atoms were provided."
+            f"whereas {len(atoms)} atoms were provided."
         )
 
     from .. import measure
@@ -81,18 +82,16 @@ def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
 
     elif type(ktheta) is list:
         raise NotImplementedError(
-            "Setup of multiple angle restraints simultaneously is not currently supported. You can setup one restraint at a time however."
+            "Setup of multiple angle restraints simultaneously is not currently supported. Please set up each restraint individually and then combine them into multiple restraints."
         )
 
-    # TODO: Add support for multiple angle restraints
     if theta0 is None:
-        # calculate all of the current angles
         from .. import measure
         theta0 = measure(atoms[0], atoms[1], atoms[2])
 
     elif type(theta0) is list:
         raise NotImplementedError(
-            "Setup of multiple angle restraints simultaneously is not currently supported. You can setup one restraint at a time however."
+            "Setup of multiple angle restraints simultaneously is not currently supported. Please set up each restraint individually and then combine them into multiple restraints."
         )
     else:
         theta0 = u(theta0)
@@ -505,7 +504,6 @@ def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
     """
     from .. import u
     from ..base import create_map
-    # from ..mm import DihedralRestraint
     from ..mm import DihedralRestraint, DihedralRestraints
 
     map = create_map(map)
@@ -519,7 +517,7 @@ def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
     if len(atoms) != 4:
         raise ValueError(
             "You need to provide 4 atoms to create a dihedral restraint"
-            f"but only {len(atoms)} atoms were provided."
+            f"whereas {len(atoms)} atoms were provided."
         )
 
     from .. import measure
@@ -529,19 +527,16 @@ def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
 
     elif type(kphi) is list:
         raise NotImplementedError(
-            "Setup of multiple dihedral restraints simultaneously is not currently supported. You can setup one restraint at a time however."
+            "Setup of multiple dihedral restraints simultaneously is not currently supported. Please set up each restraint individually and then combine them into multiple restraints."
         )
 
-    # TODO: Add support for multiple dihedral restraints
     if phi0 is None:
-        # calculate all of the current angles
         from .. import measure
-        # only support 1 dihedral restraint at the moment
         phi0 = measure(atoms[0], atoms[1], atoms[2], atoms[3])
 
     elif type(phi0) is list:
         raise NotImplementedError(
-            "Setup of multiple dihedral restraints simultaneously is not currently supported. You can setup one restraint at a time however."
+            "Setup of multiple dihedral restraints simultaneously is not currently supported. Please set up each restraint individually and then combine them into multiple restraints."
         )
     else:
         phi0 = u(phi0)

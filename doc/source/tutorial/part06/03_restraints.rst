@@ -236,6 +236,74 @@ BondRestraints( size=630
    the first atom in the first molecule and the oxygen atoms in all of
    the water molecules.
 
+Angle or Dihedral Restraints
+---------------------------
+
+The :func:`sire.restraints.angle` or :func:`sire.restraints.dihedral` functions
+are used to create angle or distance restraints.
+
+Just like the other restraint functions, these functions take 
+the set of molecules or system you want to simulate,
+plus a search string, lists of atom indexes, or molecule views
+holding the atoms that you want to restrain., e.g.
+
+>>> restraints = sr.restraints.angle(mols=mols, atoms=[0, 1, 2])
+>>> print(restraints)
+AngleRestraints( name=restraint, size=1
+0: AngleRestraint( [0, 1, 2], theta0=112.8°, ktheta=0.0304617 kcal mol-1 °-2 )
+ )
+
+or
+
+>>> restraints = sr.restraints.dihedral(mols=mols, atoms=[0, 1, 2, 3])
+>>> print(restraints)
+DihedralRestraints( name=restraint, size=1
+0: DihedralRestraint( [0, 1, 2, 3], phi0=244.528°, kphi=0.0304617 kcal mol-1 °-2 )
+ )
+
+creates a single harmonic angle or dihedral restraint that acts between
+the specified atoms. By default, the equilibrium angle (theta0 or phi0)
+is the current angle between the atoms (112.8° or 244.528°), 
+and the force constant (ktheta or kphi) is 100 kcal mol-1 rad-2.
+
+You can set these via the ``ktheta`` or ``kphi`` and ``theta0`` or ``phi0`` arguments depending
+on the restraint used, e.g.
+
+>>> restraints = sr.restraints.angle(mols=mols, atoms=[0, 1, 2],
+...                                  theta0="1.5 rad", ktheta="50 kcal mol-1 rad-2")
+>>> print(restraints)
+AngleRestraints( name=restraint, size=1
+0: AngleRestraint( [0, 1, 2], theta0=85.9437°, ktheta=0.0152309 kcal mol-1 °-2 )
+ )
+
+or
+
+>>> restraints = sr.restraints.dihedral(mols=mols, atoms=[0, 1, 2, 3],
+...                                     phi0="2 rad", kphi="10 kcal mol-1 rad-2")
+>>> print(restraints)
+DihedralRestraints( name=restraint, size=1
+0: DihedralRestraint( [0, 1, 2, 3], phi0=114.592°, kphi=0.00304617 kcal mol-1 °-2 )
+ )
+
+You can specify the atoms using a search string, passing the atoms themselves,
+or passing the atoms from a molecular container.
+
+>>> ang = mols.angles()[0]
+>>> restraints = sr.restraints.angle(mols=mols, atoms=ang.atoms())
+>>> print(restraints)
+AngleRestraints( name=restraint, size=1
+0: AngleRestraint( [0, 1, 2], theta0=112.8°, ktheta=0.0304617 kcal mol-1 °-2 )
+ )
+
+or
+
+>>> dih = mols.dihedrals()[0]
+>>> restraints = sr.restraints.dihedral(mols=mols, atoms=dih.atoms())
+>>> print(restraints)
+DihedralRestraints( name=restraint, size=1
+0: DihedralRestraint( [0, 1, 4, 5], phi0=243.281°, kphi=0.0304617 kcal mol-1 °-2 )
+ )
+
 Boresch Restraints
 ---------------------------
 
