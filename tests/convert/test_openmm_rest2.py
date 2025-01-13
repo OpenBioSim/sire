@@ -170,7 +170,7 @@ def test_rest2(rest2_selection, excluded_atoms):
             torsion_params_modified[i]._value, torsion_params_initial[i]._value
         )
 
-    # Nonbonded charages should be scaled by the square root of the scaling
+    # Nonbonded charges should be scaled by the square root of the scaling
     # factor and epsilon should be scaled by the scaling factor.
     for i in range(len(nonbonded_params_initial)):
         charge, epsilon = nonbonded_params_initial[i]
