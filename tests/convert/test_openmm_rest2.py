@@ -1,9 +1,18 @@
 from math import isclose
 
+import pytest
+
 import sire as sr
 
 
-def test_rest2():
+@pytest.mark.parametrize(
+    ["rest2_selection", "excluded_atoms"],
+    [
+        (None, []),
+        ("not atomidx 0,1,2,3", [0, 1, 2, 3]),
+    ],
+)
+def test_rest2(rest2_selection, excluded_atoms):
     """
     Test that REST2 modifications are correctly applied to the system.
     """
@@ -18,7 +27,7 @@ def test_rest2():
     num_dihedrals = len(mol.dihedrals())
 
     # Create a dynamics object.
-    d = mol.dynamics()
+    d = mol.dynamics(rest2_selection=rest2_selection)
 
     # Extract the OpenMM system.
     omm_system = d.context().getSystem()
@@ -30,8 +39,18 @@ def test_rest2():
 
     # Store the initial parameters.
     torsion_params_initial = []
-    for i in range(force.getNumTorsions()):
-        torsion_params_initial.append(force.getTorsionParameters(i)[-1])
+    excluded_torsion_indices = []
+    for x in range(force.getNumTorsions()):
+        i, j, k, l, periodicity, phase, force_constant = force.getTorsionParameters(x)
+        torsion_params_initial.append(force_constant)
+        # This torsion is not in the REST2 region and should be excluded.
+        if (
+            i in excluded_atoms
+            or j in excluded_atoms
+            or k in excluded_atoms
+            or l in excluded_atoms
+        ):
+            excluded_torsion_indices.append(force_constant)
 
     # Find the NonbondedForce.
     for force in omm_system.getForces():
@@ -134,9 +153,16 @@ def test_rest2():
 
     # All dihedral force constants should be halved.
     for i in range(num_dihedrals):
-        assert isclose(
-            torsion_params_modified[i]._value, torsion_params_initial[i]._value * scale
-        )
+        if i in excluded_torsion_indices:
+            # This torsion is not in the REST2 region so is unchanged.
+            assert isclose(
+                torsion_params_modified[i]._value, torsion_params_initial[i]._value
+            )
+        else:
+            assert isclose(
+                torsion_params_modified[i]._value,
+                torsion_params_initial[i]._value * scale,
+            )
 
     # All impropers should be unchanged.
     for i in range(num_dihedrals, len(torsion_params_initial)):
