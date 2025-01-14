@@ -995,7 +995,8 @@ class DynamicsData:
                         "len(rest2_scale_factors) must be equal to len(lambda_windows)"
                     )
             else:
-                rest2_scale_factors = [1.0] * len(lambda_windows)
+                if lambda_windows is not None:
+                    rest2_scale_factors = [1.0] * len(lambda_windows)
 
         def runfunc(num_steps):
             try:
