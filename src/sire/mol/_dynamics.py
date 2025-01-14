@@ -1066,10 +1066,6 @@ class DynamicsData:
                         else:
                             save_energy = False
 
-                        nrun_till_save = min(steps_till_frame, steps_till_energy)
-
-                        assert nrun_till_save >= 0
-
                         self._enter_dynamics_block()
 
                         # process the last block in the foreground
@@ -1083,11 +1079,13 @@ class DynamicsData:
                         else:
                             process_promise = None
 
-                        while nrun_till_save > 0:
+                        while completed < steps_to_run:
+
                             nrun = block_size
 
-                            if 2 * nrun > nrun_till_save:
-                                nrun = nrun_till_save
+                            # this block will exceed the run time so reduce the size
+                            if 2 * nrun > steps_to_run - completed:
+                                nrun = steps_to_run - completed
 
                             # run the current block in the background
                             run_promise = pool.submit(runfunc, nrun)
@@ -1114,7 +1112,6 @@ class DynamicsData:
 
                             if result == 0:
                                 completed += nrun
-                                nrun_till_save -= nrun
                                 progress.set_progress(completed)
                                 run_promise = None
                             else:
