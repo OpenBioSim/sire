@@ -1079,22 +1079,44 @@ class DynamicsData:
                         else:
                             process_promise = None
 
-                        while completed < steps_to_run:
+                        nrun = block_size
 
-                            nrun = block_size
+                        # this block will exceed the run time so reduce the size
+                        if nrun > steps_to_run - completed:
+                            nrun = steps_to_run - completed
 
-                            # this block will exceed the run time so reduce the size
-                            if 2 * nrun > steps_to_run - completed:
-                                nrun = steps_to_run - completed
+                        # run the current block in the background
+                        run_promise = pool.submit(runfunc, nrun)
 
-                            # run the current block in the background
-                            run_promise = pool.submit(runfunc, nrun)
+                        result = None
 
-                            result = None
+                        while not run_promise.done():
+                            try:
+                                result = run_promise.result(timeout=1.0)
+                            except Exception as e:
+                                if (
+                                    "NaN" in str(e)
+                                    and not have_saved_frame
+                                    and not have_saved_energy
+                                    and auto_fix_minimise
+                                ):
+                                    raise NeedsMinimiseError()
 
-                            while not run_promise.done():
+                        # catch rare edge case where the promise timed
+                        # out, but then completed before the .done()
+                        # test in the next loop iteration
+                        if result is None:
+                            result = run_promise.result()
+
+                        if result == 0:
+                            completed += nrun
+                            progress.set_progress(completed)
+                            run_promise = None
+                        else:
+                            # make sure we finish processing the last block
+                            if process_promise is not None:
                                 try:
-                                    result = run_promise.result(timeout=1.0)
+                                    process_promise.result()
                                 except Exception as e:
                                     if (
                                         "NaN" in str(e)
@@ -1104,39 +1126,15 @@ class DynamicsData:
                                     ):
                                         raise NeedsMinimiseError()
 
-                            # catch rare edge case where the promise timed
-                            # out, but then completed before the .done()
-                            # test in the next loop iteration
-                            if result is None:
-                                result = run_promise.result()
+                            if (
+                                not have_saved_frame
+                                and not have_saved_energy
+                                and auto_fix_minimise
+                            ):
+                                raise NeedsMinimiseError()
 
-                            if result == 0:
-                                completed += nrun
-                                progress.set_progress(completed)
-                                run_promise = None
-                            else:
-                                # make sure we finish processing the last block
-                                if process_promise is not None:
-                                    try:
-                                        process_promise.result()
-                                    except Exception as e:
-                                        if (
-                                            "NaN" in str(e)
-                                            and not have_saved_frame
-                                            and not have_saved_energy
-                                            and auto_fix_minimise
-                                        ):
-                                            raise NeedsMinimiseError()
-
-                                if (
-                                    not have_saved_frame
-                                    and not have_saved_energy
-                                    and auto_fix_minimise
-                                ):
-                                    raise NeedsMinimiseError()
-
-                                # something went wrong - re-raise the exception
-                                raise result
+                            # something went wrong - re-raise the exception
+                            raise result
 
                         # make sure we've finished processing the last block
                         if process_promise is not None:
