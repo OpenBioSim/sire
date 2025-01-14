@@ -269,10 +269,6 @@ class SOMMContext(_Context):
             if rest2_scale < 1.0:
                 raise ValueError("'rest2_scale' must be >= 1.0")
 
-        if (lambda_value == self._lambda_value) and (rest2_scale == self._rest2_scale):
-            # Nothing to do.
-            return
-
         self._lambda_value = self._lambda_lever.set_lambda(
             self,
             lambda_value=lambda_value,
