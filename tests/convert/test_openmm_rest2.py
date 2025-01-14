@@ -27,7 +27,7 @@ def test_rest2(rest2_selection, excluded_atoms):
     num_dihedrals = len(mol.dihedrals())
 
     # Create a dynamics object.
-    d = mol.dynamics(rest2_selection=rest2_selection)
+    d = mol.dynamics(platform="Reference", rest2_selection=rest2_selection)
 
     # Extract the OpenMM system.
     omm_system = d.context().getSystem()
