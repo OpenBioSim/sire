@@ -619,7 +619,7 @@ namespace SireOpenMM
                                     double starting_k, double ratchet_scale,
                                     double max_constraint_error, double timeout)
     {
-        PyThreadState *_save = PyEval_SaveThread();
+        PyGILState_STATE gstate = PyGILState_Ensure();
 
         if (max_iterations < 0)
         {
@@ -1105,7 +1105,7 @@ namespace SireOpenMM
                                            CODELOC);
         }
 
-        PyEval_RestoreThread(_save);
+        PyGILState_Release(gstate);
 
         return data.getLog().join("\n");
     }
