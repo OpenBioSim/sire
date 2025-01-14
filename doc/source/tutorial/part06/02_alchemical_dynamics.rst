@@ -23,6 +23,20 @@ the simulation that will control how it is run:
   λ is a parameter that controls the morph from the reference state
   (at λ=0) to the perturbed state (at λ=1).
 
+* ``rest2_scale`` - this sets the scale factor for Replica Exchange
+  with Solute Tempering (REST2) simulations. This is a floating point
+  number that defaults to ``1.0``. The scale factor defines the temperature
+  of the REST2 region relative to the rest of the system, which can be used
+  to soften dihedral potentials and non-bonded interactions in the REST2
+  region to aid conformational sampling.
+
+* ``rest2_selection`` - this is a selection string that specifies additional
+  atoms to include in the REST2 region, e.g. relevant atoms within the protein
+  binding site. (By default, the REST2 region comprises all atoms in perturbable
+  molecules.) If the selection includes atoms from a perturbable molecule, then
+  only those atoms within the perturbable molecule will be used, i.e. this
+  allows a user to specify a sub-set of atoms within a perturbable molecule.
+
 * ``swap_end_states`` - if set to ``True``, this will swap the end states
   of the perturbation. The morph will run from the perturbed state
   (at λ=0) to the reference state (at λ=1). Note that the coordinates
@@ -452,7 +466,8 @@ are;
   new value of λ for the context. Note that this should only really
   be used to change λ to evaluate energies at different λ-windows.
   It is better to re-create the context if you want to simulate
-  at a different λ-value.
+  at a different λ-value. This function can also be used to set the
+  ``rest2_scale`` parameter for the context.
 * :func:`~sire.Convert.SireOpenMM.SOMMContext.get_lambda_schedule` - return the
   λ-schedule used to control the morph.
 * :func:`~sire.Convert.SireOpenMM.SOMMContext.set_lambda_schedule` - set the
