@@ -427,6 +427,7 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
 
     auto *restraintff = new OpenMM::CustomAngleForce(energy_expression);
 
+    restraintff->setName("AngleRestraintForce");
     restraintff->addPerAngleParameter("rho");
     restraintff->addPerAngleParameter("k");
     restraintff->addPerAngleParameter("theta0");
@@ -489,6 +490,7 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
 
     // it seems that OpenMM wants to call the torsion angle theta rather than phi
     // we need to rename our parameters accordingly
+    restraintff->setName("TorsionRestraintForce");
     restraintff->addPerTorsionParameter("rho");
     restraintff->addPerTorsionParameter("k");
     restraintff->addPerTorsionParameter("theta0");

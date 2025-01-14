@@ -2012,13 +2012,13 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
             dynamic_cast<OpenMM::CustomBondForce *>(&ff),
             rho, context);
     }
-    else if (ff_type == "CustomAngleForce")
+    else if (ff_type == "AngleRestraintForce")
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomAngleForce *>(&ff),
             rho, context);
     }
-    else if (ff_type == "CustomTorsionForce")
+    else if (ff_type == "TorsionRestraintForce")
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomTorsionForce *>(&ff),
