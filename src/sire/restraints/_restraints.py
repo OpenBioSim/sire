@@ -49,7 +49,7 @@ def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
         The equilibrium angles for the angle restraints. If None, these
         will be measured from the current coordinates of the atoms.
         Default is None.
-    
+
     Returns
     -------
     AnglelRestraints : SireMM::AngleRestraints
@@ -82,16 +82,19 @@ def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
 
     elif type(ktheta) is list:
         raise NotImplementedError(
-            "Setup of multiple angle restraints simultaneously is not currently supported. Please set up each restraint individually and then combine them into multiple restraints."
+            "Setup of multiple angle restraints simultaneously is not currently supported. "
+            "Please set up each restraint individually and then combine them into multiple restraints."
         )
 
     if theta0 is None:
         from .. import measure
+
         theta0 = measure(atoms[0], atoms[1], atoms[2])
 
     elif type(theta0) is list:
         raise NotImplementedError(
-            "Setup of multiple angle restraints simultaneously is not currently supported. Please set up each restraint individually and then combine them into multiple restraints."
+            "Setup of multiple angle restraints simultaneously is not currently supported. "
+            "Please set up each restraint individually and then combine them into multiple restraints."
         )
     else:
         theta0 = u(theta0)
@@ -465,6 +468,7 @@ def _check_stability_boresch_restraint(restraint_components, temperature=u("298 
                     " values further from 0 or pi radians."
                 )
 
+
 def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
     """
     Create a set of dihedral restraints from all of the atoms in 'atoms'
@@ -494,7 +498,7 @@ def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
         The equilibrium torsional angle for restraints. If None, these
         will be measured from the current coordinates of the atoms.
         Default is None.
-    
+
     Returns
     -------
     DihedralRestraints : SireMM::DihedralRestraints
@@ -527,16 +531,19 @@ def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
 
     elif type(kphi) is list:
         raise NotImplementedError(
-            "Setup of multiple dihedral restraints simultaneously is not currently supported. Please set up each restraint individually and then combine them into multiple restraints."
+            "Setup of multiple dihedral restraints simultaneously is not currently supported. "
+            "Please set up each restraint individually and then combine them into multiple restraints."
         )
 
     if phi0 is None:
         from .. import measure
+
         phi0 = measure(atoms[0], atoms[1], atoms[2], atoms[3])
 
     elif type(phi0) is list:
         raise NotImplementedError(
-            "Setup of multiple dihedral restraints simultaneously is not currently supported. Please set up each restraint individually and then combine them into multiple restraints."
+            "Setup of multiple dihedral restraints simultaneously is not currently supported. "
+            "Please set up each restraint individually and then combine them into multiple restraints."
         )
     else:
         phi0 = u(phi0)

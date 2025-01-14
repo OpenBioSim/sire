@@ -1473,8 +1473,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
                             if (nbidx < 0)
                                 throw SireError::program_bug(QObject::tr(
-                                                                 "Unset NB14 index for a ghost atom?"),
-                                                             CODELOC);
+                                                                "Unset NB14 index for a ghost atom?"),
+                                                            CODELOC);
 
                             coul_14_scale = morphed_ghost14_charge_scale[j];
                             lj_14_scale = morphed_ghost14_lj_scale[j];
@@ -1602,11 +1602,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double length, k;
 
                 bondff->getBondParameters(index, particle1, particle2,
-                                          length, k);
+                                        length, k);
 
                 bondff->setBondParameters(index, particle1, particle2,
-                                          morphed_bond_length[j],
-                                          morphed_bond_k[j]);
+                                        morphed_bond_length[j],
+                                        morphed_bond_k[j]);
             }
         }
 
@@ -1651,13 +1651,13 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double size, k;
 
                 angff->getAngleParameters(index,
-                                          particle1, particle2, particle3,
-                                          size, k);
+                                        particle1, particle2, particle3,
+                                        size, k);
 
                 angff->setAngleParameters(index,
-                                          particle1, particle2, particle3,
-                                          morphed_angle_size[j],
-                                          morphed_angle_k[j]);
+                                        particle1, particle2, particle3,
+                                        morphed_angle_size[j],
+                                        morphed_angle_k[j]);
             }
         }
 
