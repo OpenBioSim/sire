@@ -619,7 +619,7 @@ namespace SireOpenMM
                                     double starting_k, double ratchet_scale,
                                     double max_constraint_error, double timeout)
     {
-        PyGILState_STATE gstate = PyGILState_Ensure();
+        PyThreadState *_save = PyEval_SaveThread();
 
         if (max_iterations < 0)
         {
@@ -1090,6 +1090,8 @@ namespace SireOpenMM
             }
         }
 
+        PyEval_RestoreThread(_save);
+
         if (is_success)
         {
             data.addLog("Minimisation successful!");
@@ -1104,8 +1106,6 @@ namespace SireOpenMM
                                                "while simultaneously satisfying the constraints."),
                                            CODELOC);
         }
-
-        PyGILState_Release(gstate);
 
         return data.getLog().join("\n");
     }
