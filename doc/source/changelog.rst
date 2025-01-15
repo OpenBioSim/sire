@@ -23,6 +23,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Improved handling of NaN errors during dynamics.
 
+* Restore thread state before raising exceptions in the Sire OpenMM minimiser.
+
+* Add support for Replica Exchange with Solute Tempering (REST2) simulations.
+
 `2024.3.1 <https://github.com/openbiosim/sire/compare/2024.3.0...2024.3.1>`__ - December 2024
 --------------------------------------------------------------------------------------------
 
