@@ -187,38 +187,46 @@ class DynamicsData:
                     raise ValueError("'rest2_scale' must be of type 'float'")
                 if rest2_scale < 1.0:
                     raise ValueError("'rest2_scale' must be >= 1.0")
+            else:
+                rest2_scale = 1.0
 
-                # Check for an additional REST2 selection.
-                if map.specified("rest2_selection"):
-                    try:
-                        rest2_selection = str(map["rest2_selection"])
-                    except:
-                        raise ValueError("'rest2_selection' must be of type 'str'")
+            # Check for an additional REST2 selection.
+            if map.specified("rest2_selection"):
+                try:
+                    rest2_selection = str(map["rest2_selection"])
+                except:
+                    raise ValueError("'rest2_selection' must be of type 'str'")
 
-                    try:
-                        from . import selection_to_atoms
+                try:
+                    from . import selection_to_atoms
 
-                        # Try to find the REST2 selection.
-                        atoms = selection_to_atoms(mols, rest2_selection)
-                    except:
-                        raise ValueError(
-                            "Invalid 'rest2_selection' string. Please check the selection syntax."
-                        )
+                    # Try to find the REST2 selection.
+                    atoms = selection_to_atoms(mols, rest2_selection)
+                except:
+                    raise ValueError(
+                        "Invalid 'rest2_selection' string. Please check the selection syntax."
+                    )
 
-                    # Store all the perturbable molecules associated with the selection.
-                    pert_mols = {}
-                    for atom in atoms:
-                        mol = atom.molecule()
-                        if mol.has_property("is_perturbable"):
-                            if mol not in pert_mols:
-                                pert_mols[mol] = [atom]
-                            else:
-                                pert_mols[mol].append(atom)
+                # Store all the perturbable molecules associated with the selection
+                # and remove perturbable atoms from the selection.
+                pert_mols = {}
+                non_pert_atoms = atoms.to_list()
+                for atom in atoms:
+                    mol = atom.molecule()
+                    if mol.has_property("is_perturbable"):
+                        non_pert_atoms.remove(atom)
+                        if mol.number() not in pert_mols:
+                            pert_mols[mol.number()] = [atom]
+                        else:
+                            pert_mols[mol.number()].append(atom)
 
-                    # Now create a boolean is_rest2 mask for the atoms in the perturbable molecules.
-                    for mol in pert_mols:
+                # Now create a boolean is_rest2 mask for the atoms in the perturbable molecules.
+                # Only do this if there are perturbable atoms in the selection.
+                if len(non_pert_atoms) != len(atoms):
+                    for num in pert_mols:
+                        mol = self._sire_mols[num]
                         is_rest2 = [False] * mol.num_atoms()
-                        for atom in pert_mols[mol]:
+                        for atom in pert_mols[num]:
                             is_rest2[atom.index().value()] = True
 
                         # Set the is_rest2 property for each perturbable molecule.
@@ -248,8 +256,9 @@ class DynamicsData:
                 self._enforce_periodic_box = False
 
             # Prepare the OpenMM REST2 data structures.
-            if map.specified("rest2_scale") and map.specified("rest2_selection"):
-                self._omm_mols._prepare_rest2(self._sire_mols, atoms)
+            if map.specified("rest2_selection"):
+                if len(non_pert_atoms) > 0:
+                    self._omm_mols._prepare_rest2(self._sire_mols, non_pert_atoms)
         else:
             self._sire_mols = None
             self._energy_trajectory = None

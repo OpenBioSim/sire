@@ -79,12 +79,13 @@ class SOMMContext(_Context):
                     raise ValueError("'rest2_scale' must be >= 1.0")
                 self._rest2_scale = rest2_scale
 
-                if map.specified("rest2_selection"):
-                    self._has_rest2_selection = True
-                else:
-                    self._has_rest2_selection = False
             else:
                 self._rest2_scale = 1.0
+
+            # Check for a REST2 selection.
+            if map.specified("rest2_selection"):
+                self._has_rest2_selection = True
+            else:
                 self._has_rest2_selection = False
 
             self._lambda_value = self._lambda_lever.set_lambda(
@@ -100,6 +101,8 @@ class SOMMContext(_Context):
             self._lambda_lever = None
             self._lambda_value = 0.0
             self._map = None
+
+        self._is_non_pert_rest2 = False
 
     def __str__(self):
         p = self.getPlatform()
@@ -258,8 +261,6 @@ class SOMMContext(_Context):
         'update_constraints' is True then the constraints will be updated
         to match the new value of lambda.
         """
-        if self._lambda_lever is None:
-            return
 
         # If not provided, use the REST2 scaling factor used to initalise
         # the context.
@@ -269,15 +270,16 @@ class SOMMContext(_Context):
             if rest2_scale < 1.0:
                 raise ValueError("'rest2_scale' must be >= 1.0")
 
-        self._lambda_value = self._lambda_lever.set_lambda(
-            self,
-            lambda_value=lambda_value,
-            rest2_scale=rest2_scale,
-            update_constraints=update_constraints,
-        )
+        if self._lambda_lever is not None:
+            self._lambda_value = self._lambda_lever.set_lambda(
+                self,
+                lambda_value=lambda_value,
+                rest2_scale=rest2_scale,
+                update_constraints=update_constraints,
+            )
 
         # Update any additional parameters in the REST2 region.
-        if self._has_rest2_selection and rest2_scale != self._rest2_scale:
+        if self._is_non_pert_rest2 and rest2_scale != self._rest2_scale:
             self._update_rest2(lambda_value, rest2_scale)
             self._rest2_scale = rest2_scale
 
@@ -377,6 +379,9 @@ class SOMMContext(_Context):
         """
 
         # Adapted from code in meld: https://github.com/maccallumlab/meld
+
+        # Flag that REST2 modifications are being applied to non-perturbable atoms.
+        self._is_non_pert_rest2 = True
 
         import openmm
         from ..Mol import AtomIdx, Connectivity
