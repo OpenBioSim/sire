@@ -1026,8 +1026,6 @@ class DynamicsData:
                     }
                 )
 
-        block_size = 50
-
         state = None
         state_has_cv = (False, False)
         saved_last_frame = False
@@ -1057,21 +1055,31 @@ class DynamicsData:
 
                 with ThreadPoolExecutor() as pool:
                     while completed < steps_to_run:
+                        block_size = 50
+
                         steps_till_frame = self._next_save_frame - (
                             completed + nsteps_before_run
                         )
-                        if steps_till_frame <= 0 or steps_till_frame == steps_to_run:
+                        if steps_till_frame <= 0 or (
+                            steps_till_frame <= block_size
+                            and steps_till_frame <= steps_to_run - completed
+                        ):
                             save_frame = True
                             self._next_save_frame += frame_frequency_steps
+                            block_size = frame_frequency_steps
                         else:
                             save_frame = False
 
                         steps_till_energy = self._next_save_energy - (
                             completed + nsteps_before_run
                         )
-                        if steps_till_energy <= 0 or steps_till_energy == steps_to_run:
+                        if steps_till_energy <= 0 or (
+                            steps_till_energy <= block_size
+                            and steps_till_energy <= steps_to_run - completed
+                        ):
                             save_energy = True
                             self._next_save_energy += energy_frequency_steps
+                            block_size = energy_frequency_steps
                         else:
                             save_energy = False
 
