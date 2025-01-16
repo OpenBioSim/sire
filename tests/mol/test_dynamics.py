@@ -116,4 +116,4 @@ def test_sample_frequency(ala_mols):
     new_mols = d.commit()
 
     # Check that the trajectory has 2 frames.
-    assert len(new_mols.trajectory()) == 2
+    assert new_mols.num_frames() == 2
