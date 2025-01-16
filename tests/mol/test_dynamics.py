@@ -117,3 +117,18 @@ def test_sample_frequency(ala_mols):
 
     # Check that the trajectory has 2 frames.
     assert new_mols.num_frames() == 2
+
+    # Now check when we request that a trajectory frame is saved when run exits.
+
+    # Recreate the dynamics object.
+    d = mols.dynamics(platform="Reference", timestep="1 fs")
+
+    # Run 10 cycles of dynamics saving frames every 5 fs.
+    for i in range(10):
+        d.run("1 fs", frame_frequency="5 fs", save_frame_on_exit=True)
+
+    # Get the updated system.
+    new_mols = d.commit()
+
+    # Check that the trajectory has 10 frames.
+    assert new_mols.num_frames() == 10
