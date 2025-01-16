@@ -891,6 +891,7 @@ class DynamicsData:
         rest2_scale_factors=None,
         save_velocities: bool = None,
         save_frame_on_exit: bool = False,
+        save_energy_on_exit: bool = False,
         auto_fix_minimise: bool = True,
     ):
         if self.is_null():
@@ -905,6 +906,7 @@ class DynamicsData:
             "rest2_scale_factors": rest2_scale_factors,
             "save_velocities": save_velocities,
             "save_frame_on_exit": save_frame_on_exit,
+            "save_energy_on_exit": save_energy_on_exit,
             "auto_fix_minimise": auto_fix_minimise,
         }
 
@@ -1092,6 +1094,14 @@ class DynamicsData:
                             and completed + block_size >= steps_to_run
                         ):
                             save_frame = True
+
+                        # save the last energy if we're about to exit and the user
+                        # has requested it
+                        if (
+                            save_energy_on_exit
+                            and completed + block_size >= steps_to_run
+                        ):
+                            save_energy = True
 
                         self._enter_dynamics_block()
 
@@ -1447,6 +1457,7 @@ class Dynamics:
         rest2_scale_factors=None,
         save_velocities: bool = None,
         save_frame_on_exit: bool = False,
+        save_energy_on_exit: bool = False,
         auto_fix_minimise: bool = True,
     ):
         """
@@ -1517,6 +1528,10 @@ class Dynamics:
             Whether to save a trajectory frame on exit, regardless of
             whether the frame frequency has been reached.
 
+        save_energy_on_exit: bool
+            Whether to save the energy on exit, regardless of whether
+            the energy frequency has been reached.
+
         auto_fix_minimise: bool
             Whether or not to automatically run minimisation if the
             trajectory exits with an error in the first few steps.
@@ -1540,6 +1555,7 @@ class Dynamics:
                 rest2_scale_factors=rest2_scale_factors,
                 save_velocities=save_velocities,
                 save_frame_on_exit=save_frame_on_exit,
+                save_energy_on_exit=save_energy_on_exit,
                 auto_fix_minimise=auto_fix_minimise,
             )
 

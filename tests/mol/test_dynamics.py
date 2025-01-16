@@ -123,9 +123,22 @@ def test_sample_frequency(ala_mols):
     # Recreate the dynamics object.
     d = mols.dynamics(platform="Reference", timestep="1 fs")
 
-    # Run 10 cycles of dynamics saving frames every 5 fs.
+    # Run 10 cycles of dynamics, saving energies frames on exit.
     for i in range(10):
-        d.run("1 fs", frame_frequency="5 fs", save_frame_on_exit=True)
+        d.run(
+            "1 fs",
+            energy_frequency="2 fs",
+            frame_frequency="5 fs",
+            lambda_windows=lambdas,
+            save_frame_on_exit=True,
+            save_energy_on_exit=True,
+        )
+
+    # Get the energy trajectory.
+    nrg_traj = d.energy_trajectory()
+
+    # Make sure the trajectory has 10 frames.
+    assert len(nrg_traj) == 10
 
     # Get the updated system.
     new_mols = d.commit()
