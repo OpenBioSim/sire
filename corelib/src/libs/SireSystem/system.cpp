@@ -4090,6 +4090,7 @@ void System::deleteAllFrames(const SireBase::PropertyMap &map)
 {
     this->accept();
     this->mustNowRecalculateFromScratch();
+    this->system_trajectory = 0;
     MolGroupsBase::deleteAllFrames(map);
 }
 
