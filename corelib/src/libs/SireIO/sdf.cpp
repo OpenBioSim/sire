@@ -959,6 +959,13 @@ SDFMolecule parseMolecule(const Molecule &molecule, QStringList &errors, const P
                 sdfmol.addProperty("CHG", i + 1, QString::number(charge));
                 charge = 0;
             }
+            else if (charge > 0)
+            {
+                if (charge < 4)
+                {
+                    charge = 4 - charge;
+                }
+            }
             else if (charge < 0)
             {
                 switch (charge)
