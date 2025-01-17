@@ -27,6 +27,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add support for Replica Exchange with Solute Tempering (REST2) simulations.
 
+* Null SystemTrajectory pointer when all frames are deleted.
+
 * Fix handling of positive formal charge when writing SDF files.
 
 `2024.3.1 <https://github.com/openbiosim/sire/compare/2024.3.0...2024.3.1>`__ - December 2024
