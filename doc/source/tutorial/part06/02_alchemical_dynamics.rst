@@ -340,14 +340,6 @@ from an ``initial`` value of 2.0 to a ``final`` value of 3.0 via
    :alt: View of the λ-schedule that sandwiches a standard morph stage
           between two stages that scale the charge lever.
 
-.. note::
-
-   Schedules constructed outside of the dynamics simulation do not have
-   the full set of levers (e.g. torsion_k, dih_scale etc) as
-   levers are only added as they are needed (hence why only
-   ``default`` and ``charge`` are shown here). The additional levers
-   are added when the schedule is added to the simulation.
-
 Once you have created your schedule you can add it via the
 :meth:`~sire.mol.Dynamics.set_schedule` function of the
 :class:`~sire.mol.Dynamics` object, e.g.
