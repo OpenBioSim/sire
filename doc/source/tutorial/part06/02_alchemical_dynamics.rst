@@ -224,7 +224,7 @@ You can plot how this schedule would morph the perturbable properties
 using the :func:`~sire.cas.LambdaSchedule.plot` function, e.g.
 
 >>> df = get_lever_values(initial=2.0, final=3.0)
->>> df.plot()
+>>> df.plot(subplots=True)
 
 .. image:: images/06_02_01.jpg
    :alt: View of the default λ-schedule
@@ -249,7 +249,7 @@ This shows that in the default ``morph`` stage of this schedule, we will
 scale the ``charge`` parameters by λ^2, while all other parameters (the
 default) will scale using λ. We can plot the result of this using;
 
->>> s.get_lever_values(initial=2.0, final=3.0).plot()
+>>> s.get_lever_values(initial=2.0, final=3.0).plot(subplots=True)
 
 .. image:: images/06_02_02.jpg
    :alt: View of the λ-schedule where charge is scaled by λ^2
@@ -279,7 +279,7 @@ LambdaSchedule(
 Again, it is worth plotting the impact of this schedule on a hypothetical
 parameter.
 
->>> s.get_lever_values(initial=2.0, final=3.0).plot()
+>>> s.get_lever_values(initial=2.0, final=3.0).plot(subplots=True)
 
 .. image:: images/06_02_03.jpg
    :alt: View of the λ-schedule where charge is scaled in a second stage to zero.
@@ -334,7 +334,7 @@ by γ, which is set to 0.2 for all stages.
 We can see how this would affect a hypothetical parameter that goes
 from an ``initial`` value of 2.0 to a ``final`` value of 3.0 via
 
->>> s.get_lever_values(initial=2.0, final=3.0).plot()
+>>> s.get_lever_values(initial=2.0, final=3.0).plot(subplots=True)
 
 .. image:: images/06_02_04.jpg
    :alt: View of the λ-schedule that sandwiches a standard morph stage
