@@ -214,7 +214,7 @@ a :class:`sire.cas.LambdaSchedule`.
 You can get the λ-schedule used by the dynamics simulation using the
 :func:`~sire.mol.Dynamics.lambda_schedule` function, e.g.
 
->>> s = d.lambda_schedule()
+>>> s = d.get_schedule()
 >>> print(s)
 LambdaSchedule(
   morph: λ * final + initial * (-λ + 1)
@@ -230,7 +230,7 @@ using the :func:`~sire.cas.LambdaSchedule.plot` function, e.g.
    :alt: View of the default λ-schedule
 
 This shows how the different levers available in this schedule would morph
-a hyperthetical parameter that has an ``initial`` value of ``2.0`` and a
+a hypothetical parameter that has an ``initial`` value of ``2.0`` and a
 ``final`` value of ``3.0``.
 
 In this case the levers are all identical, so would change the parameter
@@ -276,7 +276,7 @@ LambdaSchedule(
     charge: final * (-λ + 1)
 )
 
-Again, it is worth plotting the impact of this schedule on a hyperthetical
+Again, it is worth plotting the impact of this schedule on a hypothetical
 parameter.
 
 >>> s.get_lever_values(initial=2.0, final=3.0).plot()
@@ -331,7 +331,7 @@ the charge lever from γ times the ``final`` value to the full
 ``final`` value. It also scales the charge lever in the ``morph`` stage
 by γ, which is set to 0.2 for all stages.
 
-We can see how this would affect a hyperthetical parameter that goes
+We can see how this would affect a hypothetical parameter that goes
 from an ``initial`` value of 2.0 to a ``final`` value of 3.0 via
 
 >>> s.get_lever_values(initial=2.0, final=3.0).plot()
