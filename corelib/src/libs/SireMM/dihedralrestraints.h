@@ -2,7 +2,7 @@
   *
   *  Sire - Molecular Simulation Framework
   *
-  *  Copyright (C) 2009  Christopher Woods
+  *  Copyright (C) 2025  Christopher Woods
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::DihedralRestraints 
 namespace SireMM
 {
 
-    /** This class represents a single angle restraint between any three
+    /** This class represents a single torsion restraint between any four
      *  atoms in a system
      * @author Christopher Woods
      */

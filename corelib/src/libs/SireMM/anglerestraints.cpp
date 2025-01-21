@@ -2,7 +2,7 @@
   *
   *  Sire - Molecular Simulation Framework
   *
-  *  Copyright (C) 2009  Christopher Woods
+  *  Copyright (C) 2025  Christopher Woods
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
@@ -98,19 +98,8 @@ AngleRestraint::AngleRestraint(const QList<qint64> &atoms,
     : ConcreteProperty<AngleRestraint, Property>(),
       _theta0(theta0), _ktheta(ktheta)
 {
-    // Need to think here about validating the angle and force constant values
-    // if (atoms.count() != 3)
-    // {
-    //     throw SireError::invalid_arg(QObject::tr(
-    //                                      "Wrong number of inputs for an Angle restraint. You need to "
-    //                                      "provide 3 atoms (%1).")
-    //                                      .arg(atoms.count()),
-    //                                  //  .arg(theta0.count())
-    //                                  //  .arg(ktheta.count()),
-    //                                  CODELOC);
-    // }
 
-    // make sure that we have 3 distinct atoms
+    // Make sure that we have 3 distinct atoms
     QSet<qint64> distinct;
     distinct.reserve(3);
 
@@ -119,12 +108,6 @@ AngleRestraint::AngleRestraint(const QList<qint64> &atoms,
         if (atom >= 0)
             distinct.insert(atom);
     }
-
-    // if (distinct.count() != 3)
-    //     throw SireError::invalid_arg(QObject::tr(
-    //                                      "There is something wrong with the atoms provided. "
-    //                                      "They should all be unique and all greater than or equal to 0."),
-    //                                  CODELOC);
 
     atms = atoms.toVector();
 }
