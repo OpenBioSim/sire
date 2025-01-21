@@ -205,7 +205,7 @@ void register_LambdaLever_class(){
         }
         { //::SireOpenMM::LambdaLever::setExceptionIndicies
         
-            typedef void ( ::SireOpenMM::LambdaLever::*setExceptionIndicies_function_type)( int,::QString const &,::QVector< boost::tuples::tuple< int, int, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > > const & ) ;
+            typedef void ( ::SireOpenMM::LambdaLever::*setExceptionIndicies_function_type)( int,::QString const &,::QVector< boost::tuples::tuple< int, int > > const & ) ;
             setExceptionIndicies_function_type setExceptionIndicies_function_value( &::SireOpenMM::LambdaLever::setExceptionIndicies );
             
             LambdaLever_exposer.def( 
@@ -231,13 +231,13 @@ void register_LambdaLever_class(){
         }
         { //::SireOpenMM::LambdaLever::setLambda
         
-            typedef double ( ::SireOpenMM::LambdaLever::*setLambda_function_type)( ::OpenMM::Context &,double,bool ) const;
+            typedef double ( ::SireOpenMM::LambdaLever::*setLambda_function_type)( ::OpenMM::Context &,double,double,bool ) const;
             setLambda_function_type setLambda_function_value( &::SireOpenMM::LambdaLever::setLambda );
             
             LambdaLever_exposer.def( 
                 "setLambda"
                 , setLambda_function_value
-                , ( bp::arg("system"), bp::arg("lambda_value"), bp::arg("update_constraints")=(bool)(true) )
+                , ( bp::arg("system"), bp::arg("lambda_value"), bp::arg("rest2_scale")=(double)(1.0), bp::arg("update_constraints")=(bool)(true) )
                 , "Set the value of lambda in the passed context. Returns the\n  actual value of lambda set.\n" );
         
         }

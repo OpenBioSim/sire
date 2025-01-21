@@ -1090,6 +1090,8 @@ namespace SireOpenMM
             }
         }
 
+        PyEval_RestoreThread(_save);
+
         if (is_success)
         {
             data.addLog("Minimisation successful!");
@@ -1104,8 +1106,6 @@ namespace SireOpenMM
                                                "while simultaneously satisfying the constraints."),
                                            CODELOC);
         }
-
-        PyEval_RestoreThread(_save);
 
         return data.getLog().join("\n");
     }

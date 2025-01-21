@@ -38,7 +38,10 @@ class EMLEEngine(_Convert._SireOpenMM.PyQMEngine):
         )
 
         # Get the OpenMM EMLE force.
-        emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
+        for force in d._d._omm_mols.getSystem().getForces():
+            if "QMForce" in force.getName():
+                break
+        emle_force = _deepcopy(force)
 
         # Create a null CustomBondForce to add the EMLE interpolation
         # parameter.
@@ -84,7 +87,10 @@ class TorchEMLEEngine(_Convert._SireOpenMM.TorchQMEngine):
         )
 
         # Get the OpenMM EMLE force.
-        emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
+        for force in d._d._omm_mols.getSystem().getForces():
+            if "QMForce" in force.getName():
+                break
+        emle_force = _deepcopy(force)
 
         # Create a null CustomBondForce to add the EMLE interpolation
         # parameter.

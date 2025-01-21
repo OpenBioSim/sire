@@ -16,7 +16,7 @@ include_directories(${TBB_INCLUDE_DIR})
 # Define the headers in SireMM
 set ( SIREMM_HEADERS
       amberparams.h
-      anglerestraint.h
+      anglerestraints.h
       angle.h
       atomfunctions.h
       atomljs.h
@@ -43,7 +43,7 @@ set ( SIREMM_HEADERS
       cljworkspace.h
       coulombpotential.h
       dihedral.h
-      dihedralrestraint.h
+      dihedralrestraints.h
       distancerestraint.h
       errors.h
       excludedpairs.h
@@ -110,7 +110,7 @@ set ( SIREMM_SOURCES
 
       amberparams.cpp
       angle.cpp
-      anglerestraint.cpp
+      anglerestraints.cpp
       atomfunctions.cpp
       atomljs.cpp
       bond.cpp
@@ -135,7 +135,7 @@ set ( SIREMM_SOURCES
       cljworkspace.cpp
       coulombpotential.cpp
       dihedral.cpp
-      dihedralrestraint.cpp
+      dihedralrestraints.cpp
       distancerestraint.cpp
       errors.cpp
       excludedpairs.cpp

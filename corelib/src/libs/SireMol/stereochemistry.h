@@ -73,6 +73,7 @@ namespace SireMol
         static const char *typeName();
 
         static Stereochemistry up();
+        static Stereochemistry cisOrTrans();
         static Stereochemistry down();
         static Stereochemistry notStereo();
         static Stereochemistry undefined();
@@ -85,6 +86,7 @@ namespace SireMol
 
         bool isDefined() const;
         bool isUp() const;
+        bool isCisOrTrans() const;
         bool isDown() const;
         bool isNotStereo() const;
 

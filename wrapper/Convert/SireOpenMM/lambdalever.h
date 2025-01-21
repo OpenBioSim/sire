@@ -117,7 +117,7 @@ namespace SireOpenMM
                                               const PerturbableOpenMMMolecule &mol) const;
 
         double setLambda(OpenMM::Context &system, double lambda_value,
-                         bool update_constraints = true) const;
+                         double rest2_scale = 1.0, bool update_constraints = true) const;
 
         void setForceIndex(const QString &force, int index);
 

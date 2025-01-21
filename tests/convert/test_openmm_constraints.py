@@ -467,7 +467,6 @@ def test_asymmetric_constraints(merged_ethane_methanol):
     # different constraints.
 
     from math import isclose
-    from openmm import XmlSerializer
     from tempfile import NamedTemporaryFile
 
     # Extract the molecule.
@@ -497,9 +496,9 @@ def test_asymmetric_constraints(merged_ethane_methanol):
     xml0 = NamedTemporaryFile()
     xml1 = NamedTemporaryFile()
     with open(xml0.name, "w") as f:
-        f.write(XmlSerializer.serialize(d_forwards._d._omm_mols.getSystem()))
+        f.write(d_forwards.to_xml())
     with open(xml1.name, "w") as f:
-        f.write(XmlSerializer.serialize(d_backwards._d._omm_mols.getSystem()))
+        f.write(d_backwards.to_xml())
 
     # Load the serialised systems and sort.
     with open(xml0.name, "r") as f:
