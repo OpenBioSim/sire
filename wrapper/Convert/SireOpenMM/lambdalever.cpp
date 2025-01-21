@@ -26,11 +26,11 @@
   *
 \*********************************************/
 
-#include "pyqm.h"
 #include "lambdalever.h"
+#include "pyqm.h"
 
-#include "SireBase/propertymap.h"
 #include "SireBase/arrayproperty.hpp"
+#include "SireBase/propertymap.h"
 
 #include "SireCAS/values.h"
 
@@ -1923,6 +1923,100 @@ void _update_restraint_in_context(OpenMM::CustomCompoundBondForce *ff, double rh
     ff->updateParametersInContext(context);
 }
 
+/** Update the parameters for a CustomAngleForce for scale factor 'rho'
+ *  in the passed context */
+void _update_restraint_in_context(OpenMM::CustomAngleForce *ff, double rho,
+                                  OpenMM::Context &context)
+{
+    if (ff == 0)
+        throw SireError::invalid_cast(QObject::tr(
+                                          "Unable to cast the restraint force to an OpenMM::CustomAngleForce, "
+                                          "despite it reporting that is was an object of this type..."),
+                                      CODELOC);
+
+    const int nangles = ff->getNumAngles();
+
+    if (nangles == 0)
+        // nothing to update
+        return;
+
+    const int nparams = ff->getNumPerAngleParameters();
+
+    if (nparams == 0)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "Unable to set 'rho' for this restraint as it has no custom parameters!"),
+                                            CODELOC);
+
+    // we set the first parameter - we can see what the current value
+    // is from the first restraint. This is because rho should be the
+    // first parameter and have the same value for all restraints
+    std::vector<double> custom_params;
+    custom_params.resize(nparams);
+    int atom0, atom1, atom2;
+
+    ff->getAngleParameters(0, atom0, atom1, atom2, custom_params);
+
+    if (custom_params[0] == rho)
+        // nothing to do - it is already equal to this value
+        return;
+
+    for (int i = 0; i < nangles; ++i)
+    {
+        ff->getAngleParameters(i, atom0, atom1, atom2, custom_params);
+        custom_params[0] = rho;
+        ff->setAngleParameters(i, atom0, atom1, atom2, custom_params);
+    }
+
+    ff->updateParametersInContext(context);
+}
+
+/** Update the parameters for a CustomTorsionForce for scale factor 'rho'
+ *  in the passed context */
+void _update_restraint_in_context(OpenMM::CustomTorsionForce *ff, double rho,
+                                  OpenMM::Context &context)
+{
+    if (ff == 0)
+        throw SireError::invalid_cast(QObject::tr(
+                                          "Unable to cast the restraint force to an OpenMM::CustomTorsionForce, "
+                                          "despite it reporting that is was an object of this type..."),
+                                      CODELOC);
+
+    const int ntorsions = ff->getNumTorsions();
+
+    if (ntorsions == 0)
+        // nothing to update
+        return;
+
+    const int nparams = ff->getNumPerTorsionParameters();
+
+    if (nparams == 0)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "Unable to set 'rho' for this restraint as it has no custom parameters!"),
+                                            CODELOC);
+
+    // we set the first parameter - we can see what the current value
+    // is from the first restraint. This is because rho should be the
+    // first parameter and have the same value for all restraints
+    std::vector<double> custom_params;
+    custom_params.resize(nparams);
+    int atom0, atom1, atom2, atom3;
+
+    ff->getTorsionParameters(0, atom0, atom1, atom2, atom3, custom_params);
+
+    if (custom_params[0] == rho)
+        // nothing to do - it is already equal to this value
+        return;
+
+    for (int i = 0; i < ntorsions; ++i)
+    {
+        ff->getTorsionParameters(i, atom0, atom1, atom2, atom3, custom_params);
+        custom_params[0] = rho;
+        ff->setTorsionParameters(i, atom0, atom1, atom2, atom3, custom_params);
+    }
+
+    ff->updateParametersInContext(context);
+}
+
 /** Update the parameters for a CustomBondForce for scale factor 'rho'
  *  in the passed context */
 void _update_restraint_in_context(OpenMM::CustomBondForce *ff, double rho,
@@ -1982,6 +2076,24 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomBondForce *>(&ff),
+            rho, context);
+    }
+    else if (ff_type == "AngleRestraintForce")
+    {
+        _update_restraint_in_context(
+            dynamic_cast<OpenMM::CustomAngleForce *>(&ff),
+            rho, context);
+    }
+    else if (ff_type == "TorsionRestraintForce")
+    {
+        _update_restraint_in_context(
+            dynamic_cast<OpenMM::CustomTorsionForce *>(&ff),
+            rho, context);
+    }
+    else if (ff_type == "CustomCompoundBondForce")
+    {
+        _update_restraint_in_context(
+            dynamic_cast<OpenMM::CustomCompoundBondForce *>(&ff),
             rho, context);
     }
     else if (ff_type == "BoreschRestraintForce")
@@ -2072,7 +2184,6 @@ int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
     this->lambda_cache.clear();
     return this->perturbable_mols.count() - 1;
 }
-
 
 /** Set the exception indices for the perturbable molecule at
  *  index 'mol_idx'

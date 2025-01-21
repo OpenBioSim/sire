@@ -16,7 +16,7 @@
 #include "selectordihedral.h"
 #include "clj14group.h"
 #include "improper.h"
-#include "anglerestraint.h"
+#include "anglerestraints.h"
 #include "bondrestraints.h"
 #include "twoatomfunctions.h"
 #include "boreschrestraints.h"
@@ -54,7 +54,7 @@
 #include "cljboxes.h"
 #include "internalgroupff.h"
 #include "internalcomponent.h"
-#include "dihedralrestraint.h"
+#include "dihedralrestraints.h"
 #include "selectorimproper.h"
 #include "intergroupff.h"
 #include "dihedral.h"
@@ -112,6 +112,7 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::Improper >();
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMM::Improper> >();
     ObjectRegistry::registerConverterFor< SireMM::AngleRestraint >();
+    ObjectRegistry::registerConverterFor< SireMM::AngleRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::BondRestraint >();
     ObjectRegistry::registerConverterFor< SireMM::BondRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::TwoAtomFunctions >();
@@ -200,6 +201,7 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::Intra14Component >();
     ObjectRegistry::registerConverterFor< SireMM::InternalComponent >();
     ObjectRegistry::registerConverterFor< SireMM::DihedralRestraint >();
+    ObjectRegistry::registerConverterFor< SireMM::DihedralRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::SelectorImproper >();
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMM::SelectorImproper> >();
     ObjectRegistry::registerConverterFor< SireMM::InterGroupFF >();

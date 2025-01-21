@@ -22,3 +22,4 @@ can be recognised.
 * `@msuruzon <https://github.com/msuruzhon>`__
 * `@kexul <https://github.com/kexul>`__
 * `@mb2055 <https://github.com/mb2055>`__
+* `@akalpokas <https://github.com/akalpokas>`__

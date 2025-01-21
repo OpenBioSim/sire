@@ -35,6 +35,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fix lambda schedule discussion and plots in the tutorial.
 
+* Added support for angle and dihedral restraints which can be used in alchemical and standard simulations.
+
 `2024.3.1 <https://github.com/openbiosim/sire/compare/2024.3.0...2024.3.1>`__ - December 2024
 --------------------------------------------------------------------------------------------
 
