@@ -33,6 +33,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fix handling of positive formal charge when writing SDF files.
 
+* Fix lambda schedule discussion and plots in the tutorial.
+
 `2024.3.1 <https://github.com/openbiosim/sire/compare/2024.3.0...2024.3.1>`__ - December 2024
 --------------------------------------------------------------------------------------------
 
