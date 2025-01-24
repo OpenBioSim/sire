@@ -208,12 +208,15 @@ class DynamicsData:
                     )
 
                 # Store all the perturbable molecules associated with the selection
-                # and remove perturbable atoms from the selection.
+                # and remove perturbable atoms from the selection. Remove alchemical ions
+                # from the selection.
                 pert_mols = {}
                 non_pert_atoms = atoms.to_list()
                 for atom in atoms:
                     mol = atom.molecule()
-                    if mol.has_property("is_perturbable"):
+                    if mol.has_property("is_alchemical_ion"):
+                        non_pert_atoms.remove(atom)
+                    elif mol.has_property("is_perturbable"):
                         non_pert_atoms.remove(atom)
                         if mol.number() not in pert_mols:
                             pert_mols[mol.number()] = [atom]
@@ -239,6 +242,20 @@ class DynamicsData:
 
                         # Update the system.
                         self._sire_mols.update(mol)
+
+            # Search for alchemical ions and exclude them via a REST2 mask.
+            try:
+                for mol in self._sire_mols.molecules("property is_alchemical_ion"):
+                    is_rest2 = [False] * mol.num_atoms()
+                    mol = (
+                        mol.edit()
+                        .set_property("is_rest2", is_rest2)
+                        .molecule()
+                        .commit()
+                    )
+                    self._sire_mols.update(mol)
+            except:
+                pass
 
             from ..convert import to
 
