@@ -37,6 +37,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added support for angle and dihedral restraints which can be used in alchemical and standard simulations.
 
+* Allow user to compute energy trajectory over a subset of the lambda windows for each lambda.
+
 `2024.3.1 <https://github.com/openbiosim/sire/compare/2024.3.0...2024.3.1>`__ - December 2024
 --------------------------------------------------------------------------------------------
 

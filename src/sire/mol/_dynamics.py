@@ -358,6 +358,8 @@ class DynamicsData:
         rest2_scale_factors=[],
         save_velocities: bool = False,
         delta_lambda: float = None,
+        num_energy_neighbours: int = None,
+        null_energy: float = None,
     ):
         if not self._is_running:
             raise SystemError("Cannot stop dynamics that is not running!")
@@ -387,6 +389,13 @@ class DynamicsData:
         self._elapsed_time = current_time
         self._current_time += delta
 
+        # store the number of lambda windows
+        num_lambda_windows = len(lambda_windows)
+
+        # compute energies for all windows
+        if num_energy_neighbours is None:
+            num_energy_neighbours = num_lambda_windows
+
         if save_energy:
             # should save energy here
             nrgs = {}
@@ -408,7 +417,7 @@ class DynamicsData:
             sim_lambda_value = self._omm_mols.get_lambda()
             sim_rest2_scale = self._omm_mols.get_rest2_scale()
 
-            # Store the potential energy and accumulated non-equilibrium work.
+            # store the potential energy and accumulated non-equilibrium work
             if self._is_interpolate:
                 nrg = nrgs["potential"]
 
@@ -423,21 +432,32 @@ class DynamicsData:
                 nrgs[str(sim_lambda_value)] = nrgs["potential"]
 
                 if lambda_windows is not None:
-                    for lambda_value, rest2_scale in zip(
-                        lambda_windows, rest2_scale_factors
+                    # get the index of the simulation lambda value in the
+                    # lambda windows list
+                    try:
+                        lambda_index = lambda_windows.index(sim_lambda_value)
+                    except:
+                        num_energy_neighbours = num_lambda_windows
+                        lambda_index = i
+
+                    for i, (lambda_value, rest2_scale) in enumerate(
+                        zip(lambda_windows, rest2_scale_factors)
                     ):
                         if lambda_value != sim_lambda_value:
-                            self._omm_mols.set_lambda(
-                                lambda_value,
-                                rest2_scale=rest2_scale,
-                                update_constraints=False,
-                            )
-                            nrgs[str(lambda_value)] = (
-                                self._omm_mols.get_potential_energy(
-                                    to_sire_units=False
-                                ).value_in_unit(openmm.unit.kilocalorie_per_mole)
-                                * kcal_per_mol
-                            )
+                            if abs(lambda_index - i) <= num_energy_neighbours:
+                                self._omm_mols.set_lambda(
+                                    lambda_value,
+                                    rest2_scale=rest2_scale,
+                                    update_constraints=False,
+                                )
+                                nrgs[str(lambda_value)] = (
+                                    self._omm_mols.get_potential_energy(
+                                        to_sire_units=False
+                                    ).value_in_unit(openmm.unit.kilocalorie_per_mole)
+                                    * kcal_per_mol
+                                )
+                            else:
+                                nrgs[str(lambda_value)] = null_energy * kcal_per_mol
 
                 self._omm_mols.set_lambda(
                     sim_lambda_value,
@@ -910,6 +930,8 @@ class DynamicsData:
         save_frame_on_exit: bool = False,
         save_energy_on_exit: bool = False,
         auto_fix_minimise: bool = True,
+        num_energy_neighbours: int = None,
+        null_energy: str = None,
     ):
         if self.is_null():
             return
@@ -925,6 +947,8 @@ class DynamicsData:
             "save_frame_on_exit": save_frame_on_exit,
             "save_energy_on_exit": save_energy_on_exit,
             "auto_fix_minimise": auto_fix_minimise,
+            "num_energy_neighbours": num_energy_neighbours,
+            "null_energy": null_energy,
         }
 
         from concurrent.futures import ThreadPoolExecutor
@@ -943,6 +967,17 @@ class DynamicsData:
 
         if energy_frequency is not None:
             energy_frequency = u(energy_frequency)
+
+        if null_energy is not None:
+            null_energy = u(null_energy)
+        else:
+            null_energy = u("10000 kcal/mol")
+
+        if num_energy_neighbours is not None:
+            try:
+                num_energy_neighbours = int(num_energy_neighbours)
+            except:
+                num_energy_neighbours = len(lambda_windows)
 
         try:
             steps_to_run = int(time.to(picosecond) / self.timestep().to(picosecond))
@@ -1204,6 +1239,8 @@ class DynamicsData:
                             rest2_scale_factors=rest2_scale_factors,
                             save_velocities=save_velocities,
                             delta_lambda=delta_lambda,
+                            num_energy_neighbours=num_energy_neighbours,
+                            null_energy=null_energy.value(),
                         )
 
                         saved_last_frame = False
@@ -1476,6 +1513,8 @@ class Dynamics:
         save_frame_on_exit: bool = False,
         save_energy_on_exit: bool = False,
         auto_fix_minimise: bool = True,
+        num_energy_neighbours: int = None,
+        null_energy: str = None,
     ):
         """
         Perform dynamics on the molecules.
@@ -1555,6 +1594,27 @@ class Dynamics:
             Such failures often indicate that the system needs
             minimsing. This automatically runs the minimisation
             in these cases, and then runs the requested dynamics.
+
+        num_energy_neighbours: int
+            The number of neighbouring windows to use when computing
+            the energy trajectory for the simulation lambda value.
+            This can be used to compute energies over a subset of the
+            values in 'lambda_windows', hence reducing the cost of
+            computing the energy trajectory. Note that the simulation
+            lambda value must be contained in 'lambda_windows', so it
+            is recommended that the values are rounded. A value of
+            'null_energy' will be added to the energy trajectory for the
+            lambda windows that are omitted. Note that a similar result
+            can be achieved by simply removing any lambda values from
+            'lambda_windows' that you don't want, but this will result
+            in an energy trajectory that only contains results for
+            the specified lambda values.
+
+        null_energy: str
+            The energy value to use for lambda windows that are not
+            being computed as part of the energy trajectory, i.e. when
+            'num_energy_neighbours' is less than len(lambda_windows).
+            By default, a value of '10000 kcal mol-1' is used.
         """
         if not self._d.is_null():
             if save_velocities is None:
@@ -1574,6 +1634,8 @@ class Dynamics:
                 save_frame_on_exit=save_frame_on_exit,
                 save_energy_on_exit=save_energy_on_exit,
                 auto_fix_minimise=auto_fix_minimise,
+                num_energy_neighbours=num_energy_neighbours,
+                null_energy=null_energy,
             )
 
         return self
