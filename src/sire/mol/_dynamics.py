@@ -1609,7 +1609,8 @@ class Dynamics:
             can be achieved by simply removing any lambda values from
             'lambda_windows' that you don't want, but this will result
             in an energy trajectory that only contains results for
-            the specified lambda values.
+            the specified lambda values. If None, then all lambda windows
+            will be used.
 
         null_energy: str
             The energy value to use for lambda windows that are not
