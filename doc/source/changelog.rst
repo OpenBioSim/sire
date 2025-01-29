@@ -37,6 +37,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added support for angle and dihedral restraints which can be used in alchemical and standard simulations.
 
+* Fix the ``hasForceSpecificEquation`` function in the ``LambdaLever`` class so that it returns true if
+  there is a default equation for the force.
+
 `2024.3.1 <https://github.com/openbiosim/sire/compare/2024.3.0...2024.3.1>`__ - December 2024
 --------------------------------------------------------------------------------------------
 
