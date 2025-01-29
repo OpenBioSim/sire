@@ -390,11 +390,12 @@ class DynamicsData:
         self._current_time += delta
 
         # store the number of lambda windows
-        num_lambda_windows = len(lambda_windows)
+        if lambda_windows is not None:
+            num_lambda_windows = len(lambda_windows)
 
-        # compute energies for all windows
-        if num_energy_neighbours is None:
-            num_energy_neighbours = num_lambda_windows
+            # compute energies for all windows
+            if num_energy_neighbours is None:
+                num_energy_neighbours = num_lambda_windows
 
         if save_energy:
             # should save energy here
