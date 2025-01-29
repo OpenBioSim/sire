@@ -1032,8 +1032,12 @@ bool LambdaSchedule::hasForceSpecificEquation(const QString &stage,
 
     if (force == "*")
         return false;
-    else
-        return this->stage_equations[idx].contains(_get_lever_name(force, lever));
+
+    // If there is a default equation for this force, always return true
+    if (this->stage_equations[idx].contains(_get_lever_name(force, "*")))
+        return true;
+
+    return this->stage_equations[idx].contains(_get_lever_name(force, lever));
 }
 
 SireCAS::Expression LambdaSchedule::_getEquation(int stage,
