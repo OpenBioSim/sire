@@ -37,6 +37,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added support for angle and dihedral restraints which can be used in alchemical and standard simulations.
 
+* Allow user to compute energy trajectory over a subset of the lambda windows for each lambda.
+
 * Fix the ``hasForceSpecificEquation`` function in the ``LambdaLever`` class so that it returns true if
   there is a default equation for the force.
 
