@@ -39,6 +39,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Allow user to compute energy trajectory over a subset of the lambda windows for each lambda.
 
+* Fix the ``hasForceSpecificEquation`` function in the ``LambdaLever`` class so that it returns true if
+  there is a default equation for the force.
+
 `2024.3.1 <https://github.com/openbiosim/sire/compare/2024.3.0...2024.3.1>`__ - December 2024
 --------------------------------------------------------------------------------------------
 
