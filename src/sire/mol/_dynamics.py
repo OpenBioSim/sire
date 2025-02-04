@@ -1001,8 +1001,13 @@ class DynamicsData:
                     save_frequency = 25
             else:
                 save_frequency = save_frequency.to(picosecond)
+            no_save = False
+        else:
+            no_save = True
+            save_frequency = steps_to_run + 1
 
         if energy_frequency != 0:
+            no_save_energy = False
             if energy_frequency is None:
                 if self._map.specified("energy_frequency"):
                     energy_frequency = (
@@ -1010,10 +1015,15 @@ class DynamicsData:
                     )
                 else:
                     energy_frequency = save_frequency
+                    no_save_energy = no_save
             else:
                 energy_frequency = energy_frequency.to(picosecond)
+        else:
+            energy_frequency = steps_to_run + 1
+            no_save_energy = True
 
         if frame_frequency != 0:
+            no_save_frame = False
             if frame_frequency is None:
                 if self._map.specified("frame_frequency"):
                     frame_frequency = (
@@ -1021,8 +1031,12 @@ class DynamicsData:
                     )
                 else:
                     frame_frequency = save_frequency
+                    no_save_frame = no_save
             else:
                 frame_frequency = frame_frequency.to(picosecond)
+        else:
+            frame_frequency = steps_to_run + 1
+            no_save_frame = True
 
         completed = 0
 
@@ -1095,9 +1109,38 @@ class DynamicsData:
             pass
 
         nsteps_before_run = self._current_step
+        # if this is the first call, then set the save frequencies
         if nsteps_before_run == 0:
             self._next_save_frame = frame_frequency_steps
             self._next_save_energy = energy_frequency_steps
+            self._prev_frame_frequency_steps = frame_frequency_steps
+            self._prev_energy_frequency_steps = energy_frequency_steps
+            self._prev_no_frame = no_save_frame
+            self._prev_no_energy = no_save_energy
+        # handle adjustments to the save frequencies
+        else:
+            if frame_frequency_steps != self._prev_frame_frequency_steps:
+                if self._prev_no_frame:
+                    self._next_save_frame = nsteps_before_run + frame_frequency_steps
+                else:
+                    self._next_save_frame = (
+                        self._next_save_frame
+                        + frame_frequency_steps
+                        - self._prev_frame_frequency_steps
+                    )
+            if energy_frequency_steps != self._prev_energy_frequency_steps:
+                if self._prev_no_energy:
+                    self._next_save_energy = nsteps_before_run + energy_frequency_steps
+                else:
+                    self._next_save_energy = (
+                        self._next_save_energy
+                        + energy_frequency_steps
+                        - self._prev_energy_frequency_steps
+                    )
+            self._prev_no_frame = no_save_frame
+            self._prev_frame_frequency_steps = frame_frequency_steps
+            self._prev_no_energy = no_save_energy
+            self._prev_energy_frequency_steps = energy_frequency_steps
 
         from ..base import ProgressBar
         from ..units import second
@@ -1123,7 +1166,8 @@ class DynamicsData:
                         ):
                             save_frame = True
                             self._next_save_frame += frame_frequency_steps
-                            block_size = frame_frequency_steps
+                            if frame_frequency_steps < block_size:
+                                block_size = frame_frequency_steps
                         else:
                             save_frame = False
 
@@ -1136,7 +1180,8 @@ class DynamicsData:
                         ):
                             save_energy = True
                             self._next_save_energy += energy_frequency_steps
-                            block_size = energy_frequency_steps
+                            if energy_frequency_steps < block_size:
+                                block_size = energy_frequency_steps
                         else:
                             save_energy = False
 
