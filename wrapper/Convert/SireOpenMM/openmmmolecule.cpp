@@ -51,10 +51,14 @@ OpenMMMolecule::OpenMMMolecule()
 }
 
 OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
+                               int start_atom_idx,
                                const PropertyMap &map)
 {
     molinfo = mol.info();
     number = mol.number();
+
+    // store the starting index of the atoms in the OpenMM system
+    this->start_atom_idx = start_atom_idx;
 
     if (molinfo.nAtoms() == 0)
     {
@@ -479,6 +483,20 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     const auto &moldata = mol.data();
     atoms = mol.atoms();
     const int nats = atoms.count();
+
+    // Create the REST2 region mask.
+    if (mol.hasProperty("is_rest2"))
+    {
+        const auto &is_rest2_prop = moldata.property("is_rest2").asA<SireBase::IntegerArrayProperty>();
+        for (int i = 0; i < nats; ++i)
+        {
+            is_rest2.append(is_rest2_prop.at(i) == 1);
+        }
+    }
+    else
+    {
+        is_rest2 = QVector<bool>(nats, true);
+    }
 
     if (nats <= 0)
     {
@@ -1057,6 +1075,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     const double dihedral_k_to_openmm = (SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
 
     dih_params.clear();
+    is_improper.clear();
 
     for (auto it = params.dihedrals().constBegin();
          it != params.dihedrals().constEnd();
@@ -1087,6 +1106,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 dih_params.append(boost::make_tuple(atom0, atom1,
                                                     atom2, atom3,
                                                     periodicity, phase, v));
+                is_improper.append(false);
             }
             else if (periodicity == 0 and v == 0)
             {
@@ -1095,6 +1115,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 dih_params.append(boost::make_tuple(atom0, atom1,
                                                     atom2, atom3,
                                                     1, phase, v));
+                is_improper.append(false);
             }
             else
             {
@@ -1127,6 +1148,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 dih_params.append(boost::make_tuple(atom0, atom1,
                                                     atom2, atom3,
                                                     periodicity, phase, v));
+                is_improper.append(true);
             }
             else if (periodicity == 0 and v == 0)
             {
@@ -1135,6 +1157,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 dih_params.append(boost::make_tuple(atom0, atom1,
                                                     atom2, atom3,
                                                     1, phase, v));
+                is_improper.append(true);
             }
             else
             {
@@ -1369,7 +1392,9 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
     perturbed->ang_params = ang_params_1;
 
     QVector<boost::tuple<int, int, int, int, int, double, double>> dih_params_1;
+    QVector<bool> is_improper_1;
     dih_params_1.reserve(dih_params.count());
+    is_improper_1.reserve(dih_params.count());
 
     found_index_0 = QVector<bool>(dih_params.count(), false);
     found_index_1 = QVector<bool>(perturbed->dih_params.count(), false);
@@ -1377,6 +1402,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
     for (int i = 0; i < dih_params.count(); ++i)
     {
         const auto &dih0 = dih_params.at(i);
+        const bool is_improper0 = is_improper.at(i);
 
         int atom0 = boost::get<0>(dih0);
         int atom1 = boost::get<1>(dih0);
@@ -1390,6 +1416,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
             if (not found_index_1[j])
             {
                 const auto &dih1 = perturbed->dih_params.at(j);
+                const bool is_improper1 = perturbed->is_improper.at(j);
 
                 // we need to match all of the atoms AND the periodicity
                 if (boost::get<0>(dih1) == atom0 and boost::get<1>(dih1) == atom1 and
@@ -1398,6 +1425,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                 {
                     // we have found the matching torsion!
                     dih_params_1.append(dih1);
+                    is_improper_1.append(is_improper1);
                     found_index_0[i] = true;
                     found_index_1[j] = true;
                     found = true;
@@ -1410,6 +1438,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
         {
             // add a null dihedral with the same periodicity and phase, but null k
             dih_params_1.append(boost::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, boost::get<4>(dih0), boost::get<5>(dih0), 0.0));
+            is_improper_1.append(is_improper0);
             found_index_0[i] = true;
         }
     }
@@ -1420,6 +1449,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
         {
             // need to add a dihedral missing in the reference state
             const auto &dih1 = perturbed->dih_params.at(j);
+            const auto is_improper1 = perturbed->is_improper.at(j);
 
             int atom0 = boost::get<0>(dih1);
             int atom1 = boost::get<1>(dih1);
@@ -1428,7 +1458,9 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
 
             // add a null dihedral with the same periodicity and phase, but null k
             dih_params.append(boost::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, boost::get<4>(dih1), boost::get<5>(dih1), 0.0));
+            is_improper.append(is_improper1);
             dih_params_1.append(dih1);
+            is_improper_1.append(is_improper1);
             found_index_1[j] = true;
         }
     }
@@ -1442,6 +1474,8 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
     }
 
     perturbed->dih_params = dih_params_1;
+    perturbed->is_improper = is_improper_1;
+    is_improper = is_improper_1;
 
     // now align all of the exceptions - this should allow the bonding
     // to change during the perturbation
@@ -2089,10 +2123,11 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule()
 
 /** Construct from a passed molecule and map */
 PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const Molecule &mol,
+                                                     int start_atom_idx,
                                                      const PropertyMap &map)
     : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
 {
-    this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, map), map));
+    this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, start_atom_idx, map), map));
 }
 
 /** Return whether or not this is null */
@@ -2115,6 +2150,9 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
                                             CODELOC);
 
     auto molecule = mol.atoms.molecule();
+
+    // store the index of the first atom in the OpenMM system
+    this->start_atom_idx = mol.start_atom_idx;
 
     for (int i = 0; i < mol.atoms.count(); ++i)
     {
@@ -2196,6 +2234,9 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
 
     perturbable_constraints = mol.perturbable_constraints;
 
+    is_improper = mol.is_improper;
+    is_rest2 = mol.is_rest2;
+
     bool fix_perturbable_zero_sigmas = false;
 
     if (map.specified("fix_perturbable_zero_sigmas"))
@@ -2261,7 +2302,10 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMole
       to_ghost_idxs(other.to_ghost_idxs), from_ghost_idxs(other.from_ghost_idxs),
       exception_atoms(other.exception_atoms), exception_idxs(other.exception_idxs),
       perturbable_constraints(other.perturbable_constraints),
-      constraint_idxs(other.constraint_idxs)
+      constraint_idxs(other.constraint_idxs),
+      start_atom_idx(other.start_atom_idx),
+      is_improper(other.is_improper),
+      is_rest2(other.is_rest2)
 {
 }
 
@@ -2704,4 +2748,22 @@ QList<Angle> PerturbableOpenMMMolecule::angles() const
 QList<Dihedral> PerturbableOpenMMMolecule::torsions() const
 {
     return perturbed_dihs;
+}
+
+/** Return the improper flag vector for the perturbed dihedrals */
+QVector<bool> PerturbableOpenMMMolecule::getIsImproper() const
+{
+    return is_improper;
+}
+
+/** Return the index of the first atom in the Sire system */
+int PerturbableOpenMMMolecule::getStartAtomIdx() const
+{
+    return start_atom_idx;
+}
+
+/** Whether the atom is in the REST2 region. */
+bool PerturbableOpenMMMolecule::isRest2(int atom) const
+{
+    return is_rest2[atom];
 }

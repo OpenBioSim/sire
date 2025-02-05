@@ -179,6 +179,84 @@ class DynamicsData:
             self._is_running = False
             self._schedule_changed = False
 
+            # Check for a REST2 scaling factor.
+            if map.specified("rest2_scale"):
+                try:
+                    rest2_scale = map["rest2_scale"].value().as_double()
+                except:
+                    raise ValueError("'rest2_scale' must be of type 'float'")
+                if rest2_scale < 1.0:
+                    raise ValueError("'rest2_scale' must be >= 1.0")
+            else:
+                rest2_scale = 1.0
+
+            # Check for an additional REST2 selection.
+            if map.specified("rest2_selection"):
+                try:
+                    rest2_selection = str(map["rest2_selection"])
+                except:
+                    raise ValueError("'rest2_selection' must be of type 'str'")
+
+                try:
+                    from . import selection_to_atoms
+
+                    # Try to find the REST2 selection.
+                    atoms = selection_to_atoms(mols, rest2_selection)
+                except:
+                    raise ValueError(
+                        "Invalid 'rest2_selection' string. Please check the selection syntax."
+                    )
+
+                # Store all the perturbable molecules associated with the selection
+                # and remove perturbable atoms from the selection. Remove alchemical ions
+                # from the selection.
+                pert_mols = {}
+                non_pert_atoms = atoms.to_list()
+                for atom in atoms:
+                    mol = atom.molecule()
+                    if mol.has_property("is_alchemical_ion"):
+                        non_pert_atoms.remove(atom)
+                    elif mol.has_property("is_perturbable"):
+                        non_pert_atoms.remove(atom)
+                        if mol.number() not in pert_mols:
+                            pert_mols[mol.number()] = [atom]
+                        else:
+                            pert_mols[mol.number()].append(atom)
+
+                # Now create a boolean is_rest2 mask for the atoms in the perturbable molecules.
+                # Only do this if there are perturbable atoms in the selection.
+                if len(non_pert_atoms) != len(atoms):
+                    for num in pert_mols:
+                        mol = self._sire_mols[num]
+                        is_rest2 = [False] * mol.num_atoms()
+                        for atom in pert_mols[num]:
+                            is_rest2[atom.index().value()] = True
+
+                        # Set the is_rest2 property for each perturbable molecule.
+                        mol = (
+                            mol.edit()
+                            .set_property("is_rest2", is_rest2)
+                            .molecule()
+                            .commit()
+                        )
+
+                        # Update the system.
+                        self._sire_mols.update(mol)
+
+            # Search for alchemical ions and exclude them via a REST2 mask.
+            try:
+                for mol in self._sire_mols.molecules("property is_alchemical_ion"):
+                    is_rest2 = [False] * mol.num_atoms()
+                    mol = (
+                        mol.edit()
+                        .set_property("is_rest2", is_rest2)
+                        .molecule()
+                        .commit()
+                    )
+                    self._sire_mols.update(mol)
+            except:
+                pass
+
             from ..convert import to
 
             self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
@@ -194,6 +272,10 @@ class DynamicsData:
             else:
                 self._enforce_periodic_box = False
 
+            # Prepare the OpenMM REST2 data structures.
+            if map.specified("rest2_selection"):
+                if len(non_pert_atoms) > 0:
+                    self._omm_mols._prepare_rest2(self._sire_mols, non_pert_atoms)
         else:
             self._sire_mols = None
             self._energy_trajectory = None
@@ -208,6 +290,8 @@ class DynamicsData:
     def _update_from(self, state, state_has_cv, nsteps_completed):
         if self.is_null():
             return
+
+        self._current_step = nsteps_completed
 
         if not state_has_cv[0]:
             # there is no information to update
@@ -247,8 +331,6 @@ class DynamicsData:
                 map=self._map,
             )
 
-        self._current_step = nsteps_completed
-
         self._sire_mols.update(mols_to_update.molecules())
 
         if self._ffinfo.space().is_periodic():
@@ -273,8 +355,11 @@ class DynamicsData:
         save_frame: bool = False,
         save_energy: bool = False,
         lambda_windows=[],
+        rest2_scale_factors=[],
         save_velocities: bool = False,
         delta_lambda: float = None,
+        num_energy_neighbours: int = None,
+        null_energy: float = None,
     ):
         if not self._is_running:
             raise SystemError("Cannot stop dynamics that is not running!")
@@ -304,6 +389,14 @@ class DynamicsData:
         self._elapsed_time = current_time
         self._current_time += delta
 
+        # store the number of lambda windows
+        if lambda_windows is not None:
+            num_lambda_windows = len(lambda_windows)
+
+            # compute energies for all windows
+            if num_energy_neighbours is None:
+                num_energy_neighbours = num_lambda_windows
+
         if save_energy:
             # should save energy here
             nrgs = {}
@@ -323,8 +416,9 @@ class DynamicsData:
             )
 
             sim_lambda_value = self._omm_mols.get_lambda()
+            sim_rest2_scale = self._omm_mols.get_rest2_scale()
 
-            # Store the potential energy and accumulated non-equilibrium work.
+            # store the potential energy and accumulated non-equilibrium work
             if self._is_interpolate:
                 nrg = nrgs["potential"]
 
@@ -339,19 +433,38 @@ class DynamicsData:
                 nrgs[str(sim_lambda_value)] = nrgs["potential"]
 
                 if lambda_windows is not None:
-                    for lambda_value in lambda_windows:
-                        if lambda_value != sim_lambda_value:
-                            self._omm_mols.set_lambda(
-                                lambda_value, update_constraints=False
-                            )
-                            nrgs[str(lambda_value)] = (
-                                self._omm_mols.get_potential_energy(
-                                    to_sire_units=False
-                                ).value_in_unit(openmm.unit.kilocalorie_per_mole)
-                                * kcal_per_mol
-                            )
+                    # get the index of the simulation lambda value in the
+                    # lambda windows list
+                    try:
+                        lambda_index = lambda_windows.index(sim_lambda_value)
+                    except:
+                        num_energy_neighbours = num_lambda_windows
+                        lambda_index = i
 
-                self._omm_mols.set_lambda(sim_lambda_value, update_constraints=False)
+                    for i, (lambda_value, rest2_scale) in enumerate(
+                        zip(lambda_windows, rest2_scale_factors)
+                    ):
+                        if lambda_value != sim_lambda_value:
+                            if abs(lambda_index - i) <= num_energy_neighbours:
+                                self._omm_mols.set_lambda(
+                                    lambda_value,
+                                    rest2_scale=rest2_scale,
+                                    update_constraints=False,
+                                )
+                                nrgs[str(lambda_value)] = (
+                                    self._omm_mols.get_potential_energy(
+                                        to_sire_units=False
+                                    ).value_in_unit(openmm.unit.kilocalorie_per_mole)
+                                    * kcal_per_mol
+                                )
+                            else:
+                                nrgs[str(lambda_value)] = null_energy * kcal_per_mol
+
+                self._omm_mols.set_lambda(
+                    sim_lambda_value,
+                    rest2_scale=sim_rest2_scale,
+                    update_constraints=False,
+                )
 
             if self._is_interpolate:
                 self._energy_trajectory.set(
@@ -545,7 +658,10 @@ class DynamicsData:
         if not self.is_null():
             self._omm_mols.set_lambda_schedule(schedule)
             self._schedule_changed = True
-            self.set_lambda(self._omm_mols.get_lambda())
+            self.set_lambda(
+                self._omm_mols.get_lambda(),
+                rest2_scale=self._omm_mols.get_rest2_scale(),
+            )
 
     def get_lambda(self):
         if self.is_null():
@@ -553,7 +669,12 @@ class DynamicsData:
         else:
             return self._omm_mols.get_lambda()
 
-    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
+    def set_lambda(
+        self,
+        lambda_value: float,
+        rest2_scale: float = 1.0,
+        update_constraints: bool = True,
+    ):
         if not self.is_null():
             s = self.get_schedule()
 
@@ -562,14 +683,18 @@ class DynamicsData:
 
             lambda_value = s.clamp(lambda_value)
 
-            if (not self._schedule_changed) and (
-                lambda_value == self._omm_mols.get_lambda()
+            if (
+                (not self._schedule_changed)
+                and (lambda_value == self._omm_mols.get_lambda())
+                and (rest2_scale == self._omm_mols.get_rest2_scale())
             ):
                 # nothing to do
                 return
 
             self._omm_mols.set_lambda(
-                lambda_value=lambda_value, update_constraints=update_constraints
+                lambda_value=lambda_value,
+                rest2_scale=rest2_scale,
+                update_constraints=update_constraints,
             )
             self._schedule_changed = False
             self._clear_state()
@@ -780,13 +905,11 @@ class DynamicsData:
         from ..utils import Console
 
         Console.warning(
-            "Something went wrong when running dynamics. Since no steps "
-            "were completed, it is likely that the system needs minimising. "
-            "The system will be minimised, and then dynamics will be "
-            "attempted again. If an error still occurs, then it is likely "
-            "that the step size is too large, the molecules are "
-            "over-constrained, or there is something more fundemental "
-            "going wrong..."
+            "Something went wrong when running dynamics. The system will be "
+            "minimised, and then dynamics will be attempted again. If an "
+            "error still occurs, then it is likely that the step size is too "
+            "large, the molecules are over-constrained, or there is something "
+            "more fundemental going wrong..."
         )
 
         # rebuild the molecules
@@ -803,8 +926,13 @@ class DynamicsData:
         frame_frequency=None,
         energy_frequency=None,
         lambda_windows=None,
+        rest2_scale_factors=None,
         save_velocities: bool = None,
+        save_frame_on_exit: bool = False,
+        save_energy_on_exit: bool = False,
         auto_fix_minimise: bool = True,
+        num_energy_neighbours: int = None,
+        null_energy: str = None,
     ):
         if self.is_null():
             return
@@ -815,8 +943,13 @@ class DynamicsData:
             "frame_frequency": frame_frequency,
             "energy_frequency": energy_frequency,
             "lambda_windows": lambda_windows,
+            "rest2_scale_factors": rest2_scale_factors,
             "save_velocities": save_velocities,
+            "save_frame_on_exit": save_frame_on_exit,
+            "save_energy_on_exit": save_energy_on_exit,
             "auto_fix_minimise": auto_fix_minimise,
+            "num_energy_neighbours": num_energy_neighbours,
+            "null_energy": null_energy,
         }
 
         from concurrent.futures import ThreadPoolExecutor
@@ -835,6 +968,17 @@ class DynamicsData:
 
         if energy_frequency is not None:
             energy_frequency = u(energy_frequency)
+
+        if null_energy is not None:
+            null_energy = u(null_energy)
+        else:
+            null_energy = u("10000 kcal/mol")
+
+        if num_energy_neighbours is not None:
+            try:
+                num_energy_neighbours = int(num_energy_neighbours)
+            except:
+                num_energy_neighbours = len(lambda_windows)
 
         try:
             steps_to_run = int(time.to(picosecond) / self.timestep().to(picosecond))
@@ -857,8 +1001,13 @@ class DynamicsData:
                     save_frequency = 25
             else:
                 save_frequency = save_frequency.to(picosecond)
+            no_save = False
+        else:
+            no_save = True
+            save_frequency = steps_to_run + 1
 
         if energy_frequency != 0:
+            no_save_energy = False
             if energy_frequency is None:
                 if self._map.specified("energy_frequency"):
                     energy_frequency = (
@@ -866,10 +1015,15 @@ class DynamicsData:
                     )
                 else:
                     energy_frequency = save_frequency
+                    no_save_energy = no_save
             else:
                 energy_frequency = energy_frequency.to(picosecond)
+        else:
+            energy_frequency = steps_to_run + 1
+            no_save_energy = True
 
         if frame_frequency != 0:
+            no_save_frame = False
             if frame_frequency is None:
                 if self._map.specified("frame_frequency"):
                     frame_frequency = (
@@ -877,8 +1031,12 @@ class DynamicsData:
                     )
                 else:
                     frame_frequency = save_frequency
+                    no_save_frame = no_save
             else:
                 frame_frequency = frame_frequency.to(picosecond)
+        else:
+            frame_frequency = steps_to_run + 1
+            no_save_frame = True
 
         completed = 0
 
@@ -899,6 +1057,9 @@ class DynamicsData:
             # Fixed lambda value.
             else:
                 delta_lambda = None
+
+            # Set the REST2 scaling factors.
+            rest2_scale_factors = [1.0, 1.0]
         else:
             delta_lambda = None
             if lambda_windows is not None:
@@ -907,6 +1068,15 @@ class DynamicsData:
             else:
                 if self._map.specified("lambda_windows"):
                     lambda_windows = self._map["lambda_windows"].value()
+
+            if rest2_scale_factors is not None:
+                if len(rest2_scale_factors) != len(lambda_windows):
+                    raise ValueError(
+                        "len(rest2_scale_factors) must be equal to len(lambda_windows)"
+                    )
+            else:
+                if lambda_windows is not None:
+                    rest2_scale_factors = [1.0] * len(lambda_windows)
 
         def runfunc(num_steps):
             try:
@@ -927,60 +1097,50 @@ class DynamicsData:
                     }
                 )
 
-        def get_steps_till_save(completed: int, total: int):
-            """Internal function to calculate the number of steps
-            to run before the next save. This returns a tuple
-            of number of steps, and then if a frame should be
-            saved and if the energy should be saved
-            """
-            if completed < 0:
-                completed = 0
-
-            if completed >= total:
-                return (
-                    0,
-                    frame_frequency_steps > 0,
-                    energy_frequency_steps > 0,
-                )
-
-            elif frame_frequency_steps <= 0 and energy_frequency_steps <= 0:
-                return (total, False, False)
-
-            n_to_end = total - completed
-
-            if frame_frequency_steps > 0:
-                n_to_frame = min(
-                    frame_frequency_steps - (completed % frame_frequency_steps),
-                    n_to_end,
-                )
-            else:
-                n_to_frame = total - completed
-
-            if energy_frequency_steps > 0:
-                n_to_energy = min(
-                    energy_frequency_steps - (completed % energy_frequency_steps),
-                    n_to_end,
-                )
-            else:
-                n_to_energy = total - completed
-
-            if n_to_frame == n_to_energy:
-                return (n_to_frame, True, True)
-            elif n_to_frame < n_to_energy:
-                return (n_to_frame, True, False)
-            else:
-                return (n_to_energy, False, True)
-
-        block_size = 50
-
         state = None
         state_has_cv = (False, False)
         saved_last_frame = False
+
+        # whether the energy or frame were saved after the current block
+        have_saved_frame = False
+        have_saved_energy = False
 
         class NeedsMinimiseError(Exception):
             pass
 
         nsteps_before_run = self._current_step
+        # if this is the first call, then set the save frequencies
+        if nsteps_before_run == 0:
+            self._next_save_frame = frame_frequency_steps
+            self._next_save_energy = energy_frequency_steps
+            self._prev_frame_frequency_steps = frame_frequency_steps
+            self._prev_energy_frequency_steps = energy_frequency_steps
+            self._prev_no_frame = no_save_frame
+            self._prev_no_energy = no_save_energy
+        # handle adjustments to the save frequencies
+        else:
+            if frame_frequency_steps != self._prev_frame_frequency_steps:
+                if self._prev_no_frame:
+                    self._next_save_frame = nsteps_before_run + frame_frequency_steps
+                else:
+                    self._next_save_frame = (
+                        self._next_save_frame
+                        + frame_frequency_steps
+                        - self._prev_frame_frequency_steps
+                    )
+            if energy_frequency_steps != self._prev_energy_frequency_steps:
+                if self._prev_no_energy:
+                    self._next_save_energy = nsteps_before_run + energy_frequency_steps
+                else:
+                    self._next_save_energy = (
+                        self._next_save_energy
+                        + energy_frequency_steps
+                        - self._prev_energy_frequency_steps
+                    )
+            self._prev_no_frame = no_save_frame
+            self._prev_frame_frequency_steps = frame_frequency_steps
+            self._prev_no_energy = no_save_energy
+            self._prev_energy_frequency_steps = energy_frequency_steps
 
         from ..base import ProgressBar
         from ..units import second
@@ -995,13 +1155,51 @@ class DynamicsData:
 
                 with ThreadPoolExecutor() as pool:
                     while completed < steps_to_run:
-                        (
-                            nrun_till_save,
-                            save_frame,
-                            save_energy,
-                        ) = get_steps_till_save(completed, steps_to_run)
+                        block_size = 50
 
-                        assert nrun_till_save > 0
+                        steps_till_frame = self._next_save_frame - (
+                            completed + nsteps_before_run
+                        )
+                        if steps_till_frame <= 0 or (
+                            steps_till_frame <= block_size
+                            and steps_till_frame <= steps_to_run - completed
+                        ):
+                            save_frame = True
+                            self._next_save_frame += frame_frequency_steps
+                            if frame_frequency_steps < block_size:
+                                block_size = frame_frequency_steps
+                        else:
+                            save_frame = False
+
+                        steps_till_energy = self._next_save_energy - (
+                            completed + nsteps_before_run
+                        )
+                        if steps_till_energy <= 0 or (
+                            steps_till_energy <= block_size
+                            and steps_till_energy <= steps_to_run - completed
+                        ):
+                            save_energy = True
+                            self._next_save_energy += energy_frequency_steps
+                            if energy_frequency_steps < block_size:
+                                block_size = energy_frequency_steps
+                        else:
+                            save_energy = False
+
+                        # save the last frame if we're about to exit and the user
+                        # has requested it
+                        if (
+                            save_frame_on_exit
+                            and completed + block_size >= steps_to_run
+                        ):
+                            save_frame = True
+
+                        # save the last energy if we're about to exit and the user
+                        # has requested it
+                        if (
+                            save_energy_on_exit
+                            and completed + block_size >= steps_to_run
+                        ):
+                            save_energy = True
 
                         self._enter_dynamics_block()
 
@@ -1016,47 +1214,62 @@ class DynamicsData:
                         else:
                             process_promise = None
 
-                        while nrun_till_save > 0:
-                            nrun = block_size
+                        nrun = block_size
 
-                            if 2 * nrun > nrun_till_save:
-                                nrun = nrun_till_save
+                        # this block will exceed the run time so reduce the size
+                        if nrun > steps_to_run - completed:
+                            nrun = steps_to_run - completed
 
-                            # run the current block in the background
-                            run_promise = pool.submit(runfunc, nrun)
+                        # run the current block in the background
+                        run_promise = pool.submit(runfunc, nrun)
 
-                            result = None
+                        result = None
 
-                            while not run_promise.done():
-                                try:
-                                    result = run_promise.result(timeout=1.0)
-                                except Exception:
-                                    pass
-
-                            # catch rare edge case where the promise timed
-                            # out, but then completed before the .done()
-                            # test in the next loop iteration
-                            if result is None:
-                                result = run_promise.result()
-
-                            if result == 0:
-                                completed += nrun
-                                nrun_till_save -= nrun
-                                progress.set_progress(completed)
-                                run_promise = None
-                            else:
-                                # make sure we finish processing the last block
-                                if process_promise is not None:
-                                    try:
-                                        process_promise.result()
-                                    except Exception:
-                                        pass
-
-                                if completed == 0 and auto_fix_minimise:
+                        while not run_promise.done():
+                            try:
+                                result = run_promise.result(timeout=1.0)
+                            except Exception as e:
+                                if (
+                                    "NaN" in str(e)
+                                    and not have_saved_frame
+                                    and not have_saved_energy
+                                    and auto_fix_minimise
+                                ):
                                     raise NeedsMinimiseError()
 
-                                # something went wrong - re-raise the exception
-                                raise result
+                        # catch rare edge case where the promise timed
+                        # out, but then completed before the .done()
+                        # test in the next loop iteration
+                        if result is None:
+                            result = run_promise.result()
+
+                        if result == 0:
+                            completed += nrun
+                            progress.set_progress(completed)
+                            run_promise = None
+                        else:
+                            # make sure we finish processing the last block
+                            if process_promise is not None:
+                                try:
+                                    process_promise.result()
+                                except Exception as e:
+                                    if (
+                                        "NaN" in str(e)
+                                        and not have_saved_frame
+                                        and not have_saved_energy
+                                        and auto_fix_minimise
+                                    ):
+                                        raise NeedsMinimiseError()
+
+                            if (
+                                not have_saved_frame
+                                and not have_saved_energy
+                                and auto_fix_minimise
+                            ):
+                                raise NeedsMinimiseError()
+
+                            # something went wrong - re-raise the exception
+                            raise result
 
                         # make sure we've finished processing the last block
                         if process_promise is not None:
@@ -1069,11 +1282,17 @@ class DynamicsData:
                             save_frame=save_frame,
                             save_energy=save_energy,
                             lambda_windows=lambda_windows,
+                            rest2_scale_factors=rest2_scale_factors,
                             save_velocities=save_velocities,
                             delta_lambda=delta_lambda,
+                            num_energy_neighbours=num_energy_neighbours,
+                            null_energy=null_energy.value(),
                         )
 
                         saved_last_frame = False
+
+                        have_saved_frame = save_frame
+                        have_saved_energy = save_energy
 
                         kinetic_energy = state.getKineticEnergy().value_in_unit(
                             openmm.unit.kilocalorie_per_mole
@@ -1086,7 +1305,11 @@ class DynamicsData:
                             state = None
                             saved_last_frame = True
 
-                            if completed == 0 and auto_fix_minimise:
+                            if (
+                                not have_saved_frame
+                                and not have_saved_energy
+                                and auto_fix_minimise
+                            ):
                                 raise NeedsMinimiseError()
 
                             raise RuntimeError(
@@ -1331,8 +1554,13 @@ class Dynamics:
         frame_frequency=None,
         energy_frequency=None,
         lambda_windows=None,
+        rest2_scale_factors=None,
         save_velocities: bool = None,
+        save_frame_on_exit: bool = False,
+        save_energy_on_exit: bool = False,
         auto_fix_minimise: bool = True,
+        num_energy_neighbours: int = None,
+        null_energy: str = None,
     ):
         """
         Perform dynamics on the molecules.
@@ -1389,10 +1617,22 @@ class Dynamics:
             we always save the potential energy of the simulated lambda
             value, even if it is not in the list of lambda windows.
 
+        rest2_scale_factors: list[float]
+            The scaling factors for the REST2 region for each lambda
+            window.
+
         save_velocities: bool
             Whether or not to save the velocities when running dynamics.
             By default this is False. Set this to True if you are
             interested in saving the velocities.
+
+        save_frame_on_exit: bool
+            Whether to save a trajectory frame on exit, regardless of
+            whether the frame frequency has been reached.
+
+        save_energy_on_exit: bool
+            Whether to save the energy on exit, regardless of whether
+            the energy frequency has been reached.
 
         auto_fix_minimise: bool
             Whether or not to automatically run minimisation if the
@@ -1400,6 +1640,28 @@ class Dynamics:
             Such failures often indicate that the system needs
             minimsing. This automatically runs the minimisation
             in these cases, and then runs the requested dynamics.
+
+        num_energy_neighbours: int
+            The number of neighbouring windows to use when computing
+            the energy trajectory for the simulation lambda value.
+            This can be used to compute energies over a subset of the
+            values in 'lambda_windows', hence reducing the cost of
+            computing the energy trajectory. Note that the simulation
+            lambda value must be contained in 'lambda_windows', so it
+            is recommended that the values are rounded. A value of
+            'null_energy' will be added to the energy trajectory for the
+            lambda windows that are omitted. Note that a similar result
+            can be achieved by simply removing any lambda values from
+            'lambda_windows' that you don't want, but this will result
+            in an energy trajectory that only contains results for
+            the specified lambda values. If None, then all lambda windows
+            will be used.
+
+        null_energy: str
+            The energy value to use for lambda windows that are not
+            being computed as part of the energy trajectory, i.e. when
+            'num_energy_neighbours' is less than len(lambda_windows).
+            By default, a value of '10000 kcal mol-1' is used.
         """
         if not self._d.is_null():
             if save_velocities is None:
@@ -1414,8 +1676,13 @@ class Dynamics:
                 frame_frequency=frame_frequency,
                 energy_frequency=energy_frequency,
                 lambda_windows=lambda_windows,
+                rest2_scale_factors=rest2_scale_factors,
                 save_velocities=save_velocities,
+                save_frame_on_exit=save_frame_on_exit,
+                save_energy_on_exit=save_energy_on_exit,
                 auto_fix_minimise=auto_fix_minimise,
+                num_energy_neighbours=num_energy_neighbours,
+                null_energy=null_energy,
             )
 
         return self
@@ -1444,12 +1711,21 @@ class Dynamics:
         """
         return self._d.get_lambda()
 
-    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
+    def set_lambda(
+        self,
+        lambda_value: float,
+        rest2_scale: float = 1.0,
+        update_constraints: bool = True,
+    ):
         """
         Set the current value of lambda for this system. This will
         update the forcefield parameters in the context according
         to the data in the LambdaSchedule. This does nothing if
         this isn't a perturbable system.
+
+        The `rest2_scale` parameter specifies the temperature of the
+        REST2 region relative to the rest of the system at the specified
+        lambda value.
 
         If `update_constraints` is True, then this will also update
         the constraint length of any constrained perturbable bonds.
@@ -1458,8 +1734,24 @@ class Dynamics:
         the constraint will not be changed.
         """
         self._d.set_lambda(
-            lambda_value=lambda_value, update_constraints=update_constraints
+            lambda_value=lambda_value,
+            rest2_scale=rest2_scale,
+            update_constraints=update_constraints,
         )
+
+    def get_rest2_scale(self):
+        """
+        Return the current REST2 scaling factor.
+        """
+        if self.is_null():
+            return None
+        return self._d.get_rest2_scale()
+
+    def set_rest2_scale(self, rest2_scale: float):
+        """
+        Set the current REST2 scaling factor.
+        """
+        self._d.set_rest2_scale(rest2_scale=rest2_scale)
 
     def ensemble(self):
         """
@@ -1646,35 +1938,56 @@ class Dynamics:
         """
         return self._d.current_energy()
 
-    def current_potential_energy(self, lambda_values=None):
+    def current_potential_energy(self, lambda_values=None, rest2_scale_factors=None):
         """
         Return the current potential energy.
 
         If `lambda_values` is passed (which should be a list of
         lambda values) then this will return the energies
         (as a list) at the requested lambda values
+
+        If `rest2_scale_factors` is passed, then these will be
+        used to scale the temperature of the REST2 region at each
+        lambda value.
         """
         if lambda_values is None:
             return self._d.current_potential_energy()
         else:
             if not isinstance(lambda_values, list):
                 lambda_values = [lambda_values]
+            if rest2_scale_factors is None:
+                rest2_scale_factors = [1.0] * len(lambda_values)
+            else:
+                if not isinstance(rest2_scale_factors, list):
+                    rest2_scale_factors = [rest2_scale_factors]
+                else:
+                    if len(rest2_scale_factors) != len(lambda_values):
+                        raise ValueError(
+                            "len(rest2_scale_factors) must be equal to len(lambda_values)"
+                        )
 
             # save the current value of lambda so we
             # can restore it
             old_lambda = self.get_lambda()
+            old_rest2_scale = self.get_rest2_scale()
 
             nrgs = []
 
             try:
-                for lambda_value in lambda_values:
-                    self.set_lambda(lambda_value, update_constraints=False)
+                for lambda_value, rest2_scale in zip(
+                    lambda_values, rest2_scale_factors
+                ):
+                    self.set_lambda(
+                        lambda_value, rest2_scale=rest2_scale, update_constraints=False
+                    )
                     nrgs.append(self._d.current_potential_energy())
             except Exception:
-                self.set_lambda(old_lambda, update_constraints=False)
+                self.set_lambda(old_lambda, old_rest2_scale, update_constraints=False)
                 raise
 
-            self.set_lambda(old_lambda, update_constraints=False)
+            self.set_lambda(
+                old_lambda, rest2_scale=old_rest2_scale, update_constraints=False
+            )
 
             return nrgs
 

@@ -144,7 +144,7 @@ QDataStream &operator<<(QDataStream &ds, const OpenMMPMEFEP &velver)
     sds << velver.frequent_save_velocities << velver.molgroup << velver.solute << velver.solutehard
         << velver.solutetodummy << velver.solutefromdummy << velver.combiningRules << velver.CutoffType
         << velver.cutoff_distance << velver.field_dielectric << velver.Andersen_flag << velver.Andersen_frequency
-        << velver.MCBarostat_flag << velver.MCBarostat_frequency << velver.ConstraintType << velver.Pressure
+        << velver.MCBarostat_flag << velver.MCBarostat_membrane_flag << velver.MCBarostat_frequency << velver.ConstraintType << velver.Pressure
         << velver.Temperature << velver.platform_type << velver.Restraint_flag << velver.CMMremoval_frequency
         << velver.buffer_frequency << velver.energy_frequency << velver.device_index << velver.precision
         << velver.current_lambda << velver.coulomb_power << velver.shift_delta << velver.delta_alchemical
@@ -166,7 +166,7 @@ QDataStream &operator>>(QDataStream &ds, OpenMMPMEFEP &velver)
         sds >> velver.frequent_save_velocities >> velver.molgroup >> velver.solute >> velver.solutehard >>
             velver.solutetodummy >> velver.solutefromdummy >> velver.combiningRules >> velver.CutoffType >>
             velver.cutoff_distance >> velver.field_dielectric >> velver.Andersen_flag >> velver.Andersen_frequency >>
-            velver.MCBarostat_flag >> velver.MCBarostat_frequency >> velver.ConstraintType >> velver.Pressure >>
+            velver.MCBarostat_flag >> velver.MCBarostat_membrane_flag >> velver.MCBarostat_frequency >> velver.ConstraintType >> velver.Pressure >>
             velver.Temperature >> velver.platform_type >> velver.Restraint_flag >> velver.CMMremoval_frequency >>
             velver.buffer_frequency >> velver.energy_frequency >> velver.device_index >> velver.precision >>
             velver.current_lambda >> velver.coulomb_power >> velver.shift_delta >> velver.delta_alchemical >>
@@ -194,7 +194,7 @@ OpenMMPMEFEP::OpenMMPMEFEP(bool frequent_save)
       solutefromdummy(MoleculeGroup()), openmm_system(0), openmm_context(0), isSystemInitialised(false),
       isContextInitialised(false), combiningRules("arithmetic"), CutoffType("PME"), cutoff_distance(1.0 * nanometer),
       field_dielectric(78.3), Andersen_flag(false), Andersen_frequency(90.0), MCBarostat_flag(false),
-      MCBarostat_frequency(25), ConstraintType("none"), Pressure(1.0 * bar), Temperature(300.0 * kelvin),
+      MCBarostat_membrane_flag(false), MCBarostat_frequency(25), ConstraintType("none"), Pressure(1.0 * bar), Temperature(300.0 * kelvin),
       platform_type("Reference"), Restraint_flag(false), CMMremoval_frequency(0), buffer_frequency(0),
       energy_frequency(100), device_index("0"), precision("single"), current_lambda(0.5), coulomb_power(0),
       shift_delta(2.0), delta_alchemical(0.001), alchemical_array(), finite_diff_gradients(), pot_energies(),
@@ -212,7 +212,7 @@ OpenMMPMEFEP::OpenMMPMEFEP(const MoleculeGroup &molecule_group, const MoleculeGr
       solute(solute_group), solutehard(solute_hard), solutetodummy(solute_todummy), solutefromdummy(solute_fromdummy),
       openmm_system(0), openmm_context(0), isSystemInitialised(false), isContextInitialised(false),
       combiningRules("arithmetic"), CutoffType("PME"), cutoff_distance(1.0 * nanometer), field_dielectric(78.3),
-      Andersen_flag(false), Andersen_frequency(90.0), MCBarostat_flag(false), MCBarostat_frequency(25),
+      Andersen_flag(false), Andersen_frequency(90.0), MCBarostat_flag(false), MCBarostat_membrane_flag(false), MCBarostat_frequency(25),
       ConstraintType("none"), Pressure(1.0 * bar), Temperature(300.0 * kelvin), platform_type("Reference"),
       Restraint_flag(false), CMMremoval_frequency(0), buffer_frequency(0), energy_frequency(100), device_index("0"),
       precision("single"), current_lambda(0.5), coulomb_power(0), shift_delta(2.0), delta_alchemical(0.001),
@@ -230,7 +230,7 @@ OpenMMPMEFEP::OpenMMPMEFEP(const OpenMMPMEFEP &other)
       isSystemInitialised(other.isSystemInitialised), isContextInitialised(other.isContextInitialised),
       combiningRules(other.combiningRules), CutoffType(other.CutoffType), cutoff_distance(other.cutoff_distance),
       field_dielectric(other.field_dielectric), Andersen_flag(other.Andersen_flag),
-      Andersen_frequency(other.Andersen_frequency), MCBarostat_flag(other.MCBarostat_flag),
+      Andersen_frequency(other.Andersen_frequency), MCBarostat_flag(other.MCBarostat_flag), MCBarostat_membrane_flag(other.MCBarostat_membrane_flag),
       MCBarostat_frequency(other.MCBarostat_frequency), ConstraintType(other.ConstraintType), Pressure(other.Pressure),
       Temperature(other.Temperature), platform_type(other.platform_type), Restraint_flag(other.Restraint_flag),
       CMMremoval_frequency(other.CMMremoval_frequency), buffer_frequency(other.buffer_frequency),
@@ -272,6 +272,7 @@ OpenMMPMEFEP &OpenMMPMEFEP::operator=(const OpenMMPMEFEP &other)
     Andersen_flag = other.Andersen_flag;
     Andersen_frequency = other.Andersen_frequency;
     MCBarostat_flag = other.MCBarostat_flag;
+    MCBarostat_membrane_flag = other.MCBarostat_membrane_flag;
     MCBarostat_frequency = other.MCBarostat_frequency;
     ConstraintType = other.ConstraintType;
     Pressure = other.Pressure;
@@ -315,7 +316,7 @@ bool OpenMMPMEFEP::operator==(const OpenMMPMEFEP &other) const
            combiningRules == other.combiningRules and CutoffType == other.CutoffType and
            cutoff_distance == other.cutoff_distance and field_dielectric == other.field_dielectric and
            Andersen_flag == other.Andersen_flag and Andersen_frequency == other.Andersen_frequency and
-           MCBarostat_flag == other.MCBarostat_flag and MCBarostat_frequency == other.MCBarostat_frequency and
+           MCBarostat_flag == other.MCBarostat_flag and MCBarostat_membrane_flag == other.MCBarostat_membrane_flag and MCBarostat_frequency == other.MCBarostat_frequency and
            ConstraintType == other.ConstraintType and Pressure == other.Pressure and
            Temperature == other.Temperature and platform_type == other.platform_type and
            Restraint_flag == other.Restraint_flag and CMMremoval_frequency == other.CMMremoval_frequency and
@@ -386,17 +387,39 @@ void OpenMMPMEFEP::addMCBarostat(OpenMM::System &system)
     const double converted_Temperature = convertTo(Temperature.value(), kelvin);
     const double converted_Pressure = convertTo(Pressure.value(), bar);
 
-    auto barostat = new OpenMM::MonteCarloBarostat(converted_Pressure, converted_Temperature, MCBarostat_frequency);
+    if (MCBarostat_membrane_flag == true)
+    {
+        // Simple options for now: zero surface tension, XY isotropic, Z free
+        const double surface_Tension = 0;
+        OpenMM::MonteCarloMembraneBarostat::XYMode xymode = OpenMM::MonteCarloMembraneBarostat::XYIsotropic;
+        OpenMM::MonteCarloMembraneBarostat::ZMode zmode = OpenMM::MonteCarloMembraneBarostat::ZFree;
+        auto barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
 
-    barostat->setRandomNumberSeed(random_seed);
-    system.addForce(barostat);
+        //Set The random seed
+        barostat->setRandomNumberSeed(random_seed);
+
+        system.addForce(barostat);
+    }
+    else
+    {
+        auto barostat = new OpenMM::MonteCarloBarostat(converted_Pressure, converted_Temperature, MCBarostat_frequency);
+
+        // Set The random seed
+        barostat->setRandomNumberSeed(random_seed);
+
+        system.addForce(barostat);
+    }
 
     if (Debug)
     {
-        qDebug() << "Monte Carlo Barostat set";
-        qDebug() << "Temperature =" << converted_Temperature << " K";
-        qDebug() << "Pressure =" << converted_Pressure << " bar";
-        qDebug() << "Frequency every" << MCBarostat_frequency << " steps";
+        qDebug() << "Monte Carlo Barostat set\n";
+        qDebug() << "Temperature = " << converted_Temperature << " K\n";
+        qDebug() << "Pressure = " << converted_Pressure << " bar\n";
+        qDebug() << "Frequency every " << MCBarostat_frequency << " steps\n";
+        if (MCBarostat_membrane_flag)
+        {
+            qDebug() << "Membrane barostat, surface tension 0, XY isotropic, Z free\n";
+        }
     }
 }
 
@@ -3665,8 +3688,8 @@ boost::tuples::tuple<double, double, double> OpenMMPMEFEP::calculateGradient(dou
 {
     double double_increment = incr_plus - incr_minus;
     double gradient = 0;
-    double potential_energy_lambda_plus_delta;
-    double potential_energy_lambda_minus_delta;
+    double potential_energy_lambda_plus_delta = 0;
+    double potential_energy_lambda_minus_delta = 0;
     double forward_m;
     double backward_m;
     if (incr_plus < 1.0)
@@ -3885,6 +3908,16 @@ void OpenMMPMEFEP::setMCBarostat(bool MCBarostat)
 bool OpenMMPMEFEP::getMCBarostat(void)
 {
     return MCBarostat_flag;
+}
+
+void OpenMMPMEFEP::setMCBarostatMembrane(bool MCBarostat_membrane)
+{
+    MCBarostat_membrane_flag = MCBarostat_membrane;
+}
+
+bool OpenMMPMEFEP::getMCBarostatMembrane(void)
+{
+    return MCBarostat_membrane_flag;
 }
 
 /** Get the Monte Carlo Barostat frequency in time speps */

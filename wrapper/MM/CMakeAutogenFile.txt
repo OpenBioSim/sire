@@ -68,6 +68,7 @@ set ( PYPP_SOURCES
        PositionalRestraints.pypp.cpp
        IntraGroupFF.pypp.cpp
        DihedralRestraint.pypp.cpp
+       DihedralRestraints.pypp.cpp
        IntraFF.pypp.cpp
        DihedralComponent.pypp.cpp
        ScaledChargeParameterNames3D.pypp.cpp
@@ -181,6 +182,7 @@ set ( PYPP_SOURCES
        CoulombNBPairs.pypp.cpp
        AmberDihedral.pypp.cpp
        AngleRestraint.pypp.cpp
+       AngleRestraints.pypp.cpp
        TwoAtomFunctions.pypp.cpp
        IntraSoftCLJFFBase.pypp.cpp
        BondSymbols.pypp.cpp

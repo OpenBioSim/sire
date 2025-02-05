@@ -129,7 +129,7 @@ QDataStream &operator<<(QDataStream &ds, const OpenMMFrEnergyDT &velver)
 
     sds << velver.frequent_save_velocities << velver.molgroup << velver.solutegroup << velver.CutoffType
         << velver.cutoff_distance << velver.field_dielectric << velver.Andersen_flag << velver.Andersen_frequency
-        << velver.MCBarostat_flag << velver.MCBarostat_frequency << velver.ConstraintType << velver.Pressure
+        << velver.MCBarostat_flag << velver.MCBarostat_membrane_flag << velver.MCBarostat_frequency << velver.ConstraintType << velver.Pressure
         << velver.Temperature << velver.platform_type << velver.Restraint_flag << velver.CMMremoval_frequency
         << velver.energy_frequency << velver.device_index << velver.Alchemical_value << velver.coulomb_power
         << velver.shift_delta << velver.delta_alchemical << velver.buffer_coords << velver.gradients
@@ -151,7 +151,7 @@ QDataStream &operator>>(QDataStream &ds, OpenMMFrEnergyDT &velver)
 
         sds >> velver.frequent_save_velocities >> velver.molgroup >> velver.solutegroup >> velver.CutoffType >>
             velver.cutoff_distance >> velver.field_dielectric >> velver.Andersen_flag >> velver.Andersen_frequency >>
-            velver.MCBarostat_flag >> velver.MCBarostat_frequency >> velver.ConstraintType >> velver.Pressure >>
+            velver.MCBarostat_flag >> velver.MCBarostat_membrane_flag >> velver.MCBarostat_frequency >> velver.ConstraintType >> velver.Pressure >>
             velver.Temperature >> velver.platform_type >> velver.Restraint_flag >> velver.CMMremoval_frequency >>
             velver.energy_frequency >> velver.device_index >> velver.Alchemical_value >> velver.coulomb_power >>
             velver.shift_delta >> velver.delta_alchemical >> velver.buffer_coords >> velver.gradients >>
@@ -175,7 +175,7 @@ OpenMMFrEnergyDT::OpenMMFrEnergyDT(bool frequent_save)
     : ConcreteProperty<OpenMMFrEnergyDT, Integrator>(), frequent_save_velocities(frequent_save),
       molgroup(MoleculeGroup()), solutegroup(MoleculeGroup()), openmm_system(0), isInitialised(false),
       CutoffType("nocutoff"), cutoff_distance(1.0 * nanometer), field_dielectric(78.3), Andersen_flag(false),
-      Andersen_frequency(90.0), MCBarostat_flag(false), MCBarostat_frequency(25), ConstraintType("none"),
+      Andersen_frequency(90.0), MCBarostat_flag(false), MCBarostat_membrane_flag(false), MCBarostat_frequency(25), ConstraintType("none"),
       Pressure(1.0 * bar), Temperature(300.0 * kelvin), platform_type("Reference"), Restraint_flag(false),
       CMMremoval_frequency(0), energy_frequency(100), device_index("0"), Alchemical_value(0.5), coulomb_power(0),
       shift_delta(2.0), delta_alchemical(0.001), buffer_coords(false), gradients()
@@ -188,7 +188,7 @@ OpenMMFrEnergyDT::OpenMMFrEnergyDT(const MoleculeGroup &molecule_group, const Mo
     : ConcreteProperty<OpenMMFrEnergyDT, Integrator>(), frequent_save_velocities(frequent_save),
       molgroup(molecule_group), solutegroup(solute_group), openmm_system(0), isInitialised(false),
       CutoffType("nocutoff"), cutoff_distance(1.0 * nanometer), field_dielectric(78.3), Andersen_flag(false),
-      Andersen_frequency(90.0), MCBarostat_flag(false), MCBarostat_frequency(25), ConstraintType("none"),
+      Andersen_frequency(90.0), MCBarostat_flag(false), MCBarostat_membrane_flag(false), MCBarostat_frequency(25), ConstraintType("none"),
       Pressure(1.0 * bar), Temperature(300.0 * kelvin), platform_type("Reference"), Restraint_flag(false),
       CMMremoval_frequency(0), energy_frequency(100), device_index("0"), Alchemical_value(0.5), coulomb_power(0),
       shift_delta(2.0), delta_alchemical(0.001), buffer_coords(false), gradients()
@@ -201,7 +201,7 @@ OpenMMFrEnergyDT::OpenMMFrEnergyDT(const OpenMMFrEnergyDT &other)
       molgroup(other.molgroup), solutegroup(other.solutegroup), openmm_system(other.openmm_system),
       isInitialised(other.isInitialised), CutoffType(other.CutoffType), cutoff_distance(other.cutoff_distance),
       field_dielectric(other.field_dielectric), Andersen_flag(other.Andersen_flag),
-      Andersen_frequency(other.Andersen_frequency), MCBarostat_flag(other.MCBarostat_flag),
+      Andersen_frequency(other.Andersen_frequency), MCBarostat_flag(other.MCBarostat_flag), MCBarostat_membrane_flag(other.MCBarostat_membrane_flag),
       MCBarostat_frequency(other.MCBarostat_frequency), ConstraintType(other.ConstraintType), Pressure(other.Pressure),
       Temperature(other.Temperature), platform_type(other.platform_type), Restraint_flag(other.Restraint_flag),
       CMMremoval_frequency(other.CMMremoval_frequency), energy_frequency(other.energy_frequency),
@@ -232,6 +232,7 @@ OpenMMFrEnergyDT &OpenMMFrEnergyDT::operator=(const OpenMMFrEnergyDT &other)
     Andersen_flag = other.Andersen_flag;
     Andersen_frequency = other.Andersen_frequency;
     MCBarostat_flag = other.MCBarostat_flag;
+    MCBarostat_membrane_flag = other.MCBarostat_membrane_flag;
     MCBarostat_frequency = other.MCBarostat_frequency;
     ConstraintType = other.ConstraintType;
     Pressure = other.Pressure;
@@ -521,9 +522,21 @@ void OpenMMFrEnergyDT::initialise()
         const double converted_Temperature = convertTo(Temperature.value(), kelvin);
         const double converted_Pressure = convertTo(Pressure.value(), bar);
 
-        OpenMM::MonteCarloBarostat *barostat =
-            new OpenMM::MonteCarloBarostat(converted_Pressure, converted_Temperature, MCBarostat_frequency);
-        system_openmm->addForce(barostat);
+        if (MCBarostat_membrane_flag)
+        {
+            // Simple options for now: zero surface tension, XY isotropic, Z free
+            const double surface_Tension = 0;
+            OpenMM::MonteCarloMembraneBarostat::XYMode xymode = OpenMM::MonteCarloMembraneBarostat::XYIsotropic;
+            OpenMM::MonteCarloMembraneBarostat::ZMode zmode = OpenMM::MonteCarloMembraneBarostat::ZFree;
+            OpenMM::MonteCarloMembraneBarostat * barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
+            system_openmm->addForce(barostat);
+        }
+        else
+        {
+            OpenMM::MonteCarloBarostat *barostat =
+                new OpenMM::MonteCarloBarostat(converted_Pressure, converted_Temperature, MCBarostat_frequency);
+            system_openmm->addForce(barostat);
+        }
 
         if (Debug)
         {
@@ -531,6 +544,10 @@ void OpenMMFrEnergyDT::initialise()
             qDebug() << "Temperature = " << converted_Temperature << " K\n";
             qDebug() << "Pressure = " << converted_Pressure << " bar\n";
             qDebug() << "Frequency every " << MCBarostat_frequency << " steps\n";
+            if (MCBarostat_membrane_flag)
+            {
+                qDebug() << "Membrane barostat, surface tension 0, XY isotropic, Z free\n";
+            }
         }
     }
 
@@ -1793,6 +1810,18 @@ bool OpenMMFrEnergyDT::getMCBarostat(void)
 {
 
     return MCBarostat_flag;
+}
+
+/** Set Monte Carlo membrane Barostat on/off */
+void OpenMMFrEnergyDT::setMCBarostat_membrane(bool MCBarostat_membrane)
+{
+	MCBarostat_membrane_flag = MCBarostat_membrane;
+}
+
+bool OpenMMFrEnergyDT::getMCBarostat_membrane(void)
+{
+
+	return MCBarostat_membrane_flag;
 }
 
 /** Get the Monte Carlo Barostat frequency in time speps */

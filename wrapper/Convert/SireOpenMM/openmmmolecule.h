@@ -44,6 +44,7 @@ namespace SireOpenMM
 
         OpenMMMolecule();
         OpenMMMolecule(const SireMol::Molecule &mol,
+                       int start_atom_idx,
                        const SireBase::PropertyMap &map);
 
         ~OpenMMMolecule();
@@ -183,6 +184,15 @@ namespace SireOpenMM
          *  perturbable atoms */
         qint32 perturbable_constraint_type;
 
+        /** Whether each dihedral is an improper */
+        QVector<bool> is_improper;
+
+        /** Whether each atom is within the REST2 region */
+        QVector<bool> is_rest2;
+
+        /** The starting index of the first OpenMM atom in the original Sire system. */
+        int start_atom_idx;
+
     private:
         void constructFromAmber(const SireMol::Molecule &mol,
                                 const SireMM::AmberParams &params,
@@ -211,6 +221,7 @@ namespace SireOpenMM
                                   const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         PerturbableOpenMMMolecule(const SireMol::Molecule &mol,
+                                  int start_atom_idx,
                                   const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         PerturbableOpenMMMolecule(const PerturbableOpenMMMolecule &other);
@@ -271,6 +282,9 @@ namespace SireOpenMM
         QSet<qint32> getToGhostIdxs() const;
         QSet<qint32> getFromGhostIdxs() const;
 
+        int getStartAtomIdx() const;
+        bool isRest2(int atom) const;
+
         bool isGhostAtom(int atom) const;
 
         QVector<boost::tuple<qint32, qint32>> getExceptionAtoms() const;
@@ -292,6 +306,8 @@ namespace SireOpenMM
         QList<SireMM::Bond> bonds() const;
         QList<SireMM::Angle> angles() const;
         QList<SireMM::Dihedral> torsions() const;
+
+        QVector<bool> getIsImproper() const;
 
     private:
         /** The atoms that are perturbed, in the order they appear
@@ -358,8 +374,16 @@ namespace SireOpenMM
          *  to the number of perturbable constraints in the molecule
          */
         QVector<qint32> constraint_idxs;
-    };
 
+        /** Whether each dihedral is an improper */
+        QVector<bool> is_improper;
+
+        /** Whether each atom is within the REST2 region */
+        QVector<bool> is_rest2;
+
+        /** The starting index of the first OpenMM atom in the original Sire system. */
+        int start_atom_idx;
+    };
 }
 
 Q_DECLARE_METATYPE(SireOpenMM::PerturbableOpenMMMolecule)

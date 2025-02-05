@@ -4,6 +4,8 @@ __all__ = [
     "AmberDihPart",
     "AmberDihedral",
     "Angle",
+    "AngleRestraint",
+    "AngleRestraints",
     "Bond",
     "BondRestraint",
     "BondRestraints",
@@ -11,6 +13,8 @@ __all__ = [
     "Improper",
     "PositionRestraint",
     "PositionRestraints",
+    "DihedralRestraint",
+    "DihedralRestraints",
     "SelectorAngle",
     "SelectorBond",
     "SelectorDihedral",
@@ -29,6 +33,9 @@ from .. import use_new_api as _use_new_api
 
 _use_new_api()
 
+AngleRestraint = _MM.AngleRestraint
+AngleRestraints = _MM.AngleRestraints
+
 # It would be better if these were called "DistanceRestraints",
 # but there is already a legacy Sire.MM class with this name
 BondRestraint = _MM.BondRestraint
@@ -39,6 +46,9 @@ BoreschRestraints = _MM.BoreschRestraints
 
 PositionalRestraint = _MM.PositionalRestraint
 PositionalRestraints = _MM.PositionalRestraints
+
+DihedralRestraint = _MM.DihedralRestraint
+DihedralRestraints = _MM.DihedralRestraints
 
 AmberBond = _MM.AmberBond
 AmberAngle = _MM.AmberAngle

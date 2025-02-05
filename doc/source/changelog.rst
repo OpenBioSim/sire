@@ -12,15 +12,38 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - December 2024
---------------------------------------------------------------------------------------------
-
-* Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
+`2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
+----------------------------------------------------------------------------------------
 
 * Fixed update of triclinic box vectors in ``SOMD`` following ``OpenMM`` bug fix.
 
+* Don't automatically save energies and frames when ``dynamics.run()`` returns.
+
+* Improved handling of ``OpenMM`` NaN errors during dynamics.
+
+* Restore thread state before raising exceptions in the Sire OpenMM minimiser.
+
+* Add support for Replica Exchange with Solute Tempering (REST2) simulations.
+
+* Null SystemTrajectory pointer when all frames are deleted.
+
+* Handle cis/trans double bond stereochemistry values in SDF bond blocks.
+
+* Fix handling of positive formal charge when writing SDF files.
+
+* Fix lambda schedule discussion and plots in the tutorial.
+
+* Added support for angle and dihedral restraints which can be used in alchemical and standard simulations.
+
+* Allow user to compute energy trajectory over a subset of the lambda windows for each lambda.
+
+* Fix the ``hasForceSpecificEquation`` function in the ``LambdaLever`` class so that it returns true if
+  there is a default equation for the force.
+
+* Added support for the ``OpenMM`` ``MonteCarloMembraneBarostat`` to ``SOMD``.
+
 `2024.3.1 <https://github.com/openbiosim/sire/compare/2024.3.0...2024.3.1>`__ - December 2024
----------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
 * Fixed instantiaton of ``QByteArray`` in ``Sire::Mol::Frame::toByteArray`` and count bytes with ``QByteArray::size``.
 
@@ -32,17 +55,17 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Make minimisation function settings consistent across API.
 
-* Reload ``TorchQMForce`` module if OpenMM platform changes.
+* Reload TorchQMForce module if OpenMM platform changes.
 
-* Fixed calculation of non-equilibrium work when starting from QM state.
+* Fix calculation of non-equilibrium work when starting from QM state.
 
-* Fixed stereochemistry in RDKit molecule conversion.
+* Fix stereochemistry in RDKit molecule conversion.
 
 * Fixed :func:`sire.restraints.get_standard_state_correction` to be consistent with the definition of
   the "force constanst" as ``F = 2 ** k ** x`` (rather than ``F = k ** x``). Updated docstrings and
   restraints documentation to make it clear how the force constants are defined.
 
-* Fixed thread safety issue in Sire OpenMM minimiser.
+* Fix thread safety issue in Sire OpenMM minimiser.
 
 `2024.3.0 <https://github.com/openbiosim/sire/compare/2024.2.0...2024.3.0>`__ - October 2024
 --------------------------------------------------------------------------------------------

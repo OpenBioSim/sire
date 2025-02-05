@@ -3,22 +3,11 @@
 // (C) Christopher Woods, GPL >= 3 License
 
 #include "boost/python.hpp"
-#include "Helpers/clone_const_reference.hpp"
 #include "DihedralRestraint.pypp.hpp"
 
 namespace bp = boost::python;
 
-#include "SireCAS/conditional.h"
-
 #include "SireCAS/errors.h"
-
-#include "SireCAS/power.h"
-
-#include "SireCAS/symbols.h"
-
-#include "SireCAS/values.h"
-
-#include "SireFF/forcetable.h"
 
 #include "SireID/index.h"
 
@@ -26,13 +15,13 @@ namespace bp = boost::python;
 
 #include "SireStream/shareddatastream.h"
 
-#include "SireUnits/angle.h"
-
 #include "SireUnits/units.h"
 
-#include "dihedralrestraint.h"
+#include "dihedralrestraints.h"
 
-#include "dihedralrestraint.h"
+#include <QDebug>
+
+#include "dihedralrestraints.h"
 
 SireMM::DihedralRestraint __copy__(const SireMM::DihedralRestraint &other){ return SireMM::DihedralRestraint(other); }
 
@@ -47,162 +36,50 @@ SireMM::DihedralRestraint __copy__(const SireMM::DihedralRestraint &other){ retu
 void register_DihedralRestraint_class(){
 
     { //::SireMM::DihedralRestraint
-        typedef bp::class_< SireMM::DihedralRestraint, bp::bases< SireMM::Restraint3D, SireMM::Restraint, SireBase::Property > > DihedralRestraint_exposer_t;
-        DihedralRestraint_exposer_t DihedralRestraint_exposer = DihedralRestraint_exposer_t( "DihedralRestraint", "This is a restraint that operates on the dihedral angle between\nfour SireMM::Point objects (e.g. four atoms in a molecule)\n\nAuthor: Christopher Woods\n", bp::init< >("Constructor") );
+        typedef bp::class_< SireMM::DihedralRestraint, bp::bases< SireBase::Property > > DihedralRestraint_exposer_t;
+        DihedralRestraint_exposer_t DihedralRestraint_exposer = DihedralRestraint_exposer_t( "DihedralRestraint", "This class represents a single angle restraint between any three\natoms in a system\nAuthor: Christopher Woods\n", bp::init< >("Null constructor") );
         bp::scope DihedralRestraint_scope( DihedralRestraint_exposer );
-        DihedralRestraint_exposer.def( bp::init< SireFF::PointRef const &, SireFF::PointRef const &, SireFF::PointRef const &, SireFF::PointRef const &, SireCAS::Expression const & >(( bp::arg("point0"), bp::arg("point1"), bp::arg("point2"), bp::arg("point3"), bp::arg("restraint") ), "Construct a restraint that acts on the angle within the\nthree points point0, point1 and point2 (theta == a(012)),\nrestraining the angle within these points using the expression\nrestraint") );
-        DihedralRestraint_exposer.def( bp::init< SireFF::PointRef const &, SireFF::PointRef const &, SireFF::PointRef const &, SireFF::PointRef const &, SireCAS::Expression const &, SireCAS::Values const & >(( bp::arg("point0"), bp::arg("point1"), bp::arg("point2"), bp::arg("point3"), bp::arg("restraint"), bp::arg("values") ), "Construct a restraint that acts on the angle within the\nthree points point0, point1 and point2 (theta == a(012)),\nrestraining the angle within these points using the expression\nrestraint") );
+        DihedralRestraint_exposer.def( bp::init< QList< long long > const &, SireUnits::Dimension::Angle const &, SireUnits::Dimension::HarmonicAngleConstant const & >(( bp::arg("atoms"), bp::arg("phi0"), bp::arg("kphi") ), "Construct a restraint that acts on the angle within the\nfour atoms atom0, atom1, atom2 atom3 (phi == a(0123)),\nrestraining the angle within these atoms") );
         DihedralRestraint_exposer.def( bp::init< SireMM::DihedralRestraint const & >(( bp::arg("other") ), "Copy constructor") );
-        { //::SireMM::DihedralRestraint::builtinSymbols
+        { //::SireMM::DihedralRestraint::atoms
         
-            typedef ::SireCAS::Symbols ( ::SireMM::DihedralRestraint::*builtinSymbols_function_type)(  ) const;
-            builtinSymbols_function_type builtinSymbols_function_value( &::SireMM::DihedralRestraint::builtinSymbols );
+            typedef ::QVector< long long > ( ::SireMM::DihedralRestraint::*atoms_function_type)(  ) const;
+            atoms_function_type atoms_function_value( &::SireMM::DihedralRestraint::atoms );
             
             DihedralRestraint_exposer.def( 
-                "builtinSymbols"
-                , builtinSymbols_function_value
+                "atoms"
+                , atoms_function_value
                 , bp::release_gil_policy()
-                , "Return the built-in symbols for this restraint" );
+                , "Return the atoms involved in the restraint" );
         
         }
-        { //::SireMM::DihedralRestraint::builtinValues
+        { //::SireMM::DihedralRestraint::isNull
         
-            typedef ::SireCAS::Values ( ::SireMM::DihedralRestraint::*builtinValues_function_type)(  ) const;
-            builtinValues_function_type builtinValues_function_value( &::SireMM::DihedralRestraint::builtinValues );
+            typedef bool ( ::SireMM::DihedralRestraint::*isNull_function_type)(  ) const;
+            isNull_function_type isNull_function_value( &::SireMM::DihedralRestraint::isNull );
             
             DihedralRestraint_exposer.def( 
-                "builtinValues"
-                , builtinValues_function_value
+                "isNull"
+                , isNull_function_value
                 , bp::release_gil_policy()
-                , "Return the values of the built-in symbols of this restraint" );
+                , "" );
         
         }
-        { //::SireMM::DihedralRestraint::contains
+        { //::SireMM::DihedralRestraint::kphi
         
-            typedef bool ( ::SireMM::DihedralRestraint::*contains_function_type)( ::SireMol::MolNum ) const;
-            contains_function_type contains_function_value( &::SireMM::DihedralRestraint::contains );
+            typedef ::SireUnits::Dimension::HarmonicAngleConstant ( ::SireMM::DihedralRestraint::*kphi_function_type)(  ) const;
+            kphi_function_type kphi_function_value( &::SireMM::DihedralRestraint::kphi );
             
             DihedralRestraint_exposer.def( 
-                "contains"
-                , contains_function_value
-                , ( bp::arg("molnum") )
+                "kphi"
+                , kphi_function_value
                 , bp::release_gil_policy()
-                , "Return whether or not this restraint affects the molecule\nwith number molnum" );
-        
-        }
-        { //::SireMM::DihedralRestraint::contains
-        
-            typedef bool ( ::SireMM::DihedralRestraint::*contains_function_type)( ::SireMol::MolID const & ) const;
-            contains_function_type contains_function_value( &::SireMM::DihedralRestraint::contains );
-            
-            DihedralRestraint_exposer.def( 
-                "contains"
-                , contains_function_value
-                , ( bp::arg("molid") )
-                , bp::release_gil_policy()
-                , "Return whether or not this restraint affects the molecule\nwith ID molid" );
-        
-        }
-        { //::SireMM::DihedralRestraint::differentialRestraintFunction
-        
-            typedef ::SireCAS::Expression const & ( ::SireMM::DihedralRestraint::*differentialRestraintFunction_function_type)(  ) const;
-            differentialRestraintFunction_function_type differentialRestraintFunction_function_value( &::SireMM::DihedralRestraint::differentialRestraintFunction );
-            
-            DihedralRestraint_exposer.def( 
-                "differentialRestraintFunction"
-                , differentialRestraintFunction_function_value
-                , bp::return_value_policy< bp::copy_const_reference >()
-                , "Return the function used to calculate the restraint force" );
-        
-        }
-        { //::SireMM::DihedralRestraint::differentiate
-        
-            typedef ::SireMM::RestraintPtr ( ::SireMM::DihedralRestraint::*differentiate_function_type)( ::SireCAS::Symbol const & ) const;
-            differentiate_function_type differentiate_function_value( &::SireMM::DihedralRestraint::differentiate );
-            
-            DihedralRestraint_exposer.def( 
-                "differentiate"
-                , differentiate_function_value
-                , ( bp::arg("symbol") )
-                , bp::release_gil_policy()
-                , "Return the differential of this restraint with respect to\nthe symbol symbol\nThrow: SireCAS::unavailable_differential\n" );
-        
-        }
-        { //::SireMM::DihedralRestraint::force
-        
-            typedef void ( ::SireMM::DihedralRestraint::*force_function_type)( ::SireFF::MolForceTable &,double ) const;
-            force_function_type force_function_value( &::SireMM::DihedralRestraint::force );
-            
-            DihedralRestraint_exposer.def( 
-                "force"
-                , force_function_value
-                , ( bp::arg("forcetable"), bp::arg("scale_force")=1 )
-                , "Calculate the force acting on the molecule in the forcetable forcetable\ncaused by this restraint, and add it on to the forcetable scaled by\nscale_force" );
-        
-        }
-        { //::SireMM::DihedralRestraint::force
-        
-            typedef void ( ::SireMM::DihedralRestraint::*force_function_type)( ::SireFF::ForceTable &,double ) const;
-            force_function_type force_function_value( &::SireMM::DihedralRestraint::force );
-            
-            DihedralRestraint_exposer.def( 
-                "force"
-                , force_function_value
-                , ( bp::arg("forcetable"), bp::arg("scale_force")=1 )
-                , "Calculate the force acting on the molecules in the forcetable forcetable\ncaused by this restraint, and add it on to the forcetable scaled by\nscale_force" );
-        
-        }
-        { //::SireMM::DihedralRestraint::halfHarmonic
-        
-            typedef ::SireMM::DihedralRestraint ( *halfHarmonic_function_type )( ::SireFF::PointRef const &,::SireFF::PointRef const &,::SireFF::PointRef const &,::SireFF::PointRef const &,::SireUnits::Dimension::Angle const &,::SireMM::HarmonicAngleForceConstant const & );
-            halfHarmonic_function_type halfHarmonic_function_value( &::SireMM::DihedralRestraint::halfHarmonic );
-            
-            DihedralRestraint_exposer.def( 
-                "halfHarmonic"
-                , halfHarmonic_function_value
-                , ( bp::arg("point0"), bp::arg("point1"), bp::arg("point2"), bp::arg("point3"), bp::arg("angle"), bp::arg("force_constant") )
-                , bp::release_gil_policy()
-                , "Return a distance restraint that applied a half-harmonic potential\nbetween the points point0 and point1 above a distance distance\nusing a force constant force_constant" );
-        
-        }
-        { //::SireMM::DihedralRestraint::harmonic
-        
-            typedef ::SireMM::DihedralRestraint ( *harmonic_function_type )( ::SireFF::PointRef const &,::SireFF::PointRef const &,::SireFF::PointRef const &,::SireFF::PointRef const &,::SireMM::HarmonicAngleForceConstant const & );
-            harmonic_function_type harmonic_function_value( &::SireMM::DihedralRestraint::harmonic );
-            
-            DihedralRestraint_exposer.def( 
-                "harmonic"
-                , harmonic_function_value
-                , ( bp::arg("point0"), bp::arg("point1"), bp::arg("point2"), bp::arg("point3"), bp::arg("force_constant") )
-                , bp::release_gil_policy()
-                , "Return a distance restraint that applies a harmonic potential between\nthe points point0 and point1 using a force constant force_constant" );
-        
-        }
-        { //::SireMM::DihedralRestraint::molecules
-        
-            typedef ::SireMol::Molecules ( ::SireMM::DihedralRestraint::*molecules_function_type)(  ) const;
-            molecules_function_type molecules_function_value( &::SireMM::DihedralRestraint::molecules );
-            
-            DihedralRestraint_exposer.def( 
-                "molecules"
-                , molecules_function_value
-                , bp::release_gil_policy()
-                , "Return the molecules used in this restraint" );
-        
-        }
-        { //::SireMM::DihedralRestraint::nPoints
-        
-            typedef int ( ::SireMM::DihedralRestraint::*nPoints_function_type)(  ) const;
-            nPoints_function_type nPoints_function_value( &::SireMM::DihedralRestraint::nPoints );
-            
-            DihedralRestraint_exposer.def( 
-                "nPoints"
-                , nPoints_function_value
-                , bp::release_gil_policy()
-                , "This restraint involves four points" );
+                , "Return the force constant for the restraint" );
         
         }
         DihedralRestraint_exposer.def( bp::self != bp::self );
+        DihedralRestraint_exposer.def( bp::self + bp::self );
+        DihedralRestraint_exposer.def( bp::self + bp::other< SireMM::DihedralRestraints >() );
         { //::SireMM::DihedralRestraint::operator=
         
             typedef ::SireMM::DihedralRestraint & ( ::SireMM::DihedralRestraint::*assign_function_type)( ::SireMM::DihedralRestraint const & ) ;
@@ -217,90 +94,28 @@ void register_DihedralRestraint_class(){
         
         }
         DihedralRestraint_exposer.def( bp::self == bp::self );
-        { //::SireMM::DihedralRestraint::phi
+        { //::SireMM::DihedralRestraint::phi0
         
-            typedef ::SireCAS::Symbol const & ( *phi_function_type )(  );
-            phi_function_type phi_function_value( &::SireMM::DihedralRestraint::phi );
+            typedef ::SireUnits::Dimension::Angle ( ::SireMM::DihedralRestraint::*phi0_function_type)(  ) const;
+            phi0_function_type phi0_function_value( &::SireMM::DihedralRestraint::phi0 );
             
             DihedralRestraint_exposer.def( 
-                "phi"
-                , phi_function_value
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the symbol that represents the dihedral angle between the points (phi)" );
-        
-        }
-        { //::SireMM::DihedralRestraint::point
-        
-            typedef ::SireFF::Point const & ( ::SireMM::DihedralRestraint::*point_function_type)( int ) const;
-            point_function_type point_function_value( &::SireMM::DihedralRestraint::point );
-            
-            DihedralRestraint_exposer.def( 
-                "point"
-                , point_function_value
-                , ( bp::arg("i") )
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the ith point" );
-        
-        }
-        { //::SireMM::DihedralRestraint::point0
-        
-            typedef ::SireFF::Point const & ( ::SireMM::DihedralRestraint::*point0_function_type)(  ) const;
-            point0_function_type point0_function_value( &::SireMM::DihedralRestraint::point0 );
-            
-            DihedralRestraint_exposer.def( 
-                "point0"
-                , point0_function_value
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the first point" );
-        
-        }
-        { //::SireMM::DihedralRestraint::point1
-        
-            typedef ::SireFF::Point const & ( ::SireMM::DihedralRestraint::*point1_function_type)(  ) const;
-            point1_function_type point1_function_value( &::SireMM::DihedralRestraint::point1 );
-            
-            DihedralRestraint_exposer.def( 
-                "point1"
-                , point1_function_value
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the second point" );
-        
-        }
-        { //::SireMM::DihedralRestraint::point2
-        
-            typedef ::SireFF::Point const & ( ::SireMM::DihedralRestraint::*point2_function_type)(  ) const;
-            point2_function_type point2_function_value( &::SireMM::DihedralRestraint::point2 );
-            
-            DihedralRestraint_exposer.def( 
-                "point2"
-                , point2_function_value
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the third point" );
-        
-        }
-        { //::SireMM::DihedralRestraint::point3
-        
-            typedef ::SireFF::Point const & ( ::SireMM::DihedralRestraint::*point3_function_type)(  ) const;
-            point3_function_type point3_function_value( &::SireMM::DihedralRestraint::point3 );
-            
-            DihedralRestraint_exposer.def( 
-                "point3"
-                , point3_function_value
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the fourth point" );
-        
-        }
-        { //::SireMM::DihedralRestraint::setSpace
-        
-            typedef void ( ::SireMM::DihedralRestraint::*setSpace_function_type)( ::SireVol::Space const & ) ;
-            setSpace_function_type setSpace_function_value( &::SireMM::DihedralRestraint::setSpace );
-            
-            DihedralRestraint_exposer.def( 
-                "setSpace"
-                , setSpace_function_value
-                , ( bp::arg("space") )
+                "phi0"
+                , phi0_function_value
                 , bp::release_gil_policy()
-                , "Set the space used to evaluate the energy of this restraint\nThrow: SireVol::incompatible_space\n" );
+                , "Return the equilibrium angle for the restraint" );
+        
+        }
+        { //::SireMM::DihedralRestraint::toString
+        
+            typedef ::QString ( ::SireMM::DihedralRestraint::*toString_function_type)(  ) const;
+            toString_function_type toString_function_value( &::SireMM::DihedralRestraint::toString );
+            
+            DihedralRestraint_exposer.def( 
+                "toString"
+                , toString_function_value
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireMM::DihedralRestraint::typeName
@@ -315,69 +130,26 @@ void register_DihedralRestraint_class(){
                 , "" );
         
         }
-        { //::SireMM::DihedralRestraint::update
+        { //::SireMM::DihedralRestraint::what
         
-            typedef void ( ::SireMM::DihedralRestraint::*update_function_type)( ::SireMol::MoleculeData const & ) ;
-            update_function_type update_function_value( &::SireMM::DihedralRestraint::update );
+            typedef char const * ( ::SireMM::DihedralRestraint::*what_function_type)(  ) const;
+            what_function_type what_function_value( &::SireMM::DihedralRestraint::what );
             
             DihedralRestraint_exposer.def( 
-                "update"
-                , update_function_value
-                , ( bp::arg("moldata") )
+                "what"
+                , what_function_value
                 , bp::release_gil_policy()
-                , "Update the points of this restraint using new molecule data from moldata\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
+                , "" );
         
         }
-        { //::SireMM::DihedralRestraint::update
-        
-            typedef void ( ::SireMM::DihedralRestraint::*update_function_type)( ::SireMol::Molecules const & ) ;
-            update_function_type update_function_value( &::SireMM::DihedralRestraint::update );
-            
-            DihedralRestraint_exposer.def( 
-                "update"
-                , update_function_value
-                , ( bp::arg("molecules") )
-                , bp::release_gil_policy()
-                , "Update the points of this restraint using new molecule data from molecules\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
-        
-        }
-        { //::SireMM::DihedralRestraint::usesMoleculesIn
-        
-            typedef bool ( ::SireMM::DihedralRestraint::*usesMoleculesIn_function_type)( ::SireFF::ForceTable const & ) const;
-            usesMoleculesIn_function_type usesMoleculesIn_function_value( &::SireMM::DihedralRestraint::usesMoleculesIn );
-            
-            DihedralRestraint_exposer.def( 
-                "usesMoleculesIn"
-                , usesMoleculesIn_function_value
-                , ( bp::arg("forcetable") )
-                , bp::release_gil_policy()
-                , "Return whether or not this restraint involves any of the molecules\nthat are in the forcetable forcetable" );
-        
-        }
-        { //::SireMM::DihedralRestraint::usesMoleculesIn
-        
-            typedef bool ( ::SireMM::DihedralRestraint::*usesMoleculesIn_function_type)( ::SireMol::Molecules const & ) const;
-            usesMoleculesIn_function_type usesMoleculesIn_function_value( &::SireMM::DihedralRestraint::usesMoleculesIn );
-            
-            DihedralRestraint_exposer.def( 
-                "usesMoleculesIn"
-                , usesMoleculesIn_function_value
-                , ( bp::arg("molecules") )
-                , bp::release_gil_policy()
-                , "Return whether or not this restraint involves any of the molecules\nin molecules" );
-        
-        }
-        DihedralRestraint_exposer.staticmethod( "halfHarmonic" );
-        DihedralRestraint_exposer.staticmethod( "harmonic" );
-        DihedralRestraint_exposer.staticmethod( "phi" );
         DihedralRestraint_exposer.staticmethod( "typeName" );
         DihedralRestraint_exposer.def( "__copy__", &__copy__<SireMM::DihedralRestraint>);
         DihedralRestraint_exposer.def( "__deepcopy__", &__copy__<SireMM::DihedralRestraint>);
         DihedralRestraint_exposer.def( "clone", &__copy__<SireMM::DihedralRestraint>);
         DihedralRestraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::DihedralRestraint >,
-                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+                                bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         DihedralRestraint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::DihedralRestraint >,
-                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+                                bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         DihedralRestraint_exposer.def_pickle(sire_pickle_suite< ::SireMM::DihedralRestraint >());
         DihedralRestraint_exposer.def( "__str__", &__str__< ::SireMM::DihedralRestraint > );
         DihedralRestraint_exposer.def( "__repr__", &__str__< ::SireMM::DihedralRestraint > );

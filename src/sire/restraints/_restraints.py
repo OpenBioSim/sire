@@ -1,6 +1,8 @@
 __all__ = [
+    "angle",
     "boresch",
     "bond",
+    "dihedral",
     "distance",
     "positional",
 ]
@@ -16,6 +18,96 @@ def _to_atoms(mols, atoms):
     from ..mol import selection_to_atoms
 
     return selection_to_atoms(mols, atoms)
+
+
+def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
+    """
+    Create a set of anglel restraints from all of the atoms in 'atoms'
+    where all atoms are contained in the container 'mols', using the
+    passed values of the force constant 'ktheta' and equilibrium
+    angle value theta0.
+
+    If theta0 is None, then the current angle for
+    provided atoms will be used as the equilibium value.
+
+    If ktheta is None, then a default value of 100 kcal mol-1 rad-2 will be used
+
+    Parameters
+    ----------
+    mols : sire.system._system.System
+        The system containing the atoms.
+
+    atoms : SireMol::Selector<SireMol::Atom>
+        The atoms to restrain.
+
+    ktheta : str or SireUnits::Dimension::GeneralUnit or, optional
+        The force constants for the angle restraints.
+        If None, this will default to 100 kcal mol-1 rad-2.
+        Default is None.
+
+    theta0 : str or SireUnits::Dimension::GeneralUnit, optional
+        The equilibrium angles for the angle restraints. If None, these
+        will be measured from the current coordinates of the atoms.
+        Default is None.
+
+    Returns
+    -------
+    AnglelRestraints : SireMM::AngleRestraints
+        A container of angle restraints, where the first restraint is
+        the AngleRestraint created. The angle restraint created can be
+        extracted with AngleRestraints[0].
+    """
+    from .. import u
+    from ..base import create_map
+    from ..mm import AngleRestraint, AngleRestraints
+
+    map = create_map(map)
+    map_dict = map.to_dict()
+    ktheta = ktheta if ktheta is not None else map_dict.get("ktheta", None)
+    theta0 = theta0 if theta0 is not None else map_dict.get("theta0", None)
+    name = name if name is not None else map_dict.get("name", None)
+
+    atoms = _to_atoms(mols, atoms)
+
+    if len(atoms) != 3:
+        raise ValueError(
+            "You need to provide 3 atoms to create an angle restraint"
+            f"whereas {len(atoms)} atoms were provided."
+        )
+
+    from .. import measure
+
+    if ktheta is None:
+        ktheta = u("100 kcal mol-1 rad-2")
+
+    elif type(ktheta) is list:
+        raise NotImplementedError(
+            "Setup of multiple angle restraints simultaneously is not currently supported. "
+            "Please set up each restraint individually and then combine them into multiple restraints."
+        )
+
+    if theta0 is None:
+        from .. import measure
+
+        theta0 = measure(atoms[0], atoms[1], atoms[2])
+
+    elif type(theta0) is list:
+        raise NotImplementedError(
+            "Setup of multiple angle restraints simultaneously is not currently supported. "
+            "Please set up each restraint individually and then combine them into multiple restraints."
+        )
+    else:
+        theta0 = u(theta0)
+
+    mols = mols.atoms()
+
+    if name is None:
+        restraints = AngleRestraints()
+    else:
+        restraints = AngleRestraints(name=name)
+
+    restraints.add(AngleRestraint(mols.find(atoms), theta0, ktheta))
+    return restraints
 
 
 def boresch(
@@ -375,6 +467,96 @@ def _check_stability_boresch_restraint(restraint_components, temperature=u("298 
                     " Consider increasing the force constants or selecting equilibrium"
                     " values further from 0 or pi radians."
                 )
+
+
+def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
+    """
+    Create a set of dihedral restraints from all of the atoms in 'atoms'
+    where all atoms are contained in the container 'mols', using the
+    passed values of the force constant 'kphi' and equilibrium
+    torsion angle phi0.
+
+    If phi0 is None, then the current torsional angle for
+    the provided atoms will be used as the equilibium value.
+
+    If kphi is None, then a default value of 100 kcal mol-1 rad-2 will be used
+
+    Parameters
+    ----------
+    mols : sire.system._system.System
+        The system containing the atoms.
+
+    atoms : SireMol::Selector<SireMol::Atom>
+        The atoms to restrain.
+
+    kphi : str or SireUnits::Dimension::GeneralUnit or, optional
+        The force constants for the torsion restraints.
+        If None, this will default to 100 kcal mol-1 rad-2.
+        Default is None.
+
+    phi0 : str or SireUnits::Dimension::GeneralUnit, optional
+        The equilibrium torsional angle for restraints. If None, these
+        will be measured from the current coordinates of the atoms.
+        Default is None.
+
+    Returns
+    -------
+    DihedralRestraints : SireMM::DihedralRestraints
+        A container of Dihedral restraints, where the first restraint is
+        the DihedralRestraint created. The Dihedral restraint created can be
+        extracted with DihedralRestraints[0].
+    """
+    from .. import u
+    from ..base import create_map
+    from ..mm import DihedralRestraint, DihedralRestraints
+
+    map = create_map(map)
+    map_dict = map.to_dict()
+    kphi = kphi if kphi is not None else map_dict.get("kphi", None)
+    phi0 = phi0 if phi0 is not None else map_dict.get("phi0", None)
+    name = name if name is not None else map_dict.get("name", None)
+
+    atoms = _to_atoms(mols, atoms)
+
+    if len(atoms) != 4:
+        raise ValueError(
+            "You need to provide 4 atoms to create a dihedral restraint"
+            f"whereas {len(atoms)} atoms were provided."
+        )
+
+    from .. import measure
+
+    if kphi is None:
+        kphi = u("100 kcal mol-1 rad-2")
+
+    elif type(kphi) is list:
+        raise NotImplementedError(
+            "Setup of multiple dihedral restraints simultaneously is not currently supported. "
+            "Please set up each restraint individually and then combine them into multiple restraints."
+        )
+
+    if phi0 is None:
+        from .. import measure
+
+        phi0 = measure(atoms[0], atoms[1], atoms[2], atoms[3])
+
+    elif type(phi0) is list:
+        raise NotImplementedError(
+            "Setup of multiple dihedral restraints simultaneously is not currently supported. "
+            "Please set up each restraint individually and then combine them into multiple restraints."
+        )
+    else:
+        phi0 = u(phi0)
+
+    mols = mols.atoms()
+
+    if name is None:
+        restraints = DihedralRestraints()
+    else:
+        restraints = DihedralRestraints(name=name)
+
+    restraints.add(DihedralRestraint(mols.find(atoms), phi0, kphi))
+    return restraints
 
 
 def distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):

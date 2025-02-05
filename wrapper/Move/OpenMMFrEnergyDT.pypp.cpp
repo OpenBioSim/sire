@@ -309,6 +309,16 @@ void register_OpenMMFrEnergyDT_class(){
                 , "" );
         
         }
+        { //::SireMove::OpenMMFrEnergyDT::getMCBarostat_membrane
+
+            typedef bool ( ::SireMove::OpenMMFrEnergyDT::*getMCBarostat_membrane_function_type)(  ) ;
+            getMCBarostat_membrane_function_type getMCBarostat_membrane_function_value( &::SireMove::OpenMMFrEnergyDT::getMCBarostat_membrane );
+
+            OpenMMFrEnergyDT_exposer.def(
+                "getMCBarostat_membrane"
+                , getMCBarostat_membrane_function_value
+                , "" );
+        }
         { //::SireMove::OpenMMFrEnergyDT::getMCBarostat_frequency
         
             typedef int ( ::SireMove::OpenMMFrEnergyDT::*getMCBarostat_frequency_function_type)(  ) ;
@@ -614,6 +624,18 @@ void register_OpenMMFrEnergyDT_class(){
                 , bp::release_gil_policy()
                 , "Set Monte Carlo Barostat onoff" );
         
+        }
+        { //::SireMove::OpenMMFrEnergyDT::setMCBarostat_membrane
+
+            typedef void ( ::SireMove::OpenMMFrEnergyDT::*setMCBarostat_membrane_function_type)( bool ) ;
+            setMCBarostat_membrane_function_type setMCBarostat_membrane_function_value( &::SireMove::OpenMMFrEnergyDT::setMCBarostat_membrane );
+
+            OpenMMFrEnergyDT_exposer.def(
+                "setMCBarostat_membrane"
+                , setMCBarostat_membrane_function_value
+                , ( bp::arg("arg0") )
+                , "Set Monte Carlo Membrane Barostat onoff (only has an effect if Monte Carlo Barostat is on)" );
+
         }
         { //::SireMove::OpenMMFrEnergyDT::setMCBarostat_frequency
         

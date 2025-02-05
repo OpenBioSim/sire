@@ -126,7 +126,7 @@ void register_PerturbableOpenMMMolecule_class(){
         PerturbableOpenMMMolecule_exposer_t PerturbableOpenMMMolecule_exposer = PerturbableOpenMMMolecule_exposer_t( "PerturbableOpenMMMolecule", "This class holds all of the information of an OpenMM molecule\nthat can be perturbed using a LambdaSchedule. The data is held\nin easy-to-access arrays, with guarantees that the arrays are\ncompatible and the data is aligned.\n", bp::init< >("Null constructor") );
         bp::scope PerturbableOpenMMMolecule_scope( PerturbableOpenMMMolecule_exposer );
         PerturbableOpenMMMolecule_exposer.def( bp::init< SireOpenMM::OpenMMMolecule const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("mol"), bp::arg("map")=SireBase::PropertyMap() ), "Construct from the passed OpenMMMolecule") );
-        PerturbableOpenMMMolecule_exposer.def( bp::init< SireMol::Molecule const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("mol"), bp::arg("map")=SireBase::PropertyMap() ), "Construct from a passed molecule and map") );
+        PerturbableOpenMMMolecule_exposer.def( bp::init< SireMol::Molecule const &, int, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("mol"), bp::arg("map")=SireBase::PropertyMap() ), "Construct from a passed molecule and map") );
         PerturbableOpenMMMolecule_exposer.def( bp::init< SireOpenMM::PerturbableOpenMMMolecule const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireOpenMM::PerturbableOpenMMMolecule::angles
         

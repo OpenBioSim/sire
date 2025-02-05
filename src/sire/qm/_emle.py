@@ -38,7 +38,10 @@ class EMLEEngine(_Convert._SireOpenMM.PyQMEngine):
         )
 
         # Get the OpenMM EMLE force.
-        emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
+        for force in d._d._omm_mols.getSystem().getForces():
+            if "QMForce" in force.getName():
+                break
+        emle_force = _deepcopy(force)
 
         # Create a null CustomBondForce to add the EMLE interpolation
         # parameter.
@@ -84,7 +87,10 @@ class TorchEMLEEngine(_Convert._SireOpenMM.TorchQMEngine):
         )
 
         # Get the OpenMM EMLE force.
-        emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
+        for force in d._d._omm_mols.getSystem().getForces():
+            if "QMForce" in force.getName():
+                break
+        emle_force = _deepcopy(force)
 
         # Create a null CustomBondForce to add the EMLE interpolation
         # parameter.
@@ -225,23 +231,10 @@ def emle(
 
     # Create an engine from an EMLE calculator.
     if isinstance(calculator, _EMLECalculator):
-        # Determine the callback name. Use an optimised version of the callback
-        # if the user has specified "torchani" as the backend and is using
-        # "electrostatic" embedding.
-        if calculator._backend == "torchani" and calculator._method == "electrostatic":
-            try:
-                from emle.models import ANI2xEMLE as _ANI2xEMLE
-
-                callback = "_sire_callback_optimised"
-            except:
-                callback = "_sire_callback"
-        else:
-            callback = "_sire_callback"
-
         # Create the EMLE engine.
         engine = EMLEEngine(
             calculator,
-            callback,
+            "_sire_callback",
             cutoff,
             neighbour_list_frequency,
             False,

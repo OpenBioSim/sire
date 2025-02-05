@@ -27,6 +27,8 @@
 
 #include "AngleRestraint.pypp.hpp"
 
+#include "AngleRestraints.pypp.hpp"
+
 #include "AngleSymbols.pypp.hpp"
 
 #include "AtomFunction.pypp.hpp"
@@ -160,6 +162,8 @@
 #include "DihedralParameterName.pypp.hpp"
 
 #include "DihedralRestraint.pypp.hpp"
+
+#include "DihedralRestraints.pypp.hpp"
 
 #include "DihedralSymbols.pypp.hpp"
 
@@ -552,6 +556,10 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_AngleRestraint_class();
 
+    register_Restraints_class();
+
+    register_AngleRestraints_class();
+
     register_InternalSymbolsBase_class();
 
     register_AngleSymbols_class();
@@ -585,8 +593,6 @@ BOOST_PYTHON_MODULE(_MM){
     register_BondParameterName_class();
 
     register_BondRestraint_class();
-
-    register_Restraints_class();
 
     register_BondRestraints_class();
 
@@ -681,6 +687,8 @@ BOOST_PYTHON_MODULE(_MM){
     register_DihedralParameterName_class();
 
     register_DihedralRestraint_class();
+
+    register_DihedralRestraints_class();
 
     register_DihedralSymbols_class();
 
