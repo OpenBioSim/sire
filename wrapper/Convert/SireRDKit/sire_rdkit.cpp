@@ -606,6 +606,12 @@ namespace SireRDKit
         SireMaths::Vector *coords_data = coords.data();
         bool has_coords = false;
 
+        bool force_stereo_inference = false;
+        if (map.specified("force_stereo_inference"))
+        {
+            force_stereo_inference = map["force_stereo_inference"].value().asABoolean();
+        }
+
         for (int i = 0; i < atoms.count(); ++i)
         {
             const auto atom = atoms(i);
@@ -639,6 +645,12 @@ namespace SireRDKit
             const auto element = atom.property<SireMol::Element>(map["element"]);
 
             a->setAtomicNum(element.nProtons());
+
+            if (force_stereo_inference)
+            {
+                // don't automatically add hydrogens
+                a->setNoImplicit(true);
+            }
 
             elements.append(element);
 
@@ -703,15 +715,18 @@ namespace SireRDKit
             RDKit::Bond::BondType bondtype = RDKit::Bond::SINGLE;
             RDKit::Bond::BondStereo stereo = RDKit::Bond::STEREONONE;
 
-            try
+            if (not force_stereo_inference)
             {
-                bondtype = string_to_bondtype(bond.property(map["order"]).asA<SireMol::BondOrder>().toRDKit());
+                try
+                {
+                    bondtype = string_to_bondtype(bond.property(map["order"]).asA<SireMol::BondOrder>().toRDKit());
 
-                // one bond has bond info, so assume that all do
-                has_bond_info = true;
-            }
-            catch (...)
-            {
+                    // one bond has bond info, so assume that all do
+                    has_bond_info = true;
+                }
+                catch (...)
+                {
+                }
             }
 
             try
@@ -855,7 +870,7 @@ namespace SireRDKit
 
         // try assigning stereochemistry from 3D coordinates as it is the most
         // reliable way to do it
-        if (has_coords)
+        if (has_coords and not force_stereo_inference)
         {
             try
             {
