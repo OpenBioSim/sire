@@ -646,11 +646,8 @@ namespace SireRDKit
 
             a->setAtomicNum(element.nProtons());
 
-            if (force_stereo_inference)
-            {
-                // don't automatically add hydrogens
-                a->setNoImplicit(true);
-            }
+            // don't automatically add hydrogens
+            a->setNoImplicit(true);
 
             elements.append(element);
 
@@ -789,8 +786,10 @@ namespace SireRDKit
         molecule.updatePropertyCache(false);
 
         if (atoms.count() > 1 and (not has_bond_info or force_stereo_inference))
+        {
             // we need to infer the bond information
             infer_bond_info(molecule);
+        }
 
         // try each sanitisation step in turn, skipping failed
         try
