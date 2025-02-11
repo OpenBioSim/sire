@@ -715,18 +715,15 @@ namespace SireRDKit
             RDKit::Bond::BondType bondtype = RDKit::Bond::SINGLE;
             RDKit::Bond::BondStereo stereo = RDKit::Bond::STEREONONE;
 
-            if (not force_stereo_inference)
+            try
             {
-                try
-                {
-                    bondtype = string_to_bondtype(bond.property(map["order"]).asA<SireMol::BondOrder>().toRDKit());
+                bondtype = string_to_bondtype(bond.property(map["order"]).asA<SireMol::BondOrder>().toRDKit());
 
-                    // one bond has bond info, so assume that all do
-                    has_bond_info = true;
-                }
-                catch (...)
-                {
-                }
+                // one bond has bond info, so assume that all do
+                has_bond_info = true;
+            }
+            catch (...)
+            {
             }
 
             try
@@ -791,7 +788,7 @@ namespace SireRDKit
         molecule.commitBatchEdit();
         molecule.updatePropertyCache(false);
 
-        if (atoms.count() > 1 and (not has_bond_info))
+        if (atoms.count() > 1 and (not has_bond_info or force_stereo_inference))
             // we need to infer the bond information
             infer_bond_info(molecule);
 
