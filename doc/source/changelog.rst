@@ -17,6 +17,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 ------------------------------------------------------------------------------------------
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
+* Allow user to force fresh inference of stereochemistry when converting to RDKit format.
+* Fix setting of positive formal charge when reading SDF files.
 
 `2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
 ----------------------------------------------------------------------------------------
