@@ -118,7 +118,6 @@ def test_rdkit_returns_null():
     "rdkit" not in sr.convert.supported_formats(),
     reason="rdkit support is not available",
 )
-@pytest.mark.xfail(reason="SMILES now mismatches since SDF stereochemistry is preserved")
 def test_rdkit_infer_bonds(ejm55_sdf, ejm55_gro):
     sdf = ejm55_sdf[0].molecule()
     gro = ejm55_gro["not (protein or water)"].molecule()
