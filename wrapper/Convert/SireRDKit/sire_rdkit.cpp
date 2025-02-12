@@ -606,6 +606,12 @@ namespace SireRDKit
         SireMaths::Vector *coords_data = coords.data();
         bool has_coords = false;
 
+        bool force_stereo_inference = false;
+        if (map.specified("force_stereo_inference"))
+        {
+            force_stereo_inference = map["force_stereo_inference"].value().asABoolean();
+        }
+
         for (int i = 0; i < atoms.count(); ++i)
         {
             const auto atom = atoms(i);
@@ -639,6 +645,9 @@ namespace SireRDKit
             const auto element = atom.property<SireMol::Element>(map["element"]);
 
             a->setAtomicNum(element.nProtons());
+
+            // don't automatically add hydrogens
+            a->setNoImplicit(true);
 
             elements.append(element);
 
@@ -776,9 +785,11 @@ namespace SireRDKit
         molecule.commitBatchEdit();
         molecule.updatePropertyCache(false);
 
-        if (atoms.count() > 1 and (not has_bond_info))
+        if (atoms.count() > 1 and (not has_bond_info or force_stereo_inference))
+        {
             // we need to infer the bond information
             infer_bond_info(molecule);
+        }
 
         // try each sanitisation step in turn, skipping failed
         try
@@ -855,7 +866,7 @@ namespace SireRDKit
 
         // try assigning stereochemistry from 3D coordinates as it is the most
         // reliable way to do it
-        if (has_coords)
+        if (has_coords and not force_stereo_inference)
         {
             try
             {
