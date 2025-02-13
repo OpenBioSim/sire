@@ -647,7 +647,8 @@ namespace SireRDKit
             a->setAtomicNum(element.nProtons());
 
             // don't automatically add hydrogens
-            a->setNoImplicit(true);
+            if (force_stereo_inference)
+                a->setNoImplicit(true);
 
             elements.append(element);
 
