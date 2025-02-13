@@ -411,6 +411,7 @@ namespace SireRDKit
         {
             if (atom->getAtomicNum() > 1)
             {
+                atom->setNoImplicit(true);
                 atoms.append(std::make_pair(get_nb_unpaired_electrons(*atom),
                                             atom));
             }
@@ -646,9 +647,6 @@ namespace SireRDKit
 
             a->setAtomicNum(element.nProtons());
 
-            // don't automatically add hydrogens
-            a->setNoImplicit(true);
-
             elements.append(element);
 
             try
@@ -791,74 +789,11 @@ namespace SireRDKit
             infer_bond_info(molecule);
         }
 
-        // try each sanitisation step in turn, skipping failed
+        // sanitze the molecule.
         try
         {
-            RDKit::MolOps::cleanUp(molecule);
-        }
-        catch (...)
-        {
-        }
+            RDKit::MolOps::sanitizeMol(molecule);
 
-        try
-        {
-            molecule.updatePropertyCache();
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::symmetrizeSSSR(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::Kekulize(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::assignRadicals(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::setAromaticity(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::setConjugation(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::setHybridization(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::cleanupChirality(molecule);
         }
         catch (...)
         {
