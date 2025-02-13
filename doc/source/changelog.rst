@@ -20,6 +20,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Allow user to force fresh inference of stereochemistry when converting to RDKit format.
 * Fix setting of positive formal charge when reading SDF files.
 * Only use ``atom->setNoImplicit(True)`` inside custom RDKit sterochemistry inference function.
+* Fix redistribution of excess QM charge and make it the default behaviour.
 
 `2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
 ----------------------------------------------------------------------------------------
