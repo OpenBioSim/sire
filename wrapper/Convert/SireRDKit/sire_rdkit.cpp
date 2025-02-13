@@ -411,6 +411,7 @@ namespace SireRDKit
         {
             if (atom->getAtomicNum() > 1)
             {
+                atom->setNoImplicit(true);
                 atoms.append(std::make_pair(get_nb_unpaired_electrons(*atom),
                                             atom));
             }
@@ -645,10 +646,6 @@ namespace SireRDKit
             const auto element = atom.property<SireMol::Element>(map["element"]);
 
             a->setAtomicNum(element.nProtons());
-
-            // don't automatically add hydrogens
-            if (force_stereo_inference)
-                a->setNoImplicit(true);
 
             elements.append(element);
 
