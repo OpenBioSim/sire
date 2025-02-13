@@ -18,7 +18,7 @@ def create_engine(
     cutoff="7.5A",
     neighbour_list_frequency=0,
     mechanical_embedding=False,
-    redistribute_charge=False,
+    redistribute_charge=True,
     map=None,
 ):
     """
@@ -68,8 +68,11 @@ def create_engine(
 
     redistribute_charge : bool
         Whether to redistribute charge of the QM atoms to ensure that the total
-        charge of the QM region is an integer. Excess charge is redistributed
-        over the non QM atoms within the residues involved in the QM region.
+        charge of the QM region is an integer. If the QM region is a an entire
+        molecule, then the charge on each atom is shifted so that the total
+        charge is an integer. Alternatively, when the QM region is part of a
+        molecule, the excess charge is redistributed over the MM atoms within
+        the residues of the QM region.
 
     Returns
     -------

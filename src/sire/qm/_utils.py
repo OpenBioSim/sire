@@ -102,6 +102,7 @@ def _check_charge(mols, qm_atoms, map, redistribute_charge=False, tol=1e-6):
     """
 
     import math as _math
+    import sys as _sys
 
     from sire.units import e_charge as _e_charge
 
@@ -127,8 +128,16 @@ def _check_charge(mols, qm_atoms, map, redistribute_charge=False, tol=1e-6):
             # Redistribute the charge over the QM atoms.
             qm_frac = excess_charge / len(qm_atoms)
 
-            # Redistribute the charge over the non QM atoms.
-            rem_frac = excess_charge / (residues.num_atoms() - len(qm_atoms))
+            # Work out the number of non-QM atoms.
+            num_mm = residues.num_atoms() - len(qm_atoms)
+
+            # Redistribute the charge over the MM atoms.
+            if num_mm > 0:
+                rem_frac = excess_charge / num_mm
+
+            print(
+                f"Redistributing excess QM charge of {excess_charge}", file=_sys.stderr
+            )
 
             # Loop over the residues.
             for res in residues:
@@ -140,10 +149,11 @@ def _check_charge(mols, qm_atoms, map, redistribute_charge=False, tol=1e-6):
 
                 # Loop over the atoms in the residue.
                 for atom in res:
-                    # Shift the charge.
+                    # Shift the charge of the QM atoms.
                     if atom in qm_atoms:
                         cursor[atom][charge_prop] -= qm_frac
-                    else:
+                    # Shift the charge of the MM atoms.
+                    elif num_mm > 0:
                         cursor[atom][charge_prop] += rem_frac
 
                 # Commit the changes.
