@@ -792,74 +792,11 @@ namespace SireRDKit
             infer_bond_info(molecule);
         }
 
-        // try each sanitisation step in turn, skipping failed
+        // sanitze the molecule.
         try
         {
-            RDKit::MolOps::cleanUp(molecule);
-        }
-        catch (...)
-        {
-        }
+            RDKit::MolOps::sanitizeMol(molecule);
 
-        try
-        {
-            molecule.updatePropertyCache();
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::symmetrizeSSSR(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::Kekulize(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::assignRadicals(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::setAromaticity(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::setConjugation(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::setHybridization(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::cleanupChirality(molecule);
         }
         catch (...)
         {
