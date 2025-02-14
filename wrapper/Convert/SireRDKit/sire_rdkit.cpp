@@ -597,7 +597,16 @@ namespace SireRDKit
         RDKit::RWMol molecule;
         molecule.beginBatchEdit();
 
-        molecule.setProp<std::string>("_Name", mol.name().value().toStdString());
+        std::string name;
+        if (mol.hasProperty("name"))
+        {
+            name = mol.property("name").asAString().toStdString();
+        }
+        else
+        {
+            name = mol.name().value().toStdString();
+        }
+        molecule.setProp<std::string>("_Name", name);
 
         const auto atoms = mol.atoms();
 
@@ -793,7 +802,6 @@ namespace SireRDKit
         try
         {
             RDKit::MolOps::sanitizeMol(molecule);
-
         }
         catch (...)
         {
