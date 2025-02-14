@@ -636,6 +636,33 @@ namespace SireRDKit
             }
         }
 
+        // set and existing RDKit data as properties
+        std::string rdkit_tag;
+        if (mol.hasProperty("rdkit_data"))
+        {
+            const auto rdkit_data = mol.property("rdkit_data").asA<SireBase::Properties>();
+
+            for (const auto &tag : rdkit_data.propertyKeys())
+            {
+                try
+                {
+                    molecule.setProp<std::string>(tag.toStdString(), rdkit_data.property(tag).asAString().toStdString());
+                }
+                catch (...)
+                {
+                    const auto string_array = rdkit_data.property(tag).asA<SireBase::StringArrayProperty>();
+
+                    QString string;
+                    for (int i=0; i<string_array.size(); i++)
+                    {
+                        string.append(string_array[i] + "\n");
+                    }
+
+                    molecule.setProp<std::string>(tag.toStdString(), string.toStdString());
+                }
+            }
+        }
+
         const auto atoms = mol.atoms();
 
         QList<SireMol::Element> elements;
@@ -1031,6 +1058,35 @@ namespace SireRDKit
 
                 molecule.setProperty(map["coordinates"].source(), coords);
             }
+        }
+
+        // copy additional properties from the molecule
+        SireBase::Properties props;
+
+        for (const auto &prop : mol->getPropList())
+        {
+            if (prop == "_Name")
+                continue;
+
+            const auto sire_prop = QString::fromStdString(prop);
+            const auto value = QString::fromStdString(mol->getProp<std::string>(prop));
+            const auto list = value.split("\n");
+
+            // there is a list of values
+            if (list.count() > 1)
+            {
+                props.setProperty(sire_prop, SireBase::wrap(list));
+            }
+            // there is a single value
+            else
+            {
+                props.setProperty(sire_prop, SireBase::wrap(value));
+            }
+        }
+
+        if (not props.isEmpty())
+        {
+            molecule.setProperty("rdkit_data", props);
         }
 
         return molecule.commit();
