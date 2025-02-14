@@ -597,6 +597,7 @@ namespace SireRDKit
         RDKit::RWMol molecule;
         molecule.beginBatchEdit();
 
+        // set the name of the molecule
         std::string name;
         if (mol.hasProperty("name"))
         {
@@ -607,6 +608,33 @@ namespace SireRDKit
             name = mol.name().value().toStdString();
         }
         molecule.setProp<std::string>("_Name", name);
+
+        // set any SDF tags as properties
+        std::string sdf_tag;
+        if (mol.hasProperty("sdf_data"))
+        {
+            const auto sdf_data = mol.property("sdf_data").asA<SireBase::Properties>();
+
+            for (const auto &tag : sdf_data.propertyKeys())
+            {
+                try
+                {
+                    molecule.setProp<std::string>(tag.toStdString(), sdf_data.property(tag).asAString().toStdString());
+                }
+                catch (...)
+                {
+                    const auto string_array = sdf_data.property(tag).asA<SireBase::StringArrayProperty>();
+
+                    QString string;
+                    for (int i=0; i<string_array.size(); i++)
+                    {
+                        string.append(string_array[i] + "\n");
+                    }
+
+                    molecule.setProp<std::string>(tag.toStdString(), string.toStdString());
+                }
+            }
+        }
 
         const auto atoms = mol.atoms();
 
