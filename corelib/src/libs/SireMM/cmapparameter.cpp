@@ -153,6 +153,11 @@ const char *CMAPParameter::what() const
     return CMAPParameter::typeName();
 }
 
+CMAPParameter *CMAPParameter::clone() const
+{
+    return new CMAPParameter(*this);
+}
+
 QString CMAPParameter::toString() const
 {
     return QString("CMAPParameter(\n%1\n)").arg(param.toString());

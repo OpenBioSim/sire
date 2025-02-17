@@ -59,7 +59,6 @@ namespace SireMM
 {
     using SireMol::AtomID;
     using SireMol::AtomIdx;
-    using SireMol::AtomMatcher;
     using SireMol::CGAtomIdx;
 
     /** This class holds a single CMAP function for a single set
@@ -116,7 +115,8 @@ namespace SireMM
         class IDQuint
         {
         public:
-            IDQuint(quint32 atm0, quint32 atm1, quint32 atm2, quint32 atm3, quint32 atm4, quint32 atm5);
+            IDQuint(quint32 atm0 = 0, quint32 atm1 = 0, quint32 atm2 = 0,
+                    quint32 atm3 = 0, quint32 atm4 = 0);
 
             IDQuint(const IDQuint &other);
 
@@ -126,6 +126,11 @@ namespace SireMM
 
             bool operator==(const IDQuint &other) const;
             bool operator!=(const IDQuint &other) const;
+
+            bool operator<(const IDQuint &other) const;
+            bool operator<=(const IDQuint &other) const;
+            bool operator>(const IDQuint &other) const;
+            bool operator>=(const IDQuint &other) const;
 
             quint32 operator[](int i) const
             {
@@ -153,15 +158,15 @@ namespace SireMM
 
         SIRE_ALWAYS_INLINE uint qHash(const IDQuint &idquint)
         {
-            return (idquint.atom0 << 28) | ((idquad.atom1 << 24) & 0x0F000000) |
-                   ((idquad.atom2 << 16) & 0x00FF0000) |
-                   ((idquad.atom3 << 8) & 0x0000FF00) |
-                   (idquad.atom4 & 0x000000FF);
+            return (idquint.atom0 << 28) | ((idquint.atom1 << 24) & 0x0F000000) |
+                   ((idquint.atom2 << 16) & 0x00FF0000) |
+                   ((idquint.atom3 << 8) & 0x0000FF00) |
+                   (idquint.atom4 & 0x000000FF);
         }
     }
 
     /** This class holds all of the CMAP parameters for a single molecule */
-    class SIREMM_EXPORT CMAPFunctions : public ConcreteProperty<CMAPFunctions, SireMol::MoleculeProperty>
+    class SIREMM_EXPORT CMAPFunctions : public SireBase::ConcreteProperty<CMAPFunctions, SireMol::MoleculeProperty>
     {
         friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CMAPFunctions &);
         friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CMAPFunctions &);
@@ -169,8 +174,8 @@ namespace SireMM
     public:
         CMAPFunctions();
 
-        CMAPFunctions(const MoleculeData &moldata);
-        CMAPFunctions(const MoleculeInfoData &molinfo);
+        CMAPFunctions(const SireMol::MoleculeData &moldata);
+        CMAPFunctions(const SireMol::MoleculeInfoData &molinfo);
 
         CMAPFunctions(const CMAPFunctions &other);
 
@@ -191,8 +196,8 @@ namespace SireMM
         void set(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3,
                  const AtomID &atom4, const CMAPParameter &parameter);
 
-        void set(const AtomIdx &atom0, const AtomIdx &atom1, const AtomIdx &atom2, const AtomIdx &atom3,
-                 const AtomIdx &atom4, const CMAPParameter &parameter);
+        void set(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3,
+                 AtomIdx atom4, const CMAPParameter &parameter);
 
         void clear();
 
@@ -204,12 +209,14 @@ namespace SireMM
         void clear(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3,
                    const AtomID &atom4);
 
+        void clear(const QList<AtomIdx> &atoms, bool exclusive = true);
+
         bool isEmpty() const;
 
         int nFunctions() const;
 
-        CMAPParameter parameter(const AtomIdx &atom0, const AtomIdx &atom1, const AtomIdx &atom2,
-                                const AtomIdx &atom3, const AtomIdx &atom4) const;
+        CMAPParameter parameter(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3,
+                                AtomIdx atom4) const;
 
         CMAPParameter parameter(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
                                 const AtomID &atom3, const AtomID &atom4) const;
@@ -218,7 +225,9 @@ namespace SireMM
 
         QVector<CMAPFunction> parameters(const QList<AtomIdx> &atoms, bool exclusive = true) const;
 
-        CMAPFunctions includeOnly(const AtomSelection &selected_atoms, bool isstrict = true) const;
+        CMAPFunctions includeOnly(const SireMol::AtomSelection &selected_atoms, bool isstrict = true) const;
+
+        bool isCompatibleWith(const SireMol::MoleculeInfoData &molinfo) const;
 
         SireBase::PropertyList merge(const MolViewProperty &other,
                                      const SireMol::AtomIdxMapping &mapping,
@@ -226,13 +235,18 @@ namespace SireMM
                                      const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     protected:
-        SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                      const AtomMatcher &atommatcher) const;
+        SireBase::PropertyPtr _pvt_makeCompatibleWith(const SireMol::MoleculeInfoData &molinfo,
+                                                      const SireMol::AtomMatcher &atommatcher) const;
 
-        SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+        SireBase::PropertyPtr _pvt_makeCompatibleWith(const SireMol::MoleculeInfoData &molinfo,
                                                       const QHash<AtomIdx, AtomIdx> &map) const;
 
+        const SireMol::MoleculeInfoData &info() const;
+
     private:
+        /** The metadata for the molecule that contains these functions */
+        SireBase::SharedDataPointer<SireMol::MoleculeInfoData> molinfo;
+
         /** All of the CMAP parameters, identified by the IDQuint of
          *  that contains the parameters */
         QHash<detail::IDQuint, CMAPParameter> parameters_by_atoms;

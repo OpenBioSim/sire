@@ -36,8 +36,8 @@ namespace SireMM
     class CMAPParameter;
 }
 
-QDataStream &operator<<(QDataStream &, const SireMM::CMAPParameter &);
-QDataStream &operator>>(QDataStream &, SireMM::CMAPParameter &);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CMAPParameter &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CMAPParameter &);
 
 namespace SireMM
 {

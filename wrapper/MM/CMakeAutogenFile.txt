@@ -13,6 +13,7 @@ set ( PYPP_SOURCES
        TripleDistanceRestraint.pypp.cpp
        IntraCoulombFF.pypp.cpp
        SelectorImproper.pypp.cpp
+       DihedralRestraints.pypp.cpp
        Mover_SelectorDihedral_.pypp.cpp
        ThreeAtomPerturbation.pypp.cpp
        LJException.pypp.cpp
@@ -40,6 +41,7 @@ set ( PYPP_SOURCES
        StretchBendTorsionSymbols.pypp.cpp
        AtomFunction.pypp.cpp
        CoulombComponent.pypp.cpp
+       CMAPFunction.pypp.cpp
        AtomFunctions.pypp.cpp
        CLJAtoms.pypp.cpp
        InterGroupLJFF.pypp.cpp
@@ -68,13 +70,13 @@ set ( PYPP_SOURCES
        PositionalRestraints.pypp.cpp
        IntraGroupFF.pypp.cpp
        DihedralRestraint.pypp.cpp
-       DihedralRestraints.pypp.cpp
        IntraFF.pypp.cpp
        DihedralComponent.pypp.cpp
        ScaledChargeParameterNames3D.pypp.cpp
        InternalSymbolsBase.pypp.cpp
        BondComponent.pypp.cpp
        CoulombPotentialInterface_IntraCoulombPotential_.pypp.cpp
+       CMAPParameter.pypp.cpp
        ScaledCLJParameterNames3D.pypp.cpp
        Mover_SelectorBond_.pypp.cpp
        CoulombPotentialInterface_InterCoulombPotential_.pypp.cpp
@@ -126,6 +128,7 @@ set ( PYPP_SOURCES
        SelectorAngle.pypp.cpp
        DihedralSymbols.pypp.cpp
        CLJCutoffFunction.pypp.cpp
+       CMAPFunctions.pypp.cpp
        CLJComponent.pypp.cpp
        Mover_SelectorAngle_.pypp.cpp
        StretchBendTorsionComponent.pypp.cpp
@@ -182,7 +185,6 @@ set ( PYPP_SOURCES
        CoulombNBPairs.pypp.cpp
        AmberDihedral.pypp.cpp
        AngleRestraint.pypp.cpp
-       AngleRestraints.pypp.cpp
        TwoAtomFunctions.pypp.cpp
        IntraSoftCLJFFBase.pypp.cpp
        BondSymbols.pypp.cpp
@@ -193,6 +195,7 @@ set ( PYPP_SOURCES
        IntraCoulombFFBase.pypp.cpp
        DistanceRestraint.pypp.cpp
        UreyBradleyParameterName.pypp.cpp
+       AngleRestraints.pypp.cpp
        TwoAtomPerturbation.pypp.cpp
        InterFF.pypp.cpp
        SelectorMAngle.pypp.cpp

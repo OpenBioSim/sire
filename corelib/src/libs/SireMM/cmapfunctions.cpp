@@ -35,6 +35,8 @@
 #include "SireMol/atommatcher.h"
 #include "SireMol/atomselection.h"
 #include "SireMol/moleculeinfodata.h"
+#include "SireMol/moleculedata.h"
+#include "SireMol/atommapping.h"
 
 #include "SireError/errors.h"
 
@@ -47,7 +49,6 @@ using namespace SireMM;
 using namespace SireMM::detail;
 
 using namespace SireBase;
-using namespace SireCAS;
 using namespace SireMol;
 using namespace SireStream;
 
@@ -146,11 +147,11 @@ CMAPFunction *CMAPFunction::clone() const
 QString CMAPFunction::toString() const
 {
     return QString("CMAPFunction(%1-%2-%3-%4-%5\n%6)")
-        .arg(atm0)
-        .arg(atm1)
-        .arg(atm2)
-        .arg(atm3)
-        .arg(atm4)
+        .arg(atm0.toString())
+        .arg(atm1.toString())
+        .arg(atm2.toString())
+        .arg(atm3.toString())
+        .arg(atm4.toString())
         .arg(param.toString());
 }
 
@@ -257,7 +258,7 @@ QDataStream &operator<<(QDataStream &ds, const CMAPFunctions &cmapfuncs)
 
     SharedDataStream sds(ds);
 
-    sds << cmapfuncs.parameters_by_atoms << static_cast<const MoleculeProperty &>(cmapfuncs);
+    sds << cmapfuncs.molinfo << cmapfuncs.parameters_by_atoms << static_cast<const MoleculeProperty &>(cmapfuncs);
 
     return ds;
 }
@@ -271,7 +272,9 @@ QDataStream &operator>>(QDataStream &ds, CMAPFunctions &cmapfuncs)
     {
         SharedDataStream sds(ds);
 
-        sds >> cmapfuncs.parameters_by_atoms >> static_cast<MoleculeProperty &>(cmapfuncs);
+        sds >> cmapfuncs.molinfo >>
+            cmapfuncs.parameters_by_atoms >>
+            static_cast<MoleculeProperty &>(cmapfuncs);
     }
     else
         throw version_error(v, "1", r_cmapfuncs, CODELOC);
@@ -284,17 +287,20 @@ CMAPFunctions::CMAPFunctions()
 }
 
 CMAPFunctions::CMAPFunctions(const MoleculeData &moldata)
-    : ConcreteProperty<CMAPFunctions, MoleculeProperty>(moldata)
+    : ConcreteProperty<CMAPFunctions, MoleculeProperty>(),
+      molinfo(moldata.info())
 {
 }
 
 CMAPFunctions::CMAPFunctions(const MoleculeInfoData &molinfo)
-    : ConcreteProperty<CMAPFunctions, MoleculeProperty>(molinfo)
+    : ConcreteProperty<CMAPFunctions, MoleculeProperty>(),
+      molinfo(molinfo)
 {
 }
 
 CMAPFunctions::CMAPFunctions(const CMAPFunctions &other)
     : ConcreteProperty<CMAPFunctions, MoleculeProperty>(other),
+      molinfo(other.molinfo),
       parameters_by_atoms(other.parameters_by_atoms)
 {
 }
@@ -339,6 +345,11 @@ const char *CMAPFunctions::typeName()
 const char *CMAPFunctions::what() const
 {
     return CMAPFunctions::typeName();
+}
+
+const MoleculeInfoData &CMAPFunctions::info() const
+{
+    return *molinfo;
 }
 
 void CMAPFunctions::set(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2,
@@ -388,7 +399,7 @@ void CMAPFunctions::clear(AtomIdx atom)
 {
     quint32 atm = atom.map(info().nAtoms());
 
-    QList<IDQuint> keys = potentials_by_atoms.keys();
+    QList<IDQuint> keys = parameters_by_atoms.keys();
 
     foreach (const IDQuint &key, keys)
     {
@@ -406,6 +417,45 @@ void CMAPFunctions::clear(const AtomID &atom)
     foreach (AtomIdx atomidx, atomidxs)
     {
         this->clear(atomidx);
+    }
+}
+
+/** Clear all functions that involve any of the atoms in 'atoms'
+ *  - if 'exclusive' is true, then this only removes functions
+ *  that exclusively involve these atoms - if false, then
+ *  if removes functions that involve any of these atoms
+ */
+void CMAPFunctions::clear(const QList<AtomIdx> &atoms, bool exclusive)
+{
+    QSet<quint32> atms;
+    atms.reserve(atoms.count());
+
+    for (const auto &atom : atoms)
+    {
+        atms.insert(atom.map(info().nAtoms()));
+    }
+
+    QList<IDQuint> keys = parameters_by_atoms.keys();
+
+    if (exclusive)
+    {
+        for (const auto &key : keys)
+        {
+            if (atms.contains(key.atom0) and atms.contains(key.atom1) and atms.contains(key.atom2) and atms.contains(key.atom3) and atms.contains(key.atom4))
+            {
+                parameters_by_atoms.remove(key);
+            }
+        }
+    }
+    else
+    {
+        for (const auto &key : keys)
+        {
+            if (atms.contains(key.atom0) or atms.contains(key.atom1) or atms.contains(key.atom2) or atms.contains(key.atom3) or atms.contains(key.atom4))
+            {
+                parameters_by_atoms.remove(key);
+            }
+        }
     }
 }
 
@@ -475,16 +525,21 @@ CMAPParameter CMAPFunctions::parameter(const AtomID &atom0, const AtomID &atom1,
 
 QVector<CMAPFunction> CMAPFunctions::parameters() const
 {
-    QVector<CMAPFunction> funcs;
-    funcs.reserve(parameters_by_atoms.size());
+    QVector<CMAPFunction> funcs(parameters_by_atoms.count());
 
-    auto keys = parameters_by_atoms.keys();
-    std::sort(keys.begin(), keys.end());
+    CMAPFunction *funcs_array = funcs.data();
 
-    foreach (const IDQuint &key, keys)
+    int i = 0;
+
+    for (QHash<IDQuint, CMAPParameter>::const_iterator it = parameters_by_atoms.constBegin();
+         it != parameters_by_atoms.constEnd(); ++it)
     {
-        funcs.append(CMAPFunction(key.atom0, key.atom1, key.atom2, key.atom3, key.atom4,
-                                  parameters_by_atoms.value(key)));
+        funcs_array[i] = CMAPFunction(
+            info().cgAtomIdx(AtomIdx(it.key().atom0)), info().cgAtomIdx(AtomIdx(it.key().atom1)),
+            info().cgAtomIdx(AtomIdx(it.key().atom2)), info().cgAtomIdx(AtomIdx(it.key().atom3)),
+            info().cgAtomIdx(AtomIdx(it.key().atom4)), it.value());
+
+        ++i;
     }
 
     return funcs;
@@ -516,12 +571,12 @@ QVector<CMAPFunction> CMAPFunctions::parameters(const QList<AtomIdx> &atms, bool
         {
             if (atoms.contains(AtomIdx(it.key().atom0)) or atoms.contains(AtomIdx(it.key().atom1)) or atoms.contains(AtomIdx(it.key().atom2)) or atoms.contains(AtomIdx(it.key().atom3)) or atoms.contains(AtomIdx(it.key().atom4)))
             {
-                funcs.append(FourAtomFunction(info().cgAtomIdx(AtomIdx(it.key().atom0)),
-                                              info().cgAtomIdx(AtomIdx(it.key().atom1)),
-                                              info().cgAtomIdx(AtomIdx(it.key().atom2)),
-                                              info().cgAtomIdx(AtomIdx(it.key().atom3)),
-                                              info().cgAtomIdx(AtomIdx(it.key().atom4)),
-                                              it.value()));
+                funcs.append(CMAPFunction(info().cgAtomIdx(AtomIdx(it.key().atom0)),
+                                          info().cgAtomIdx(AtomIdx(it.key().atom1)),
+                                          info().cgAtomIdx(AtomIdx(it.key().atom2)),
+                                          info().cgAtomIdx(AtomIdx(it.key().atom3)),
+                                          info().cgAtomIdx(AtomIdx(it.key().atom4)),
+                                          it.value()));
             }
         }
     }
@@ -538,7 +593,7 @@ CMAPFunctions CMAPFunctions::includeOnly(const AtomSelection &selected_atoms, bo
 {
     CMAPFunctions ret(*this);
 
-    QMutableHashIterator<IDQuint, Expression> it(ret.parameters_by_atoms);
+    QMutableHashIterator<IDQuint, CMAPParameter> it(ret.parameters_by_atoms);
 
     if (isstrict)
     {
@@ -566,7 +621,7 @@ CMAPFunctions CMAPFunctions::includeOnly(const AtomSelection &selected_atoms, bo
                     selected_atoms.selected(AtomIdx(it.key().atom1)) or
                     selected_atoms.selected(AtomIdx(it.key().atom2)) or
                     selected_atoms.selected(AtomIdx(it.key().atom3)) or
-                    selected_atoms.selected(AtomIdx(it.key().atom4)))
+                    selected_atoms.selected(AtomIdx(it.key().atom4))))
             {
                 it.remove();
             }
@@ -574,6 +629,13 @@ CMAPFunctions CMAPFunctions::includeOnly(const AtomSelection &selected_atoms, bo
     }
 
     return ret;
+}
+
+/** Return whether or not this property is compatible with the molecule
+    whose layout information is in 'molinfo' */
+bool CMAPFunctions::isCompatibleWith(const MoleculeInfoData &molinfo) const
+{
+    return info() == molinfo;
 }
 
 /** Merge this property with another property */
@@ -647,7 +709,7 @@ PropertyList CMAPFunctions::merge(const MolViewProperty &other,
 
     const auto ref_cmaps = prop0.parameters(map0to1.keys(), true);
 
-    for (const auto &ref_cmap : ref_cmas)
+    for (const auto &ref_cmap : ref_cmaps)
     {
         const auto atom0 = info().atomIdx(ref_cmap.atom0());
         const auto atom1 = info().atomIdx(ref_cmap.atom1());
@@ -719,7 +781,7 @@ PropertyPtr CMAPFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molin
 {
     CMAPFunctions ret(molinfo);
 
-    for (QHash<IDQuint, Expression>::const_iterator it = parameters_by_atoms.constBegin();
+    for (QHash<IDQuint, CMAPParameter>::const_iterator it = parameters_by_atoms.constBegin();
          it != parameters_by_atoms.constEnd(); ++it)
     {
         AtomIdx new_atom0 = map.value(AtomIdx(it.key().atom0), AtomIdx(-1));

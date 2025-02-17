@@ -16,7 +16,7 @@
 #include "selectordihedral.h"
 #include "clj14group.h"
 #include "improper.h"
-#include "anglerestraints.h"
+#include "dihedralrestraints.h"
 #include "bondrestraints.h"
 #include "twoatomfunctions.h"
 #include "boreschrestraints.h"
@@ -24,6 +24,7 @@
 #include "internalperturbation.h"
 #include "restraintff.h"
 #include "selectormbond.h"
+#include "cmapparameter.h"
 #include "restraint.h"
 #include "intraff.h"
 #include "cljdelta.h"
@@ -36,6 +37,7 @@
 #include "intragroupff.h"
 #include "cljextractor.h"
 #include "angle.h"
+#include "anglerestraints.h"
 #include "cljgroup.h"
 #include "selectormdihedral.h"
 #include "cljgrid.h"
@@ -54,7 +56,6 @@
 #include "cljboxes.h"
 #include "internalgroupff.h"
 #include "internalcomponent.h"
-#include "dihedralrestraints.h"
 #include "selectorimproper.h"
 #include "intergroupff.h"
 #include "dihedral.h"
@@ -63,6 +64,7 @@
 #include "cljnbpairs.h"
 #include "ljpair.h"
 #include "cljfunction.h"
+#include "cmapfunctions.h"
 #include "softcljcomponent.h"
 #include "selectorbond.h"
 #include "positionalrestraints.h"
@@ -111,8 +113,8 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::CLJ14Group >();
     ObjectRegistry::registerConverterFor< SireMM::Improper >();
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMM::Improper> >();
-    ObjectRegistry::registerConverterFor< SireMM::AngleRestraint >();
-    ObjectRegistry::registerConverterFor< SireMM::AngleRestraints >();
+    ObjectRegistry::registerConverterFor< SireMM::DihedralRestraint >();
+    ObjectRegistry::registerConverterFor< SireMM::DihedralRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::BondRestraint >();
     ObjectRegistry::registerConverterFor< SireMM::BondRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::TwoAtomFunctions >();
@@ -124,6 +126,7 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::FourAtomPerturbation >();
     ObjectRegistry::registerConverterFor< SireMM::RestraintFF >();
     ObjectRegistry::registerConverterFor< SireMM::SelectorMBond >();
+    ObjectRegistry::registerConverterFor< SireMM::CMAPParameter >();
     ObjectRegistry::registerConverterFor< SireMM::NullRestraint >();
     ObjectRegistry::registerConverterFor< SireMM::IntraFF >();
     ObjectRegistry::registerConverterFor< SireMM::CLJDelta >();
@@ -146,6 +149,8 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::CLJExtractor >();
     ObjectRegistry::registerConverterFor< SireMM::Angle >();
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMM::Angle> >();
+    ObjectRegistry::registerConverterFor< SireMM::AngleRestraint >();
+    ObjectRegistry::registerConverterFor< SireMM::AngleRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::CLJGroup >();
     ObjectRegistry::registerConverterFor< SireMM::SelectorMDihedral >();
     ObjectRegistry::registerConverterFor< SireMM::CLJGrid >();
@@ -200,8 +205,6 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::Intra14LJComponent >();
     ObjectRegistry::registerConverterFor< SireMM::Intra14Component >();
     ObjectRegistry::registerConverterFor< SireMM::InternalComponent >();
-    ObjectRegistry::registerConverterFor< SireMM::DihedralRestraint >();
-    ObjectRegistry::registerConverterFor< SireMM::DihedralRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::SelectorImproper >();
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMM::SelectorImproper> >();
     ObjectRegistry::registerConverterFor< SireMM::InterGroupFF >();
@@ -217,6 +220,8 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::LJNBPairs >();
     ObjectRegistry::registerConverterFor< SireMM::LJPair >();
     ObjectRegistry::registerConverterFor< SireMM::NullCLJFunction >();
+    ObjectRegistry::registerConverterFor< SireMM::CMAPFunction >();
+    ObjectRegistry::registerConverterFor< SireMM::CMAPFunctions >();
     ObjectRegistry::registerConverterFor< SireMM::SoftCLJComponent >();
     ObjectRegistry::registerConverterFor< SireMM::SelectorBond >();
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMM::SelectorBond> >();
