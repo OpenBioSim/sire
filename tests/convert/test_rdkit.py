@@ -179,3 +179,34 @@ def test_rdkit_force_infer():
 
     assert bond == "SINGLE"
     assert bond_infer == "TRIPLE"
+
+
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
+def test_rdkit_sdf_tags(tagged_sdf):
+
+    # store the sdf data property
+    sdf_data = tagged_sdf.property("sdf_data")
+
+    # convert to rdkit
+    rdmol = sr.convert.to_rdkit(tagged_sdf)
+
+    # convert back to sire
+    mol = sr.convert.to_sire(rdmol)
+
+    # get the rdf data property
+    rdkit_data = mol.property("rdkit_data")
+
+    # check that the data is the same
+    for prop in sdf_data.keys():
+        assert prop in rdkit_data.keys()
+        assert sdf_data[prop] == rdkit_data[prop]
+
+    # convert back to rdkit
+    rdmol2 = sr.convert.to_rdkit(mol)
+
+    # check that the data is the same on the rdkit molecule
+    for prop in rdmol.GetPropNames():
+        assert rdmol.GetProp(prop) == rdmol2.GetProp(prop)
