@@ -659,7 +659,11 @@ namespace SireRDKit
                     QString string;
                     for (int i=0; i<string_array.size(); i++)
                     {
-                        string.append(string_array[i] + "\n");
+                        string.append(string_array[i]);
+                        if (i < string_array.size() - 1)
+                        {
+                            string.append("\n");
+                        }
                     }
 
                     molecule.setProp<std::string>(tag.toStdString(), string.toStdString());
