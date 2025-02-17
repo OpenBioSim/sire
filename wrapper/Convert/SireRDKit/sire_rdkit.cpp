@@ -628,7 +628,11 @@ namespace SireRDKit
                     QString string;
                     for (int i=0; i<string_array.size(); i++)
                     {
-                        string.append(string_array[i] + "\n");
+                        string.append(string_array[i]);
+                        if (i < string_array.size() - 1)
+                        {
+                            string.append("\n");
+                        }
                     }
 
                     molecule.setProp<std::string>(tag.toStdString(), string.toStdString());
@@ -1065,10 +1069,12 @@ namespace SireRDKit
 
         for (const auto &prop : mol->getPropList())
         {
-            if (prop == "_Name")
+            const auto sire_prop = QString::fromStdString(prop);
+
+            // skip internal properties
+            if (sire_prop.startsWith("_"))
                 continue;
 
-            const auto sire_prop = QString::fromStdString(prop);
             const auto value = QString::fromStdString(mol->getProp<std::string>(prop));
             const auto list = value.split("\n");
 
