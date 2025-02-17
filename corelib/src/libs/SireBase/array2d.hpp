@@ -73,7 +73,7 @@ namespace SireBase
     {
 
         friend SIREBASE_EXPORT QDataStream & ::operator<< <>(QDataStream &, const Array2D<T> &);
-        friend SIREBASE_EXPORT QDataStream & ::operator>><>(QDataStream &, Array2D<T> &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>> <>(QDataStream &, Array2D<T> &);
 
     public:
         Array2D();
@@ -113,6 +113,9 @@ namespace SireBase
         const T *constRow(int i) const;
 
         Array2D<T> transpose() const;
+
+        QVector<T> toRowMajorVector() const;
+        QVector<T> toColumnMajorVector() const;
 
     private:
         /** The 1D array of entries in this Array2D */
@@ -387,6 +390,33 @@ namespace SireBase
         }
 
         return rows.join("\n");
+    }
+
+    /** Return a vector of all the elements in this array in row-major order */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QVector<T> Array2D<T>::toRowMajorVector() const
+    {
+        return array;
+    }
+
+    /** Return a vector of all the elements in this array in column-major order */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QVector<T> Array2D<T>::toColumnMajorVector() const
+    {
+        QVector<T> column_major(this->nRows() * this->nColumns());
+
+        T *column_major_data = column_major.data();
+        const T *array_data = array.constData();
+
+        for (int i = 0; i < this->nRows(); ++i)
+        {
+            for (int j = 0; j < this->nColumns(); ++j)
+            {
+                column_major_data[j * this->nRows() + i] = array_data[this->map(i, j)];
+            }
+        }
+
+        return column_major;
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
