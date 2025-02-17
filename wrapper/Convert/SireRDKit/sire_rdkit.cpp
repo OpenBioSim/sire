@@ -598,16 +598,7 @@ namespace SireRDKit
         molecule.beginBatchEdit();
 
         // set the name of the molecule
-        std::string name;
-        if (mol.hasProperty("name"))
-        {
-            name = mol.property("name").asAString().toStdString();
-        }
-        else
-        {
-            name = mol.name().value().toStdString();
-        }
-        molecule.setProp<std::string>("_Name", name);
+        molecule.setProp<std::string>("_Name", mol.name().value().toStdString());
 
         // set any SDF tags as properties
         std::string sdf_tag;
