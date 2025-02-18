@@ -243,3 +243,8 @@ def openmm_platform():
 @pytest.fixture(scope="session")
 def thrombin_complex():
     return sr.load_test_files("thrombin.top", "thrombin.rst7")
+
+
+@pytest.fixture(scope="session")
+def tagged_sdf():
+    return sr.load_test_files("sdf_tags.sdf")[0]

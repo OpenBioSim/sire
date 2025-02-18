@@ -41,3 +41,10 @@ def test_charge():
         # Read back in and check that the charges are still correct.
         for c0, c1 in zip(mol.property("formal_charge").to_list(), mapping.values()):
             assert isclose(c0.value(), c1)
+
+
+def test_name(tagged_sdf):
+    """
+    Make sure that the molecule takes its name from the SDF title field.
+    """
+    assert tagged_sdf.name().value() == tagged_sdf.property("name").value()

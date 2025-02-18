@@ -12,6 +12,15 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2024.4.2 <https://github.com/openbiosim/sire/compare/2024.4.1...2024.4.2>`__ - Feb 2025
+----------------------------------------------------------------------------------------
+
+* Preserve molecule name when reading from SDF format.
+
+* Handle missing velocity data for ``AMBER`` RST7 files with only a few atoms.
+
+* Preserve SDF metadata when converting to ``RDKIt`` format.
+
 `2024.4.1 <https://github.com/openbiosim/sire/compare/2024.4.0...2024.4.1>`__ - Feb 2025
 ----------------------------------------------------------------------------------------
 
