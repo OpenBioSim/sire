@@ -1898,6 +1898,9 @@ MolEditor SDF::getMolecule(int imol, const PropertyMap &map) const
         mol.setProperty(map["sdf_counts"], SireBase::wrap(sdf_counts));
     }
 
+    // set the name of the molecule
+    mol.rename(MolName(sdfmol.name));
+
     return mol.setProperty(map["coordinates"], coords)
         .setProperty(map["formal_charge"], charges)
         .setProperty(map["element"], elements)

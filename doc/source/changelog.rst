@@ -21,6 +21,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fix setting of positive formal charge when reading SDF files.
 * Only use ``atom->setNoImplicit(True)`` inside custom RDKit sterochemistry inference function.
 * Fix redistribution of excess QM charge and make it the default behaviour.
+* Preserve molecule name when reading from SDF format and on conversion to RDKit.
+* Handle missing velocity data for ``AMBER`` RST7 files with only a few atoms.
+* Preserve SDF metadata when converting to ``RDKIt`` format.
 
 `2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
 ----------------------------------------------------------------------------------------
