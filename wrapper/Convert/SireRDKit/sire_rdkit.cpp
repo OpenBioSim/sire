@@ -597,7 +597,70 @@ namespace SireRDKit
         RDKit::RWMol molecule;
         molecule.beginBatchEdit();
 
+        // set the name of the molecule
         molecule.setProp<std::string>("_Name", mol.name().value().toStdString());
+
+        // set any SDF tags as properties
+        std::string sdf_tag;
+        if (mol.hasProperty("sdf_data"))
+        {
+            const auto sdf_data = mol.property("sdf_data").asA<SireBase::Properties>();
+
+            for (const auto &tag : sdf_data.propertyKeys())
+            {
+                try
+                {
+                    molecule.setProp<std::string>(tag.toStdString(), sdf_data.property(tag).asAString().toStdString());
+                }
+                catch (...)
+                {
+                    const auto string_array = sdf_data.property(tag).asA<SireBase::StringArrayProperty>();
+
+                    QString string;
+                    for (int i=0; i<string_array.size(); i++)
+                    {
+                        string.append(string_array[i]);
+                        if (i < string_array.size() - 1)
+                        {
+                            string.append("\n");
+                        }
+                    }
+
+                    molecule.setProp<std::string>(tag.toStdString(), string.toStdString());
+                }
+            }
+        }
+
+        // set and existing RDKit data as properties
+        std::string rdkit_tag;
+        if (mol.hasProperty("rdkit_data"))
+        {
+            const auto rdkit_data = mol.property("rdkit_data").asA<SireBase::Properties>();
+
+            for (const auto &tag : rdkit_data.propertyKeys())
+            {
+                try
+                {
+                    molecule.setProp<std::string>(tag.toStdString(), rdkit_data.property(tag).asAString().toStdString());
+                }
+                catch (...)
+                {
+                    const auto string_array = rdkit_data.property(tag).asA<SireBase::StringArrayProperty>();
+
+                    QString string;
+                    for (int i=0; i<string_array.size(); i++)
+                    {
+                        string.append(string_array[i]);
+                        if (i < string_array.size() - 1)
+                        {
+                            string.append("\n");
+                        }
+                    }
+
+                    molecule.setProp<std::string>(tag.toStdString(), string.toStdString());
+                }
+            }
+        }
 
         const auto atoms = mol.atoms();
 
@@ -793,7 +856,6 @@ namespace SireRDKit
         try
         {
             RDKit::MolOps::sanitizeMol(molecule);
-
         }
         catch (...)
         {
@@ -995,6 +1057,37 @@ namespace SireRDKit
 
                 molecule.setProperty(map["coordinates"].source(), coords);
             }
+        }
+
+        // copy additional properties from the molecule
+        SireBase::Properties props;
+
+        for (const auto &prop : mol->getPropList())
+        {
+            const auto sire_prop = QString::fromStdString(prop);
+
+            // skip internal properties
+            if (sire_prop.startsWith("_"))
+                continue;
+
+            const auto value = QString::fromStdString(mol->getProp<std::string>(prop));
+            const auto list = value.split("\n");
+
+            // there is a list of values
+            if (list.count() > 1)
+            {
+                props.setProperty(sire_prop, SireBase::wrap(list));
+            }
+            // there is a single value
+            else
+            {
+                props.setProperty(sire_prop, SireBase::wrap(value));
+            }
+        }
+
+        if (not props.isEmpty())
+        {
+            molecule.setProperty("rdkit_data", props);
         }
 
         return molecule.commit();
