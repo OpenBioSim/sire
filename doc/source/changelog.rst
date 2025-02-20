@@ -24,6 +24,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Preserve molecule name when reading from SDF format and on conversion to RDKit.
 * Handle missing velocity data for ``AMBER`` RST7 files with only a few atoms.
 * Preserve SDF metadata when converting to ``RDKIt`` format.
+* Fixed unbound local variable when simulation lambda value is not in ``lambda_windows`` array.
 
 `2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
 ----------------------------------------------------------------------------------------
