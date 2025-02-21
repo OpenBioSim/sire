@@ -656,8 +656,61 @@ void AmberPrm::rebuildLJParameters()
     }
 }
 
+/** This function is called to build all of the CMAP terms from the data
+ *  read in from the PRM file
+ */
+void AmberPrm::rebuildCMAPTerms()
+{
+    // cmap_data.clear();
+
+    // some confusion as both CHARMM_X and X names are used
+    const auto cmap_count = int_data.value("CMAP_COUNT") + int_data.value("CHARMM_CMAP_COUNT");
+
+    if (cmap_count.size() < 2)
+        return;
+
+    // the first value is the CMAP_TERM_COUNT, the second is the CMAP_TYPE_COUNT
+    const int cmap_term_count = cmap_count[0];
+    const int cmap_type_count = cmap_count[1];
+
+    const auto cmap_resolution = int_data.value("CMAP_RESOLUTION") + int_data.value("CHARMM_CMAP_RESOLUTION");
+
+    // this should have CMAP_TERM_COUNT entries
+    if (cmap_resolution.count() != cmap_term_count)
+    {
+        throw SireIO::parse_error(QObject::tr("The number of CMAP resolution terms is not equal to the number of "
+                                              "CMAP terms! Should be %1, but is %2!")
+                                      .arg(cmap_term_count)
+                                      .arg(cmap_resolution.count()),
+                                  CODELOC);
+    }
+
+    // there are CMAP_TYPE_COUNT data entries for the grids,
+    // called CMAP_PARAMETER_01 to CMAP_PARAMETER_{CMAP_TYPE_COUNT}
+    QVector<QVector<double>> cmap_parameters(cmap_type_count);
+
+    qDebug() << "CMAP_TYPE_COUNT" << cmap_type_count;
+    qDebug() << "CMAP_TERM_COUNT" << cmap_term_count;
+
+    for (int i = 1; i <= cmap_type_count; ++i)
+    {
+        const auto cmap_parameter = float_data.value(QString("CMAP_PARAMETER_%1").arg(i, 2, 10, QChar('0'))) +
+                                    float_data.value(QString("CHARMM_CMAP_PARAMETER_%1").arg(i, 2, 10, QChar('0')));
+
+        cmap_parameters[i - 1] = cmap_parameter;
+    }
+
+    // finally, there is CMAP_INDEX that gives 5 indicies for the atoms,
+    // then the CMAP term number?
+    const auto cmap_index = int_data.value("CMAP_INDEX") + int_data.value("CHARMM_CMAP_INDEX");
+
+    qDebug() << Sire::toString(cmap_index);
+    qDebug() << Sire::toString(cmap_parameters);
+    qDebug() << Sire::toString(cmap_resolution);
+}
+
 /** This function finds all atoms that are bonded to the atom at index 'atom_idx'
-    (which is in molecule with index 'mol_idx', populating the hashe
+(which is in molecule with index 'mol_idx', populating the hashe
     'atom_to_mol' (the molecule containing the passed atom). This uses the bonding information
     in 'bonded_atoms', which is the list of all atoms that are bonded to each atom */
 static void findBondedAtoms(int atom_idx, int mol_idx, const QMultiHash<int, int> &bonded_atoms,
@@ -908,13 +961,19 @@ void AmberPrm::rebuildAfterReload()
             { this->rebuildBADIndicies(); },
             // now we have to build the excluded atom lists
             [&]()
-            { this->rebuildExcludedAtoms(); });
+            { this->rebuildExcludedAtoms(); },
+            // now we have to build the CMAP terms
+            [&]()
+            {
+                this->rebuildCMAPTerms();
+            });
     }
     else
     {
         this->rebuildLJParameters();
         this->rebuildBADIndicies();
         this->rebuildExcludedAtoms();
+        this->rebuildCMAPTerms();
     }
 }
 
@@ -1109,6 +1168,13 @@ double AmberPrm::processAllFlags()
             break;
         }
         case FLOAT:
+        {
+            QVector<double> data = readFloatData(l, format, index, &scr, &errors);
+            QMutexLocker lkr(&float_mutex);
+            float_data.insert(flag, data);
+            break;
+        }
+        case FFLOAT:
         {
             QVector<double> data = readFloatData(l, format, index, &scr, &errors);
             QMutexLocker lkr(&float_mutex);

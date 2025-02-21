@@ -91,7 +91,8 @@ namespace SireIO
             UNKNOWN = 0,
             INTEGER = 1,
             FLOAT = 2,
-            STRING = 3
+            STRING = 3,
+            FFLOAT = 4,
         };
 
         AmberPrm();
@@ -187,6 +188,7 @@ namespace SireIO
         void rebuildBADIndicies();
         void rebuildExcludedAtoms();
         void rebuildMolNumToAtomNums();
+        void rebuildCMAPTerms();
 
         SireMM::AmberParams getAmberParams(int imol, const SireMol::MoleculeInfoData &molinfo) const;
 
