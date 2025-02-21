@@ -324,6 +324,42 @@ QVector<QVector<int>> indexDihedrals(const QVector<qint64> &dihs, const QVector<
     return moldihs;
 }
 
+/** Internal function used to return the start index for the cmaps of each
+    molecule, and the number of cmaps in each molecule */
+QVector<QVector<int>> indexCMAPs(const QVector<qint64> &cmaps, const QVector<int> &atom_to_mol, const int nmols)
+{
+    QVector<QVector<int>> molcmaps(nmols);
+    auto molcmaps_data = molcmaps.data();
+
+    const auto cmaps_data = cmaps.constData();
+    const auto atom_to_mol_data = atom_to_mol.constData();
+
+    for (int i = 0; i < cmaps.count(); i += 6)
+    {
+        // format is atom0-atom1-atom2-atom3-atom4-parameter
+        int mol0 = atom_to_mol_data[cmaps_data[i] / 3];     // divide by three as index is
+        int mol1 = atom_to_mol_data[cmaps_data[i + 1] / 3]; // into the coordinate array
+        int mol2 = atom_to_mol_data[std::abs(cmaps_data[i + 2] / 3)];
+        int mol3 = atom_to_mol_data[std::abs(cmaps_data[i + 3] / 3)];
+        int mol4 = atom_to_mol_data[std::abs(cmaps_data[i + 4] / 3)];
+
+        if (mol0 != mol1 or mol0 != mol2 or mol0 != mol3 or mol0 != mol4)
+            throw SireIO::parse_error(
+                QObject::tr("Something went wrong as there is a cmap between more than one different "
+                            "molecule! (%1, %2, %3, %4, %5)")
+                    .arg(mol0)
+                    .arg(mol1)
+                    .arg(mol2)
+                    .arg(mol3)
+                    .arg(mol4),
+                CODELOC);
+
+        molcmaps_data[mol0].append(i);
+    }
+
+    return molcmaps;
+}
+
 /** Function called to rebuild the Bond Angle and Dihedral indicies */
 void AmberPrm::rebuildBADIndicies()
 {
@@ -352,7 +388,10 @@ void AmberPrm::rebuildBADIndicies()
             [&]()
             { dihs_inc_h = indexDihedrals(this->intData("DIHEDRALS_INC_HYDROGEN"), atom_to_mol, nmols); },
             [&]()
-            { dihs_exc_h = indexDihedrals(this->intData("DIHEDRALS_WITHOUT_HYDROGEN"), atom_to_mol, nmols); });
+            { dihs_exc_h = indexDihedrals(this->intData("DIHEDRALS_WITHOUT_HYDROGEN"), atom_to_mol, nmols); },
+            [&]()
+            { cmap_idxs = indexCMAPs(this->intData("CMAP_INDEX") + this->intData("CHARMM_CMAP_INDEX"),
+                                     atom_to_mol, nmols); });
     }
     else
     {
@@ -362,6 +401,7 @@ void AmberPrm::rebuildBADIndicies()
         angs_exc_h = indexAngles(this->intData("ANGLES_WITHOUT_HYDROGEN"), atom_to_mol, nmols);
         dihs_inc_h = indexDihedrals(this->intData("DIHEDRALS_INC_HYDROGEN"), atom_to_mol, nmols);
         dihs_exc_h = indexDihedrals(this->intData("DIHEDRALS_WITHOUT_HYDROGEN"), atom_to_mol, nmols);
+        cmap_idxs = indexCMAPs(this->intData("CMAP_INDEX") + this->intData("CHARMM_CMAP_INDEX"), atom_to_mol, nmols);
     }
 }
 
@@ -661,7 +701,7 @@ void AmberPrm::rebuildLJParameters()
  */
 void AmberPrm::rebuildCMAPTerms()
 {
-    // cmap_data.clear();
+    cmap_data.clear();
 
     // some confusion as both CHARMM_X and X names are used
     const auto cmap_count = int_data.value("CMAP_COUNT") + int_data.value("CHARMM_CMAP_COUNT");
@@ -687,26 +727,30 @@ void AmberPrm::rebuildCMAPTerms()
 
     // there are CMAP_TYPE_COUNT data entries for the grids,
     // called CMAP_PARAMETER_01 to CMAP_PARAMETER_{CMAP_TYPE_COUNT}
-    QVector<QVector<double>> cmap_parameters(cmap_type_count);
-
-    qDebug() << "CMAP_TYPE_COUNT" << cmap_type_count;
-    qDebug() << "CMAP_TERM_COUNT" << cmap_term_count;
-
     for (int i = 1; i <= cmap_type_count; ++i)
     {
+        const auto resolution = cmap_resolution[i - 1];
+
         const auto cmap_parameter = float_data.value(QString("CMAP_PARAMETER_%1").arg(i, 2, 10, QChar('0'))) +
                                     float_data.value(QString("CHARMM_CMAP_PARAMETER_%1").arg(i, 2, 10, QChar('0')));
 
-        cmap_parameters[i - 1] = cmap_parameter;
+        // the number of values should equal the resolution squared
+        if (cmap_parameter.count() != resolution * resolution)
+        {
+            throw SireIO::parse_error(QObject::tr("The number of CMAP parameters for type %1 is not equal to the "
+                                                  "resolution squared! Should be %2, but is %3!")
+                                          .arg(i)
+                                          .arg(resolution * resolution)
+                                          .arg(cmap_parameter.count()),
+                                      CODELOC);
+        }
+
+        // the values are in column-major order
+        cmap_data.insert(i, CMAPParameter(Array2D<double>::fromColumnMajorVector(
+                                cmap_parameter, resolution, resolution)));
     }
 
-    // finally, there is CMAP_INDEX that gives 5 indicies for the atoms,
-    // then the CMAP term number?
-    const auto cmap_index = int_data.value("CMAP_INDEX") + int_data.value("CHARMM_CMAP_INDEX");
-
-    qDebug() << Sire::toString(cmap_index);
-    qDebug() << Sire::toString(cmap_parameters);
-    qDebug() << Sire::toString(cmap_resolution);
+    qDebug() << Sire::toString(cmap_data);
 }
 
 /** This function finds all atoms that are bonded to the atom at index 'atom_idx'
@@ -3869,10 +3913,11 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
 AmberPrm::AmberPrm(const AmberPrm &other)
     : ConcreteProperty<AmberPrm, MoleculeParser>(other), flag_to_line(other.flag_to_line), int_data(other.int_data),
       float_data(other.float_data), string_data(other.string_data), lj_data(other.lj_data),
-      lj_exceptions(other.lj_exceptions),
+      lj_exceptions(other.lj_exceptions), cmap_data(other.cmap_data),
       bonds_inc_h(other.bonds_inc_h), bonds_exc_h(other.bonds_exc_h), angs_inc_h(other.angs_inc_h),
       angs_exc_h(other.angs_exc_h), dihs_inc_h(other.dihs_inc_h), dihs_exc_h(other.dihs_exc_h),
-      excl_atoms(other.excl_atoms), molnum_to_atomnums(other.molnum_to_atomnums), pointers(other.pointers),
+      excl_atoms(other.excl_atoms), cmap_idxs(other.cmap_idxs),
+      molnum_to_atomnums(other.molnum_to_atomnums), pointers(other.pointers),
       ffield(other.ffield), warns(other.warns), comb_rules(other.comb_rules)
 {
 }
@@ -3893,6 +3938,7 @@ AmberPrm &AmberPrm::operator=(const AmberPrm &other)
         string_data = other.string_data;
         lj_data = other.lj_data;
         lj_exceptions = other.lj_exceptions;
+        cmap_data = other.cmap_data;
         bonds_inc_h = other.bonds_inc_h;
         bonds_exc_h = other.bonds_exc_h;
         angs_inc_h = other.angs_inc_h;
@@ -3900,6 +3946,7 @@ AmberPrm &AmberPrm::operator=(const AmberPrm &other)
         dihs_inc_h = other.dihs_inc_h;
         dihs_exc_h = other.dihs_exc_h;
         excl_atoms = other.excl_atoms;
+        cmap_idxs = other.cmap_idxs;
         molnum_to_atomnums = other.molnum_to_atomnums;
         pointers = other.pointers;
         ffield = other.ffield;
