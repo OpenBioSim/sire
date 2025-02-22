@@ -709,8 +709,11 @@ void AmberPrm::rebuildCMAPTerms()
     if (cmap_count.size() < 2)
         return;
 
-    // the first value is the CMAP_TERM_COUNT, the second is the CMAP_TYPE_COUNT
-    const int cmap_term_count = cmap_count[0];
+    // the first value is the CMAP_TERM_COUNT. This is not read - and we don't need
+    // it because it is implied when we actually read in the CMAP terms
+    // const int cmap_term_count = cmap_count[0];
+
+    // the second is the CMAP_TYPE_COUNT
     const int cmap_type_count = cmap_count[1];
 
     const auto cmap_resolution = int_data.value("CMAP_RESOLUTION") + int_data.value("CHARMM_CMAP_RESOLUTION");
