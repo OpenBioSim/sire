@@ -716,11 +716,11 @@ void AmberPrm::rebuildCMAPTerms()
     const auto cmap_resolution = int_data.value("CMAP_RESOLUTION") + int_data.value("CHARMM_CMAP_RESOLUTION");
 
     // this should have CMAP_TERM_COUNT entries
-    if (cmap_resolution.count() != cmap_term_count)
+    if (cmap_resolution.count() != cmap_type_count)
     {
         throw SireIO::parse_error(QObject::tr("The number of CMAP resolution terms is not equal to the number of "
                                               "CMAP terms! Should be %1, but is %2!")
-                                      .arg(cmap_term_count)
+                                      .arg(cmap_type_count)
                                       .arg(cmap_resolution.count()),
                                   CODELOC);
     }
