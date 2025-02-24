@@ -1819,8 +1819,8 @@ std::tuple<QVector<qint64>, QVector<qint64>, QHash<AmberBond, qint64>> getBondDa
     const auto info = params.info();
     const auto bonds = params.bonds();
 
-    bonds_inc_h.reserve(3 * bonds.count());
-    bonds_exc_h.reserve(3 * bonds.count());
+    bonds_inc_h.reserve(bonds.count());
+    bonds_exc_h.reserve(bonds.count());
 
     for (auto it = bonds.constBegin(); it != bonds.constEnd(); ++it)
     {
@@ -1920,8 +1920,8 @@ std::tuple<QVector<qint64>, QVector<qint64>, QHash<AmberAngle, qint64>> getAngle
     const auto info = params.info();
     const auto angles = params.angles();
 
-    angs_inc_h.reserve(4 * angles.count());
-    angs_exc_h.reserve(4 * angles.count());
+    angs_inc_h.reserve(angles.count());
+    angs_exc_h.reserve(angles.count());
 
     for (auto it = angles.constBegin(); it != angles.constEnd(); ++it)
     {
@@ -2185,6 +2185,108 @@ std::tuple<QVector<qint64>, QVector<qint64>, QHash<AmberNBDihPart, qint64>> getD
     std::sort(start_it, end_it);
 
     return std::make_tuple(dihs_inc_h, dihs_exc_h, param_to_idx);
+}
+
+namespace detail
+{
+    /** Internal class that is used to help sort the cmap arrays */
+    struct Idx6
+    {
+    public:
+        qint64 a, b, c, d, e, f;
+
+        bool operator<(const Idx6 &other) const
+        {
+            qint64 c_cmp = std::abs(c);
+            qint64 other_c_cmp = std::abs(other.c);
+            qint64 d_cmp = std::abs(d);
+            qint64 other_d_cmp = std::abs(other.d);
+            qint64 e_cmp = std::abs(e);
+            qint64 other_e_cmp = std::abs(other.e);
+            if (a < other.a)
+            {
+                return true;
+            }
+            else if (a == other.a)
+            {
+                if (b < other.b)
+                {
+                    return true;
+                }
+                else if (b == other.b)
+                {
+                    if (c_cmp < other_c_cmp)
+                    {
+                        return true;
+                    }
+                    else if (c_cmp == other_c_cmp)
+                    {
+                        if (d_cmp < other_d_cmp)
+                        {
+                            return true;
+                        }
+                        else if (d_cmp == other_d_cmp)
+                        {
+                            if (e_cmp < other_e_cmp)
+                            {
+                                return true;
+                            }
+                            else if (e_cmp == other_e_cmp)
+                            {
+                                return f < other.f;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+    };
+} // namespace detail
+/** Internal function used to get the cmap information from the passed molecule */
+std::tuple<QVector<qint64>, QHash<CMAPParameter, qint64>> getCMAPData(const AmberParams &params,
+                                                                      int start_idx)
+{
+    QHash<CMAPParameter, qint64> param_to_idx;
+    QVector<qint64> cmap_idxs;
+
+    const auto info = params.info();
+    const auto cmaps = params.cmapFunctions().parameters();
+
+    if (cmaps.isEmpty())
+    {
+        return std::make_tuple(cmap_idxs, param_to_idx);
+    }
+
+    cmap_idxs.reserve(cmaps.count());
+
+    for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
+    {
+        // have we seen this cmap parameter before?
+        qint64 idx = param_to_idx.value(it->parameter(), -1);
+
+        // if not, save this to the database and increase the number of parameters
+        if (idx == -1)
+        {
+            param_to_idx.insert(it->parameter(), param_to_idx.count() + 1);
+            idx = param_to_idx.count();
+        }
+
+        cmap_idxs.append(6 * (info.atomIdx(it->atom0()).value() + start_idx));
+        cmap_idxs.append(6 * (info.atomIdx(it->atom1()).value() + start_idx));
+        cmap_idxs.append(6 * (info.atomIdx(it->atom2()).value() + start_idx));
+        cmap_idxs.append(6 * (info.atomIdx(it->atom3()).value() + start_idx));
+        cmap_idxs.append(6 * (info.atomIdx(it->atom4()).value() + start_idx));
+        cmap_idxs.append(idx);
+    }
+
+    // now sort the arrays so that the order is the same every time this
+    // molecule is written to a file
+    ::detail::Idx6 *start_it = reinterpret_cast<::detail::Idx6 *>(cmap_idxs.data());
+    ::detail::Idx6 *end_it = start_it + (cmap_idxs.count() / 6);
+    std::sort(start_it, end_it);
+
+    return std::make_tuple(cmap_idxs, param_to_idx);
 }
 
 /** Internal function that converts the passed list of parameters into a list
@@ -3099,8 +3201,8 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         }
 
         QVector<qint64> all_bonds_inc_h, all_bonds_exc_h;
-        all_bonds_inc_h.reserve(nbonds_inc_h);
-        all_bonds_exc_h.reserve(nbonds_exc_h);
+        all_bonds_inc_h.reserve(3 * nbonds_inc_h);
+        all_bonds_exc_h.reserve(3 * nbonds_exc_h);
 
         // we now need to go through the bonds and remove duplicated bond parameters
         QVector<double> k_data, r0_data;
@@ -3225,8 +3327,8 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         }
 
         QVector<qint64> all_angs_inc_h, all_angs_exc_h;
-        all_angs_inc_h.reserve(nangs_inc_h);
-        all_angs_exc_h.reserve(nangs_exc_h);
+        all_angs_inc_h.reserve(4 * nangs_inc_h);
+        all_angs_exc_h.reserve(4 * nangs_exc_h);
 
         // we now need to go through the angles and remove duplicated angle parameters
         QVector<double> k_data, t0_data;
@@ -3516,6 +3618,116 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                                numdih);
     };
 
+    // function used to get all of the CMAP information
+    auto getAllCMAPs = [&]()
+    {
+        QVector<std::tuple<QVector<qint64>, QHash<CMAPParameter, qint64>>> all_cmap_data(params.count());
+        auto all_cmap_data_data = all_cmap_data.data();
+
+        // get all of the cmap information from each molecule
+        if (use_parallel)
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, params.count()), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
+                {
+                    all_cmap_data_data[i] = getCMAPData(params_data[i], atom_start_index_data[i]);
+                } });
+        }
+        else
+        {
+            for (int i = 0; i < params.count(); ++i)
+            {
+                all_cmap_data_data[i] = getCMAPData(params_data[i], atom_start_index_data[i]);
+            }
+        }
+
+        // count up the number of cmap parameters to help reserve memory space
+        int ncmaps = 0;
+        int nparams = 0;
+        for (int i = 0; i < params.count(); ++i)
+        {
+            ncmaps += std::get<0>(all_cmap_data[i]).count();
+            nparams += std::get<1>(all_cmap_data[i]).count();
+        }
+
+        QVector<qint64> all_cmap_idxs;
+        all_cmap_idxs.reserve(ncmaps);
+
+        // we now need to go through the cmaps and remove duplicated cmap parameters
+        QVector<CMAPParameter> cmap_params;
+        QHash<CMAPParameter, int> all_cmap_to_idx;
+        all_cmap_to_idx.reserve(nparams);
+
+        // combine all parameters into a single set, with a unique index
+        for (int i = 0; i < params.count(); ++i)
+        {
+            const auto cmap_to_idx = std::get<1>(all_cmap_data_data[i]);
+
+            // first, find all unique angles
+            for (auto it = cmap_to_idx.constBegin(); it != cmap_to_idx.constEnd(); ++it)
+            {
+                if (not all_cmap_to_idx.contains(it.key()))
+                {
+                    all_cmap_to_idx.insert(it.key(), -1);
+                }
+            }
+        }
+
+        // now, sort the list so that there is a consistent order of
+        // parameters every time this output file is written
+        {
+            auto all_cmaps = all_cmap_to_idx.keys();
+            std::sort(all_cmaps.begin(), all_cmaps.end());
+
+            cmap_params = QVector<CMAPParameter>(all_cmaps.count());
+
+            int i = 0;
+            for (const auto &cmap : all_cmaps)
+            {
+                cmap_params[i] = cmap;
+
+                all_cmap_to_idx[cmap] = i + 1;
+                i += 1;
+            }
+        }
+
+        for (int i = 0; i < params.count(); ++i)
+        {
+            // create a hash to map local parameter indicies to global parameter indicies
+            QHash<qint64, qint64> idx_to_idx;
+
+            // get all of the cmap parameters
+            const auto cmap_to_idx = std::get<1>(all_cmap_data_data[i]);
+
+            // for each one, get the global parameter index, save the parameters to
+            // the cmap arrays, and update the mapping from local to global indicies
+            for (auto it = cmap_to_idx.constBegin(); it != cmap_to_idx.constEnd(); ++it)
+            {
+                idx_to_idx.insert(it.value(), all_cmap_to_idx.value(it.key(), -1));
+            }
+
+            // now run through the cmaps updating their local indicies to
+            // global indicies
+            const auto cmap_idxs = std::get<0>(all_cmap_data_data[i]);
+
+            for (int j = 0; j < cmap_idxs.count(); j += 6)
+            {
+                all_cmap_idxs.append(cmap_idxs[j]);
+                all_cmap_idxs.append(cmap_idxs[j + 1]);
+                all_cmap_idxs.append(cmap_idxs[j + 2]);
+                all_cmap_idxs.append(cmap_idxs[j + 3]);
+                all_cmap_idxs.append(cmap_idxs[j + 4]);
+                all_cmap_idxs.append(idx_to_idx.value(cmap_idxs[j + 5]));
+            }
+        }
+
+        int ncmap = all_cmap_idxs.count() / 6; // number of cmap terms
+
+        return std::make_tuple(writeIntData(all_cmap_idxs, AmberFormat(AmberPrm::INTEGER, 6, 8)),
+                               cmap_params, ncmap);
+    };
+
     QStringList lines;
 
     QStringList name_lines, charge_lines, number_lines, mass_lines, radius_lines, ambtyp_lines, screening_lines,
@@ -3528,6 +3740,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     std::tuple<QStringList, QStringList, QStringList, QStringList, QStringList, QStringList, QStringList, int, int, int,
                int>
         dih_lines;
+    std::tuple<QStringList, QVector<CMAPParameter>, int> cmap_lines;
 
     const QVector<std::function<void()>> info_functions = {
         [&]()
@@ -3538,6 +3751,8 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         { ang_lines = getAllAngles(); },
         [&]()
         { dih_lines = getAllDihedrals(); },
+        [&]()
+        { cmap_lines = getAllCMAPs(); },
         [&]()
         { name_lines = getAllAtomNames(); },
         [&]()
@@ -3810,6 +4025,49 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     lines.append("       0");
 
     // we don't currently support IFCAP > 0, IFPERT > 0 or IFPOL > 0
+
+    if (std::get<2>(cmap_lines) > 0)
+    {
+        const auto cmap_params = std::get<1>(cmap_lines);
+
+        lines.append("%FLAG CMAP_COUNT");
+        QVector<qint64> counts(2);
+        counts[0] = std::get<2>(cmap_lines);
+        counts[1] = cmap_params.count();
+        lines += writeIntData(counts, AmberFormat(AmberPrm::INTEGER, 2, 8));
+
+        QVector<qint64> resolutions;
+
+        for (const auto &cmap_param : cmap_params)
+        {
+            if (cmap_param.nRows() != cmap_param.nColumns())
+            {
+                throw SireIO::parse_error(
+                    QObject::tr("CMAP parameters must be square matrices, but the matrix for %1x%2")
+                        .arg(cmap_param.nRows())
+                        .arg(cmap_param.nColumns()),
+                    CODELOC);
+            }
+
+            resolutions.append(cmap_param.nRows());
+        }
+
+        lines.append("%FLAG CMAP_RESOLUTION");
+        lines += writeIntData(resolutions, AmberFormat(AmberPrm::INTEGER, 20, 4));
+
+        for (int i = 0; i < cmap_params.count(); ++i)
+        {
+            const auto &cmap_param = cmap_params[i];
+
+            lines.append(QString("%FLAG CMAP_PARAMETER_%1").arg(i + 1, 2, 10, QChar('0')));
+
+            lines += writeFloatData(cmap_param.grid().toColumnMajorVector(),
+                                    AmberFormat(AmberPrm::FFLOAT, 8, 9, 5));
+        }
+
+        lines.append("%FLAG CMAP_INDEX");
+        lines += std::get<0>(cmap_lines);
+    }
 
     return lines;
 }
@@ -4714,6 +4972,32 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
         return params;
     };
 
+    // function to assign all of the cmap information
+    auto assign_cmaps = [&]()
+    {
+        AmberParams params(molinfo);
+
+        auto func = [&](const QVector<int> &idxs, const QVector<qint64> &cmaps)
+        {
+            for (int idx : idxs)
+            {
+                const AtomNum atom0(cmaps[idx] / 5 + 1);
+                const AtomNum atom1(cmaps[idx + 1] / 5 + 1);
+                const AtomNum atom2(cmaps[idx + 2] / 5 + 1);
+                const AtomNum atom3(cmaps[idx + 3] / 5 + 1);
+                const AtomNum atom4(cmaps[idx + 4] / 5 + 1);
+
+                const int param_idx = cmaps[idx + 5] - 1; // 1 indexed to 0 indexed
+
+                params.add(atom0, atom1, atom2, atom3, atom4, cmap_data[param_idx]);
+            }
+        };
+
+        func(cmap_idxs[molidx], this->intData("CMAP_INDEX") + this->intData("CHARMM_CMAP_INDEX"));
+
+        return params;
+    };
+
     // function to read in the excluded atoms information
     auto assign_excluded = [&]()
     {
@@ -4814,7 +5098,7 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
     // assign all of the parameters
     if (usesParallel())
     {
-        AmberParams atoms, bonds, angles, dihedrals, excluded;
+        AmberParams atoms, bonds, angles, dihedrals, excluded, cmaps;
 
         tbb::parallel_invoke([&]()
                              { atoms = assign_atoms(); },
@@ -4825,13 +5109,16 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
                              [&]()
                              { dihedrals = assign_dihedrals(); },
                              [&]()
-                             { excluded = assign_excluded(); });
+                             { excluded = assign_excluded(); },
+                             [&]()
+                             { cmaps = assign_cmaps(); });
 
         params += atoms;
         params += bonds;
         params += angles;
         params += dihedrals;
         params += excluded;
+        params += cmaps;
     }
     else
     {
@@ -4840,6 +5127,7 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
         params += assign_angles();
         params += assign_dihedrals();
         params += assign_excluded();
+        params += assign_cmaps();
     }
 
     const auto radius_set = this->stringData("RADIUS_SET");
@@ -4902,6 +5190,11 @@ MolEditor AmberPrm::getMoleculeEditor(int molidx, const PropertyMap &map) const
     _setProperty(mol, map, "treechain", amber_params.treeChains());
     _setProperty(mol, map, "parameters", amber_params);
     _setProperty(mol, map, "forcefield", ffield);
+
+    if (not amber_params.cmapFunctions().isEmpty())
+    {
+        _setProperty(mol, map, "cmap", amber_params.cmapFunctions());
+    }
 
     return mol;
 }

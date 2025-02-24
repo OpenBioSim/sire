@@ -280,6 +280,19 @@ void register_CMAPFunctions_class(){
                 , "" );
         
         }
+        { //::SireMM::CMAPFunctions::set
+        
+            typedef void ( ::SireMM::CMAPFunctions::*set_function_type)( ::SireMM::CMAPFunction const & ) ;
+            set_function_type set_function_value( &::SireMM::CMAPFunctions::set );
+            
+            CMAPFunctions_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("func") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMM::CMAPFunctions::toString
         
             typedef ::QString ( ::SireMM::CMAPFunctions::*toString_function_type)(  ) const;

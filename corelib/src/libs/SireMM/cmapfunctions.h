@@ -199,6 +199,8 @@ namespace SireMM
         void set(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3,
                  AtomIdx atom4, const CMAPParameter &parameter);
 
+        void set(const CMAPFunction &func);
+
         void clear();
 
         void clear(AtomIdx atom);

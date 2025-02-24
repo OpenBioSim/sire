@@ -390,6 +390,12 @@ void CMAPFunctions::set(const AtomID &atom0, const AtomID &atom1, const AtomID &
               info().atomIdx(atom3), info().atomIdx(atom4), parameter);
 }
 
+void CMAPFunctions::set(const CMAPFunction &param)
+{
+    this->set(info().atomIdx(param.atom()), info().atomIdx(param.atom1()), info().atomIdx(param.atom2()),
+              info().atomIdx(param.atom3()), info().atomIdx(param.atom4()), param.parameter());
+}
+
 void CMAPFunctions::clear()
 {
     parameters_by_atoms.clear();
