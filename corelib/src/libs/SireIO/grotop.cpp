@@ -6444,7 +6444,7 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
                 {
 
                     // could be residue_numberChain_name
-                    const QRegularExpression re("(\\d+)([\\w\\d]*)");
+                    const QRegularExpression re("(\\-?\\d+)([\\w\\d]*)");
 
                     auto m = re.match(words[2]);
 
