@@ -337,11 +337,11 @@ QVector<QVector<int>> indexCMAPs(const QVector<qint64> &cmaps, const QVector<int
     for (int i = 0; i < cmaps.count(); i += 6)
     {
         // format is atom0-atom1-atom2-atom3-atom4-parameter
-        int mol0 = atom_to_mol_data[cmaps_data[i] / 3];     // divide by three as index is
-        int mol1 = atom_to_mol_data[cmaps_data[i + 1] / 3]; // into the coordinate array
-        int mol2 = atom_to_mol_data[std::abs(cmaps_data[i + 2] / 3)];
-        int mol3 = atom_to_mol_data[std::abs(cmaps_data[i + 3] / 3)];
-        int mol4 = atom_to_mol_data[std::abs(cmaps_data[i + 4] / 3)];
+        int mol0 = atom_to_mol_data[cmaps_data[i]];     // DO NOT DIVIDE BY THREE
+        int mol1 = atom_to_mol_data[cmaps_data[i + 1]]; // THIS IS THE RAW ATOM INDEX
+        int mol2 = atom_to_mol_data[cmaps_data[i + 2]];
+        int mol3 = atom_to_mol_data[cmaps_data[i + 3]];
+        int mol4 = atom_to_mol_data[cmaps_data[i + 4]];
 
         if (mol0 != mol1 or mol0 != mol2 or mol0 != mol3 or mol0 != mol4)
             throw SireIO::parse_error(
@@ -752,8 +752,6 @@ void AmberPrm::rebuildCMAPTerms()
         cmap_data.insert(i, CMAPParameter(Array2D<double>::fromColumnMajorVector(
                                 cmap_parameter, resolution, resolution)));
     }
-
-    qDebug() << Sire::toString(cmap_data);
 }
 
 /** This function finds all atoms that are bonded to the atom at index 'atom_idx'
@@ -2243,6 +2241,7 @@ namespace detail
         }
     };
 } // namespace detail
+
 /** Internal function used to get the cmap information from the passed molecule */
 std::tuple<QVector<qint64>, QHash<CMAPParameter, qint64>> getCMAPData(const AmberParams &params,
                                                                       int start_idx)
@@ -4981,13 +4980,16 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
         {
             for (int idx : idxs)
             {
-                const AtomNum atom0(cmaps[idx] / 5 + 1);
-                const AtomNum atom1(cmaps[idx + 1] / 5 + 1);
-                const AtomNum atom2(cmaps[idx + 2] / 5 + 1);
-                const AtomNum atom3(cmaps[idx + 3] / 5 + 1);
-                const AtomNum atom4(cmaps[idx + 4] / 5 + 1);
+                const AtomNum atom0(cmaps[idx] + 1);
+                const AtomNum atom1(cmaps[idx + 1] + 1);
+                const AtomNum atom2(cmaps[idx + 2] + 1);
+                const AtomNum atom3(cmaps[idx + 3] + 1);
+                const AtomNum atom4(cmaps[idx + 4] + 1);
 
                 const int param_idx = cmaps[idx + 5] - 1; // 1 indexed to 0 indexed
+
+                qDebug() << cmaps[idx] << cmaps[idx + 1] << cmaps[idx + 2] << cmaps[idx + 3] << cmaps[idx + 4] << cmaps[idx + 5];
+                qDebug() << atom0.value() << atom1.value() << atom2.value() << atom3.value() << atom4.value() << param_idx;
 
                 params.add(atom0, atom1, atom2, atom3, atom4, cmap_data[param_idx]);
             }

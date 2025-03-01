@@ -312,6 +312,7 @@ CMAPFunctions::~CMAPFunctions()
 CMAPFunctions &CMAPFunctions::operator=(const CMAPFunctions &other)
 {
     MoleculeProperty::operator=(other);
+    molinfo = other.molinfo;
     parameters_by_atoms = other.parameters_by_atoms;
 
     return *this;
@@ -349,6 +350,9 @@ const char *CMAPFunctions::what() const
 
 const MoleculeInfoData &CMAPFunctions::info() const
 {
+    if (molinfo.constData() == 0)
+        throw SireError::program_bug("MoleculeInfoData is null!", CODELOC);
+
     return *molinfo;
 }
 
@@ -392,7 +396,7 @@ void CMAPFunctions::set(const AtomID &atom0, const AtomID &atom1, const AtomID &
 
 void CMAPFunctions::set(const CMAPFunction &param)
 {
-    this->set(info().atomIdx(param.atom()), info().atomIdx(param.atom1()), info().atomIdx(param.atom2()),
+    this->set(info().atomIdx(param.atom0()), info().atomIdx(param.atom1()), info().atomIdx(param.atom2()),
               info().atomIdx(param.atom3()), info().atomIdx(param.atom4()), param.parameter());
 }
 
@@ -504,7 +508,7 @@ void CMAPFunctions::clear(const AtomID &atom0, const AtomID &atom1, const AtomID
 
 bool CMAPFunctions::isEmpty() const
 {
-    return parameters_by_atoms.isEmpty();
+    return parameters_by_atoms.isEmpty() or this->molinfo.constData() == 0;
 }
 
 int CMAPFunctions::nFunctions() const

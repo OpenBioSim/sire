@@ -96,6 +96,8 @@ void register_CMAPParameter_class(){
         
         }
         CMAPParameter_exposer.def( bp::self != bp::self );
+        CMAPParameter_exposer.def( bp::self < bp::self );
+        CMAPParameter_exposer.def( bp::self <= bp::self );
         { //::SireMM::CMAPParameter::operator=
         
             typedef ::SireMM::CMAPParameter & ( ::SireMM::CMAPParameter::*assign_function_type)( ::SireMM::CMAPParameter const & ) ;
@@ -110,6 +112,8 @@ void register_CMAPParameter_class(){
         
         }
         CMAPParameter_exposer.def( bp::self == bp::self );
+        CMAPParameter_exposer.def( bp::self > bp::self );
+        CMAPParameter_exposer.def( bp::self >= bp::self );
         { //::SireMM::CMAPParameter::toString
         
             typedef ::QString ( ::SireMM::CMAPParameter::*toString_function_type)(  ) const;

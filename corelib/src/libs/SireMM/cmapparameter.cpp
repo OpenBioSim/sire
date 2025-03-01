@@ -108,6 +108,16 @@ Array2D<double> deduplicate_parameter(const Array2D<double> &grid)
     }
 }
 
+namespace SireMM
+{
+    uint qHash(const CMAPParameter &param)
+    {
+        // because the parameters are de-duplicated, we can just hash the
+        // pointer to the shared cache
+        return ::qHash(quintptr(param.param.constData()));
+    }
+} // namespace SireMM
+
 CMAPParameter::CMAPParameter(const Array2D<double> &grid)
 {
     // put the grid into the shared cache, so that we only have
@@ -141,6 +151,49 @@ bool CMAPParameter::operator==(const CMAPParameter &other) const
 bool CMAPParameter::operator!=(const CMAPParameter &other) const
 {
     return not CMAPParameter::operator==(other);
+}
+
+bool CMAPParameter::operator<(const CMAPParameter &other) const
+{
+    // the ordering is based on the smaller grid, and then comparing
+    // the numbers one by one to find the first smaller value
+    if (this->param.nRows() < other.param.nRows())
+        return true;
+    else if (this->param.nRows() == other.param.nRows() and this->param.nColumns() < other.param.nColumns())
+        return true;
+    else if (this->param.nRows() == other.param.nRows() and this->param.nColumns() == other.param.nColumns())
+    {
+        for (int i = 0; i < this->param.nRows(); i++)
+        {
+            for (int j = 0; j < this->param.nColumns(); j++)
+            {
+                if (this->param(i, j) < other.param(i, j))
+                    return true;
+                else if (this->param(i, j) > other.param(i, j))
+                    return false;
+            }
+        }
+
+        // must be equal if we get here
+        return false;
+    }
+    else
+        return false;
+}
+
+bool CMAPParameter::operator<=(const CMAPParameter &other) const
+{
+    return CMAPParameter::operator<(other) or CMAPParameter::operator==(other);
+}
+
+bool CMAPParameter::operator>(const CMAPParameter &other) const
+{
+    return not CMAPParameter::operator<=(other);
+}
+
+bool CMAPParameter::operator>=(const CMAPParameter &other) const
+{
+    return not CMAPParameter::operator<(other);
 }
 
 const char *CMAPParameter::typeName()

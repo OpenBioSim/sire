@@ -41,11 +41,15 @@ SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CMAPParameter &);
 
 namespace SireMM
 {
+    SIREMM_EXPORT uint qHash(const CMAPParameter &param);
+
     class SIREMM_EXPORT CMAPParameter
     {
 
         friend QDataStream & ::operator<<(QDataStream &, const CMAPParameter &);
         friend QDataStream & ::operator>>(QDataStream &, CMAPParameter &);
+
+        friend uint qHash(const CMAPParameter &param);
 
     public:
         CMAPParameter();
@@ -57,6 +61,11 @@ namespace SireMM
 
         bool operator==(const CMAPParameter &other) const;
         bool operator!=(const CMAPParameter &other) const;
+
+        bool operator<(const CMAPParameter &other) const;
+        bool operator<=(const CMAPParameter &other) const;
+        bool operator>(const CMAPParameter &other) const;
+        bool operator>=(const CMAPParameter &other) const;
 
         static const char *typeName();
         const char *what() const;
