@@ -2249,6 +2249,8 @@ std::tuple<QVector<qint64>, QHash<CMAPParameter, qint64>> getCMAPData(const Ambe
     QHash<CMAPParameter, qint64> param_to_idx;
     QVector<qint64> cmap_idxs;
 
+    start_idx /= 3;
+
     const auto info = params.info();
     const auto cmaps = params.cmapFunctions().parameters();
 
@@ -2271,11 +2273,12 @@ std::tuple<QVector<qint64>, QHash<CMAPParameter, qint64>> getCMAPData(const Ambe
             idx = param_to_idx.count();
         }
 
-        cmap_idxs.append(6 * (info.atomIdx(it->atom0()).value() + start_idx));
-        cmap_idxs.append(6 * (info.atomIdx(it->atom1()).value() + start_idx));
-        cmap_idxs.append(6 * (info.atomIdx(it->atom2()).value() + start_idx));
-        cmap_idxs.append(6 * (info.atomIdx(it->atom3()).value() + start_idx));
-        cmap_idxs.append(6 * (info.atomIdx(it->atom4()).value() + start_idx));
+        // multiply by 3 as index is into the coordinates array
+        cmap_idxs.append(info.atomIdx(it->atom0()).value() + start_idx);
+        cmap_idxs.append(info.atomIdx(it->atom1()).value() + start_idx);
+        cmap_idxs.append(info.atomIdx(it->atom2()).value() + start_idx);
+        cmap_idxs.append(info.atomIdx(it->atom3()).value() + start_idx);
+        cmap_idxs.append(info.atomIdx(it->atom4()).value() + start_idx);
         cmap_idxs.append(idx);
     }
 
@@ -3663,7 +3666,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         {
             const auto cmap_to_idx = std::get<1>(all_cmap_data_data[i]);
 
-            // first, find all unique angles
+            // first, find all unique cmaps
             for (auto it = cmap_to_idx.constBegin(); it != cmap_to_idx.constEnd(); ++it)
             {
                 if (not all_cmap_to_idx.contains(it.key()))
@@ -4987,9 +4990,6 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
                 const AtomNum atom4(cmaps[idx + 4] + 1);
 
                 const int param_idx = cmaps[idx + 5] - 1; // 1 indexed to 0 indexed
-
-                qDebug() << cmaps[idx] << cmaps[idx + 1] << cmaps[idx + 2] << cmaps[idx + 3] << cmaps[idx + 4] << cmaps[idx + 5];
-                qDebug() << atom0.value() << atom1.value() << atom2.value() << atom3.value() << atom4.value() << param_idx;
 
                 params.add(atom0, atom1, atom2, atom3, atom4, cmap_data[param_idx]);
             }
