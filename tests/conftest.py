@@ -243,3 +243,8 @@ def openmm_platform():
 @pytest.fixture(scope="session")
 def thrombin_complex():
     return sr.load_test_files("thrombin.top", "thrombin.rst7")
+
+
+@pytest.fixture(scope="session")
+def amber_cmap():
+    return sr.load_test_files("amber_cmap.prm7")

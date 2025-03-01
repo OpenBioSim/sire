@@ -2273,7 +2273,6 @@ std::tuple<QVector<qint64>, QHash<CMAPParameter, qint64>> getCMAPData(const Ambe
             idx = param_to_idx.count();
         }
 
-        // multiply by 3 as index is into the coordinates array
         cmap_idxs.append(info.atomIdx(it->atom0()).value() + start_idx);
         cmap_idxs.append(info.atomIdx(it->atom1()).value() + start_idx);
         cmap_idxs.append(info.atomIdx(it->atom2()).value() + start_idx);
@@ -4989,7 +4988,7 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
                 const AtomNum atom3(cmaps[idx + 3] + 1);
                 const AtomNum atom4(cmaps[idx + 4] + 1);
 
-                const int param_idx = cmaps[idx + 5] - 1; // 1 indexed to 0 indexed
+                const int param_idx = cmaps[idx + 5];
 
                 params.add(atom0, atom1, atom2, atom3, atom4, cmap_data[param_idx]);
             }
