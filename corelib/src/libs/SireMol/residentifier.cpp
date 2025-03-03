@@ -436,7 +436,7 @@ ResNum::ResNum() : SireID::Number(), ResID()
 {
 }
 
-ResNum::ResNum(quint32 num) : SireID::Number(num), ResID()
+ResNum::ResNum(qint32 num) : SireID::Number(num), ResID()
 {
 }
 
