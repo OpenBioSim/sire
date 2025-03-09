@@ -399,7 +399,7 @@ def conda_install(
             continue
 
         # remove duplicates
-        dep = f'"{dependency}"'
+        dep = f'{dependency}'
 
         if dep not in deps:
             deps.append(dep)
