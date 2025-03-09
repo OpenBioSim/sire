@@ -335,7 +335,7 @@ top of :mod:`sire`, then you should install using;
 
 .. code-block:: bash
 
-   $ python --install-bss-deps install
+   $ python setup.py --install-bss-deps install
 
 This will use ``conda`` to download and install all of
 BioSimSpace's dependencies as well. This ensures that incompatible versions
