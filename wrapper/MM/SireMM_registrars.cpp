@@ -18,6 +18,7 @@
 #include "improper.h"
 #include "anglerestraints.h"
 #include "bondrestraints.h"
+#include "inversebondrestraints.h"
 #include "twoatomfunctions.h"
 #include "boreschrestraints.h"
 #include "ljparameter.h"
@@ -115,6 +116,8 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::AngleRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::BondRestraint >();
     ObjectRegistry::registerConverterFor< SireMM::BondRestraints >();
+    ObjectRegistry::registerConverterFor< SireMM::InverseBondRestraint >();
+    ObjectRegistry::registerConverterFor< SireMM::InverseBondRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::TwoAtomFunctions >();
     ObjectRegistry::registerConverterFor< SireMM::BoreschRestraint >();
     ObjectRegistry::registerConverterFor< SireMM::BoreschRestraints >();

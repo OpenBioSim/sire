@@ -10,6 +10,7 @@
 #include "atomljs.h"
 #include "bond.h"
 #include "bondrestraints.h"
+#include "inversebondrestraints.h"
 #include "boreschrestraints.h"
 #include "clj14group.h"
 #include "cljatoms.h"

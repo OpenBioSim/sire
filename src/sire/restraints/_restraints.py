@@ -4,6 +4,8 @@ __all__ = [
     "bond",
     "dihedral",
     "distance",
+    "inverse_bond",
+    "inverse_distance",
     "positional",
 ]
 
@@ -669,6 +671,118 @@ def bond(*args, **kwargs):
     as a distance restraint
     """
     return distance(*args, **kwargs)
+
+
+def inverse_distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):
+    """
+    Create a set of inverse distance restraints from all of the atoms in 'atoms0'
+    to all of the atoms in 'atoms1' where all atoms are
+    contained in the container 'mols', using the
+    passed values of 'k' and radius r0.
+    Note that 'k' corresponds to half the force constant, because
+    the restraint energy is defined as k*(r - r0)**2 (hence the force is
+    defined as 2*k*(r-r0)).
+
+    These restraints will be per atom-atom distance. If a list of k and/or r0
+    values are passed, then different values could be used for
+    different atom-atom distances (assuming the same number as the number of
+    atom-atom distances). Otherwise, all atom-atom distances will use the
+    same parameters.
+
+    If r0 is None, then the current atom-atom distance for
+    each atom-atom pair will be used as the equilibium value.
+
+    If k is None, then a default value of 150 kcal mol-1 A-2 will be used
+    """
+    from .. import u
+    from ..base import create_map
+    from ..mm import InverseBondRestraint, InverseBondRestraints
+
+    map = create_map(map)
+
+    if k is None:
+        k = [u("150 kcal mol-1 A-2")]
+    elif type(k) is list:
+        k = [u(x) for x in k]
+    else:
+        k = [u(k)]
+
+    atoms0 = _to_atoms(mols, atoms0)
+    atoms1 = _to_atoms(mols, atoms1)
+
+    if atoms0.is_empty() or atoms1.is_empty():
+        raise ValueError("We need at least one atom in each group")
+
+    while len(atoms0) < len(atoms1):
+        atoms0 += atoms0[-1]
+
+    while len(atoms1) < len(atoms0):
+        atoms1 += atoms1[-1]
+
+    if r0 is None:
+        # calculate all of the current distances
+        from .. import measure
+
+        r0 = []
+        for atom0, atom1 in zip(atoms0, atoms1):
+            r0.append(measure(atom0, atom1))
+    elif type(r0) is list:
+        r0 = [u(x) for x in r0]
+    else:
+        r0 = [u(r0)]
+
+    mols = mols.atoms()
+
+    if name is None:
+        restraints = InverseBondRestraints()
+    else:
+        restraints = InverseBondRestraints(name=name)
+
+    for i, (atom0, atom1) in enumerate(zip(atoms0, atoms1)):
+        idxs0 = mols.find(atom0)
+        idxs1 = mols.find(atom1)
+
+        if type(idxs0) is int:
+            idxs0 = [idxs0]
+
+        if type(idxs1) is int:
+            idxs1 = [idxs1]
+
+        if len(idxs0) == 0:
+            raise KeyError(
+                f"Could not find atom {atom0} in the molecules. Please ensure "
+                "that 'mols' contains all of that atoms, or else we can't "
+                "add the positional restraints."
+            )
+
+        if len(idxs1) == 0:
+            raise KeyError(
+                f"Could not find atom {atom1} in the molecules. Please ensure "
+                "that 'mols' contains all of that atoms, or else we can't "
+                "add the positional restraints."
+            )
+
+        if i < len(k):
+            ik = k[i]
+        else:
+            ik = k[-1]
+
+        if i < len(r0):
+            ir0 = r0[i]
+        else:
+            ir0 = r0[-1]
+
+        restraints.add(InverseBondRestraint(idxs0[0], idxs1[0], ik, ir0))
+
+    return restraints
+
+
+def inverse_bond(*args, **kwargs):
+    """
+    Synonym for distance(), as a bond restraint is treated the same
+    as a distance restraint
+    """
+    return inverse_distance(*args, **kwargs)
 
 
 def positional(mols, atoms, k=None, r0=None, position=None, name=None, map=None):

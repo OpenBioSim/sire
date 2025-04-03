@@ -59,6 +59,10 @@
 
 #include "BondRestraints.pypp.hpp"
 
+#include "InverseBondRestraint.pypp.hpp"
+
+#include "InverseBondRestraints.pypp.hpp"
+
 #include "BondSymbols.pypp.hpp"
 
 #include "BoreschRestraint.pypp.hpp"
@@ -595,6 +599,10 @@ BOOST_PYTHON_MODULE(_MM){
     register_BondRestraint_class();
 
     register_BondRestraints_class();
+
+    register_InverseBondRestraint_class();
+
+    register_InverseBondRestraints_class();
 
     register_BondSymbols_class();
 
