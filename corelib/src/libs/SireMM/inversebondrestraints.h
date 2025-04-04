@@ -26,8 +26,8 @@
   *
 \*********************************************/
 
-#ifndef SIREMM_BONDRESTRAINTS_H
-#define SIREMM_BONDRESTRAINTS_H
+#ifndef SIREMM_INVERSEBONDRESTRAINTS_H
+#define SIREMM_INVERSEBONDRESTRAINTS_H
 
 #include "restraints.h"
 

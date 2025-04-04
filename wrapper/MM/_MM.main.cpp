@@ -59,10 +59,6 @@
 
 #include "BondRestraints.pypp.hpp"
 
-#include "InverseBondRestraint.pypp.hpp"
-
-#include "InverseBondRestraints.pypp.hpp"
-
 #include "BondSymbols.pypp.hpp"
 
 #include "BoreschRestraint.pypp.hpp"
@@ -304,6 +300,10 @@
 #include "IntraSoftCLJFF.pypp.hpp"
 
 #include "IntraSoftCLJFFBase.pypp.hpp"
+
+#include "InverseBondRestraint.pypp.hpp"
+
+#include "InverseBondRestraints.pypp.hpp"
 
 #include "LJ1264Parameter.pypp.hpp"
 
@@ -554,10 +554,6 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_AngleParameterName_class();
 
-    register_Restraint_class();
-
-    register_Restraint3D_class();
-
     register_AngleRestraint_class();
 
     register_Restraints_class();
@@ -599,10 +595,6 @@ BOOST_PYTHON_MODULE(_MM){
     register_BondRestraint_class();
 
     register_BondRestraints_class();
-
-    register_InverseBondRestraint_class();
-
-    register_InverseBondRestraints_class();
 
     register_BondSymbols_class();
 
@@ -700,6 +692,10 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_DihedralSymbols_class();
 
+    register_Restraint_class();
+
+    register_Restraint3D_class();
+
     register_DistanceRestraint_class();
 
     register_DoubleDistanceRestraint_class();
@@ -775,6 +771,10 @@ BOOST_PYTHON_MODULE(_MM){
     register_IntraFF_class();
 
     register_IntraGroupFF_class();
+
+    register_InverseBondRestraint_class();
+
+    register_InverseBondRestraints_class();
 
     register_LJ1264Parameter_class();
 

@@ -40,7 +40,7 @@ void register_InverseBondRestraints_class(){
 
     { //::SireMM::InverseBondRestraints
         typedef bp::class_< SireMM::InverseBondRestraints, bp::bases< SireMM::Restraints, SireBase::Property > > InverseBondRestraints_exposer_t;
-        InverseBondRestraints_exposer_t InverseBondRestraints_exposer = InverseBondRestraints_exposer_t( "InverseBondRestraints", "This class provides the information for a collection of inverse bond\nrestraints that can be added to a collection of molecues. Each\nrestraint can act on a pair of particles or a pair of the\ncentroids of two collections of particles.\nThe restaints are spherically symmetric, and\nare simple harmonic potentials\n", bp::init< >("Null constructor") );
+        InverseBondRestraints_exposer_t InverseBondRestraints_exposer = InverseBondRestraints_exposer_t( "InverseBondRestraints", "This class provides the information for a collection of bond\nrestraints that can be added to a collection of molecues. Each\nrestraint can act on a pair of particles or a pair of the\ncentroids of two collections of particles.\nThe restaints are spherically symmetric, and\nare simple harmonic potentials\n", bp::init< >("Null constructor") );
         bp::scope InverseBondRestraints_scope( InverseBondRestraints_exposer );
         InverseBondRestraints_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "") );
         InverseBondRestraints_exposer.def( bp::init< SireMM::InverseBondRestraint const & >(( bp::arg("restraint") ), "") );

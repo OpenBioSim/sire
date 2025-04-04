@@ -264,7 +264,7 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
                                 OpenMM::System &system, LambdaLever &lambda_lever,
                                 int natoms)
 {
-    if (inverserestraints.isEmpty())
+    if (restraints.isEmpty())
         return;
 
     if (restraints.hasCentroidRestraints())
@@ -277,7 +277,7 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
     const auto energy_expression = QString(
         "rho*k*delta*delta*step;"
         "delta=(r-r0);"
-        "step=max(0,min(1,(r - r0)))")
+        "step=max(0,min(1,(r0 - r)))")
         .toStdString();
 
     auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
@@ -1908,7 +1908,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             }
             else if (prop.read().isA<SireMM::InverseBondRestraints>())
             {
-                _add_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
+                _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
                                      system, lambda_lever, start_index);
             }
             else if (prop.read().isA<SireMM::BoreschRestraints>())

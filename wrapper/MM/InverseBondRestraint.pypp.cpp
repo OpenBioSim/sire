@@ -37,7 +37,7 @@ void register_InverseBondRestraint_class(){
 
     { //::SireMM::InverseBondRestraint
         typedef bp::class_< SireMM::InverseBondRestraint, bp::bases< SireBase::Property > > InverseBondRestraint_exposer_t;
-        InverseBondRestraint_exposer_t InverseBondRestraint_exposer = InverseBondRestraint_exposer_t( "InverseBondRestraint", "This class represents a single inverse bond restraint between any two\natoms in a system (or between the centroids of any two groups\nof atoms in a system)\n", bp::init< >("Null constructor") );
+        InverseBondRestraint_exposer_t InverseBondRestraint_exposer = InverseBondRestraint_exposer_t( "InverseBondRestraint", "This class represents a single bond restraint between any two\natoms in a system (or between the centroids of any two groups\nof atoms in a system)\n", bp::init< >("Null constructor") );
         bp::scope InverseBondRestraint_scope( InverseBondRestraint_exposer );
         InverseBondRestraint_exposer.def( bp::init< qint64, qint64, SireUnits::Dimension::HarmonicBondConstant const &, SireUnits::Dimension::Length const & >(( bp::arg("atom0"), bp::arg("atom1"), bp::arg("k"), bp::arg("r0") ), "Construct to restrain the atom at index atom to the specified position\n  using the specified force constant and flat-bottom well-width\n") );
         InverseBondRestraint_exposer.def( bp::init< QList< long long > const &, QList< long long > const &, SireUnits::Dimension::HarmonicBondConstant const &, SireUnits::Dimension::Length const & >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("k"), bp::arg("r0") ), "Construct to restrain the centroid of the atoms whose indicies are\n  in atoms to the specified position using the specified force constant\n  and flat-bottom well width\n") );
