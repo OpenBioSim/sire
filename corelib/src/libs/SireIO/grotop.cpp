@@ -6278,13 +6278,17 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
         // the child tags for each moleculetype
         QList<QMultiHash<QString, int>> moltags;
         {
-            // list of tags that are valid within a moleculetype
+            // list of tags that are valid within a moleculetype -
+            // it is REALLY IMPORTANT that this list is kept up to date,
+            // as otherwise a new tag will cause the parser to move on to
+            // parsing a new moleculetype!
             const QStringList valid_tags = {"atoms",
                                             "bonds",
                                             "pairs",
                                             "pairs_nb",
                                             "angles",
                                             "dihedrals",
+                                            "cmap",
                                             "exclusions",
                                             "contraints",
                                             "settles",
@@ -6834,7 +6838,8 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
             }
 
             // now print out warnings for any lines that are missed...
-            const QStringList missed_tags = {"pairs",
+            const QStringList missed_tags = {"cmap",
+                                             "pairs",
                                              "pairs_nb",
                                              "exclusions",
                                              "contraints",
