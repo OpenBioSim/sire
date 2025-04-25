@@ -357,6 +357,15 @@ void AmberRst7::parse(const PropertyMap &map)
         // we have already validated that there are enough lines
         const QString &line = l[linenum];
 
+        if (natoms <= 2 and line.trimmed().isEmpty())
+        {
+            // if there are only two atoms, then the final line might not be reserved
+            // for velocities
+            vels.clear();
+
+            return;
+        }
+
         if (line.length() < column + 36)
         {
             errors.append(QObject::tr("Cannot read the velocities for the atom at index %1 as "

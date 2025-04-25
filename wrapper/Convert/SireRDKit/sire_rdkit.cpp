@@ -411,6 +411,7 @@ namespace SireRDKit
         {
             if (atom->getAtomicNum() > 1)
             {
+                atom->setNoImplicit(true);
                 atoms.append(std::make_pair(get_nb_unpaired_electrons(*atom),
                                             atom));
             }
@@ -596,7 +597,70 @@ namespace SireRDKit
         RDKit::RWMol molecule;
         molecule.beginBatchEdit();
 
+        // set the name of the molecule
         molecule.setProp<std::string>("_Name", mol.name().value().toStdString());
+
+        // set any SDF tags as properties
+        std::string sdf_tag;
+        if (mol.hasProperty("sdf_data"))
+        {
+            const auto sdf_data = mol.property("sdf_data").asA<SireBase::Properties>();
+
+            for (const auto &tag : sdf_data.propertyKeys())
+            {
+                try
+                {
+                    molecule.setProp<std::string>(tag.toStdString(), sdf_data.property(tag).asAString().toStdString());
+                }
+                catch (...)
+                {
+                    const auto string_array = sdf_data.property(tag).asA<SireBase::StringArrayProperty>();
+
+                    QString string;
+                    for (int i=0; i<string_array.size(); i++)
+                    {
+                        string.append(string_array[i]);
+                        if (i < string_array.size() - 1)
+                        {
+                            string.append("\n");
+                        }
+                    }
+
+                    molecule.setProp<std::string>(tag.toStdString(), string.toStdString());
+                }
+            }
+        }
+
+        // set and existing RDKit data as properties
+        std::string rdkit_tag;
+        if (mol.hasProperty("rdkit_data"))
+        {
+            const auto rdkit_data = mol.property("rdkit_data").asA<SireBase::Properties>();
+
+            for (const auto &tag : rdkit_data.propertyKeys())
+            {
+                try
+                {
+                    molecule.setProp<std::string>(tag.toStdString(), rdkit_data.property(tag).asAString().toStdString());
+                }
+                catch (...)
+                {
+                    const auto string_array = rdkit_data.property(tag).asA<SireBase::StringArrayProperty>();
+
+                    QString string;
+                    for (int i=0; i<string_array.size(); i++)
+                    {
+                        string.append(string_array[i]);
+                        if (i < string_array.size() - 1)
+                        {
+                            string.append("\n");
+                        }
+                    }
+
+                    molecule.setProp<std::string>(tag.toStdString(), string.toStdString());
+                }
+            }
+        }
 
         const auto atoms = mol.atoms();
 
@@ -605,6 +669,12 @@ namespace SireRDKit
         QVector<SireMaths::Vector> coords(atoms.count());
         SireMaths::Vector *coords_data = coords.data();
         bool has_coords = false;
+
+        bool force_stereo_inference = false;
+        if (map.specified("force_stereo_inference"))
+        {
+            force_stereo_inference = map["force_stereo_inference"].value().asABoolean();
+        }
 
         for (int i = 0; i < atoms.count(); ++i)
         {
@@ -776,78 +846,16 @@ namespace SireRDKit
         molecule.commitBatchEdit();
         molecule.updatePropertyCache(false);
 
-        if (atoms.count() > 1 and (not has_bond_info))
+        if (atoms.count() > 1 and (not has_bond_info or force_stereo_inference))
+        {
             // we need to infer the bond information
             infer_bond_info(molecule);
-
-        // try each sanitisation step in turn, skipping failed
-        try
-        {
-            RDKit::MolOps::cleanUp(molecule);
-        }
-        catch (...)
-        {
         }
 
+        // sanitze the molecule.
         try
         {
-            molecule.updatePropertyCache();
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::symmetrizeSSSR(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::Kekulize(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::assignRadicals(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::setAromaticity(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::setConjugation(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::setHybridization(molecule);
-        }
-        catch (...)
-        {
-        }
-
-        try
-        {
-            RDKit::MolOps::cleanupChirality(molecule);
+            RDKit::MolOps::sanitizeMol(molecule);
         }
         catch (...)
         {
@@ -855,7 +863,7 @@ namespace SireRDKit
 
         // try assigning stereochemistry from 3D coordinates as it is the most
         // reliable way to do it
-        if (has_coords)
+        if (has_coords and not force_stereo_inference)
         {
             try
             {
@@ -1049,6 +1057,37 @@ namespace SireRDKit
 
                 molecule.setProperty(map["coordinates"].source(), coords);
             }
+        }
+
+        // copy additional properties from the molecule
+        SireBase::Properties props;
+
+        for (const auto &prop : mol->getPropList())
+        {
+            const auto sire_prop = QString::fromStdString(prop);
+
+            // skip internal properties
+            if (sire_prop.startsWith("_"))
+                continue;
+
+            const auto value = QString::fromStdString(mol->getProp<std::string>(prop));
+            const auto list = value.split("\n");
+
+            // there is a list of values
+            if (list.count() > 1)
+            {
+                props.setProperty(sire_prop, SireBase::wrap(list));
+            }
+            // there is a single value
+            else
+            {
+                props.setProperty(sire_prop, SireBase::wrap(value));
+            }
+        }
+
+        if (not props.isEmpty())
+        {
+            molecule.setProperty("rdkit_data", props);
         }
 
         return molecule.commit();

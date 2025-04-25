@@ -235,11 +235,11 @@ namespace SireIO
                 case 0:
                     return 0;
                 case 1:
-                    return 1;
+                    return 3;
                 case 2:
                     return 2;
                 case 3:
-                    return 3;
+                    return 1;
                 case 4:
                     return 0;
                 case 5:
@@ -1897,6 +1897,9 @@ MolEditor SDF::getMolecule(int imol, const PropertyMap &map) const
     {
         mol.setProperty(map["sdf_counts"], SireBase::wrap(sdf_counts));
     }
+
+    // set the name of the molecule
+    mol.rename(MolName(sdfmol.name));
 
     return mol.setProperty(map["coordinates"], coords)
         .setProperty(map["formal_charge"], charges)

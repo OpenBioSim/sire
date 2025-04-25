@@ -17,6 +17,14 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 ------------------------------------------------------------------------------------------
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
+* Allow user to force fresh inference of stereochemistry when converting to RDKit format.
+* Fix setting of positive formal charge when reading SDF files.
+* Only use ``atom->setNoImplicit(True)`` inside custom RDKit sterochemistry inference function.
+* Fix redistribution of excess QM charge and make it the default behaviour.
+* Preserve molecule name when reading from SDF format and on conversion to RDKit.
+* Handle missing velocity data for ``AMBER`` RST7 files with only a few atoms.
+* Preserve SDF metadata when converting to ``RDKIt`` format.
+* Fixed unbound local variable when simulation lambda value is not in ``lambda_windows`` array.
 
 `2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
 ----------------------------------------------------------------------------------------

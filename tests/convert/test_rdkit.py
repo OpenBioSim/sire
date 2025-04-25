@@ -118,20 +118,14 @@ def test_rdkit_returns_null():
     "rdkit" not in sr.convert.supported_formats(),
     reason="rdkit support is not available",
 )
-@pytest.mark.xfail(reason="SMILES now mismatches since SDF stereochemistry is preserved")
 def test_rdkit_infer_bonds(ejm55_sdf, ejm55_gro):
     sdf = ejm55_sdf[0].molecule()
     gro = ejm55_gro["not (protein or water)"].molecule()
-
-    from rdkit import Chem
 
     assert sdf.smiles() == gro.smiles()
 
     match_sdf = sdf["smarts [NX3][CX3](=[OX1])[#6]"]
     match_gro = gro["smarts [NX3][CX3](=[OX1])[#6]"]
-
-    print(match_sdf)
-    print(match_gro)
 
     assert len(match_sdf) == 1
     assert len(match_gro) == 1
@@ -168,3 +162,51 @@ def test_rdkit_preserve_info(ala_mols, ejm55_gro):
 
             assert res0.name() == res1.name()
             assert res0.number() == res1.number()
+
+
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
+def test_rdkit_force_infer():
+    mol = sr.load_test_files("missing_cyanide_bond.sdf")[0]
+
+    rdmol = sr.convert.to(mol, "rdkit", map={"force_stereo_inference": False})
+    rdmol_infer = sr.convert.to(mol, "rdkit", map={"force_stereo_inference": True})
+
+    bond = rdmol.GetBonds()[0].GetBondType().name
+    bond_infer = rdmol_infer.GetBonds()[0].GetBondType().name
+
+    assert bond == "SINGLE"
+    assert bond_infer == "TRIPLE"
+
+
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
+def test_rdkit_sdf_tags(tagged_sdf):
+
+    # store the sdf data property
+    sdf_data = tagged_sdf.property("sdf_data")
+
+    # convert to rdkit
+    rdmol = sr.convert.to_rdkit(tagged_sdf)
+
+    # convert back to sire
+    mol = sr.convert.to_sire(rdmol)
+
+    # get the rdf data property
+    rdkit_data = mol.property("rdkit_data")
+
+    # check that the data is the same
+    for prop in sdf_data.keys():
+        assert prop in rdkit_data.keys()
+        assert sdf_data[prop] == rdkit_data[prop]
+
+    # convert back to rdkit
+    rdmol2 = sr.convert.to_rdkit(mol)
+
+    # check that the data is the same on the rdkit molecule
+    for prop in rdmol.GetPropNames():
+        assert rdmol.GetProp(prop) == rdmol2.GetProp(prop)

@@ -437,15 +437,18 @@ class DynamicsData:
                     # lambda windows list
                     try:
                         lambda_index = lambda_windows.index(sim_lambda_value)
+                        has_lambda_index = True
                     except:
-                        num_energy_neighbours = num_lambda_windows
-                        lambda_index = i
+                        has_lambda_index = False
 
                     for i, (lambda_value, rest2_scale) in enumerate(
                         zip(lambda_windows, rest2_scale_factors)
                     ):
                         if lambda_value != sim_lambda_value:
-                            if abs(lambda_index - i) <= num_energy_neighbours:
+                            if (
+                                not has_lambda_index
+                                or abs(lambda_index - i) <= num_energy_neighbours
+                            ):
                                 self._omm_mols.set_lambda(
                                     lambda_value,
                                     rest2_scale=rest2_scale,
