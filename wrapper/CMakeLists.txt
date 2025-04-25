@@ -132,6 +132,9 @@ set(CMAKE_CXX_COMPILER "${SIRE_CXX_COMPILER}")
 
 message( STATUS "Setting C compiler to ${SIRE_C_COMPILER} and C++ compiler to ${SIRE_CXX_COMPILER}" )
 
+message( STATUS "Using C++ standard ${SIRE_CXX_STANDARD} - setting this to CMAKE_CXX_STANDARD" )
+set(CMAKE_CXX_STANDARD ${SIRE_CXX_STANDARD})
+
 if ("$ENV{CONDA_BUILD}" STREQUAL "1")
   message( STATUS "Compiling as part of a conda-build")
 else()
