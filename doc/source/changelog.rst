@@ -25,6 +25,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Handle missing velocity data for ``AMBER`` RST7 files with only a few atoms.
 * Preserve SDF metadata when converting to ``RDKIt`` format.
 * Fixed unbound local variable when simulation lambda value is not in ``lambda_windows`` array.
+* Added CMAP support when reading / writing AMBER topology files. The parameters are in the ``cmap`` property.
+* Fixed compile issues for MacOS Sequoia
+* Upgraded minimum cmake supported version to 3.5
 
 `2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
 ----------------------------------------------------------------------------------------
