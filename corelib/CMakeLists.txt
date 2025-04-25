@@ -4,9 +4,9 @@
 #
 ################################
 
-# require cmake >= 3.3.0 (released in 2018)
-cmake_minimum_required(VERSION 3.3.0 FATAL_ERROR)
-cmake_policy(VERSION 3.3)
+# require cmake >= 3.5.0 (released in 2018)
+cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
+cmake_policy(VERSION 3.5)
 
 # Read the version number (so we can set it once in one place)
 file (STRINGS "../version.txt" VERSION_TEXT)
