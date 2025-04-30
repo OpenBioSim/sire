@@ -1,4 +1,3 @@
-
 #include "sire_openmm.h"
 
 #include <OpenMM.h>
@@ -705,30 +704,6 @@ uint qHash(const IndexPair &pair)
     return qHash(pair._atom0) ^ qHash(pair._atom1);
 }
 
-std::vector<double> splitString(const std::string& str, char delimiter) {
-    std::vector<double> result;
-    std::stringstream ss(str);
-    std::string item;
-
-    while (std::getline(ss, item, delimiter)) {
-        result.push_back(std::stod(item));
-    }
-
-    return result;
-}
-
-std::vector<int> splitString(const std::string& str, char delimiter) {
-    std::vector<int> result;
-    std::stringstream ss(str);
-    std::string item;
-
-    while (std::getline(ss, item, delimiter)) {
-        result.push_back(std::stoi(item));
-    }
-
-    return result;
-}
-
 /**
 
 This is the (monster) function that converts a passed set of Sire
@@ -816,9 +791,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // molecules into some temporary OpenMMMolecule objects
     QVector<OpenMMMolecule> openmm_mols(nmols);
     auto openmm_mols_data = openmm_mols.data();
-
-    // VS
-    // Possibly need to add number of virtual sites here
 
     // Create a vector containing the start index for the atoms in each molecule.
     QVector<int> start_atom_index(nmols);
@@ -1345,6 +1317,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // particle for the first atom in this molecule
         start_indexes[i] = start_index;
         const auto &mol = openmm_mols_data[i];
+        int n_vs;
 
         order_of_added_atoms.append(mol.atoms);
 
@@ -1541,45 +1514,64 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     non_ghost_atoms.append(atom_index);
                 }
             }
-            if (map.specified("virtual_sites") and mol.property("n_virtual_sites") > 0)
+        if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
             {
-                int n_vs = mol.property("n_virtual_sites");
-                std::vector<std::string> vs_indices = mol.property("vs_indices").asAnArray();
-                std::vector<std::string> vs_ows = mol.property("vs_ows").asAnArray();
-                std::vector<std::string> vs_xs = mol.property("vs_xs").asAnArray();
-                std::vector<std::string> vs_ys = mol.property("vs_ys").asAnArray();
-                std::vector<std::string> vs_zs = mol.property("vs_zs").asAnArray();
-                std::vector<double> vs_charges = mol.property("vs_charges").asAnArray();
+                n_vs = mols[i].property("n_virtual_sites").asAnInteger();
+                SireBase::Properties vs_properties = mols[i].property("virtual_sites").asA<SireBase::Properties>(); 
+                SireBase::PropertyList vs_charges = mols[i].property("vs_charges").asAnArray();
 
-                int start_vs = start_index + mol.molinfo.nAtoms()
+                int start_vs = start_index + mol.molinfo.nAtoms();
 
                 for (int k = 0; k < n_vs; ++k)
                 {
+                    SireBase::Properties vs_params = vs_properties.property(std::to_string(k).c_str()).asA<SireBase::Properties>();
                     // Add parameters to system
                     // Virtual sites with non-zero LJ interactions are not supported
                     const int atom_index = start_vs + k;
                     system.addParticle(0.0);
+
                     // Calculate virtual site parameters
-                    std::vector<int> indices = splitString(vs_indices.at(k),',');
+                    SireBase::PropertyList indices = vs_params.property("vs_indices").asAnArray();
+                    std::vector<int> indices_vec = {};
                     for (int a = 0; a < indices.size(); ++a)
                     {
-                        indices[a] += start_index;
+                        indices_vec.push_back(indices.at(a).asAnInteger() + start_index);
                     }
 
-                    std::vector<double> ows = splitString(vs_ows.at(k),',');
-                    std::vector<double> xs = splitString(vs_xs.at(k),',');
-                    std::vector<double> ys = splitString(vs_ys.at(k),',');
-                    std::vector<double> zs = splitString(vs_zs.at(k),',');
+                    SireBase::PropertyList ows = vs_params.property("vs_ows").asAnArray();
+                    std::vector<double> ows_vec = {};
+                    for (int a = 0; a < ows.size(); ++a)
+                    {
+                        ows_vec.push_back(ows.at(a).asADouble());
+                    }
 
-                    OpenMM::LocalCoordinatesSite *new_vs = new OpenMM::LocalCoordinatesSite(indices, ows, xs, ys, zs);
-                    system.setVirtualSite(atom_index, new_vs)
+                    SireBase::PropertyList xs = vs_params.property("vs_xs").asAnArray();
+                    std::vector<double> xs_vec = {};
+                    for (int a = 0; a < xs.size(); ++a)
+                    {
+                        xs_vec.push_back(xs.at(a).asADouble());
+                    }
+
+                    SireBase::PropertyList ys = vs_params.property("vs_ys").asAnArray();
+                    std::vector<double> ys_vec = {};
+                    for (int a = 0; a < ys.size(); ++a)
+                    {
+                        ys_vec.push_back(ys.at(a).asADouble());
+                    }
+
+                    SireBase::PropertyList local = vs_params.property("vs_local").asAnArray();
+                    OpenMM::Vec3 local_vec = {local.at(0).asADouble(), local.at(1).asADouble(), local.at(2).asADouble()};
+
+                    OpenMM::LocalCoordinatesSite *new_vs = new OpenMM::LocalCoordinatesSite(indices_vec, ows_vec, xs_vec, ys_vec, local_vec);
+                    system.setVirtualSite(atom_index, new_vs);
                     // Add to forcefield
-                    double vs_charge = vs_charges[k];
+                    double vs_charge = vs_charges.at(k).asADouble();
                     cljff->addParticle(vs_charge, 0.1, 0.0);
                     if (any_perturbable)
                     {
-                        ghost_ghostff->addParticle(vs_charge, 0.1, 0.0, 0.0, 0.0);
-                        ghost_nonghostff->addParticle(vs_charge, 0.1, 0.0, 0.0, 0.0);
+                        custom_params = {vs_charge, 0.1, 0.0, 0.0, 0.0};
+                        ghost_ghostff->addParticle(custom_params);
+                        ghost_nonghostff->addParticle(custom_params);
                         non_ghost_atoms.append(atom_index);
                     }
                 }
@@ -1633,9 +1625,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
 
         start_index += mol.masses.count();
-        if (map.specified("virtual_sites"))
+        if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
         {
-            start_index += mol.property("virtual_sites")
+            start_index += n_vs;
         }
     }
 
@@ -1684,18 +1676,22 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     /// (we need to remember which ghost-ghost interactions we have
     ///  excluded, so that we don't double-exclude them later)
     QSet<IndexPair> excluded_ghost_pairs;
-    excluded_ghost_pairs.reserve((n_ghost_atoms * n_ghost_atoms) / 2);
-
-    std::vector<double> vs_charges; 
-    if map.specified("virtual_sites")
-    {
-        vs_charges = mol.property("vs_charges").asAnArray();
-    }
+    excluded_ghost_pairs.reserve((n_ghost_atoms * n_ghost_atoms) / 2); 
 
     for (int i = 0; i < nmols; ++i)
     {
         int start_index = start_indexes[i];
         const auto &mol = openmm_mols_data[i];
+        SireBase::Properties vs_parents; 
+        SireBase::PropertyList vs_charges;
+
+        if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
+        {
+            vs_parents = mols[i].property("parents").asA<SireBase::Properties>();
+            vs_charges = mols[i].property("vs_charges").asAnArray();
+        }
+        auto cljs_data = mol.cljs.constData();
+
 
         QVector<boost::tuple<int, int>> exception_idxs;
         QVector<int> constraint_idxs;
@@ -1817,51 +1813,52 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             }
 
             // Virtual sites inherit the exceptions of their parent atoms
-            if (map.specified("virtual_sites"))
-            {
-                
-                std::vector virtual_sites_0 = mol[atom0].property("virtual_sites");
-                std::vector virtual_sites_1 = mol[atom1].property("virtual_sites");
+            if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
+            {   
+                SireBase::PropertyList virtual_sites_0 = vs_parents.property(std::to_string(atom0).c_str()).asAnArray();
+                SireBase::PropertyList virtual_sites_1 = vs_parents.property(std::to_string(atom1).c_str()).asAnArray();
                 double charge_mult = 0;
                 if (boost::get<2>(p) != 0.0)
                 {
                     charge_mult = coul_14_scale;
                 }
-                double atom0_charge = ;
-                double atom1_charge = ;
-                double vs0_charge;
-                double vs1_charge;
-                double scaled_coul; 
+                double atom0_charge = boost::get<0>(cljs_data[atom0]);
+                double atom1_charge = boost::get<0>(cljs_data[atom1]); 
 
+                // Exceptions between VS on atom0 and VS on atom1/atom1 itself
                 for (int vs0 = 0; vs0 < virtual_sites_0.size(); ++vs0)
                 {  
-                    vs0_charge = vs_charges.at(vs0);
-                    vs0_index = start_index + mol.nAtoms() + vs0;
+                    double vs0_charge = vs_charges.at(vs0).asADouble();
+                    int vs0_index = start_index + mol.nAtoms() + virtual_sites_0.at(vs0).asAnInteger();
                     // VS on atom 0 - atom 1
-                    scaled_coul = charge_mult*vs0_charge*atom1_charge;
-                    cljff->addException(virtual_sites_0.at(vs0_index), boost::get<1>(p),
+                    double scaled_coul = charge_mult*vs0_charge*atom1_charge;
+                    cljff->addException(vs0_index, boost::get<1>(p),
                                         scaled_coul, 1e-9,
                                         1e-9, true);
                     for (int vs1 = 0; vs1 < virtual_sites_1.size(); ++vs1)
                     {  
-                        vs1_charge = vs_charges.at(vs1); 
-                        vs1_index = start_index + mol.nAtoms() + vs1;
-                        // VS on atom 1 - atom 0
-                        scaled_coul = charge_mult*vs1_charge*atom0_charge;
-                        if (vs0 == 0)
-                        {
-                            cljff->addException(virtual_sites_1.at(vs1_index), boost::get<0>(p),
-                                                scaled_coul, 1e-9,
-                                                1e-9, true);
-                        }
+                        double vs1_charge = vs_charges.at(vs1).asADouble(); 
+                        int vs1_index = start_index + mol.nAtoms() + virtual_sites_1.at(vs1).asAnInteger();
 
                         // VS on atom 0 - VS on atom 1
                         scaled_coul = charge_mult*vs0_charge*vs1_charge;
-                        cljff->addException(virtual_sites_0.at(vs0_index), virtual_sites_1.at(vs1_index),
-                                            scaled_coul, 1e-9,
-                                            1e-9, true);
+                        cljff->addException(vs0_index, vs1_index,
+                                            scaled_coul, 0,
+                                            1, true);
                     }
-                    }
+                }
+
+                // atom 0 - VS on atom 1
+                for (int vs1 = 0; vs1 < virtual_sites_1.size(); ++vs1)
+                {  
+                    double vs1_charge = vs_charges.at(vs1).asADouble();
+                    int vs1_index = start_index + mol.nAtoms() + virtual_sites_1.at(vs1).asAnInteger();
+
+                    double scaled_coul = charge_mult*vs1_charge*atom0_charge;
+                    cljff->addException(vs1_index, boost::get<0>(p),
+                                        scaled_coul, 1e-9,
+                                        1e-9, true);
+                }
             }
 
             // we need to make sure that the list of exclusions in
@@ -1883,21 +1880,26 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
 
         // Exclusions/exceptions between virtual sites on the same atom
-        if (map.specified("virtual_sites"))
+        if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
         {
             int n_atom_vs;
-            int vs_start = start_index + mol.nAtoms()
-            for (a = 0; a < mol.nAtoms(); ++a)
+            int vs_start = start_index + mol.nAtoms();
+            for (int a = 0; a < mol.nAtoms(); ++a)
             {
-                std::vector<int> atom_vs = mol[a].property("virtual_sites");
+                SireBase::PropertyList atom_vs = vs_parents.property(std::to_string(a).c_str()).asAnArray();
                 n_atom_vs = atom_vs.size();
                 for (int v0 = 0; v0 < atom_vs.size(); ++v0)
                 {
+                    int vs0_index = vs_start + atom_vs.at(v0).asAnInteger();
+                    cljff->addException(vs0_index, start_index+a,
+                        0.0, 0,
+                        1, true);
                     for (int v1 = v0+1; v1 < atom_vs.size(); ++v1)
                     {
-                        cljff->addException(vs_start+v0, vs_start+v1,
-                                            0.0, 1e-9,
-                                            1e-9, true);                            
+                        int vs1_index = vs_start + atom_vs.at(v1).asAnInteger();
+                        cljff->addException(vs0_index, vs1_index,
+                                            0.0, 0,
+                                            1, true);                            
                     }
                 }
             }
@@ -2034,11 +2036,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     const auto &mol = openmm_mols_data[i];
                     mol.copyInCoordsAndVelocities(coords_data + start_index,
                                                   vels_data + start_index);
-                    if (map.specified("virtual_sites") and mol.property("virtual_sites") > 0)
+                    if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
                     {
                         // Initiate all VS with zero coords, as they will need to be
                         // calculated in the openmm context anyway
-                        for (int vs = 0; vs < mol.property("virtual_sites"); ++vs)
+                        for (int vs = 0; vs < map["virtual_sites"].value().asAnInteger(); ++vs)
                         {
                             coords_data[start_index+mol.nAtoms()+vs] = OpenMM::Vec3(0,0,0);
                             vels_data[start_index+mol.nAtoms()+vs] = OpenMM::Vec3(0,0,0);
@@ -2054,6 +2056,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             const auto &mol = openmm_mols_data[i];
             mol.copyInCoordsAndVelocities(coords_data + start_index,
                                           vels_data + start_index);
+            if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
+            {
+            for (int vs = 0; vs < map["virtual_sites"].value().asAnInteger(); ++vs)
+                {
+                    coords_data[start_index+mol.nAtoms()+vs] = OpenMM::Vec3(0,0,0);
+                    vels_data[start_index+mol.nAtoms()+vs] = OpenMM::Vec3(0,0,0);
+                }
+            }
         }
     }
 

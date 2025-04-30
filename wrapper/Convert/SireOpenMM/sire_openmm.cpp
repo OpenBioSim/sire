@@ -330,6 +330,10 @@ namespace SireOpenMM
         {
             offsets[i] = offset;
             offset += mols_data[i].count();
+            // if (mols_data[i].hasProperty("n_virtual_sites")) 
+            // {
+            //     offset += mols_data[i].property("n_virtual_sites").asAnInteger();
+            // }
         }
 
         const auto offsets_data = offsets.constData();
@@ -495,6 +499,10 @@ namespace SireOpenMM
         {
             offsets[i] = offset;
             offset += mols[i].nAtoms();
+            if (mols[i].hasProperty("n_virtual_sites")) 
+            {
+                offset += mols[i].property("n_virtual_sites").asAnInteger();
+            }
         }
 
         const auto offsets_data = offsets.constData();
@@ -603,6 +611,10 @@ namespace SireOpenMM
         {
             offsets[i] = offset;
             offset += mols_data[i].count();
+            // if (mols_data[i].hasProperty("n_virtual_sites")) 
+            // {
+            //     offset += mols_data[i].property("n_virtual_sites").asAnInteger();
+            // }
         }
 
         const auto offsets_data = offsets.constData();
@@ -822,6 +834,10 @@ namespace SireOpenMM
         {
             offsets[i] = offset;
             offset += mols[i].nAtoms();
+            if (mols[i].hasProperty("n_virtual_sites")) 
+            {
+                offset += mols[i].property("n_virtual_sites").asAnInteger();
+            }
         }
 
         const auto offsets_data = offsets.constData();
