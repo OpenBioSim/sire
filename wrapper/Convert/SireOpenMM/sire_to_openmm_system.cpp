@@ -1,3 +1,4 @@
+#include <iostream>
 #include "sire_openmm.h"
 
 #include <OpenMM.h>
@@ -1818,12 +1819,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 SireBase::PropertyList virtual_sites_0 = vs_parents.property(std::to_string(atom0).c_str()).asAnArray();
                 SireBase::PropertyList virtual_sites_1 = vs_parents.property(std::to_string(atom1).c_str()).asAnArray();
                 double charge_mult = 0;
+                double atom0_charge = boost::get<0>(cljs_data[atom0]);
+                double atom1_charge = boost::get<0>(cljs_data[atom1]); 
                 if (boost::get<2>(p) != 0.0)
                 {
                     charge_mult = coul_14_scale;
+                    std::cout << "charge_mult " << charge_mult << "atom0_charge " << atom0_charge << "atom1_charge" << atom1_charge << "\n";
                 }
-                double atom0_charge = boost::get<0>(cljs_data[atom0]);
-                double atom1_charge = boost::get<0>(cljs_data[atom1]); 
 
                 // Exceptions between VS on atom0 and VS on atom1/atom1 itself
                 for (int vs0 = 0; vs0 < virtual_sites_0.size(); ++vs0)
@@ -1833,8 +1835,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     // VS on atom 0 - atom 1
                     double scaled_coul = charge_mult*vs0_charge*atom1_charge;
                     cljff->addException(vs0_index, boost::get<1>(p),
-                                        scaled_coul, 1e-9,
-                                        1e-9, true);
+                                        scaled_coul, 1,
+                                        0, false);
                     for (int vs1 = 0; vs1 < virtual_sites_1.size(); ++vs1)
                     {  
                         double vs1_charge = vs_charges.at(vs1).asADouble(); 
@@ -1843,8 +1845,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         // VS on atom 0 - VS on atom 1
                         scaled_coul = charge_mult*vs0_charge*vs1_charge;
                         cljff->addException(vs0_index, vs1_index,
-                                            scaled_coul, 0,
-                                            1, true);
+                                            scaled_coul, 1,
+                                            0, false);
                     }
                 }
 
@@ -1856,8 +1858,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
                     double scaled_coul = charge_mult*vs1_charge*atom0_charge;
                     cljff->addException(vs1_index, boost::get<0>(p),
-                                        scaled_coul, 1e-9,
-                                        1e-9, true);
+                                        scaled_coul, 1,
+                                        0, false);
                 }
             }
 
@@ -1892,14 +1894,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 {
                     int vs0_index = vs_start + atom_vs.at(v0).asAnInteger();
                     cljff->addException(vs0_index, start_index+a,
-                        0.0, 0,
-                        1, true);
+                        0.0, 1,
+                        0, false);
                     for (int v1 = v0+1; v1 < atom_vs.size(); ++v1)
                     {
                         int vs1_index = vs_start + atom_vs.at(v1).asAnInteger();
                         cljff->addException(vs0_index, vs1_index,
-                                            0.0, 0,
-                                            1, true);                            
+                                            0.0, 1,
+                                            0, false);                            
                     }
                 }
             }
