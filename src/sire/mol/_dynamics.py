@@ -276,6 +276,8 @@ class DynamicsData:
             if map.specified("rest2_selection"):
                 if len(non_pert_atoms) > 0:
                     self._omm_mols._prepare_rest2(self._sire_mols, non_pert_atoms)
+
+            self._omm_mols.computeVirtualSites()
         else:
             self._sire_mols = None
             self._energy_trajectory = None
@@ -887,6 +889,8 @@ class DynamicsData:
             raise ValueError("Unable to parse 'timeout' as a time")
 
         self._clear_state()
+        # Need to calculate virtual site positions first
+        self._omm_mols.computeVirtualSites()
 
         self._minimisation_log = minimise_openmm_context(
             self._omm_mols,

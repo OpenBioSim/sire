@@ -1,4 +1,3 @@
-#include <iostream>
 #include "sire_openmm.h"
 
 #include <OpenMM.h>
@@ -1824,7 +1823,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 if (boost::get<2>(p) != 0.0)
                 {
                     charge_mult = coul_14_scale;
-                    std::cout << "charge_mult " << charge_mult << "atom0_charge " << atom0_charge << "atom1_charge" << atom1_charge << "\n";
                 }
 
                 // Exceptions between VS on atom0 and VS on atom1/atom1 itself
