@@ -193,6 +193,13 @@ namespace SireOpenMM
         /** The starting index of the first OpenMM atom in the original Sire system. */
         int start_atom_idx;
 
+        /** Virtual site properties */
+        bool has_vs;
+        int n_vs;
+        SireBase::Properties vs_parents;
+        SireBase::PropertyList vs_charges;
+        SireBase::Properties vs_properties;
+
     private:
         void constructFromAmber(const SireMol::Molecule &mol,
                                 const SireMM::AmberParams &params,

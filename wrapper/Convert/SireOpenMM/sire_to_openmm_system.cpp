@@ -1289,6 +1289,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     {
         const auto &mol = openmm_mols_data[i];
         n_atoms += mol.nAtoms();
+        if (mol.has_vs)
+        {
+            n_atoms += mol.n_vs;
+        }
         n_ghost_atoms += mol.nGhostAtoms();
     }
 
@@ -1305,11 +1309,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     from_ghost_idxs.reserve(n_ghost_atoms);
     to_ghost_idxs.reserve(n_ghost_atoms);
 
-    // VS
-    // Add virtual sites here
-    // Separate loop either after this outer loop or at the end of each inner loop where required
-    // Also here, add logic to update charges for molecules with library charges
-
     // loop over every molecule and add them one by one
     for (int i = 0; i < nmols; ++i)
     {
@@ -1317,7 +1316,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // particle for the first atom in this molecule
         start_indexes[i] = start_index;
         const auto &mol = openmm_mols_data[i];
-        int n_vs;
 
         order_of_added_atoms.append(mol.atoms);
 
@@ -1365,6 +1363,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // index of this perturbable molecule in the list
             // of perturbable molecules (e.g. the first perturbable
             // molecule we find has index 0)
+            // VS - do we need to pass virtual site parameters here, or 
+            // is what is already in the molecule properties ok
             auto pert_idx = lambda_lever.addPerturbableMolecule(mol,
                                                                 start_indicies,
                                                                 map);
@@ -1514,17 +1514,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     non_ghost_atoms.append(atom_index);
                 }
             }
-        if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
+        if (mol.has_vs)
             {
-                n_vs = mols[i].property("n_virtual_sites").asAnInteger();
-                SireBase::Properties vs_properties = mols[i].property("virtual_sites").asA<SireBase::Properties>(); 
-                SireBase::PropertyList vs_charges = mols[i].property("vs_charges").asAnArray();
-
                 int start_vs = start_index + mol.molinfo.nAtoms();
 
-                for (int k = 0; k < n_vs; ++k)
+                for (int k = 0; k < mol.n_vs; ++k)
                 {
-                    SireBase::Properties vs_params = vs_properties.property(std::to_string(k).c_str()).asA<SireBase::Properties>();
+                    SireBase::Properties vs_params = mol.vs_properties.property(std::to_string(k).c_str()).asA<SireBase::Properties>();
                     // Add parameters to system
                     // Virtual sites with non-zero LJ interactions are not supported
                     const int atom_index = start_vs + k;
@@ -1537,6 +1533,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     {
                         indices_vec.push_back(indices.at(a).asAnInteger() + start_index);
                     }
+                    int parent_idx = indices.at(0).asAnInteger();
 
                     SireBase::PropertyList ows = vs_params.property("vs_ows").asAnArray();
                     std::vector<double> ows_vec = {};
@@ -1564,15 +1561,58 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
                     OpenMM::LocalCoordinatesSite *new_vs = new OpenMM::LocalCoordinatesSite(indices_vec, ows_vec, xs_vec, ys_vec, local_vec);
                     system.setVirtualSite(atom_index, new_vs);
-                    // Add to forcefield
-                    double vs_charge = vs_charges.at(k).asADouble();
-                    cljff->addParticle(vs_charge, 0.1, 0.0);
-                    if (any_perturbable)
+
+                    // Add to forcefield, depending on whether the system is perturbable
+                    // Note that VS with LJ parameters are currently not supported, so epsilon and sigma are hard-coded to 0 in all cases
+                    double vs_charge = mol.vs_charges.at(k).asADouble();
+                    cljff->addParticle(vs_charge, 1.0, 0.0);
+
+                    if (any_perturbable and mol.isPerturbable())
                     {
-                        custom_params = {vs_charge, 0.1, 0.0, 0.0, 0.0};
+                        // reduced_q
+                        custom_params[0] = vs_charge;
+                        // half_sigma
+                        custom_params[1] = 1.0;
+                        // two_sqrt_epsilon
+                        custom_params[2] = 0.0;
+                        // alpha
+                        custom_params[3] = alphas_data[mol.molinfo.nAtoms()+k];
+                        // kappa
+                        custom_params[4] = kappas_data[mol.molinfo.nAtoms()+k];
+
+                        ghost_ghostff->addParticle(custom_params);
+                        ghost_nonghostff->addParticle(custom_params);
+
+                        // Append virtual sites to ghost atom list
+                        // Not sure if this is actually necessary, because there are no LJ interactions
+                        // on virtual sites
+                        if (mol.from_ghost_idxs.contains(parent_idx)) 
+                        {
+                            ghost_atoms.append(atom_index);
+                        }
+                        const bool vs_to_ghost = mol.to_ghost_idxs.contains(parent_idx);
+                        const bool vs_from_ghost = mol.from_ghost_idxs.contains(parent_idx);
+                        if (vs_from_ghost or vs_to_ghost)
+                        {
+                            ghost_atoms.append(atom_index);
+        
+                            if (vs_from_ghost)
+                            {
+                                from_ghost_idxs.append(atom_index);
+                            }
+                            else
+                            {
+                                to_ghost_idxs.append(atom_index);
+                            }
+                    }
+                    else if (any_perturbable)
+                    {
+                        // Add to ghost FFs if necessary
+                        custom_params = {vs_charge, 1.0, 0.0, 0.0, 0.0};
                         ghost_ghostff->addParticle(custom_params);
                         ghost_nonghostff->addParticle(custom_params);
                         non_ghost_atoms.append(atom_index);
+                    }
                     }
                 }
             }
@@ -1625,9 +1665,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
 
         start_index += mol.masses.count();
-        if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
+        if (mol.has_vs)
         {
-            start_index += n_vs;
+            start_index += mol.n_vs;
         }
     }
 
@@ -1682,16 +1722,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     {
         int start_index = start_indexes[i];
         const auto &mol = openmm_mols_data[i];
-        SireBase::Properties vs_parents; 
-        SireBase::PropertyList vs_charges;
-
-        if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
-        {
-            vs_parents = mols[i].property("parents").asA<SireBase::Properties>();
-            vs_charges = mols[i].property("vs_charges").asAnArray();
-        }
         auto cljs_data = mol.cljs.constData();
-
 
         QVector<boost::tuple<int, int>> exception_idxs;
         QVector<int> constraint_idxs;
@@ -1741,6 +1772,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                       coul_14_scale,
                                       lj_14_scale);
 
+            // VS
+            // Still need to do this block
+            // Try to find a way to avoid ridiculous amount of nesting
             if (is_perturbable)
             {
                 const bool atom0_is_ghost = mol.isGhostAtom(atom0);
@@ -1812,55 +1846,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                     boost::get<4>(p), true);
             }
 
-            // Virtual sites inherit the exceptions of their parent atoms
-            if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
-            {   
-                SireBase::PropertyList virtual_sites_0 = vs_parents.property(std::to_string(atom0).c_str()).asAnArray();
-                SireBase::PropertyList virtual_sites_1 = vs_parents.property(std::to_string(atom1).c_str()).asAnArray();
-                double charge_mult = 0;
-                double atom0_charge = boost::get<0>(cljs_data[atom0]);
-                double atom1_charge = boost::get<0>(cljs_data[atom1]); 
-                if (boost::get<2>(p) != 0.0)
-                {
-                    charge_mult = coul_14_scale;
-                }
-
-                // Exceptions between VS on atom0 and VS on atom1/atom1 itself
-                for (int vs0 = 0; vs0 < virtual_sites_0.size(); ++vs0)
-                {  
-                    double vs0_charge = vs_charges.at(vs0).asADouble();
-                    int vs0_index = start_index + mol.nAtoms() + virtual_sites_0.at(vs0).asAnInteger();
-                    // VS on atom 0 - atom 1
-                    double scaled_coul = charge_mult*vs0_charge*atom1_charge;
-                    cljff->addException(vs0_index, boost::get<1>(p),
-                                        scaled_coul, 1,
-                                        0, false);
-                    for (int vs1 = 0; vs1 < virtual_sites_1.size(); ++vs1)
-                    {  
-                        double vs1_charge = vs_charges.at(vs1).asADouble(); 
-                        int vs1_index = start_index + mol.nAtoms() + virtual_sites_1.at(vs1).asAnInteger();
-
-                        // VS on atom 0 - VS on atom 1
-                        scaled_coul = charge_mult*vs0_charge*vs1_charge;
-                        cljff->addException(vs0_index, vs1_index,
-                                            scaled_coul, 1,
-                                            0, false);
-                    }
-                }
-
-                // atom 0 - VS on atom 1
-                for (int vs1 = 0; vs1 < virtual_sites_1.size(); ++vs1)
-                {  
-                    double vs1_charge = vs_charges.at(vs1).asADouble();
-                    int vs1_index = start_index + mol.nAtoms() + virtual_sites_1.at(vs1).asAnInteger();
-
-                    double scaled_coul = charge_mult*vs1_charge*atom0_charge;
-                    cljff->addException(vs1_index, boost::get<0>(p),
-                                        scaled_coul, 1,
-                                        0, false);
-                }
-            }
-
             // we need to make sure that the list of exclusions in
             // the NonbondedForce match those in the CustomNonbondedForces
             if (ghost_ghostff != 0)
@@ -1879,14 +1864,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                                constraint_idxs);
         }
 
-        // Exclusions/exceptions between virtual sites on the same atom
-        if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
+        // Exclusions/exceptions between virtual sites on the same atom, and with the parent atom
+        if (mol.has_vs)
         {
             int n_atom_vs;
             int vs_start = start_index + mol.nAtoms();
             for (int a = 0; a < mol.nAtoms(); ++a)
             {
-                SireBase::PropertyList atom_vs = vs_parents.property(std::to_string(a).c_str()).asAnArray();
+                SireBase::PropertyList atom_vs = mol.vs_parents.property(std::to_string(a).c_str()).asAnArray();
                 n_atom_vs = atom_vs.size();
                 for (int v0 = 0; v0 < atom_vs.size(); ++v0)
                 {
@@ -1894,12 +1879,24 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     cljff->addException(vs0_index, start_index+a,
                         0.0, 1,
                         0, false);
+                    if (ghost_ghostff != 0)
+                    {
+                        ghost_ghostff->addExclusion(vs0_index, start_index+a);
+                        ghost_nonghostff->addExclusion(vs0_index, start_index+a);
+                    }
+
+
                     for (int v1 = v0+1; v1 < atom_vs.size(); ++v1)
                     {
                         int vs1_index = vs_start + atom_vs.at(v1).asAnInteger();
                         cljff->addException(vs0_index, vs1_index,
                                             0.0, 1,
-                                            0, false);                            
+                                            0, false);
+                        if (ghost_ghostff != 0)
+                        {
+                            ghost_ghostff->addExclusion(vs0_index, vs1_index);
+                            ghost_nonghostff->addExclusion(vs0_index, vs1_index);     
+                        }                      
                     }
                 }
             }
@@ -2036,7 +2033,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     const auto &mol = openmm_mols_data[i];
                     mol.copyInCoordsAndVelocities(coords_data + start_index,
                                                   vels_data + start_index);
-                    if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
+                    if (mol.has_vs)
                     {
                         // Initiate all VS with zero coords, as they will need to be
                         // calculated in the openmm context anyway
@@ -2056,7 +2053,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             const auto &mol = openmm_mols_data[i];
             mol.copyInCoordsAndVelocities(coords_data + start_index,
                                           vels_data + start_index);
-            if (map.specified("virtual_sites") and mols[i].property("n_virtual_sites").asAnInteger() > 0)
+            if (mol.has_vs)
             {
             for (int vs = 0; vs < map["virtual_sites"].value().asAnInteger(); ++vs)
                 {
