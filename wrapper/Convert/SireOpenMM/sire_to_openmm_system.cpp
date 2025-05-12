@@ -1514,108 +1514,106 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     non_ghost_atoms.append(atom_index);
                 }
             }
+        }
         if (mol.has_vs)
+        {
+            int start_vs = start_index + mol.molinfo.nAtoms();
+
+            for (int k = 0; k < mol.n_vs; ++k)
             {
-                int start_vs = start_index + mol.molinfo.nAtoms();
+                SireBase::Properties vs_params = mol.vs_properties.property(std::to_string(k).c_str()).asA<SireBase::Properties>();
+                // Add parameters to system
+                // Virtual sites with non-zero LJ interactions are not supported
+                const int atom_index = start_vs + k;
+                system.addParticle(0.0);
 
-                for (int k = 0; k < mol.n_vs; ++k)
+                // Calculate virtual site parameters
+                SireBase::PropertyList indices = vs_params.property("vs_indices").asAnArray();
+                std::vector<int> indices_vec = {};
+                for (int a = 0; a < indices.size(); ++a)
                 {
-                    SireBase::Properties vs_params = mol.vs_properties.property(std::to_string(k).c_str()).asA<SireBase::Properties>();
-                    // Add parameters to system
-                    // Virtual sites with non-zero LJ interactions are not supported
-                    const int atom_index = start_vs + k;
-                    system.addParticle(0.0);
+                    indices_vec.push_back(indices.at(a).asAnInteger() + start_index);
+                }
+                int parent_idx = indices.at(0).asAnInteger();
 
-                    // Calculate virtual site parameters
-                    SireBase::PropertyList indices = vs_params.property("vs_indices").asAnArray();
-                    std::vector<int> indices_vec = {};
-                    for (int a = 0; a < indices.size(); ++a)
+                SireBase::PropertyList ows = vs_params.property("vs_ows").asAnArray();
+                std::vector<double> ows_vec = {};
+                for (int a = 0; a < ows.size(); ++a)
+                {
+                    ows_vec.push_back(ows.at(a).asADouble());
+                }
+
+                SireBase::PropertyList xs = vs_params.property("vs_xs").asAnArray();
+                std::vector<double> xs_vec = {};
+                for (int a = 0; a < xs.size(); ++a)
+                {
+                    xs_vec.push_back(xs.at(a).asADouble());
+                }
+
+                SireBase::PropertyList ys = vs_params.property("vs_ys").asAnArray();
+                std::vector<double> ys_vec = {};
+                for (int a = 0; a < ys.size(); ++a)
+                {
+                    ys_vec.push_back(ys.at(a).asADouble());
+                }
+
+                SireBase::PropertyList local = vs_params.property("vs_local").asAnArray();
+                OpenMM::Vec3 local_vec = {local.at(0).asADouble(), local.at(1).asADouble(), local.at(2).asADouble()};
+
+                OpenMM::LocalCoordinatesSite *new_vs = new OpenMM::LocalCoordinatesSite(indices_vec, ows_vec, xs_vec, ys_vec, local_vec);
+                system.setVirtualSite(atom_index, new_vs);
+
+                // Add to forcefield, depending on whether the system is perturbable
+                // Note that VS with LJ parameters are currently not supported, so epsilon and sigma are hard-coded to 0 in all cases
+                double vs_charge = mol.vs_charges.at(k).asADouble();
+                cljff->addParticle(vs_charge, 1.0, 0.0);
+
+                if (any_perturbable and mol.isPerturbable())
+                {
+                    // reduced_q
+                    custom_params[0] = vs_charge;
+                    // half_sigma
+                    custom_params[1] = 1.0;
+                    // two_sqrt_epsilon
+                    custom_params[2] = 0.0;
+                    // alpha
+                    custom_params[3] = alphas_data[mol.molinfo.nAtoms()+k];
+                    // kappa
+                    custom_params[4] = kappas_data[mol.molinfo.nAtoms()+k];
+
+                    ghost_ghostff->addParticle(custom_params);
+                    ghost_nonghostff->addParticle(custom_params);
+
+                    // Append virtual sites to ghost atom list
+                    if (mol.from_ghost_idxs.contains(parent_idx)) 
                     {
-                        indices_vec.push_back(indices.at(a).asAnInteger() + start_index);
+                        ghost_atoms.append(atom_index);
                     }
-                    int parent_idx = indices.at(0).asAnInteger();
-
-                    SireBase::PropertyList ows = vs_params.property("vs_ows").asAnArray();
-                    std::vector<double> ows_vec = {};
-                    for (int a = 0; a < ows.size(); ++a)
+                    const bool vs_to_ghost = mol.to_ghost_idxs.contains(parent_idx);
+                    const bool vs_from_ghost = mol.from_ghost_idxs.contains(parent_idx);
+                    if (vs_from_ghost or vs_to_ghost)
                     {
-                        ows_vec.push_back(ows.at(a).asADouble());
-                    }
-
-                    SireBase::PropertyList xs = vs_params.property("vs_xs").asAnArray();
-                    std::vector<double> xs_vec = {};
-                    for (int a = 0; a < xs.size(); ++a)
-                    {
-                        xs_vec.push_back(xs.at(a).asADouble());
-                    }
-
-                    SireBase::PropertyList ys = vs_params.property("vs_ys").asAnArray();
-                    std::vector<double> ys_vec = {};
-                    for (int a = 0; a < ys.size(); ++a)
-                    {
-                        ys_vec.push_back(ys.at(a).asADouble());
-                    }
-
-                    SireBase::PropertyList local = vs_params.property("vs_local").asAnArray();
-                    OpenMM::Vec3 local_vec = {local.at(0).asADouble(), local.at(1).asADouble(), local.at(2).asADouble()};
-
-                    OpenMM::LocalCoordinatesSite *new_vs = new OpenMM::LocalCoordinatesSite(indices_vec, ows_vec, xs_vec, ys_vec, local_vec);
-                    system.setVirtualSite(atom_index, new_vs);
-
-                    // Add to forcefield, depending on whether the system is perturbable
-                    // Note that VS with LJ parameters are currently not supported, so epsilon and sigma are hard-coded to 0 in all cases
-                    double vs_charge = mol.vs_charges.at(k).asADouble();
-                    cljff->addParticle(vs_charge, 1.0, 0.0);
-
-                    if (any_perturbable and mol.isPerturbable())
-                    {
-                        // reduced_q
-                        custom_params[0] = vs_charge;
-                        // half_sigma
-                        custom_params[1] = 1.0;
-                        // two_sqrt_epsilon
-                        custom_params[2] = 0.0;
-                        // alpha
-                        custom_params[3] = alphas_data[mol.molinfo.nAtoms()+k];
-                        // kappa
-                        custom_params[4] = kappas_data[mol.molinfo.nAtoms()+k];
-
-                        ghost_ghostff->addParticle(custom_params);
-                        ghost_nonghostff->addParticle(custom_params);
-
-                        // Append virtual sites to ghost atom list
-                        // Not sure if this is actually necessary, because there are no LJ interactions
-                        // on virtual sites
-                        if (mol.from_ghost_idxs.contains(parent_idx)) 
+                        ghost_atoms.append(atom_index);
+    
+                        if (vs_from_ghost)
                         {
-                            ghost_atoms.append(atom_index);
+                            from_ghost_idxs.append(atom_index);
                         }
-                        const bool vs_to_ghost = mol.to_ghost_idxs.contains(parent_idx);
-                        const bool vs_from_ghost = mol.from_ghost_idxs.contains(parent_idx);
-                        if (vs_from_ghost or vs_to_ghost)
+                        else
                         {
-                            ghost_atoms.append(atom_index);
-        
-                            if (vs_from_ghost)
-                            {
-                                from_ghost_idxs.append(atom_index);
-                            }
-                            else
-                            {
-                                to_ghost_idxs.append(atom_index);
-                            }
-                    }
-                    else if (any_perturbable)
-                    {
-                        // Add to ghost FFs if necessary
-                        custom_params = {vs_charge, 1.0, 0.0, 0.0, 0.0};
-                        ghost_ghostff->addParticle(custom_params);
-                        ghost_nonghostff->addParticle(custom_params);
-                        non_ghost_atoms.append(atom_index);
-                    }
+                            to_ghost_idxs.append(atom_index);
+                        }
                     }
                 }
-            }
+                else if (any_perturbable)
+                {
+                    // Add to ghost FFs if necessary
+                    custom_params = {vs_charge, 1.0, 0.0, 0.0, 0.0};
+                    ghost_ghostff->addParticle(custom_params);
+                    ghost_nonghostff->addParticle(custom_params);
+                    non_ghost_atoms.append(atom_index);
+                }
+        }
         }
 
         // now add all of the bond parameters

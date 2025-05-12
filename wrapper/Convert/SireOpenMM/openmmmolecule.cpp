@@ -69,19 +69,6 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
     // Set up virtual site properties
 
-    if (map.specified("virtual_sites") and mol.property("n_virtual_sites").asAnInteger() > 0)
-    {
-        this->has_vs = true; 
-        this->vs_parents = mol.property("parents").asA<SireBase::Properties>();
-        this->vs_charges = mol.property("vs_charges").asAnArray();
-        this->vs_properties = mol.property("virtual_sites").asA<SireBase::Properties>();
-        this->n_vs = mol.property("n_virtual_sites").asAnInteger();
-    }
-    else 
-    {
-        this->has_vs = false;
-    }
-
     bool is_perturbable = false;
     bool swap_end_states = false;
 
@@ -102,6 +89,26 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
     else
     {
         ffinfo = mol.property(map["forcefield"]).asA<MMDetail>();
+    }
+
+    if (map.specified("virtual_sites") and mol.property("n_virtual_sites").asAnInteger() > 0)
+    {
+        this->has_vs = true; 
+        this->vs_parents = mol.property("parents").asA<SireBase::Properties>();
+        this->vs_properties = mol.property("virtual_sites").asA<SireBase::Properties>();
+        this->n_vs = mol.property("n_virtual_sites").asAnInteger();
+        if (is_perturbable)
+        {
+            this->vs_charges = mol.property("vs_charges0").asAnArray();
+        }
+        else
+        {
+            this->vs_charges = mol.property("vs_charges").asAnArray();
+        }
+    }
+    else 
+    {
+        this->has_vs = false;
     }
 
     if (map.specified("constraint"))
@@ -1240,7 +1247,8 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
     this->perturbed->alphas = this->alphas;
     this->perturbed->kappas = this->kappas;
 
-    for (int i = 0; i < cljs.count(); ++i)
+    //for (int i = 0; i < cljs.count(); ++i)
+    for (int i = 0; i < this->nAtoms(); ++i)
     {
         const auto &clj0 = cljs.at(i);
         const auto &clj1 = perturbed->cljs.at(i);
@@ -1630,7 +1638,7 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
     if (unbonded_atoms.isEmpty())
         unbonded_atoms = QSet<qint32>();
 
-    const int nats = this->cljs.count();
+    const int nats = this->atoms.count();
 
     const auto &nbpairs = mol.property(map["intrascale"]).asA<CLJNBPairs>();
 
