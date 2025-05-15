@@ -283,7 +283,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
                                  "dihedral", "element", "forcefield",
                                  "gb_radii", "gb_screening", "improper",
                                  "intrascale", "mass", "name",
-                                 "parameters", "treechain"};
+                                 "parameters", "treechain", "vs_charges"};
 
             // we can't specialise these globally in case other molecules
             // are not of amber type
@@ -760,9 +760,10 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     if (this->has_vs)
     {
+        auto vs_charges = mol.property(map["vs_charges"]).asAnArray();
         for (int vs = 0; vs < this->n_vs; ++vs)
         {
-            double chg = this->vs_charges.at(vs).asADouble();
+            double chg = vs_charges.at(vs).asADouble();
             double sig = 1e-9;
             double eps = 0.0;
 
