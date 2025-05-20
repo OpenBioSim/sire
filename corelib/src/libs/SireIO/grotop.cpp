@@ -351,12 +351,13 @@ static const RegisterMetaType<GroMolType> r_gromoltyp(NO_ROOT);
 
 QDataStream &operator<<(QDataStream &ds, const GroMolType &moltyp)
 {
-    writeHeader(ds, r_gromoltyp, 2);
+    writeHeader(ds, r_gromoltyp, 3);
 
     SharedDataStream sds(ds);
 
     sds << moltyp.nme << moltyp.warns << moltyp.atms0 << moltyp.atms1 << moltyp.bnds0 << moltyp.bnds1 << moltyp.angs0
-        << moltyp.angs1 << moltyp.dihs0 << moltyp.dihs1 << moltyp.first_atoms0 << moltyp.first_atoms1 << moltyp.ffield0
+        << moltyp.angs1 << moltyp.dihs0 << moltyp.dihs1
+        << moltyp.cmaps0 << moltyp.cmaps1 << moltyp.first_atoms0 << moltyp.first_atoms1 << moltyp.ffield0
         << moltyp.ffield1 << moltyp.nexcl0 << moltyp.nexcl1 << moltyp.is_perturbable;
 
     return ds;
@@ -366,12 +367,24 @@ QDataStream &operator>>(QDataStream &ds, GroMolType &moltyp)
 {
     VersionID v = readHeader(ds, r_gromoltyp);
 
-    if (v == 1 or v == 2)
+    if (v == 1 or v == 2 or v == 3)
     {
         SharedDataStream sds(ds);
 
         sds >> moltyp.nme >> moltyp.warns >> moltyp.atms0 >> moltyp.atms1 >> moltyp.bnds0 >> moltyp.bnds1 >>
-            moltyp.angs0 >> moltyp.angs1 >> moltyp.dihs0 >> moltyp.dihs1 >> moltyp.first_atoms0 >> moltyp.first_atoms1;
+            moltyp.angs0 >> moltyp.angs1 >> moltyp.dihs0 >> moltyp.dihs1;
+
+        if (v == 3)
+        {
+            sds >> moltyp.cmaps0 >> moltyp.cmaps1;
+        }
+        else
+        {
+            moltyp.cmaps0 = QHash<SireMol::CMAPID, QString>();
+            moltyp.cmaps1 = QHash<SireMol::CMAPID, QString>();
+        }
+
+        sds >> moltyp.first_atoms0 >> moltyp.first_atoms1;
 
         if (v == 2)
             sds >> moltyp.ffield0 >> moltyp.ffield1;
@@ -384,7 +397,7 @@ QDataStream &operator>>(QDataStream &ds, GroMolType &moltyp)
         sds >> moltyp.nexcl0 >> moltyp.nexcl1 >> moltyp.is_perturbable;
     }
     else
-        throw version_error(v, "1,2", r_gromoltyp, CODELOC);
+        throw version_error(v, "1,2,3", r_gromoltyp, CODELOC);
 
     return ds;
 }
@@ -1365,7 +1378,8 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
 GroMolType::GroMolType(const GroMolType &other)
     : nme(other.nme), warns(other.warns), atms0(other.atms0), atms1(other.atms1), first_atoms0(other.first_atoms0),
       first_atoms1(other.first_atoms1), bnds0(other.bnds0), bnds1(other.bnds1), angs0(other.angs0), angs1(other.angs1),
-      dihs0(other.dihs0), dihs1(other.dihs1), ffield0(other.ffield0), ffield1(other.ffield1), nexcl0(other.nexcl0),
+      dihs0(other.dihs0), dihs1(other.dihs1), cmaps0(other.cmaps0), cmaps1(other.cmaps1),
+      ffield0(other.ffield0), ffield1(other.ffield1), nexcl0(other.nexcl0),
       nexcl1(other.nexcl1), is_perturbable(other.is_perturbable)
 {
 }
@@ -1392,6 +1406,8 @@ GroMolType &GroMolType::operator=(const GroMolType &other)
         angs1 = other.angs1;
         dihs0 = other.dihs0;
         dihs1 = other.dihs1;
+        cmaps0 = other.cmaps0;
+        cmaps1 = other.cmaps1;
         ffield0 = other.ffield0;
         ffield1 = other.ffield1;
         nexcl0 = other.nexcl0;
@@ -1408,7 +1424,8 @@ bool GroMolType::operator==(const GroMolType &other) const
     return nme == other.nme and warns == other.warns and atms0 == other.atms0 and atms1 == other.atms1 and
            first_atoms0 == other.first_atoms0 and first_atoms1 == other.first_atoms1 and bnds0 == other.bnds0 and
            bnds1 == other.bnds1 and angs0 == other.angs0 and angs1 == other.angs1 and dihs0 == other.dihs0 and
-           dihs1 == other.dihs1 and nexcl0 == other.nexcl0 and nexcl1 == other.nexcl1 and
+           dihs1 == other.dihs1 and cmaps0 == other.cmaps0 and cmaps1 == other.cmaps1 and
+           nexcl0 == other.nexcl0 and nexcl1 == other.nexcl1 and
            is_perturbable == other.is_perturbable;
 }
 
@@ -2589,12 +2606,13 @@ static const RegisterMetaType<GroTop> r_grotop;
 
 QDataStream &operator<<(QDataStream &ds, const GroTop &grotop)
 {
-    writeHeader(ds, r_grotop, 1);
+    writeHeader(ds, r_grotop, 2);
 
     SharedDataStream sds(ds);
 
     sds << grotop.include_path << grotop.included_files << grotop.expanded_lines << grotop.atom_types
-        << grotop.bond_potentials << grotop.ang_potentials << grotop.dih_potentials << grotop.moltypes << grotop.grosys
+        << grotop.bond_potentials << grotop.ang_potentials << grotop.dih_potentials
+        << grotop.cmap_potentials << grotop.moltypes << grotop.grosys
         << grotop.nb_func_type << grotop.combining_rule << grotop.fudge_lj << grotop.fudge_qq << grotop.parse_warnings
         << grotop.generate_pairs << static_cast<const MoleculeParser &>(grotop);
 
@@ -2605,13 +2623,20 @@ QDataStream &operator>>(QDataStream &ds, GroTop &grotop)
 {
     VersionID v = readHeader(ds, r_grotop);
 
-    if (v == 1)
+    if (v == 1 or v == 2)
     {
         SharedDataStream sds(ds);
 
         sds >> grotop.include_path >> grotop.included_files >> grotop.expanded_lines >> grotop.atom_types >>
-            grotop.bond_potentials >> grotop.ang_potentials >> grotop.dih_potentials >> grotop.moltypes >>
-            grotop.grosys >> grotop.nb_func_type >> grotop.combining_rule >> grotop.fudge_lj >> grotop.fudge_qq >>
+            grotop.bond_potentials >> grotop.ang_potentials >> grotop.dih_potentials;
+
+        if (v == 2)
+            sds >> grotop.cmap_potentials;
+        else
+            grotop.cmap_potentials.clear();
+
+        sds >> grotop.moltypes >> grotop.grosys >> grotop.nb_func_type >>
+            grotop.combining_rule >> grotop.fudge_lj >> grotop.fudge_qq >>
             grotop.parse_warnings >> grotop.generate_pairs >> static_cast<MoleculeParser &>(grotop);
     }
     else
@@ -4714,7 +4739,8 @@ GroTop::GroTop(const GroTop &other)
     : ConcreteProperty<GroTop, MoleculeParser>(other), include_path(other.include_path),
       included_files(other.included_files), expanded_lines(other.expanded_lines), atom_types(other.atom_types),
       bond_potentials(other.bond_potentials), ang_potentials(other.ang_potentials),
-      dih_potentials(other.dih_potentials), moltypes(other.moltypes), grosys(other.grosys),
+      dih_potentials(other.dih_potentials), cmap_potentials(other.cmap_potentials),
+      moltypes(other.moltypes), grosys(other.grosys),
       nb_func_type(other.nb_func_type), combining_rule(other.combining_rule), fudge_lj(other.fudge_lj),
       fudge_qq(other.fudge_qq), parse_warnings(other.parse_warnings), generate_pairs(other.generate_pairs)
 {
@@ -4737,6 +4763,7 @@ GroTop &GroTop::operator=(const GroTop &other)
         bond_potentials = other.bond_potentials;
         ang_potentials = other.ang_potentials;
         dih_potentials = other.dih_potentials;
+        cmap_potentials = other.cmap_potentials;
         moltypes = other.moltypes;
         grosys = other.grosys;
         nb_func_type = other.nb_func_type;
@@ -8296,7 +8323,9 @@ Molecule GroTop::createMolecule(QString moltype_name, QStringList &errors, const
                                                             [&]()
                                                             { return getAngleProperties(molinfo, moltype); },
                                                             [&]()
-                                                            { return getDihedralProperties(molinfo, moltype); }};
+                                                            { return getDihedralProperties(molinfo, moltype); },
+                                                            [&]()
+                                                            { return getCMAPProperties(molinfo, moltype); }};
 
     QVector<PropsAndErrors> props(funcs.count());
     auto props_data = props.data();
