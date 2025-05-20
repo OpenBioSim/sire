@@ -47,6 +47,8 @@ namespace bp = boost::python;
 
 SireMol::ResIdxAtomCoordMatcher __copy__(const SireMol::ResIdxAtomCoordMatcher &other){ return SireMol::ResIdxAtomCoordMatcher(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -113,9 +115,9 @@ void register_ResIdxAtomCoordMatcher_class(){
         
         }
         ResIdxAtomCoordMatcher_exposer.staticmethod( "typeName" );
-        ResIdxAtomCoordMatcher_exposer.def( "__copy__", &__copy__);
-        ResIdxAtomCoordMatcher_exposer.def( "__deepcopy__", &__copy__);
-        ResIdxAtomCoordMatcher_exposer.def( "clone", &__copy__);
+        ResIdxAtomCoordMatcher_exposer.def( "__copy__", &__copy__<SireMol::ResIdxAtomCoordMatcher>);
+        ResIdxAtomCoordMatcher_exposer.def( "__deepcopy__", &__copy__<SireMol::ResIdxAtomCoordMatcher>);
+        ResIdxAtomCoordMatcher_exposer.def( "clone", &__copy__<SireMol::ResIdxAtomCoordMatcher>);
         ResIdxAtomCoordMatcher_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ResIdxAtomCoordMatcher >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ResIdxAtomCoordMatcher_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ResIdxAtomCoordMatcher >,

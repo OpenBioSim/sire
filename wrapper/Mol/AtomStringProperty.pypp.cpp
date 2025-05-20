@@ -47,6 +47,8 @@ namespace bp = boost::python;
 
 SireMol::AtomProperty<QString> __copy__(const SireMol::AtomProperty<QString> &other){ return SireMol::AtomProperty<QString>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -676,9 +678,9 @@ void register_AtomStringProperty_class(){
         }
         AtomStringProperty_exposer.staticmethod( "fromVariant" );
         AtomStringProperty_exposer.staticmethod( "typeName" );
-        AtomStringProperty_exposer.def( "__copy__", &__copy__);
-        AtomStringProperty_exposer.def( "__deepcopy__", &__copy__);
-        AtomStringProperty_exposer.def( "clone", &__copy__);
+        AtomStringProperty_exposer.def( "__copy__", &__copy__<SireMol::AtomProperty<QString>>);
+        AtomStringProperty_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomProperty<QString>>);
+        AtomStringProperty_exposer.def( "clone", &__copy__<SireMol::AtomProperty<QString>>);
         AtomStringProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomProperty<QString> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomStringProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomProperty<QString> >,

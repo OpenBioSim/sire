@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 SireMol::AbsFromNumber __copy__(const SireMol::AbsFromNumber &other){ return SireMol::AbsFromNumber(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -98,9 +100,9 @@ void register_AbsFromNumber_class(){
         
         }
         AbsFromNumber_exposer.staticmethod( "typeName" );
-        AbsFromNumber_exposer.def( "__copy__", &__copy__);
-        AbsFromNumber_exposer.def( "__deepcopy__", &__copy__);
-        AbsFromNumber_exposer.def( "clone", &__copy__);
+        AbsFromNumber_exposer.def( "__copy__", &__copy__<SireMol::AbsFromNumber>);
+        AbsFromNumber_exposer.def( "__deepcopy__", &__copy__<SireMol::AbsFromNumber>);
+        AbsFromNumber_exposer.def( "clone", &__copy__<SireMol::AbsFromNumber>);
         AbsFromNumber_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AbsFromNumber >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AbsFromNumber_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AbsFromNumber >,

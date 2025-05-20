@@ -38,6 +38,8 @@ namespace bp = boost::python;
 
 SireMol::UserBeading __copy__(const SireMol::UserBeading &other){ return SireMol::UserBeading(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -105,9 +107,9 @@ void register_UserBeading_class(){
         
         }
         UserBeading_exposer.staticmethod( "typeName" );
-        UserBeading_exposer.def( "__copy__", &__copy__);
-        UserBeading_exposer.def( "__deepcopy__", &__copy__);
-        UserBeading_exposer.def( "clone", &__copy__);
+        UserBeading_exposer.def( "__copy__", &__copy__<SireMol::UserBeading>);
+        UserBeading_exposer.def( "__deepcopy__", &__copy__<SireMol::UserBeading>);
+        UserBeading_exposer.def( "clone", &__copy__<SireMol::UserBeading>);
         UserBeading_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::UserBeading >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         UserBeading_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::UserBeading >,

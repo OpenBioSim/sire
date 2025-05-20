@@ -37,6 +37,8 @@ namespace bp = boost::python;
 
 SireMol::MoleculeBeading __copy__(const SireMol::MoleculeBeading &other){ return SireMol::MoleculeBeading(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -78,9 +80,9 @@ void register_MoleculeBeading_class(){
         
         }
         MoleculeBeading_exposer.staticmethod( "typeName" );
-        MoleculeBeading_exposer.def( "__copy__", &__copy__);
-        MoleculeBeading_exposer.def( "__deepcopy__", &__copy__);
-        MoleculeBeading_exposer.def( "clone", &__copy__);
+        MoleculeBeading_exposer.def( "__copy__", &__copy__<SireMol::MoleculeBeading>);
+        MoleculeBeading_exposer.def( "__deepcopy__", &__copy__<SireMol::MoleculeBeading>);
+        MoleculeBeading_exposer.def( "clone", &__copy__<SireMol::MoleculeBeading>);
         MoleculeBeading_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::MoleculeBeading >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         MoleculeBeading_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::MoleculeBeading >,

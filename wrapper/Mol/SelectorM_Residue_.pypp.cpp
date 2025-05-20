@@ -55,6 +55,8 @@ namespace bp = boost::python;
 
 SireMol::SelectorM<SireMol::Residue> __copy__(const SireMol::SelectorM<SireMol::Residue> &other){ return SireMol::SelectorM<SireMol::Residue>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -1807,6 +1809,32 @@ void register_SelectorM_Residue__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Residue >::toSelectorList
+        
+            typedef SireMol::SelectorM< SireMol::Residue > exported_class_t;
+            typedef ::QList< SireMol::Selector< SireMol::Residue > > ( ::SireMol::SelectorM< SireMol::Residue >::*toSelectorList_function_type)(  ) const;
+            toSelectorList_function_type toSelectorList_function_value( &::SireMol::SelectorM< SireMol::Residue >::toSelectorList );
+            
+            SelectorM_Residue__exposer.def( 
+                "toSelectorList"
+                , toSelectorList_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Residue >::toSelectorVector
+        
+            typedef SireMol::SelectorM< SireMol::Residue > exported_class_t;
+            typedef ::QVector< SireMol::Selector< SireMol::Residue > > ( ::SireMol::SelectorM< SireMol::Residue >::*toSelectorVector_function_type)(  ) const;
+            toSelectorVector_function_type toSelectorVector_function_value( &::SireMol::SelectorM< SireMol::Residue >::toSelectorVector );
+            
+            SelectorM_Residue__exposer.def( 
+                "toSelectorVector"
+                , toSelectorVector_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Residue >::toSingleMolecule
         
             typedef SireMol::SelectorM< SireMol::Residue > exported_class_t;
@@ -1903,9 +1931,9 @@ void register_SelectorM_Residue__class(){
         
         }
         SelectorM_Residue__exposer.staticmethod( "typeName" );
-        SelectorM_Residue__exposer.def( "__copy__", &__copy__);
-        SelectorM_Residue__exposer.def( "__deepcopy__", &__copy__);
-        SelectorM_Residue__exposer.def( "clone", &__copy__);
+        SelectorM_Residue__exposer.def( "__copy__", &__copy__<SireMol::SelectorM<SireMol::Residue>>);
+        SelectorM_Residue__exposer.def( "__deepcopy__", &__copy__<SireMol::SelectorM<SireMol::Residue>>);
+        SelectorM_Residue__exposer.def( "clone", &__copy__<SireMol::SelectorM<SireMol::Residue>>);
         SelectorM_Residue__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::SelectorM<SireMol::Residue> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SelectorM_Residue__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::SelectorM<SireMol::Residue> >,

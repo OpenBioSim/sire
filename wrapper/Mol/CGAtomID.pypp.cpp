@@ -27,6 +27,8 @@ namespace bp = boost::python;
 
 SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID> __copy__(const SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID> &other){ return SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -125,9 +127,9 @@ void register_CGAtomID_class(){
         
         }
         CGAtomID_exposer.staticmethod( "typeName" );
-        CGAtomID_exposer.def( "__copy__", &__copy__);
-        CGAtomID_exposer.def( "__deepcopy__", &__copy__);
-        CGAtomID_exposer.def( "clone", &__copy__);
+        CGAtomID_exposer.def( "__copy__", &__copy__<SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID>>);
+        CGAtomID_exposer.def( "__deepcopy__", &__copy__<SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID>>);
+        CGAtomID_exposer.def( "clone", &__copy__<SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID>>);
         CGAtomID_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CGAtomID_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::GroupAtomID<SireMol::CGID, SireMol::AtomID> >,

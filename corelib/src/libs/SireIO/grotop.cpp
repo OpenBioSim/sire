@@ -2126,6 +2126,29 @@ void GroMolType::addDihedrals(const QMultiHash<DihedralID, GromacsDihedral> &dih
         dihs0 += dihedrals;
 }
 
+/** Add the passed CMAPs to the molecule */
+void GroMolType::addCMAPs(const QHash<CMAPID, QString> &cmaps, bool is_lambda1)
+{
+    // The molecule is not perturbable!
+    if (is_lambda1 and not this->is_perturbable)
+        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+
+    if (is_lambda1)
+    {
+        for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
+        {
+            cmaps1.insert(it.key(), it.value());
+        }
+    }
+    else
+    {
+        for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
+        {
+            cmaps0.insert(it.key(), it.value());
+        }
+    }
+}
+
 /** Return all of the bonds */
 QMultiHash<BondID, GromacsBond> GroMolType::bonds(bool is_lambda1) const
 {
@@ -2163,6 +2186,19 @@ QMultiHash<DihedralID, GromacsDihedral> GroMolType::dihedrals(bool is_lambda1) c
         return dihs1;
     else
         return dihs0;
+}
+
+/** Return all of the cmaps */
+QHash<CMAPID, QString> GroMolType::cmaps(bool is_lambda1) const
+{
+    // The molecule is not perturbable!
+    if (is_lambda1 and not this->is_perturbable)
+        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+
+    if (is_lambda1)
+        return cmaps1;
+    else
+        return cmaps0;
 }
 
 /** Return whether or not this is a topology for water. This should
@@ -5100,6 +5136,31 @@ QList<GromacsDihedral> GroTop::dihedrals(const QString &atm0, const QString &atm
     return dih_potentials.values(searchForDihType(atm0, atm1, atm2, atm3, func_type));
 }
 
+/** Return all of the CMAP potentials for the passed quint of atom types, for the
+ *  passed function type. This returns a list of all associated parameters
+ *  (or an empty list if none exist) */
+QList<CMAPParameter> GroTop::cmaps(const QString &atm0, const QString &atm1, const QString &atm2,
+                                   const QString &atm3, const QString &atm4, int func_type) const
+{
+    // get the key for this cmap
+    QString key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, func_type);
+
+    auto it = cmap_potentials.find(key);
+
+    if (it == cmap_potentials.end())
+    {
+        // no cmap found
+        return QList<CMAPParameter>();
+    }
+    else
+    {
+        // return the cmap
+        QList<CMAPParameter> cmaps;
+        cmaps.append(it.value());
+        return cmaps;
+    }
+}
+
 /** Return the atom types loaded from this file */
 QHash<QString, GromacsAtomType> GroTop::atomTypes() const
 {
@@ -6979,6 +7040,52 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
             moltype.addDihedrals(dihs);
         };
 
+        // function that extracts all of the information from the 'cmap' lines
+        auto addCMAPsTo = [&](GroMolType &moltype, int linenum)
+        {
+            QStringList lines = getDirectiveLines(linenum);
+
+            QHash<CMAPID, QString> cmaps;
+            cmaps.reserve(lines.count());
+
+            for (const auto &line : lines)
+            {
+                const auto words = line.split(" ");
+
+                if (words.count() < 6)
+                {
+                    moltype.addWarning(QObject::tr("Cannot extract CMAP information "
+                                                   "from the line '%1' as it should contain at least six words "
+                                                   "(pieces of information)")
+                                           .arg(line));
+                    continue;
+                }
+
+                bool ok0, ok1, ok2, ok3, ok4, ok5;
+
+                int atm0 = words[0].toInt(&ok0);
+                int atm1 = words[1].toInt(&ok1);
+                int atm2 = words[2].toInt(&ok2);
+                int atm3 = words[3].toInt(&ok3);
+                int atm4 = words[4].toInt(&ok4);
+                int func = words[5].toInt(&ok5);
+
+                if (not(ok0 and ok1 and ok2 and ok3 and ok4 and ok5))
+                {
+                    moltype.addWarning(QObject::tr("Cannot extract CMAP information "
+                                                   "from the line '%1' as the first six words need to be integers. ")
+                                           .arg(line));
+                    continue;
+                }
+
+                cmaps.insert(CMAPID(AtomNum(atm0), AtomNum(atm1), AtomNum(atm2), AtomNum(atm3), AtomNum(atm4)),
+                             QString::number(func));
+            }
+
+            // save the CMAPs in the molecule
+            moltype.addCMAPs(cmaps);
+        };
+
         // interpret the defaults so that the forcefield for each moltype can
         // be determined
         const QString elecstyle = "coulomb";
@@ -7010,9 +7117,13 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
                 addDihedralsTo(moltype, linenum);
             }
 
+            for (auto linenum : moltag.values("cmap"))
+            {
+                addCMAPsTo(moltype, linenum);
+            }
+
             // now print out warnings for any lines that are missed...
-            const QStringList missed_tags = {"cmap",
-                                             "pairs",
+            const QStringList missed_tags = {"pairs",
                                              "pairs_nb",
                                              "exclusions",
                                              "contraints",
@@ -8019,6 +8130,103 @@ GroTop::PropsAndErrors GroTop::getDihedralProperties(const MoleculeInfo &molinfo
     {
         QStringList errors;
         errors.append(QObject::tr("Error getting dihedral properties for %1. %2: %3")
+                          .arg(moltype.name())
+                          .arg(e.what())
+                          .arg(e.why()));
+
+        if (not moltype.warnings().isEmpty())
+        {
+            errors.append("There were warnings parsing this molecule template:");
+            errors += moltype.warnings();
+        }
+
+        return std::make_tuple(Properties(), errors);
+    }
+}
+
+/** This internal function is used to return all of the cmap properties
+    for the passed molecule */
+GroTop::PropsAndErrors GroTop::getCMAPProperties(const MoleculeInfo &molinfo, const GroMolType &moltype) const
+{
+    try
+    {
+        QStringList errors;
+
+        // add in all of the cmap functions
+        CMAPFunctions cmapfuncs(molinfo);
+
+        const auto cmaps = moltype.cmaps();
+
+        for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
+        {
+            const auto &cmap = it.key();
+            auto potential = it.value();
+
+            if (potential != "1")
+            {
+                errors.append(QObject::tr("The CMAP potential '%1' is not a valid "
+                                          "CMAP potential. It should be '1'.")
+                                  .arg(potential));
+                continue;
+            }
+
+            AtomIdx idx0 = molinfo.atomIdx(cmap.atom0());
+            AtomIdx idx1 = molinfo.atomIdx(cmap.atom1());
+            AtomIdx idx2 = molinfo.atomIdx(cmap.atom2());
+            AtomIdx idx3 = molinfo.atomIdx(cmap.atom3());
+            AtomIdx idx4 = molinfo.atomIdx(cmap.atom4());
+
+            if (idx4 < idx0)
+            {
+                qSwap(idx0, idx4);
+                qSwap(idx3, idx1);
+            }
+
+            // look up the atoms in the molecule template
+            const auto atom0 = moltype.atom(idx0);
+            const auto atom1 = moltype.atom(idx1);
+            const auto atom2 = moltype.atom(idx2);
+            const auto atom3 = moltype.atom(idx3);
+            const auto atom4 = moltype.atom(idx4);
+
+            // get the cmap parameter for these atom types - this returns
+            // an empty list if there are no matching parameters. We
+            // only support function type 1 for CMAP potentials
+            auto resolved = this->cmaps(atom0.atomType(), atom1.atomType(), atom2.atomType(),
+                                        atom3.atomType(), atom4.atomType(), 1);
+
+            if (resolved.isEmpty())
+            {
+                errors.append(QObject::tr("Cannot find the cmap parameters for "
+                                          "the cmap between atoms %1-%2-%3-%4-%5 (atom types %6-%7-%8-%9-%10, "
+                                          "function type 1).")
+                                  .arg(atom0.toString())
+                                  .arg(atom1.toString())
+                                  .arg(atom2.toString())
+                                  .arg(atom3.toString())
+                                  .arg(atom4.toString())
+                                  .arg(atom0.atomType())
+                                  .arg(atom1.atomType())
+                                  .arg(atom2.atomType())
+                                  .arg(atom3.atomType())
+                                  .arg(atom4.atomType()));
+
+                continue;
+            }
+
+            // we will just use the first CMAP function
+            cmapfuncs.set(idx0, idx1, idx2, idx3, idx4, resolved[0]);
+        }
+
+        Properties props;
+        props.setProperty("cmap", cmapfuncs);
+
+        return std::make_tuple(props, errors);
+    }
+    catch (const SireError::exception &e)
+    {
+        QStringList errors;
+        errors.append(QObject::tr("Error getting CMAP properties for %1. %2: %3")
                           .arg(moltype.name())
                           .arg(e.what())
                           .arg(e.why()));

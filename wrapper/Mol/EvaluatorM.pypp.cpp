@@ -69,6 +69,8 @@ namespace bp = boost::python;
 
 SireMol::EvaluatorM __copy__(const SireMol::EvaluatorM &other){ return SireMol::EvaluatorM(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -371,9 +373,9 @@ void register_EvaluatorM_class(){
         
         }
         EvaluatorM_exposer.staticmethod( "typeName" );
-        EvaluatorM_exposer.def( "__copy__", &__copy__);
-        EvaluatorM_exposer.def( "__deepcopy__", &__copy__);
-        EvaluatorM_exposer.def( "clone", &__copy__);
+        EvaluatorM_exposer.def( "__copy__", &__copy__<SireMol::EvaluatorM>);
+        EvaluatorM_exposer.def( "__deepcopy__", &__copy__<SireMol::EvaluatorM>);
+        EvaluatorM_exposer.def( "clone", &__copy__<SireMol::EvaluatorM>);
         EvaluatorM_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::EvaluatorM >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         EvaluatorM_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::EvaluatorM >,

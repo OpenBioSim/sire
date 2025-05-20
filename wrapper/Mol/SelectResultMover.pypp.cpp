@@ -31,6 +31,8 @@ namespace bp = boost::python;
 
 SireMol::SelectResultMover __copy__(const SireMol::SelectResultMover &other){ return SireMol::SelectResultMover(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -120,9 +122,9 @@ void register_SelectResultMover_class(){
         
         }
         SelectResultMover_exposer.staticmethod( "typeName" );
-        SelectResultMover_exposer.def( "__copy__", &__copy__);
-        SelectResultMover_exposer.def( "__deepcopy__", &__copy__);
-        SelectResultMover_exposer.def( "clone", &__copy__);
+        SelectResultMover_exposer.def( "__copy__", &__copy__<SireMol::SelectResultMover>);
+        SelectResultMover_exposer.def( "__deepcopy__", &__copy__<SireMol::SelectResultMover>);
+        SelectResultMover_exposer.def( "clone", &__copy__<SireMol::SelectResultMover>);
         SelectResultMover_exposer.def( "__str__", &__str__< ::SireMol::SelectResultMover > );
         SelectResultMover_exposer.def( "__repr__", &__str__< ::SireMol::SelectResultMover > );
     }

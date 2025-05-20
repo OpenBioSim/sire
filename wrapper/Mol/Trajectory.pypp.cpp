@@ -25,6 +25,8 @@ namespace bp = boost::python;
 
 #include "SireStream/datastream.h"
 
+#include "SireStream/magic_error.h"
+
 #include "SireStream/shareddatastream.h"
 
 #include "SireUnits/dimensions.h"
@@ -42,6 +44,8 @@ namespace bp = boost::python;
 #include "trajectory.h"
 
 SireMol::Trajectory __copy__(const SireMol::Trajectory &other){ return SireMol::Trajectory(other); }
+
+#include "Helpers/copy.hpp"
 
 #include "Qt/qdatastream.hpp"
 
@@ -367,9 +371,9 @@ void register_Trajectory_class(){
         
         }
         Trajectory_exposer.staticmethod( "typeName" );
-        Trajectory_exposer.def( "__copy__", &__copy__);
-        Trajectory_exposer.def( "__deepcopy__", &__copy__);
-        Trajectory_exposer.def( "clone", &__copy__);
+        Trajectory_exposer.def( "__copy__", &__copy__<SireMol::Trajectory>);
+        Trajectory_exposer.def( "__deepcopy__", &__copy__<SireMol::Trajectory>);
+        Trajectory_exposer.def( "clone", &__copy__<SireMol::Trajectory>);
         Trajectory_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Trajectory >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Trajectory_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Trajectory >,
