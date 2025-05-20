@@ -39,6 +39,7 @@
 
 #include "SireMM/gromacsparams.h"
 #include "SireMM/mmdetail.h"
+#include "SireMM/cmapparameter.h"
 
 #include <QMultiHash>
 
@@ -488,6 +489,9 @@ namespace SireIO
 
         /** The database of dihedral potentials */
         QMultiHash<QString, SireMM::GromacsDihedral> dih_potentials;
+
+        /** The database of cmap potentials */
+        QHash<QString, SireMM::CMAPParameter> cmap_potentials;
 
         /** The list of all moleculetypes loaded from this file */
         QVector<GroMolType> moltypes;

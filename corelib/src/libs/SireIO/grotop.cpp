@@ -50,6 +50,7 @@
 #include "SireMM/internalff.h"
 #include "SireMM/threeatomfunctions.h"
 #include "SireMM/twoatomfunctions.h"
+#include "SireMM/cmapfunctions.h"
 
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
@@ -4935,6 +4936,24 @@ static QString get_dihedral_id(const QString &atm0, const QString &atm1, const Q
     }
 }
 
+/** Return the ID string for the cmap atom types 'atm0' 'atm1' 'atm2' 'atm3' 'atm4'. This
+    creates the string 'atm0;atm1;atm2;atm3;atm4' or 'atm4;atm3;atm2;atm1;atm0' depending on which
+    of the atoms is lower. The ';' character is used as a separator
+    as it cannot be in the atom names, as it is used as a comment
+    character in the Gromacs Top file */
+static QString get_cmap_id(const QString &atm0, const QString &atm1, const QString &atm2,
+                           const QString &atm3, const QString &atm4, int func_type)
+{
+    if ((atm0 < atm4) or (atm0 == atm4 and atm1 <= atm3))
+    {
+        return QString("%1;%2;%3;%4;%5;%6").arg(atm0, atm1, atm2, atm3, atm4).arg(func_type);
+    }
+    else
+    {
+        return QString("%1;%2;%3;%4;%5;%6").arg(atm4, atm3, atm2, atm1, atm0).arg(func_type);
+    }
+}
+
 /** Return the Gromacs System that describes the list of molecules that should
     be contained */
 GroSystem GroTop::groSystem() const
@@ -5333,6 +5352,9 @@ QVector<QString> GroTop::preprocess(const QVector<QString> &lines, QHash<QString
                 throw SireIO::parse_error(
                     QObject::tr("Continuation line on the last line of the Gromacs file! '%1'").arg(line), CODELOC);
             }
+
+            // replace this last slash with a space
+            line = line.left(line.length() - 1) + " ";
 
             line += lines_it.next();
             line = line.simplified();
@@ -6269,6 +6291,157 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
         return warnings;
     };
 
+    // internal function to process the cmaptypes lines
+    auto processCMAPTypes = [&]()
+    {
+        QStringList warnings;
+
+        // get all 'cmaptypes' lines
+        const auto lines = getAllLines("cmaptypes");
+
+        // save into a database of cmap parameters - the index is the
+        // combination of the five atom types for the matching atoms
+        QHash<QString, CMAPParameter> cmaps;
+
+        for (const auto &line : lines)
+        {
+            // each line should contain the atom types of the five atoms,
+            // followed by the function type number (1), followed by the
+            // number of rows and columns, followed by num_rows*num_cols
+            // values for the cmap function
+            const auto words = line.split(" ", Qt::SkipEmptyParts);
+
+            if (words.count() < 8)
+            {
+                warnings.append(QObject::tr("There is not enough data on the "
+                                            "line '%1' to extract a Gromacs CMAP parameter. Skipping line.")
+                                    .arg(line));
+                continue;
+            }
+
+            // first, get the five atom types
+            const auto &atm0 = words[0];
+            const auto &atm1 = words[1];
+            const auto &atm2 = words[2];
+            const auto &atm3 = words[3];
+            const auto &atm4 = words[4];
+
+            // now, get the function type
+            bool ok;
+
+            int func_type = words[5].toInt(&ok);
+
+            if (not ok)
+            {
+                warnings.append(QObject::tr("Unable to determine the function type "
+                                            "for the cmap on line '%1'. Skipping line.")
+                                    .arg(line));
+                continue;
+            }
+
+            // gromacs currently only supports function type 1 - so do we!
+            if (func_type != 1)
+            {
+                warnings.append(QObject::tr("The function type for the cmap on line '%1' is not supported. "
+                                            "Only function type 1 is supported. Skipping line.")
+                                    .arg(line));
+                continue;
+            }
+
+            // now get the number of rows and columns
+            int nrows = words[6].toInt(&ok);
+
+            if (not ok)
+            {
+                warnings.append(QObject::tr("Unable to determine the number of rows "
+                                            "for the cmap on line '%1'. Skipping line.")
+                                    .arg(line));
+                continue;
+            }
+
+            int ncols = words[7].toInt(&ok);
+
+            if (not ok)
+            {
+                warnings.append(QObject::tr("Unable to determine the number of columns "
+                                            "for the cmap on line '%1'. Skipping line.")
+                                    .arg(line));
+                continue;
+            }
+
+            // there should be nrows*ncols values after this
+            if (words.count() != 8 + nrows * ncols)
+            {
+                warnings.append(QObject::tr("The number of values for the cmap on line '%1' is not correct. "
+                                            "There should be %2 values, but there are %3. Skipping line.")
+                                    .arg(line)
+                                    .arg(nrows * ncols)
+                                    .arg(words.count() - 8));
+                continue;
+            }
+
+            // just do some DOS protection, should now have more than 512 rows or columns
+            if (nrows > 512 or ncols > 512)
+            {
+                warnings.append(QObject::tr("The number of rows (%1) or columns (%2) for the cmap on line '%3' is too large. "
+                                            "Skipping line.")
+                                    .arg(nrows)
+                                    .arg(ncols)
+                                    .arg(line));
+                continue;
+            }
+
+            // check that the number of rows and columns is not negative or zero
+            if (nrows <= 0 or ncols <= 0)
+            {
+                warnings.append(QObject::tr("The number of rows (%1) or columns (%2) for the cmap on line '%3' is not positive. "
+                                            "Skipping line.")
+                                    .arg(nrows)
+                                    .arg(ncols)
+                                    .arg(line));
+                continue;
+            }
+
+            // we can now read in the cmap values
+            QVector<double> cmap_values(nrows * ncols);
+            auto *cmap_values_data = cmap_values.data();
+
+            ok = true;
+
+            for (int i = 0; i < nrows * ncols; ++i)
+            {
+                bool val_ok = true;
+                double value = words[8 + i].toDouble(&val_ok);
+
+                if (not val_ok)
+                {
+                    warnings.append(QObject::tr("Unable to read the value %1 for the cmap on line '%2'. Skipping line.")
+                                        .arg(i)
+                                        .arg(line));
+                    ok = false;
+                    break;
+                }
+
+                cmap_values_data[i] = value;
+            }
+
+            if (not ok)
+            {
+                continue;
+            }
+
+            CMAPParameter cmap(Array2D<double>::fromColumnMajorVector(cmap_values, nrows, ncols));
+
+            QString key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, func_type);
+
+            cmaps.insert(key, cmap);
+        }
+
+        cmap_potentials = cmaps;
+
+        return warnings;
+    };
+
     // internal function to process moleculetype lines
     auto processMoleculeTypes = [&]()
     {
@@ -7034,7 +7207,8 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
     // now we can process the other tags
     const QVector<std::function<QStringList()>> funcs = {
         processBondTypes, processPairTypes, processAngleTypes, processDihedralTypes,
-        processConstraintTypes, processNonBondParams, processMoleculeTypes, processSystem};
+        processConstraintTypes, processNonBondParams, processCMAPTypes,
+        processMoleculeTypes, processSystem};
 
     if (usesParallel())
     {
