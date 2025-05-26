@@ -2273,11 +2273,12 @@ std::tuple<QVector<qint64>, QHash<CMAPParameter, qint64>> getCMAPData(const Ambe
             idx = param_to_idx.count();
         }
 
-        cmap_idxs.append(info.atomIdx(it->atom0()).value() + start_idx);
-        cmap_idxs.append(info.atomIdx(it->atom1()).value() + start_idx);
-        cmap_idxs.append(info.atomIdx(it->atom2()).value() + start_idx);
-        cmap_idxs.append(info.atomIdx(it->atom3()).value() + start_idx);
-        cmap_idxs.append(info.atomIdx(it->atom4()).value() + start_idx);
+        // need to add 1 as Amber is 1-indexed
+        cmap_idxs.append(info.atomIdx(it->atom0()).value() + 1 + start_idx);
+        cmap_idxs.append(info.atomIdx(it->atom1()).value() + 1 + start_idx);
+        cmap_idxs.append(info.atomIdx(it->atom2()).value() + 1 + start_idx);
+        cmap_idxs.append(info.atomIdx(it->atom3()).value() + 1 + start_idx);
+        cmap_idxs.append(info.atomIdx(it->atom4()).value() + 1 + start_idx);
         cmap_idxs.append(idx);
     }
 
@@ -4982,11 +4983,12 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
         {
             for (int idx : idxs)
             {
-                const AtomNum atom0(cmaps[idx] + 1);
-                const AtomNum atom1(cmaps[idx + 1] + 1);
-                const AtomNum atom2(cmaps[idx + 2] + 1);
-                const AtomNum atom3(cmaps[idx + 3] + 1);
-                const AtomNum atom4(cmaps[idx + 4] + 1);
+                // do not add 1 - these are already correctly indexed
+                const AtomNum atom0(cmaps[idx]);
+                const AtomNum atom1(cmaps[idx + 1]);
+                const AtomNum atom2(cmaps[idx + 2]);
+                const AtomNum atom3(cmaps[idx + 3]);
+                const AtomNum atom4(cmaps[idx + 4]);
 
                 const int param_idx = cmaps[idx + 5];
 
