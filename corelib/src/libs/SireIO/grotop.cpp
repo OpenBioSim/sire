@@ -3497,6 +3497,37 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
     return lines;
 }
 
+/** Write all of the CMAP types */
+static QStringList writeCMAPTypes(const QHash<QString, CMAPParameter> &cmap_params)
+{
+    QStringList lines;
+
+    if (cmap_params.isEmpty())
+    {
+        return lines; // no cmap parameters
+    }
+
+    lines.append("[ cmaptypes ]");
+
+    auto keys = cmap_params.keys();
+    std::sort(keys.begin(), keys.end());
+
+    for (auto key : keys)
+    {
+        const auto &cmap = cmap_params[key];
+        key = key.replace(";", " ");
+
+        // Create the line with the parameters.
+        lines.append(QString("%1 %2")
+                         .arg(key)
+                         .arg(cmap_to_string(cmap)));
+    }
+
+    lines.append("");
+
+    return lines;
+}
+
 /** Internal function used to convert a Gromacs Moltyp to a set of lines */
 static QStringList writeMolType(const QString &name, const GroMolType &moltype, const Molecule &mol,
                                 bool uses_parallel)
@@ -4724,20 +4755,38 @@ static QStringList writeSystem(QString name, const QVector<QString> &mol_to_molt
  *  atoms that reference those CMAP terms use a consistent set of atom
  *  types.
  */
-void GroTop::sanitiseCMAPs()
+static QHash<QString, CMAPParameter> sanitiseCMAPs(QHash<QString, GroMolType> &name_to_mtyp,
+                                                   QMap<QPair<int, QString>, GroMolType> &idx_name_to_mtyp)
 {
+    QHash<QString, CMAPParameter> cmap_potentials;
+
     // first, go through all of the molecules and extract out all of the
     // unique CMAP terms - they are already written in a Gromacs string
     // format
     QHash<QString, CMAPParameter> unique_cmaps;
 
-    for (auto &mol : moltypes)
+    // get a list of pointers to all of the molecule types
+    QVector<GroMolType *> moltypes;
+
+    moltypes.reserve(name_to_mtyp.count() + idx_name_to_mtyp.count());
+
+    for (auto it = name_to_mtyp.begin(); it != name_to_mtyp.end(); ++it)
     {
-        if (mol.isPerturbable())
+        moltypes.append(&it.value());
+    }
+
+    for (auto it = idx_name_to_mtyp.begin(); it != idx_name_to_mtyp.end(); ++it)
+    {
+        moltypes.append(&it.value());
+    }
+
+    for (auto mol : moltypes)
+    {
+        if (mol->isPerturbable())
         {
             // do this both for lambda = 0 and lambda = 1
-            const auto cmaps0 = mol.cmaps();
-            const auto cmaps1 = mol.cmaps(true);
+            const auto cmaps0 = mol->cmaps();
+            const auto cmaps1 = mol->cmaps(true);
 
             for (auto it = cmaps0.constBegin(); it != cmaps0.constEnd(); ++it)
             {
@@ -4756,11 +4805,11 @@ void GroTop::sanitiseCMAPs()
                 }
 
                 // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
-                const auto atm0 = mol.atom(atoms.atom0().asA<AtomIdx>()).atomType();
-                const auto atm1 = mol.atom(atoms.atom1().asA<AtomIdx>()).atomType();
-                const auto atm2 = mol.atom(atoms.atom2().asA<AtomIdx>()).atomType();
-                const auto atm3 = mol.atom(atoms.atom3().asA<AtomIdx>()).atomType();
-                const auto atm4 = mol.atom(atoms.atom4().asA<AtomIdx>()).atomType();
+                const auto atm0 = mol->atom(atoms.atom0().asA<AtomIdx>()).atomType();
+                const auto atm1 = mol->atom(atoms.atom1().asA<AtomIdx>()).atomType();
+                const auto atm2 = mol->atom(atoms.atom2().asA<AtomIdx>()).atomType();
+                const auto atm3 = mol->atom(atoms.atom3().asA<AtomIdx>()).atomType();
+                const auto atm4 = mol->atom(atoms.atom4().asA<AtomIdx>()).atomType();
 
                 // create the key for the combination of these atom types
                 // and a "1" function type
@@ -4807,11 +4856,11 @@ void GroTop::sanitiseCMAPs()
                 }
 
                 // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
-                const auto atm0 = mol.atom(atoms.atom0().asA<AtomIdx>(), true).atomType();
-                const auto atm1 = mol.atom(atoms.atom1().asA<AtomIdx>(), true).atomType();
-                const auto atm2 = mol.atom(atoms.atom2().asA<AtomIdx>(), true).atomType();
-                const auto atm3 = mol.atom(atoms.atom3().asA<AtomIdx>(), true).atomType();
-                const auto atm4 = mol.atom(atoms.atom4().asA<AtomIdx>(), true).atomType();
+                const auto atm0 = mol->atom(atoms.atom0().asA<AtomIdx>(), true).atomType();
+                const auto atm1 = mol->atom(atoms.atom1().asA<AtomIdx>(), true).atomType();
+                const auto atm2 = mol->atom(atoms.atom2().asA<AtomIdx>(), true).atomType();
+                const auto atm3 = mol->atom(atoms.atom3().asA<AtomIdx>(), true).atomType();
+                const auto atm4 = mol->atom(atoms.atom4().asA<AtomIdx>(), true).atomType();
 
                 // create the key for the combination of these atom types
                 // and a "1" function type
@@ -4841,12 +4890,12 @@ void GroTop::sanitiseCMAPs()
                 }
             }
 
-            mol.sanitiseCMAPs();
-            mol.sanitiseCMAPs(true);
+            mol->sanitiseCMAPs();
+            mol->sanitiseCMAPs(true);
         }
         else
         {
-            const auto cmaps = mol.cmaps();
+            const auto cmaps = mol->cmaps();
 
             for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
             {
@@ -4865,11 +4914,11 @@ void GroTop::sanitiseCMAPs()
                 }
 
                 // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
-                const auto atm0 = mol.atom(atoms.atom0().asA<AtomIdx>()).atomType();
-                const auto atm1 = mol.atom(atoms.atom1().asA<AtomIdx>()).atomType();
-                const auto atm2 = mol.atom(atoms.atom2().asA<AtomIdx>()).atomType();
-                const auto atm3 = mol.atom(atoms.atom3().asA<AtomIdx>()).atomType();
-                const auto atm4 = mol.atom(atoms.atom4().asA<AtomIdx>()).atomType();
+                const auto atm0 = mol->atom(atoms.atom0().asA<AtomIdx>()).atomType();
+                const auto atm1 = mol->atom(atoms.atom1().asA<AtomIdx>()).atomType();
+                const auto atm2 = mol->atom(atoms.atom2().asA<AtomIdx>()).atomType();
+                const auto atm3 = mol->atom(atoms.atom3().asA<AtomIdx>()).atomType();
+                const auto atm4 = mol->atom(atoms.atom4().asA<AtomIdx>()).atomType();
 
                 // create the key for the combination of these atom types
                 // and a "1" function type
@@ -4899,9 +4948,11 @@ void GroTop::sanitiseCMAPs()
                 }
             }
 
-            mol.sanitiseCMAPs();
+            mol->sanitiseCMAPs();
         }
     }
+
+    return cmap_potentials;
 }
 
 /** Construct this parser by extracting all necessary information from the
@@ -5119,7 +5170,7 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
     }
 
     // first, we need to de-deduplicate and sanitise all of the CMAP terms
-    this->sanitiseCMAPs();
+    cmap_potentials = sanitiseCMAPs(name_to_mtyp, idx_name_to_mtyp);
 
     // next, we need to write the defaults section of the file
     QStringList lines = ::writeDefaults(ffield);
@@ -5127,6 +5178,8 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
     // next, we need to extract and write all of the atom types from all of
     // the molecules
     lines += ::writeAtomTypes(idx_name_to_mtyp, idx_name_to_example, ffield, map);
+
+    lines += ::writeCMAPTypes(cmap_potentials);
 
     lines += ::writeMolTypes(idx_name_to_mtyp, idx_name_to_example, usesParallel(),
                              isSorted);

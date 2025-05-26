@@ -483,8 +483,6 @@ namespace SireIO
         PropsAndErrors getDihedralProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
         PropsAndErrors getCMAPProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
 
-        void sanitiseCMAPs();
-
         /** This is the full search path of all directories that should
             be searched for Gromacs include files */
         QStringList include_path;
