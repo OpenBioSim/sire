@@ -3539,7 +3539,7 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
     lines.append(QString("%1  %2").arg(name).arg(moltype.nExcludedAtoms()));
     lines.append("");
 
-    QStringList atomlines, bondlines, anglines, dihlines, scllines;
+    QStringList atomlines, bondlines, anglines, dihlines, cmaplines, scllines;
 
     // Store whether the molecule is perturbable.
     const auto is_perturbable = moltype.isPerturbable();
@@ -4371,6 +4371,64 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
         std::sort(dihlines.begin(), dihlines.end());
     };
 
+    // write all of the cmaps
+    auto write_cmaps = [&]()
+    {
+        if (is_perturbable)
+        {
+            const auto cmaps0 = moltype.cmaps();
+            const auto cmaps1 = moltype.cmaps(true);
+
+            if (cmaps0 != cmaps1)
+            {
+                throw SireError::unsupported(
+                    QObject::tr("The molecule '%1' has different CMAP parameters at lambda = 0 and lambda = 1. "
+                                "This is not supported yet by the Sire parser!")
+                        .arg(moltype.name()),
+                    CODELOC);
+            }
+        }
+
+        const auto cmaps = moltype.cmaps();
+
+        for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
+        {
+            const auto &cmap = it.key();
+            const auto &param = it.value();
+
+            // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+            int atom0 = cmap.atom0().asA<AtomIdx>().value() + 1;
+            int atom1 = cmap.atom1().asA<AtomIdx>().value() + 1;
+            int atom2 = cmap.atom2().asA<AtomIdx>().value() + 1;
+            int atom3 = cmap.atom3().asA<AtomIdx>().value() + 1;
+            int atom4 = cmap.atom4().asA<AtomIdx>().value() + 1;
+
+            bool ok;
+            int function_type = param.toInt(&ok);
+
+            if (not ok)
+            {
+                throw SireError::program_bug(QObject::tr(
+                                                 "The CMAP parameter '%2' for %1 is not a valid integer. "
+                                                 "This is a bug in Sire, please report it.")
+                                                 .arg(cmap.toString())
+                                                 .arg(param),
+                                             CODELOC);
+            }
+
+            // format is the index of each atom, plus the function type,
+            cmaplines.append(QString("%1 %2 %3 %4 %5 %6")
+                                 .arg(atom0, 6)
+                                 .arg(atom1, 6)
+                                 .arg(atom2, 6)
+                                 .arg(atom3, 6)
+                                 .arg(atom4, 6)
+                                 .arg(function_type, 6));
+        }
+
+        std::sort(cmaplines.begin(), cmaplines.end());
+    };
+
     // write all of the pairs (1-4 scaling factors). This is needed even though
     // we have set autogenerate pairs to "yes"
     auto write_pairs = [&]()
@@ -4574,7 +4632,8 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
         }
     };
 
-    const QVector<std::function<void()>> funcs = {write_atoms, write_bonds, write_angs, write_dihs, write_pairs};
+    const QVector<std::function<void()>> funcs = {write_atoms, write_bonds, write_angs,
+                                                  write_dihs, write_cmaps, write_pairs};
 
     if (uses_parallel)
     {
@@ -4640,6 +4699,14 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
         lines.append("[ dihedrals ]");
         lines.append(";   ai     aj     ak     al  funct  parameters");
         lines += dihlines;
+        lines.append("");
+    }
+
+    if (not cmaplines.isEmpty())
+    {
+        lines.append("[ cmap ]");
+        lines.append(";   ai     aj     ak     al     am  funct");
+        lines += cmaplines;
         lines.append("");
     }
 
