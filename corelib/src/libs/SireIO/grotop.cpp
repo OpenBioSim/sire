@@ -431,20 +431,38 @@ static QString cmap_to_string(const CMAPParameter &cmap)
 {
     // format is "1 nRows nCols param param param..."
     QStringList params;
-    params.append(QString::number(cmap.nRows()));
-    params.append(QString::number(cmap.nColumns()));
+    params.append(QString("%1 %2").arg(cmap.nRows(), 2).arg(cmap.nColumns(), 2));
 
-    for (auto value : cmap.grid().toColumnMajorVector())
+    // write as 10 values per line
+    // (this is the format used by Gromacs)
+    const auto vals = cmap.grid().toColumnMajorVector();
+
+    QStringList line;
+
+    for (int i = 0; i < vals.size(); ++i)
     {
-        params.append(QString::number(value, 'f', 8));
+        line.append(QString::number(vals[i], 'f', 8));
+
+        if (line.count() == 10)
+        {
+            params.append(line.join(" "));
+            line.clear();
+        }
     }
 
-    return params.join(" ");
+    if (not line.isEmpty())
+    {
+        params.append(line.join(" "));
+    }
+
+    return params.join("\\\n");
 }
 
-static CMAPParameter string_to_cmap(const QString &params)
+static CMAPParameter string_to_cmap(QString params)
 {
-    QStringList parts = params.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    params = params.trimmed().replace("\\\n", " ");
+
+    QStringList parts = params.split(" ", Qt::SkipEmptyParts);
 
     if (parts.size() < 3)
     {
