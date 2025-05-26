@@ -409,6 +409,95 @@ GroMolType::GroMolType()
 {
 }
 
+/** Return the ID string for the cmap atom types 'atm0' 'atm1' 'atm2' 'atm3' 'atm4'. This
+    creates the string 'atm0;atm1;atm2;atm3;atm4' or 'atm4;atm3;atm2;atm1;atm0' depending on which
+    of the atoms is lower. The ';' character is used as a separator
+    as it cannot be in the atom names, as it is used as a comment
+    character in the Gromacs Top file */
+static QString get_cmap_id(const QString &atm0, const QString &atm1, const QString &atm2,
+                           const QString &atm3, const QString &atm4, int func_type)
+{
+    if ((atm0 < atm4) or (atm0 == atm4 and atm1 <= atm3))
+    {
+        return QString("%1;%2;%3;%4;%5;%6").arg(atm0, atm1, atm2, atm3, atm4).arg(func_type);
+    }
+    else
+    {
+        return QString("%1;%2;%3;%4;%5;%6").arg(atm4, atm3, atm2, atm1, atm0).arg(func_type);
+    }
+}
+
+static QString cmap_to_string(const CMAPParameter &cmap)
+{
+    // format is "1 nRows nCols param param param..."
+    QStringList params;
+    params.append(QString::number(cmap.nRows()));
+    params.append(QString::number(cmap.nColumns()));
+
+    for (auto value : cmap.grid().toColumnMajorVector())
+    {
+        params.append(QString::number(value, 'f', 8));
+    }
+
+    return params.join(" ");
+}
+
+static CMAPParameter string_to_cmap(const QString &params)
+{
+    QStringList parts = params.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+
+    if (parts.size() < 3)
+    {
+        throw SireError::incompatible_error(QObject::tr(
+                                                "Invalid CMAP parameter string '%1'. Expected format: '1 nRows nCols param param ...'")
+                                                .arg(params),
+                                            CODELOC);
+    }
+
+    bool ok_rows, ok_cols;
+
+    int nRows = parts[0].toInt(&ok_rows);
+    int nCols = parts[1].toInt(&ok_cols);
+
+    if (!ok_rows || !ok_cols || nRows <= 0 || nCols <= 0)
+    {
+        throw SireError::incompatible_error(QObject::tr("Invalid CMAP parameter string '%1'. "
+                                                        "Expected positive integers for nRows and nCols.")
+                                                .arg(params),
+                                            CODELOC);
+    }
+
+    if (parts.size() != 2 + nRows * nCols)
+    {
+        throw SireError::incompatible_error(QObject::tr(
+                                                "Invalid CMAP parameter string '%1'. Expected %2 parameters, got %3.")
+                                                .arg(params)
+                                                .arg(2 + nRows * nCols)
+                                                .arg(parts.size()),
+                                            CODELOC);
+    }
+
+    QVector<double> grid(nRows * nCols);
+
+    for (int i = 0; i < nRows * nCols; ++i)
+    {
+        bool ok;
+        double value = parts[2 + i].toDouble(&ok);
+
+        if (!ok)
+        {
+            throw SireError::incompatible_error(QObject::tr("Invalid CMAP parameter string '%1'. "
+                                                            "Expected floating-point values for parameters.")
+                                                    .arg(params),
+                                                CODELOC);
+        }
+
+        grid[i] = value;
+    }
+
+    return CMAPParameter(Array2D<double>::fromColumnMajorVector(grid, nRows, nCols));
+}
+
 /** Construct from the passed molecule */
 GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
     : nexcl0(3), nexcl1(3), // default to '3' as this is normal for most molecules
@@ -901,8 +990,71 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             }
         };
 
+        // get all of the CMAP terms in this molecule
+        auto extract_cmaps = [&](bool is_lambda1)
+        {
+            bool has_cmaps(false);
+            CMAPFunctions cmaps;
+
+            try
+            {
+                if (is_lambda1)
+                    cmaps = mol.property(map["cmap1"]).asA<CMAPFunctions>();
+                else
+                    cmaps = mol.property(map["cmap0"]).asA<CMAPFunctions>();
+
+                has_cmaps = true;
+            }
+            catch (...)
+            {
+            }
+
+            if (has_cmaps)
+            {
+                QHash<CMAPParameter, QString> cmap_params;
+
+                for (const auto &cmap : cmaps.parameters())
+                {
+                    AtomIdx atom0 = molinfo.atomIdx(cmap.atom0());
+                    AtomIdx atom1 = molinfo.atomIdx(cmap.atom1());
+                    AtomIdx atom2 = molinfo.atomIdx(cmap.atom2());
+                    AtomIdx atom3 = molinfo.atomIdx(cmap.atom3());
+                    AtomIdx atom4 = molinfo.atomIdx(cmap.atom4());
+
+                    if ((atom0 > atom4) or (atom0 == atom4 and atom1 > atom2))
+                    {
+                        qSwap(atom0, atom4);
+                        qSwap(atom1, atom2);
+                    }
+
+                    // we will store the CMAP parameter as a string - this
+                    // will let us de-duplicate parameters later
+                    if (cmap_params.contains(cmap.parameter()))
+                    {
+                        if (is_lambda1)
+                            cmaps1.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
+                                          cmap_params[cmap.parameter()]);
+                        else
+                            cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
+                                          cmap_params[cmap.parameter()]);
+                    }
+                    else
+                    {
+                        // store the parameter as a string
+                        QString param_str = cmap_to_string(cmap.parameter());
+                        cmap_params.insert(cmap.parameter(), param_str);
+
+                        if (is_lambda1)
+                            cmaps1.insert(CMAPID(atom0, atom1, atom2, atom3, atom4), param_str);
+                        else
+                            cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4), param_str);
+                    }
+                }
+            }
+        };
+
         const QVector<std::function<void(bool)>> functions = {extract_atoms, extract_bonds, extract_angles,
-                                                              extract_dihedrals};
+                                                              extract_dihedrals, extract_cmaps};
 
         if (uses_parallel)
         {
@@ -1349,8 +1501,60 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             }
         };
 
+        // get all of the CMAP terms in this molecule
+        auto extract_cmaps = [&]()
+        {
+            bool has_cmaps(false);
+            CMAPFunctions cmaps;
+
+            try
+            {
+                cmaps = mol.property(map["cmap"]).asA<CMAPFunctions>();
+                has_cmaps = true;
+            }
+            catch (...)
+            {
+            }
+
+            if (has_cmaps)
+            {
+                QHash<CMAPParameter, QString> cmap_params;
+
+                for (const auto &cmap : cmaps.parameters())
+                {
+                    AtomIdx atom0 = molinfo.atomIdx(cmap.atom0());
+                    AtomIdx atom1 = molinfo.atomIdx(cmap.atom1());
+                    AtomIdx atom2 = molinfo.atomIdx(cmap.atom2());
+                    AtomIdx atom3 = molinfo.atomIdx(cmap.atom3());
+                    AtomIdx atom4 = molinfo.atomIdx(cmap.atom4());
+
+                    if ((atom0 > atom4) or (atom0 == atom4 and atom1 > atom2))
+                    {
+                        qSwap(atom0, atom4);
+                        qSwap(atom1, atom2);
+                    }
+
+                    // we will store the CMAP parameter as a string - this
+                    // will let us de-duplicate parameters later
+                    if (cmap_params.contains(cmap.parameter()))
+                    {
+                        cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
+                                      cmap_params[cmap.parameter()]);
+                    }
+                    else
+                    {
+                        // store the parameter as a string
+                        QString param_str = cmap_to_string(cmap.parameter());
+                        cmap_params.insert(cmap.parameter(), param_str);
+
+                        cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4), param_str);
+                    }
+                }
+            }
+        };
+
         const QVector<std::function<void()>> functions = {extract_atoms, extract_bonds, extract_angles,
-                                                          extract_dihedrals};
+                                                          extract_dihedrals, extract_cmaps};
 
         if (uses_parallel)
         {
@@ -2216,6 +2420,31 @@ QHash<CMAPID, QString> GroMolType::cmaps(bool is_lambda1) const
         return cmaps1;
     else
         return cmaps0;
+}
+
+/** Sanitise all of the CMAP terms - this sets the string equal to "1",
+ *  as the information contained previously has already been read
+ */
+void GroMolType::sanitiseCMAPs(bool is_lambda1)
+{
+    // The molecule is not perturbable!
+    if (is_lambda1 and not this->is_perturbable)
+        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+
+    if (is_lambda1)
+    {
+        for (auto it = cmaps1.begin(); it != cmaps1.end(); ++it)
+        {
+            it.value() = "1";
+        }
+    }
+    else
+    {
+        for (auto it = cmaps0.begin(); it != cmaps0.end(); ++it)
+        {
+            it.value() = "1";
+        }
+    }
 }
 
 /** Return whether or not this is a topology for water. This should
@@ -4489,6 +4718,192 @@ static QStringList writeSystem(QString name, const QVector<QString> &mol_to_molt
     return lines;
 }
 
+/** Function called by the below constructor to sanitise all of the CMAP terms
+ *  that have been loaded into an intermediate state. The aim is to create a
+ *  database of unique CMAP terms, and then make sure that each set of
+ *  atoms that reference those CMAP terms use a consistent set of atom
+ *  types.
+ */
+void GroTop::sanitiseCMAPs()
+{
+    // first, go through all of the molecules and extract out all of the
+    // unique CMAP terms - they are already written in a Gromacs string
+    // format
+    QHash<QString, CMAPParameter> unique_cmaps;
+
+    for (auto &mol : moltypes)
+    {
+        if (mol.isPerturbable())
+        {
+            // do this both for lambda = 0 and lambda = 1
+            const auto cmaps0 = mol.cmaps();
+            const auto cmaps1 = mol.cmaps(true);
+
+            for (auto it = cmaps0.constBegin(); it != cmaps0.constEnd(); ++it)
+            {
+                const auto &atoms = it.key();
+                const auto &param = it.value();
+                CMAPParameter cmap;
+
+                if (not unique_cmaps.contains(param))
+                {
+                    cmap = string_to_cmap(param);
+                    unique_cmaps.insert(param, cmap);
+                }
+                else
+                {
+                    cmap = unique_cmaps[param];
+                }
+
+                // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
+                const auto atm0 = mol.atom(atoms.atom0().asA<AtomIdx>()).atomType();
+                const auto atm1 = mol.atom(atoms.atom1().asA<AtomIdx>()).atomType();
+                const auto atm2 = mol.atom(atoms.atom2().asA<AtomIdx>()).atomType();
+                const auto atm3 = mol.atom(atoms.atom3().asA<AtomIdx>()).atomType();
+                const auto atm4 = mol.atom(atoms.atom4().asA<AtomIdx>()).atomType();
+
+                // create the key for the combination of these atom types
+                // and a "1" function type
+                const auto key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, 1);
+
+                // have we seen this key before?
+                if (cmap_potentials.contains(key))
+                {
+                    // check that we are consistent
+                    if (cmap_potentials[key] != cmap)
+                    {
+                        // we will eventually have to change atom types
+                        // of atoms so we can fix this - for now, we just
+                        // raise an error as this is unsupported
+                        throw SireError::unsupported(
+                            QObject::tr("The CMAP term for atom types %1-%2-%3-%4-%5 "
+                                        "is associated with more than one different CMAP "
+                                        "parameter. This is not currently supported.")
+                                .arg(atm0, atm1, atm2, atm3, atm4),
+                            CODELOC);
+                    }
+                }
+                else
+                {
+                    // we have not seen this key before, so add it
+                    cmap_potentials.insert(key, cmap);
+                }
+            }
+
+            for (auto it = cmaps1.constBegin(); it != cmaps1.constEnd(); ++it)
+            {
+                const auto &atoms = it.key();
+                const auto &param = it.value();
+                CMAPParameter cmap;
+
+                if (not unique_cmaps.contains(param))
+                {
+                    cmap = string_to_cmap(param);
+                    unique_cmaps.insert(param, cmap);
+                }
+                else
+                {
+                    cmap = unique_cmaps[param];
+                }
+
+                // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
+                const auto atm0 = mol.atom(atoms.atom0().asA<AtomIdx>(), true).atomType();
+                const auto atm1 = mol.atom(atoms.atom1().asA<AtomIdx>(), true).atomType();
+                const auto atm2 = mol.atom(atoms.atom2().asA<AtomIdx>(), true).atomType();
+                const auto atm3 = mol.atom(atoms.atom3().asA<AtomIdx>(), true).atomType();
+                const auto atm4 = mol.atom(atoms.atom4().asA<AtomIdx>(), true).atomType();
+
+                // create the key for the combination of these atom types
+                // and a "1" function type
+                const auto key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, 1);
+
+                // have we seen this key before?
+                if (cmap_potentials.contains(key))
+                {
+                    // check that we are consistent
+                    if (cmap_potentials[key] != cmap)
+                    {
+                        // we will eventually have to change atom types
+                        // of atoms so we can fix this - for now, we just
+                        // raise an error as this is unsupported
+                        throw SireError::unsupported(
+                            QObject::tr("The CMAP term for atom types %1-%2-%3-%4-%5 "
+                                        "is associated with more than one different CMAP "
+                                        "parameter. This is not currently supported.")
+                                .arg(atm0, atm1, atm2, atm3, atm4),
+                            CODELOC);
+                    }
+                }
+                else
+                {
+                    // we have not seen this key before, so add it
+                    cmap_potentials.insert(key, cmap);
+                }
+            }
+
+            mol.sanitiseCMAPs();
+            mol.sanitiseCMAPs(true);
+        }
+        else
+        {
+            const auto cmaps = mol.cmaps();
+
+            for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
+            {
+                const auto &atoms = it.key();
+                const auto &param = it.value();
+                CMAPParameter cmap;
+
+                if (not unique_cmaps.contains(param))
+                {
+                    cmap = string_to_cmap(param);
+                    unique_cmaps.insert(param, cmap);
+                }
+                else
+                {
+                    cmap = unique_cmaps[param];
+                }
+
+                // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
+                const auto atm0 = mol.atom(atoms.atom0().asA<AtomIdx>()).atomType();
+                const auto atm1 = mol.atom(atoms.atom1().asA<AtomIdx>()).atomType();
+                const auto atm2 = mol.atom(atoms.atom2().asA<AtomIdx>()).atomType();
+                const auto atm3 = mol.atom(atoms.atom3().asA<AtomIdx>()).atomType();
+                const auto atm4 = mol.atom(atoms.atom4().asA<AtomIdx>()).atomType();
+
+                // create the key for the combination of these atom types
+                // and a "1" function type
+                const auto key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, 1);
+
+                // have we seen this key before?
+                if (cmap_potentials.contains(key))
+                {
+                    // check that we are consistent
+                    if (cmap_potentials[key] != cmap)
+                    {
+                        // we will eventually have to change atom types
+                        // of atoms so we can fix this - for now, we just
+                        // raise an error as this is unsupported
+                        throw SireError::unsupported(
+                            QObject::tr("The CMAP term for atom types %1-%2-%3-%4-%5 "
+                                        "is associated with more than one different CMAP "
+                                        "parameter. This is not currently supported.")
+                                .arg(atm0, atm1, atm2, atm3, atm4),
+                            CODELOC);
+                    }
+                }
+                else
+                {
+                    // we have not seen this key before, so add it
+                    cmap_potentials.insert(key, cmap);
+                }
+            }
+
+            mol.sanitiseCMAPs();
+        }
+    }
+}
+
 /** Construct this parser by extracting all necessary information from the
     passed SireSystem::System, looking for the properties that are specified
     in the passed property map */
@@ -4702,6 +5117,9 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
                 .arg(errors.join("\n\n")),
             CODELOC);
     }
+
+    // first, we need to de-deduplicate and sanitise all of the CMAP terms
+    this->sanitiseCMAPs();
 
     // next, we need to write the defaults section of the file
     QStringList lines = ::writeDefaults(ffield);
@@ -4996,24 +5414,6 @@ static QString get_dihedral_id(const QString &atm0, const QString &atm1, const Q
     else
     {
         return QString("%1;%2;%3;%4;%5").arg(atm3, atm2, atm1, atm0).arg(func_type);
-    }
-}
-
-/** Return the ID string for the cmap atom types 'atm0' 'atm1' 'atm2' 'atm3' 'atm4'. This
-    creates the string 'atm0;atm1;atm2;atm3;atm4' or 'atm4;atm3;atm2;atm1;atm0' depending on which
-    of the atoms is lower. The ';' character is used as a separator
-    as it cannot be in the atom names, as it is used as a comment
-    character in the Gromacs Top file */
-static QString get_cmap_id(const QString &atm0, const QString &atm1, const QString &atm2,
-                           const QString &atm3, const QString &atm4, int func_type)
-{
-    if ((atm0 < atm4) or (atm0 == atm4 and atm1 <= atm3))
-    {
-        return QString("%1;%2;%3;%4;%5;%6").arg(atm0, atm1, atm2, atm3, atm4).arg(func_type);
-    }
-    else
-    {
-        return QString("%1;%2;%3;%4;%5;%6").arg(atm4, atm3, atm2, atm1, atm0).arg(func_type);
     }
 }
 

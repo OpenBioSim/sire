@@ -250,6 +250,8 @@ namespace SireIO
 
         QStringList warnings() const;
 
+        void sanitiseCMAPs(bool is_lambda1 = false);
+
         bool needsSanitising(bool is_lambda1 = false) const;
 
     private:
@@ -480,6 +482,8 @@ namespace SireIO
         PropsAndErrors getAngleProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
         PropsAndErrors getDihedralProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
         PropsAndErrors getCMAPProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
+
+        void sanitiseCMAPs();
 
         /** This is the full search path of all directories that should
             be searched for Gromacs include files */
