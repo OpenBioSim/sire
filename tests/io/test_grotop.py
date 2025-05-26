@@ -167,3 +167,88 @@ def test_fep_atoms():
         atoms_list = atoms.split("\n")
         for a, b in zip(atoms_list, atoms_lines):
             assert a.strip() == b.strip()
+
+
+def test_grotop_cmap(tmpdir, gromacs_cmap):
+    """
+    Test that the GROMACS cmap is correctly parsed and saved.
+    """
+    mols = gromacs_cmap.clone()
+
+    dir = tmpdir.mkdir("test_grotop_cmap")
+
+    mol = mols[0]
+    cmaps = mol.property("cmap").parameters()
+
+    assert len(cmaps) == 127
+
+    unique_cmaps = {}
+
+    # these parameters are all between atoms called "C", "N", "CA", "C", "N"
+    for cmap in cmaps:
+        assert mol.atom(cmap.atom0()).name().value() == "C"
+        assert mol.atom(cmap.atom1()).name().value() == "N"
+        assert mol.atom(cmap.atom2()).name().value() == "CA"
+        assert mol.atom(cmap.atom3()).name().value() == "C"
+        assert mol.atom(cmap.atom4()).name().value() == "N"
+
+        # there should be 24 rows and 24 columns in the cmap
+        assert cmap.parameter().num_rows() == 24
+        assert cmap.parameter().num_columns() == 24
+
+        unique_cmaps[cmap.parameter().to_string()] = 1
+
+    assert len(unique_cmaps) == 3
+
+    orig_cmaps = cmaps
+
+    # now other molecule should have any cmap parameters
+    for mol in mols[1:]:
+        try:
+            cmaps = mol.property("cmap")
+        except Exception:
+            cmaps = None
+
+        if cmaps is not None:
+            assert len(cmaps.parameters()) == 0
+
+    # Save to a temporary file.
+    f = sr.save(mols, dir.join("output"), format="GroTop")
+
+    # Load the saved file.
+    mols2 = sr.load(f, show_warnings=False)
+
+    # assert that we have the same cmap parameters
+    cmaps = mols2[0].property("cmap").parameters()
+
+    assert len(cmaps) == 127
+
+    unique_cmaps2 = {}
+
+    # these parameters are all between atoms called "C", "N", "CA", "C", "N"
+    for cmap in cmaps:
+        assert mols2[0].atom(cmap.atom0()).name().value() == "C"
+        assert mols2[0].atom(cmap.atom1()).name().value() == "N"
+        assert mols2[0].atom(cmap.atom2()).name().value() == "CA"
+        assert mols2[0].atom(cmap.atom3()).name().value() == "C"
+        assert mols2[0].atom(cmap.atom4()).name().value() == "N"
+
+        # there should be 24 rows and 24 columns in the cmap
+        assert cmap.parameter().num_rows() == 24
+        assert cmap.parameter().num_columns() == 24
+
+        unique_cmaps2[cmap.parameter().to_string()] = 1
+
+    assert len(unique_cmaps2) == 3
+
+    assert cmaps == orig_cmaps
+
+    # make sure that no other molecule have any cmap parameters
+    for mol in mols2[1:]:
+        try:
+            cmaps = mol.property("cmap")
+        except Exception:
+            cmaps = None
+
+        if cmaps is not None:
+            assert len(cmaps.parameters()) == 0
