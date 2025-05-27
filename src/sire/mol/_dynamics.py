@@ -280,6 +280,21 @@ class DynamicsData:
             self._sire_mols = None
             self._energy_trajectory = None
 
+        # Store the pressure value needed for the contribution to the reduced potential.
+        if self._map.specified("pressure"):
+            try:
+                from sire.units import mole
+
+                NA = 6.02214076e23 / mole
+                self._pressure = (self._map["pressure"] * NA).value()
+            except Exception as e:
+                raise ValueError(
+                    "'Unable to computed reduced pressure from 'pressure' "
+                    f"value: {self._map['pressure']}'"
+                ) from e
+        else:
+            self._pressure = None
+
     def is_null(self):
         return self._sire_mols is None
 
@@ -360,12 +375,14 @@ class DynamicsData:
         delta_lambda: float = None,
         num_energy_neighbours: int = None,
         null_energy: float = None,
+        adams_value: float = None,
+        num_waters: int = None,
     ):
         if not self._is_running:
             raise SystemError("Cannot stop dynamics that is not running!")
 
         import openmm
-        from ..units import nanosecond, kcal_per_mol
+        from ..units import angstrom, nanosecond, kcal_per_mol
 
         if save_frame:
             self._omm_state = self._omm_mols.getState(
@@ -418,6 +435,12 @@ class DynamicsData:
             sim_lambda_value = self._omm_mols.get_lambda()
             sim_rest2_scale = self._omm_mols.get_rest2_scale()
 
+            # Get the current volume.
+            if self._pressure is not None:
+                volume = self._omm_state.getPeriodicBoxVolume().value_in_unit(
+                    angstrom**3
+                )
+
             # store the potential energy and accumulated non-equilibrium work
             if self._is_interpolate:
                 nrg = nrgs["potential"]
@@ -454,12 +477,14 @@ class DynamicsData:
                                     rest2_scale=rest2_scale,
                                     update_constraints=False,
                                 )
-                                nrgs[str(lambda_value)] = (
-                                    self._omm_mols.get_potential_energy(
-                                        to_sire_units=False
-                                    ).value_in_unit(openmm.unit.kilocalorie_per_mole)
-                                    * kcal_per_mol
-                                )
+                                nrg = self._omm_mols.get_potential_energy(
+                                    to_sire_units=False
+                                ).value_in_unit(openmm.unit.kilocalorie_per_mole)
+                                if self._pressure is not None:
+                                    nrg += self._pressure * volume
+                                if adams_value is not None:
+                                    nrg += adams_value * num_waters
+                                nrgs[str(lambda_value)] = nrg * kcal_per_mol
                             else:
                                 nrgs[str(lambda_value)] = null_energy * kcal_per_mol
 
@@ -936,6 +961,8 @@ class DynamicsData:
         auto_fix_minimise: bool = True,
         num_energy_neighbours: int = None,
         null_energy: str = None,
+        adams_value: float = None,
+        num_waters: int = None,
     ):
         if self.is_null():
             return
@@ -953,6 +980,8 @@ class DynamicsData:
             "auto_fix_minimise": auto_fix_minimise,
             "num_energy_neighbours": num_energy_neighbours,
             "null_energy": null_energy,
+            "adams_value": adams_value,
+            "num_waters": num_waters,
         }
 
         from concurrent.futures import ThreadPoolExecutor
@@ -982,6 +1011,18 @@ class DynamicsData:
                 num_energy_neighbours = int(num_energy_neighbours)
             except:
                 num_energy_neighbours = len(lambda_windows)
+
+        if adams_value is not None:
+            try:
+                adams_value = float(adams_value)
+            except:
+                raise ValueError("'adams_value' must be a float")
+
+        if num_waters is not None:
+            try:
+                num_waters = int(num_waters)
+            except:
+                raise ValueError("'num_waters' must be an integer")
 
         try:
             steps_to_run = int(time.to(picosecond) / self.timestep().to(picosecond))
@@ -1290,6 +1331,8 @@ class DynamicsData:
                             delta_lambda=delta_lambda,
                             num_energy_neighbours=num_energy_neighbours,
                             null_energy=null_energy.value(),
+                            adams_value=adams_value,
+                            num_waters=num_waters,
                         )
 
                         saved_last_frame = False
@@ -1665,6 +1708,16 @@ class Dynamics:
             being computed as part of the energy trajectory, i.e. when
             'num_energy_neighbours' is less than len(lambda_windows).
             By default, a value of '10000 kcal mol-1' is used.
+
+        adams_value: float
+            The value of the Adams parameter. This should be used if
+            you are running dynamics as part of a Grand Canonical water
+            sampling simulation.
+
+        num_waters: int
+            The current number of water molecules in the simulation box.
+            This is used to compute the Grand Canonical contribution to
+            the potential energy.
         """
         if not self._d.is_null():
             if save_velocities is None:
