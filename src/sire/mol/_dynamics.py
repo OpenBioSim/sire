@@ -377,7 +377,7 @@ class DynamicsData:
         delta_lambda: float = None,
         num_energy_neighbours: int = None,
         null_energy: float = None,
-        adams_value: float = None,
+        excess_chemical_potential: str = None,
         num_waters: int = None,
     ):
         if not self._is_running:
@@ -458,8 +458,8 @@ class DynamicsData:
                 nrg = (nrgs["potential"] / kcal_per_mol).value()
                 if self._pressure is not None:
                     nrg += self._pressure * volume
-                if adams_value is not None:
-                    nrg += adams_value * num_waters
+                if excess_chemical_potential is not None:
+                    nrg += excess_chemical_potential * num_waters
                 nrgs[str(sim_lambda_value)] = nrg * kcal_per_mol
 
                 if lambda_windows is not None:
@@ -489,8 +489,8 @@ class DynamicsData:
                                 ).value_in_unit(openmm.unit.kilocalorie_per_mole)
                                 if self._pressure is not None:
                                     nrg += self._pressure * volume
-                                if adams_value is not None:
-                                    nrg += adams_value * num_waters
+                                if excess_chemical_potential is not None:
+                                    nrg += excess_chemical_potential * num_waters
                                 nrgs[str(lambda_value)] = nrg * kcal_per_mol
                             else:
                                 nrgs[str(lambda_value)] = null_energy * kcal_per_mol
@@ -968,7 +968,7 @@ class DynamicsData:
         auto_fix_minimise: bool = True,
         num_energy_neighbours: int = None,
         null_energy: str = None,
-        adams_value: float = None,
+        excess_chemical_potential: float = None,
         num_waters: int = None,
     ):
         if self.is_null():
@@ -987,7 +987,7 @@ class DynamicsData:
             "auto_fix_minimise": auto_fix_minimise,
             "num_energy_neighbours": num_energy_neighbours,
             "null_energy": null_energy,
-            "adams_value": adams_value,
+            "excess_chemical_potential": excess_chemical_potential,
             "num_waters": num_waters,
         }
 
@@ -1019,11 +1019,8 @@ class DynamicsData:
             except:
                 num_energy_neighbours = len(lambda_windows)
 
-        if adams_value is not None:
-            try:
-                adams_value = float(adams_value)
-            except:
-                raise ValueError("'adams_value' must be a float")
+        if excess_chemical_potential is not None:
+            excess_chemical_potential = u(excess_chemical_potential)
 
         if num_waters is not None:
             try:
@@ -1338,7 +1335,7 @@ class DynamicsData:
                             delta_lambda=delta_lambda,
                             num_energy_neighbours=num_energy_neighbours,
                             null_energy=null_energy.value(),
-                            adams_value=adams_value,
+                            excess_chemical_potential=excess_chemical_potential.value(),
                             num_waters=num_waters,
                         )
 
@@ -1614,7 +1611,7 @@ class Dynamics:
         auto_fix_minimise: bool = True,
         num_energy_neighbours: int = None,
         null_energy: str = None,
-        adams_value: float = None,
+        excess_chemical_potential: str = None,
         num_waters: int = None,
     ):
         """
@@ -1718,10 +1715,10 @@ class Dynamics:
             'num_energy_neighbours' is less than len(lambda_windows).
             By default, a value of '10000 kcal mol-1' is used.
 
-        adams_value: float
-            The value of the Adams parameter. This should be used if
-            you are running dynamics as part of a Grand Canonical water
-            sampling simulation.
+        excess_chemical_potential: str
+            The excess chemical potential of water. This is required when
+            running dynamics as part of a Grand Canonical water sampling
+            simulation.
 
         num_waters: int
             The current number of water molecules in the simulation box.
@@ -1748,7 +1745,7 @@ class Dynamics:
                 auto_fix_minimise=auto_fix_minimise,
                 num_energy_neighbours=num_energy_neighbours,
                 null_energy=null_energy,
-                adams_value=adams_value,
+                excess_chemical_potential=excess_chemical_potential,
                 num_waters=num_waters,
             )
 
