@@ -83,6 +83,7 @@ set ( SIREMM_HEADERS
       restraints.h
       restraintcomponent.h
       restraintff.h
+      rmsdrestraints.h
       selectorangle.h
       selectorbond.h
       selectordihedral.h
@@ -174,6 +175,7 @@ set ( SIREMM_SOURCES
       restraints.cpp
       restraintcomponent.cpp
       restraintff.cpp
+      rmsdrestraints.cpp
       selectorangle.cpp
       selectorbond.cpp
       selectordihedral.cpp
