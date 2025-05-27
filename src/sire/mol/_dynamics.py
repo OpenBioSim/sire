@@ -384,7 +384,7 @@ class DynamicsData:
             raise SystemError("Cannot stop dynamics that is not running!")
 
         import openmm
-        from ..units import angstrom, nanosecond, kcal_per_mol
+        from ..units import nanosecond, kcal_per_mol
 
         if save_frame:
             self._omm_state = self._omm_mols.getState(
@@ -440,7 +440,7 @@ class DynamicsData:
             # Get the current volume.
             if self._pressure is not None:
                 volume = self._omm_state.getPeriodicBoxVolume().value_in_unit(
-                    angstrom**3
+                    openmm.unit.angstrom**3
                 )
 
             # store the potential energy and accumulated non-equilibrium work
