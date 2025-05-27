@@ -283,10 +283,12 @@ class DynamicsData:
         # Store the pressure value needed for the contribution to the reduced potential.
         if self._map.specified("pressure"):
             try:
+                from sire import u
                 from sire.units import mole
 
                 NA = 6.02214076e23 / mole
-                self._pressure = (self._map["pressure"] * NA).value()
+                pressure = u(self._map["pressure"].source())
+                self._pressure = (pressure * NA).value()
             except Exception as e:
                 raise ValueError(
                     "'Unable to computed reduced pressure from 'pressure' "
@@ -453,7 +455,12 @@ class DynamicsData:
                 self._nrg_prev = nrg
                 nrgs["work"] = self._work
             else:
-                nrgs[str(sim_lambda_value)] = nrgs["potential"]
+                nrg = (nrgs["potential"] / kcal_per_mol).value()
+                if self._pressure is not None:
+                    nrg += self._pressure * volume
+                if adams_value is not None:
+                    nrg += adams_value * num_waters
+                nrgs[str(sim_lambda_value)] = nrg * kcal_per_mol
 
                 if lambda_windows is not None:
                     # get the index of the simulation lambda value in the
