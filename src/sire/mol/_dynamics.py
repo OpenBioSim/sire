@@ -1607,6 +1607,8 @@ class Dynamics:
         auto_fix_minimise: bool = True,
         num_energy_neighbours: int = None,
         null_energy: str = None,
+        adams_value: float = None,
+        num_waters: int = None,
     ):
         """
         Perform dynamics on the molecules.
@@ -1739,6 +1741,8 @@ class Dynamics:
                 auto_fix_minimise=auto_fix_minimise,
                 num_energy_neighbours=num_energy_neighbours,
                 null_energy=null_energy,
+                adams_value=adams_value,
+                num_waters=num_waters,
             )
 
         return self
