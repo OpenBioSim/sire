@@ -339,9 +339,9 @@ const char *RMSDRestraints::what() const
     return RMSDRestraints::typeName();
 }
 
-PositionalRestraints *PositionalRestraints::clone() const
+RMSDRestraints *RMSDRestraints::clone() const
 {
-    return new PositionalRestraints(*this);
+    return new RMSDRestraints(*this);
 }
 
 QString RMSDRestraints::toString() const
