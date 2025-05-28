@@ -185,7 +185,6 @@ QString RMSDRestraint::toString() const
         }
         for (const auto &pos : ref_pos)
         {
-            // Assuming pos has methods x(), y(), and z() to get components
             p.append(QString("(%1, %2, %3)")
                 .arg(pos.x())
                 .arg(pos.y())
