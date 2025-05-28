@@ -50,6 +50,8 @@ using namespace SireStream;
 //////////// Implementation of RMSDRestraint
 ////////////
 
+static const RegisterMetaType<RMSDRestraint> r_rmsdrest;
+
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const RMSDRestraint &rmsdrest)
 {
