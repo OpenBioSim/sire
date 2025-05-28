@@ -194,7 +194,11 @@ QString RMSDRestraint::toString() const
         }
         for (const auto &pos : ref_pos)
         {
-            p.append(QString::number(pos));
+            // Assuming pos has methods x(), y(), and z() to get components
+            p.append(QString("(%1, %2, %3)")
+                .arg(pos.x())
+                .arg(pos.y())
+                .arg(pos.z()));
         }
         return QString("RMSDRestraint( [%1], [%2], k=%3, r0=%4 )")
             .arg(a.join(", "))
@@ -333,6 +337,11 @@ const char *RMSDRestraints::typeName()
 const char *RMSDRestraints::what() const
 {
     return RMSDRestraints::typeName();
+}
+
+PositionalRestraints *PositionalRestraints::clone() const
+{
+    return new PositionalRestraints(*this);
 }
 
 QString RMSDRestraints::toString() const
