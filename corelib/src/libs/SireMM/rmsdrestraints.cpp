@@ -96,20 +96,11 @@ RMSDRestraint::RMSDRestraint(const QList<qint64> &atoms,
                              const SireUnits::Dimension::HarmonicBondConstant &k,
                              const SireUnits::Dimension::Length &r0)
     : ConcreteProperty<RMSDRestraint, Property>(),
-      ref_pos(ref_positions.toVector()), _k(k), _r0(r0)
+      atms(atoms.toVector()),
+      ref_pos(ref_positions.toVector()), 
+      _k(k), 
+      _r0(r0)
 {
-    // Make sure that we have a set of distinct atoms
-    // QSet<qint64> distinct;
-    // distinct.reserve(atoms.size());
-
-    // for (const auto &atom : atoms)
-    // {
-    //     if (atom >= 0)
-    //         distinct.insert(atom);
-    // }
-
-    // Convert atom indices to QVector
-    atms = atoms.toVector();
 }
 
 /** Copy constructor */
