@@ -627,6 +627,13 @@ class DynamicsData:
                 self._map["pressure"] = ensemble.pressure()
                 self._omm_mols.set_pressure(ensemble.pressure())
 
+                from sire import u
+                from sire.units import mole
+
+                NA = 6.02214076e23 / mole
+                pressure = u(self._map["pressure"].source())
+                self._pressure = (pressure * NA).value()
+
     def set_temperature(self, temperature, rescale_velocities: bool = True):
         """
         Set the temperature for the dynamics. Note that this will only
