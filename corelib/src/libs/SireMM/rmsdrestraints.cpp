@@ -186,7 +186,7 @@ QString RMSDRestraint::toString() const
     else
     {
         return QString("RMSDRestraint( %1 => %2, k=%3 : r0=%4 )")
-            .arg(this->atom())
+            .arg(this->atoms())
             .arg(ref_pos.toString())
             .arg(_k.toString())
             .arg(_r0.toString());
