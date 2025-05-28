@@ -377,7 +377,7 @@ class DynamicsData:
         delta_lambda: float = None,
         num_energy_neighbours: int = None,
         null_energy: float = None,
-        excess_chemical_potential: str = None,
+        excess_chemical_potential: float = None,
         num_waters: int = None,
     ):
         if not self._is_running:
@@ -1020,7 +1020,7 @@ class DynamicsData:
                 num_energy_neighbours = len(lambda_windows)
 
         if excess_chemical_potential is not None:
-            excess_chemical_potential = u(excess_chemical_potential)
+            excess_chemical_potential = u(excess_chemical_potential).value()
 
         if num_waters is not None:
             try:
@@ -1335,7 +1335,7 @@ class DynamicsData:
                             delta_lambda=delta_lambda,
                             num_energy_neighbours=num_energy_neighbours,
                             null_energy=null_energy.value(),
-                            excess_chemical_potential=excess_chemical_potential.value(),
+                            excess_chemical_potential=excess_chemical_potential,
                             num_waters=num_waters,
                         )
 
