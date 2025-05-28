@@ -212,6 +212,29 @@ SireUnits::Dimension::Length RMSDRestraint::r0() const
     return this->_r0;
 }
 
+/** Return the atoms involved in the restraint */
+QVector<qint64> RMSDRestraint::atoms() const
+{
+    return this->atms;
+}
+
+/** Return the atoms involved in the restraint */
+QVector<qint64> RMSDRestraint::atoms() const
+{
+    return this->atms;
+}
+
+/** Return the reference positions */
+QVector<SireMaths::Vector> RMSDRestraint::ref_positions() const
+{
+    return this->ref_pos;
+}
+
+// QVector<SireMaths::Vector> RMSDRestraint::ref_positions() const
+// {
+//     return this->ref_pos.toList();
+// }
+
 ///////
 /////// Implementation of RMSDRestraints
 ///////
