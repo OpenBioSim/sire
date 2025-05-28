@@ -88,8 +88,7 @@ RMSDRestraint::RMSDRestraint()
 }
 
 
-/** Construct a restraint that acts on the group of provided atoms,
-    restraining these wrt the desired reference positions */
+/** Construct a restraint that acts on the group of provided atoms */
 RMSDRestraint::RMSDRestraint(const QList<qint64> &atoms, 
                              const QList<SireMaths::Vector> &ref_positions,
                              const SireUnits::Dimension::HarmonicBondConstant &k,

@@ -15,6 +15,8 @@ __all__ = [
     "PositionRestraints",
     "DihedralRestraint",
     "DihedralRestraints",
+    "RMSDRestraint",
+    "RMSDRestraints",
     "SelectorAngle",
     "SelectorBond",
     "SelectorDihedral",
@@ -46,6 +48,9 @@ BoreschRestraints = _MM.BoreschRestraints
 
 PositionalRestraint = _MM.PositionalRestraint
 PositionalRestraints = _MM.PositionalRestraints
+
+RMSDRestraint = _MM.RMSDRestraint
+RMSDRestraints = _MM.RMSDRestraints
 
 DihedralRestraint = _MM.DihedralRestraint
 DihedralRestraints = _MM.DihedralRestraints

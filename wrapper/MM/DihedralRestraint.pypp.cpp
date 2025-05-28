@@ -37,7 +37,7 @@ void register_DihedralRestraint_class(){
 
     { //::SireMM::DihedralRestraint
         typedef bp::class_< SireMM::DihedralRestraint, bp::bases< SireBase::Property > > DihedralRestraint_exposer_t;
-        DihedralRestraint_exposer_t DihedralRestraint_exposer = DihedralRestraint_exposer_t( "DihedralRestraint", "This class represents a single angle restraint between any three\natoms in a system\nAuthor: Christopher Woods\n", bp::init< >("Null constructor") );
+        DihedralRestraint_exposer_t DihedralRestraint_exposer = DihedralRestraint_exposer_t( "DihedralRestraint", "This class represents a single torsion restraint between any four\natoms in a system\nAuthor: Christopher Woods\n", bp::init< >("Null constructor") );
         bp::scope DihedralRestraint_scope( DihedralRestraint_exposer );
         DihedralRestraint_exposer.def( bp::init< QList< long long > const &, SireUnits::Dimension::Angle const &, SireUnits::Dimension::HarmonicAngleConstant const & >(( bp::arg("atoms"), bp::arg("phi0"), bp::arg("kphi") ), "Construct a restraint that acts on the angle within the\nfour atoms atom0, atom1, atom2 atom3 (phi == a(0123)),\nrestraining the angle within these atoms") );
         DihedralRestraint_exposer.def( bp::init< SireMM::DihedralRestraint const & >(( bp::arg("other") ), "Copy constructor") );
@@ -147,9 +147,9 @@ void register_DihedralRestraint_class(){
         DihedralRestraint_exposer.def( "__deepcopy__", &__copy__<SireMM::DihedralRestraint>);
         DihedralRestraint_exposer.def( "clone", &__copy__<SireMM::DihedralRestraint>);
         DihedralRestraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::DihedralRestraint >,
-                                bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         DihedralRestraint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::DihedralRestraint >,
-                                bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         DihedralRestraint_exposer.def_pickle(sire_pickle_suite< ::SireMM::DihedralRestraint >());
         DihedralRestraint_exposer.def( "__str__", &__str__< ::SireMM::DihedralRestraint > );
         DihedralRestraint_exposer.def( "__repr__", &__str__< ::SireMM::DihedralRestraint > );

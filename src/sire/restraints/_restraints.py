@@ -5,6 +5,7 @@ __all__ = [
     "dihedral",
     "distance",
     "positional",
+    "rmsd"
 ]
 
 from .. import u
@@ -760,5 +761,63 @@ def positional(mols, atoms, k=None, r0=None, position=None, name=None, map=None)
             )
         else:
             restraints.add(PositionalRestraint(idxs[0], position[i], ik, ir0))
+
+    return restraints
+
+
+def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None):
+    """
+    Create a set of RMSD restraints for the atoms specified in
+    'atoms' that are contained in the container 'mols', using the
+    passed values of 'k' and flat-bottom potential
+    well-width 'r0' for the restraints. Note that 'k' values
+    correspond to half the force constants for the harmonic
+    restraints, because the harmonic restraint energy is defined as
+    k*(r - r0)**2 (hence the force is defined as 2*(r - r0)).
+
+    The RMSD calculation is perfomed by default using the position 
+    of mols. Optionally, a different state of the system can be 
+    supplied as a reference under the 'ref' argument.
+
+    If 'r0' is not specified, then a simple harmonic restraint
+    is used.
+
+    If 'k' is not specified, then a default of 150 kcal mol-1 A-2
+    will be used.
+    """
+    from .. import u
+    from ..mm import RMSDRestraint, RMSDRestraints
+
+    if k is None:
+        k = u("150 kcal mol-1 A-2")
+    else:
+        k = u(k)
+
+    if r0 is None:
+        r0 = u("0")
+    else:
+        r0 = u(r0)
+
+    atoms = _to_atoms(mols, atoms)
+    mols = mols.atoms()
+
+    if name is None:
+        restraints = RMSDRestraints()
+    else:
+        restraints = RMSDRestraints(name=name)
+
+    # Set default reference positions to mols
+    if ref is None:
+        ref = mols
+    else:
+        try:
+            ref = ref.atoms()
+        except:
+            raise TypeError("The reference state must be a complete system. ")
+
+    # Generate list of all positions as reference for RMSD calculation
+    ref_pos = ref.atoms().property("coordinates")
+
+    restraints.add(RMSDRestraint(mols.find(atoms), ref_pos, k, r0))
 
     return restraints
