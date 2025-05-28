@@ -185,9 +185,20 @@ QString RMSDRestraint::toString() const
 
     else
     {
-        return QString("RMSDRestraint( %1 => %2, k=%3 : r0=%4 )")
-            .arg(this->atoms())
-            .arg(ref_pos.toString())
+        QStringList a;
+        QStringList p;
+
+        for (const auto &atom : atms)
+        {
+            a.append(QString::number(atom));
+        }
+        for (const auto &pos : ref_pos)
+        {
+            p.append(QString::number(pos));
+        }
+        return QString("RMSDRestraint( [%1], [%2], k=%3, r0=%4 )")
+            .arg(a.join(", "))
+            .arg(p.join(", "))
             .arg(_k.toString())
             .arg(_r0.toString());
     }
