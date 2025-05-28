@@ -50,7 +50,7 @@ void register_RMSDRestraint_class(){
                 "atoms"
                 , atoms_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the atoms involved in the restraint" );
         
         }
         { //::SireMM::RMSDRestraint::isNull
@@ -115,7 +115,7 @@ void register_RMSDRestraint_class(){
                 "ref_positions"
                 , ref_positions_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the reference positions" );
         
         }
         { //::SireMM::RMSDRestraint::toString
