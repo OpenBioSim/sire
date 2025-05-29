@@ -43,7 +43,7 @@ void register_RMSDRestraint_class(){
         RMSDRestraint_exposer.def( bp::init< SireMM::RMSDRestraint const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::RMSDRestraint::atoms
         
-            typedef ::QList< long long > ( ::SireMM::RMSDRestraint::*atoms_function_type)(  ) const;
+            typedef ::QVector< long long > ( ::SireMM::RMSDRestraint::*atoms_function_type)(  ) const;
             atoms_function_type atoms_function_value( &::SireMM::RMSDRestraint::atoms );
             
             RMSDRestraint_exposer.def( 
@@ -108,7 +108,7 @@ void register_RMSDRestraint_class(){
         }
         { //::SireMM::RMSDRestraint::ref_positions
         
-            typedef ::QList< SireMaths::Vector > ( ::SireMM::RMSDRestraint::*ref_positions_function_type)(  ) const;
+            typedef ::QVector< SireMaths::Vector > ( ::SireMM::RMSDRestraint::*ref_positions_function_type)(  ) const;
             ref_positions_function_type ref_positions_function_value( &::SireMM::RMSDRestraint::ref_positions );
             
             RMSDRestraint_exposer.def( 
