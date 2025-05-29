@@ -90,8 +90,8 @@ namespace SireMM
 
         bool isNull() const;
 
-        QList<qint64> atoms() const;
-        QList<SireMaths::Vector> ref_positions() const;
+        QVector<qint64> atoms() const;
+        QVector<SireMaths::Vector> ref_positions() const;
 
         SireUnits::Dimension::HarmonicBondConstant k() const;
         SireUnits::Dimension::Length r0() const;

@@ -96,11 +96,11 @@ RMSDRestraint::RMSDRestraint(const QList<qint64> &atoms,
                              const SireUnits::Dimension::HarmonicBondConstant &k,
                              const SireUnits::Dimension::Length &r0)
     : ConcreteProperty<RMSDRestraint, Property>(),
-      atms(atoms.toVector()),
-      ref_pos(ref_positions.toVector()), 
       _k(k), 
       _r0(r0)
 {
+    atms = atoms.toVector();
+    ref_pos = ref_positions.toVector(); 
 }
 
 /** Copy constructor */
@@ -119,6 +119,7 @@ RMSDRestraint &RMSDRestraint::operator=(const RMSDRestraint &other)
 {
     if (this != &other)
     {
+        Property::operator=(other);
         atms = other.atms;
         ref_pos = other.ref_pos;
         _k = other._k;
@@ -130,8 +131,10 @@ RMSDRestraint &RMSDRestraint::operator=(const RMSDRestraint &other)
 
 bool RMSDRestraint::operator==(const RMSDRestraint &other) const
 {
-    return atms == other.atms and ref_pos == other.ref_pos and
-           _k == other._k and _r0 == other._r0;
+    return atms == other.atms and 
+    ref_pos == other.ref_pos and
+    _k == other._k and 
+    _r0 == other._r0;
 }
 
 bool RMSDRestraint::operator!=(const RMSDRestraint &other) const
@@ -210,12 +213,6 @@ SireUnits::Dimension::HarmonicBondConstant RMSDRestraint::k() const
 SireUnits::Dimension::Length RMSDRestraint::r0() const
 {
     return this->_r0;
-}
-
-/** Return the atoms involved in the restraint */
-QVector<qint64> RMSDRestraint::atoms() const
-{
-    return this->atms;
 }
 
 /** Return the atoms involved in the restraint */
@@ -466,7 +463,7 @@ RMSDRestraints RMSDRestraints::operator+(const RMSDRestraint &restraint) const
 {
     RMSDRestraints ret(*this);
     ret += restraint;
-    return *this;
+    return ret;
 }
 
 /** Add restraints onto the list */
@@ -481,5 +478,5 @@ RMSDRestraints RMSDRestraints::operator+(const RMSDRestraints &restraints) const
 {
     RMSDRestraints ret(*this);
     ret += restraints;
-    return *this;
+    return ret;
 }
