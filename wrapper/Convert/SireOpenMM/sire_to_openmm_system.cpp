@@ -400,6 +400,91 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     }
 }
 
+void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
+                              OpenMM::System &system, LambdaLever &lambda_lever,
+                              int natoms)
+{
+    if (restraints.isEmpty())
+        return;
+    
+    // Check that restraints only contains a single RMSD restraint
+    if (restraints.count() > 1)
+    {
+        throw SireError::unsupported(QObject::tr(
+                    "Setup of multiple RMSD restraints simultaneously is not currently supported. "
+                    "Please set up each restraint individually and then combine them into multiple restraints."),
+                                     CODELOC);
+    }
+
+    // Check that natoms and ref_positions match
+    
+
+    // Internal functions to convert to OpenMM units
+    const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+    const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
+
+    // Function to covnert SireMaths::Vector to OpenMM::Vec3 
+    auto to_vec3 = [](const SireMaths::Vector &coords)
+    {
+        const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+
+        return OpenMM::Vec3(internal_to_nm * coords.x(),
+                            internal_to_nm * coords.y(),
+                            internal_to_nm * coords.z());
+    };
+
+    // energy expression of a flat-bottom well potential, scaled by rho
+    const auto energy_expression = QString(
+                                    "rho*k*step(delta)*delta*delta;"
+                                    "delta=(rmsd-rmsd_b)")
+                                    .toStdString();
+
+    // Apply RMSD restraining potential using OpenMM::CustomCVForce
+    const auto atom_restraints = restraints.restraints();
+    for (const auto &restraint : atom_restraints)
+    {
+        double k = restraint.k().value() * internal_to_k;
+        double r0 = restraint.r0().value() * internal_to_nm;
+
+        // Extract indices of atoms to be restrained
+        const int n_particles = restraint.atoms().size();
+        std::vector<int> particles;
+        particles.resize(n_particles);
+
+        for (int i = 0; i < n_particles; ++i)
+        {
+            particles[i] = restraint.atoms()[i];
+        }
+
+        // Extract reference positions and convert to correct units
+        std::vector<OpenMM::Vec3> referencePositions;
+        const int n_total = restraint.ref_positions().size();
+        referencePositions.resize(n_total);
+
+        for (int i = 0; i < n_total; ++i)
+        {
+            referencePositions[i] = to_vec3(restraint.ref_positions()[i]);
+        }
+
+        auto *restraintff = new OpenMM::CustomCVForce(energy_expression);
+        restraintff->setName("RMSDRestraintForce");
+
+        restraintff->addGlobalParameter("rho", 1.0);
+        restraintff->addGlobalParameter("k", k);
+        restraintff->addGlobalParameter("rmsd_b", r0);  
+
+        restraintff->setUsesPeriodicBoundaryConditions(true);
+
+        auto *rmsdCV = new OpenMM::RMSDForce(referencePositions, particles); 
+        restraintff->addCollectiveVariable("rmsd", rmsdCV);
+
+        lambda_lever.addRestraintIndex(restraints.name(),
+                                    system.addForce(restraintff));
+
+    }
+
+}
+
 /** Add all of the angle restraints from 'restraints' to the passed
  *  system, which is acted on by the passed LambdaLever. The number
  *  of real (non-anchor) atoms in the OpenMM::System is 'natoms'
