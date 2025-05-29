@@ -2064,6 +2064,36 @@ void _update_restraint_in_context(OpenMM::CustomBondForce *ff, double rho,
     ff->updateParametersInContext(context);
 }
 
+/** Update the parameters for a CustomCVForce for scale factor 'rho'
+ *  in the passed context */
+void _update_restraint_in_context(OpenMM::CustomCVForce *ff, double rho,
+                                  OpenMM::Context &context)
+{
+    if (ff == 0)
+        throw SireError::invalid_cast(QObject::tr(
+                                          "Unable to cast the restraint force to an OpenMM::CustomCVForce, "
+                                          "despite it reporting that is was an object of this type..."),
+                                      CODELOC);
+
+    const int nparams = ff->getNumGlobalParameters();
+
+    if (nparams == 0)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "Unable to set 'rho' for this restraint as it has no custom parameters!"),
+                                            CODELOC);
+
+
+    // First global param corresponds to rho.
+    double current_rho = ff->getGlobalParameterDefaultValue(0);
+    if (current_rho == rho)
+        return; 
+
+    // Update the default value of rho
+    ff->setGlobalParameterDefaultValue(0, rho);
+
+    ff->updateParametersInContext(context);
+}
+
 /** Internal function used to update the restraint force to use the
  *  supplied value of rho in the passed context */
 void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
@@ -2100,6 +2130,12 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomCompoundBondForce *>(&ff),
+            rho, context);
+    }
+    else if (ff_type == "RMSDRestraintForce")
+    {
+        _update_restraint_in_context(
+            dynamic_cast<OpenMM::CustomCVForce *>(&ff),
             rho, context);
     }
     else
