@@ -27,6 +27,7 @@
 #include "SireMM/boreschrestraints.h"
 #include "SireMM/dihedralrestraints.h"
 #include "SireMM/positionalrestraints.h"
+#include "SireMM/rmsdrestraints.h"
 #include "SireMM/selectorbond.h"
 
 #include "SireVol/periodicbox.h"
@@ -415,9 +416,6 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
                     "Please set up each restraint individually and then combine them into multiple restraints."),
                                      CODELOC);
     }
-
-    // Check that natoms and ref_positions match
-    
 
     // Internal functions to convert to OpenMM units
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
@@ -1917,6 +1915,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             {
                 _add_positional_restraints(prop.read().asA<SireMM::PositionalRestraints>(),
                                            system, lambda_lever, anchor_coords, start_index);
+            }
+            else if (prop.read().isA<SireMM::RMSDRestraints>())
+            {
+                _add_rmsd_restraints(prop.read().asA<SireMM::RMSDRestraints>(),
+                                           system, lambda_lever, start_index);
             }
             else if (prop.read().isA<SireMM::BondRestraints>())
             {
