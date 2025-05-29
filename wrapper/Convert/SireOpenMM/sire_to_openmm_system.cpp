@@ -471,8 +471,6 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
         restraintff->addGlobalParameter("k", k);
         restraintff->addGlobalParameter("rmsd_b", r0);  
 
-        restraintff->setUsesPeriodicBoundaryConditions(true);
-
         auto *rmsdCV = new OpenMM::RMSDForce(referencePositions, particles); 
         restraintff->addCollectiveVariable("rmsd", rmsdCV);
 
