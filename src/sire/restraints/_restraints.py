@@ -765,7 +765,7 @@ def positional(mols, atoms, k=None, r0=None, position=None, name=None, map=None)
     return restraints
 
 
-def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None):
+def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None, map=None):
     """
     Create a set of RMSD restraints for the atoms specified in
     'atoms' that are contained in the container 'mols', using the
@@ -773,11 +773,11 @@ def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None):
     well-width 'r0' for the restraints. Note that 'k' values
     correspond to half the force constants for the harmonic
     restraints, because the harmonic restraint energy is defined as
-    k*(r - r0)**2 (hence the force is defined as 2*(r - r0)).
+    k*(rmsd - r0)**2 (hence the force is defined as 2*(rmsd - r0)).
 
     The RMSD calculation is perfomed by default using the position 
     of mols. Optionally, a different state of the system can be 
-    supplied as a reference under the 'ref' argument.
+    supplied as a reference by passing the 'ref' argument.
 
     If 'r0' is not specified, then a simple harmonic restraint
     is used.
@@ -786,7 +786,10 @@ def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None):
     will be used.
     """
     from .. import u
+    from ..base import create_map
     from ..mm import RMSDRestraint, RMSDRestraints
+
+    map = create_map(map)
 
     if k is None:
         k = u("150 kcal mol-1 A-2")
@@ -813,7 +816,7 @@ def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None):
         try:
             ref = ref.atoms()
         except:
-            raise TypeError("The reference state must be a complete system. ")
+            raise TypeError("The reference state must be a complete system.")
 
     # Generate list of all positions as reference for RMSD calculation
     ref_pos = ref.atoms().property("coordinates")
