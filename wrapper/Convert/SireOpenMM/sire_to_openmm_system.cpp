@@ -408,15 +408,6 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
     if (restraints.isEmpty())
         return;
     
-    // Check that restraints only contains a single RMSD restraint
-    if (restraints.count() > 1)
-    {
-        throw SireError::unsupported(QObject::tr(
-                    "Setup of multiple RMSD restraints simultaneously is not currently supported. "
-                    "Please set up each restraint individually and then combine them into multiple restraints."),
-                                     CODELOC);
-    }
-
     // Internal functions to convert to OpenMM units
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
     const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
