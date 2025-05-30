@@ -180,22 +180,14 @@ QString RMSDRestraint::toString() const
     else
     {
         QStringList a;
-        QStringList p;
 
         for (const auto &atom : atms)
         {
             a.append(QString::number(atom));
         }
-        for (const auto &pos : ref_pos)
-        {
-            p.append(QString("(%1, %2, %3)")
-                .arg(pos.x())
-                .arg(pos.y())
-                .arg(pos.z()));
-        }
-        return QString("RMSDRestraint( [%1], [%2], k=%3, r0=%4 )")
+
+        return QString("RMSDRestraint( [%1], k=%2, r0=%3 )")
             .arg(a.join(", "))
-            .arg(p.join(", "))
             .arg(_k.toString())
             .arg(_r0.toString());
     }
@@ -227,10 +219,6 @@ QVector<SireMaths::Vector> RMSDRestraint::ref_positions() const
     return this->ref_pos;
 }
 
-// QVector<SireMaths::Vector> RMSDRestraint::ref_positions() const
-// {
-//     return this->ref_pos.toList();
-// }
 
 ///////
 /////// Implementation of RMSDRestraints
