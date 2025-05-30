@@ -1,12 +1,4 @@
-__all__ = [
-    "angle",
-    "boresch",
-    "bond",
-    "dihedral",
-    "distance",
-    "positional",
-    "rmsd"
-]
+__all__ = ["angle", "boresch", "bond", "dihedral", "distance", "positional", "rmsd"]
 
 from .. import u
 
@@ -775,8 +767,8 @@ def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None, map=None):
     restraints, because the harmonic restraint energy is defined as
     k*(rmsd - r0)**2 (hence the force is defined as 2*(rmsd - r0)).
 
-    The RMSD calculation is perfomed by default using the position 
-    of mols. Optionally, a different state of the system can be 
+    The RMSD calculation is perfomed by default using the position
+    of mols. Optionally, a different state of the system can be
     supplied as a reference by passing the 'ref' argument.
 
     If 'r0' is not specified, then a simple harmonic restraint
@@ -815,7 +807,7 @@ def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None, map=None):
     else:
         try:
             ref = ref.atoms()
-        except:
+        except AttributeError:
             raise TypeError("The reference state must be a complete system.")
 
     # Generate list of all positions as reference for RMSD calculation
