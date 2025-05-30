@@ -776,6 +776,36 @@ def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None, map=None):
 
     If 'k' is not specified, then a default of 150 kcal mol-1 A-2
     will be used.
+
+    Parameters
+    ----------
+    mols : sire.system._system.System
+        The system containing the atoms.
+
+    atoms : SireMol::Selector<SireMol::Atom>
+        The atoms to restrain.
+
+    ref : sire.system._system.System
+        The system from which the reference positions for the RMSD calculation
+        are extracted from. If None, this will default to the current
+        state of mols.    
+
+    k : str or SireUnits::Dimension::GeneralUnit or, optional
+        The force constant for the RMSD restraints.
+        If None, this will default to 150 kcal mol-1 A-2.
+        Default is None.
+
+    r0 : str or SireUnits::Dimension::GeneralUnit, optional
+        The width of the flat bottom restraint. If None, this is zero
+        and a simple harmonic restraint is used.
+        Default is None.
+
+    Returns
+    -------
+    RMSDRestraints : SireMM::RMSDRestraints
+        A container of RMSD restraints, where the first restraint is
+        the RMSDRestraint created. The RMSD restraint created can be
+        extracted with RMSDRestraints[0].
     """
     from .. import u
     from ..base import create_map
