@@ -1284,30 +1284,32 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // count the number of atoms and ghost atoms
     int n_atoms = 0;
     int n_ghost_atoms = 0;
+    int n_vs = 0;
 
     for (int i = 0; i < nmols; ++i)
     {
         const auto &mol = openmm_mols_data[i];
         n_atoms += mol.nAtoms();
+        n_ghost_atoms += mol.nGhostAtoms();
         if (mol.has_vs)
         {
-            n_atoms += mol.n_vs;
+            n_vs += mol.n_vs;
         }
-        n_ghost_atoms += mol.nGhostAtoms();
     }
 
     // there's probably lots of optimisations we can make if the
     // number of ghost atoms is zero...
-    ghost_atoms.reserve(n_ghost_atoms);
-    non_ghost_atoms.reserve(n_atoms - n_ghost_atoms);
+    // Making sure there is space in all arrays for virtual sites to be ghosts
+    ghost_atoms.reserve(n_ghost_atoms + n_vs);
+    non_ghost_atoms.reserve(n_atoms - n_ghost_atoms + n_vs);
 
     // the set of all ghost atoms, with the value
     // indicating if this is a from-ghost (true) or
     // a to-ghost (false)
     QVector<int> from_ghost_idxs;
     QVector<int> to_ghost_idxs;
-    from_ghost_idxs.reserve(n_ghost_atoms);
-    to_ghost_idxs.reserve(n_ghost_atoms);
+    from_ghost_idxs.reserve(n_ghost_atoms + n_vs);
+    to_ghost_idxs.reserve(n_ghost_atoms + n_vs);
 
     // loop over every molecule and add them one by one
     for (int i = 0; i < nmols; ++i)
@@ -1584,26 +1586,22 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     ghost_ghostff->addParticle(custom_params);
                     ghost_nonghostff->addParticle(custom_params);
 
-                    // Append virtual sites to ghost atom list
-                    if (mol.from_ghost_idxs.contains(parent_idx)) 
-                    {
-                        ghost_atoms.append(atom_index);
-                    }
                     const bool vs_to_ghost = mol.to_ghost_idxs.contains(parent_idx);
                     const bool vs_from_ghost = mol.from_ghost_idxs.contains(parent_idx);
-                    if (vs_from_ghost or vs_to_ghost)
+
+                    // Append virtual sites to ghost atom list
+
+                    if (vs_to_ghost)
                     {
                         ghost_atoms.append(atom_index);
-    
-                        if (vs_from_ghost)
-                        {
-                            from_ghost_idxs.append(atom_index);
-                        }
-                        else
-                        {
-                            to_ghost_idxs.append(atom_index);
-                        }
+                        to_ghost_idxs.append(atom_index);
                     }
+                    else if (vs_from_ghost)
+                    {
+                        ghost_atoms.append(atom_index);
+                        from_ghost_idxs.append(atom_index);
+                    }
+
                 }
                 else if (any_perturbable)
                 {
@@ -1770,9 +1768,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                       coul_14_scale,
                                       lj_14_scale);
 
-            // VS
-            // Still need to do this block
-            // Try to find a way to avoid ridiculous amount of nesting
             if (is_perturbable)
             {
                 const bool atom0_is_ghost = mol.isGhostAtom(atom0);
@@ -1926,7 +1921,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     ghost_ghostff->addExclusion(from_ghost_idx, to_ghost_idx);
                     ghost_nonghostff->addExclusion(from_ghost_idx, to_ghost_idx);
                     cljff->addException(from_ghost_idx, to_ghost_idx,
-                                        0.0, 1e-9, 1e-9, true);
+                                        0.0, 1e-9, 1e-9, false);
                 }
             }
         }

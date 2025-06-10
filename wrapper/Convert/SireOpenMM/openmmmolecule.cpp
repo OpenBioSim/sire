@@ -1279,7 +1279,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                         auto atom_vs = this->vs_parents.property(std::to_string(i).c_str()).asAnArray();
                         for (int vs = 0; vs < atom_vs.size(); ++vs)
                         {
-                            int vs_index = cljs.count() + vs;
+                            int vs_index = this->nAtoms() + atom_vs.at(vs).asAnInteger();
                             from_ghost_idxs.insert(vs_index);
                             this->alphas[vs_index] = 1.0;
                             this->kappas[vs_index] = 1.0;
@@ -1305,7 +1305,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                     auto atom_vs = this->vs_parents.property(std::to_string(i).c_str()).asAnArray();
                     for (int vs = 0; vs < atom_vs.size(); ++vs)
                     {
-                        int vs_index = cljs.count() + vs;
+                        int vs_index = this->nAtoms() + atom_vs.at(vs).asAnInteger();
                         to_ghost_idxs.insert(vs_index);
                         this->perturbed->alphas[vs_index] = 1.0;
                         this->kappas[vs_index] = 1.0;
