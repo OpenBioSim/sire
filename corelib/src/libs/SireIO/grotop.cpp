@@ -427,6 +427,22 @@ static QString get_cmap_id(const QString &atm0, const QString &atm1, const QStri
     }
 }
 
+static QList<QString> cmap_id_to_atomtypes(const QString &cmap_id)
+{
+    // split the string by the ';' character
+    QStringList parts = cmap_id.split(";");
+
+    if (parts.size() != 6)
+    {
+        throw SireError::incompatible_error(QObject::tr("Invalid CMAP ID '%1'. Expected format: 'atm0;atm1;atm2;atm3;atm4;func_type'")
+                                                .arg(cmap_id),
+                                            CODELOC);
+    }
+
+    // return the first 5 parts as a list of atom types
+    return parts.mid(0, 5);
+}
+
 static QString cmap_to_string(const CMAPParameter &cmap)
 {
     // format is "1 nRows nCols param param param..."
@@ -3133,10 +3149,25 @@ static QStringList writeDefaults(const MMDetail &ffield)
     that the atom types for all molecules are all consistent, i.e. atom type
     X has the same mass, vdw parameters, element type etc. for all molecules */
 static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps,
+                                  QHash<QString, CMAPParameter> &cmap_potentials,
                                   const QMap<QPair<int, QString>, Molecule> &molecules, const MMDetail &ffield,
                                   const PropertyMap &map)
 {
-    // first, build up a dictionary of all of the unique atom types
+    // first, get a list of all atom types involved in CMAP parameters
+    // (I've passed this in as a reference, in case in the future we can fix this
+    //  problem and update the CMAP parameters being written out. For now, we
+    //  just raise an exception if this is detected as a problem)
+    QSet<QString> cmap_atom_types;
+
+    for (auto it = cmap_potentials.constBegin(); it != cmap_potentials.constEnd(); ++it)
+    {
+        for (const auto &atom_type : cmap_id_to_atomtypes(it.key()))
+        {
+            cmap_atom_types.insert(atom_type);
+        }
+    }
+
+    // next, build up a dictionary of all of the unique atom types
     QHash<QString, QString> atomtypes;
     QHash<QString, QString> param_hash;
 
@@ -3215,6 +3246,13 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
                 else if (not was_perturbable)
                     particle_type = "D";
 
+                if (cmap_atom_types.contains(atomtype))
+                {
+                    throw SireError::incompatible_error(
+                        QObject::tr("Cannot write a dummy atom type '%1' for a CMAP parameter.").arg(atomtype),
+                        CODELOC);
+                }
+
                 // Flag that we need to update the atoms.
                 update_atoms0 = true;
             }
@@ -3259,6 +3297,15 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
                 // The parameters for this type differ.
                 if (atomtypes[atomtype] != type_string)
                 {
+                    if (cmap_atom_types.contains(atomtype))
+                    {
+                        throw SireError::incompatible_error(
+                            QObject::tr("Cannot write a CMAP parameter for atom type '%1' with different "
+                                        "parameters.")
+                                .arg(atomtype),
+                            CODELOC);
+                    }
+
                     // First check the values to see if there's an existing type
                     // with these parameters.
                     const auto params = param_hash.keys();
@@ -3382,6 +3429,13 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
                 // This is a dummy atom.
                 if (elem.nProtons() == 0 and lj.isDummy())
                 {
+                    if (cmap_atom_types.contains(atomtype))
+                    {
+                        throw SireError::incompatible_error(
+                            QObject::tr("Cannot write a dummy atom type '%1' for a CMAP parameter.").arg(atomtype),
+                            CODELOC);
+                    }
+
                     atomtype += "_du";
 
                     // Flag that we need to update the atoms.
@@ -3429,6 +3483,15 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
                     // The parameters for this type differ.
                     if (atomtypes[atomtype] != type_string)
                     {
+                        if (cmap_atom_types.contains(atomtype))
+                        {
+                            throw SireError::incompatible_error(
+                                QObject::tr("Cannot write a CMAP parameter for atom type '%1' with different "
+                                            "parameters.")
+                                    .arg(atomtype),
+                                CODELOC);
+                        }
+
                         // First check the values to see if there's an existing type
                         // with these parameters.
                         const auto params = param_hash.keys();
@@ -5368,7 +5431,7 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
 
     // next, we need to extract and write all of the atom types from all of
     // the molecules
-    lines += ::writeAtomTypes(idx_name_to_mtyp, idx_name_to_example, ffield, map);
+    lines += ::writeAtomTypes(idx_name_to_mtyp, cmap_potentials, idx_name_to_example, ffield, map);
 
     lines += ::writeCMAPTypes(cmap_potentials);
 
