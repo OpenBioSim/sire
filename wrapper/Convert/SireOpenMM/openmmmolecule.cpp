@@ -91,7 +91,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         ffinfo = mol.property(map["forcefield"]).asA<MMDetail>();
     }
 
-    if (map.specified("virtual_sites") and mol.property("n_virtual_sites").asAnInteger() > 0)
+    if (mol.hasProperty("n_virtual_sites") and mol.property("n_virtual_sites").asAnInteger() > 0)
     {
         this->has_vs = true; 
         this->vs_parents = mol.property("parents").asA<SireBase::Properties>();

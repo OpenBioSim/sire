@@ -2030,7 +2030,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     {
                         // Initiate all VS with zero coords, as they will need to be
                         // calculated in the openmm context anyway
-                        for (int vs = 0; vs < map["virtual_sites"].value().asAnInteger(); ++vs)
+                        for (int vs = 0; vs < mol.n_vs; ++vs)
                         {
                             coords_data[start_index+mol.nAtoms()+vs] = OpenMM::Vec3(0,0,0);
                             vels_data[start_index+mol.nAtoms()+vs] = OpenMM::Vec3(0,0,0);
@@ -2048,7 +2048,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                           vels_data + start_index);
             if (mol.has_vs)
             {
-            for (int vs = 0; vs < map["virtual_sites"].value().asAnInteger(); ++vs)
+            for (int vs = 0; vs < mol.n_vs; ++vs)
                 {
                     coords_data[start_index+mol.nAtoms()+vs] = OpenMM::Vec3(0,0,0);
                     vels_data[start_index+mol.nAtoms()+vs] = OpenMM::Vec3(0,0,0);
