@@ -477,8 +477,7 @@ if ( ${SIRE_CXX_COMPILER_ID} MATCHES "GNU" )
     # get the compiler version (via gcc -dumpversion)
     # (I'll assume that we are using the same version
     # of compiler for C and C++...)
-    EXEC_PROGRAM( ${CMAKE_CXX_COMPILER}
-                  ARGS -dumpversion
+    EXECUTE_PROCESS( COMMAND ${CMAKE_CXX_COMPILER} -dumpversion
                   OUTPUT_VARIABLE exe_output )
 
     # These two regexps are copied from the Chicken CMake
