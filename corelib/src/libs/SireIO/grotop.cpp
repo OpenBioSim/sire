@@ -4865,6 +4865,50 @@ static QHash<QString, CMAPParameter> sanitiseCMAPs(QHash<QString, GroMolType> &n
         moltypes.append(&it.value());
     }
 
+    // first, create a set of all existing atom types
+    QSet<QString> existing_atom_types;
+
+    for (auto mol : moltypes)
+    {
+        for (const auto &atom : mol->atoms())
+        {
+            existing_atom_types.insert(atom.atomType());
+        }
+    }
+
+    auto get_new_atomtype = [&](const QString &atm_type)
+    {
+        if (not existing_atom_types.contains(atm_type))
+            return atm_type;
+
+        QString new_atm_type = atm_type + "A";
+
+        int count = 0;
+
+        while (existing_atom_types.contains(new_atm_type))
+        {
+            count += 1;
+
+            // convert the count to a letter
+            // e.g. 0 -> A, 1 -> B, ..., 25 -> Z, 26 -> AA, 27 -> AB, ...
+            QString suffix = "";
+
+            int c = count;
+
+            while (c >= 0)
+            {
+                suffix = QChar('A' + (c % 26)) + suffix;
+                c = c / 26 - 1;
+            }
+
+            new_atm_type = atm_type + suffix;
+        }
+
+        existing_atom_types.insert(new_atm_type);
+        qDebug() << "New atom type" << new_atm_type << "for" << atm_type;
+        return new_atm_type;
+    };
+
     for (auto mol : moltypes)
     {
         if (mol->isPerturbable())
@@ -4906,15 +4950,15 @@ static QHash<QString, CMAPParameter> sanitiseCMAPs(QHash<QString, GroMolType> &n
                     // check that we are consistent
                     if (cmap_potentials[key] != cmap)
                     {
-                        // we will eventually have to change atom types
-                        // of atoms so we can fix this - for now, we just
-                        // raise an error as this is unsupported
-                        throw SireError::unsupported(
-                            QObject::tr("The CMAP term for atom types %1-%2-%3-%4-%5 "
-                                        "is associated with more than one different CMAP "
-                                        "parameter. This is not currently supported.")
-                                .arg(atm0, atm1, atm2, atm3, atm4),
-                            CODELOC);
+                        auto new_atm_type = get_new_atomtype(atm2);
+
+                        mol->atom(atoms.atom2().asA<AtomIdx>(), true).setAtomType(new_atm_type);
+                        existing_atom_types.insert(new_atm_type);
+
+                        auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
+                        cmap_potentials.insert(new_key, cmap);
+
+                        qDebug() << "Inserted new CMAP key" << new_key;
                     }
                 }
                 else
@@ -4957,15 +5001,15 @@ static QHash<QString, CMAPParameter> sanitiseCMAPs(QHash<QString, GroMolType> &n
                     // check that we are consistent
                     if (cmap_potentials[key] != cmap)
                     {
-                        // we will eventually have to change atom types
-                        // of atoms so we can fix this - for now, we just
-                        // raise an error as this is unsupported
-                        throw SireError::unsupported(
-                            QObject::tr("The CMAP term for atom types %1-%2-%3-%4-%5 "
-                                        "is associated with more than one different CMAP "
-                                        "parameter. This is not currently supported.")
-                                .arg(atm0, atm1, atm2, atm3, atm4),
-                            CODELOC);
+                        auto new_atm_type = get_new_atomtype(atm2);
+
+                        mol->atom(atoms.atom2().asA<AtomIdx>(), true).setAtomType(new_atm_type);
+                        existing_atom_types.insert(new_atm_type);
+
+                        auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
+                        cmap_potentials.insert(new_key, cmap);
+
+                        qDebug() << "Inserted new CMAP key" << new_key;
                     }
                 }
                 else
@@ -5015,15 +5059,15 @@ static QHash<QString, CMAPParameter> sanitiseCMAPs(QHash<QString, GroMolType> &n
                     // check that we are consistent
                     if (cmap_potentials[key] != cmap)
                     {
-                        // we will eventually have to change atom types
-                        // of atoms so we can fix this - for now, we just
-                        // raise an error as this is unsupported
-                        throw SireError::unsupported(
-                            QObject::tr("The CMAP term for atom types %1-%2-%3-%4-%5 "
-                                        "is associated with more than one different CMAP "
-                                        "parameter. This is not currently supported.")
-                                .arg(atm0, atm1, atm2, atm3, atm4),
-                            CODELOC);
+                        auto new_atm_type = get_new_atomtype(atm2);
+
+                        mol->atom(atoms.atom2().asA<AtomIdx>(), true).setAtomType(new_atm_type);
+                        existing_atom_types.insert(new_atm_type);
+
+                        auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
+                        cmap_potentials.insert(new_key, cmap);
+
+                        qDebug() << "Inserted new CMAP key" << new_key;
                     }
                 }
                 else
