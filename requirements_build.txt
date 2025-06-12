@@ -1,6 +1,6 @@
 # Build requirements for Sire.
 
-cmake
+cmake >= 3.30.0
 git
 python
 
