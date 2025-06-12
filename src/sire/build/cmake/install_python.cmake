@@ -9,52 +9,21 @@ if (NOT DEFINED PYTHON_EXECUTABLE)
   endif()
 endif()
 
-find_package( PythonInterp REQUIRED )
+find_package( Python REQUIRED COMPONENTS Interpreter Development )
 
-set( PYTHON_VERSION "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" )
+set( PYTHON_VERSION "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}" )
 
-unset(PYTHON_LIBRARY CACHE)
+message( STATUS "Using python ${PYTHON_VERSION} from ${PYTHON_EXECUTABLE}" )
 
-# sys.abiflags is an empty string for Python >= 3.8
-if (${PYTHON_VERSION} LESS 3.8)
-  set(PYTHON_ABIFLAGS "m")
-else()
-  set(PYTHON_ABIFLAGS "")
-endif()
+# Set the require Python variables.
+set ( PYTHON_SITE_DIR "${Python_SITELIB}" )
+set ( PYTHON_INCLUDE_DIR "${Python_INCLUDE_DIRS}" )
+set ( PYTHON_LIBRARIES "${Python_LIBRARIES}" )
 
-if (MSVC)
-  find_library( PYTHON_LIBRARY
-                NAMES python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}.lib
-                PATHS ${ANACONDA_BASE}/libs NO_DEFAULT_PATH )
-else()
-  find_library( PYTHON_LIBRARY
-                NAMES python${PYTHON_VERSION}${PYTHON_ABIFLAGS}
-                PATHS ${ANACONDA_BASE}/lib NO_DEFAULT_PATH )
-endif()
-
-if (NOT PYTHON_LIBRARY)
+if (NOT PYTHON_LIBRARIES)
   message( FATAL_ERROR "Where is the python library that comes with anaconda? "
                         "It cannot be found. Please check that your anaconda "
                         "installation is complete." )
-endif()
-
-set( PYTHON_LIBRARIES "${PYTHON_LIBRARY}" )
-if (CMAKE_GENERATOR MATCHES "Visual Studio")  # MSBuild
-  set( PYTHON_SITE_DIR "../../lib/site-packages" )
-else()
-  set( PYTHON_SITE_DIR "../../lib/python${PYTHON_VERSION}/site-packages" )
-endif()
-
-if(CMAKE_GENERATOR MATCHES "Visual Studio")  # MSBuild
-  set( PYTHON_MODULE_EXTENSION ".pyd" )
-else()
-  set( PYTHON_MODULE_EXTENSION ".so" )
-  get_filename_component(PYTHON_INCLUDE_DIR "${PYTHON_LIBRARY}" DIRECTORY)
-  get_filename_component(PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}" DIRECTORY)
-  set( PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}/include")
-  if (NOT MSVC)
-    set( PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}/python${PYTHON_VERSION}${PYTHON_ABIFLAGS}" )
-  endif()
 endif()
 
 message( STATUS "Using anaconda/miniconda python in ${PYTHON_LIBRARIES} | ${PYTHON_INCLUDE_DIR}" )
