@@ -231,6 +231,8 @@ namespace SireIO
         GroAtom atom(const SireMol::AtomNum &atomnum, bool is_lambda1 = false) const;
         GroAtom atom(const SireMol::AtomName &atomnam, bool is_lambda1 = false) const;
 
+        void setAtomType(const SireMol::AtomIdx &atomidx, const QString &atomtype, bool is_lambda1 = false);
+
         QVector<GroAtom> atoms(bool is_lambda1 = false) const;
         void setAtoms(const QVector<GroAtom> &atoms, bool is_lambda1 = false);
 

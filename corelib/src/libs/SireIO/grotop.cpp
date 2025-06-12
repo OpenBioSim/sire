@@ -1705,7 +1705,7 @@ MMDetail GroMolType::forcefield(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot extract forcefield. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         return ffield1;
@@ -1718,7 +1718,7 @@ void GroMolType::setNExcludedAtoms(qint64 n, bool is_lambda1)
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot set excluded atoms. The molecule isn't perturbable!"));
 
     if (n >= 0)
         if (is_lambda1)
@@ -1739,7 +1739,7 @@ qint64 GroMolType::nExcludedAtoms(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get excluded atoms. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         return nexcl1;
@@ -1753,7 +1753,7 @@ void GroMolType::addAtom(const GroAtom &atom, bool is_lambda1)
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot add atom. The molecule isn't perturbable!"));
 
     if (not atom.isNull())
     {
@@ -1769,7 +1769,7 @@ bool GroMolType::needsSanitising(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot check needs sanitise. The molecule isn't perturbable!"));
 
     if (is_lambda1)
     {
@@ -1792,7 +1792,7 @@ int GroMolType::nAtoms(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get number of atoms. The molecule isn't perturbable!"));
 
     if (needsSanitising(is_lambda1))
     {
@@ -1814,7 +1814,7 @@ int GroMolType::nResidues(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get number of residues. The molecule isn't perturbable!"));
 
     if (needsSanitising(is_lambda1))
     {
@@ -1836,7 +1836,7 @@ GroAtom GroMolType::atom(const AtomIdx &atomidx, bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get atom. The molecule isn't perturbable!"));
 
     if (needsSanitising(is_lambda1))
     {
@@ -1864,7 +1864,7 @@ GroAtom GroMolType::atom(const AtomNum &atomnum, bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get atom by number. The molecule isn't perturbable!"));
 
     if (needsSanitising(is_lambda1))
     {
@@ -1906,7 +1906,7 @@ GroAtom GroMolType::atom(const AtomName &atomnam, bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get atom by name. The molecule isn't perturbable!"));
 
     if (needsSanitising(is_lambda1))
     {
@@ -1942,13 +1942,38 @@ GroAtom GroMolType::atom(const AtomName &atomnam, bool is_lambda1) const
                                 CODELOC);
 }
 
+/** Set the atom type of the specified atom */
+void GroMolType::setAtomType(const AtomIdx &atomidx, const QString &atomtype, bool is_lambda1)
+{
+    // The molecule is not perturbable!
+    if (is_lambda1 and not this->is_perturbable)
+        throw SireError::incompatible_error(QObject::tr("Cannot set atom type. The molecule isn't perturbable!"));
+
+    if (needsSanitising(is_lambda1))
+    {
+        GroMolType other(*this);
+        other._pvt_sanitise(is_lambda1);
+        other.setAtomType(atomidx, atomtype, is_lambda1);
+        return;
+    }
+
+    if (is_lambda1)
+    {
+        atms1[atomidx.map(atms1.count())].setAtomType(atomtype);
+    }
+    else
+    {
+        atms0[atomidx.map(atms0.count())].setAtomType(atomtype);
+    }
+}
+
 /** Return all atoms that have the passed name. Returns an empty
     list if there are no atoms with this name */
 QVector<GroAtom> GroMolType::atoms(const AtomName &atomnam, bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get atoms by name. The molecule isn't perturbable!"));
 
     if (needsSanitising(is_lambda1))
     {
@@ -1988,7 +2013,7 @@ QVector<GroAtom> GroMolType::atoms(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get atoms. The molecule isn't perturbable!"));
 
     if (needsSanitising(is_lambda1))
     {
@@ -2008,7 +2033,7 @@ void GroMolType::setAtoms(const QVector<GroAtom> &atoms, bool is_lambda1)
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot set atoms. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         this->atms1 = atoms;
@@ -2021,7 +2046,7 @@ QVector<GroAtom> GroMolType::atoms(const ResIdx &residx, bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get atoms by residue. The molecule isn't perturbable!"));
 
     if (needsSanitising(is_lambda1))
     {
@@ -2065,7 +2090,7 @@ QVector<GroAtom> GroMolType::atoms(const ResNum &resnum, bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get atoms by residue number. The molecule isn't perturbable!"));
 
     if (needsSanitising(is_lambda1))
     {
@@ -2113,7 +2138,7 @@ QVector<GroAtom> GroMolType::atoms(const ResName &resnam, bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get atoms by residue name. The molecule isn't perturbable!"));
 
     if (needsSanitising(is_lambda1))
     {
@@ -2161,7 +2186,7 @@ void GroMolType::_pvt_sanitise(bool is_lambda1)
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot sanitise. The molecule isn't perturbable!"));
 
     // sort the atoms so that they are in residue number / atom number order, and
     // we check and remove duplicate atom numbers
@@ -2183,7 +2208,7 @@ void GroMolType::sanitise(QString elecstyle, QString vdwstyle, QString combrule,
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot call sanitise. The molecule isn't perturbable!"));
 
     if (not needsSanitising(is_lambda1))
         return;
@@ -2292,7 +2317,7 @@ void GroMolType::addBond(const BondID &bond, const GromacsBond &param, bool is_l
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot add bond. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         bnds1.insert(bond, param);
@@ -2305,7 +2330,7 @@ void GroMolType::addAngle(const AngleID &angle, const GromacsAngle &param, bool 
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot add angle. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         angs1.insert(angle, param);
@@ -2318,7 +2343,7 @@ void GroMolType::addDihedral(const DihedralID &dihedral, const GromacsDihedral &
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot add dihedral. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         dihs1.insert(dihedral, param);
@@ -2331,7 +2356,7 @@ void GroMolType::addBonds(const QMultiHash<BondID, GromacsBond> &bonds, bool is_
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot add bonds. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         bnds1 += bonds;
@@ -2344,7 +2369,7 @@ void GroMolType::addAngles(const QMultiHash<AngleID, GromacsAngle> &angles, bool
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot add angles. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         angs1 += angles;
@@ -2357,7 +2382,7 @@ void GroMolType::addDihedrals(const QMultiHash<DihedralID, GromacsDihedral> &dih
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot add dihedrals. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         dihs1 += dihedrals;
@@ -2370,7 +2395,9 @@ void GroMolType::addCMAPs(const QHash<CMAPID, QString> &cmaps, bool is_lambda1)
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot add CMAPs. The molecule isn't perturbable!"));
+    }
 
     if (is_lambda1)
     {
@@ -2393,7 +2420,7 @@ QMultiHash<BondID, GromacsBond> GroMolType::bonds(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get bonds. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         return bnds1;
@@ -2406,7 +2433,7 @@ QMultiHash<AngleID, GromacsAngle> GroMolType::angles(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get angles. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         return angs1;
@@ -2419,7 +2446,7 @@ QMultiHash<DihedralID, GromacsDihedral> GroMolType::dihedrals(bool is_lambda1) c
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get dihedrals. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         return dihs1;
@@ -2432,7 +2459,7 @@ QHash<CMAPID, QString> GroMolType::cmaps(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot get CMAPs. The molecule isn't perturbable!"));
 
     if (is_lambda1)
         return cmaps1;
@@ -2447,7 +2474,7 @@ void GroMolType::sanitiseCMAPs(bool is_lambda1)
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot sanitise CMAPs. The molecule isn't perturbable!"));
 
     if (is_lambda1)
     {
@@ -2471,7 +2498,7 @@ bool GroMolType::isWater(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot check water. The molecule isn't perturbable!"));
 
     if (nResidues(is_lambda1) == 1)
     {
@@ -2562,7 +2589,7 @@ QStringList GroMolType::settlesLines(bool is_lambda1) const
 {
     // The molecule is not perturbable!
     if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("The molecule isn't perturbable!"));
+        throw SireError::incompatible_error(QObject::tr("Cannot check settles. The molecule isn't perturbable!"));
 
     if (not this->isWater(is_lambda1))
         return QStringList();
@@ -4870,43 +4897,51 @@ static QHash<QString, CMAPParameter> sanitiseCMAPs(QHash<QString, GroMolType> &n
 
     for (auto mol : moltypes)
     {
-        for (const auto &atom : mol->atoms())
+        if (mol->isPerturbable())
         {
-            existing_atom_types.insert(atom.atomType());
+            for (const auto &atom : mol->atoms(false))
+            {
+                existing_atom_types.insert(atom.atomType());
+            }
+
+            for (const auto &atom : mol->atoms(true))
+            {
+                existing_atom_types.insert(atom.atomType());
+            }
+        }
+        else
+        {
+            for (const auto &atom : mol->atoms())
+            {
+                existing_atom_types.insert(atom.atomType());
+            }
         }
     }
 
-    auto get_new_atomtype = [&](const QString &atm_type)
+    auto get_atomtype_count = [&](const QString &atm_type, int count) -> QString
     {
-        if (not existing_atom_types.contains(atm_type))
-            return atm_type;
+        // convert the count to a letter
+        // e.g. 0 -> A, 1 -> B, ..., 25 -> Z, 26 -> AA, 27 -> AB, ...
+        QString suffix = "";
 
-        QString new_atm_type = atm_type + "A";
-
-        int count = 0;
-
-        while (existing_atom_types.contains(new_atm_type))
+        while (count >= 0)
         {
-            count += 1;
-
-            // convert the count to a letter
-            // e.g. 0 -> A, 1 -> B, ..., 25 -> Z, 26 -> AA, 27 -> AB, ...
-            QString suffix = "";
-
-            int c = count;
-
-            while (c >= 0)
-            {
-                suffix = QChar('A' + (c % 26)) + suffix;
-                c = c / 26 - 1;
-            }
-
-            new_atm_type = atm_type + suffix;
+            suffix = QChar('A' + (count % 26)) + suffix;
+            count = count / 26 - 1;
         }
 
-        existing_atom_types.insert(new_atm_type);
-        qDebug() << "New atom type" << new_atm_type << "for" << atm_type;
-        return new_atm_type;
+        return atm_type + suffix;
+    };
+
+    auto get_new_atomtype = [&](const QString &atm_type, int count) -> QString
+    {
+        // make sure there is no "old" atom type that is the same as the new one
+        while (existing_atom_types.contains(get_atomtype_count(atm_type, count)))
+        {
+            count += 1;
+        }
+
+        return get_atomtype_count(atm_type, count);
     };
 
     for (auto mol : moltypes)
@@ -4950,15 +4985,24 @@ static QHash<QString, CMAPParameter> sanitiseCMAPs(QHash<QString, GroMolType> &n
                     // check that we are consistent
                     if (cmap_potentials[key] != cmap)
                     {
-                        auto new_atm_type = get_new_atomtype(atm2);
-
-                        mol->atom(atoms.atom2().asA<AtomIdx>(), true).setAtomType(new_atm_type);
-                        existing_atom_types.insert(new_atm_type);
-
+                        int count = 0;
+                        auto new_atm_type = get_new_atomtype(atm2, count);
                         auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
-                        cmap_potentials.insert(new_key, cmap);
 
-                        qDebug() << "Inserted new CMAP key" << new_key;
+                        while (cmap_potentials.contains(new_key) and cmap_potentials[new_key] != cmap)
+                        {
+                            count += 1;
+                            new_atm_type = get_new_atomtype(atm2, count);
+                            new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
+                        }
+
+                        // we have found a new atom type that can be used for this new CMAP
+                        mol->setAtomType(atoms.atom2().asA<AtomIdx>(), new_atm_type);
+
+                        if (not cmap_potentials.contains(new_key))
+                        {
+                            cmap_potentials.insert(new_key, cmap);
+                        }
                     }
                 }
                 else
@@ -5001,15 +5045,24 @@ static QHash<QString, CMAPParameter> sanitiseCMAPs(QHash<QString, GroMolType> &n
                     // check that we are consistent
                     if (cmap_potentials[key] != cmap)
                     {
-                        auto new_atm_type = get_new_atomtype(atm2);
-
-                        mol->atom(atoms.atom2().asA<AtomIdx>(), true).setAtomType(new_atm_type);
-                        existing_atom_types.insert(new_atm_type);
-
+                        int count = 0;
+                        auto new_atm_type = get_new_atomtype(atm2, count);
                         auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
-                        cmap_potentials.insert(new_key, cmap);
 
-                        qDebug() << "Inserted new CMAP key" << new_key;
+                        while (cmap_potentials.contains(new_key) and cmap_potentials[new_key] != cmap)
+                        {
+                            count += 1;
+                            new_atm_type = get_new_atomtype(atm2, count);
+                            new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
+                        }
+
+                        // we have found a new atom type that can be used for this new CMAP
+                        mol->setAtomType(atoms.atom2().asA<AtomIdx>(), new_atm_type, true);
+
+                        if (not cmap_potentials.contains(new_key))
+                        {
+                            cmap_potentials.insert(new_key, cmap);
+                        }
                     }
                 }
                 else
@@ -5059,15 +5112,24 @@ static QHash<QString, CMAPParameter> sanitiseCMAPs(QHash<QString, GroMolType> &n
                     // check that we are consistent
                     if (cmap_potentials[key] != cmap)
                     {
-                        auto new_atm_type = get_new_atomtype(atm2);
-
-                        mol->atom(atoms.atom2().asA<AtomIdx>(), true).setAtomType(new_atm_type);
-                        existing_atom_types.insert(new_atm_type);
-
+                        int count = 0;
+                        auto new_atm_type = get_new_atomtype(atm2, count);
                         auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
-                        cmap_potentials.insert(new_key, cmap);
 
-                        qDebug() << "Inserted new CMAP key" << new_key;
+                        while (cmap_potentials.contains(new_key) and cmap_potentials[new_key] != cmap)
+                        {
+                            count += 1;
+                            new_atm_type = get_new_atomtype(atm2, count);
+                            new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
+                        }
+
+                        // we have found a new atom type that can be used for this new CMAP
+                        mol->setAtomType(atoms.atom2().asA<AtomIdx>(), new_atm_type);
+
+                        if (not cmap_potentials.contains(new_key))
+                        {
+                            cmap_potentials.insert(new_key, cmap);
+                        }
                     }
                 }
                 else
