@@ -422,16 +422,37 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
                             internal_to_nm * coords.z());
     };
 
-    // energy expression of a flat-bottom well potential, scaled by rho
-    const auto energy_expression = QString(
-                                    "rho*k*step(delta)*delta*delta;"
-                                    "delta=(rmsd-rmsd_b)")
-                                    .toStdString();
+    // Count the number of existing RMSD forces in the system
+    std::vector<OpenMM::Force*> forces;
+    
+    for (int i = 0; i < system.getNumForces(); ++i) {
+        forces.push_back(&system.getForce(i));
+    }
+
+    int n_CVForces = 0;
+
+    for (auto* force : forces) {
+        if (dynamic_cast<OpenMM::CustomCVForce*>(force)) {
+            n_CVForces++;
+        }
+    }
 
     // Apply RMSD restraining potential using OpenMM::CustomCVForce
     const auto atom_restraints = restraints.restraints();
     for (const auto &restraint : atom_restraints)
     {
+        // Define unique parameter names for rho, k and rmsd_b
+        std::string k_unique = "k_" + std::to_string(n_CVForces);
+        std::string rho_unique = "rho_" + std::to_string(n_CVForces);
+        std::string rmsd_b_unique = "rmsd_b_" + std::to_string(n_CVForces);
+        
+        // Unique CV name
+        std::string rmsd_unique = "rmsd_" + std::to_string(n_CVForces);
+                
+        // energy expression of a flat-bottom well potential, scaled by rho
+        const auto energy_expression = rho_unique + "*" + k_unique + "*step(delta)*delta*delta;" +
+            "delta=(" + rmsd_unique + "-" + rmsd_b_unique + ")";
+    
         double k = restraint.k().value() * internal_to_k;
         double r0 = restraint.r0().value() * internal_to_nm;
 
@@ -458,15 +479,18 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
         auto *restraintff = new OpenMM::CustomCVForce(energy_expression);
         restraintff->setName("RMSDRestraintForce");
 
-        restraintff->addGlobalParameter("rho", 1.0);
-        restraintff->addGlobalParameter("k", k);
-        restraintff->addGlobalParameter("rmsd_b", r0);  
+        restraintff->addGlobalParameter(rho_unique, 1.0);
+        restraintff->addGlobalParameter(k_unique, k);
+        restraintff->addGlobalParameter(rmsd_b_unique, r0);  
 
         auto *rmsdCV = new OpenMM::RMSDForce(referencePositions, particles); 
-        restraintff->addCollectiveVariable("rmsd", rmsdCV);
+        restraintff->addCollectiveVariable(rmsd_unique, rmsdCV);
 
         lambda_lever.addRestraintIndex(restraints.name(),
                                     system.addForce(restraintff));
+
+        // Update the counter for number of CustomCVForces
+        n_CVForces++;
 
     }
 
