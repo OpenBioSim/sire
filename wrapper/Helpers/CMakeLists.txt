@@ -6,7 +6,7 @@
 ########################################
 
 # Third Party dependencies of this module
-include_directories( ${Boost_INCLUDE_DIRS}
+include_directories( ${BOOST_INCLUDE_DIR}
                      ${PYTHON_INCLUDE_DIR} )
 
 # Sire include paths

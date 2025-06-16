@@ -440,6 +440,9 @@ set (Boost_USE_STATIC_RUNTIME OFF)
 set (Boost_DEBUG ON)  # this gives a nice print out in the cmake list to debug how boost is found and linked
 find_package( Boost 1.7 COMPONENTS python REQUIRED )
 
+# Set the Boost include directory
+set (BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
+
 # Need to define this with C++17 so that
 # boost::hash does not use std::unary_function
 # (which was deprecated in C++11 and removed in C++17)
