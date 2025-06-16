@@ -10,7 +10,7 @@ set( CMAKE_CXX_FLAGS "${OPTIMISED_CXX_FLAGS}" )
 
 add_subdirectory (SireRDKit)
 add_subdirectory (SireOpenMM)
-#add_subdirectory (SireGemmi)
+add_subdirectory (SireGemmi)
 
 # installation
 set( INSTALLDIR ${SIRE_PYTHON}/sire/legacy/Convert )
