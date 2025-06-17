@@ -442,13 +442,19 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
     for (const auto &restraint : atom_restraints)
     {
         // Define unique parameter names for rho, k and rmsd_b
+        // std::string rho_unique = "rho_" + std::to_string(n_CVForces);
+        std::string rho_unique = "rho";
         std::string k_unique = "k_" + std::to_string(n_CVForces);
-        std::string rho_unique = "rho_" + std::to_string(n_CVForces);
         std::string rmsd_b_unique = "rmsd_b_" + std::to_string(n_CVForces);
-        
         // Unique CV name
         std::string rmsd_unique = "rmsd_" + std::to_string(n_CVForces);
-                
+          
+        // Single parameter naming
+        // std::string rho_unique = "rho";
+        // std::string k_unique = "k";
+        // std::string rmsd_b_unique = "rb";
+        // std::string rmsd_unique = "rmsd";
+
         // energy expression of a flat-bottom well potential, scaled by rho
         const auto energy_expression = rho_unique + "*" + k_unique + "*step(delta)*delta*delta;" +
             "delta=(" + rmsd_unique + "-" + rmsd_b_unique + ")";
@@ -478,6 +484,10 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
 
         auto *restraintff = new OpenMM::CustomCVForce(energy_expression);
         restraintff->setName("RMSDRestraintForce");
+
+        // Set unique force name
+        // std::string force_name = "RMSDRestraintForce" + std::to_string(n_CVForces);
+        // restraintff->setName(force_name);
 
         restraintff->addGlobalParameter(rho_unique, 1.0);
         restraintff->addGlobalParameter(k_unique, k);
