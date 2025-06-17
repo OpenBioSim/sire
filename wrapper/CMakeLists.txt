@@ -441,8 +441,9 @@ set (Boost_DEBUG ON)  # this gives a nice print out in the cmake list to debug h
 find_package( Boost 1.7 COMPONENTS headers python REQUIRED )
 
 # Set the Boost include directory
-set (BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIR}")
-include_directories( ${Boost_INCLUDE_DIR} )
+set (BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
+include_directories( ${Boost_INCLUDE_DIRS} )
+message( STATUS "Boost include directory is: ${BOOST_INCLUDE_DIR}" )
 
 # Need to define this with C++17 so that
 # boost::hash does not use std::unary_function
