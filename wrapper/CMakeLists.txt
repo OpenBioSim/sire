@@ -296,33 +296,9 @@ endif()
 include_directories( "${SIRE_APP}/include" "${SIRE_APP}/Library/include" )
 include_directories(BEFORE ${CONDA_INCLUDE_DIR})
 
-message(STATUS "Checking if conda/include is a hidden include...")
-include(CheckCXXSourceRuns)
-get_property(CMAKE_REQUIRED_INCLUDES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-message(STATUS "${CMAKE_REQUIRED_INCLUDES}")
-  check_cxx_source_runs("
-
-  #include \"tbb/tbb.h\"
-
-  int main()
-  {
-    return 0;
-  }" IS_CONDA_INCLUDE_WORKING)
-
-if (IS_CONDA_INCLUDE_WORKING)
-  message(STATUS "-Iconda/include is used correctly.")
-
-  if (APPLE)
-    message(STATUS "...but, MacOS still causes issues where conda/include is removed.")
-    message(STATUS "Unsetting CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES so that conda/include is not hidden.")
-    unset(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
-  endif()
-
-else()
-  # Things don't work, so we need to switch off implicit include directories
-  unset(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
-  message(STATUS "Unsetting CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES so that conda/include is not hidden.")
-endif()
+# Make sure the conda include directory is visible.
+message(STATUS "Unsetting CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES so that conda/include is not hidden.")
+unset(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
 
 # The wrappers MUST be built as shared libraries
 set (BUILD_SHARED_LIBS ON)
