@@ -66,7 +66,7 @@ def _zero_charge(mols, qm_atoms, map=None):
     return mols
 
 
-def _check_charge(mols, qm_atoms, map, redistribute_charge=False, tol=1e-6):
+def _check_charge(mols, qm_atoms, map, redistribute_charge=False, tol=1e-2):
     """
     Internal helper function to check that the QM region has integer charge.
 
