@@ -582,8 +582,8 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
         print("This is a conda build")
 
         if sys.platform == "win32":
-            CXX = "CL"
-            CC = "CL"
+            CXX = "cl.exe"
+            CC = "cl.exe"
         else:
             CXX = os.environ["CXX"]
             CC = os.environ["CC"]
