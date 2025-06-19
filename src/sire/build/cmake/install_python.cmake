@@ -9,16 +9,16 @@ if (NOT DEFINED PYTHON_EXECUTABLE)
   endif()
 endif()
 
-find_package( Python REQUIRED COMPONENTS Interpreter Development )
+find_package( Python3 REQUIRED COMPONENTS Interpreter Development )
 
 set( PYTHON_VERSION "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}" )
 
 message( STATUS "Using python ${PYTHON_VERSION} from ${PYTHON_EXECUTABLE}" )
 
 # Set the require Python variables.
-set ( PYTHON_SITE_DIR "${Python_SITELIB}" )
-set ( PYTHON_INCLUDE_DIR "${Python_INCLUDE_DIRS}" )
-set ( PYTHON_LIBRARIES "${Python_LIBRARIES}" )
+set ( PYTHON_SITE_DIR "${Python3_SITELIB}" )
+set ( PYTHON_INCLUDE_DIR "${Python3_INCLUDE_DIRS}" )
+set ( PYTHON_LIBRARIES "${Python3_LIBRARIES}" )
 
 if (NOT PYTHON_LIBRARIES)
   message( FATAL_ERROR "Where is the python library that comes with anaconda? "
