@@ -9,6 +9,11 @@ if (NOT DEFINED PYTHON_EXECUTABLE)
   endif()
 endif()
 
+# Now lets find Python...
+set(Python3_ROOT_DIR "${ANACONDA_BASE}")
+set(Python3_FIND_STRATEGY "LOCATION")
+set(Python3_USE_STATIC_LIBS False)
+
 find_package( Python3 REQUIRED COMPONENTS Interpreter Development )
 
 set( PYTHON_VERSION "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}" )
