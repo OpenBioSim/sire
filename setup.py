@@ -580,12 +580,8 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     # get the compilers
     if conda_build:
         print("This is a conda build")
-        if sys.platform == "win32":
-            CXX = os.environ["cxx_compiler"]
-            CC = os.environ["c_compiler"]
-        else:
-            CXX = os.environ["CXX"]
-            CC = os.environ["CC"]
+        CXX = os.environ["CXX"]
+        CC = os.environ["CC"]
 
         # make sure that these compilers are in the path
         CXX_bin = shutil.which(CXX)
