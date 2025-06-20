@@ -280,6 +280,23 @@ class DynamicsData:
             self._sire_mols = None
             self._energy_trajectory = None
 
+        # Store the pressure value needed for the contribution to the reduced potential.
+        if self._map.specified("pressure"):
+            try:
+                from sire import u
+                from sire.units import mole
+
+                NA = 6.02214076e23 / mole
+                pressure = u(self._map["pressure"].source())
+                self._pressure = (pressure * NA).value()
+            except Exception as e:
+                raise ValueError(
+                    "'Unable to computed reduced pressure from 'pressure' "
+                    f"value: {self._map['pressure']}'"
+                ) from e
+        else:
+            self._pressure = None
+
     def is_null(self):
         return self._sire_mols is None
 
@@ -360,6 +377,8 @@ class DynamicsData:
         delta_lambda: float = None,
         num_energy_neighbours: int = None,
         null_energy: float = None,
+        excess_chemical_potential: float = None,
+        num_waters: int = None,
     ):
         if not self._is_running:
             raise SystemError("Cannot stop dynamics that is not running!")
@@ -418,6 +437,12 @@ class DynamicsData:
             sim_lambda_value = self._omm_mols.get_lambda()
             sim_rest2_scale = self._omm_mols.get_rest2_scale()
 
+            # Get the current volume.
+            if self._pressure is not None:
+                volume = self._omm_state.getPeriodicBoxVolume().value_in_unit(
+                    openmm.unit.angstrom**3
+                )
+
             # store the potential energy and accumulated non-equilibrium work
             if self._is_interpolate:
                 nrg = nrgs["potential"]
@@ -430,7 +455,12 @@ class DynamicsData:
                 self._nrg_prev = nrg
                 nrgs["work"] = self._work
             else:
-                nrgs[str(sim_lambda_value)] = nrgs["potential"]
+                nrg = (nrgs["potential"] / kcal_per_mol).value()
+                if self._pressure is not None:
+                    nrg += self._pressure * volume
+                if excess_chemical_potential is not None:
+                    nrg += excess_chemical_potential * num_waters
+                nrgs[str(sim_lambda_value)] = nrg * kcal_per_mol
 
                 if lambda_windows is not None:
                     # get the index of the simulation lambda value in the
@@ -454,12 +484,14 @@ class DynamicsData:
                                     rest2_scale=rest2_scale,
                                     update_constraints=False,
                                 )
-                                nrgs[str(lambda_value)] = (
-                                    self._omm_mols.get_potential_energy(
-                                        to_sire_units=False
-                                    ).value_in_unit(openmm.unit.kilocalorie_per_mole)
-                                    * kcal_per_mol
-                                )
+                                nrg = self._omm_mols.get_potential_energy(
+                                    to_sire_units=False
+                                ).value_in_unit(openmm.unit.kilocalorie_per_mole)
+                                if self._pressure is not None:
+                                    nrg += self._pressure * volume
+                                if excess_chemical_potential is not None:
+                                    nrg += excess_chemical_potential * num_waters
+                                nrgs[str(lambda_value)] = nrg * kcal_per_mol
                             else:
                                 nrgs[str(lambda_value)] = null_energy * kcal_per_mol
 
@@ -594,6 +626,13 @@ class DynamicsData:
             if ensemble.pressure() != self.ensemble().pressure():
                 self._map["pressure"] = ensemble.pressure()
                 self._omm_mols.set_pressure(ensemble.pressure())
+
+                from sire import u
+                from sire.units import mole
+
+                NA = 6.02214076e23 / mole
+                pressure = u(self._map["pressure"].source())
+                self._pressure = (pressure * NA).value()
 
     def set_temperature(self, temperature, rescale_velocities: bool = True):
         """
@@ -936,6 +975,8 @@ class DynamicsData:
         auto_fix_minimise: bool = True,
         num_energy_neighbours: int = None,
         null_energy: str = None,
+        excess_chemical_potential: float = None,
+        num_waters: int = None,
     ):
         if self.is_null():
             return
@@ -953,6 +994,8 @@ class DynamicsData:
             "auto_fix_minimise": auto_fix_minimise,
             "num_energy_neighbours": num_energy_neighbours,
             "null_energy": null_energy,
+            "excess_chemical_potential": excess_chemical_potential,
+            "num_waters": num_waters,
         }
 
         from concurrent.futures import ThreadPoolExecutor
@@ -982,6 +1025,15 @@ class DynamicsData:
                 num_energy_neighbours = int(num_energy_neighbours)
             except:
                 num_energy_neighbours = len(lambda_windows)
+
+        if excess_chemical_potential is not None:
+            excess_chemical_potential = u(excess_chemical_potential).value()
+
+        if num_waters is not None:
+            try:
+                num_waters = int(num_waters)
+            except:
+                raise ValueError("'num_waters' must be an integer")
 
         try:
             steps_to_run = int(time.to(picosecond) / self.timestep().to(picosecond))
@@ -1290,6 +1342,8 @@ class DynamicsData:
                             delta_lambda=delta_lambda,
                             num_energy_neighbours=num_energy_neighbours,
                             null_energy=null_energy.value(),
+                            excess_chemical_potential=excess_chemical_potential,
+                            num_waters=num_waters,
                         )
 
                         saved_last_frame = False
@@ -1564,6 +1618,8 @@ class Dynamics:
         auto_fix_minimise: bool = True,
         num_energy_neighbours: int = None,
         null_energy: str = None,
+        excess_chemical_potential: str = None,
+        num_waters: int = None,
     ):
         """
         Perform dynamics on the molecules.
@@ -1665,6 +1721,16 @@ class Dynamics:
             being computed as part of the energy trajectory, i.e. when
             'num_energy_neighbours' is less than len(lambda_windows).
             By default, a value of '10000 kcal mol-1' is used.
+
+        excess_chemical_potential: str
+            The excess chemical potential of water. This is required when
+            running dynamics as part of a Grand Canonical water sampling
+            simulation.
+
+        num_waters: int
+            The current number of water molecules in the simulation box.
+            This is used to compute the Grand Canonical contribution to
+            the potential energy.
         """
         if not self._d.is_null():
             if save_velocities is None:
@@ -1686,6 +1752,8 @@ class Dynamics:
                 auto_fix_minimise=auto_fix_minimise,
                 num_energy_neighbours=num_energy_neighbours,
                 null_energy=null_energy,
+                excess_chemical_potential=excess_chemical_potential,
+                num_waters=num_waters,
             )
 
         return self

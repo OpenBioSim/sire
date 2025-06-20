@@ -15,7 +15,9 @@ if (${SIRE_USE_OPENMM})
     message ( STATUS "${OpenMM_LIBRARIES} | ${OpenMM_INCLUDE_DIR}" )
 
     # Third Party dependencies of this module
-    include_directories( ${OpenMM_INCLUDE_DIR} )
+    include_directories( ${BOOST_INCLUDE_DIR}
+                         ${PYTHON_INCLUDE_DIR}
+                         ${OpenMM_INCLUDE_DIR} )
     add_definitions("-DSIRE_USE_OPENMM")
     add_definitions("-DQT_NO_SIGNALS_SLOTS_KEYWORDS")
 
@@ -106,6 +108,7 @@ if (${SIRE_USE_OPENMM})
                           SIRE_SireBase
                           SIRE_SireStream
                           SIRE_SireError
+                          ${Boost_LIBRARIES}
                           ${OpenMM_LIBRARIES}
                           ${TORCH_LIBRARIES}
                           )

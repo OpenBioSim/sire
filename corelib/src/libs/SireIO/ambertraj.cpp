@@ -105,7 +105,7 @@ static QStringList toLines(const QVector<Vector> &all_coords,
         }
     }
 
-    return writeFloatData(coords, AmberFormat(AmberPrm::FLOAT, 10, 8, 3), 0, false, 'f');
+    return writeFloatData(coords, AmberFormat(AmberPrm::FFLOAT, 10, 8, 3), 0, false);
 }
 
 /** This is a specialisation of TextFile for AmberTraj files */
@@ -588,7 +588,7 @@ public:
                                                 CODELOC);
         }
 
-        lines += writeFloatData(box_data, AmberFormat(AmberPrm::FLOAT, 10, 8, 3), 0, false, 'f');
+        lines += writeFloatData(box_data, AmberFormat(AmberPrm::FFLOAT, 10, 8, 3), 0, false);
 
         QMutexLocker lkr(&mutex);
         frame_buffer = lines;

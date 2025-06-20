@@ -31,6 +31,8 @@ namespace bp = boost::python;
 
 SireMol::VolumeMap __copy__(const SireMol::VolumeMap &other){ return SireMol::VolumeMap(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -532,9 +534,9 @@ void register_VolumeMap_class(){
         
         }
         VolumeMap_exposer.staticmethod( "typeName" );
-        VolumeMap_exposer.def( "__copy__", &__copy__);
-        VolumeMap_exposer.def( "__deepcopy__", &__copy__);
-        VolumeMap_exposer.def( "clone", &__copy__);
+        VolumeMap_exposer.def( "__copy__", &__copy__<SireMol::VolumeMap>);
+        VolumeMap_exposer.def( "__deepcopy__", &__copy__<SireMol::VolumeMap>);
+        VolumeMap_exposer.def( "clone", &__copy__<SireMol::VolumeMap>);
         VolumeMap_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::VolumeMap >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         VolumeMap_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::VolumeMap >,

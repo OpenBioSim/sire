@@ -4,9 +4,9 @@
 #
 ################################
 
-# require cmake >= 3.3.0 (released in 2018)
-cmake_minimum_required(VERSION 3.3.0 FATAL_ERROR)
-cmake_policy(VERSION 3.3)
+# require cmake >= 3.30.0
+cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_policy(VERSION 3.30)
 
 # Read the version number (so we can set it once in one place)
 file (STRINGS "../version.txt" VERSION_TEXT)
@@ -17,6 +17,8 @@ set (S_VERSION_MAJOR ${CMAKE_MATCH_1})
 set (S_VERSION_MINOR ${CMAKE_MATCH_2})
 set (S_VERSION_PATCH ${CMAKE_MATCH_3})
 set (SIRE_VERSION "${S_VERSION_MAJOR}.${S_VERSION_MINOR}.${S_VERSION_PATCH}")
+
+set (SIRE_CXX_STANDARD 14)
 
 message( STATUS "Building Sire ${SIRE_VERSION}")
 
@@ -392,6 +394,7 @@ set(NEED_UNDEF_STRICT_ANSI FALSE)
 if (SIRE_HAS_CPP_17)
   message(STATUS "Compiler supports C++ 2017")
   set(SIRE_CXX_NG_FLAGS "${SIRE_CXX_NG_FLAGS} ${SLASH_HYPHEN}std${COLON_EQUALS}c++17 ${SLASH_HYPHEN}DSIRE_HAS_CPP_17 ${SLASH_HYPHEN}DSIRE_HAS_CPP_14 ${SLASH_HYPHEN}DSIRE_HAS_CPP_1Y ${SLASH_HYPHEN}DSIRE_HAS_CPP_11")
+  set(SIRE_CXX_STANDARD 17)
 
   if (APPLE)
     # C++ 2017 does not support aligned_alloc on old MacOS - check for this!
@@ -431,6 +434,7 @@ if (SIRE_HAS_CPP_17)
 elseif (SIRE_HAS_CPP_14)
   message(STATUS "Compiler supports C++ 2014")
   set(SIRE_CXX_NG_FLAGS "${SIRE_CXX_NG_FLAGS} ${SLASH_HYPHEN}std${COLON_EQUALS}c++14 ${SLASH_HYPHEN}DSIRE_HAS_CPP_14 ${SLASH_HYPHEN}DSIRE_HAS_CPP_1Y ${SLASH_HYPHEN}DSIRE_HAS_CPP_11")
+  set(SIRE_CXX_STANDARD 14)
 
   if (NEED_UNDEF_STRICT_ANSI)
     message( STATUS "Undefining __STRICT_ANSI__ because of compile problems")
@@ -442,6 +446,10 @@ else()
 endif()
 
 save_sire_variable( "SIRE_CXX_NG_FLAGS" "${SIRE_CXX_NG_FLAGS}" )
+save_sire_variable( "SIRE_CXX_STANDARD" "${SIRE_CXX_STANDARD}" )
+
+message( STATUS "Setting CMAKE_CXX_STANDARD to ${SIRE_CXX_STANDARD}" )
+set(CMAKE_CXX_STANDARD ${SIRE_CXX_STANDARD})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SIRE_CXX_NG_FLAGS}")
 
@@ -469,8 +477,7 @@ if ( ${SIRE_CXX_COMPILER_ID} MATCHES "GNU" )
     # get the compiler version (via gcc -dumpversion)
     # (I'll assume that we are using the same version
     # of compiler for C and C++...)
-    EXEC_PROGRAM( ${CMAKE_CXX_COMPILER}
-                  ARGS -dumpversion
+    EXECUTE_PROCESS( COMMAND ${CMAKE_CXX_COMPILER} -dumpversion
                   OUTPUT_VARIABLE exe_output )
 
     # These two regexps are copied from the Chicken CMake

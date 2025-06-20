@@ -37,6 +37,8 @@ namespace bp = boost::python;
 
 SireMol::NullBeading __copy__(const SireMol::NullBeading &other){ return SireMol::NullBeading(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -78,9 +80,9 @@ void register_NullBeading_class(){
         
         }
         NullBeading_exposer.staticmethod( "typeName" );
-        NullBeading_exposer.def( "__copy__", &__copy__);
-        NullBeading_exposer.def( "__deepcopy__", &__copy__);
-        NullBeading_exposer.def( "clone", &__copy__);
+        NullBeading_exposer.def( "__copy__", &__copy__<SireMol::NullBeading>);
+        NullBeading_exposer.def( "__deepcopy__", &__copy__<SireMol::NullBeading>);
+        NullBeading_exposer.def( "clone", &__copy__<SireMol::NullBeading>);
         NullBeading_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::NullBeading >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         NullBeading_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::NullBeading >,

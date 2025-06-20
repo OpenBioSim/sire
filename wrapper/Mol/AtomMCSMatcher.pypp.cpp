@@ -48,6 +48,8 @@ namespace bp = boost::python;
 
 SireMol::AtomMCSMatcher __copy__(const SireMol::AtomMCSMatcher &other){ return SireMol::AtomMCSMatcher(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -169,9 +171,9 @@ void register_AtomMCSMatcher_class(){
         
         }
         AtomMCSMatcher_exposer.staticmethod( "typeName" );
-        AtomMCSMatcher_exposer.def( "__copy__", &__copy__);
-        AtomMCSMatcher_exposer.def( "__deepcopy__", &__copy__);
-        AtomMCSMatcher_exposer.def( "clone", &__copy__);
+        AtomMCSMatcher_exposer.def( "__copy__", &__copy__<SireMol::AtomMCSMatcher>);
+        AtomMCSMatcher_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomMCSMatcher>);
+        AtomMCSMatcher_exposer.def( "clone", &__copy__<SireMol::AtomMCSMatcher>);
         AtomMCSMatcher_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomMCSMatcher >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomMCSMatcher_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomMCSMatcher >,

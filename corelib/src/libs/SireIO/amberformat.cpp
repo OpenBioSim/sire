@@ -47,7 +47,8 @@ AmberFormat::AmberFormat(SireIO::AmberPrm::FLAG_TYPE flag, int num, int field, i
 }
 
 /** Construct a format based on the Amber string description of that format. This
-    is in the form "%FORMAT(20a4)" or "%FORMAT(10I8)" or "%FORMAT(5E16.8)" */
+    is in the form "%FORMAT(20a4)" or "%FORMAT(10I8)" or "%FORMAT(5E16.8)"
+    or %FORMAT(8F9.5) */
 AmberFormat::AmberFormat(const QString &line)
 {
     QRegularExpression re("%FORMAT\\((\\d+)(\\w)(\\d+)\\.?(\\d+)?\\)");
@@ -73,6 +74,8 @@ AmberFormat::AmberFormat(const QString &line)
         flag_type = AmberPrm::INTEGER;
     else if (typ == "e")
         flag_type = AmberPrm::FLOAT;
+    else if (typ == "f")
+        flag_type = AmberPrm::FFLOAT;
     else
         flag_type = AmberPrm::UNKNOWN;
 
@@ -99,6 +102,11 @@ QString AmberFormat::toString() const
             .arg(num_values)
             .arg(field_width)
             .arg(point_width);
+    case AmberPrm::FFLOAT:
+        return QString("AmberFormat( %1 x float[width = %2, precision = %3] )")
+            .arg(num_values)
+            .arg(field_width)
+            .arg(point_width);
     default:
         return QString("AmberFormat( UNKNOWN )");
     }
@@ -115,6 +123,8 @@ QString AmberFormat::toAmberString() const
         return QString("%FORMAT(%1I%2)").arg(num_values).arg(field_width);
     case AmberPrm::FLOAT:
         return QString("%FORMAT(%1E%2.%3)").arg(num_values).arg(field_width).arg(point_width);
+    case AmberPrm::FFLOAT:
+        return QString("%FORMAT(%1F%2.%3)").arg(num_values).arg(field_width).arg(point_width);
     default:
         return QString("%FORMAT(%1U%2)").arg(num_values).arg(field_width);
     }
@@ -275,14 +285,20 @@ namespace SireIO
             This will include the Amber format string as a header if 'include_header'
             is true, and will append any errors encountered during writing to 'errors'
             if this is non-zero. This returns the text lines as a QStringList */
-        QStringList writeFloatData(const QVector<double> &data, AmberFormat format, QStringList *errors, bool include_header,
-                                   char float_format)
+        QStringList writeFloatData(const QVector<double> &data, AmberFormat format, QStringList *errors, bool include_header)
         {
             QStringList lines;
 
             if (include_header)
             {
                 lines.append(format.toAmberString());
+            }
+
+            char float_format = 'f';
+
+            if (format.flagType() == AmberPrm::FLOAT)
+            {
+                float_format = 'e';
             }
 
             int n = 0;

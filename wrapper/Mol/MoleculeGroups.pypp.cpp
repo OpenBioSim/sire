@@ -80,6 +80,8 @@ namespace bp = boost::python;
 
 SireMol::MoleculeGroups __copy__(const SireMol::MoleculeGroups &other){ return SireMol::MoleculeGroups(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -549,9 +551,9 @@ void register_MoleculeGroups_class(){
         
         }
         MoleculeGroups_exposer.staticmethod( "typeName" );
-        MoleculeGroups_exposer.def( "__copy__", &__copy__);
-        MoleculeGroups_exposer.def( "__deepcopy__", &__copy__);
-        MoleculeGroups_exposer.def( "clone", &__copy__);
+        MoleculeGroups_exposer.def( "__copy__", &__copy__<SireMol::MoleculeGroups>);
+        MoleculeGroups_exposer.def( "__deepcopy__", &__copy__<SireMol::MoleculeGroups>);
+        MoleculeGroups_exposer.def( "clone", &__copy__<SireMol::MoleculeGroups>);
         MoleculeGroups_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::MoleculeGroups >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         MoleculeGroups_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::MoleculeGroups >,

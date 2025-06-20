@@ -59,6 +59,8 @@ namespace bp = boost::python;
 
 SireMol::ResNum __copy__(const SireMol::ResNum &other){ return SireMol::ResNum(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -71,7 +73,7 @@ void register_ResNum_class(){
         typedef bp::class_< SireMol::ResNum, bp::bases< SireMol::ResID, SireID::ID, SireID::Number > > ResNum_exposer_t;
         ResNum_exposer_t ResNum_exposer = ResNum_exposer_t( "ResNum", "This ID number is used to identify a CutGroup by the user-supplied\nnumber\n\nAuthor: Christopher Woods\n", bp::init< >("") );
         bp::scope ResNum_scope( ResNum_exposer );
-        ResNum_exposer.def( bp::init< quint32 >(( bp::arg("num") ), "") );
+        ResNum_exposer.def( bp::init< qint32 >(( bp::arg("num") ), "") );
         ResNum_exposer.def( bp::init< SireMol::ResNum const & >(( bp::arg("other") ), "") );
         { //::SireMol::ResNum::hash
         
@@ -168,9 +170,9 @@ void register_ResNum_class(){
         
         }
         ResNum_exposer.staticmethod( "typeName" );
-        ResNum_exposer.def( "__copy__", &__copy__);
-        ResNum_exposer.def( "__deepcopy__", &__copy__);
-        ResNum_exposer.def( "clone", &__copy__);
+        ResNum_exposer.def( "__copy__", &__copy__<SireMol::ResNum>);
+        ResNum_exposer.def( "__deepcopy__", &__copy__<SireMol::ResNum>);
+        ResNum_exposer.def( "clone", &__copy__<SireMol::ResNum>);
         ResNum_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ResNum >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ResNum_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ResNum >,

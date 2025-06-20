@@ -37,6 +37,7 @@
 #include "SireMM/atomljs.h"
 #include "SireMM/ljparameter.h"
 #include "SireMM/lj1264parameter.h"
+#include "SireMM/cmapparameter.h"
 
 #include "SireMaths/vector.h"
 
@@ -91,7 +92,8 @@ namespace SireIO
             UNKNOWN = 0,
             INTEGER = 1,
             FLOAT = 2,
-            STRING = 3
+            STRING = 3,
+            FFLOAT = 4,
         };
 
         AmberPrm();
@@ -164,6 +166,7 @@ namespace SireIO
         int nDihedralsNoHydrogen() const;
 
         int nExcluded() const;
+
         int nResidues() const;
 
         int nMolecules() const;
@@ -187,6 +190,7 @@ namespace SireIO
         void rebuildBADIndicies();
         void rebuildExcludedAtoms();
         void rebuildMolNumToAtomNums();
+        void rebuildCMAPTerms();
 
         SireMM::AmberParams getAmberParams(int imol, const SireMol::MoleculeInfoData &molinfo) const;
 
@@ -218,6 +222,9 @@ namespace SireIO
         /** All of the LJ exceptions, indexed by LJ parameter ID */
         QHash<quint64, QList<SireMM::LJException>> lj_exceptions;
 
+        /** All of the CMAP parameters, indexed by CMAP parameter ID */
+        QHash<quint64, SireMM::CMAPParameter> cmap_data;
+
         /** The indicies of the bonds for each molecule */
         QVector<QVector<int>> bonds_inc_h, bonds_exc_h;
 
@@ -229,6 +236,9 @@ namespace SireIO
 
         /** The excluded atoms for each atom of each molecule */
         QVector<QVector<QVector<int>>> excl_atoms;
+
+        /** The indices of the cmaps for each molecule */
+        QVector<QVector<int>> cmap_idxs;
 
         /** The AtomNums of each atom in each molecule (indexed by MolNum) */
         QVector<QVector<int>> molnum_to_atomnums;

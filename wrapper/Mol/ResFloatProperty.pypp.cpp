@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::ResProperty<double> __copy__(const SireMol::ResProperty<double> &other){ return SireMol::ResProperty<double>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -393,9 +395,9 @@ void register_ResFloatProperty_class(){
         }
         ResFloatProperty_exposer.staticmethod( "fromVariant" );
         ResFloatProperty_exposer.staticmethod( "typeName" );
-        ResFloatProperty_exposer.def( "__copy__", &__copy__);
-        ResFloatProperty_exposer.def( "__deepcopy__", &__copy__);
-        ResFloatProperty_exposer.def( "clone", &__copy__);
+        ResFloatProperty_exposer.def( "__copy__", &__copy__<SireMol::ResProperty<double>>);
+        ResFloatProperty_exposer.def( "__deepcopy__", &__copy__<SireMol::ResProperty<double>>);
+        ResFloatProperty_exposer.def( "clone", &__copy__<SireMol::ResProperty<double>>);
         ResFloatProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ResProperty<double> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ResFloatProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ResProperty<double> >,

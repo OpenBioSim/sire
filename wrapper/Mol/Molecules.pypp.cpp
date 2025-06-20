@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireBase/lazyevaluator.h"
 
+#include "SireBase/parallel.h"
+
 #include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
@@ -54,6 +56,8 @@ namespace bp = boost::python;
 #include "molecules.h"
 
 SireMol::Molecules __copy__(const SireMol::Molecules &other){ return SireMol::Molecules(other); }
+
+#include "Helpers/copy.hpp"
 
 #include "Qt/qdatastream.hpp"
 
@@ -929,9 +933,9 @@ void register_Molecules_class(){
         
         }
         Molecules_exposer.staticmethod( "typeName" );
-        Molecules_exposer.def( "__copy__", &__copy__);
-        Molecules_exposer.def( "__deepcopy__", &__copy__);
-        Molecules_exposer.def( "clone", &__copy__);
+        Molecules_exposer.def( "__copy__", &__copy__<SireMol::Molecules>);
+        Molecules_exposer.def( "__deepcopy__", &__copy__<SireMol::Molecules>);
+        Molecules_exposer.def( "clone", &__copy__<SireMol::Molecules>);
         Molecules_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Molecules >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Molecules_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Molecules >,

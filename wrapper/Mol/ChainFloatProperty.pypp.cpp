@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::ChainProperty<double> __copy__(const SireMol::ChainProperty<double> &other){ return SireMol::ChainProperty<double>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -393,9 +395,9 @@ void register_ChainFloatProperty_class(){
         }
         ChainFloatProperty_exposer.staticmethod( "fromVariant" );
         ChainFloatProperty_exposer.staticmethod( "typeName" );
-        ChainFloatProperty_exposer.def( "__copy__", &__copy__);
-        ChainFloatProperty_exposer.def( "__deepcopy__", &__copy__);
-        ChainFloatProperty_exposer.def( "clone", &__copy__);
+        ChainFloatProperty_exposer.def( "__copy__", &__copy__<SireMol::ChainProperty<double>>);
+        ChainFloatProperty_exposer.def( "__deepcopy__", &__copy__<SireMol::ChainProperty<double>>);
+        ChainFloatProperty_exposer.def( "clone", &__copy__<SireMol::ChainProperty<double>>);
         ChainFloatProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ChainProperty<double> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ChainFloatProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ChainProperty<double> >,

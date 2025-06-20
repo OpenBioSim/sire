@@ -21,6 +21,8 @@ namespace bp = boost::python;
 
 SireMol::Stereochemistry __copy__(const SireMol::Stereochemistry &other){ return SireMol::Stereochemistry(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -35,6 +37,18 @@ void register_Stereochemistry_class(){
         bp::scope Stereochemistry_scope( Stereochemistry_exposer );
         Stereochemistry_exposer.def( bp::init< QString const & >(( bp::arg("s") ), "Construct from the passed string") );
         Stereochemistry_exposer.def( bp::init< SireMol::Stereochemistry const & >(( bp::arg("other") ), "Copy constructor") );
+        { //::SireMol::Stereochemistry::cisOrTrans
+        
+            typedef ::SireMol::Stereochemistry ( *cisOrTrans_function_type )(  );
+            cisOrTrans_function_type cisOrTrans_function_value( &::SireMol::Stereochemistry::cisOrTrans );
+            
+            Stereochemistry_exposer.def( 
+                "cisOrTrans"
+                , cisOrTrans_function_value
+                , bp::release_gil_policy()
+                , "Return a cis or trans Stereochemistry" );
+        
+        }
         { //::SireMol::Stereochemistry::down
         
             typedef ::SireMol::Stereochemistry ( *down_function_type )(  );
@@ -71,6 +85,18 @@ void register_Stereochemistry_class(){
                 , ( bp::arg("val") )
                 , bp::release_gil_policy()
                 , "Construct from the the passed SDF number" );
+        
+        }
+        { //::SireMol::Stereochemistry::isCisOrTrans
+        
+            typedef bool ( ::SireMol::Stereochemistry::*isCisOrTrans_function_type)(  ) const;
+            isCisOrTrans_function_type isCisOrTrans_function_value( &::SireMol::Stereochemistry::isCisOrTrans );
+            
+            Stereochemistry_exposer.def( 
+                "isCisOrTrans"
+                , isCisOrTrans_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not this is a cis or trans bond" );
         
         }
         { //::SireMol::Stereochemistry::isDefined
@@ -232,6 +258,7 @@ void register_Stereochemistry_class(){
                 , "Return the stereo type (uses SDF values, e.g. 0 is not stereo,\n1 is up, 6 is down. We have added -1 to mean undefined)\n" );
         
         }
+        Stereochemistry_exposer.staticmethod( "cisOrTrans" );
         Stereochemistry_exposer.staticmethod( "down" );
         Stereochemistry_exposer.staticmethod( "fromRDKit" );
         Stereochemistry_exposer.staticmethod( "fromSDF" );
@@ -239,9 +266,9 @@ void register_Stereochemistry_class(){
         Stereochemistry_exposer.staticmethod( "typeName" );
         Stereochemistry_exposer.staticmethod( "undefined" );
         Stereochemistry_exposer.staticmethod( "up" );
-        Stereochemistry_exposer.def( "__copy__", &__copy__);
-        Stereochemistry_exposer.def( "__deepcopy__", &__copy__);
-        Stereochemistry_exposer.def( "clone", &__copy__);
+        Stereochemistry_exposer.def( "__copy__", &__copy__<SireMol::Stereochemistry>);
+        Stereochemistry_exposer.def( "__deepcopy__", &__copy__<SireMol::Stereochemistry>);
+        Stereochemistry_exposer.def( "clone", &__copy__<SireMol::Stereochemistry>);
         Stereochemistry_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Stereochemistry >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Stereochemistry_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Stereochemistry >,

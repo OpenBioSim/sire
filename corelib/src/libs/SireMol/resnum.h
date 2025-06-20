@@ -59,7 +59,7 @@ namespace SireMol
     public:
         ResNum();
 
-        explicit ResNum(quint32 num);
+        explicit ResNum(qint32 num);
 
         ResNum(const ResNum &other);
 

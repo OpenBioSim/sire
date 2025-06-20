@@ -21,10 +21,18 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fix setting of positive formal charge when reading SDF files.
 * Only use ``atom->setNoImplicit(True)`` inside custom RDKit sterochemistry inference function.
 * Fix redistribution of excess QM charge and make it the default behaviour.
+* Reduce tolerance of integer charge check for QM/MM simulations.
 * Preserve molecule name when reading from SDF format and on conversion to RDKit.
 * Handle missing velocity data for ``AMBER`` RST7 files with only a few atoms.
 * Preserve SDF metadata when converting to ``RDKIt`` format.
 * Fixed unbound local variable when simulation lambda value is not in ``lambda_windows`` array.
+* Allow negative residue numbers.
+* Make sure box vectors are in reduced form before setting via the ``OpenMM`` C++ API.
+* Add isobaric and grand canonical terms to reduced potential.
+* Keep kappa term fixed during decoupling schedules.
+* Added CMAP support when reading / writing AMBER and GROMACS topology files. The parameters are in the ``cmap`` property.
+* Fixed compile issues for MacOS Sequoia.
+* Upgraded minimum cmake supported version to 3.5.
 
 `2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
 ----------------------------------------------------------------------------------------

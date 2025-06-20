@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 SireMol::GroupGroupID<SireMol::CGID, SireMol::ResID> __copy__(const SireMol::GroupGroupID<SireMol::CGID, SireMol::ResID> &other){ return SireMol::GroupGroupID<SireMol::CGID, SireMol::ResID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -113,9 +115,9 @@ void register_CGResID_class(){
         
         }
         CGResID_exposer.staticmethod( "typeName" );
-        CGResID_exposer.def( "__copy__", &__copy__);
-        CGResID_exposer.def( "__deepcopy__", &__copy__);
-        CGResID_exposer.def( "clone", &__copy__);
+        CGResID_exposer.def( "__copy__", &__copy__<SireMol::GroupGroupID<SireMol::CGID, SireMol::ResID>>);
+        CGResID_exposer.def( "__deepcopy__", &__copy__<SireMol::GroupGroupID<SireMol::CGID, SireMol::ResID>>);
+        CGResID_exposer.def( "clone", &__copy__<SireMol::GroupGroupID<SireMol::CGID, SireMol::ResID>>);
         CGResID_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::GroupGroupID<SireMol::CGID, SireMol::ResID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CGResID_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::GroupGroupID<SireMol::CGID, SireMol::ResID> >,

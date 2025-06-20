@@ -55,6 +55,8 @@ namespace bp = boost::python;
 
 SireID::InvertMatch<SireMol::AtomID> __copy__(const SireID::InvertMatch<SireMol::AtomID> &other){ return SireID::InvertMatch<SireMol::AtomID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -167,9 +169,9 @@ void register_InvertMatch_AtomID__class(){
         
         }
         InvertMatch_AtomID__exposer.staticmethod( "typeName" );
-        InvertMatch_AtomID__exposer.def( "__copy__", &__copy__);
-        InvertMatch_AtomID__exposer.def( "__deepcopy__", &__copy__);
-        InvertMatch_AtomID__exposer.def( "clone", &__copy__);
+        InvertMatch_AtomID__exposer.def( "__copy__", &__copy__<SireID::InvertMatch<SireMol::AtomID>>);
+        InvertMatch_AtomID__exposer.def( "__deepcopy__", &__copy__<SireID::InvertMatch<SireMol::AtomID>>);
+        InvertMatch_AtomID__exposer.def( "clone", &__copy__<SireID::InvertMatch<SireMol::AtomID>>);
         InvertMatch_AtomID__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireID::InvertMatch<SireMol::AtomID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         InvertMatch_AtomID__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireID::InvertMatch<SireMol::AtomID> >,

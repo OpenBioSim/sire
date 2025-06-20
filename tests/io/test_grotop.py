@@ -167,3 +167,152 @@ def test_fep_atoms():
         atoms_list = atoms.split("\n")
         for a, b in zip(atoms_list, atoms_lines):
             assert a.strip() == b.strip()
+
+
+def test_grotop_cmap(tmpdir, gromacs_cmap):
+    """
+    Test that the GROMACS cmap is correctly parsed and saved.
+    """
+    mols = gromacs_cmap.clone()
+
+    dir = tmpdir.mkdir("test_grotop_cmap")
+
+    mol = mols[0]
+    cmaps = mol.property("cmap").parameters()
+
+    assert len(cmaps) == 127
+
+    unique_cmaps = {}
+
+    # these parameters are all between atoms called "C", "N", "CA", "C", "N"
+    for cmap in cmaps:
+        assert mol.atom(cmap.atom0()).name().value() == "C"
+        assert mol.atom(cmap.atom1()).name().value() == "N"
+        assert mol.atom(cmap.atom2()).name().value() == "CA"
+        assert mol.atom(cmap.atom3()).name().value() == "C"
+        assert mol.atom(cmap.atom4()).name().value() == "N"
+
+        # there should be 24 rows and 24 columns in the cmap
+        assert cmap.parameter().num_rows() == 24
+        assert cmap.parameter().num_columns() == 24
+
+        unique_cmaps[cmap.parameter().to_string()] = 1
+
+    assert len(unique_cmaps) == 3
+
+    orig_cmaps = cmaps
+
+    # now other molecule should have any cmap parameters
+    for mol in mols[1:]:
+        try:
+            cmaps = mol.property("cmap")
+        except Exception:
+            cmaps = None
+
+        if cmaps is not None:
+            assert len(cmaps.parameters()) == 0
+
+    # Save to a temporary file.
+    f = sr.save(mols, dir.join("output"), format="GroTop")
+
+    # Load the saved file.
+    mols2 = sr.load(f, show_warnings=False)
+
+    # assert that we have the same cmap parameters
+    cmaps = mols2[0].property("cmap").parameters()
+
+    assert len(cmaps) == 127
+
+    unique_cmaps2 = {}
+
+    # these parameters are all between atoms called "C", "N", "CA", "C", "N"
+    for cmap in cmaps:
+        assert mols2[0].atom(cmap.atom0()).name().value() == "C"
+        assert mols2[0].atom(cmap.atom1()).name().value() == "N"
+        assert mols2[0].atom(cmap.atom2()).name().value() == "CA"
+        assert mols2[0].atom(cmap.atom3()).name().value() == "C"
+        assert mols2[0].atom(cmap.atom4()).name().value() == "N"
+
+        # there should be 24 rows and 24 columns in the cmap
+        assert cmap.parameter().num_rows() == 24
+        assert cmap.parameter().num_columns() == 24
+
+        unique_cmaps2[cmap.parameter().to_string()] = 1
+
+    assert len(unique_cmaps2) == 3
+
+    assert cmaps == orig_cmaps
+
+    # make sure that no other molecule have any cmap parameters
+    for mol in mols2[1:]:
+        try:
+            cmaps = mol.property("cmap")
+        except Exception:
+            cmaps = None
+
+        if cmaps is not None:
+            assert len(cmaps.parameters()) == 0
+
+
+def test_grotop_cmap_amber(tmpdir, gromacs_cmap):
+    """Testing reading and writing from gromacs to amber and back to gromacs"""
+    mols = gromacs_cmap.clone()
+
+    dir = tmpdir.mkdir("test_grotop_cmap_amber")
+
+    # Save to a temporary file in Amber format.
+    f = sr.save(mols, dir.join("output"), format="prmtop")
+
+    # Load the saved file.
+    mols2 = sr.load(f, show_warnings=False)
+
+    # Save back to GROMACS format.
+    f2 = sr.save(mols2, dir.join("output"), format="GroTop")
+
+    # Load the saved file again.
+    mols3 = sr.load(f2, show_warnings=False)
+
+    # check that all of the cmap parameters are the same
+    cmaps = mols[0].property("cmap").parameters()
+    cmaps2 = mols2[0].property("cmap").parameters()
+    cmaps3 = mols3[0].property("cmap").parameters()
+
+    for cmap in cmaps:
+        # find the same cmap in the other two molecules
+        found = False
+
+        for cmap2 in cmaps2:
+            if (
+                cmap.atom0() == cmap2.atom0()
+                and cmap.atom1() == cmap2.atom1()
+                and cmap.atom2() == cmap2.atom2()
+                and cmap.atom3() == cmap2.atom3()
+                and cmap.atom4() == cmap2.atom4()
+            ):
+                # make sure that the parameter is the same
+                for val, val2 in zip(
+                    cmap.parameter().values(), cmap2.parameter().values()
+                ):
+                    assert val == pytest.approx(val2, 1e-3)
+                found = True
+
+        assert found
+
+        found = False
+
+        for cmap3 in cmaps3:
+            if (
+                cmap.atom0() == cmap3.atom0()
+                and cmap.atom1() == cmap3.atom1()
+                and cmap.atom2() == cmap3.atom2()
+                and cmap.atom3() == cmap3.atom3()
+                and cmap.atom4() == cmap3.atom4()
+            ):
+                # make sure that the parameter is the same
+                for val, val3 in zip(
+                    cmap.parameter().values(), cmap3.parameter().values()
+                ):
+                    assert val == pytest.approx(val3, 1e-3)
+                found = True
+
+        assert found

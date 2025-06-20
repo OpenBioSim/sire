@@ -50,6 +50,7 @@
 
 #include "SireMM/atomljs.h"
 #include "SireMM/cljnbpairs.h"
+#include "SireMM/cmapfunctions.h"
 
 #include "SireCAS/symbol.h"
 
@@ -493,6 +494,18 @@ namespace SireMM
         FourAtomFunctions improperFunctions() const;
         FourAtomFunctions improperFunctions(const SireCAS::Symbol &PHI) const;
 
+        CMAPFunctions cmapFunctions() const;
+
+        void add(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                 const AtomID &atom3, const AtomID &atom4,
+                 const CMAPParameter &cmap);
+
+        void removeCMAP(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                        const AtomID &atom3, const AtomID &atom4);
+
+        CMAPParameter getCMAP(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                              const AtomID &atom3, const AtomID &atom4) const;
+
         void addNB14(const BondID &pair, double cscl, double ljscl);
         void removeNB14(const BondID &pair);
 
@@ -582,6 +595,9 @@ namespace SireMM
 
         /** A hash of coulombic and lennard jones scale factors for 1,4 pairs**/
         QHash<BondID, AmberNB14> amber_nb14s;
+
+        /** All of the CMAPFunctions for this molecule */
+        CMAPFunctions cmap_funcs;
 
         /** The radius set chosen by LEAP when assigning the Born radii */
         QString radius_set;

@@ -51,6 +51,8 @@ namespace bp = boost::python;
 
 SireID::InvertMatch<SireMol::SegID> __copy__(const SireID::InvertMatch<SireMol::SegID> &other){ return SireID::InvertMatch<SireMol::SegID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -163,9 +165,9 @@ void register_InvertMatch_SegID__class(){
         
         }
         InvertMatch_SegID__exposer.staticmethod( "typeName" );
-        InvertMatch_SegID__exposer.def( "__copy__", &__copy__);
-        InvertMatch_SegID__exposer.def( "__deepcopy__", &__copy__);
-        InvertMatch_SegID__exposer.def( "clone", &__copy__);
+        InvertMatch_SegID__exposer.def( "__copy__", &__copy__<SireID::InvertMatch<SireMol::SegID>>);
+        InvertMatch_SegID__exposer.def( "__deepcopy__", &__copy__<SireID::InvertMatch<SireMol::SegID>>);
+        InvertMatch_SegID__exposer.def( "clone", &__copy__<SireID::InvertMatch<SireMol::SegID>>);
         InvertMatch_SegID__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireID::InvertMatch<SireMol::SegID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         InvertMatch_SegID__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireID::InvertMatch<SireMol::SegID> >,

@@ -54,6 +54,8 @@
 #include "SireMM/twoatomfunctions.h"
 #include "SireMM/threeatomfunctions.h"
 #include "SireMM/fouratomfunctions.h"
+#include "SireMM/cmapfunctions.h"
+#include "SireMM/cmapparameter.h"
 #include "SireMM/cljatoms.h"
 #include "SireMM/amberparams.h"
 #include "SireMM/gromacsparams.h"
@@ -77,9 +79,12 @@ void register_SireMM_containers()
   register_list<QVector<LJParameter>>();
   register_list<QList<LJParameter>>();
 
+  register_list<QVector<CMAPParameter>>();
+
   register_list<QVector<TwoAtomFunction>>();
   register_list<QVector<ThreeAtomFunction>>();
   register_list<QVector<FourAtomFunction>>();
+  register_list<QVector<CMAPFunction>>();
 
   register_list<QVector<CLJAtom>>();
 

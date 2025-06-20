@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 SireMol::CovalentBondHunterParameters __copy__(const SireMol::CovalentBondHunterParameters &other){ return SireMol::CovalentBondHunterParameters(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMol::CovalentBondHunterParameters&){ return "SireMol::CovalentBondHunterParameters";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -81,9 +83,9 @@ void register_CovalentBondHunterParameters_class(){
         }
         CovalentBondHunterParameters_exposer.staticmethod( "coordinates" );
         CovalentBondHunterParameters_exposer.staticmethod( "element" );
-        CovalentBondHunterParameters_exposer.def( "__copy__", &__copy__);
-        CovalentBondHunterParameters_exposer.def( "__deepcopy__", &__copy__);
-        CovalentBondHunterParameters_exposer.def( "clone", &__copy__);
+        CovalentBondHunterParameters_exposer.def( "__copy__", &__copy__<SireMol::CovalentBondHunterParameters>);
+        CovalentBondHunterParameters_exposer.def( "__deepcopy__", &__copy__<SireMol::CovalentBondHunterParameters>);
+        CovalentBondHunterParameters_exposer.def( "clone", &__copy__<SireMol::CovalentBondHunterParameters>);
         CovalentBondHunterParameters_exposer.def( "__str__", &pvt_get_name);
         CovalentBondHunterParameters_exposer.def( "__repr__", &pvt_get_name);
     }
