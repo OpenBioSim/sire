@@ -28,6 +28,8 @@
 
 #include "energytrajectory.h"
 
+#include "SireBase/console.h"
+
 #include "SireUnits/units.h"
 
 #include "SireID/index.h"
@@ -316,6 +318,9 @@ void EnergyTrajectory::set(const GeneralUnit &time,
 
         else if (t == time_values[idx - 1])
         {
+            SireBase::Console::warning(QObject::tr(
+                "EnergyTrajectory::set: time %1 already exists in the trajectory. "
+                "Overwriting existing values.").arg(t.toString()));
             must_create = false;
             idx = idx - 1;
             break;
