@@ -243,6 +243,9 @@ void EnergyTrajectory::set(const GeneralUnit &time,
 
     auto t = Time(time);
 
+    // round the time to 5 decimal places
+    auto t_round = qRound(t.value() * 100000.0) / 100000.0;
+
     for (auto it = energies.constBegin(); it != energies.constEnd(); ++it)
     {
         // make sure all of the values are valid
@@ -313,10 +316,10 @@ void EnergyTrajectory::set(const GeneralUnit &time,
 
     while (idx > 0)
     {
-        if (t > time_values[idx - 1])
+        if (t_round > time_values[idx - 1])
             break;
 
-        else if (t == time_values[idx - 1])
+        else if (t_round == time_values[idx - 1])
         {
             SireBase::Console::warning(QObject::tr(
                 "EnergyTrajectory::set: time %1 already exists in the trajectory. "
@@ -331,7 +334,7 @@ void EnergyTrajectory::set(const GeneralUnit &time,
 
     if (idx >= time_values.count())
     {
-        time_values.append(t.value());
+        time_values.insert(idx, t_round);
 
         for (auto it = this->energy_values.begin();
              it != this->energy_values.end(); ++it)
@@ -347,7 +350,7 @@ void EnergyTrajectory::set(const GeneralUnit &time,
     }
     else if (must_create)
     {
-        time_values.insert(idx, t.value());
+        time_values.insert(idx, t_round);
 
         for (auto it = this->energy_values.begin();
              it != this->energy_values.end(); ++it)
