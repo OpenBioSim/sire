@@ -243,8 +243,8 @@ void EnergyTrajectory::set(const GeneralUnit &time,
 
     auto t = Time(time);
 
-    // round the time to 4 decimal places
-    auto t_round = qRound(t.value() * 10000.0) / 10000.0;
+    // round the time to 5 decimal places
+    auto t_round = qRound(t.value() * 100000.0) / 100000.0;
 
     for (auto it = energies.constBegin(); it != energies.constEnd(); ++it)
     {
