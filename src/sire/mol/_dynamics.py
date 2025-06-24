@@ -174,7 +174,10 @@ class DynamicsData:
 
             self._current_time = current_time
             self._current_step = 0
+            self._prev_step = 0
             self._elapsed_time = 0 * nanosecond
+            self._prev_current_time = 0 * nanosecond
+            self._prev_elapsed_time = 0 * nanosecond
             self._walltime = 0 * nanosecond
             self._is_running = False
             self._schedule_changed = False
@@ -1163,7 +1166,14 @@ class DynamicsData:
         class NeedsMinimiseError(Exception):
             pass
 
+        # store the previous time and number of steps to allow us to reset
+        # when a crash occurs
+        self._prev_current_time = self._current_time
+        self._prev_elapsed_time = self._elapsed_time
+        self._prev_step = self._current_step
+
         nsteps_before_run = self._current_step
+
         # if this is the first call, then set the save frequencies
         if nsteps_before_run == 0:
             self._next_save_frame = frame_frequency_steps
@@ -1390,13 +1400,20 @@ class DynamicsData:
                 )
 
         except NeedsMinimiseError:
+            from openmm.unit import picosecond
+
             # try to fix this problem by minimising,
             # then running again
             self._is_running = False
             self._clear_state()
             self._rebuild_and_minimise()
             orig_args["auto_fix_minimise"] = False
-            self._current_step = 0
+            self._current_step = self._prev_step
+            self._current_time = self._prev_current_time
+            self._elapsed_time = self._prev_elapsed_time
+            self._omm_mols.setTime(
+                self._prev_current_time.to("picosecond") * picosecond
+            )
             self.run(**orig_args)
             return
 

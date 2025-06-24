@@ -30,10 +30,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Make sure box vectors are in reduced form before setting via the ``OpenMM`` C++ API.
 * Add isobaric and grand canonical terms to reduced potential.
 * Keep kappa term fixed during decoupling schedules.
-* Added CMAP support when reading / writing AMBER and GROMACS topology files. The parameters are in the ``cmap`` property.
+* Added CMAP support when reading / writing AMBER and GROMACS topology files. The parameters
+  are in the ``cmap`` property.
 * Fixed compile issues for MacOS Sequoia.
 * Upgraded minimum cmake supported version to 3.5.
-* Reset dynamics step counter when a crash occurs so that energies and frames are save with the correct time stamp.
+* Reset dynamics step counters and internal clock when a crash occurs so that energies
+  and frames are save with the correct time stamp.
 
 `2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
 ----------------------------------------------------------------------------------------

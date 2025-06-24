@@ -54,7 +54,10 @@ def test_amber_cmap(tmpdir, amber_cmap):
 
     with open(f[0], "r") as f1:
         with open(f2[0], "r") as f2:
-            assert f1.read() == f2.read()
+            for i, (line1, line2) in enumerate(zip(f1, f2)):
+                # skip the first line since it includes a timestamp
+                if i > 0:
+                    assert line1 == line2
 
 
 def test_amber_cmap_grotop(tmpdir, amber_cmap):
