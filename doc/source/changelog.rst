@@ -36,6 +36,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Upgraded minimum cmake supported version to 3.5.
 * Reset dynamics step counters and internal clock when a crash occurs so that energies
   and frames are save with the correct time stamp.
+* Add OPC water model template for interconvesion between AMBER and GROMACS formats.
 
 `2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
 ----------------------------------------------------------------------------------------
