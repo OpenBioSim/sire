@@ -459,6 +459,22 @@ namespace SireIO
                 edit_mol = edit_mol.atom(AtomIdx(3)).setProperty(map["coordinates"], coord_virtual).molecule();
             }
 
+            // OPC
+            if (model == "OPC")
+            {
+                double a = 0.1477224;
+
+                // Expression taken from GROMACS OPC topology file, as generated
+                // by CHARMM-GUI.
+                // Vsite pos x4 = x1 + a*(x2-x1) + a*(x3-x1)
+                // x1 = oxygen, x2 = hydrogen 1, x3 = hydrogn 2
+
+                auto coord_virtual =
+                    coord_oxygen + a * (coord_hydrogen0 - coord_oxygen) + a * (coord_hydrogen1 - coord_oxygen);
+
+                edit_mol = edit_mol.atom(AtomIdx(3)).setProperty(map["coordinates"], coord_virtual).molecule();
+            }
+
             // TIP5P
             else
             {
@@ -569,6 +585,22 @@ namespace SireIO
                 edit_mol = edit_mol.atom(AtomIdx(3)).setProperty(map["coordinates"], coord_virtual).molecule();
             }
 
+            // OPC
+            if (model == "OPC")
+            {
+                double a = 0.1477224;
+
+                // Expression taken from GROMACS OPC topology file, as generated
+                // by CHARMM-GUI.
+                // Vsite pos x4 = x1 + a*(x2-x1) + a*(x3-x1)
+                // x1 = oxygen, x2 = hydrogen 1, x3 = hydrogn 2
+
+                auto coord_virtual =
+                    coord_oxygen + a * (coord_hydrogen0 - coord_oxygen) + a * (coord_hydrogen1 - coord_oxygen);
+
+                edit_mol = edit_mol.atom(AtomIdx(3)).setProperty(map["coordinates"], coord_virtual).molecule();
+            }
+
             // TIP5P
             else
             {
@@ -618,6 +650,7 @@ namespace SireIO
         models["TIP3P"] = getShareDir() + "/templates/water/tip3p";
         models["TIP4P"] = getShareDir() + "/templates/water/tip4p";
         models["TIP5P"] = getShareDir() + "/templates/water/tip5p";
+        models["OPC"] = getShareDir() + "/templates/water/opc";
 
         // Make sure the user has passed a valid water model.
         if (not models.contains(_model))
@@ -627,7 +660,7 @@ namespace SireIO
 
         // Flag whether the water model has virtual atoms.
         bool has_virtual = false;
-        if ((_model == "TIP4P") or (_model == "TIP5P"))
+        if ((_model == "TIP4P") or (_model == "TIP5P") or (_model == "OPC"))
             has_virtual = true;
 
         // Extract the water model template path.
@@ -683,6 +716,7 @@ namespace SireIO
         models["TIP3P"] = getShareDir() + "/templates/water/tip3p";
         models["TIP4P"] = getShareDir() + "/templates/water/tip4p";
         models["TIP5P"] = getShareDir() + "/templates/water/tip5p";
+        models["OPC"] = getShareDir() + "/templates/water/opc";
 
         // Make sure the user has passed a valid water model.
         if (not models.contains(_model))
@@ -692,7 +726,7 @@ namespace SireIO
 
         // Flag whether the water model has virtual atoms.
         bool has_virtual = false;
-        if ((_model == "TIP4P") or (_model == "TIP5P"))
+        if ((_model == "TIP4P") or (_model == "TIP5P") or (_model == "OPC"))
             has_virtual = true;
 
         // Extract the water model template path.
@@ -736,6 +770,7 @@ namespace SireIO
         models["TIP3P"] = getShareDir() + "/templates/water/tip3p";
         models["TIP4P"] = getShareDir() + "/templates/water/tip4pew";
         models["TIP5P"] = getShareDir() + "/templates/water/tip5p";
+        models["OPC"] = getShareDir() + "/templates/water/opc";
 
         // Make sure the user has passed a valid water model.
         if (not models.contains(_model))
@@ -745,7 +780,7 @@ namespace SireIO
 
         // Flag whether the water model has virtual atoms.
         bool has_virtual = false;
-        if ((_model == "TIP4P") or (_model == "TIP5P"))
+        if ((_model == "TIP4P") or (_model == "TIP5P") or (_model == "OPC"))
             has_virtual = true;
 
         // Extract the water model template path.
@@ -791,6 +826,7 @@ namespace SireIO
         models["TIP3P"] = getShareDir() + "/templates/water/tip3p";
         models["TIP4P"] = getShareDir() + "/templates/water/tip4p";
         models["TIP5P"] = getShareDir() + "/templates/water/tip5p";
+        models["OPC"] = getShareDir() + "/templates/water/opc";
 
         // Make sure the user has passed a valid water model.
         if (not models.contains(_model))
@@ -800,7 +836,7 @@ namespace SireIO
 
         // Flag whether the water model has virtual atoms.
         bool has_virtual = false;
-        if ((_model == "TIP4P") or (_model == "TIP5P"))
+        if ((_model == "TIP4P") or (_model == "TIP5P") or (_model == "OPC"))
             has_virtual = true;
 
         // Extract the water model template path.

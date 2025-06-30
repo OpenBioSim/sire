@@ -182,6 +182,10 @@ class DynamicsData:
             self._is_running = False
             self._schedule_changed = False
 
+            # Initialise the GCMC sampler. This will be updated externally.
+            # if the dynamics object is coupled to a sampler.
+            self._gcmc_sampler = None
+
             # Check for a REST2 scaling factor.
             if map.specified("rest2_scale"):
                 try:
@@ -1412,8 +1416,15 @@ class DynamicsData:
             self._current_time = self._prev_current_time
             self._elapsed_time = self._prev_elapsed_time
             self._omm_mols.setTime(
-                self._prev_current_time.to("picosecond") * picosecond
+                self._prev_elapsed_time.to("picosecond") * picosecond
             )
+
+            # reset the water state
+            if self._gcmc_sampler is not None:
+                self._gcmc_sampler.push()
+                self._gcmc_sampler._set_water_state(self._omm_mols)
+                self._gcmc_sampler.pop()
+
             self.run(**orig_args)
             return
 
