@@ -146,10 +146,11 @@ def test_lambdaschedule():
 
     _assert_same_equation(l.lam(), l.get_equation(stage="scale_up"), morph5_equation)
 
-@pytest.mark.parametrize("force, lever, contained", [
-    ("ghost-14", "kappa", True),
-    ("ghost-14", "epsilon", True)
-])
+
+@pytest.mark.parametrize(
+    "force, lever, contained",
+    [("ghost-14", "kappa", True), ("ghost-14", "epsilon", True)],
+)
 def test_has_force_specific_equation(force, lever, contained):
     l = sr.cas.LambdaSchedule.standard_decouple()
     assert l.has_force_specific_equation("decouple", force, lever) == contained

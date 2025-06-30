@@ -140,8 +140,7 @@ class Profiler:
             from ._console import Console
 
             Console.warning(
-                f"You cannot stop profiler {self._name} as "
-                f"it has not been started!"
+                f"You cannot stop profiler {self._name} as " f"it has not been started!"
             )
         elif self._end is not None:
             from ._console import Console

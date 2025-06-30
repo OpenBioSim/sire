@@ -1,6 +1,6 @@
 """
-Test the standardstatecorrection script, which is used to 
-compute the standard state correction when using multiple 
+Test the standardstatecorrection script, which is used to
+compute the standard state correction when using multiple
 distance restraints.
 """
 

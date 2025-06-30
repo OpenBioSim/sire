@@ -30,17 +30,12 @@ def test_mapping(ala_mols, ala_traj):
     assert mapping[mol[0:5]]["not element H"] == mol2[0:5]["not element H"]
 
     # now map the molecule in the wrong order
-    assert (
-        mapping[mol[-1::-1]]["not element H"] == mol2[-1::-1]["not element H"]
-    )
+    assert mapping[mol[-1::-1]]["not element H"] == mol2[-1::-1]["not element H"]
 
     # now try to find the matching atoms in the container
     assert mapping.find(mol, mols2)["not element H"] == mol2["not element H"]
 
-    assert (
-        mapping.find(mol[0:5], mols2)["not element H"]
-        == mol2[0:5]["not element H"]
-    )
+    assert mapping.find(mol[0:5], mols2)["not element H"] == mol2[0:5]["not element H"]
 
     assert (
         mapping.find(mol[-1::-1], mols2)["not element H"]
