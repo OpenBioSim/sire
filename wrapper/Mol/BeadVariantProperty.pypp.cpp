@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::BeadProperty<QVariant> __copy__(const SireMol::BeadProperty<QVariant> &other){ return SireMol::BeadProperty<QVariant>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -365,9 +367,9 @@ void register_BeadVariantProperty_class(){
         }
         BeadVariantProperty_exposer.staticmethod( "fromVariant" );
         BeadVariantProperty_exposer.staticmethod( "typeName" );
-        BeadVariantProperty_exposer.def( "__copy__", &__copy__);
-        BeadVariantProperty_exposer.def( "__deepcopy__", &__copy__);
-        BeadVariantProperty_exposer.def( "clone", &__copy__);
+        BeadVariantProperty_exposer.def( "__copy__", &__copy__<SireMol::BeadProperty<QVariant>>);
+        BeadVariantProperty_exposer.def( "__deepcopy__", &__copy__<SireMol::BeadProperty<QVariant>>);
+        BeadVariantProperty_exposer.def( "clone", &__copy__<SireMol::BeadProperty<QVariant>>);
         BeadVariantProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::BeadProperty<QVariant> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         BeadVariantProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::BeadProperty<QVariant> >,

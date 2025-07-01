@@ -55,6 +55,8 @@ namespace bp = boost::python;
 
 SireMol::SelectorM<SireMol::CutGroup> __copy__(const SireMol::SelectorM<SireMol::CutGroup> &other){ return SireMol::SelectorM<SireMol::CutGroup>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -1807,6 +1809,32 @@ void register_SelectorM_CutGroup__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::CutGroup >::toSelectorList
+        
+            typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;
+            typedef ::QList< SireMol::Selector< SireMol::CutGroup > > ( ::SireMol::SelectorM< SireMol::CutGroup >::*toSelectorList_function_type)(  ) const;
+            toSelectorList_function_type toSelectorList_function_value( &::SireMol::SelectorM< SireMol::CutGroup >::toSelectorList );
+            
+            SelectorM_CutGroup__exposer.def( 
+                "toSelectorList"
+                , toSelectorList_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::CutGroup >::toSelectorVector
+        
+            typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;
+            typedef ::QVector< SireMol::Selector< SireMol::CutGroup > > ( ::SireMol::SelectorM< SireMol::CutGroup >::*toSelectorVector_function_type)(  ) const;
+            toSelectorVector_function_type toSelectorVector_function_value( &::SireMol::SelectorM< SireMol::CutGroup >::toSelectorVector );
+            
+            SelectorM_CutGroup__exposer.def( 
+                "toSelectorVector"
+                , toSelectorVector_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::CutGroup >::toSingleMolecule
         
             typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;
@@ -1903,9 +1931,9 @@ void register_SelectorM_CutGroup__class(){
         
         }
         SelectorM_CutGroup__exposer.staticmethod( "typeName" );
-        SelectorM_CutGroup__exposer.def( "__copy__", &__copy__);
-        SelectorM_CutGroup__exposer.def( "__deepcopy__", &__copy__);
-        SelectorM_CutGroup__exposer.def( "clone", &__copy__);
+        SelectorM_CutGroup__exposer.def( "__copy__", &__copy__<SireMol::SelectorM<SireMol::CutGroup>>);
+        SelectorM_CutGroup__exposer.def( "__deepcopy__", &__copy__<SireMol::SelectorM<SireMol::CutGroup>>);
+        SelectorM_CutGroup__exposer.def( "clone", &__copy__<SireMol::SelectorM<SireMol::CutGroup>>);
         SelectorM_CutGroup__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::SelectorM<SireMol::CutGroup> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SelectorM_CutGroup__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::SelectorM<SireMol::CutGroup> >,

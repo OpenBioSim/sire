@@ -37,6 +37,8 @@ namespace bp = boost::python;
 
 SireMol::AtomCutting __copy__(const SireMol::AtomCutting &other){ return SireMol::AtomCutting(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -90,9 +92,9 @@ void register_AtomCutting_class(){
         
         }
         AtomCutting_exposer.staticmethod( "typeName" );
-        AtomCutting_exposer.def( "__copy__", &__copy__);
-        AtomCutting_exposer.def( "__deepcopy__", &__copy__);
-        AtomCutting_exposer.def( "clone", &__copy__);
+        AtomCutting_exposer.def( "__copy__", &__copy__<SireMol::AtomCutting>);
+        AtomCutting_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomCutting>);
+        AtomCutting_exposer.def( "clone", &__copy__<SireMol::AtomCutting>);
         AtomCutting_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomCutting >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomCutting_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomCutting >,

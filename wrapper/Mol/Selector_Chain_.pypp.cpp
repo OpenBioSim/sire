@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 SireMol::Selector<SireMol::Chain> __copy__(const SireMol::Selector<SireMol::Chain> &other){ return SireMol::Selector<SireMol::Chain>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -1095,9 +1097,9 @@ void register_Selector_Chain__class(){
         
         }
         Selector_Chain__exposer.staticmethod( "typeName" );
-        Selector_Chain__exposer.def( "__copy__", &__copy__);
-        Selector_Chain__exposer.def( "__deepcopy__", &__copy__);
-        Selector_Chain__exposer.def( "clone", &__copy__);
+        Selector_Chain__exposer.def( "__copy__", &__copy__<SireMol::Selector<SireMol::Chain>>);
+        Selector_Chain__exposer.def( "__deepcopy__", &__copy__<SireMol::Selector<SireMol::Chain>>);
+        Selector_Chain__exposer.def( "clone", &__copy__<SireMol::Selector<SireMol::Chain>>);
         Selector_Chain__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Selector<SireMol::Chain> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Selector_Chain__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Selector<SireMol::Chain> >,

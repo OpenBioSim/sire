@@ -13,9 +13,7 @@ class Ensemble(_Move.Ensemble):
     a simulation will be run.
     """
 
-    def __init__(
-        self, ensemble=None, temperature=None, pressure=None, map=None
-    ):
+    def __init__(self, ensemble=None, temperature=None, pressure=None, map=None):
         from ..base import create_map
 
         map = create_map(map)

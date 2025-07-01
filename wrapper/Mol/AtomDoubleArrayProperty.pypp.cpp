@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::AtomProperty<SireBase::DoubleArrayProperty> __copy__(const SireMol::AtomProperty<SireBase::DoubleArrayProperty> &other){ return SireMol::AtomProperty<SireBase::DoubleArrayProperty>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -648,9 +650,9 @@ void register_AtomDoubleArrayProperty_class(){
         }
         AtomDoubleArrayProperty_exposer.staticmethod( "fromVariant" );
         AtomDoubleArrayProperty_exposer.staticmethod( "typeName" );
-        AtomDoubleArrayProperty_exposer.def( "__copy__", &__copy__);
-        AtomDoubleArrayProperty_exposer.def( "__deepcopy__", &__copy__);
-        AtomDoubleArrayProperty_exposer.def( "clone", &__copy__);
+        AtomDoubleArrayProperty_exposer.def( "__copy__", &__copy__<SireMol::AtomProperty<SireBase::DoubleArrayProperty>>);
+        AtomDoubleArrayProperty_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomProperty<SireBase::DoubleArrayProperty>>);
+        AtomDoubleArrayProperty_exposer.def( "clone", &__copy__<SireMol::AtomProperty<SireBase::DoubleArrayProperty>>);
         AtomDoubleArrayProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomProperty<SireBase::DoubleArrayProperty> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomDoubleArrayProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomProperty<SireBase::DoubleArrayProperty> >,

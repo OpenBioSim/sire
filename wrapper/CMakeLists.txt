@@ -5,9 +5,9 @@
 #
 ################################
 
-# require cmake >= 3.3.0 (released in 2018)
-cmake_minimum_required(VERSION 3.3.0 FATAL_ERROR)
-cmake_policy(VERSION 3.3)
+# require cmake >= 3.30.0
+cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_policy(VERSION 3.30)
 
 # Read the version number (so we can set it once in one place)
 file (STRINGS "../version.txt" SIRE_VERSION)
@@ -131,6 +131,9 @@ set(CMAKE_C_COMPILER "${SIRE_C_COMPILER}")
 set(CMAKE_CXX_COMPILER "${SIRE_CXX_COMPILER}")
 
 message( STATUS "Setting C compiler to ${SIRE_C_COMPILER} and C++ compiler to ${SIRE_CXX_COMPILER}" )
+
+message( STATUS "Using C++ standard ${SIRE_CXX_STANDARD} - setting this to CMAKE_CXX_STANDARD" )
+set(CMAKE_CXX_STANDARD ${SIRE_CXX_STANDARD})
 
 if ("$ENV{CONDA_BUILD}" STREQUAL "1")
   message( STATUS "Compiling as part of a conda-build")
@@ -293,33 +296,9 @@ endif()
 include_directories( "${SIRE_APP}/include" "${SIRE_APP}/Library/include" )
 include_directories(BEFORE ${CONDA_INCLUDE_DIR})
 
-message(STATUS "Checking if conda/include is a hidden include...")
-include(CheckCXXSourceRuns)
-get_property(CMAKE_REQUIRED_INCLUDES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-message(STATUS "${CMAKE_REQUIRED_INCLUDES}")
-  check_cxx_source_runs("
-
-  #include \"tbb/tbb.h\"
-
-  int main()
-  {
-    return 0;
-  }" IS_CONDA_INCLUDE_WORKING)
-
-if (IS_CONDA_INCLUDE_WORKING)
-  message(STATUS "-Iconda/include is used correctly.")
-
-  if (APPLE)
-    message(STATUS "...but, MacOS still causes issues where conda/include is removed.")
-    message(STATUS "Unsetting CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES so that conda/include is not hidden.")
-    unset(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
-  endif()
-
-else()
-  # Things don't work, so we need to switch off implicit include directories
-  unset(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
-  message(STATUS "Unsetting CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES so that conda/include is not hidden.")
-endif()
+# Make sure the conda include directory is visible.
+message(STATUS "Unsetting CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES so that conda/include is not hidden.")
+unset(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
 
 # The wrappers MUST be built as shared libraries
 set (BUILD_SHARED_LIBS ON)
@@ -435,7 +414,12 @@ message( STATUS  "Executable link flags  == ${CMAKE_EXE_LINKER_FLAGS}" )
 set (Boost_USE_STATIC_LIBS OFF)
 set (Boost_USE_STATIC_RUNTIME OFF)
 set (Boost_DEBUG ON)  # this gives a nice print out in the cmake list to debug how boost is found and linked
-find_package( Boost 1.7 COMPONENTS python REQUIRED )
+find_package( Boost 1.7 COMPONENTS headers python REQUIRED )
+
+# Set the Boost include directory
+set (BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
+include_directories( ${Boost_INCLUDE_DIRS} )
+message( STATUS "Boost include directory is: ${BOOST_INCLUDE_DIR}" )
 
 # Need to define this with C++17 so that
 # boost::hash does not use std::unary_function

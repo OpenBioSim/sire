@@ -52,6 +52,8 @@ namespace bp = boost::python;
 
 SireMol::AtomStructureEditor __copy__(const SireMol::AtomStructureEditor &other){ return SireMol::AtomStructureEditor(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -456,9 +458,9 @@ void register_AtomStructureEditor_class(){
         
         }
         AtomStructureEditor_exposer.staticmethod( "typeName" );
-        AtomStructureEditor_exposer.def( "__copy__", &__copy__);
-        AtomStructureEditor_exposer.def( "__deepcopy__", &__copy__);
-        AtomStructureEditor_exposer.def( "clone", &__copy__);
+        AtomStructureEditor_exposer.def( "__copy__", &__copy__<SireMol::AtomStructureEditor>);
+        AtomStructureEditor_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomStructureEditor>);
+        AtomStructureEditor_exposer.def( "clone", &__copy__<SireMol::AtomStructureEditor>);
         AtomStructureEditor_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomStructureEditor >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomStructureEditor_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomStructureEditor >,

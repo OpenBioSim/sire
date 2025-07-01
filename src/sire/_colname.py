@@ -17,9 +17,7 @@ def colname(obj, component=None):
             return f"{res.name().value()}:{res.number().value()}"
 
         def _colname_bond(bond):
-            return (
-                f"{_colname_atom(bond.atom0())}=>{_colname_atom(bond.atom1())}"
-            )
+            return f"{_colname_atom(bond.atom0())}=>{_colname_atom(bond.atom1())}"
 
         def _colname_angle(ang):
             return (

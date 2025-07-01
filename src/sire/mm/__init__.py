@@ -9,6 +9,7 @@ __all__ = [
     "Bond",
     "BondRestraint",
     "BondRestraints",
+    "CMAPParameter",
     "Dihedral",
     "Improper",
     "PositionRestraint",
@@ -43,6 +44,8 @@ BondRestraints = _MM.BondRestraints
 
 BoreschRestraint = _MM.BoreschRestraint
 BoreschRestraints = _MM.BoreschRestraints
+
+CMAPParameter = _MM.CMAPParameter
 
 PositionalRestraint = _MM.PositionalRestraint
 PositionalRestraints = _MM.PositionalRestraints

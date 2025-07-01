@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 SireMol::MGNum __copy__(const SireMol::MGNum &other){ return SireMol::MGNum(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -145,9 +147,9 @@ void register_MGNum_class(){
         }
         MGNum_exposer.staticmethod( "getUniqueNumber" );
         MGNum_exposer.staticmethod( "typeName" );
-        MGNum_exposer.def( "__copy__", &__copy__);
-        MGNum_exposer.def( "__deepcopy__", &__copy__);
-        MGNum_exposer.def( "clone", &__copy__);
+        MGNum_exposer.def( "__copy__", &__copy__<SireMol::MGNum>);
+        MGNum_exposer.def( "__deepcopy__", &__copy__<SireMol::MGNum>);
+        MGNum_exposer.def( "clone", &__copy__<SireMol::MGNum>);
         MGNum_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::MGNum >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         MGNum_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::MGNum >,

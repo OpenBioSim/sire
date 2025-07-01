@@ -80,6 +80,8 @@ const SireBase::PropertyPtr& get_Metadata_SireMol_ChainPropertyProperty_function
 
 SireMol::Chain __copy__(const SireMol::Chain &other){ return SireMol::Chain(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -629,9 +631,9 @@ void register_Chain_class(){
         Chain_exposer.def( "_get_property_SireMol_ChainPropertyProperty", &SireMol::Chain::property< SireBase::PropertyPtr >, bp::return_value_policy<bp::copy_const_reference>());
         Chain_exposer.def( "_get_metadata_SireMol_ChainPropertyProperty", get_Metadata_SireMol_ChainPropertyProperty_function1, bp::return_value_policy<bp::copy_const_reference>());
         Chain_exposer.def( "_get_metadata_SireMol_ChainPropertyProperty", &get_Metadata_SireMol_ChainPropertyProperty_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Chain_exposer.def( "__copy__", &__copy__);
-        Chain_exposer.def( "__deepcopy__", &__copy__);
-        Chain_exposer.def( "clone", &__copy__);
+        Chain_exposer.def( "__copy__", &__copy__<SireMol::Chain>);
+        Chain_exposer.def( "__deepcopy__", &__copy__<SireMol::Chain>);
+        Chain_exposer.def( "clone", &__copy__<SireMol::Chain>);
         Chain_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Chain >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Chain_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Chain >,

@@ -12,6 +12,31 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
+-----------------------------------------------------------------------------------------
+
+* Fixed unbound local variable when simulation lambda value is not in ``lambda_windows`` array.
+
+* Allow negative residue numbers.
+
+* Make sure box vectors are in reduced form before setting via the ``OpenMM`` C++ API.
+
+* Add isobaric and grand canonical terms to reduced potential.
+
+* Keep kappa term fixed during decoupling schedules.
+
+* Added CMAP support when reading / writing AMBER and GROMACS topology files. The parameters
+  are in the ``cmap`` property.
+
+* Fixed compile issues for MacOS Sequoia.
+
+* Upgraded minimum ``CMake`` supported version to 3.5.
+
+* Reset dynamics step counters and internal clock when a crash occurs so that energies
+  and frames are save with the correct time stamp.
+
+* Add OPC water model template for interconvesion between AMBER and GROMACS formats.
+
 `2024.4.2 <https://github.com/openbiosim/sire/compare/2024.4.1...2024.4.2>`__ - Feb 2025
 ----------------------------------------------------------------------------------------
 

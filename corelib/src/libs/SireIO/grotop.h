@@ -36,9 +36,11 @@
 #include "SireMol/chainname.h"
 #include "SireMol/dihedralid.h"
 #include "SireMol/resname.h"
+#include "SireMol/cmapid.h"
 
 #include "SireMM/gromacsparams.h"
 #include "SireMM/mmdetail.h"
+#include "SireMM/cmapparameter.h"
 
 #include <QMultiHash>
 
@@ -215,6 +217,7 @@ namespace SireIO
         void addBonds(const QMultiHash<SireMol::BondID, GromacsBond> &bonds, bool is_lambda1 = false);
         void addAngles(const QMultiHash<SireMol::AngleID, GromacsAngle> &angles, bool is_lambda1 = false);
         void addDihedrals(const QMultiHash<SireMol::DihedralID, GromacsDihedral> &dihedrals, bool is_lambda1 = false);
+        void addCMAPs(const QHash<SireMol::CMAPID, QString> &cmaps, bool is_lambda1 = false);
 
         void sanitise(QString elecstyle, QString vdwstyle, QString combrule, double elec14, double vdw14,
                       bool is_lambda1 = false);
@@ -228,6 +231,8 @@ namespace SireIO
         GroAtom atom(const SireMol::AtomNum &atomnum, bool is_lambda1 = false) const;
         GroAtom atom(const SireMol::AtomName &atomnam, bool is_lambda1 = false) const;
 
+        void setAtomType(const SireMol::AtomIdx &atomidx, const QString &atomtype, bool is_lambda1 = false);
+
         QVector<GroAtom> atoms(bool is_lambda1 = false) const;
         void setAtoms(const QVector<GroAtom> &atoms, bool is_lambda1 = false);
 
@@ -240,11 +245,14 @@ namespace SireIO
         QMultiHash<SireMol::BondID, GromacsBond> bonds(bool is_lambda1 = false) const;
         QMultiHash<SireMol::AngleID, GromacsAngle> angles(bool is_lambda1 = false) const;
         QMultiHash<SireMol::DihedralID, GromacsDihedral> dihedrals(bool is_lambda1 = false) const;
+        QHash<SireMol::CMAPID, QString> cmaps(bool is_lambda1 = false) const;
 
         bool isWater(bool is_lambda1 = false) const;
         QStringList settlesLines(bool is_lambda1 = false) const;
 
         QStringList warnings() const;
+
+        void sanitiseCMAPs(bool is_lambda1 = false);
 
         bool needsSanitising(bool is_lambda1 = false) const;
 
@@ -276,6 +284,13 @@ namespace SireIO
         /** Hash of all of the dihedrals */
         QMultiHash<SireMol::DihedralID, GromacsDihedral> dihs0;
         QMultiHash<SireMol::DihedralID, GromacsDihedral> dihs1;
+
+        /** Hash of all of the CMAPs - the parameter is a string
+         *  encoding the function type for the parameter
+         *  (currently only "1" is supported)
+         */
+        QHash<SireMol::CMAPID, QString> cmaps0;
+        QHash<SireMol::CMAPID, QString> cmaps1;
 
         /** The details about the forcefield used for this molecule */
         SireMM::MMDetail ffield0;
@@ -414,6 +429,9 @@ namespace SireIO
         QList<SireMM::GromacsDihedral> dihedrals(const QString &atm0, const QString &atm1, const QString &atm2,
                                                  const QString &atm3, int func) const;
 
+        QList<SireMM::CMAPParameter> cmaps(const QString &atm0, const QString &atm1, const QString &atm2,
+                                           const QString &atm3, const QString &atm4, int func) const;
+
         QHash<QString, SireMM::GromacsAtomType> atomTypes() const;
 
         QMultiHash<QString, SireMM::GromacsBond> bondPotentials() const;
@@ -465,6 +483,7 @@ namespace SireIO
         PropsAndErrors getBondProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
         PropsAndErrors getAngleProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
         PropsAndErrors getDihedralProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
+        PropsAndErrors getCMAPProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
 
         /** This is the full search path of all directories that should
             be searched for Gromacs include files */
@@ -488,6 +507,9 @@ namespace SireIO
 
         /** The database of dihedral potentials */
         QMultiHash<QString, SireMM::GromacsDihedral> dih_potentials;
+
+        /** The database of cmap potentials */
+        QHash<QString, SireMM::CMAPParameter> cmap_potentials;
 
         /** The list of all moleculetypes loaded from this file */
         QVector<GroMolType> moltypes;

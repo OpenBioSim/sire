@@ -26,6 +26,8 @@ namespace bp = boost::python;
 
 SireMol::AtomIdxMapping __copy__(const SireMol::AtomIdxMapping &other){ return SireMol::AtomIdxMapping(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -460,9 +462,9 @@ void register_AtomIdxMapping_class(){
         
         }
         AtomIdxMapping_exposer.staticmethod( "typeName" );
-        AtomIdxMapping_exposer.def( "__copy__", &__copy__);
-        AtomIdxMapping_exposer.def( "__deepcopy__", &__copy__);
-        AtomIdxMapping_exposer.def( "clone", &__copy__);
+        AtomIdxMapping_exposer.def( "__copy__", &__copy__<SireMol::AtomIdxMapping>);
+        AtomIdxMapping_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomIdxMapping>);
+        AtomIdxMapping_exposer.def( "clone", &__copy__<SireMol::AtomIdxMapping>);
         AtomIdxMapping_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomIdxMapping >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomIdxMapping_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomIdxMapping >,

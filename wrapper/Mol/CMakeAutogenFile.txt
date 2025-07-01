@@ -27,6 +27,7 @@ set ( PYPP_SOURCES
        AtomMultiMatcher.pypp.cpp
        ChainName.pypp.cpp
        AngleID.pypp.cpp
+       CMAPID.pypp.cpp
        CGIntProperty.pypp.cpp
        MoleculeBeading.pypp.cpp
        SelectorMol.pypp.cpp

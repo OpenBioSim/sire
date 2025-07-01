@@ -21,6 +21,8 @@ namespace bp = boost::python;
 
 SireMol::Radical __copy__(const SireMol::Radical &other){ return SireMol::Radical(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -200,9 +202,9 @@ void register_Radical_class(){
         Radical_exposer.staticmethod( "triplet" );
         Radical_exposer.staticmethod( "typeName" );
         Radical_exposer.staticmethod( "undefined" );
-        Radical_exposer.def( "__copy__", &__copy__);
-        Radical_exposer.def( "__deepcopy__", &__copy__);
-        Radical_exposer.def( "clone", &__copy__);
+        Radical_exposer.def( "__copy__", &__copy__<SireMol::Radical>);
+        Radical_exposer.def( "__deepcopy__", &__copy__<SireMol::Radical>);
+        Radical_exposer.def( "clone", &__copy__<SireMol::Radical>);
         Radical_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Radical >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Radical_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Radical >,

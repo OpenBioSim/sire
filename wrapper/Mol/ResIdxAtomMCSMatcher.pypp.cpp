@@ -48,6 +48,8 @@ namespace bp = boost::python;
 
 SireMol::ResIdxAtomMCSMatcher __copy__(const SireMol::ResIdxAtomMCSMatcher &other){ return SireMol::ResIdxAtomMCSMatcher(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -169,9 +171,9 @@ void register_ResIdxAtomMCSMatcher_class(){
         
         }
         ResIdxAtomMCSMatcher_exposer.staticmethod( "typeName" );
-        ResIdxAtomMCSMatcher_exposer.def( "__copy__", &__copy__);
-        ResIdxAtomMCSMatcher_exposer.def( "__deepcopy__", &__copy__);
-        ResIdxAtomMCSMatcher_exposer.def( "clone", &__copy__);
+        ResIdxAtomMCSMatcher_exposer.def( "__copy__", &__copy__<SireMol::ResIdxAtomMCSMatcher>);
+        ResIdxAtomMCSMatcher_exposer.def( "__deepcopy__", &__copy__<SireMol::ResIdxAtomMCSMatcher>);
+        ResIdxAtomMCSMatcher_exposer.def( "clone", &__copy__<SireMol::ResIdxAtomMCSMatcher>);
         ResIdxAtomMCSMatcher_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ResIdxAtomMCSMatcher >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ResIdxAtomMCSMatcher_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ResIdxAtomMCSMatcher >,
