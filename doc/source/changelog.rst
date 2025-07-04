@@ -16,6 +16,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 ----------------------------------------------------------------------------------------
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
+* Add end-state coordinates properties to decoupled and annihilated molecules.
 
 `2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
 -----------------------------------------------------------------------------------------
