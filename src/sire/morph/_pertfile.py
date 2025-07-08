@@ -281,6 +281,7 @@ def create_from_pertfile(mol, pertfile, map=None):
     from ..legacy.MM import AmberParams
 
     map0 = {
+        "coordinates": "coordinates0",
         "charge": "charge0",
         "LJ": "LJ0",
         "ambertype": "ambertype0",
@@ -293,6 +294,7 @@ def create_from_pertfile(mol, pertfile, map=None):
     params0 = AmberParams(mol, map0)
 
     map1 = {
+        "coordinates": "coordinates1",
         "charge": "charge1",
         "LJ": "LJ1",
         "ambertype": "ambertype1",
