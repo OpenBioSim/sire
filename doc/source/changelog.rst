@@ -19,7 +19,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Add end-state coordinates properties to decoupled and annihilated molecules.
 * Map the end state coordinates property when constructing an ``AmberParams`` object when
   creating a molecule from a ``SOMD`` perturbation file.
-* Fix evaluation of custom force energes from OpenMM XML files by correctly looping over
+* Fix evaluation of custom force energies from OpenMM XML files by correctly looping over
   interaction groups.
 
 `2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
