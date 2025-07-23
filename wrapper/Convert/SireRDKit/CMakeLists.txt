@@ -4,7 +4,7 @@
 #
 ##########################################
 
-if (SIRE_HAS_CPP_17)
+if (SIRE_HAS_CPP_20)
   # Find RDKit libraries
   find_package(RDKit)
 
@@ -24,7 +24,11 @@ if (SIRE_HAS_CPP_17)
       # RDKit needs this definition set on Windows
       add_definitions(-DWIN32)
       add_definitions(-DRDKIT_DYN_LINK)
+      add_compile_options("/std:c++20")
+    else()
+      add_compile_options(-std=c++20)
     endif()
+
 
     if (APPLE)
       # RDKit uses std::bad_any_cast, which isn't available by default
