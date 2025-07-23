@@ -6,7 +6,7 @@ libboost-devel
 libboost-python-devel
 libcblas
 libnetcdf
-librdkit-dev
+librdkit-dev > 2024.09.6
 openmm >= 8.1
 pandas
 python
