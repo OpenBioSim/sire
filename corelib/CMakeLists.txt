@@ -370,10 +370,17 @@ else()
   CHECK_CXX_COMPILER_FLAG( "-std=c++17" SIRE_HAS_CPP_17 )
 endif()
 
+if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+  CHECK_CXX_COMPILER_FLAG( "/std:c++20" SIRE_HAS_CPP_20 )
+else()
+  CHECK_CXX_COMPILER_FLAG( "-std=c++20" SIRE_HAS_CPP_20 )
+endif()
+
 save_sire_variable( "SIRE_HAS_CPP_LIB" "${SIRE_HAS_CPP_LIB}" )
 
 save_sire_variable( "SIRE_HAS_CPP_14" "${SIRE_HAS_CPP_14}" )
 save_sire_variable( "SIRE_HAS_CPP_17" "${SIRE_HAS_CPP_17}" )
+save_sire_variable( "SIRE_HAS_CPP_20" "${SIRE_HAS_CPP_20}" )
 
 option( SIRE_SKIP_LIBC++ "Force Sire to ignore libc++ (e.g. in case of broken clang on linux" OFF )
 
