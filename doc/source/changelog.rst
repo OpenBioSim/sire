@@ -21,6 +21,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   creating a molecule from a ``SOMD`` perturbation file.
 * Fix evaluation of custom force energies from OpenMM XML files by correctly looping over
   interaction groups.
+* Switch to new Boost Conda package naming scheme for host requirements.
 
 `2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
 -----------------------------------------------------------------------------------------
