@@ -1,8 +1,9 @@
 # Host requirements for Sire.
 
-boost
 gsl
 lazy_import
+libboost-devel
+libboost-python-devel
 libcblas
 libnetcdf
 librdkit-dev
