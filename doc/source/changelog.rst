@@ -23,6 +23,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   interaction groups.
 * Switch to new Boost Conda package naming scheme for host requirements.
 * Use C++20 standard for SireRDKit plugin.
+* Fixed build issues on MacOS with Clang and LTO (incorrectly specified LTO library version).
 
 `2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
 -----------------------------------------------------------------------------------------
