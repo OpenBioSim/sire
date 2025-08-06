@@ -67,7 +67,7 @@ using namespace SireOpenMM;
  */
 void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
                              OpenMM::System &system, LambdaLever &lambda_lever,
-                             int natoms)
+                             int natoms, QVector &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -152,8 +152,8 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
 
         for (int i = 0; i < 3; ++i)
         {
-            particles[i] = restraint.receptorAtoms()[i];
-            particles[i + 3] = restraint.ligandAtoms()[i];
+            particles[i] = real_atoms[restraint.receptorAtoms()[i]];
+            particles[i + 3] = real_atoms[restraint.ligandAtoms()[i]];
 
             if (particles[i] < 0 or particles[i] >= natoms or
                 particles[i + 3] < 0 or particles[i + 3] >= natoms)
@@ -192,7 +192,7 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
  */
 void _add_bond_restraints(const SireMM::BondRestraints &restraints,
                           OpenMM::System &system, LambdaLever &lambda_lever,
-                          int natoms)
+                          int natoms, QVector &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -233,8 +233,8 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
 
     for (const auto &restraint : atom_restraints)
     {
-        int atom0_index = restraint.atom0();
-        int atom1_index = restraint.atom1();
+        int atom0_index = real_atoms[restraint.atom0()];
+        int atom1_index = real_atoms[restraint.atom1()];
 
         if (atom0_index < 0 or atom0_index >= natoms)
             throw SireError::invalid_index(QObject::tr(
@@ -267,7 +267,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
 void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
                                 OpenMM::System &system, LambdaLever &lambda_lever,
                                 std::vector<OpenMM::Vec3> &anchor_coords,
-                                int natoms)
+                                int natoms, QVector &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -326,7 +326,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     // we need to add all of the positions as anchor particles
     for (const auto &restraint : atom_restraints)
     {
-        int atom_index = restraint.atom();
+        int atom_index = real_atoms[restraint.atom()];
 
         if (atom_index < 0 or atom_index >= natoms)
             throw SireError::invalid_index(QObject::tr(
@@ -406,7 +406,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
 
 void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
                            OpenMM::System &system, LambdaLever &lambda_lever,
-                           int natoms)
+                           int natoms, QVector &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -447,7 +447,7 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
 
         for (int i = 0; i < 3; ++i)
         {
-            particles[i] = restraint.atoms()[i];
+            particles[i] = real_atoms[restraint.atoms()[i]];
         }
 
         std::vector<double> parameters;
@@ -464,7 +464,7 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
 
 void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
                               OpenMM::System &system, LambdaLever &lambda_lever,
-                              int natoms)
+                              int natoms, QVector &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -510,7 +510,7 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
 
         for (int i = 0; i < 4; ++i)
         {
-            particles[i] = restraint.atoms()[i];
+            particles[i] = real_atoms[restraint.atoms()[i]];
         }
 
         std::vector<double> parameters;
@@ -1281,6 +1281,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     QVector<int> ghost_atoms;
     QVector<int> non_ghost_atoms;
 
+    // indices for real atoms (i.e. not virtual sites)
+    // required so that restraints are applied to the correct particles
+    QVector<int> real_atoms;
+
     // count the number of atoms and ghost atoms
     int n_atoms = 0;
     int n_ghost_atoms = 0;
@@ -1438,6 +1442,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 ghost_ghostff->addParticle(custom_params);
                 ghost_nonghostff->addParticle(custom_params);
 
+                real_atoms.append(atom_index);
+
                 if (is_from_ghost or is_to_ghost)
                 {
                     // this is a ghost atom! We need to record this
@@ -1496,6 +1502,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
                 // Add the particle to the standard CLJ forcefield
                 cljff->addParticle(boost::get<0>(clj), boost::get<1>(clj), boost::get<2>(clj));
+
+                real_atoms.append(atom_index);
 
                 // We need to add this molecule to the ghost and ghost
                 // forcefields if there are any perturbable molecules
@@ -1967,27 +1975,27 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             if (prop.read().isA<SireMM::DihedralRestraints>())
             {
                 _add_dihedral_restraints(prop.read().asA<SireMM::DihedralRestraints>(),
-                                         system, lambda_lever, start_index);
+                                         system, lambda_lever, start_index, real_atoms);
             }
             else if (prop.read().isA<SireMM::AngleRestraints>())
             {
                 _add_angle_restraints(prop.read().asA<SireMM::AngleRestraints>(),
-                                      system, lambda_lever, start_index);
+                                      system, lambda_lever, start_index, real_atoms);
             }
             else if (prop.read().isA<SireMM::PositionalRestraints>())
             {
                 _add_positional_restraints(prop.read().asA<SireMM::PositionalRestraints>(),
-                                           system, lambda_lever, anchor_coords, start_index);
+                                           system, lambda_lever, anchor_coords, start_index, real_atoms);
             }
             else if (prop.read().isA<SireMM::BondRestraints>())
             {
                 _add_bond_restraints(prop.read().asA<SireMM::BondRestraints>(),
-                                     system, lambda_lever, start_index);
+                                     system, lambda_lever, start_index, real_atoms);
             }
             else if (prop.read().isA<SireMM::BoreschRestraints>())
             {
                 _add_boresch_restraints(prop.read().asA<SireMM::BoreschRestraints>(),
-                                        system, lambda_lever, start_index);
+                                        system, lambda_lever, start_index, real_atoms);
             }
         }
     }
