@@ -118,6 +118,15 @@ else()
   unset(ENV{DEBUG_CFLAGS})
 endif()
 
+### On MacOS there is the really annoying conda issue that
+### clang will try to set the LTO library version, but recent
+### MacOS only allow an unversioned LTO library name to be called.
+### The below CMake function will check if this is the case, and
+### make fixes to the conda environment as needed
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
+include(CheckAndFixLTOLibrary)
+check_and_fix_lto_library()
+
 message( STATUS "ABOUT TO RUN PROJECT" )
 
 # name the project
