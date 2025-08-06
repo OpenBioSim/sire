@@ -2090,7 +2090,7 @@ void _update_restraint_in_context(OpenMM::CustomCVForce *ff, double rho,
     if (current_rho == rho)
         return; 
 
-    // Update the default value of rho 
+    // Update the value of rho 
     context.setParameter(rho_name, rho);
 
     ff->updateParametersInContext(context);
