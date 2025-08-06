@@ -2082,14 +2082,16 @@ void _update_restraint_in_context(OpenMM::CustomCVForce *ff, double rho,
                                                 "Unable to set 'rho' for this restraint as it has no custom parameters!"),
                                             CODELOC);
 
+    // Find the name of the alchemical parameter (first global parameter)
+    auto rho_name = ff->getGlobalParameterName(0);
 
     // First global param corresponds to rho.
-    double current_rho = ff->getGlobalParameterDefaultValue(0);
+    double current_rho = context.getParameter(rho_name);
     if (current_rho == rho)
         return; 
 
-    // Update the default value of rho
-    ff->setGlobalParameterDefaultValue(0, rho);
+    // Update the default value of rho 
+    context.setParameter(rho_name, rho);
 
     ff->updateParametersInContext(context);
 }

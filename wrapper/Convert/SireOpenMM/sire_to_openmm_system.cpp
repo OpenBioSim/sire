@@ -443,14 +443,14 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
     {
         // Define unique parameter names for rho, k and rmsd_b
         // std::string rho_unique = "rho_" + std::to_string(n_CVForces);
-        std::string rho_unique = "rho";
+        std::string rho_unique = "rho_" + std::to_string(n_CVForces);
         std::string k_unique = "k_" + std::to_string(n_CVForces);
         std::string rmsd_b_unique = "rmsd_b_" + std::to_string(n_CVForces);
         // Unique CV name
         std::string rmsd_unique = "rmsd_" + std::to_string(n_CVForces);
           
         // Single parameter naming
-        // std::string rho_unique = "rho";
+        // std::string rho_unique = "rho"
         // std::string k_unique = "k";
         // std::string rmsd_b_unique = "rb";
         // std::string rmsd_unique = "rmsd";
