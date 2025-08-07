@@ -246,5 +246,15 @@ def thrombin_complex():
 
 
 @pytest.fixture(scope="session")
+def amber_cmap():
+    return sr.load_test_files("amber_cmap.prm7")
+
+
+@pytest.fixture(scope="session")
+def gromacs_cmap():
+    return sr.load_test_files("1aki.gro", "1aki.top")
+
+
+@pytest.fixture(scope="session")
 def tagged_sdf():
     return sr.load_test_files("sdf_tags.sdf")[0]

@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::MGIDsAndMaps __copy__(const SireMol::MGIDsAndMaps &other){ return SireMol::MGIDsAndMaps(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -137,9 +139,9 @@ void register_MGIDsAndMaps_class(){
         
         }
         MGIDsAndMaps_exposer.staticmethod( "typeName" );
-        MGIDsAndMaps_exposer.def( "__copy__", &__copy__);
-        MGIDsAndMaps_exposer.def( "__deepcopy__", &__copy__);
-        MGIDsAndMaps_exposer.def( "clone", &__copy__);
+        MGIDsAndMaps_exposer.def( "__copy__", &__copy__<SireMol::MGIDsAndMaps>);
+        MGIDsAndMaps_exposer.def( "__deepcopy__", &__copy__<SireMol::MGIDsAndMaps>);
+        MGIDsAndMaps_exposer.def( "clone", &__copy__<SireMol::MGIDsAndMaps>);
         MGIDsAndMaps_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::MGIDsAndMaps >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         MGIDsAndMaps_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::MGIDsAndMaps >,

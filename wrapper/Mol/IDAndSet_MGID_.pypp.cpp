@@ -35,6 +35,8 @@ namespace bp = boost::python;
 
 SireID::IDAndSet<SireMol::MGID> __copy__(const SireID::IDAndSet<SireMol::MGID> &other){ return SireID::IDAndSet<SireMol::MGID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -179,9 +181,9 @@ void register_IDAndSet_MGID__class(){
         
         }
         IDAndSet_MGID__exposer.staticmethod( "typeName" );
-        IDAndSet_MGID__exposer.def( "__copy__", &__copy__);
-        IDAndSet_MGID__exposer.def( "__deepcopy__", &__copy__);
-        IDAndSet_MGID__exposer.def( "clone", &__copy__);
+        IDAndSet_MGID__exposer.def( "__copy__", &__copy__<SireID::IDAndSet<SireMol::MGID>>);
+        IDAndSet_MGID__exposer.def( "__deepcopy__", &__copy__<SireID::IDAndSet<SireMol::MGID>>);
+        IDAndSet_MGID__exposer.def( "clone", &__copy__<SireID::IDAndSet<SireMol::MGID>>);
         IDAndSet_MGID__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireID::IDAndSet<SireMol::MGID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         IDAndSet_MGID__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireID::IDAndSet<SireMol::MGID> >,

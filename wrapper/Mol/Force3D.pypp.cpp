@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0> > __copy__(const SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0> > &other){ return SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0> >(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -199,9 +201,9 @@ void register_Force3D_class(){
         
         }
         Force3D_exposer.staticmethod( "typeName" );
-        Force3D_exposer.def( "__copy__", &__copy__);
-        Force3D_exposer.def( "__deepcopy__", &__copy__);
-        Force3D_exposer.def( "clone", &__copy__);
+        Force3D_exposer.def( "__copy__", &__copy__<SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0> >>);
+        Force3D_exposer.def( "__deepcopy__", &__copy__<SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0> >>);
+        Force3D_exposer.def( "clone", &__copy__<SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0> >>);
         Force3D_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0> > >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Force3D_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0> > >,

@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 SireMol::AtomProperty<SireMaths::Vector> __copy__(const SireMol::AtomProperty<SireMaths::Vector> &other){ return SireMol::AtomProperty<SireMaths::Vector>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -821,9 +823,9 @@ void register_AtomCoords_class(){
         }
         AtomCoords_exposer.staticmethod( "fromVariant" );
         AtomCoords_exposer.staticmethod( "typeName" );
-        AtomCoords_exposer.def( "__copy__", &__copy__);
-        AtomCoords_exposer.def( "__deepcopy__", &__copy__);
-        AtomCoords_exposer.def( "clone", &__copy__);
+        AtomCoords_exposer.def( "__copy__", &__copy__<SireMol::AtomProperty<SireMaths::Vector>>);
+        AtomCoords_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomProperty<SireMaths::Vector>>);
+        AtomCoords_exposer.def( "clone", &__copy__<SireMol::AtomProperty<SireMaths::Vector>>);
         AtomCoords_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomProperty<SireMaths::Vector> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomCoords_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomProperty<SireMaths::Vector> >,

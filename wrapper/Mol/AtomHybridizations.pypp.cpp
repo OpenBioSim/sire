@@ -27,6 +27,8 @@ namespace bp = boost::python;
 
 SireMol::AtomProperty<SireMol::Hybridization> __copy__(const SireMol::AtomProperty<SireMol::Hybridization> &other){ return SireMol::AtomProperty<SireMol::Hybridization>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -656,9 +658,9 @@ void register_AtomHybridizations_class(){
         }
         AtomHybridizations_exposer.staticmethod( "fromVariant" );
         AtomHybridizations_exposer.staticmethod( "typeName" );
-        AtomHybridizations_exposer.def( "__copy__", &__copy__);
-        AtomHybridizations_exposer.def( "__deepcopy__", &__copy__);
-        AtomHybridizations_exposer.def( "clone", &__copy__);
+        AtomHybridizations_exposer.def( "__copy__", &__copy__<SireMol::AtomProperty<SireMol::Hybridization>>);
+        AtomHybridizations_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomProperty<SireMol::Hybridization>>);
+        AtomHybridizations_exposer.def( "clone", &__copy__<SireMol::AtomProperty<SireMol::Hybridization>>);
         AtomHybridizations_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomProperty<SireMol::Hybridization> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomHybridizations_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomProperty<SireMol::Hybridization> >,

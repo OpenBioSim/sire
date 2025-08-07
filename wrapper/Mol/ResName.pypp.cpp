@@ -59,6 +59,8 @@ namespace bp = boost::python;
 
 SireMol::ResName __copy__(const SireMol::ResName &other){ return SireMol::ResName(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -165,9 +167,9 @@ void register_ResName_class(){
         
         }
         ResName_exposer.staticmethod( "typeName" );
-        ResName_exposer.def( "__copy__", &__copy__);
-        ResName_exposer.def( "__deepcopy__", &__copy__);
-        ResName_exposer.def( "clone", &__copy__);
+        ResName_exposer.def( "__copy__", &__copy__<SireMol::ResName>);
+        ResName_exposer.def( "__deepcopy__", &__copy__<SireMol::ResName>);
+        ResName_exposer.def( "clone", &__copy__<SireMol::ResName>);
         ResName_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ResName >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ResName_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ResName >,

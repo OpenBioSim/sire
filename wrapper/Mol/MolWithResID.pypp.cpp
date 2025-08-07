@@ -28,6 +28,8 @@ namespace bp = boost::python;
 
 SireMol::MolWithResID __copy__(const SireMol::MolWithResID &other){ return SireMol::MolWithResID(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -174,9 +176,9 @@ void register_MolWithResID_class(){
         
         }
         MolWithResID_exposer.staticmethod( "typeName" );
-        MolWithResID_exposer.def( "__copy__", &__copy__);
-        MolWithResID_exposer.def( "__deepcopy__", &__copy__);
-        MolWithResID_exposer.def( "clone", &__copy__);
+        MolWithResID_exposer.def( "__copy__", &__copy__<SireMol::MolWithResID>);
+        MolWithResID_exposer.def( "__deepcopy__", &__copy__<SireMol::MolWithResID>);
+        MolWithResID_exposer.def( "clone", &__copy__<SireMol::MolWithResID>);
         MolWithResID_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::MolWithResID >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         MolWithResID_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::MolWithResID >,

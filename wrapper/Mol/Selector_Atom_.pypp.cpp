@@ -51,6 +51,8 @@ namespace bp = boost::python;
 
 SireMol::Selector<SireMol::Atom> __copy__(const SireMol::Selector<SireMol::Atom> &other){ return SireMol::Selector<SireMol::Atom>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -1103,9 +1105,9 @@ void register_Selector_Atom__class(){
         
         }
         Selector_Atom__exposer.staticmethod( "typeName" );
-        Selector_Atom__exposer.def( "__copy__", &__copy__);
-        Selector_Atom__exposer.def( "__deepcopy__", &__copy__);
-        Selector_Atom__exposer.def( "clone", &__copy__);
+        Selector_Atom__exposer.def( "__copy__", &__copy__<SireMol::Selector<SireMol::Atom>>);
+        Selector_Atom__exposer.def( "__deepcopy__", &__copy__<SireMol::Selector<SireMol::Atom>>);
+        Selector_Atom__exposer.def( "clone", &__copy__<SireMol::Selector<SireMol::Atom>>);
         Selector_Atom__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Selector<SireMol::Atom> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Selector_Atom__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Selector<SireMol::Atom> >,

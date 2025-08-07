@@ -51,6 +51,8 @@ namespace bp = boost::python;
 
 SireMol::ResIn<SireMol::ChainID> __copy__(const SireMol::ResIn<SireMol::ChainID> &other){ return SireMol::ResIn<SireMol::ChainID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -165,9 +167,9 @@ void register_ResIn_ChainID__class(){
         
         }
         ResIn_ChainID__exposer.staticmethod( "typeName" );
-        ResIn_ChainID__exposer.def( "__copy__", &__copy__);
-        ResIn_ChainID__exposer.def( "__deepcopy__", &__copy__);
-        ResIn_ChainID__exposer.def( "clone", &__copy__);
+        ResIn_ChainID__exposer.def( "__copy__", &__copy__<SireMol::ResIn<SireMol::ChainID>>);
+        ResIn_ChainID__exposer.def( "__deepcopy__", &__copy__<SireMol::ResIn<SireMol::ChainID>>);
+        ResIn_ChainID__exposer.def( "clone", &__copy__<SireMol::ResIn<SireMol::ChainID>>);
         ResIn_ChainID__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ResIn<SireMol::ChainID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ResIn_ChainID__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ResIn<SireMol::ChainID> >,

@@ -6,7 +6,7 @@ __all__ = [
     "distance",
     "boresch",
     "get_standard_state_correction",
-    "rmsd",
+    "rmsd"
 ]
 
 from ._restraints import angle, bond, boresch, dihedral, distance, positional, rmsd

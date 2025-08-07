@@ -1,7 +1,7 @@
 import pytest
 
 # Boresch parameters from old test_boresch_corr SOMD test so we can compare
-# to previous results. Note that the force constants are 
+# to previous results. Note that the force constants are
 BORESCH_PARAMS_DEFAULT = {
     "receptor_selection": "atomidx 1538 or atomidx 1518 or atomidx 1540",
     "ligand_selection": "atomidx 4 or atomidx 3 or atomidx 5",

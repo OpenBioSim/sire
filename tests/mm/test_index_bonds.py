@@ -47,20 +47,14 @@ def test_index_bonds(ala_mols):
     assert len(mol["bonds with atoms in resnum 1"]) == 6
 
     _assert_same_bonds(mol["bonds in resnum 1"], mol["resnum 1"].bonds())
-    _assert_same_bonds(
-        mol["bonds with (atoms in resnum 1)"], mol.bonds("resnum 1")
-    )
-    _assert_same_bonds(
-        mol["bonds with atoms in resnum 1"], mol.bonds("resnum 1")
-    )
+    _assert_same_bonds(mol["bonds with (atoms in resnum 1)"], mol.bonds("resnum 1"))
+    _assert_same_bonds(mol["bonds with atoms in resnum 1"], mol.bonds("resnum 1"))
 
     # this is a single bond
     assert mol["bonds to resnum 1"] == mol.bond("resnum 1", "resnum 2")
 
     # still just a single bond
-    assert mol["bonds from resnum 1 to resnum 2"] == mol.bond(
-        "resnum 1", "resnum 2"
-    )
+    assert mol["bonds from resnum 1 to resnum 2"] == mol.bond("resnum 1", "resnum 2")
 
     cx = mol["bonds to element C"]
     ccx = mol["bonds with element C"]
@@ -99,9 +93,7 @@ def test_index_mols_bonds(ala_mols):
         assert bond.atom1().name().value() in ["O", "H1"]
 
     # mols[1:] are the water molecules
-    assert mols[
-        "bonds from element O to element H"
-    ].mass().value() == pytest.approx(
+    assert mols["bonds from element O to element H"].mass().value() == pytest.approx(
         (mols[1:]["element O"].mass() + mols[1:]["element H"].mass()).value(),
         0.0001,
     )
@@ -130,12 +122,7 @@ def test_index_bonds_by_atom(ala_mols):
 
     assert len(mols.bonds(mols.atoms()[0], mols.atoms()[5])) == 0
     assert (
-        len(
-            mols.bonds(
-                mols.atoms()[0], mols.atoms()[5], error_on_missing=False
-            )
-        )
-        == 0
+        len(mols.bonds(mols.atoms()[0], mols.atoms()[5], error_on_missing=False)) == 0
     )
 
     with pytest.raises(KeyError):

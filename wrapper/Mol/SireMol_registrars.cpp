@@ -65,6 +65,7 @@
 #include "atom.h"
 #include "atomradicals.h"
 #include "bondorder.h"
+#include "cmapid.h"
 #include "segeditor.h"
 #include "element.h"
 #include "bondhunter.h"
@@ -266,6 +267,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::Mover< SireMol::Selector<SireMol::Atom> > >();
     ObjectRegistry::registerConverterFor< SireMol::AtomRadicals >();
     ObjectRegistry::registerConverterFor< SireMol::BondOrder >();
+    ObjectRegistry::registerConverterFor< SireMol::CMAPID >();
     ObjectRegistry::registerConverterFor< SireMol::SegEditor >();
     ObjectRegistry::registerConverterFor< SireMol::SegStructureEditor >();
     ObjectRegistry::registerConverterFor< SireMol::Element >();

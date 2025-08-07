@@ -617,7 +617,7 @@ namespace SireRDKit
                     const auto string_array = sdf_data.property(tag).asA<SireBase::StringArrayProperty>();
 
                     QString string;
-                    for (int i=0; i<string_array.size(); i++)
+                    for (int i = 0; i < string_array.size(); i++)
                     {
                         string.append(string_array[i]);
                         if (i < string_array.size() - 1)
@@ -648,7 +648,7 @@ namespace SireRDKit
                     const auto string_array = rdkit_data.property(tag).asA<SireBase::StringArrayProperty>();
 
                     QString string;
-                    for (int i=0; i<string_array.size(); i++)
+                    for (int i = 0; i < string_array.size(); i++)
                     {
                         string.append(string_array[i]);
                         if (i < string_array.size() - 1)

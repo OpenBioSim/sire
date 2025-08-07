@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 0, 0, 0, 0, -1, 0> > __copy__(const SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 0, 0, 0, 0, -1, 0> > &other){ return SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 0, 0, 0, 0, -1, 0> >(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -648,9 +650,9 @@ void register_AtomMasses_class(){
         }
         AtomMasses_exposer.staticmethod( "fromVariant" );
         AtomMasses_exposer.staticmethod( "typeName" );
-        AtomMasses_exposer.def( "__copy__", &__copy__);
-        AtomMasses_exposer.def( "__deepcopy__", &__copy__);
-        AtomMasses_exposer.def( "clone", &__copy__);
+        AtomMasses_exposer.def( "__copy__", &__copy__<SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 0, 0, 0, 0, -1, 0> >>);
+        AtomMasses_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 0, 0, 0, 0, -1, 0> >>);
+        AtomMasses_exposer.def( "clone", &__copy__<SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 0, 0, 0, 0, -1, 0> >>);
         AtomMasses_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 0, 0, 0, 0, -1, 0> > >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomMasses_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 0, 0, 0, 0, -1, 0> > >,

@@ -91,6 +91,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMol::PartialMolecule> __copy__(const SireMol::Mover<SireMol::PartialMolecule> &other){ return SireMol::Mover<SireMol::PartialMolecule>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -482,9 +484,9 @@ void register_Mover_PartialMolecule__class(){
         
         }
         Mover_PartialMolecule__exposer.staticmethod( "typeName" );
-        Mover_PartialMolecule__exposer.def( "__copy__", &__copy__);
-        Mover_PartialMolecule__exposer.def( "__deepcopy__", &__copy__);
-        Mover_PartialMolecule__exposer.def( "clone", &__copy__);
+        Mover_PartialMolecule__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMol::PartialMolecule>>);
+        Mover_PartialMolecule__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMol::PartialMolecule>>);
+        Mover_PartialMolecule__exposer.def( "clone", &__copy__<SireMol::Mover<SireMol::PartialMolecule>>);
         Mover_PartialMolecule__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMol::PartialMolecule> > );
         Mover_PartialMolecule__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMol::PartialMolecule> > );
         Mover_PartialMolecule__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMol::PartialMolecule> > );

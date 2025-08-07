@@ -207,7 +207,7 @@ void FileTrajectoryParser::parse()
     // go through the suffixes in the order of greatest number
     // of files first
     auto counts = popular_suffixs.keys();
-    std::sort(counts.begin(), counts.end(), std::greater());
+    std::sort(counts.begin(), counts.end(), std::greater<qint64>());
 
     QHash<qint64, QStringList> files_by_frameidx;
 
@@ -248,7 +248,7 @@ void FileTrajectoryParser::parse()
 
     // now reconstruct the list of filenames in this frame index order
     auto idxs = files_by_frameidx.keys();
-    std::sort(idxs.begin(), idxs.end(), std::less());
+    std::sort(idxs.begin(), idxs.end(), std::less<qint64>());
 
     for (const auto &idx : idxs)
     {

@@ -67,8 +67,7 @@ def test_trajectories(tmpdir, ala_traj):
     f = []
 
     for format in ["PRMTOP", "TRAJ", "DCD", "TRR", "XTC", "RST"]:
-        f.append(sr.save(mols.trajectory()[0:5],
-                         d.join("test"), format=[format])[0])
+        f.append(sr.save(mols.trajectory()[0:5], d.join("test"), format=[format])[0])
 
     for traj in f[1:]:
         print(traj)
@@ -120,13 +119,12 @@ def test_trajectories(tmpdir, ala_traj):
                     print(frame.property("time"))
 
                 assert m.property("time").value() == pytest.approx(
-	                m2.property("time").value() + time_delta, precision)
+                    m2.property("time").value() + time_delta, precision
+                )
 
         else:
             assert m2.property("time").value() == 0
 
-        assert_space_equal(
-            m.property("space"), m2.property("space"), precision
-        )
+        assert_space_equal(m.property("space"), m2.property("space"), precision)
 
         assert_coords_equal(m[0], m2[0], precision)

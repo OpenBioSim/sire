@@ -94,7 +94,7 @@ def evaluate_xml_force(mols, xml, force):
     # Get the root of the XML tree.
     root = tree.getroot()
 
-    # Loop over the forces until we find the first CustomNonbondedForce.
+    # Loop over the forces until we find the named CustomNonbondedForce.
     is_found = False
     for force in tree.find("Forces"):
         if force.get("name") == name:
@@ -169,10 +169,14 @@ def evaluate_xml_force(mols, xml, force):
             setattr(module, parameters[3] + "1", float(particle_i.get("param4")))
             setattr(module, parameters[4] + "1", float(particle_i.get("param5")))
 
-            # Loop over all other particles in set1.
-            for y in range(x + 1, len(set1)):
+            # Loop over particles in set2.
+            for y in range(len(set2)):
                 # Get the index from set2.
-                j = set1[y]
+                j = set2[y]
+
+                # Ignore self-interaction.
+                if i == j:
+                    continue
 
                 # Check if this pair is excluded.
                 pair = (i, j) if i < j else (j, i)

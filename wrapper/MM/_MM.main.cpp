@@ -139,6 +139,12 @@
 
 #include "CLJWorkspace.pypp.hpp"
 
+#include "CMAPFunction.pypp.hpp"
+
+#include "CMAPFunctions.pypp.hpp"
+
+#include "CMAPParameter.pypp.hpp"
+
 #include "ChargeParameterName.pypp.hpp"
 
 #include "ChargeParameterName3D.pypp.hpp"
@@ -671,6 +677,12 @@ BOOST_PYTHON_MODULE(_MM){
     register_CLJSoftShiftFunction_class();
 
     register_CLJWorkspace_class();
+
+    register_CMAPFunction_class();
+
+    register_CMAPFunctions_class();
+
+    register_CMAPParameter_class();
 
     register_ChargeParameterName3D_class();
 

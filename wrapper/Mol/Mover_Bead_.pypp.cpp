@@ -87,6 +87,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMol::Bead> __copy__(const SireMol::Mover<SireMol::Bead> &other){ return SireMol::Mover<SireMol::Bead>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -478,9 +480,9 @@ void register_Mover_Bead__class(){
         
         }
         Mover_Bead__exposer.staticmethod( "typeName" );
-        Mover_Bead__exposer.def( "__copy__", &__copy__);
-        Mover_Bead__exposer.def( "__deepcopy__", &__copy__);
-        Mover_Bead__exposer.def( "clone", &__copy__);
+        Mover_Bead__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMol::Bead>>);
+        Mover_Bead__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMol::Bead>>);
+        Mover_Bead__exposer.def( "clone", &__copy__<SireMol::Mover<SireMol::Bead>>);
         Mover_Bead__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMol::Bead> > );
         Mover_Bead__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMol::Bead> > );
         Mover_Bead__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMol::Bead> > );
