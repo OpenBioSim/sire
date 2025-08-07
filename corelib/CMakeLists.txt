@@ -4,7 +4,7 @@
 #
 ################################
 
-# require cmake >= 3.3.0
+# require cmake >= 3.30.0
 cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 cmake_policy(VERSION 3.30)
 
