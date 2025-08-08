@@ -16,11 +16,21 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 ----------------------------------------------------------------------------------------
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
+
 * Add end-state coordinates properties to decoupled and annihilated molecules.
+
 * Map the end state coordinates property when constructing an ``AmberParams`` object when
   creating a molecule from a ``SOMD`` perturbation file.
+
 * Fix evaluation of custom force energies from OpenMM XML files by correctly looping over
   interaction groups.
+
+* Switch to new Boost Conda package naming scheme for host requirements.
+
+* Use C++20 standard for SireRDKit plugin.
+
+* Fixed build issues on MacOS with Clang and LTO (incorrectly specified LTO library version).
+
 * Added a feature for applying RMSD restraints using the OpenMM CustomCVForce/RMSDForce functionality.
 
 `2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
