@@ -277,6 +277,8 @@ const SireBase::PropertyPtr& get_Metadata_SireMol_AtomPropertyProperty_function2
 
 SireMol::Atom __copy__(const SireMol::Atom &other){ return SireMol::Atom(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -827,9 +829,9 @@ void register_Atom_class(){
         Atom_exposer.def( "_get_property_SireMol_AtomPropertyProperty", &SireMol::Atom::property< SireBase::PropertyPtr >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomPropertyProperty", get_Metadata_SireMol_AtomPropertyProperty_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomPropertyProperty", &get_Metadata_SireMol_AtomPropertyProperty_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "__copy__", &__copy__);
-        Atom_exposer.def( "__deepcopy__", &__copy__);
-        Atom_exposer.def( "clone", &__copy__);
+        Atom_exposer.def( "__copy__", &__copy__<SireMol::Atom>);
+        Atom_exposer.def( "__deepcopy__", &__copy__<SireMol::Atom>);
+        Atom_exposer.def( "clone", &__copy__<SireMol::Atom>);
         Atom_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Atom >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Atom_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Atom >,

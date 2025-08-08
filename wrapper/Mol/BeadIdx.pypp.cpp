@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 SireMol::BeadIdx __copy__(const SireMol::BeadIdx &other){ return SireMol::BeadIdx(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -125,9 +127,9 @@ void register_BeadIdx_class(){
         }
         BeadIdx_exposer.staticmethod( "null" );
         BeadIdx_exposer.staticmethod( "typeName" );
-        BeadIdx_exposer.def( "__copy__", &__copy__);
-        BeadIdx_exposer.def( "__deepcopy__", &__copy__);
-        BeadIdx_exposer.def( "clone", &__copy__);
+        BeadIdx_exposer.def( "__copy__", &__copy__<SireMol::BeadIdx>);
+        BeadIdx_exposer.def( "__deepcopy__", &__copy__<SireMol::BeadIdx>);
+        BeadIdx_exposer.def( "clone", &__copy__<SireMol::BeadIdx>);
         BeadIdx_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::BeadIdx >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         BeadIdx_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::BeadIdx >,

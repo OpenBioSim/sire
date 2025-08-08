@@ -10,9 +10,7 @@ def test_index_angles(ala_mols):
 
     assert len(angs0) == len(mols)
 
-    angs1 = mols.angles(
-        mols["element H"], mols["element O"], mols["element H"]
-    )
+    angs1 = mols.angles(mols["element H"], mols["element O"], mols["element H"])
 
     assert len(angs0) == len(angs1)
 

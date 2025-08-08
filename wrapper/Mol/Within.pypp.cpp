@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 SireMol::Within __copy__(const SireMol::Within &other){ return SireMol::Within(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -152,9 +154,9 @@ void register_Within_class(){
         
         }
         Within_exposer.staticmethod( "typeName" );
-        Within_exposer.def( "__copy__", &__copy__);
-        Within_exposer.def( "__deepcopy__", &__copy__);
-        Within_exposer.def( "clone", &__copy__);
+        Within_exposer.def( "__copy__", &__copy__<SireMol::Within>);
+        Within_exposer.def( "__deepcopy__", &__copy__<SireMol::Within>);
+        Within_exposer.def( "clone", &__copy__<SireMol::Within>);
         Within_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Within >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Within_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Within >,

@@ -73,7 +73,7 @@ namespace SireBase
     {
 
         friend SIREBASE_EXPORT QDataStream & ::operator<< <>(QDataStream &, const Array2D<T> &);
-        friend SIREBASE_EXPORT QDataStream & ::operator>><>(QDataStream &, Array2D<T> &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>> <>(QDataStream &, Array2D<T> &);
 
     public:
         Array2D();
@@ -113,6 +113,12 @@ namespace SireBase
         const T *constRow(int i) const;
 
         Array2D<T> transpose() const;
+
+        QVector<T> toRowMajorVector() const;
+        QVector<T> toColumnMajorVector() const;
+
+        static Array2D<T> fromRowMajorVector(const QVector<T> &vector, int nrows, int ncolumns);
+        static Array2D<T> fromColumnMajorVector(const QVector<T> &vector, int nrows, int ncolumns);
 
     private:
         /** The 1D array of entries in this Array2D */
@@ -387,6 +393,79 @@ namespace SireBase
         }
 
         return rows.join("\n");
+    }
+
+    /** Return a vector of all the elements in this array in row-major order */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QVector<T> Array2D<T>::toRowMajorVector() const
+    {
+        return array;
+    }
+
+    /** Return a vector of all the elements in this array in column-major order */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QVector<T> Array2D<T>::toColumnMajorVector() const
+    {
+        QVector<T> column_major(this->nRows() * this->nColumns());
+
+        T *column_major_data = column_major.data();
+        const T *array_data = array.constData();
+
+        for (int i = 0; i < this->nRows(); ++i)
+        {
+            for (int j = 0; j < this->nColumns(); ++j)
+            {
+                column_major_data[j * this->nRows() + i] = array_data[this->map(i, j)];
+            }
+        }
+
+        return column_major;
+    }
+
+    /** Create a new Array2D from a vector of elements in row-major order */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Array2D<T> Array2D<T>::fromRowMajorVector(const QVector<T> &vector, int nrows, int ncolumns)
+    {
+        Array2D<T> array(nrows, ncolumns);
+
+        if (vector.count() != nrows * ncolumns)
+            return array;
+
+        T *array_data = array.data();
+        const T *vector_data = vector.constData();
+
+        for (int i = 0; i < nrows; ++i)
+        {
+            for (int j = 0; j < ncolumns; ++j)
+            {
+                array_data[array.map(i, j)] = vector_data[i * ncolumns + j];
+            }
+        }
+
+        return array;
+    }
+
+    /** Create a new Array2D from a vector of elements in column-major order */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Array2D<T> Array2D<T>::fromColumnMajorVector(const QVector<T> &vector, int nrows, int ncolumns)
+    {
+        Array2D<T> array(nrows, ncolumns);
+
+        if (vector.count() != nrows * ncolumns)
+            return array;
+
+        T *array_data = array.data();
+        const T *vector_data = vector.constData();
+
+        for (int i = 0; i < nrows; ++i)
+        {
+            for (int j = 0; j < ncolumns; ++j)
+            {
+                array_data[array.map(i, j)] = vector_data[j * nrows + i];
+            }
+        }
+
+        return array;
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

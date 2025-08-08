@@ -41,6 +41,8 @@ set ( SIREMM_HEADERS
       cljrffunction.h
       cljshiftfunction.h
       cljworkspace.h
+      cmapfunctions.h
+      cmapparameter.h
       coulombpotential.h
       dihedral.h
       dihedralrestraints.h
@@ -134,6 +136,8 @@ set ( SIREMM_SOURCES
       cljrffunction.cpp
       cljshiftfunction.cpp
       cljworkspace.cpp
+      cmapfunctions.cpp
+      cmapparameter.cpp
       coulombpotential.cpp
       dihedral.cpp
       dihedralrestraints.cpp

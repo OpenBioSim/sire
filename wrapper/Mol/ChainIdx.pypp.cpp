@@ -55,6 +55,8 @@ namespace bp = boost::python;
 
 SireMol::ChainIdx __copy__(const SireMol::ChainIdx &other){ return SireMol::ChainIdx(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -170,9 +172,9 @@ void register_ChainIdx_class(){
         }
         ChainIdx_exposer.staticmethod( "null" );
         ChainIdx_exposer.staticmethod( "typeName" );
-        ChainIdx_exposer.def( "__copy__", &__copy__);
-        ChainIdx_exposer.def( "__deepcopy__", &__copy__);
-        ChainIdx_exposer.def( "clone", &__copy__);
+        ChainIdx_exposer.def( "__copy__", &__copy__<SireMol::ChainIdx>);
+        ChainIdx_exposer.def( "__deepcopy__", &__copy__<SireMol::ChainIdx>);
+        ChainIdx_exposer.def( "clone", &__copy__<SireMol::ChainIdx>);
         ChainIdx_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ChainIdx >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ChainIdx_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ChainIdx >,

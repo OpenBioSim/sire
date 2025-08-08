@@ -28,6 +28,8 @@
 #include "cljrffunction.h"
 #include "cljshiftfunction.h"
 #include "cljworkspace.h"
+#include "cmapfunctions.h"
+#include "cmapparameter.h"
 #include "coulombpotential.h"
 #include "dihedral.h"
 #include "dihedralrestraints.h"

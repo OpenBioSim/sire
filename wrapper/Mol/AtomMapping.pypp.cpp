@@ -12,6 +12,8 @@ namespace bp = boost::python;
 
 #include "SireMol/core.h"
 
+#include "SireMol/moleditor.h"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/shareddatastream.h"
@@ -23,6 +25,8 @@ namespace bp = boost::python;
 #include "atommapping.h"
 
 SireMol::AtomMapping __copy__(const SireMol::AtomMapping &other){ return SireMol::AtomMapping(other); }
+
+#include "Helpers/copy.hpp"
 
 #include "Qt/qdatastream.hpp"
 
@@ -509,9 +513,9 @@ void register_AtomMapping_class(){
         
         }
         AtomMapping_exposer.staticmethod( "typeName" );
-        AtomMapping_exposer.def( "__copy__", &__copy__);
-        AtomMapping_exposer.def( "__deepcopy__", &__copy__);
-        AtomMapping_exposer.def( "clone", &__copy__);
+        AtomMapping_exposer.def( "__copy__", &__copy__<SireMol::AtomMapping>);
+        AtomMapping_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomMapping>);
+        AtomMapping_exposer.def( "clone", &__copy__<SireMol::AtomMapping>);
         AtomMapping_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomMapping >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomMapping_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomMapping >,

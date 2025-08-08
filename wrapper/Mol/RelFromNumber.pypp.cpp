@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 SireMol::RelFromNumber __copy__(const SireMol::RelFromNumber &other){ return SireMol::RelFromNumber(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -98,9 +100,9 @@ void register_RelFromNumber_class(){
         
         }
         RelFromNumber_exposer.staticmethod( "typeName" );
-        RelFromNumber_exposer.def( "__copy__", &__copy__);
-        RelFromNumber_exposer.def( "__deepcopy__", &__copy__);
-        RelFromNumber_exposer.def( "clone", &__copy__);
+        RelFromNumber_exposer.def( "__copy__", &__copy__<SireMol::RelFromNumber>);
+        RelFromNumber_exposer.def( "__deepcopy__", &__copy__<SireMol::RelFromNumber>);
+        RelFromNumber_exposer.def( "clone", &__copy__<SireMol::RelFromNumber>);
         RelFromNumber_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::RelFromNumber >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         RelFromNumber_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::RelFromNumber >,

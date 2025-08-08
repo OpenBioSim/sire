@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 SireMol::CGEditor __copy__(const SireMol::CGEditor &other){ return SireMol::CGEditor(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -253,9 +255,9 @@ void register_CGEditor_class(){
         
         }
         CGEditor_exposer.staticmethod( "typeName" );
-        CGEditor_exposer.def( "__copy__", &__copy__);
-        CGEditor_exposer.def( "__deepcopy__", &__copy__);
-        CGEditor_exposer.def( "clone", &__copy__);
+        CGEditor_exposer.def( "__copy__", &__copy__<SireMol::CGEditor>);
+        CGEditor_exposer.def( "__deepcopy__", &__copy__<SireMol::CGEditor>);
+        CGEditor_exposer.def( "clone", &__copy__<SireMol::CGEditor>);
         CGEditor_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::CGEditor >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CGEditor_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::CGEditor >,

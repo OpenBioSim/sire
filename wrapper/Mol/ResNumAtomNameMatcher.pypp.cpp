@@ -47,6 +47,8 @@ namespace bp = boost::python;
 
 SireMol::ResNumAtomNameMatcher __copy__(const SireMol::ResNumAtomNameMatcher &other){ return SireMol::ResNumAtomNameMatcher(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -112,9 +114,9 @@ void register_ResNumAtomNameMatcher_class(){
         
         }
         ResNumAtomNameMatcher_exposer.staticmethod( "typeName" );
-        ResNumAtomNameMatcher_exposer.def( "__copy__", &__copy__);
-        ResNumAtomNameMatcher_exposer.def( "__deepcopy__", &__copy__);
-        ResNumAtomNameMatcher_exposer.def( "clone", &__copy__);
+        ResNumAtomNameMatcher_exposer.def( "__copy__", &__copy__<SireMol::ResNumAtomNameMatcher>);
+        ResNumAtomNameMatcher_exposer.def( "__deepcopy__", &__copy__<SireMol::ResNumAtomNameMatcher>);
+        ResNumAtomNameMatcher_exposer.def( "clone", &__copy__<SireMol::ResNumAtomNameMatcher>);
         ResNumAtomNameMatcher_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ResNumAtomNameMatcher >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ResNumAtomNameMatcher_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ResNumAtomNameMatcher >,

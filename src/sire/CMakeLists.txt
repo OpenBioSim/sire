@@ -4,8 +4,8 @@
 #
 ################################
 
-cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
-cmake_policy(VERSION 3.5)
+cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_policy(VERSION 3.30)
 
 ## Read the version number (so we can set it once in one place)
 file (STRINGS "../../version.txt" SIRE_VERSION)
@@ -71,7 +71,7 @@ endif ( CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR )
 
 if (NOT SIRE_FOUND_PYTHON)
   # Need to find python before we can install the Python module
-  find_package( PythonLibs 3.7 REQUIRED )
+  find_package( Python 3.7 REQUIRED )
 endif()
 
 message(STATUS "SIRE_INSTALL_PREFIX ${SIRE_INSTALL_PREFIX}")

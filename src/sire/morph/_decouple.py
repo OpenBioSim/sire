@@ -64,6 +64,7 @@ def annihilate(mol, as_new_molecule: bool = True, map=None):
         "atomtype",
         "ambertype",
         "connectivity",
+        "coordinates",
     ]:
         key = map[key].source()
 
@@ -209,6 +210,7 @@ def decouple(mol, as_new_molecule: bool = True, map=None):
         "atomtype",
         "ambertype",
         "connectivity",
+        "coordinates",
     ]:
         key = map[key].source()
 

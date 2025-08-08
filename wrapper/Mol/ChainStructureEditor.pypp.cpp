@@ -44,6 +44,8 @@ namespace bp = boost::python;
 
 SireMol::ChainStructureEditor __copy__(const SireMol::ChainStructureEditor &other){ return SireMol::ChainStructureEditor(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -426,9 +428,9 @@ void register_ChainStructureEditor_class(){
         
         }
         ChainStructureEditor_exposer.staticmethod( "typeName" );
-        ChainStructureEditor_exposer.def( "__copy__", &__copy__);
-        ChainStructureEditor_exposer.def( "__deepcopy__", &__copy__);
-        ChainStructureEditor_exposer.def( "clone", &__copy__);
+        ChainStructureEditor_exposer.def( "__copy__", &__copy__<SireMol::ChainStructureEditor>);
+        ChainStructureEditor_exposer.def( "__deepcopy__", &__copy__<SireMol::ChainStructureEditor>);
+        ChainStructureEditor_exposer.def( "clone", &__copy__<SireMol::ChainStructureEditor>);
         ChainStructureEditor_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ChainStructureEditor >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ChainStructureEditor_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ChainStructureEditor >,

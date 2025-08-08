@@ -51,6 +51,8 @@ namespace bp = boost::python;
 
 SireID::MatchAll<SireMol::CGID> __copy__(const SireID::MatchAll<SireMol::CGID> &other){ return SireID::MatchAll<SireMol::CGID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -162,9 +164,9 @@ void register_MatchAll_CGID__class(){
         
         }
         MatchAll_CGID__exposer.staticmethod( "typeName" );
-        MatchAll_CGID__exposer.def( "__copy__", &__copy__);
-        MatchAll_CGID__exposer.def( "__deepcopy__", &__copy__);
-        MatchAll_CGID__exposer.def( "clone", &__copy__);
+        MatchAll_CGID__exposer.def( "__copy__", &__copy__<SireID::MatchAll<SireMol::CGID>>);
+        MatchAll_CGID__exposer.def( "__deepcopy__", &__copy__<SireID::MatchAll<SireMol::CGID>>);
+        MatchAll_CGID__exposer.def( "clone", &__copy__<SireID::MatchAll<SireMol::CGID>>);
         MatchAll_CGID__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireID::MatchAll<SireMol::CGID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         MatchAll_CGID__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireID::MatchAll<SireMol::CGID> >,

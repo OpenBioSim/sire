@@ -24,6 +24,8 @@ namespace bp = boost::python;
 
 SireMol::FrameTransform __copy__(const SireMol::FrameTransform &other){ return SireMol::FrameTransform(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -320,9 +322,9 @@ void register_FrameTransform_class(){
         }
         FrameTransform_exposer.staticmethod( "typeName" );
         FrameTransform_exposer.staticmethod( "wouldCreateTransform" );
-        FrameTransform_exposer.def( "__copy__", &__copy__);
-        FrameTransform_exposer.def( "__deepcopy__", &__copy__);
-        FrameTransform_exposer.def( "clone", &__copy__);
+        FrameTransform_exposer.def( "__copy__", &__copy__<SireMol::FrameTransform>);
+        FrameTransform_exposer.def( "__deepcopy__", &__copy__<SireMol::FrameTransform>);
+        FrameTransform_exposer.def( "clone", &__copy__<SireMol::FrameTransform>);
         FrameTransform_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::FrameTransform >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         FrameTransform_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::FrameTransform >,

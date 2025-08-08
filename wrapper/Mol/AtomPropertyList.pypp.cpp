@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::AtomProperty<SireBase::PropertyList> __copy__(const SireMol::AtomProperty<SireBase::PropertyList> &other){ return SireMol::AtomProperty<SireBase::PropertyList>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -648,9 +650,9 @@ void register_AtomPropertyList_class(){
         }
         AtomPropertyList_exposer.staticmethod( "fromVariant" );
         AtomPropertyList_exposer.staticmethod( "typeName" );
-        AtomPropertyList_exposer.def( "__copy__", &__copy__);
-        AtomPropertyList_exposer.def( "__deepcopy__", &__copy__);
-        AtomPropertyList_exposer.def( "clone", &__copy__);
+        AtomPropertyList_exposer.def( "__copy__", &__copy__<SireMol::AtomProperty<SireBase::PropertyList>>);
+        AtomPropertyList_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomProperty<SireBase::PropertyList>>);
+        AtomPropertyList_exposer.def( "clone", &__copy__<SireMol::AtomProperty<SireBase::PropertyList>>);
         AtomPropertyList_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomProperty<SireBase::PropertyList> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomPropertyList_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomProperty<SireBase::PropertyList> >,

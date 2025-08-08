@@ -25,9 +25,7 @@ def test_ambrst_vels_and_forces(tmpdir, kigaki_mols):
 
     kcal_per_a = sr.units.kcal / sr.units.angstrom
 
-    force = sr.legacy.Mol.Force3D(
-        1 * kcal_per_a, 2 * kcal_per_a, 3 * kcal_per_a
-    )
+    force = sr.legacy.Mol.Force3D(1 * kcal_per_a, 2 * kcal_per_a, 3 * kcal_per_a)
 
     c = mol.cursor().atoms()
 

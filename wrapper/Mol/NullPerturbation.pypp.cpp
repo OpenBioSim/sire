@@ -31,6 +31,8 @@ namespace bp = boost::python;
 
 SireMol::NullPerturbation __copy__(const SireMol::NullPerturbation &other){ return SireMol::NullPerturbation(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -109,9 +111,9 @@ void register_NullPerturbation_class(){
         
         }
         NullPerturbation_exposer.staticmethod( "typeName" );
-        NullPerturbation_exposer.def( "__copy__", &__copy__);
-        NullPerturbation_exposer.def( "__deepcopy__", &__copy__);
-        NullPerturbation_exposer.def( "clone", &__copy__);
+        NullPerturbation_exposer.def( "__copy__", &__copy__<SireMol::NullPerturbation>);
+        NullPerturbation_exposer.def( "__deepcopy__", &__copy__<SireMol::NullPerturbation>);
+        NullPerturbation_exposer.def( "clone", &__copy__<SireMol::NullPerturbation>);
         NullPerturbation_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::NullPerturbation >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         NullPerturbation_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::NullPerturbation >,

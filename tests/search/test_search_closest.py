@@ -18,9 +18,7 @@ def test_search_closest(ala_mols):
 
     space = mols.space()
 
-    mindists = [
-        sr.minimum_distance(x, mols["resname ALA"], space) for x in five_waters
-    ]
+    mindists = [sr.minimum_distance(x, mols["resname ALA"], space) for x in five_waters]
 
     # the five distances should be in order
     for i in range(0, 4):
@@ -58,9 +56,7 @@ def test_search_furthest(ala_mols):
 
     assert len(five_waters) == 5
 
-    mindists = [
-        sr.minimum_distance(x, mols["resname ALA"]) for x in five_waters
-    ]
+    mindists = [sr.minimum_distance(x, mols["resname ALA"]) for x in five_waters]
 
     for i in range(0, 4):
         assert mindists[i].value() > mindists[i + 1].value()

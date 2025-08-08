@@ -766,7 +766,7 @@ namespace SireGemmi
         const auto mols = SireMol::SelectorMol(system);
 
         gemmi::Structure structure;
-        gemmi::Model model(system.name().value().toStdString());
+        gemmi::Model model;
 
         auto name = system.name().value().toStdString();
 

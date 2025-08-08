@@ -95,6 +95,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMol::Atom> __copy__(const SireMol::Mover<SireMol::Atom> &other){ return SireMol::Mover<SireMol::Atom>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -486,9 +488,9 @@ void register_Mover_Atom__class(){
         
         }
         Mover_Atom__exposer.staticmethod( "typeName" );
-        Mover_Atom__exposer.def( "__copy__", &__copy__);
-        Mover_Atom__exposer.def( "__deepcopy__", &__copy__);
-        Mover_Atom__exposer.def( "clone", &__copy__);
+        Mover_Atom__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMol::Atom>>);
+        Mover_Atom__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMol::Atom>>);
+        Mover_Atom__exposer.def( "clone", &__copy__<SireMol::Mover<SireMol::Atom>>);
         Mover_Atom__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMol::Atom> > );
         Mover_Atom__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMol::Atom> > );
         Mover_Atom__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMol::Atom> > );
