@@ -407,12 +407,12 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
 {
     if (restraints.isEmpty())
         return;
-    
+
     // Internal functions to convert to OpenMM units
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
     const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
 
-    // Function to covnert SireMaths::Vector to OpenMM::Vec3 
+    // Function to covnert SireMaths::Vector to OpenMM::Vec3
     auto to_vec3 = [](const SireMaths::Vector &coords)
     {
         const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
@@ -424,7 +424,7 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
 
     // Count the number of existing RMSD forces in the system
     std::vector<OpenMM::Force*> forces;
-    
+
     for (int i = 0; i < system.getNumForces(); ++i) {
         forces.push_back(&system.getForce(i));
     }
@@ -448,17 +448,11 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
         std::string rmsd_b_unique = "rmsd_b_" + std::to_string(n_CVForces);
         // Unique CV name
         std::string rmsd_unique = "rmsd_" + std::to_string(n_CVForces);
-          
-        // Single parameter naming
-        // std::string rho_unique = "rho"
-        // std::string k_unique = "k";
-        // std::string rmsd_b_unique = "rb";
-        // std::string rmsd_unique = "rmsd";
 
         // energy expression of a flat-bottom well potential, scaled by rho
         const auto energy_expression = rho_unique + "*" + k_unique + "*step(delta)*delta*delta;" +
             "delta=(" + rmsd_unique + "-" + rmsd_b_unique + ")";
-    
+
         double k = restraint.k().value() * internal_to_k;
         double r0 = restraint.r0().value() * internal_to_nm;
 
@@ -485,15 +479,11 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
         auto *restraintff = new OpenMM::CustomCVForce(energy_expression);
         restraintff->setName("RMSDRestraintForce");
 
-        // Set unique force name
-        // std::string force_name = "RMSDRestraintForce" + std::to_string(n_CVForces);
-        // restraintff->setName(force_name);
-
         restraintff->addGlobalParameter(rho_unique, 1.0);
         restraintff->addGlobalParameter(k_unique, k);
-        restraintff->addGlobalParameter(rmsd_b_unique, r0);  
+        restraintff->addGlobalParameter(rmsd_b_unique, r0);
 
-        auto *rmsdCV = new OpenMM::RMSDForce(referencePositions, particles); 
+        auto *rmsdCV = new OpenMM::RMSDForce(referencePositions, particles);
         restraintff->addCollectiveVariable(rmsd_unique, rmsdCV);
 
         lambda_lever.addRestraintIndex(restraints.name(),
