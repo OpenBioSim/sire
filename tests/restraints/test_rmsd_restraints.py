@@ -11,6 +11,7 @@ def test_default_rmsd_restraints_setup(ala_mols):
     assert restraints[0].k().value() == 150.0
     assert restraints[0].r0().value() == 0.0
 
+
 def test_rmsd_restraint_custom_k(ala_mols):
     """Tests that rmsd restraints can be set up correctly with custom k."""
     mols = ala_mols.clone()
@@ -22,6 +23,7 @@ def test_rmsd_restraint_custom_k(ala_mols):
     assert restraints[0].k().value() == 10.0
     assert restraints[0].r0().value() == 0.0
 
+
 def test_rmsd_restraint_custom_k_and_r0(ala_mols):
     """Tests that rmsd restraints can be set up correctly with custom k and r0."""
     mols = ala_mols.clone()
@@ -32,10 +34,11 @@ def test_rmsd_restraint_custom_k_and_r0(ala_mols):
     assert restraints[0].k().value() == 10.0
     assert restraints[0].r0().value() == 1.0
 
-def test_rmsd_restraint_custom_k_and_r0_and_ref(ala_mols):
+
+def test_rmsd_restraint_custom_k_and_r0_and_ref(ala_mols, openmm_platform):
     """Tests that rmsd restraints can be set up correctly with custom k, r0 and reference state."""
     mols = ala_mols.clone()
-    ref = mols.clone().minimisation().run().commit()
+    ref = mols.clone().minimisation(platform=openmm_platform).run().commit()
     restraints = sr.restraints.rmsd(
         mols=mols, atoms="atomname CA, C, N", k="10 kcal mol-1 A-2", r0="1 A", ref=ref
     )
@@ -43,6 +46,7 @@ def test_rmsd_restraint_custom_k_and_r0_and_ref(ala_mols):
     assert mols.count() == ref.count()
     assert restraints[0].k().value() == 10.0
     assert restraints[0].r0().value() == 1.0
+
 
 def test_multiple_rmsd_restraints(ala_mols):
     """Tests that multiple RMSD restraints can be set up correctly."""
