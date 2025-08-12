@@ -67,7 +67,7 @@ using namespace SireOpenMM;
  */
 void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
                              OpenMM::System &system, LambdaLever &lambda_lever,
-                             int natoms, QVector &real_atoms)
+                             int natoms, QVector<int> &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -192,7 +192,7 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
  */
 void _add_bond_restraints(const SireMM::BondRestraints &restraints,
                           OpenMM::System &system, LambdaLever &lambda_lever,
-                          int natoms, QVector &real_atoms)
+                          int natoms, QVector<int> &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -267,7 +267,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
 void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
                                 OpenMM::System &system, LambdaLever &lambda_lever,
                                 std::vector<OpenMM::Vec3> &anchor_coords,
-                                int natoms, QVector &real_atoms)
+                                int natoms, QVector<int> &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -406,7 +406,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
 
 void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
                            OpenMM::System &system, LambdaLever &lambda_lever,
-                           int natoms, QVector &real_atoms)
+                           int natoms, QVector<int> &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -464,7 +464,7 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
 
 void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
                               OpenMM::System &system, LambdaLever &lambda_lever,
-                              int natoms, QVector &real_atoms)
+                              int natoms, QVector<int> &real_atoms)
 {
     if (restraints.isEmpty())
         return;
