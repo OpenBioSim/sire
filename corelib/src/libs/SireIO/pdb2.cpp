@@ -2020,6 +2020,26 @@ void PDB2::addToSystem(System &system, const PropertyMap &map) const
     if (num_mols == 0)
         return;
 
+    // Use the CRYST1 record to add a space property if one isn't already present.
+    if (not system.propertyKeys().contains(map["space"].source()) and this->has_cryst1)
+    {
+        // If all the angles are close to 90 degrees, then create a PeriodicBox.
+        if (qFuzzyCompare(this->cell_alpha, 90.0) and qFuzzyCompare(this->cell_beta, 90.0) and
+            qFuzzyCompare(this->cell_gamma, 90.0))
+        {
+            // Create a PeriodicBox with the unit cell dimensions.
+            PeriodicBox box(Vector(this->cell_x, this->cell_y, this->cell_z));
+            system.setProperty(map["space"].source(), box);
+        }
+        else
+        {
+            // Create a triclinic box with the unit cell dimensions and angles.
+            TriclinicBox box(this->cell_x, this->cell_y, this->cell_z,
+                             this->cell_alpha*degree, this->cell_beta*degree, this->cell_gamma*degree);
+            system.setProperty(map["space"].source(), box);
+        }
+    }
+
     // A vector of the updated molecules.
     QVector<Molecule> mols(num_mols);
 
