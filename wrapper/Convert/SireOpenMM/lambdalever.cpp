@@ -2135,7 +2135,6 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
             rho, context);
     }
     else if (ff_type == "RMSDRestraintForce")
-    // else if (QString::fromStdString(ff_type).startsWith("RMSDRestraintForce"))
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomCVForce *>(&ff),
