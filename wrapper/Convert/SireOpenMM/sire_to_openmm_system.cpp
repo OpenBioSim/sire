@@ -412,7 +412,7 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
     const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
 
-    // Function to covnert SireMaths::Vector to OpenMM::Vec3
+    // Function to convert SireMaths::Vector to OpenMM::Vec3
     auto to_vec3 = [](const SireMaths::Vector &coords)
     {
         const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
