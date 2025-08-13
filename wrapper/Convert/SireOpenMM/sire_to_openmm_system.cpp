@@ -442,7 +442,6 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
     for (const auto &restraint : atom_restraints)
     {
         // Define unique parameter names for rho, k and rmsd_b
-        // std::string rho_unique = "rho_" + std::to_string(n_CVForces);
         std::string rho_unique = "rho_" + std::to_string(n_CVForces);
         std::string k_unique = "k_" + std::to_string(n_CVForces);
         std::string rmsd_b_unique = "rmsd_b_" + std::to_string(n_CVForces);
@@ -491,16 +490,13 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
 
         // Update the counter for number of CustomCVForces
         n_CVForces++;
-
     }
-
 }
 
 /** Add all of the angle restraints from 'restraints' to the passed
  *  system, which is acted on by the passed LambdaLever. The number
  *  of real (non-anchor) atoms in the OpenMM::System is 'natoms'
  */
-
 void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
                            OpenMM::System &system, LambdaLever &lambda_lever,
                            int natoms)
