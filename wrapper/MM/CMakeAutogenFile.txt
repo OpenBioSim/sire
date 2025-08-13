@@ -217,6 +217,8 @@ set ( PYPP_SOURCES
        CLJBox.pypp.cpp
        LJPerturbation.pypp.cpp
        IntraGroupCLJFFBase.pypp.cpp
+       RMSDRestraint.pypp.cpp
+       RMSDRestraints.pypp.cpp
        SireMM_containers.cpp
        SireMM_properties.cpp
        SireMM_registrars.cpp

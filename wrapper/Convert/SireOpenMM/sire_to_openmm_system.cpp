@@ -27,6 +27,7 @@
 #include "SireMM/boreschrestraints.h"
 #include "SireMM/dihedralrestraints.h"
 #include "SireMM/positionalrestraints.h"
+#include "SireMM/rmsdrestraints.h"
 #include "SireMM/selectorbond.h"
 
 #include "SireVol/periodicbox.h"
@@ -400,11 +401,102 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     }
 }
 
+void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
+                              OpenMM::System &system, LambdaLever &lambda_lever,
+                              int natoms)
+{
+    if (restraints.isEmpty())
+        return;
+
+    // Internal functions to convert to OpenMM units
+    const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+    const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
+
+    // Function to convert SireMaths::Vector to OpenMM::Vec3
+    auto to_vec3 = [](const SireMaths::Vector &coords)
+    {
+        const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+
+        return OpenMM::Vec3(internal_to_nm * coords.x(),
+                            internal_to_nm * coords.y(),
+                            internal_to_nm * coords.z());
+    };
+
+    // Count the number of existing RMSD forces in the system
+    std::vector<OpenMM::Force*> forces;
+
+    for (int i = 0; i < system.getNumForces(); ++i) {
+        forces.push_back(&system.getForce(i));
+    }
+
+    int n_CVForces = 0;
+
+    for (auto* force : forces) {
+        if (dynamic_cast<OpenMM::CustomCVForce*>(force)) {
+            n_CVForces++;
+        }
+    }
+
+    // Apply RMSD restraining potential using OpenMM::CustomCVForce
+    const auto atom_restraints = restraints.restraints();
+    for (const auto &restraint : atom_restraints)
+    {
+        // Define unique parameter names for rho, k and rmsd_b
+        std::string rho_unique = "rho_" + std::to_string(n_CVForces);
+        std::string k_unique = "k_" + std::to_string(n_CVForces);
+        std::string rmsd_b_unique = "rmsd_b_" + std::to_string(n_CVForces);
+        // Unique CV name
+        std::string rmsd_unique = "rmsd_" + std::to_string(n_CVForces);
+
+        // energy expression of a flat-bottom well potential, scaled by rho
+        const auto energy_expression = rho_unique + "*" + k_unique + "*step(delta)*delta*delta;" +
+            "delta=(" + rmsd_unique + "-" + rmsd_b_unique + ")";
+
+        double k = restraint.k().value() * internal_to_k;
+        double r0 = restraint.r0().value() * internal_to_nm;
+
+        // Extract indices of atoms to be restrained
+        const int n_particles = restraint.atoms().size();
+        std::vector<int> particles;
+        particles.resize(n_particles);
+
+        for (int i = 0; i < n_particles; ++i)
+        {
+            particles[i] = restraint.atoms()[i];
+        }
+
+        // Extract reference positions and convert to correct units
+        std::vector<OpenMM::Vec3> referencePositions;
+        const int n_total = restraint.ref_positions().size();
+        referencePositions.resize(n_total);
+
+        for (int i = 0; i < n_total; ++i)
+        {
+            referencePositions[i] = to_vec3(restraint.ref_positions()[i]);
+        }
+
+        auto *restraintff = new OpenMM::CustomCVForce(energy_expression);
+        restraintff->setName("RMSDRestraintForce");
+
+        restraintff->addGlobalParameter(rho_unique, 1.0);
+        restraintff->addGlobalParameter(k_unique, k);
+        restraintff->addGlobalParameter(rmsd_b_unique, r0);
+
+        auto *rmsdCV = new OpenMM::RMSDForce(referencePositions, particles);
+        restraintff->addCollectiveVariable(rmsd_unique, rmsdCV);
+
+        lambda_lever.addRestraintIndex(restraints.name(),
+                                    system.addForce(restraintff));
+
+        // Update the counter for number of CustomCVForces
+        n_CVForces++;
+    }
+}
+
 /** Add all of the angle restraints from 'restraints' to the passed
  *  system, which is acted on by the passed LambdaLever. The number
  *  of real (non-anchor) atoms in the OpenMM::System is 'natoms'
  */
-
 void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
                            OpenMM::System &system, LambdaLever &lambda_lever,
                            int natoms)
@@ -1832,6 +1924,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             {
                 _add_positional_restraints(prop.read().asA<SireMM::PositionalRestraints>(),
                                            system, lambda_lever, anchor_coords, start_index);
+            }
+            else if (prop.read().isA<SireMM::RMSDRestraints>())
+            {
+                _add_rmsd_restraints(prop.read().asA<SireMM::RMSDRestraints>(),
+                                           system, lambda_lever, start_index);
             }
             else if (prop.read().isA<SireMM::BondRestraints>())
             {

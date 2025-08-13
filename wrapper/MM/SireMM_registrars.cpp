@@ -68,6 +68,7 @@
 #include "softcljcomponent.h"
 #include "selectorbond.h"
 #include "positionalrestraints.h"
+#include "rmsdrestraints.h"
 #include "mmdetail.h"
 #include "cljworkspace.h"
 #include "intersoftcljff.h"
@@ -227,6 +228,8 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMM::SelectorBond> >();
     ObjectRegistry::registerConverterFor< SireMM::PositionalRestraint >();
     ObjectRegistry::registerConverterFor< SireMM::PositionalRestraints >();
+    ObjectRegistry::registerConverterFor< SireMM::RMSDRestraint >();
+    ObjectRegistry::registerConverterFor< SireMM::RMSDRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::MMDetail >();
     ObjectRegistry::registerConverterFor< SireMM::CLJWorkspace >();
     ObjectRegistry::registerConverterFor< SireMM::InterSoftCLJFFBase >();
