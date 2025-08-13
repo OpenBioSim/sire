@@ -49,6 +49,9 @@
 
 #include "SireUnits/units.h"
 
+#include "SireVol/periodicbox.h"
+#include "SireVol/triclinicbox.h"
+
 #include <QFile>
 #include <QtMath>
 
@@ -755,6 +758,47 @@ PDB2::PDB2(const SireSystem::System &system, const PropertyMap &map) : ConcreteP
         return;
     }
 
+    SpacePtr space;
+
+    // The list of lines.
+    QStringList lines;
+
+    // Extract the space of the system.
+    try
+    {
+        space = system.property(map["space"]).asA<Space>();
+    }
+    catch (...)
+    {
+    }
+
+    // Add the CRYST1 record if the space is present.
+    if (space.read().isA<PeriodicBox>())
+    {
+        const PeriodicBox &box = space.read().asA<PeriodicBox>();
+
+        lines.append(QString("CRYST1%1%2%3%4%5%6 P 1           1")
+                         .arg(QString::number(box.dimensions().x(), 'f', 3), 9)
+                         .arg(QString::number(box.dimensions().y(), 'f', 3), 9)
+                         .arg(QString::number(box.dimensions().z(), 'f', 3), 9)
+                         .arg(QString::number(90.0, 'f', 2), 7)
+                         .arg(QString::number(90.0, 'f', 2), 7)
+                         .arg(QString::number(90.0, 'f', 2), 7));
+
+    }
+    else if (space.read().isA<TriclinicBox>())
+    {
+        const TriclinicBox &box = space.read().asA<TriclinicBox>();
+
+        lines.append(QString("CRYST1%1%2%3%4%5%6 P 1           1")
+                         .arg(QString::number(box.vector0().magnitude(), 'f', 3), 9)
+                         .arg(QString::number(box.vector1().magnitude(), 'f', 3), 9)
+                         .arg(QString::number(box.vector2().magnitude(), 'f', 3), 9)
+                         .arg(QString::number(box.alpha(), 'f', 2), 7)
+                         .arg(QString::number(box.beta(), 'f', 2), 7)
+                         .arg(QString::number(box.gamma(), 'f', 2), 7));
+    }
+
     // Check for velocities.
     // All molecules must have velocity properties to be able to generate a PDB
     // velocity file for NAMD
@@ -790,9 +834,6 @@ PDB2::PDB2(const SireSystem::System &system, const PropertyMap &map) : ConcreteP
             }
         }
     }
-
-    // The list of lines.
-    QStringList lines;
 
     // Lines for different PDB data records (one for each molecule).
     QVector<QVector<QString>> atom_lines(nmols);
@@ -845,8 +886,19 @@ PDB2::PDB2(const SireSystem::System &system, const PropertyMap &map) : ConcreteP
 
 /** Copy constructor */
 PDB2::PDB2(const PDB2 &other)
-    : ConcreteProperty<PDB2, MoleculeParser>(other), atoms(other.atoms), chains(other.chains), residues(other.residues),
-      velocities(other.velocities), parse_warnings(other.parse_warnings)
+    : ConcreteProperty<PDB2, MoleculeParser>(other),
+        atoms(other.atoms),
+        chains(other.chains),
+        residues(other.residues),
+        velocities(other.velocities),
+        has_cryst1(other.has_cryst1),
+        cell_x(other.cell_x),
+        cell_y(other.cell_y),
+        cell_z(other.cell_z),
+        cell_alpha(other.cell_alpha),
+        cell_beta(other.cell_beta),
+        cell_gamma(other.cell_gamma),
+        parse_warnings(other.parse_warnings)
 {
 }
 
@@ -864,6 +916,13 @@ PDB2 &PDB2::operator=(const PDB2 &other)
         this->chains = other.chains;
         this->residues = other.residues;
         this->velocities = other.velocities;
+        this->has_cryst1 = other.has_cryst1;
+        this->cell_x = other.cell_x;
+        this->cell_y = other.cell_y;
+        this->cell_z = other.cell_z;
+        this->cell_alpha = other.cell_alpha;
+        this->cell_beta = other.cell_beta;
+        this->cell_gamma = other.cell_gamma;
         this->parse_warnings = other.parse_warnings;
 
         MoleculeParser::operator=(other);
@@ -951,6 +1010,19 @@ QVector<QString> PDB2::toLines(bool is_velocity) const
 
     // The index offset for the velocities vector.
     int offset = 0;
+
+    // Add crystal cell information if it exists.
+    if (this->has_cryst1)
+    {
+        // Add the CRYST1 record.
+        lines.append(QString("CRYST1%1%2%3%4%5%6 P 1           1")
+                         .arg(QString::number(this->cell_x, 'f', 3), 9)
+                         .arg(QString::number(this->cell_y, 'f', 3), 9)
+                         .arg(QString::number(this->cell_z, 'f', 3), 9)
+                         .arg(QString::number(this->cell_alpha, 'f', 2), 7)
+                         .arg(QString::number(this->cell_beta, 'f', 2), 7)
+                         .arg(QString::number(this->cell_gamma, 'f', 2), 7));
+    }
 
     // Now assemble the lines from the record data for each molecule.
     // We do this in serial since the order matters.
@@ -1218,6 +1290,9 @@ void PDB2::parseLines(const PropertyMap &map)
     // The residue mapping for the molecule.
     QMultiMap<qint64, qint64> mol_residues;
 
+    // Flag that we've not found a CRYST1 record yet.
+    this->has_cryst1 = false;
+
     // Internal function used to parse a single atom line in the file.
     auto parse_atoms = [&](const QString &line, int iatm, int iline, int num_lines, PDBAtom &atom,
                            QStringList &errors)
@@ -1303,6 +1378,41 @@ void PDB2::parseLines(const PropertyMap &map)
             // Flag that a model has been recorded and we can now parse
             // the atom records.
             isParse = true;
+        }
+
+        // CRYST1 record.
+        // This is used to define the unit cell dimensions and angles.
+        else if (record == "CRYST1")
+        {
+            // Extract the unit cell dimensions and angles.
+            // These are used to set the space property of the system containing the molecule.
+
+            // Extract the unit cell dimensions.
+            bool ok_x, ok_y, ok_z;
+            this->cell_x = line.midRef(6, 9).toDouble(&ok_x);
+            this->cell_y = line.midRef(15, 9).toDouble(&ok_y);
+            this->cell_z = line.midRef(24, 9).toDouble(&ok_z);
+
+            if (not ok_x or not ok_y or not ok_z)
+            {
+                parse_warnings.append(QObject::tr("Cannot parse CRYST1 record: "
+                                                  "invalid unit cell dimensions!"));
+                return;
+            }
+
+            // Extract the angles.
+            this->cell_alpha= line.midRef(33, 7).toDouble(&ok_x);
+            this->cell_beta = line.midRef(40, 7).toDouble(&ok_y);
+            this->cell_gamma = line.midRef(47, 7).toDouble(&ok_z);
+
+            if (not ok_z or not ok_y or not ok_z)
+            {
+                parse_warnings.append(QObject::tr("Cannot parse CRYST1 record: "
+                                                  "invalid unit cell angles!"));
+                return;
+            }
+
+            this->has_cryst1 = true;
         }
 
         // An ATOM, or HETATM record.
@@ -1862,6 +1972,26 @@ System PDB2::startSystem(const PropertyMap &map) const
     System system;
     system.add(molgroup);
     system.setProperty(map["fileformat"].source(), StringProperty(this->formatName()));
+
+    // Add periodic box information if it exists.
+    if (this->has_cryst1)
+    {
+        // If all the angles are close to 90 degrees, then create a PeriodicBox.
+        if (qFuzzyCompare(this->cell_alpha, 90.0) and qFuzzyCompare(this->cell_beta, 90.0) and
+            qFuzzyCompare(this->cell_gamma, 90.0))
+        {
+            // Create a PeriodicBox with the unit cell dimensions.
+            PeriodicBox box(Vector(this->cell_x, this->cell_y, this->cell_z));
+            system.setProperty("space", box);
+        }
+        else
+        {
+            // Create a triclinic box with the unit cell dimensions and angles.
+            TriclinicBox box(this->cell_x, this->cell_y, this->cell_z,
+                             this->cell_alpha*degree, this->cell_beta*degree, this->cell_gamma*degree);
+            system.setProperty("space", box);
+        }
+    }
 
     return system;
 }
