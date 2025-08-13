@@ -33,6 +33,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added a feature for applying RMSD restraints using the OpenMM CustomCVForce/RMSDForce functionality.
 
+* Added support for reading and writing CRYST1 records in PDB files.
+
 `2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
 -----------------------------------------------------------------------------------------
 
