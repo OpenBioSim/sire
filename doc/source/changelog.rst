@@ -31,8 +31,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed build issues on MacOS with Clang and LTO (incorrectly specified LTO library version).
 
-* Added a feature for applying RMSD restraints using the OpenMM CustomCVForce/RMSDForce functionality.
-
 * Added support for reading and writing CRYST1 records in PDB files.
 
 * Added a ``save_velocities`` kwarg to :func:`sire.save()` to allow a user to control whether
