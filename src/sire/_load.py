@@ -526,6 +526,7 @@ def save(
     molecules,
     filename: str,
     format: _Union[str, _List[str]] = None,
+    save_velocities: bool = True,
     show_warnings=True,
     silent: bool = False,
     directory: str = ".",
@@ -560,6 +561,9 @@ def save(
          If this doesn't have an extension, then it will be guessed
          based on the formats used to load the molecule originally.
          If it still isn't available, then PDB will be used.
+
+     save_velocities (bool):
+        Whether or not to save velocities.
 
       show_warnings (bool):
          Whether or not to write out any warnings that occur during save
@@ -596,6 +600,16 @@ def save(
         show_warnings = False
 
     m = {"parallel": parallel, "show_warnings": show_warnings}
+
+    if not isinstance(save_velocities, bool):
+        raise TypeError(
+            f"'save_velocities' must be of type bool, not {type(save_velocities)}"
+        )
+
+    # remap the velocity property to a null value so that velocities
+    # are not saved to file
+    if not save_velocities:
+        m["velocity"] = "null"
 
     for key in kwargs.keys():
         m[key] = kwargs[key]
