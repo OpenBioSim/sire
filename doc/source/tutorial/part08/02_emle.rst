@@ -257,7 +257,7 @@ In order to ensure that ``OpenMM-ML`` doesn't perform mechanical embedding, we
 next need to zero the charges of the QM atoms in the MM system:
 
 >>> for force in ml_system.getForces():
-...     if isinstance(force, mm.NonbondedForce):
+...     if isinstance(force, openmm.NonbondedForce):
 ...         for i in ml_atoms:
 ...             _, sigma, epsilon = force.getParticleParameters(i)
 ...             force.setParticleParameters(i, 0, sigma, epsilon)
