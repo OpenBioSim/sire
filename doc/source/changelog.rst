@@ -37,6 +37,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   velocities are saved to the output file. This is useful when the magnitude of the velocities
   overflows the output file format precision, or when the velocities are not needed
 
+* Use force field bonding when working out connectivity for QM link atoms.
+
 `2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
 -----------------------------------------------------------------------------------------
 

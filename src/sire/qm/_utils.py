@@ -337,7 +337,13 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
         qm_idxs = [atom.index() for atom in qm_atoms]
 
         # Create a connectivity object.
-        connectivity = _Mol.Connectivity(qm_mol, _Mol.CovalentBondHunter(), map)
+        connectivity = _Mol.Connectivity(qm_mol.info())
+        editor = connectivity.edit()
+
+        # Connect atoms according to the bonding from the force field.
+        for bond in qm_mol.property(map["bond"]).potentials():
+            editor.connect(bond.atom0(), bond.atom1())
+        connectivity = editor.commit()
 
         # Dictionary to store the MM1 atoms.
         mm1_atoms = {}
