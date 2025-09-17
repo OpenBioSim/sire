@@ -2610,42 +2610,64 @@ QStringList GroMolType::settlesLines(bool is_lambda1) const
 
     QStringList lines;
 
+    // lambda function to check whether a four point water model
+    // is OPC water, which is determined by the virtual site charge
+    // value being < -1.1
+    auto is_opc = [this, is_lambda1]() -> bool {
+        if (is_lambda1)
+        {
+            for (const auto &atm : atms1)
+            {
+                if (atm.mass().value() < 1.0) // virtual site
+                {
+                    if (atm.charge().value() < -1.1)
+                        return true;
+                    else
+                        return false;
+                }
+            }
+        }
+        else
+        {
+            for (const auto &atm : atms0)
+            {
+                if (atm.mass().value() < 1.0) // virtual site
+                {
+                    if (atm.charge().value() < -1.1)
+                        return true;
+                    else
+                        return false;
+                }
+            }
+        }
+
+        return false;
+    };
+
     lines.append("[ settles ]");
     lines.append("; OW    funct   doh dhh");
 
-    // find the OH and HH bonds to get the equilibrium OH and HH bond length
-    // for this water molecule - if we don't have it, then use these as default (TIP3P)
+    // Equilibrium OH and HH bond lengths. (Default to TIP3P values).
     double hh_length = 0.15136000;
     double oh_length = 0.09572000;
 
-    // there should only be two bonds - OH and HH. The longer one is HH
-    if (is_lambda1)
+    if (nAtoms(is_lambda1) == 4)
     {
-        if (bnds1.count() == 2)
+        // TIP4P/OPC
+        if (is_opc())
         {
-            auto it = bnds1.begin();
-
-            double hh_length = it.value().equilibriumLength().to(nanometer);
-            ++it;
-            double oh_length = it.value().equilibriumLength().to(nanometer);
-
-            if (oh_length > hh_length)
-                qSwap(oh_length, hh_length);
+            oh_length = 0.08724331;
+            hh_length = 0.1371205;
+        }
+        else
+        {
+            hh_length = 0.15139;
         }
     }
-    else
+    else if (nAtoms(is_lambda1) == 5)
     {
-        if (bnds0.count() == 2)
-        {
-            auto it = bnds0.begin();
-
-            double hh_length = it.value().equilibriumLength().to(nanometer);
-            ++it;
-            double oh_length = it.value().equilibriumLength().to(nanometer);
-
-            if (oh_length > hh_length)
-                qSwap(oh_length, hh_length);
-        }
+        // TIP5P
+        hh_length = 0.15139;
     }
 
     lines.append(QString("1       1       %1 %2").arg(oh_length, 7, 'f', 5).arg(hh_length, 7, 'f', 5));
@@ -2662,39 +2684,6 @@ QStringList GroMolType::settlesLines(bool is_lambda1) const
     }
     else if (nAtoms(is_lambda1) == 4)
     {
-        // lambda function to check whether a four point water model
-        // is OPC water, which is determined by the virtual site charge
-        // value being < -1.1
-        auto is_opc = [this, is_lambda1]() -> bool {
-            if (is_lambda1)
-            {
-                for (const auto &atm : atms1)
-                {
-                    if (atm.mass().value() < 1.0) // virtual site
-                    {
-                        if (atm.charge().value() < -1.1)
-                            return true;
-                        else
-                            return false;
-                    }
-                }
-            }
-            else
-            {
-                for (const auto &atm : atms0)
-                {
-                    if (atm.mass().value() < 1.0) // virtual site
-                    {
-                        if (atm.charge().value() < -1.1)
-                            return true;
-                        else
-                            return false;
-                    }
-                }
-            }
-
-            return false;
-        };
 
         // TIP4P/OPC
         lines.append("1   2   3   4");
