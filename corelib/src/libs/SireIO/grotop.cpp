@@ -2551,13 +2551,12 @@ bool GroMolType::isWater(bool is_lambda1) const
                         if (nhyd > 2)
                             return false;
                     }
-                    else
-                        // not an oxygen or hydrogen
-                        return false;
                 }
 
-                // this is a water :-)
-                return true;
+                if (noxy == 1 and nhyd == 2)
+                    return true;
+                else
+                    return false;
             }
             else
             {
@@ -2584,13 +2583,12 @@ bool GroMolType::isWater(bool is_lambda1) const
                         if (nhyd > 2)
                             return false;
                     }
-                    else
-                        // not an oxygen or hydrogen
-                        return false;
                 }
 
-                // this is a water :-)
-                return true;
+                if (noxy == 1 and nhyd == 2)
+                    return true;
+                else
+                    return false;
             }
         }
     }
