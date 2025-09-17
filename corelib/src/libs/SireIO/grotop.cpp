@@ -2652,9 +2652,31 @@ QStringList GroMolType::settlesLines(bool is_lambda1) const
 
     lines.append("");
     lines.append("[ exclusions ]");
-    lines.append("1   2   3");
-    lines.append("2   1   3");
-    lines.append("3   1   2");
+
+    if (nAtoms(is_lambda1) == 3)
+    {
+        // TIP3P or SPC
+        lines.append("1   2   3");
+        lines.append("2   1   3");
+        lines.append("3   1   2");
+    }
+    else if (nAtoms(is_lambda1) == 4)
+    {
+        // TIP4P/OPC
+        lines.append("1   2   3   4");
+        lines.append("2   1   3   4");
+        lines.append("3   1   2   4");
+        lines.append("4   1   2   3");
+    }
+    else if (nAtoms(is_lambda1) == 5)
+    {
+        // TIP5P
+        lines.append("1   2   3   4   5");
+        lines.append("2   1   3   4   5");
+        lines.append("3   1   2   4   5");
+        lines.append("4   1   2   3   5");
+        lines.append("5   1   2   3   4");
+    }
 
     return lines;
 }
