@@ -2662,11 +2662,56 @@ QStringList GroMolType::settlesLines(bool is_lambda1) const
     }
     else if (nAtoms(is_lambda1) == 4)
     {
+        // lambda function to check whether a four point water model
+        // is OPC water, which is determined by the virtual site charge
+        // value being < -1.1
+        auto is_opc = [this, is_lambda1]() -> bool {
+            if (is_lambda1)
+            {
+                for (const auto &atm : atms1)
+                {
+                    if (atm.mass().value() < 1.0) // virtual site
+                    {
+                        if (atm.charge().value() < -1.1)
+                            return true;
+                        else
+                            return false;
+                    }
+                }
+            }
+            else
+            {
+                for (const auto &atm : atms0)
+                {
+                    if (atm.mass().value() < 1.0) // virtual site
+                    {
+                        if (atm.charge().value() < -1.1)
+                            return true;
+                        else
+                            return false;
+                    }
+                }
+            }
+
+            return false;
+        };
+
         // TIP4P/OPC
         lines.append("1   2   3   4");
         lines.append("2   1   3   4");
         lines.append("3   1   2   4");
         lines.append("4   1   2   3");
+
+        // Add virtual site information.
+        lines.append("");
+        lines.append("[ virtual_sites3 ]");
+        lines.append("; Vsite from                    funct   a               b");
+
+        // Check for OPC water.
+        if (is_opc())
+            lines.append("4       1       2       3       1       0.1477224       0.1477224");
+        else
+            lines.append("4       1       2       3       1       0.128012065     0.128012065");
     }
     else if (nAtoms(is_lambda1) == 5)
     {
@@ -2676,6 +2721,13 @@ QStringList GroMolType::settlesLines(bool is_lambda1) const
         lines.append("3   1   2   4   5");
         lines.append("4   1   2   3   5");
         lines.append("5   1   2   3   4");
+
+        // Add virtual site information.
+        lines.append("");
+        lines.append("[ virtual_sites3 ]");
+        lines.append("; Vsite from                    funct   a               b               c");
+        lines.append("4      1       2       3       4        -0.344908262    -0.34490826     -6.4437903493");
+        lines.append("5      1       2       3       4        -0.344908262    -0.34490826     6.4437903493");
     }
 
     return lines;
