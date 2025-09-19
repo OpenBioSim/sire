@@ -316,3 +316,62 @@ def test_grotop_cmap_amber(tmpdir, gromacs_cmap):
                 found = True
 
         assert found
+
+
+@pytest.mark.parametrize("water_model", ["tip4p", "tip5p", "opc"])
+def test_grotop_water(tmpdir, water_model):
+    """Test read/write of GROMACS 4- and 5-point water models."""
+
+    # Mapping of water models to the expected settles and vsite lines.
+    settles_lines = {
+        "tip4p": "1       1       0.09572 0.15139",
+        "tip5p": "1       1       0.09572 0.15139",
+        "opc": "1       1       0.08724 0.13712",
+    }
+    vsite_lines = {
+        "tip4p": ("4       1       2       3 1       0.128012065     0.128012065"),
+        "tip5p": (
+            "4      1       2       3       4        -0.344908262    -0.34490826     -6.4437903493",
+            "5      1       2       3       4        -0.344908262    -0.34490826     6.4437903493",
+        ),
+        "opc": ("4       1       2       3       1       0.1477224       0.1477224",),
+    }
+
+    dir = tmpdir.mkdir("test_grotop_water")
+
+    # Store the water template directory.
+    water_dir = sr.legacy.Base.getShareDir() + "/templates/water/"
+
+    # Coordinate and topology files.
+    crd = water_dir + f"{water_model}.gro87"
+    top = water_dir + f"{water_model}.grotop"
+
+    # Load the files.
+    mols = sr.load([crd, top], show_warnings=False)
+
+    # Write to a temporary GROMACS topology file.
+    f = sr.save(mols, dir.join("tmp"), format="GroTop")
+
+    # Read the file to check it was written correctly.
+    with open(f[0], "r") as fh:
+        is_settles = False
+        is_vsite = False
+        n_vsite = 0
+        for line in fh:
+            if is_settles:
+                if line == "\n":
+                    is_settles = False
+                    continue
+                elif not line.startswith(";"):
+                    assert line.strip() == settles_lines[water_model]
+            if is_vsite:
+                if line == "\n":
+                    is_vsite = False
+                    continue
+                elif not line.startswith(";"):
+                    assert line.strip() == vsite_lines[water_model][n_vsite]
+                    n_vsite += 1
+            if line.startswith("[ settles ]"):
+                is_settles = True
+            if line.startswith("[ vsite3 ]"):
+                is_vsite = True
