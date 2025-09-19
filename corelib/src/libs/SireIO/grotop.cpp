@@ -2551,13 +2551,12 @@ bool GroMolType::isWater(bool is_lambda1) const
                         if (nhyd > 2)
                             return false;
                     }
-                    else
-                        // not an oxygen or hydrogen
-                        return false;
                 }
 
-                // this is a water :-)
-                return true;
+                if (noxy == 1 and nhyd == 2)
+                    return true;
+                else
+                    return false;
             }
             else
             {
@@ -2584,13 +2583,12 @@ bool GroMolType::isWater(bool is_lambda1) const
                         if (nhyd > 2)
                             return false;
                     }
-                    else
-                        // not an oxygen or hydrogen
-                        return false;
                 }
 
-                // this is a water :-)
-                return true;
+                if (noxy == 1 and nhyd == 2)
+                    return true;
+                else
+                    return false;
             }
         }
     }
@@ -2612,51 +2610,114 @@ QStringList GroMolType::settlesLines(bool is_lambda1) const
 
     QStringList lines;
 
+    // lambda function to check whether a four point water model
+    // is OPC water, which is determined by the virtual site charge
+    // value being < -1.1
+    auto is_opc = [this, is_lambda1]() -> bool {
+        if (is_lambda1)
+        {
+            for (const auto &atm : atms1)
+            {
+                if (atm.mass().value() < 1.0) // virtual site
+                {
+                    if (atm.charge().value() < -1.1)
+                        return true;
+                    else
+                        return false;
+                }
+            }
+        }
+        else
+        {
+            for (const auto &atm : atms0)
+            {
+                if (atm.mass().value() < 1.0) // virtual site
+                {
+                    if (atm.charge().value() < -1.1)
+                        return true;
+                    else
+                        return false;
+                }
+            }
+        }
+
+        return false;
+    };
+
     lines.append("[ settles ]");
     lines.append("; OW    funct   doh dhh");
 
-    // find the OH and HH bonds to get the equilibrium OH and HH bond length
-    // for this water molecule - if we don't have it, then use these as default (TIP3P)
+    // Equilibrium OH and HH bond lengths. (Default to TIP3P values).
     double hh_length = 0.15136000;
     double oh_length = 0.09572000;
 
-    // there should only be two bonds - OH and HH. The longer one is HH
-    if (is_lambda1)
+    if (nAtoms(is_lambda1) == 4)
     {
-        if (bnds1.count() == 2)
+        // TIP4P/OPC
+        if (is_opc())
         {
-            auto it = bnds1.begin();
-
-            double hh_length = it.value().equilibriumLength().to(nanometer);
-            ++it;
-            double oh_length = it.value().equilibriumLength().to(nanometer);
-
-            if (oh_length > hh_length)
-                qSwap(oh_length, hh_length);
+            oh_length = 0.08724331;
+            hh_length = 0.1371205;
+        }
+        else
+        {
+            hh_length = 0.15139;
         }
     }
-    else
+    else if (nAtoms(is_lambda1) == 5)
     {
-        if (bnds0.count() == 2)
-        {
-            auto it = bnds0.begin();
-
-            double hh_length = it.value().equilibriumLength().to(nanometer);
-            ++it;
-            double oh_length = it.value().equilibriumLength().to(nanometer);
-
-            if (oh_length > hh_length)
-                qSwap(oh_length, hh_length);
-        }
+        // TIP5P
+        hh_length = 0.15139;
     }
 
     lines.append(QString("1       1       %1 %2").arg(oh_length, 7, 'f', 5).arg(hh_length, 7, 'f', 5));
 
     lines.append("");
     lines.append("[ exclusions ]");
-    lines.append("1   2   3");
-    lines.append("2   1   3");
-    lines.append("3   1   2");
+
+    if (nAtoms(is_lambda1) == 3)
+    {
+        // TIP3P or SPC
+        lines.append("1   2   3");
+        lines.append("2   1   3");
+        lines.append("3   1   2");
+    }
+    else if (nAtoms(is_lambda1) == 4)
+    {
+
+        // TIP4P/OPC
+        lines.append("1   2   3   4");
+        lines.append("2   1   3   4");
+        lines.append("3   1   2   4");
+        lines.append("4   1   2   3");
+
+        // Add virtual site information.
+        lines.append("");
+        lines.append("[ virtual_sites3 ]");
+        lines.append("; Vsite from                    funct   a               b");
+
+        // Check for OPC water.
+        if (is_opc())
+            lines.append("4       1       2       3       1       0.1477224       0.1477224");
+        else
+            lines.append("4       1       2       3       1       0.128012065     0.128012065");
+    }
+    else if (nAtoms(is_lambda1) == 5)
+    {
+        // TIP5P
+        lines.append("1   2   3   4   5");
+        lines.append("2   1   3   4   5");
+        lines.append("3   1   2   4   5");
+        lines.append("4   1   2   3   5");
+        lines.append("5   1   2   3   4");
+
+        // Add virtual site information.
+        lines.append("");
+        lines.append("[ virtual_sites3 ]");
+        lines.append("; Vsite from                    funct   a               b               c");
+        lines.append("4      1       2       3       4        -0.344908262    -0.34490826     -6.4437903493");
+        lines.append("5      1       2       3       4        -0.344908262    -0.34490826     6.4437903493");
+    }
 
     return lines;
 }
