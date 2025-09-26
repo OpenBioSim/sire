@@ -442,18 +442,11 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
         bond_lengths = {}
         link_bond_lengths = {}
 
-        # Store the info for the QM molecule.
-        info = qm_mol.info()
-
         # Store the bond potential symbol.
         r = _CAS.Symbol("r")
 
         # Loop over the link atoms.
         for qm_idx, mm1_idx in mm1_atoms.items():
-            # Convert to cg_atom_idx objects.
-            cg_qm_idx = info.cg_atom_idx(qm_idx)
-            cg_mm1_idx = info.cg_atom_idx(mm1_idx)
-
             # Get the QM and MM1 atoms.
             qm_atom = qm_mol[qm_idx]
             mm1_atom = qm_mol[mm1_idx]
