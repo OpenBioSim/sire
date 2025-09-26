@@ -41,6 +41,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fix handling of 4- and 5-point water models when writing GROMACS topology files.
 
+* Fix handling of link atoms for non carbon-carbon bonds where there is no bonded
+  term in the MM force field.
+
 `2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
 -----------------------------------------------------------------------------------------
 
