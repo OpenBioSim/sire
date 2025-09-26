@@ -127,6 +127,64 @@ def test_link_atoms(ala_mols, selection, expected):
     assert bond_scale_factors == expected[2]
 
 
+def test_link_atoms_non_carbon():
+    """
+    Make sure that the link atoms are correctly identified.
+    """
+
+    from sire.base import create_map as _create_map
+    from sire.qm._utils import _create_qm_mol_to_atoms, _get_link_atoms
+
+    # Load the test system with a non-carbon link atoms.
+    mols = sr.load_test_files("sulfur_link_atom.prm7", "sulfur_link_atom.rst7")
+
+    # The selection for the QM region.
+    selection = "atomnum 3933:3936,2075:2081,589:617,621:625"
+
+    # Extract the QM atom selection.
+    qm_atoms = mols[0][selection].atoms()
+
+    # Create the mapping between molecule numbers and QM atoms.
+    qm_mol_to_atoms = _create_qm_mol_to_atoms(qm_atoms)
+
+    # Get link atom information.
+    mm1_to_qm, mm1_to_mm2, bond_scale_factors, mm1_indices = _get_link_atoms(
+        mols, qm_mol_to_atoms, _create_map({})
+    )
+
+    expected_mm1_to_qm = {586: 588, 618: 620, 2071: 2074}
+    expected_mm1_to_mm2 = {
+        586: [578, 583, 587],
+        618: [616, 619, 624],
+        2071: [2069, 2072, 2073],
+    }
+    expected_bond_scale_factors = {
+        586: 0.6312473215372766,
+        618: 0.7142857142857143,
+        2071: 0.7142857142857143,
+    }
+
+    assert mm1_to_qm == expected_mm1_to_qm
+    assert mm1_to_mm2 == expected_mm1_to_mm2
+    assert bond_scale_factors == expected_bond_scale_factors
+
+    # Work out out the sulfur to carbon van der Waals sigma ratio.
+    sigma_s = mols["element S"][0].lj().sigma().value()
+    sigma_c = mols["element C"][0].lj().sigma().value()
+    sigma_ratio = sigma_s / sigma_c
+
+    # Store the C-C and C-S bond lengths from the force field.
+    c_c_bond_length = 1.526
+    c_s_bond_length = 1.81
+
+    # Make sure the S-H bond length is scaled correctly.
+    assert np.isclose(
+        bond_scale_factors[586] * c_s_bond_length,
+        sigma_ratio * bond_scale_factors[618] * c_c_bond_length,
+        rtol=1e-6,
+    )
+
+
 def test_charge_redistribution():
     """
     Make sure that charge redistribution works correctly.
