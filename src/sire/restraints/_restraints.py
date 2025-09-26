@@ -788,7 +788,7 @@ def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None, map=None):
     ref : sire.system._system.System
         The system from which the reference positions for the RMSD calculation
         are extracted from. If None, this will default to the current
-        state of mols.    
+        state of mols.
 
     k : str or SireUnits::Dimension::GeneralUnit or, optional
         The force constant for the RMSD restraints.
