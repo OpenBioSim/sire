@@ -15,7 +15,7 @@ def _to_atoms(mols, atoms):
 
 def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
     """
-    Create a set of anglel restraints from all of the atoms in 'atoms'
+    Create a set of angle restraints from all of the atoms in 'atoms'
     where all atoms are contained in the container 'mols', using the
     passed values of the force constant 'ktheta' and equilibrium
     angle value theta0.
@@ -45,7 +45,7 @@ def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
 
     Returns
     -------
-    AnglelRestraints : SireMM::AngleRestraints
+    AngleRestraints : SireMM::AngleRestraints
         A container of angle restraints, where the first restraint is
         the AngleRestraint created. The angle restraint created can be
         extracted with AngleRestraints[0].
@@ -659,11 +659,65 @@ def morse_potential(
     mols, atoms0=None, atoms1=None, r0=None, k=None, de=None, name=None, auto_parametrise=False, map=None
 ):
     """
-    Need to write
+    Create a set of morse restraints from all of the atoms in 'atoms'
+    where all atoms are contained in the container 'mols', using the
+    passed values of the force constant 'k' and equilibrium
+    distance value r0.
+
+    If r0 is None, then the current distance for
+    provided atoms will be used as the equilibium value.
+
+    Parameters
+    ----------
+    mols : sire.system._system.System
+        The system containing the atoms.
+
+    atoms0 : SireMol::Selector<SireMol::Atom>
+        The first atom involved in the morse restraint.
+
+    atoms1 : SireMol::Selector<SireMol::Atom>
+        The second atom involved in the morse restraint.
+
+    k : str or SireUnits::Dimension::GeneralUnit,
+        The force constants for the morse restraints. Optional if
+        auto_parametrise is True.
+        Default is None.
+
+    r0 : str or SireUnits::Dimension::GeneralUnit, optional
+        The equilibrium distances for the morse restraints. If None, these
+        will be measured from the current coordinates of the atoms.
+        Default is None.
+
+    de : str or SireUnits::Dimension::GeneralUnit
+        The well depth for the morse potential.
+        Default is None.
+
+    name : str, optional
+        The name of the restraint.
+        Default is None.
+    
+    auto_parametrise : bool, optional
+        If True, will attempt to automatically parametrise the morse potential
+        from a perturbation that annihilates a bond. This requires that 'mols'
+        contains exactly one molecule that is perturbable, and that this
+        molecule contains exactly one bond that is annihilated at lambda=1.
+        The atoms involved in the annihilated bond will be used as 'atoms0'
+        and 'atoms1', the equilibrium distance r0 will be set to the current
+        bond length, and the force constant k will be set to the force constant
+        of the bond in the unperturbed state. Note that 'de' must still be
+        provided by the user.
+        Default is False.
+
+    Returns
+    -------
+    MorsePotentialRestraints : SireMM::MorsePotentialRestraints
+        A container of morse restraints, where the first restraint is
+        the MorsePotentialRestraint created. The morse restraint created can be
+        extracted with MorsePotentialRestraints[0].
     """
 
-    # TODO: Remove ability to set up multiple restraints at once, as this is not supported.
-    # for this kind of restraint.
+    # TODO: Add ability to auto-parametrise the morse potential with k, r0 and de
+    # from a perturbation that annihilates a bond.
 
     from .. import u
     from ..base import create_map
@@ -673,8 +727,8 @@ def morse_potential(
     map = create_map(map)
 
     if k is None:
-        # k = [u("5 kcal mol-1 A-2")]
-        raise ValueError("k must be provided")
+        if not auto_parametrise:
+            raise ValueError("k must be provided")
 
     elif type(k) is list:
         k = [u(x) for x in k]
@@ -693,23 +747,36 @@ def morse_potential(
         pert_omm = pert.to_openmm()
         changed_bonds = pert_omm.changed_bonds(to_pandas=False)
 
-        # we'll attempt to find the bond that is annihilated at lambda=1
+        # Attempt to find the bond that is annihilated at lambda=1
+        annihilated_bonds_counter = 0
         for bond in changed_bonds:
             bond_name, length0, length1, k0, k1 = bond
             if k1 == 0:
-                atoms0 = [bond_name.atom0().index().value()]
-                atoms1 = [bond_name.atom1().index().value()]
+                annihilated_bonds_counter += 1
+
+                atom0_idx = [bond_name.atom0().index().value()][0]
+                atom1_idx = [bond_name.atom1().index().value()][0]
+
                 length0 = u(f"{length0} nm")
 
-                # Translate the atom numbers to the original system
+                # Divide k0 by 2 to convert from force constant to sire internal k
+                k0 = k0 / 2.0
+                k0 = u(f"{k0} kJ mol-1 nm-2")
+                k = [k0]
+
+                # Translate the atom numbers to the original system indexes
                 atoms0 = mols[f"molecule property is_perturbable and atomidx {atom0_idx}"]
                 atoms1 = mols[f"molecule property is_perturbable and atomidx {atom1_idx}"]
                 break
-        
-        if len(atoms0) == 0 or len(atoms1) == 0:
-            raise ValueError(
-                "Could not find any bonds that are annihilated at lambda=1.")
 
+        if annihilated_bonds_counter == 0:
+            raise ValueError(
+                "Auto parametrisation could not find any bonds that are annihilated in the perturbation to set up the Morse potential restraints."
+            )
+        if annihilated_bonds_counter > 1:
+            raise ValueError(
+                "Auto parametrisation found multiple bonds that are annihilated in the perturbation to set up the Morse potential restraints. This is not currently supported."
+            )
 
     atoms0 = _to_atoms(mols, atoms0)
     atoms1 = _to_atoms(mols, atoms1)
@@ -717,11 +784,12 @@ def morse_potential(
     if atoms0.is_empty() or atoms1.is_empty():
         raise ValueError("We need at least one atom in each group")
 
-    while len(atoms0) < len(atoms1):
-        atoms0 += atoms0[-1]
-
-    while len(atoms1) < len(atoms0):
-        atoms1 += atoms1[-1]
+    if len(atoms0) != len(atoms1):
+        raise ValueError("atoms0 and atoms1 must be the same length")
+    
+    if len(atoms0) > 1 or len(atoms1) > 1:
+        if not auto_parametrise:
+            raise ValueError("Setting up multiple morse potential restraints at once is not currently supported. Please set up each restraint individually and then combine them into multiple restraints.")
 
     if r0 is None:
         if auto_parametrise:
@@ -739,7 +807,7 @@ def morse_potential(
         r0 = [u(r0)]
 
     if de is None:
-        raise ValueError("de must be provided")
+        raise ValueError("The value of DE must be provided")
 
     mols = mols.atoms()
 
@@ -762,14 +830,14 @@ def morse_potential(
             raise KeyError(
                 f"Could not find atom {atom0} in the molecules. Please ensure "
                 "that 'mols' contains all of that atoms, or else we can't "
-                "add the moving harmonic restraints."
+                "add the morse potential restraints."
             )
 
         if len(idxs1) == 0:
             raise KeyError(
                 f"Could not find atom {atom1} in the molecules. Please ensure "
                 "that 'mols' contains all of that atoms, or else we can't "
-                "add the moving harmonic restraints."
+                "add the morse potential restraints."
             )
 
         if i < len(k):
