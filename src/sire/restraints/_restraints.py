@@ -760,9 +760,10 @@ def morse_potential(
                 length0 = u(f"{length0} nm")
 
                 # Divide k0 by 2 to convert from force constant to sire internal k
-                k0 = k0 / 2.0
-                k0 = u(f"{k0} kJ mol-1 nm-2")
-                k = [k0]
+                if k is None:
+                    k0 = k0 / 2.0
+                    k0 = u(f"{k0} kJ mol-1 nm-2")
+                    k = [k0]
 
                 # Translate the atom numbers to the original system indexes
                 atoms0 = mols[f"molecule property is_perturbable and atomidx {atom0_idx}"]
