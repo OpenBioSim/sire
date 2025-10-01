@@ -1,4 +1,4 @@
-__all__ = ["angle", "boresch", "bond", "dihedral", "distance", "positional", "rmsd"]
+__all__ = ["angle", "boresch", "bond", "dihedral", "distance", "morse_potential", "positional", "rmsd"]
 
 from .. import u
 
@@ -655,6 +655,132 @@ def distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):
 
     return restraints
 
+def morse_potential(
+    mols, atoms0=None, atoms1=None, r0=None, k=None, de=None, name=None, auto_parametrise=False, map=None
+):
+    """
+    Need to write
+    """
+
+    # TODO: Remove ability to set up multiple restraints at once, as this is not supported.
+    # for this kind of restraint.
+
+    from .. import u
+    from ..base import create_map
+    from ..mm import MorsePotentialRestraint, MorsePotentialRestraints
+    from ..morph import link_to_reference
+
+    map = create_map(map)
+
+    if k is None:
+        # k = [u("5 kcal mol-1 A-2")]
+        raise ValueError("k must be provided")
+
+    elif type(k) is list:
+        k = [u(x) for x in k]
+    else:
+        k = [u(k)]
+    if auto_parametrise:
+        mol = mols.molecules("molecule property is_perturbable")
+        ref_mol = link_to_reference(mol)
+
+        if len(ref_mol) != 1:
+            raise ValueError(
+                "We need exactly one molecule that is perturbable to set up the Morse potential restraints"
+            )
+        perturbable_mol = ref_mol[0]
+        pert = perturbable_mol.perturbation(map=map)
+        pert_omm = pert.to_openmm()
+        changed_bonds = pert_omm.changed_bonds(to_pandas=False)
+
+        # we'll attempt to find the bond that is annihilated at lambda=1
+        for bond in changed_bonds:
+            bond_name, length0, length1, k0, k1 = bond
+            if k1 == 0:
+                atoms0 = [bond_name.atom0().index().value()]
+                atoms1 = [bond_name.atom1().index().value()]
+                length0 = u(f"{length0} nm")
+                break
+        
+        if len(atoms0) == 0 or len(atoms1) == 0:
+            raise ValueError(
+                "Could not find any bonds that are annihilated at lambda=1.")
+
+
+    atoms0 = _to_atoms(mols, atoms0)
+    atoms1 = _to_atoms(mols, atoms1)
+
+    if atoms0.is_empty() or atoms1.is_empty():
+        raise ValueError("We need at least one atom in each group")
+
+    while len(atoms0) < len(atoms1):
+        atoms0 += atoms0[-1]
+
+    while len(atoms1) < len(atoms0):
+        atoms1 += atoms1[-1]
+
+    if r0 is None:
+        if auto_parametrise:
+            r0 = [length0]
+        else:
+            # calculate all of the current distances
+            from .. import measure
+
+            r0 = []
+            for atom0, atom1 in zip(atoms0, atoms1):
+                r0.append(measure(atom0, atom1))
+    elif type(r0) is list:
+        r0 = [u(x) for x in r0]
+    else:
+        r0 = [u(r0)]
+
+    if de is None:
+        raise ValueError("de must be provided")
+
+    mols = mols.atoms()
+
+    if name is None:
+        restraints = MorsePotentialRestraints()
+    else:
+        restraints = MorsePotentialRestraints(name=name)
+
+    for i, (atom0, atom1) in enumerate(zip(atoms0, atoms1)):
+        idxs0 = mols.find(atom0)
+        idxs1 = mols.find(atom1)
+
+        if type(idxs0) is int:
+            idxs0 = [idxs0]
+
+        if type(idxs1) is int:
+            idxs1 = [idxs1]
+
+        if len(idxs0) == 0:
+            raise KeyError(
+                f"Could not find atom {atom0} in the molecules. Please ensure "
+                "that 'mols' contains all of that atoms, or else we can't "
+                "add the moving harmonic restraints."
+            )
+
+        if len(idxs1) == 0:
+            raise KeyError(
+                f"Could not find atom {atom1} in the molecules. Please ensure "
+                "that 'mols' contains all of that atoms, or else we can't "
+                "add the moving harmonic restraints."
+            )
+
+        if i < len(k):
+            ik = k[i]
+        else:
+            ik = k[-1]
+
+        if i < len(r0):
+            ir0 = r0[i]
+        else:
+            ir0 = r0[-1]
+
+        restraints.add(MorsePotentialRestraint(idxs0[0], idxs1[0], ik, ir0, de))
+
+    return restraints
 
 def bond(*args, **kwargs):
     """

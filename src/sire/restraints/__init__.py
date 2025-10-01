@@ -5,6 +5,7 @@ __all__ = [
     "bond",
     "dihedral",
     "distance",
+    "morse_potential",
     "boresch",
     "get_standard_state_correction",
 ]

@@ -68,6 +68,7 @@
 #include "softcljcomponent.h"
 #include "selectorbond.h"
 #include "positionalrestraints.h"
+#include "morsepotentialrestraints.h"
 #include "rmsdrestraints.h"
 #include "mmdetail.h"
 #include "cljworkspace.h"
@@ -238,6 +239,8 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::InterGroupSoftCLJFF >();
     ObjectRegistry::registerConverterFor< SireMM::RestraintComponent >();
     ObjectRegistry::registerConverterFor< SireMM::LJ1264Parameter >();
+    ObjectRegistry::registerConverterFor< SireMM::MorsePotentialRestraint >();
+    ObjectRegistry::registerConverterFor< SireMM::MorsePotentialRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::GromacsAtomType >();
     ObjectRegistry::registerConverterFor< SireMM::GromacsBond >();
     ObjectRegistry::registerConverterFor< SireMM::GromacsAngle >();

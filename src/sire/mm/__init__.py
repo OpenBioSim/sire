@@ -16,6 +16,8 @@ __all__ = [
     "PositionalRestraints",
     "DihedralRestraint",
     "DihedralRestraints",
+    "MorsePotentialRestraint",
+    "MorsePotentialRestraints",
     "RMSDRestraint",
     "RMSDRestraints",
     "SelectorAngle",
@@ -57,6 +59,9 @@ RMSDRestraints = _MM.RMSDRestraints
 
 DihedralRestraint = _MM.DihedralRestraint
 DihedralRestraints = _MM.DihedralRestraints
+
+MorsePotentialRestraint = _MM.MorsePotentialRestraint
+MorsePotentialRestraints = _MM.MorsePotentialRestraints
 
 AmberBond = _MM.AmberBond
 AmberAngle = _MM.AmberAngle
