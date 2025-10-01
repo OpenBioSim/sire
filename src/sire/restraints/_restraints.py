@@ -700,6 +700,10 @@ def morse_potential(
                 atoms0 = [bond_name.atom0().index().value()]
                 atoms1 = [bond_name.atom1().index().value()]
                 length0 = u(f"{length0} nm")
+
+                # Translate the atom numbers to the original system
+                atoms0 = mols[f"molecule property is_perturbable and atomidx {atom0_idx}"]
+                atoms1 = mols[f"molecule property is_perturbable and atomidx {atom1_idx}"]
                 break
         
         if len(atoms0) == 0 or len(atoms1) == 0:
