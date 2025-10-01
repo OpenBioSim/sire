@@ -266,84 +266,85 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
  *  of real (non-anchor) atoms in the OpenMM::System is 'natoms'
  */
 void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &restraints,
-    OpenMM::System &system, LambdaLever &lambda_lever,
-    int natoms)
+        OpenMM::System &system, LambdaLever &lambda_lever,
+        int natoms)
 {
-if (restraints.isEmpty())
-return;
+    if (restraints.isEmpty())
+    return;
 
-if (restraints.hasCentroidRestraints())
-{
-throw SireError::unsupported(QObject::tr(
-                   "Centroid bond restraints aren't yet supported..."),
-               CODELOC);
-}
+    if (restraints.hasCentroidRestraints())
+    {
+        throw SireError::unsupported(QObject::tr(
+                        "Centroid bond restraints aren't yet supported..."),
+                    CODELOC);
+    }
 
-// energy expression of a harmonic bond potential, scaled by rho
-// e_restraint = rho*DE*(1-exp(-Bij*dr))**2
-// Bij = sqrt(k/2*DE)
+    // energy expression of a harmonic bond potential, scaled by rho
+    // e_restraint = rho*DE*(1-exp(-Bij*dr))**2
+    // Bij = sqrt(k/2*DE)
 
-// OLD EXPRESSION
-const auto energy_expression = QString(
-                                   "rho*e_restraint;"
-                                   "e_restraint=de*(1-exp(-sqrt(k/(2*de))*delta))^2;"
-                                   "delta=(r-r0)")
-                                   .toStdString();
+    // OLD EXPRESSION
+    const auto energy_expression = QString(
+                                    "rho*e_restraint;"
+                                    "e_restraint=de*(1-exp(-sqrt(k/(2*de))*delta))^2;"
+                                    "delta=(r-r0)")
+                                    .toStdString();
 
-// const auto energy_expression = QString(
-//               "rho*k*delta*delta;"
-//               "delta=(r-r_adjusted);"
-//               "r_adjusted=(r1*(1-rho)+(r0*rho));")
-//               .toStdString();
+    // const auto energy_expression = QString(
+    //               "rho*k*delta*delta;"
+    //               "delta=(r-r_adjusted);"
+    //               "r_adjusted=(r1*(1-rho)+(r0*rho));")
+    //               .toStdString();
 
-auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
-restraintff->setName("MorsePotentialRestraintForce");
+    auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
+    restraintff->setName("MorsePotentialRestraintForce");
 
-restraintff->addPerBondParameter("rho");
-restraintff->addPerBondParameter("k");
-restraintff->addPerBondParameter("r0");
-restraintff->addPerBondParameter("de");
+    restraintff->addPerBondParameter("rho");
+    restraintff->addPerBondParameter("k");
+    restraintff->addPerBondParameter("r0");
+    restraintff->addPerBondParameter("de");
 
-restraintff->setUsesPeriodicBoundaryConditions(true);
+    restraintff->setUsesPeriodicBoundaryConditions(true);
 
-lambda_lever.addRestraintIndex(restraints.name(),
-             system.addForce(restraintff));
+    lambda_lever.addRestraintIndex(restraints.name(),
+                system.addForce(restraintff));
 
-const auto atom_restraints = restraints.atomRestraints();
+    const auto atom_restraints = restraints.atomRestraints();
 
-const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
-const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
-const double internal_to_de = (1 * SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
+    const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+    const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
+    const double internal_to_de = (1 * SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
 
-auto cljff = lambda_lever.getForce<OpenMM::NonbondedForce>("clj", system);
+    auto cljff = lambda_lever.getForce<OpenMM::NonbondedForce>("clj", system);
 
-std::vector<double> custom_params = {1.0, 0.0, 0.0, 0.0};
+    std::vector<double> custom_params = {1.0, 0.0, 0.0, 0.0};
 
-for (const auto &restraint : atom_restraints)
-{
-int atom0_index = restraint.atom0();
-int atom1_index = restraint.atom1();
+    for (const auto &restraint : atom_restraints)
+    {
+        int atom0_index = restraint.atom0();
+        int atom1_index = restraint.atom1();
 
-if (atom0_index < 0 or atom0_index >= natoms)
-throw SireError::invalid_index(QObject::tr(
-                         "Invalid particle index! %1 from %2")
-                         .arg(atom0_index)
-                         .arg(natoms),
-                     CODELOC);
+        if (atom0_index < 0 or atom0_index >= natoms)
+        throw SireError::invalid_index(QObject::tr(
+                                "Invalid particle index! %1 from %2")
+                                .arg(atom0_index)
+                                .arg(natoms),
+                            CODELOC);
 
-if (atom1_index < 0 or atom1_index >= natoms)
-throw SireError::invalid_index(QObject::tr(
-                         "Invalid particle index! %1 from %2")
-                         .arg(atom1_index)
-                         .arg(natoms),
-                     CODELOC);
+        if (atom1_index < 0 or atom1_index >= natoms)
+        throw SireError::invalid_index(QObject::tr(
+                                "Invalid particle index! %1 from %2")
+                                .arg(atom1_index)
+                                .arg(natoms),
+                            CODELOC);
 
-custom_params[0] = 1.0;                                     // rho - always equal to 1 (scaled by lever)
-custom_params[1] = restraint.k().value() * internal_to_k;   // k
-custom_params[2] = restraint.r0().value() * internal_to_nm; // r0
-custom_params[3] = restraint.de().value() * internal_to_de; // r1
+        custom_params[0] = 1.0;                                     // rho - always equal to 1 (scaled by lever)
+        custom_params[1] = restraint.k().value() * internal_to_k;   // k
+        custom_params[2] = restraint.r0().value() * internal_to_nm; // r0
+        custom_params[3] = restraint.de().value() * internal_to_de; // r1
 
-restraintff->addBond(atom0_index, atom1_index, custom_params);
+        restraintff->addBond(atom0_index, atom1_index, custom_params);
+    }
 }
 
 /** Add all of the positional restraints from 'restraints' to the passed

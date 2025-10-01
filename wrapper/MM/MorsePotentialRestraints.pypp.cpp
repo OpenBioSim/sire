@@ -40,7 +40,7 @@ void register_MorsePotentialRestraints_class(){
 
     { //::SireMM::MorsePotentialRestraints
         typedef bp::class_< SireMM::MorsePotentialRestraints, bp::bases< SireMM::Restraints, SireBase::Property > > MorsePotentialRestraints_exposer_t;
-        MorsePotentialRestraints_exposer_t MorsePotentialRestraints_exposer = MorsePotentialRestraints_exposer_t( "MorsePotentialRestraints", "This class provides the information for a collection of Moving Harmonic Restraints\nrestraints that can be added to a collection of molecues. Each\nrestraint can act on a pair of particles or a pair of the\ncentroids of two collections of particles.\nThe restaints are spherically symmetric, and\nare simple harmonic potentials\n", bp::init< >("Null constructor") );
+        MorsePotentialRestraints_exposer_t MorsePotentialRestraints_exposer = MorsePotentialRestraints_exposer_t( "MorsePotentialRestraints", "This class provides the information for a collection of Moving Harmonic Restraints\nrestraints that can be added to a collection of molecules. Each\nrestraint can act on a pair of particles.\n", bp::init< >("Null constructor") );
         bp::scope MorsePotentialRestraints_scope( MorsePotentialRestraints_exposer );
         MorsePotentialRestraints_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "") );
         MorsePotentialRestraints_exposer.def( bp::init< SireMM::MorsePotentialRestraint const & >(( bp::arg("restraint") ), "") );

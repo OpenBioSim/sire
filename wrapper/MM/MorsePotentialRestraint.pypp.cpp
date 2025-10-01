@@ -37,10 +37,10 @@ void register_MorsePotentialRestraint_class(){
 
     { //::SireMM::MorsePotentialRestraint
         typedef bp::class_< SireMM::MorsePotentialRestraint, bp::bases< SireBase::Property > > MorsePotentialRestraint_exposer_t;
-        MorsePotentialRestraint_exposer_t MorsePotentialRestraint_exposer = MorsePotentialRestraint_exposer_t( "MorsePotentialRestraint", "This class represents a single Morse restraint between any two\natoms in a system (or between the centroids of any two groups\nof atoms in a system)\n", bp::init< >("Null constructor") );
+        MorsePotentialRestraint_exposer_t MorsePotentialRestraint_exposer = MorsePotentialRestraint_exposer_t( "MorsePotentialRestraint", "This class represents a single Morse restraint between any two\natoms in a system\n", bp::init< >("Null constructor") );
         bp::scope MorsePotentialRestraint_scope( MorsePotentialRestraint_exposer );
         MorsePotentialRestraint_exposer.def( bp::init< qint64, qint64, SireUnits::Dimension::HarmonicBondConstant const &, SireUnits::Dimension::Length const &, SireUnits::Dimension::MolarEnergy const & >(( bp::arg("atom0"), bp::arg("atom1"), bp::arg("k"), bp::arg("r0"), bp::arg("de") ), "Construct to restrain the atom at index atom to the specified position\n  using the specified force constant and flat-bottom well-width\n") );
-        MorsePotentialRestraint_exposer.def( bp::init< QList< long long > const &, QList< long long > const &, SireUnits::Dimension::HarmonicBondConstant const &, SireUnits::Dimension::Length const &, SireUnits::Dimension::MolarEnergy const & >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("k"), bp::arg("r0"), bp::arg("de") ), "Construct to restrain the centroid of the atoms whose indicies are\n  in atoms to the specified position using the specified force constant\n  and flat-bottom well width\n") );
+        MorsePotentialRestraint_exposer.def( bp::init< QList< long long > const &, QList< long long > const &, SireUnits::Dimension::HarmonicBondConstant const &, SireUnits::Dimension::Length const &, SireUnits::Dimension::MolarEnergy const & >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("k"), bp::arg("r0"), bp::arg("de") ), "Construct to restrain the atoms whose indicies are\n  in atoms to the specified position using the specified force constant\n  and dissociation energy\n") );
         MorsePotentialRestraint_exposer.def( bp::init< SireMM::MorsePotentialRestraint const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::MorsePotentialRestraint::atom0
         
@@ -176,7 +176,7 @@ void register_MorsePotentialRestraint_class(){
                 "r0"
                 , r0_function_value
                 , bp::release_gil_policy()
-                , "Return the width of the harmonic MovingHarmonic." );
+                , "Return the equilibrium position of the harmonic MovingHarmonic." );
         
         }
         { //::SireMM::MorsePotentialRestraint::toString
