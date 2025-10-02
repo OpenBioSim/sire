@@ -262,8 +262,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
 }
 
 /** Add all of the morse potential restraints from 'restraints' to the passed
- *  system, which is acted on by the passed LambdaLever. The number
- *  of real (non-anchor) atoms in the OpenMM::System is 'natoms'
+ *  system, which is acted on by the passed LambdaLever.
  */
 void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &restraints,
         OpenMM::System &system, LambdaLever &lambda_lever,
@@ -282,19 +281,14 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
     // energy expression of a harmonic bond potential, scaled by rho
     // e_restraint = rho*DE*(1-exp(-Bij*dr))**2
     // Bij = sqrt(k/2*DE)
+    // dr = (r - r0)
 
-    // OLD EXPRESSION
     const auto energy_expression = QString(
                                     "rho*e_restraint;"
                                     "e_restraint=de*(1-exp(-sqrt(k/(2*de))*delta))^2;"
                                     "delta=(r-r0)")
                                     .toStdString();
 
-    // const auto energy_expression = QString(
-    //               "rho*k*delta*delta;"
-    //               "delta=(r-r_adjusted);"
-    //               "r_adjusted=(r1*(1-rho)+(r0*rho));")
-    //               .toStdString();
 
     auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
     restraintff->setName("MorsePotentialRestraintForce");
@@ -310,7 +304,6 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
                 system.addForce(restraintff));
 
     const auto atom_restraints = restraints.atomRestraints();
-
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
     const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
     const double internal_to_de = (1 * SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
@@ -341,7 +334,7 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
         custom_params[0] = 1.0;                                     // rho - always equal to 1 (scaled by lever)
         custom_params[1] = restraint.k().value() * internal_to_k;   // k
         custom_params[2] = restraint.r0().value() * internal_to_nm; // r0
-        custom_params[3] = restraint.de().value() * internal_to_de; // r1
+        custom_params[3] = restraint.de().value() * internal_to_de; // de
 
         restraintff->addBond(atom0_index, atom1_index, custom_params);
     }

@@ -12,7 +12,7 @@ def test_morse_potential_restraints_setup(cyclopentane_cyclohexane):
         k="100 kcal mol-1 A-2",
         r0="1.5 A",
         de="50 kcal mol-1",
-        )
+    )
     assert restraints.num_restraints() == 1
     assert restraints[0].atom0() == 0
     assert restraints[0].atom1() == 4
@@ -28,12 +28,13 @@ def test_morse_potential_restraint_auto_param(cyclopentane_cyclohexane):
         mols,
         de="25 kcal mol-1",
         auto_parametrise=True,
-        )
+    )
     assert restraints.num_restraints() == 1
     assert restraints[0].atom0() == 0
     assert restraints[0].atom1() == 4
     assert restraints[0].k().value() == pytest.approx(228.89, rel=0.1)
     assert restraints[0].de().value() == 25.0
+
 
 def test_morse_potential_restraint_auto_param_override(cyclopentane_cyclohexane):
     """Tests that morse_potential restraints can be set up correctly with automatic parametrisation and some parameters can be overwritten."""
@@ -43,7 +44,7 @@ def test_morse_potential_restraint_auto_param_override(cyclopentane_cyclohexane)
         de="25 kcal mol-1",
         k="100 kcal mol-1 A-2",
         auto_parametrise=True,
-        )
+    )
     assert restraints.num_restraints() == 1
     assert restraints[0].atom0() == 0
     assert restraints[0].atom1() == 4
@@ -58,14 +59,14 @@ def test_multiple_morse_potential_restraints(cyclopentane_cyclohexane):
         mols,
         de="25 kcal mol-1",
         auto_parametrise=True,
-        )
+    )
     restraint1 = sr.restraints.morse_potential(
-    mols,
-    atoms0=mols["molecule property is_perturbable and atomidx 0"],
-    atoms1=mols["molecule property is_perturbable and atomidx 1"],
-    k="100 kcal mol-1 A-2",
-    r0="1.5 A",
-    de="50 kcal mol-1",
+        mols,
+        atoms0=mols["molecule property is_perturbable and atomidx 0"],
+        atoms1=mols["molecule property is_perturbable and atomidx 1"],
+        k="100 kcal mol-1 A-2",
+        r0="1.5 A",
+        de="50 kcal mol-1",
     )
     restraints.add(restraint1)
     assert restraints.num_restraints() == 2

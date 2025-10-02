@@ -1,4 +1,13 @@
-__all__ = ["angle", "boresch", "bond", "dihedral", "distance", "morse_potential", "positional", "rmsd"]
+__all__ = [
+    "angle",
+    "boresch",
+    "bond",
+    "dihedral",
+    "distance",
+    "morse_potential",
+    "positional",
+    "rmsd",
+]
 
 from .. import u
 
@@ -655,17 +664,34 @@ def distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):
 
     return restraints
 
+
 def morse_potential(
-    mols, atoms0=None, atoms1=None, r0=None, k=None, de=None, name=None, auto_parametrise=False, map=None
+    mols,
+    atoms0=None,
+    atoms1=None,
+    r0=None,
+    k=None,
+    de=None,
+    name=None,
+    auto_parametrise=False,
+    map=None,
 ):
     """
-    Create a set of morse restraints from all of the atoms in 'atoms'
+    Create a set of Morse restraints from all of the atoms in 'atoms'
     where all atoms are contained in the container 'mols', using the
-    passed values of the force constant 'k' and equilibrium
-    distance value r0.
+    passed values of the force constant, 'k', equilibrium
+    distance value, r0, and well depth, de.
 
     If r0 is None, then the current distance for
     provided atoms will be used as the equilibium value.
+
+    The potential energy of the Morse potential is defined as:
+
+    e_morse=de*(1-exp(-sqrt(k/(2*de))*delta))^2
+    where, delta=(r-r0). Additionally, if alchemical Morse potential is used, the potential is scaled as:
+
+    rho*e_morse
+    where rho is the lambda scaling parameter.
 
     Parameters
     ----------
@@ -673,51 +699,47 @@ def morse_potential(
         The system containing the atoms.
 
     atoms0 : SireMol::Selector<SireMol::Atom>
-        The first atom involved in the morse restraint.
+        The first atom involved in the Morse restraint.
 
     atoms1 : SireMol::Selector<SireMol::Atom>
-        The second atom involved in the morse restraint.
+        The second atom involved in the Morse restraint.
 
     k : str or SireUnits::Dimension::GeneralUnit,
-        The force constants for the morse restraints. Optional if
+        The force constants for the Morse restraints. Optional if
         auto_parametrise is True.
         Default is None.
 
     r0 : str or SireUnits::Dimension::GeneralUnit, optional
-        The equilibrium distances for the morse restraints. If None, these
+        The equilibrium distance for the Morse restraints. If None, this
         will be measured from the current coordinates of the atoms.
         Default is None.
 
     de : str or SireUnits::Dimension::GeneralUnit
-        The well depth for the morse potential.
+        The well depth (dissociation energy) for the Morse potential.
         Default is None.
 
     name : str, optional
         The name of the restraint.
         Default is None.
-    
+
     auto_parametrise : bool, optional
-        If True, will attempt to automatically parametrise the morse potential
+        If True, will attempt to automatically parametrise the Morse potential
         from a perturbation that annihilates a bond. This requires that 'mols'
         contains exactly one molecule that is perturbable, and that this
         molecule contains exactly one bond that is annihilated at lambda=1.
         The atoms involved in the annihilated bond will be used as 'atoms0'
-        and 'atoms1', the equilibrium distance r0 will be set to the current
+        and 'atoms1', the equilibrium distance r0 will be set to the original
         bond length, and the force constant k will be set to the force constant
-        of the bond in the unperturbed state. Note that 'de' must still be
-        provided by the user.
+        of the bond in the unperturbed state. Note that 'de' must still be provided.
         Default is False.
 
     Returns
     -------
     MorsePotentialRestraints : SireMM::MorsePotentialRestraints
-        A container of morse restraints, where the first restraint is
-        the MorsePotentialRestraint created. The morse restraint created can be
+        A container of Morse restraints, where the first restraint is
+        the MorsePotentialRestraint created. The Morse restraint created can be
         extracted with MorsePotentialRestraints[0].
     """
-
-    # TODO: Add ability to auto-parametrise the morse potential with k, r0 and de
-    # from a perturbation that annihilates a bond.
 
     from .. import u
     from ..base import create_map
@@ -728,7 +750,7 @@ def morse_potential(
 
     if k is None:
         if not auto_parametrise:
-            raise ValueError("k must be provided")
+            raise ValueError("k must be provided if auto_parametrise is False")
 
     elif type(k) is list:
         k = [u(x) for x in k]
@@ -740,7 +762,7 @@ def morse_potential(
 
         if len(ref_mol) != 1:
             raise ValueError(
-                "We need exactly one molecule that is perturbable to set up the Morse potential restraints"
+                "We need exactly one molecule that is perturbable to automatically set up the Morse potential restraints"
             )
         perturbable_mol = ref_mol[0]
         pert = perturbable_mol.perturbation(map=map)
@@ -748,36 +770,29 @@ def morse_potential(
         changed_bonds = pert_omm.changed_bonds(to_pandas=False)
 
         # Attempt to find the bond that is annihilated at lambda=1
-        annihilated_bonds_counter = 0
         for bond in changed_bonds:
             bond_name, length0, length1, k0, k1 = bond
             if k1 == 0:
-                annihilated_bonds_counter += 1
 
                 atom0_idx = [bond_name.atom0().index().value()][0]
                 atom1_idx = [bond_name.atom1().index().value()][0]
 
                 length0 = u(f"{length0} nm")
 
-                # Divide k0 by 2 to convert from force constant to sire internal k
+                # Divide k0 by 2 to convert from force constant to sire half force constant k
                 if k is None:
                     k0 = k0 / 2.0
                     k0 = u(f"{k0} kJ mol-1 nm-2")
                     k = [k0]
 
                 # Translate the atom numbers to the original system indexes
-                atoms0 = mols[f"molecule property is_perturbable and atomidx {atom0_idx}"]
-                atoms1 = mols[f"molecule property is_perturbable and atomidx {atom1_idx}"]
+                atoms0 = mols[
+                    f"molecule property is_perturbable and atomidx {atom0_idx}"
+                ]
+                atoms1 = mols[
+                    f"molecule property is_perturbable and atomidx {atom1_idx}"
+                ]
                 break
-
-        if annihilated_bonds_counter == 0:
-            raise ValueError(
-                "Auto parametrisation could not find any bonds that are annihilated in the perturbation to set up the Morse potential restraints."
-            )
-        if annihilated_bonds_counter > 1:
-            raise ValueError(
-                "Auto parametrisation found multiple bonds that are annihilated in the perturbation to set up the Morse potential restraints. This is not currently supported."
-            )
 
     atoms0 = _to_atoms(mols, atoms0)
     atoms1 = _to_atoms(mols, atoms1)
@@ -787,10 +802,12 @@ def morse_potential(
 
     if len(atoms0) != len(atoms1):
         raise ValueError("atoms0 and atoms1 must be the same length")
-    
+
     if len(atoms0) > 1 or len(atoms1) > 1:
         if not auto_parametrise:
-            raise ValueError("Setting up multiple morse potential restraints at once is not currently supported. Please set up each restraint individually and then combine them into multiple restraints.")
+            raise ValueError(
+                "Setting up multiplorse potential restraints at once is not currently supported. Please set up each restraint individually and then combine them into multiple restraints."
+            )
 
     if r0 is None:
         if auto_parametrise:
@@ -854,6 +871,7 @@ def morse_potential(
         restraints.add(MorsePotentialRestraint(idxs0[0], idxs1[0], ik, ir0, de))
 
     return restraints
+
 
 def bond(*args, **kwargs):
     """
