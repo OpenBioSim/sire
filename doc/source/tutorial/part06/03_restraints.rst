@@ -364,7 +364,12 @@ If not supplied, automatic parametrisation feature can be used, which will detec
 annihilated and set the parameters accordingly (dissociation energy value still needs to be provided). For example,
 
 >>> mols = sr.load_test_files("cyclopentane_cyclohexane.bss")
->>> morse_restraints = sr.restraints.morse_potential(mols, atoms0=mols["molecule property is_perturbable and atomidx 0"], atoms1=mols["molecule property is_perturbable and atomidx 4"], k="100 kcal mol-1 A-2", r0="1.5 A", de="50 kcal mol-1")
+>>> morse_restraints = sr.restraints.morse_potential(mols,
+                                                   atoms0=mols["molecule property is_perturbable and atomidx 0"],
+                                                   atoms1=mols["molecule property is_perturbable and atomidx 4"],
+                                                   k="100 kcal mol-1 A-2",
+                                                   r0="1.5 A",
+                                                   de="50 kcal mol-1")
 >>> morse_restraint = morse_restraints[0]
 >>> print(morse_restraint)
 MorsePotentialRestraint( 0 <=> 4, k=100 kcal mol-1 Å-2 : r0=1.5 Å : de=50 kcal mol-1 )
@@ -373,8 +378,8 @@ creates a Morse potential restraint between atoms 0 and 4 using the specified pa
 Alternatively, if the molecule contains a bond that is being alchemically annihilated, e.g.
 
 >>> morse_restraints = sr.restraints.morse_potential(mols, auto_parametrise=True, de="50 kcal mol-1")
->>> morse_restraints = morse_restraints[0]
->>> print(morse_restraints)
+>>> morse_restraint = morse_restraints[0]
+>>> print(morse_restraint)
 MorsePotentialRestraint( 0 <=> 4, k=228.89 kcal mol-1 Å-2 : r0=1.5354 Å : de=50 kcal mol-1 )
 
 creates a Morse potential restraint between atoms 0 and 4 by attempting to match the bond parameters of the bond being alchemically annihilated.

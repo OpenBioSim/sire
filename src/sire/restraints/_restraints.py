@@ -716,7 +716,7 @@ def morse_potential(
 
     de : str or SireUnits::Dimension::GeneralUnit
         The well depth (dissociation energy) for the Morse potential.
-        Default is None.
+        Default is 100 kcal mol-1.
 
     name : str, optional
         The name of the restraint.
@@ -748,15 +748,21 @@ def morse_potential(
 
     map = create_map(map)
 
-    if k is None:
-        if not auto_parametrise:
-            raise ValueError("k must be provided if auto_parametrise is False")
+    if auto_parametrise is False:
+        if atoms0 is None or atoms1 is None:
+            raise ValueError(
+                "If auto_parametrise is False, then atoms0 and atoms1 must be provided"
+            )
+        if k is None:
+            raise ValueError(
+                "If auto_parametrise is False, then the force constant k must be provided"
+            )
+        elif isinstance(k, list):
+            k = [u(x) for x in k]
+        else:
+            k = [u(k)]
 
-    elif type(k) is list:
-        k = [u(x) for x in k]
     else:
-        k = [u(k)]
-    if auto_parametrise:
         mol = mols.molecules("molecule property is_perturbable")
         ref_mol = link_to_reference(mol)
 
@@ -785,6 +791,12 @@ def morse_potential(
                     k0 = u(f"{k0} kJ mol-1 nm-2")
                     k = [k0]
 
+                # User can still override the force constant if they want, but we need to ensure it's a list of units
+                elif isinstance(k, list):
+                    k = [u(x) for x in k]
+                else:
+                    k = [u(k)]
+
                 # Translate the atom numbers to the original system indexes
                 atoms0 = mols[
                     f"molecule property is_perturbable and atomidx {atom0_idx}"
@@ -794,8 +806,11 @@ def morse_potential(
                 ]
                 break
 
-    atoms0 = _to_atoms(mols, atoms0)
-    atoms1 = _to_atoms(mols, atoms1)
+    try:
+        atoms0 = _to_atoms(mols, atoms0)
+        atoms1 = _to_atoms(mols, atoms1)
+    except:
+        raise ValueError("Unable to find atoms0 or atoms1 in the provided system")
 
     if atoms0.is_empty() or atoms1.is_empty():
         raise ValueError("We need at least one atom in each group")
@@ -806,7 +821,8 @@ def morse_potential(
     if len(atoms0) > 1 or len(atoms1) > 1:
         if not auto_parametrise:
             raise ValueError(
-                "Setting up multiplorse potential restraints at once is not currently supported. Please set up each restraint individually and then combine them into multiple restraints."
+                "Setting up multiple Morse potential restraints at once is not currently supported."
+                "Please set up each restraint individually and then combine them into multiple restraints."
             )
 
     if r0 is None:
@@ -822,10 +838,18 @@ def morse_potential(
     elif type(r0) is list:
         r0 = [u(x) for x in r0]
     else:
-        r0 = [u(r0)]
+        try:
+            r0 = [u(r0)]
+        except:
+            raise ValueError(f"Unable to parse 'r0' as a Sire GeneralUnit: {r0}")
 
     if de is None:
-        raise ValueError("The value of DE must be provided")
+        de = u("100 kcal mol-1")
+    else:
+        try:
+            de = u(de)
+        except:
+            raise ValueError(f"Unable to parse 'de' as a Sire GeneralUnit: {de}")
 
     mols = mols.atoms()
 
