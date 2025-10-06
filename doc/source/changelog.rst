@@ -12,8 +12,8 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - Sep 2025
-----------------------------------------------------------------------------------------
+`2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
+--------------------------------------------------------------------------------------------
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
