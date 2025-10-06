@@ -63,6 +63,7 @@
 #include "ljperturbation.h"
 #include "ljpotential.h"
 #include "mmdetail.h"
+#include "morsepotentialrestraints.h"
 #include "multicljcomponent.h"
 #include "positionalrestraints.h"
 #include "restraint.h"

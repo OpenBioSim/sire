@@ -350,6 +350,40 @@ DihedralRestraints( name=restraint, size=1
 0: DihedralRestraint( [0, 1, 4, 5], phi0=243.281°, kphi=0.0304617 kcal mol-1 °-2 )
  )
 
+Morse Potential Restraints
+---------------------------
+
+The :func:`sire.restraints.morse_potential` function is used to create Morse potential restraints,
+which can be used to carry harmonic bond annihilations alchemical relative binding free energy calculations.
+
+To create a Morse potential restraint, you need to specify the two atoms to be restrained. Like the distance restraints,
+the atoms can be specified using a search string, passing lists of atom indexes, or 
+molecule views holding the atoms. You have to specify the bond force constants,
+equilibrium bond distance value and the dissociation energy for the restraints.
+If not supplied, automatic parametrisation feature can be used, which will detect the bond being alchemically
+annihilated and set the parameters accordingly (dissociation energy value still needs to be provided). For example,
+
+>>> mols = sr.load_test_files("cyclopentane_cyclohexane.bss")
+>>> morse_restraints = sr.restraints.morse_potential(mols,
+                                                   atoms0=mols["molecule property is_perturbable and atomidx 0"],
+                                                   atoms1=mols["molecule property is_perturbable and atomidx 4"],
+                                                   k="100 kcal mol-1 A-2",
+                                                   r0="1.5 A",
+                                                   de="50 kcal mol-1")
+>>> morse_restraint = morse_restraints[0]
+>>> print(morse_restraint)
+MorsePotentialRestraint( 0 <=> 4, k=100 kcal mol-1 Å-2 : r0=1.5 Å : de=50 kcal mol-1 )
+
+creates a Morse potential restraint between atoms 0 and 4 using the specified parameters.
+Alternatively, if the molecule contains a bond that is being alchemically annihilated, e.g.
+
+>>> morse_restraints = sr.restraints.morse_potential(mols, auto_parametrise=True, de="50 kcal mol-1")
+>>> morse_restraint = morse_restraints[0]
+>>> print(morse_restraint)
+MorsePotentialRestraint( 0 <=> 4, k=228.89 kcal mol-1 Å-2 : r0=1.5354 Å : de=50 kcal mol-1 )
+
+creates a Morse potential restraint between atoms 0 and 4 by attempting to match the bond parameters of the bond being alchemically annihilated.
+
 Boresch Restraints
 ---------------------------
 
