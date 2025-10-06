@@ -688,7 +688,8 @@ def morse_potential(
     The potential energy of the Morse potential is defined as:
 
     e_morse=de*(1-exp(-sqrt(k/(2*de))*delta))^2
-    where, delta=(r-r0). Additionally, if alchemical Morse potential is used, the potential is scaled as:
+    where, delta=(r-r0). Additionally, if alchemical Morse potential is used,
+    the potential is scaled as:
 
     rho*e_morse
     where rho is the lambda scaling parameter.
@@ -768,7 +769,8 @@ def morse_potential(
 
         if len(ref_mol) != 1:
             raise ValueError(
-                "We need exactly one molecule that is perturbable to automatically set up the Morse potential restraints"
+                "We need exactly one molecule that is perturbable to automatically "
+                "set up the Morse potential restraints"
             )
         perturbable_mol = ref_mol[0]
         pert = perturbable_mol.perturbation(map=map)
@@ -785,13 +787,15 @@ def morse_potential(
 
                 length0 = u(f"{length0} nm")
 
-                # Divide k0 by 2 to convert from force constant to sire half force constant k
+                # Divide k0 by 2 to convert from force constant to sire half
+                # force constant k
                 if k is None:
                     k0 = k0 / 2.0
                     k0 = u(f"{k0} kJ mol-1 nm-2")
                     k = [k0]
 
-                # User can still override the force constant if they want, but we need to ensure it's a list of units
+                # User can still override the force constant if they want, but
+                # we need to ensure it's a list of units
                 elif isinstance(k, list):
                     k = [u(x) for x in k]
                 else:
