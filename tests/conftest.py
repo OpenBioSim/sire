@@ -151,6 +151,11 @@ def ethane_12dichloroethane():
 
 
 @pytest.fixture(scope="session")
+def cyclopentane_cyclohexane():
+    return sr.load_test_files("cyclopentane_cyclohexane.bss")
+
+
+@pytest.fixture(scope="session")
 def pentane_cyclopentane():
     return sr.load_test_files("pentane_cyclopentane.bss")
 

@@ -166,7 +166,7 @@ void register_AmberParams_class(){
                 , add_function_value
                 , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("atom2"), bp::arg("atom3"), bp::arg("atom4"), bp::arg("cmap") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Add the passed CMAP parameter for this set of 5 atoms. This will replace\n  any existing CMAP parameter for this set of atoms\n" );
         
         }
         { //::SireMM::AmberParams::addNB14
@@ -301,7 +301,7 @@ void register_AmberParams_class(){
                 "cmapFunctions"
                 , cmapFunctions_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return all of the CMAP functions for the molecule. This will be empty\n  if there are no CMAP functions for this molecule\n" );
         
         }
         { //::SireMM::AmberParams::connectivity
@@ -463,7 +463,7 @@ void register_AmberParams_class(){
                 , getCMAP_function_value
                 , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("atom2"), bp::arg("atom3"), bp::arg("atom4") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the CMAP parameter for the passed 5 atoms. This returns a null\n  parameter if there is no matching CMAP parameter for this set of atoms\n" );
         
         }
         { //::SireMM::AmberParams::getNB14
@@ -743,7 +743,7 @@ void register_AmberParams_class(){
                 , removeCMAP_function_value
                 , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("atom2"), bp::arg("atom3"), bp::arg("atom4") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Remove the CMAP function from the passed set of 5 atoms" );
         
         }
         { //::SireMM::AmberParams::removeNB14

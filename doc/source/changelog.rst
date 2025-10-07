@@ -12,8 +12,8 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - Sep 2025
-----------------------------------------------------------------------------------------
+`2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
+--------------------------------------------------------------------------------------------
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
@@ -31,6 +31,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed build issues on MacOS with Clang and LTO (incorrectly specified LTO library version).
 
+* Added a feature for applying RMSD restraints using the OpenMM CustomCVForce/RMSDForce functionality.
+
 * Added support for reading and writing CRYST1 records in PDB files.
 
 * Added a ``save_velocities`` kwarg to :func:`sire.save()` to allow a user to control whether
@@ -43,6 +45,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fix handling of link atoms for non carbon-carbon bonds where there is no bonded
   term in the MM force field.
+
+* Added alchemical Morse potentials for experimental use in scaffold-hopping transformations.
 
 `2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
 -----------------------------------------------------------------------------------------

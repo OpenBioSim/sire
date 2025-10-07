@@ -335,6 +335,10 @@
 
 #include "MMDetail.pypp.hpp"
 
+#include "MorsePotentialRestraint.pypp.hpp"
+
+#include "MorsePotentialRestraints.pypp.hpp"
+
 #include "Mover_Angle_.pypp.hpp"
 
 #include "Mover_Bond_.pypp.hpp"
@@ -362,6 +366,10 @@
 #include "PositionalRestraint.pypp.hpp"
 
 #include "PositionalRestraints.pypp.hpp"
+
+#include "RMSDRestraint.pypp.hpp"
+
+#include "RMSDRestraints.pypp.hpp"
 
 #include "Restraint.pypp.hpp"
 
@@ -800,6 +808,10 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_MMDetail_class();
 
+    register_MorsePotentialRestraint_class();
+
+    register_MorsePotentialRestraints_class();
+
     register_MultiCLJComponent_class();
 
     register_NoCutoff_class();
@@ -811,6 +823,10 @@ BOOST_PYTHON_MODULE(_MM){
     register_PositionalRestraint_class();
 
     register_PositionalRestraints_class();
+
+    register_RMSDRestraint_class();
+
+    register_RMSDRestraints_class();
 
     register_RestraintComponent_class();
 
