@@ -17,6 +17,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
+* Reset GCMC water state prior to minimisation following a dynamics crash.
+
 `2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
 --------------------------------------------------------------------------------------------
 
