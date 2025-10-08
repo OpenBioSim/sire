@@ -230,8 +230,6 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
     const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
 
-    auto cljff = lambda_lever.getForce<OpenMM::NonbondedForce>("clj", system);
-
     std::vector<double> custom_params = {1.0, 0.0, 0.0};
 
     for (const auto &restraint : atom_restraints)
@@ -307,8 +305,6 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
     const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
     const double internal_to_de = (1 * SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
-
-    auto cljff = lambda_lever.getForce<OpenMM::NonbondedForce>("clj", system);
 
     std::vector<double> custom_params = {1.0, 0.0, 0.0, 0.0};
 
