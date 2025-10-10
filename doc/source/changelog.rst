@@ -19,6 +19,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Reset GCMC water state prior to minimisation following a dynamics crash.
 
+* Set appropriate default OpenMM box vectors when a system has no periodic space.
+
 `2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
 --------------------------------------------------------------------------------------------
 
