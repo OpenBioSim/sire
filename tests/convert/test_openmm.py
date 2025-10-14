@@ -411,3 +411,39 @@ def test_openmm_skipped_constrained_bonds(zero_lj_mols, openmm_platform):
             line1 = lines1[i]
             assert "Bond" in line1
             i += 1
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_default_box_vectors(ala_mols, openmm_platform):
+    mols = ala_mols.clone()
+
+    # Remove the shared space property.
+    mols.remove_shared_property("space")
+
+    # Create a "vacuum" system.
+    omm = sr.convert.to(
+        mols[0],
+        "openmm",
+        map={
+            "cutoff": "12 A",
+            "platform": openmm_platform,
+        },
+    )
+
+    # Get the box vectors.
+    box_vectors = omm.getState().getPeriodicBoxVectors()
+
+    # Get the AABox of the first molecule.
+    aabox = sr.legacy.Vol.AABox(mols[0].property("coordinates").to_vector())
+
+    # Work out the box vectors from the AABox, i.e. the box size plus twice the cutoff.
+    box = 2.0 * aabox.half_extents() + sr.maths.Vector(24, 24, 24)
+
+    from openmm.unit import angstrom
+
+    # Check that the box vectors match the expected values.
+    for i, vec in enumerate(box_vectors):
+        assert vec[i].value_in_unit(angstrom) == pytest.approx(box[i].value(), abs=1e-3)
