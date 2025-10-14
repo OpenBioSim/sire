@@ -966,6 +966,12 @@ class DynamicsData:
 
         self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
+        # reset the water state
+        if self._gcmc_sampler is not None:
+            self._gcmc_sampler.push()
+            self._gcmc_sampler._set_water_state(self._omm_mols)
+            self._gcmc_sampler.pop()
+
         self.run_minimisation()
 
     def run(
@@ -1418,12 +1424,6 @@ class DynamicsData:
             self._omm_mols.setTime(
                 self._prev_elapsed_time.to("picosecond") * picosecond
             )
-
-            # reset the water state
-            if self._gcmc_sampler is not None:
-                self._gcmc_sampler.push()
-                self._gcmc_sampler._set_water_state(self._omm_mols)
-                self._gcmc_sampler.pop()
 
             self.run(**orig_args)
             return
