@@ -87,6 +87,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMol::CutGroup> __copy__(const SireMol::Mover<SireMol::CutGroup> &other){ return SireMol::Mover<SireMol::CutGroup>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -478,9 +480,9 @@ void register_Mover_CutGroup__class(){
         
         }
         Mover_CutGroup__exposer.staticmethod( "typeName" );
-        Mover_CutGroup__exposer.def( "__copy__", &__copy__);
-        Mover_CutGroup__exposer.def( "__deepcopy__", &__copy__);
-        Mover_CutGroup__exposer.def( "clone", &__copy__);
+        Mover_CutGroup__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMol::CutGroup>>);
+        Mover_CutGroup__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMol::CutGroup>>);
+        Mover_CutGroup__exposer.def( "clone", &__copy__<SireMol::Mover<SireMol::CutGroup>>);
         Mover_CutGroup__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMol::CutGroup> > );
         Mover_CutGroup__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMol::CutGroup> > );
         Mover_CutGroup__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMol::CutGroup> > );

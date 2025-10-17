@@ -190,6 +190,14 @@ Next we create a new engine bound to the calculator:
     ``qm_mols`` is not needed when using ``OpenMM-ML``, since it will perform
     its own internal modifications for performing interpolation.
 
+.. note::
+
+    The OpenMM-ML interface shouldn't be used with QM regions containing link
+    atoms, since we require a combined in-vacuo and embedding force to correctly
+    project forces along the link atom bonds. In the approach shown here, only
+    the embedding force is projected, which will lead to incorrect forces on
+    the atoms adjacent to the link atoms.
+
 Rather than using this engine with a ``sire`` dynamics object, we can instead
 extract the underlying ``OpenMM`` force object and add it to an existing
 ``OpenMM`` system. The forces can be extracted from the engine as follows:
@@ -257,7 +265,7 @@ In order to ensure that ``OpenMM-ML`` doesn't perform mechanical embedding, we
 next need to zero the charges of the QM atoms in the MM system:
 
 >>> for force in ml_system.getForces():
-...     if isinstance(force, mm.NonbondedForce):
+...     if isinstance(force, openmm.NonbondedForce):
 ...         for i in ml_atoms:
 ...             _, sigma, epsilon = force.getParticleParameters(i)
 ...             force.setParticleParameters(i, 0, sigma, epsilon)

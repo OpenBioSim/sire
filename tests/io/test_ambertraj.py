@@ -18,6 +18,4 @@ def test_ambtraj(tmpdir, kigaki_mols):
 
     for mol, newmol in zip(mols[0:20], newmols[0:20]):
         for atom, newatom in zip(mol.atoms(), newmol.atoms()):
-            compare(
-                atom.property("coordinates"), newatom.property("coordinates")
-            )
+            compare(atom.property("coordinates"), newatom.property("coordinates"))

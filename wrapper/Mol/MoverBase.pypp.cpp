@@ -55,6 +55,8 @@ namespace bp = boost::python;
 
 SireMol::MoverBase __copy__(const SireMol::MoverBase &other){ return SireMol::MoverBase(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMol::MoverBase&){ return "SireMol::MoverBase";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -79,9 +81,9 @@ void register_MoverBase_class(){
                 , "" );
         
         }
-        MoverBase_exposer.def( "__copy__", &__copy__);
-        MoverBase_exposer.def( "__deepcopy__", &__copy__);
-        MoverBase_exposer.def( "clone", &__copy__);
+        MoverBase_exposer.def( "__copy__", &__copy__<SireMol::MoverBase>);
+        MoverBase_exposer.def( "__deepcopy__", &__copy__<SireMol::MoverBase>);
+        MoverBase_exposer.def( "clone", &__copy__<SireMol::MoverBase>);
         MoverBase_exposer.def( "__str__", &pvt_get_name);
         MoverBase_exposer.def( "__repr__", &pvt_get_name);
     }

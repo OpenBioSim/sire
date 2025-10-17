@@ -55,6 +55,8 @@ namespace bp = boost::python;
 
 SireMol::SelectorM<SireMol::Segment> __copy__(const SireMol::SelectorM<SireMol::Segment> &other){ return SireMol::SelectorM<SireMol::Segment>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -1807,6 +1809,32 @@ void register_SelectorM_Segment__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Segment >::toSelectorList
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::QList< SireMol::Selector< SireMol::Segment > > ( ::SireMol::SelectorM< SireMol::Segment >::*toSelectorList_function_type)(  ) const;
+            toSelectorList_function_type toSelectorList_function_value( &::SireMol::SelectorM< SireMol::Segment >::toSelectorList );
+            
+            SelectorM_Segment__exposer.def( 
+                "toSelectorList"
+                , toSelectorList_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::toSelectorVector
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::QVector< SireMol::Selector< SireMol::Segment > > ( ::SireMol::SelectorM< SireMol::Segment >::*toSelectorVector_function_type)(  ) const;
+            toSelectorVector_function_type toSelectorVector_function_value( &::SireMol::SelectorM< SireMol::Segment >::toSelectorVector );
+            
+            SelectorM_Segment__exposer.def( 
+                "toSelectorVector"
+                , toSelectorVector_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Segment >::toSingleMolecule
         
             typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
@@ -1903,9 +1931,9 @@ void register_SelectorM_Segment__class(){
         
         }
         SelectorM_Segment__exposer.staticmethod( "typeName" );
-        SelectorM_Segment__exposer.def( "__copy__", &__copy__);
-        SelectorM_Segment__exposer.def( "__deepcopy__", &__copy__);
-        SelectorM_Segment__exposer.def( "clone", &__copy__);
+        SelectorM_Segment__exposer.def( "__copy__", &__copy__<SireMol::SelectorM<SireMol::Segment>>);
+        SelectorM_Segment__exposer.def( "__deepcopy__", &__copy__<SireMol::SelectorM<SireMol::Segment>>);
+        SelectorM_Segment__exposer.def( "clone", &__copy__<SireMol::SelectorM<SireMol::Segment>>);
         SelectorM_Segment__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::SelectorM<SireMol::Segment> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SelectorM_Segment__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::SelectorM<SireMol::Segment> >,

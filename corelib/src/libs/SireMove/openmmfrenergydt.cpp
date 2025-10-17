@@ -1252,7 +1252,14 @@ void OpenMMFrEnergyDT::integrate(IntegratorWorkspace &workspace, const Symbol &n
         // TriclinicBox.
         else if (ptr_sys.property(space_property).isA<TriclinicBox>())
         {
-            const TriclinicBox &space = ptr_sys.property(space_property).asA<TriclinicBox>();
+            TriclinicBox space = ptr_sys.property(space_property).asA<TriclinicBox>();
+
+            // Make sure the box is in reduced form. This is necessary since SOMD reads
+            // the box vectors from fixed precision AMBER RST7 files. The OpenMM C++ API
+            // checks the that the vectors are reduced to "exact" numerical precision,
+            // which may no longer be the case due to rounding errors from the precision
+            // loss.
+            space.reduce();
 
             // Get the three triclinic box vectors.
             const auto v0 = space.vector0();

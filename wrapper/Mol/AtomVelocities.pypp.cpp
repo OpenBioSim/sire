@@ -20,6 +20,8 @@ namespace bp = boost::python;
 
 SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> > __copy__(const SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> > &other){ return SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> >(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -649,9 +651,9 @@ void register_AtomVelocities_class(){
         }
         AtomVelocities_exposer.staticmethod( "fromVariant" );
         AtomVelocities_exposer.staticmethod( "typeName" );
-        AtomVelocities_exposer.def( "__copy__", &__copy__);
-        AtomVelocities_exposer.def( "__deepcopy__", &__copy__);
-        AtomVelocities_exposer.def( "clone", &__copy__);
+        AtomVelocities_exposer.def( "__copy__", &__copy__<SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> >>);
+        AtomVelocities_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> >>);
+        AtomVelocities_exposer.def( "clone", &__copy__<SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> >>);
         AtomVelocities_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> > >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomVelocities_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> > >,

@@ -700,20 +700,18 @@ void LambdaSchedule::addDecoupleStage(const QString &name, bool perturbed_is_dec
         this->setEquation(name, "ghost/ghost", "*", this->initial());
         this->setEquation(name, "ghost-14", "*", this->initial());
 
-        // we also need to scale down kappa as the decoupled state is
-        // not evaluated in the NonbondedForce, so must not be cancelled
-        this->setEquation(name, "ghost/ghost", "kappa", 1.0 - this->lam());
-        this->setEquation(name, "ghost-14", "kappa", 1.0 - this->lam());
+        // kappa is fixed to 1.0
+        this->setEquation(name, "ghost/ghost", "kappa", 1.0);
+        this->setEquation(name, "ghost-14", "kappa", 1.0);
     }
     else
     {
         this->setEquation(name, "ghost/ghost", "*", this->final());
         this->setEquation(name, "ghost-14", "*", this->final());
 
-        // we also need to scale up kappa as the decoupled state is
-        // not evaluated in the NonbondedForce, so must not be cancelled
-        this->setEquation(name, "ghost/ghost", "kappa", this->lam());
-        this->setEquation(name, "ghost-14", "kappa", this->lam());
+        // kappa is fixed to 1.0
+        this->setEquation(name, "ghost/ghost", "kappa", 1.0);
+        this->setEquation(name, "ghost-14", "kappa", 1.0);
     }
 }
 

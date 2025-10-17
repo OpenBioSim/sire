@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::CGProperty<long long> __copy__(const SireMol::CGProperty<long long> &other){ return SireMol::CGProperty<long long>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -393,9 +395,9 @@ void register_CGIntProperty_class(){
         }
         CGIntProperty_exposer.staticmethod( "fromVariant" );
         CGIntProperty_exposer.staticmethod( "typeName" );
-        CGIntProperty_exposer.def( "__copy__", &__copy__);
-        CGIntProperty_exposer.def( "__deepcopy__", &__copy__);
-        CGIntProperty_exposer.def( "clone", &__copy__);
+        CGIntProperty_exposer.def( "__copy__", &__copy__<SireMol::CGProperty<long long>>);
+        CGIntProperty_exposer.def( "__deepcopy__", &__copy__<SireMol::CGProperty<long long>>);
+        CGIntProperty_exposer.def( "clone", &__copy__<SireMol::CGProperty<long long>>);
         CGIntProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::CGProperty<long long> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CGIntProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::CGProperty<long long> >,

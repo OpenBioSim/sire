@@ -24,6 +24,8 @@ namespace bp = boost::python;
 
 SireMol::MoleculeInfo __copy__(const SireMol::MoleculeInfo &other){ return SireMol::MoleculeInfo(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -2314,9 +2316,9 @@ void register_MoleculeInfo_class(){
         
         }
         MoleculeInfo_exposer.staticmethod( "typeName" );
-        MoleculeInfo_exposer.def( "__copy__", &__copy__);
-        MoleculeInfo_exposer.def( "__deepcopy__", &__copy__);
-        MoleculeInfo_exposer.def( "clone", &__copy__);
+        MoleculeInfo_exposer.def( "__copy__", &__copy__<SireMol::MoleculeInfo>);
+        MoleculeInfo_exposer.def( "__deepcopy__", &__copy__<SireMol::MoleculeInfo>);
+        MoleculeInfo_exposer.def( "clone", &__copy__<SireMol::MoleculeInfo>);
         MoleculeInfo_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::MoleculeInfo >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         MoleculeInfo_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::MoleculeInfo >,

@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 SireMol::ResEditor __copy__(const SireMol::ResEditor &other){ return SireMol::ResEditor(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -354,9 +356,9 @@ void register_ResEditor_class(){
         
         }
         ResEditor_exposer.staticmethod( "typeName" );
-        ResEditor_exposer.def( "__copy__", &__copy__);
-        ResEditor_exposer.def( "__deepcopy__", &__copy__);
-        ResEditor_exposer.def( "clone", &__copy__);
+        ResEditor_exposer.def( "__copy__", &__copy__<SireMol::ResEditor>);
+        ResEditor_exposer.def( "__deepcopy__", &__copy__<SireMol::ResEditor>);
+        ResEditor_exposer.def( "clone", &__copy__<SireMol::ResEditor>);
         ResEditor_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ResEditor >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ResEditor_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ResEditor >,

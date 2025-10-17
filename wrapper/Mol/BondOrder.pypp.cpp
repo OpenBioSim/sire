@@ -21,6 +21,8 @@ namespace bp = boost::python;
 
 SireMol::BondOrder __copy__(const SireMol::BondOrder &other){ return SireMol::BondOrder(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -276,9 +278,9 @@ void register_BondOrder_class(){
         BondOrder_exposer.staticmethod( "tripleBond" );
         BondOrder_exposer.staticmethod( "typeName" );
         BondOrder_exposer.staticmethod( "undefinedBond" );
-        BondOrder_exposer.def( "__copy__", &__copy__);
-        BondOrder_exposer.def( "__deepcopy__", &__copy__);
-        BondOrder_exposer.def( "clone", &__copy__);
+        BondOrder_exposer.def( "__copy__", &__copy__<SireMol::BondOrder>);
+        BondOrder_exposer.def( "__deepcopy__", &__copy__<SireMol::BondOrder>);
+        BondOrder_exposer.def( "clone", &__copy__<SireMol::BondOrder>);
         BondOrder_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::BondOrder >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         BondOrder_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::BondOrder >,

@@ -9,12 +9,17 @@ __all__ = [
     "Bond",
     "BondRestraint",
     "BondRestraints",
+    "CMAPParameter",
     "Dihedral",
     "Improper",
-    "PositionRestraint",
-    "PositionRestraints",
+    "PositionalRestraint",
+    "PositionalRestraints",
     "DihedralRestraint",
     "DihedralRestraints",
+    "MorsePotentialRestraint",
+    "MorsePotentialRestraints",
+    "RMSDRestraint",
+    "RMSDRestraints",
     "SelectorAngle",
     "SelectorBond",
     "SelectorDihedral",
@@ -44,11 +49,19 @@ BondRestraints = _MM.BondRestraints
 BoreschRestraint = _MM.BoreschRestraint
 BoreschRestraints = _MM.BoreschRestraints
 
+CMAPParameter = _MM.CMAPParameter
+
 PositionalRestraint = _MM.PositionalRestraint
 PositionalRestraints = _MM.PositionalRestraints
 
+RMSDRestraint = _MM.RMSDRestraint
+RMSDRestraints = _MM.RMSDRestraints
+
 DihedralRestraint = _MM.DihedralRestraint
 DihedralRestraints = _MM.DihedralRestraints
+
+MorsePotentialRestraint = _MM.MorsePotentialRestraint
+MorsePotentialRestraints = _MM.MorsePotentialRestraints
 
 AmberBond = _MM.AmberBond
 AmberAngle = _MM.AmberAngle

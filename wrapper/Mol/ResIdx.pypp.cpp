@@ -59,6 +59,8 @@ namespace bp = boost::python;
 
 SireMol::ResIdx __copy__(const SireMol::ResIdx &other){ return SireMol::ResIdx(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -174,9 +176,9 @@ void register_ResIdx_class(){
         }
         ResIdx_exposer.staticmethod( "null" );
         ResIdx_exposer.staticmethod( "typeName" );
-        ResIdx_exposer.def( "__copy__", &__copy__);
-        ResIdx_exposer.def( "__deepcopy__", &__copy__);
-        ResIdx_exposer.def( "clone", &__copy__);
+        ResIdx_exposer.def( "__copy__", &__copy__<SireMol::ResIdx>);
+        ResIdx_exposer.def( "__deepcopy__", &__copy__<SireMol::ResIdx>);
+        ResIdx_exposer.def( "clone", &__copy__<SireMol::ResIdx>);
         ResIdx_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ResIdx >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ResIdx_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ResIdx >,

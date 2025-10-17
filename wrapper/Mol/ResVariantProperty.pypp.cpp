@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::ResProperty<QVariant> __copy__(const SireMol::ResProperty<QVariant> &other){ return SireMol::ResProperty<QVariant>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -393,9 +395,9 @@ void register_ResVariantProperty_class(){
         }
         ResVariantProperty_exposer.staticmethod( "fromVariant" );
         ResVariantProperty_exposer.staticmethod( "typeName" );
-        ResVariantProperty_exposer.def( "__copy__", &__copy__);
-        ResVariantProperty_exposer.def( "__deepcopy__", &__copy__);
-        ResVariantProperty_exposer.def( "clone", &__copy__);
+        ResVariantProperty_exposer.def( "__copy__", &__copy__<SireMol::ResProperty<QVariant>>);
+        ResVariantProperty_exposer.def( "__deepcopy__", &__copy__<SireMol::ResProperty<QVariant>>);
+        ResVariantProperty_exposer.def( "clone", &__copy__<SireMol::ResProperty<QVariant>>);
         ResVariantProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ResProperty<QVariant> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ResVariantProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ResProperty<QVariant> >,

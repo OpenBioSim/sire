@@ -156,6 +156,19 @@ void register_AmberParams_class(){
                 , "" );
         
         }
+        { //::SireMM::AmberParams::add
+        
+            typedef void ( ::SireMM::AmberParams::*add_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMM::CMAPParameter const & ) ;
+            add_function_type add_function_value( &::SireMM::AmberParams::add );
+            
+            AmberParams_exposer.def( 
+                "add"
+                , add_function_value
+                , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("atom2"), bp::arg("atom3"), bp::arg("atom4"), bp::arg("cmap") )
+                , bp::release_gil_policy()
+                , "Add the passed CMAP parameter for this set of 5 atoms. This will replace\n  any existing CMAP parameter for this set of atoms\n" );
+        
+        }
         { //::SireMM::AmberParams::addNB14
         
             typedef void ( ::SireMM::AmberParams::*addNB14_function_type)( ::SireMol::BondID const &,double,double ) ;
@@ -277,6 +290,18 @@ void register_AmberParams_class(){
                 , cljScaleFactors_function_value
                 , bp::release_gil_policy()
                 , "Return the CLJ nonbonded 1-4 scale factors for the molecule" );
+        
+        }
+        { //::SireMM::AmberParams::cmapFunctions
+        
+            typedef ::SireMM::CMAPFunctions ( ::SireMM::AmberParams::*cmapFunctions_function_type)(  ) const;
+            cmapFunctions_function_type cmapFunctions_function_value( &::SireMM::AmberParams::cmapFunctions );
+            
+            AmberParams_exposer.def( 
+                "cmapFunctions"
+                , cmapFunctions_function_value
+                , bp::release_gil_policy()
+                , "Return all of the CMAP functions for the molecule. This will be empty\n  if there are no CMAP functions for this molecule\n" );
         
         }
         { //::SireMM::AmberParams::connectivity
@@ -426,6 +451,19 @@ void register_AmberParams_class(){
                 , gbScreening_function_value
                 , bp::release_gil_policy()
                 , "Return all of the Born screening parameters for the atoms" );
+        
+        }
+        { //::SireMM::AmberParams::getCMAP
+        
+            typedef ::SireMM::CMAPParameter ( ::SireMM::AmberParams::*getCMAP_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const & ) const;
+            getCMAP_function_type getCMAP_function_value( &::SireMM::AmberParams::getCMAP );
+            
+            AmberParams_exposer.def( 
+                "getCMAP"
+                , getCMAP_function_value
+                , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("atom2"), bp::arg("atom3"), bp::arg("atom4") )
+                , bp::release_gil_policy()
+                , "Return the CMAP parameter for the passed 5 atoms. This returns a null\n  parameter if there is no matching CMAP parameter for this set of atoms\n" );
         
         }
         { //::SireMM::AmberParams::getNB14
@@ -693,6 +731,19 @@ void register_AmberParams_class(){
                 , ( bp::arg("improper") )
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMM::AmberParams::removeCMAP
+        
+            typedef void ( ::SireMM::AmberParams::*removeCMAP_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMol::AtomID const & ) ;
+            removeCMAP_function_type removeCMAP_function_value( &::SireMM::AmberParams::removeCMAP );
+            
+            AmberParams_exposer.def( 
+                "removeCMAP"
+                , removeCMAP_function_value
+                , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("atom2"), bp::arg("atom3"), bp::arg("atom4") )
+                , bp::release_gil_policy()
+                , "Remove the CMAP function from the passed set of 5 atoms" );
         
         }
         { //::SireMM::AmberParams::removeNB14

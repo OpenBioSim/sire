@@ -47,6 +47,8 @@ namespace bp = boost::python;
 
 SireMol::AtomCoordMatcher __copy__(const SireMol::AtomCoordMatcher &other){ return SireMol::AtomCoordMatcher(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -113,9 +115,9 @@ void register_AtomCoordMatcher_class(){
         
         }
         AtomCoordMatcher_exposer.staticmethod( "typeName" );
-        AtomCoordMatcher_exposer.def( "__copy__", &__copy__);
-        AtomCoordMatcher_exposer.def( "__deepcopy__", &__copy__);
-        AtomCoordMatcher_exposer.def( "clone", &__copy__);
+        AtomCoordMatcher_exposer.def( "__copy__", &__copy__<SireMol::AtomCoordMatcher>);
+        AtomCoordMatcher_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomCoordMatcher>);
+        AtomCoordMatcher_exposer.def( "clone", &__copy__<SireMol::AtomCoordMatcher>);
         AtomCoordMatcher_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomCoordMatcher >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomCoordMatcher_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomCoordMatcher >,

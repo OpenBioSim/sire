@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 SireMol::CovalentBondHunter __copy__(const SireMol::CovalentBondHunter &other){ return SireMol::CovalentBondHunter(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -111,9 +113,9 @@ void register_CovalentBondHunter_class(){
         }
         CovalentBondHunter_exposer.staticmethod( "parameters" );
         CovalentBondHunter_exposer.staticmethod( "typeName" );
-        CovalentBondHunter_exposer.def( "__copy__", &__copy__);
-        CovalentBondHunter_exposer.def( "__deepcopy__", &__copy__);
-        CovalentBondHunter_exposer.def( "clone", &__copy__);
+        CovalentBondHunter_exposer.def( "__copy__", &__copy__<SireMol::CovalentBondHunter>);
+        CovalentBondHunter_exposer.def( "__deepcopy__", &__copy__<SireMol::CovalentBondHunter>);
+        CovalentBondHunter_exposer.def( "clone", &__copy__<SireMol::CovalentBondHunter>);
         CovalentBondHunter_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::CovalentBondHunter >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CovalentBondHunter_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::CovalentBondHunter >,

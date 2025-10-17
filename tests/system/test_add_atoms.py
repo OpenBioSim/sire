@@ -124,9 +124,7 @@ def test_add_dummies(tmpdir, ala_mols):
         atom["element"] = sr.mol.Element(0)
         atom["mass"] = 0 * sr.units.g_per_mol
         atom["atomtype"] = "DM"
-        atom["LJ"] = sr.mm.LJParameter(
-            1 * sr.units.angstrom, 0 * sr.units.kcal_per_mol
-        )
+        atom["LJ"] = sr.mm.LJParameter(1 * sr.units.angstrom, 0 * sr.units.kcal_per_mol)
 
     mol = cursor.molecule().commit()
 

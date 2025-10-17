@@ -17,6 +17,8 @@ namespace bp = boost::python;
 
 SireMol::CGIdx __copy__(const SireMol::CGIdx &other){ return SireMol::CGIdx(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -134,9 +136,9 @@ void register_CGIdx_class(){
         CGIdx_exposer.staticmethod( "null" );
         CGIdx_exposer.staticmethod( "typeName" );
         CGIdx_exposer.def( other<SireID::Index>() + self );
-        CGIdx_exposer.def( "__copy__", &__copy__);
-        CGIdx_exposer.def( "__deepcopy__", &__copy__);
-        CGIdx_exposer.def( "clone", &__copy__);
+        CGIdx_exposer.def( "__copy__", &__copy__<SireMol::CGIdx>);
+        CGIdx_exposer.def( "__deepcopy__", &__copy__<SireMol::CGIdx>);
+        CGIdx_exposer.def( "clone", &__copy__<SireMol::CGIdx>);
         CGIdx_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::CGIdx >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CGIdx_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::CGIdx >,

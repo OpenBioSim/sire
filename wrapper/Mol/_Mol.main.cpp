@@ -191,6 +191,8 @@
 
 #include "CGsWithAtoms.pypp.hpp"
 
+#include "CMAPID.pypp.hpp"
+
 #include "Chain.pypp.hpp"
 
 #include "ChainAtomID.pypp.hpp"
@@ -867,6 +869,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_CGStructureEditor_class();
 
     register_CGsWithAtoms_class();
+
+    register_CMAPID_class();
 
     register_Chain_class();
 

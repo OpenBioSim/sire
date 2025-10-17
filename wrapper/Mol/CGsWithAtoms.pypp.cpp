@@ -18,6 +18,8 @@ namespace bp = boost::python;
 
 SireMol::CGsWithAtoms __copy__(const SireMol::CGsWithAtoms &other){ return SireMol::CGsWithAtoms(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -135,9 +137,9 @@ void register_CGsWithAtoms_class(){
         
         }
         CGsWithAtoms_exposer.staticmethod( "typeName" );
-        CGsWithAtoms_exposer.def( "__copy__", &__copy__);
-        CGsWithAtoms_exposer.def( "__deepcopy__", &__copy__);
-        CGsWithAtoms_exposer.def( "clone", &__copy__);
+        CGsWithAtoms_exposer.def( "__copy__", &__copy__<SireMol::CGsWithAtoms>);
+        CGsWithAtoms_exposer.def( "__deepcopy__", &__copy__<SireMol::CGsWithAtoms>);
+        CGsWithAtoms_exposer.def( "clone", &__copy__<SireMol::CGsWithAtoms>);
         CGsWithAtoms_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::CGsWithAtoms >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CGsWithAtoms_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::CGsWithAtoms >,

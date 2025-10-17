@@ -1,6 +1,6 @@
 # Build requirements for Sire.
 
-cmake
+cmake >= 3.30.0
 git
 python
 
@@ -13,7 +13,7 @@ sysroot_linux-64==2.17 ; sys_platform == "linux"
 
 # These packages are needed to compile
 # the SireGemmi plugin
-gemmi >=0.6.4
+gemmi >=0.6.4<0.7.0
 
 pybind11 ==2.11.1 ; sys_platform == "win32"
 pybind11 sys_platform != "win32"

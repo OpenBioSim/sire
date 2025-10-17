@@ -12,19 +12,93 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-
-`2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.0...2025.1.0>`__ - April 2025
-------------------------------------------------------------------------------------------
+`2025.3.0 <https://github.com/openbiosim/sire/compare/2025.2.0...2025.3.0>`__ - December 2025
+---------------------------------------------------------------------------------------------
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
-* Allow user to force fresh inference of stereochemistry when converting to RDKit format.
-* Fix setting of positive formal charge when reading SDF files.
-* Only use ``atom->setNoImplicit(True)`` inside custom RDKit sterochemistry inference function.
-* Fix redistribution of excess QM charge and make it the default behaviour.
-* Preserve molecule name when reading from SDF format and on conversion to RDKit.
-* Handle missing velocity data for ``AMBER`` RST7 files with only a few atoms.
-* Preserve SDF metadata when converting to ``RDKIt`` format.
+
+* Reset GCMC water state prior to minimisation following a dynamics crash.
+
+* Set appropriate default OpenMM box vectors when a system has no periodic space.
+
+`2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
+--------------------------------------------------------------------------------------------
+
+* Add end-state coordinates properties to decoupled and annihilated molecules.
+
+* Map the end state coordinates property when constructing an ``AmberParams`` object when
+  creating a molecule from a ``SOMD`` perturbation file.
+
+* Fix evaluation of custom force energies from OpenMM XML files by correctly looping over
+  interaction groups.
+
+* Switch to new Boost Conda package naming scheme for host requirements.
+
+* Use C++20 standard for SireRDKit plugin.
+
+* Fixed build issues on MacOS with Clang and LTO (incorrectly specified LTO library version).
+
+* Added a feature for applying RMSD restraints using the OpenMM CustomCVForce/RMSDForce functionality.
+
+* Added support for reading and writing CRYST1 records in PDB files.
+
+* Added a ``save_velocities`` kwarg to :func:`sire.save()` to allow a user to control whether
+  velocities are saved to the output file. This is useful when the magnitude of the velocities
+  overflows the output file format precision, or when the velocities are not needed
+
+* Use force field bonding when working out connectivity for QM link atoms.
+
+* Fix handling of 4- and 5-point water models when writing GROMACS topology files.
+
+* Fix handling of link atoms for non carbon-carbon bonds where there is no bonded
+  term in the MM force field.
+
+* Added alchemical Morse potentials for experimental use in scaffold-hopping transformations.
+
+`2025.1.0 <https://github.com/openbiosim/sire/compare/2024.4.2...2025.1.0>`__ - June 2025
+-----------------------------------------------------------------------------------------
+
 * Fixed unbound local variable when simulation lambda value is not in ``lambda_windows`` array.
+
+* Allow negative residue numbers.
+
+* Make sure box vectors are in reduced form before setting via the ``OpenMM`` C++ API.
+
+* Add isobaric and grand canonical terms to reduced potential.
+
+* Keep kappa term fixed during decoupling schedules.
+
+* Added CMAP support when reading / writing AMBER and GROMACS topology files. The parameters
+  are in the ``cmap`` property.
+
+* Fixed compile issues for MacOS Sequoia.
+
+* Upgraded minimum ``CMake`` supported version to 3.5.
+
+* Reset dynamics step counters and internal clock when a crash occurs so that energies
+  and frames are save with the correct time stamp.
+
+* Add OPC water model template for interconvesion between AMBER and GROMACS formats.
+
+`2024.4.2 <https://github.com/openbiosim/sire/compare/2024.4.1...2024.4.2>`__ - Feb 2025
+----------------------------------------------------------------------------------------
+
+* Preserve molecule name when reading from SDF format.
+
+* Handle missing velocity data for ``AMBER`` RST7 files with only a few atoms.
+
+* Preserve SDF metadata when converting to ``RDKIt`` format.
+
+`2024.4.1 <https://github.com/openbiosim/sire/compare/2024.4.0...2024.4.1>`__ - Feb 2025
+----------------------------------------------------------------------------------------
+
+* Allow user to force fresh inference of stereochemistry when converting to RDKit format.
+
+* Fix setting of positive formal charge when reading SDF files.
+
+* Only use ``atom->setNoImplicit(True)`` inside custom RDKit sterochemistry inference function.
+
+* Fix redistribution of excess QM charge and make it the default behaviour.
 
 `2024.4.0 <https://github.com/openbiosim/sire/compare/2024.3.1...2024.4.0>`__ - Feb 2025
 ----------------------------------------------------------------------------------------

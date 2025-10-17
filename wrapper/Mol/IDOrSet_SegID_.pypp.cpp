@@ -51,6 +51,8 @@ namespace bp = boost::python;
 
 SireID::IDOrSet<SireMol::SegID> __copy__(const SireID::IDOrSet<SireMol::SegID> &other){ return SireID::IDOrSet<SireMol::SegID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -195,9 +197,9 @@ void register_IDOrSet_SegID__class(){
         
         }
         IDOrSet_SegID__exposer.staticmethod( "typeName" );
-        IDOrSet_SegID__exposer.def( "__copy__", &__copy__);
-        IDOrSet_SegID__exposer.def( "__deepcopy__", &__copy__);
-        IDOrSet_SegID__exposer.def( "clone", &__copy__);
+        IDOrSet_SegID__exposer.def( "__copy__", &__copy__<SireID::IDOrSet<SireMol::SegID>>);
+        IDOrSet_SegID__exposer.def( "__deepcopy__", &__copy__<SireID::IDOrSet<SireMol::SegID>>);
+        IDOrSet_SegID__exposer.def( "clone", &__copy__<SireID::IDOrSet<SireMol::SegID>>);
         IDOrSet_SegID__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireID::IDOrSet<SireMol::SegID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         IDOrSet_SegID__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireID::IDOrSet<SireMol::SegID> >,

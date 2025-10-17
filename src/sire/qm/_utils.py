@@ -66,7 +66,7 @@ def _zero_charge(mols, qm_atoms, map=None):
     return mols
 
 
-def _check_charge(mols, qm_atoms, map, redistribute_charge=False, tol=1e-6):
+def _check_charge(mols, qm_atoms, map, redistribute_charge=False, tol=1e-2):
     """
     Internal helper function to check that the QM region has integer charge.
 
@@ -337,7 +337,13 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
         qm_idxs = [atom.index() for atom in qm_atoms]
 
         # Create a connectivity object.
-        connectivity = _Mol.Connectivity(qm_mol, _Mol.CovalentBondHunter(), map)
+        connectivity = _Mol.Connectivity(qm_mol.info())
+        editor = connectivity.edit()
+
+        # Connect atoms according to the bonding from the force field.
+        for bond in qm_mol.property(map["bond"]).potentials():
+            editor.connect(bond.atom0(), bond.atom1())
+        connectivity = editor.commit()
 
         # Dictionary to store the MM1 atoms.
         mm1_atoms = {}
@@ -436,68 +442,99 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
         bond_lengths = {}
         link_bond_lengths = {}
 
-        # Get the MM bond potentials.
-        bonds = qm_mol.property(map["bond"]).potentials()
-
-        # Store the info for the QM molecule.
-        info = qm_mol.info()
-
         # Store the bond potential symbol.
         r = _CAS.Symbol("r")
 
         # Loop over the link atoms.
         for qm_idx, mm1_idx in mm1_atoms.items():
-            # Convert to cg_atom_idx objects.
-            cg_qm_idx = info.cg_atom_idx(qm_idx)
-            cg_mm1_idx = info.cg_atom_idx(mm1_idx)
+            # Get the QM and MM1 atoms.
+            qm_atom = qm_mol[qm_idx]
+            mm1_atom = qm_mol[mm1_idx]
 
             # Store the element of the QM atom.
-            qm_elem = qm_mol[cg_qm_idx].element()
+            qm_elem = qm_atom.element()
             hydrogen = _Mol.Element("H")
 
             qm_m1_bond_found = False
             qm_link_bond_found = False
 
+            # Find all bonds involving the QM atom.
+            try:
+                bonds = qm_mol[f"element {qm_elem.symbol()}"].bonds()
+            except:
+                raise Exception(f"Unable to find bonds for QM atom {qm_idx}!")
+
             # Loop over the bonds.
             for bond in bonds:
-                # Get the indices of the atoms in the bond.
-                bond_idx0 = bond.atom0()
-                bond_idx1 = bond.atom1()
+                if qm_m1_bond_found and qm_link_bond_found:
+                    break
+
+                # Get the atoms in the bond.
+                atom0 = bond.atom0()
+                atom1 = bond.atom1()
 
                 # If the bond is between the QM atom and the MM atom, store the
                 # bond length.
-                if (
-                    not qm_m1_bond_found
-                    and cg_qm_idx == bond_idx0
-                    and cg_mm1_idx == bond_idx1
-                    or cg_qm_idx == bond_idx1
-                    and cg_mm1_idx == bond_idx0
+                if (atom0 == qm_atom and atom1 == mm1_atom) or (
+                    atom1 == qm_atom and atom0 == mm1_atom
                 ):
                     # Cast as an AmberBond.
-                    ab = _MM.AmberBond(bond.function(), r)
+                    ab = _MM.AmberBond(bond.potential(), r)
                     bond_lengths[mm1_idx] = ab.r0()
                     qm_m1_bond_found = True
-                    if qm_link_bond_found:
-                        break
                 else:
-                    elem0 = qm_mol[bond_idx0].element()
-                    elem1 = qm_mol[bond_idx1].element()
+                    elem0 = atom0.element()
+                    elem1 = atom1.element()
 
                     # Is this bond is between a hydrogen and and the same element
                     # as the QM atom? If so, store the bond length.
-                    if (
-                        not qm_link_bond_found
-                        and elem0 == hydrogen
-                        and elem1 == qm_elem
-                        or elem0 == qm_elem
-                        and elem1 == hydrogen
+                    if (elem0 == hydrogen and elem1 == qm_elem) or (
+                        elem0 == qm_elem and elem1 == hydrogen
                     ):
                         # Cast as an AmberBond.
-                        ab = _MM.AmberBond(bond.function(), r)
+                        ab = _MM.AmberBond(bond.potential(), r)
                         link_bond_lengths[mm1_idx] = ab.r0()
                         qm_link_bond_found = True
-                        if qm_m1_bond_found:
-                            break
+
+            # This should never happen, but just in case.
+            if not qm_m1_bond_found:
+                raise Exception(f"Unable to find QM-MM1 bond for MM1 atom {mm1_idx}!")
+
+            # If a QM-H bond isn't present for this force field, then we need to
+            # approximate a bond length using the ration of van der Waals radii.
+            if not qm_link_bond_found:
+                # First find a standard C-H bond length.
+                carbon = _Mol.Element("C")
+                bonds = qm_mol[f"element C"].bonds()
+                ch_bond_length = None
+                for bond in bonds:
+                    atom0 = bond.atom0()
+                    atom1 = bond.atom1()
+                    elem0 = atom0.element()
+                    elem1 = atom1.element()
+                    if (elem0 == carbon and elem1 == hydrogen) or (
+                        elem1 == carbon and elem0 == hydrogen
+                    ):
+                        # Cast as an AmberBond.
+                        ab = _MM.AmberBond(bond.potential(), r)
+                        ch_bond_length = ab.r0()
+                        break
+
+                if ch_bond_length is None:
+                    raise Exception(
+                        f"Unable to find a standard C-H bond length for QM atom {qm_idx}!"
+                    )
+
+                # Get the sigma values for the QM atom and a carbon atom.
+                qm_sigma = qm_atom.lj().sigma().value()
+                try:
+                    c_sigma = mols["element C"][0].lj().sigma().value()
+                except:
+                    raise Exception("Unable to find a carbon atom in the system!")
+
+                # Scale the bond length based on the ratio of the van der Waals
+                # radii (sigma values).
+                link_bond_lengths[mm1_idx] = ch_bond_length * (qm_sigma / c_sigma)
 
         # Work out the bond scale factors: R0(QM-L) / R0(QM-MM1)
         try:
