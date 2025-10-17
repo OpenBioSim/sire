@@ -41,9 +41,13 @@ namespace bp = boost::python;
 
 #include "pdbx.h"
 
+#include <iostream>
+
 #include "pdbx.h"
 
 SireIO::PDBx __copy__(const SireIO::PDBx &other){ return SireIO::PDBx(other); }
+
+#include "Helpers/copy.hpp"
 
 #include "Qt/qdatastream.hpp"
 
@@ -261,9 +265,9 @@ void register_PDBx_class(){
         
         }
         PDBx_exposer.staticmethod( "typeName" );
-        PDBx_exposer.def( "__copy__", &__copy__);
-        PDBx_exposer.def( "__deepcopy__", &__copy__);
-        PDBx_exposer.def( "clone", &__copy__);
+        PDBx_exposer.def( "__copy__", &__copy__<SireIO::PDBx>);
+        PDBx_exposer.def( "__deepcopy__", &__copy__<SireIO::PDBx>);
+        PDBx_exposer.def( "clone", &__copy__<SireIO::PDBx>);
         PDBx_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::PDBx >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         PDBx_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::PDBx >,

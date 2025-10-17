@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireIO::ZmatrixMaker __copy__(const SireIO::ZmatrixMaker &other){ return SireIO::ZmatrixMaker(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireIO::ZmatrixMaker&){ return "SireIO::ZmatrixMaker";}
@@ -112,9 +114,9 @@ void register_ZmatrixMaker_class(){
         
         }
         ZmatrixMaker_exposer.staticmethod( "typeName" );
-        ZmatrixMaker_exposer.def( "__copy__", &__copy__);
-        ZmatrixMaker_exposer.def( "__deepcopy__", &__copy__);
-        ZmatrixMaker_exposer.def( "clone", &__copy__);
+        ZmatrixMaker_exposer.def( "__copy__", &__copy__<SireIO::ZmatrixMaker>);
+        ZmatrixMaker_exposer.def( "__deepcopy__", &__copy__<SireIO::ZmatrixMaker>);
+        ZmatrixMaker_exposer.def( "clone", &__copy__<SireIO::ZmatrixMaker>);
         ZmatrixMaker_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::ZmatrixMaker >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ZmatrixMaker_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::ZmatrixMaker >,

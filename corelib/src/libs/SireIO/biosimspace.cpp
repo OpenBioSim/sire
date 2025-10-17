@@ -1687,6 +1687,55 @@ namespace SireIO
         return ion;
     }
 
+    System setCoordinates(System &system, const QVector<QVector<float>> &coordinates, const PropertyMap &map)
+    {
+        // Make sure that the number of coordinates matches the number of atoms.
+        if (system.nAtoms() != coordinates.size())
+        {
+            throw SireError::incompatible_error(
+                QObject::tr("Number of coordinates (%1) does not match number of atoms in the system (%2)!")
+                    .arg(coordinates.size())
+                    .arg(system.nAtoms()),
+                CODELOC);
+        }
+
+        // Store the coordinates property.
+        const auto coord_prop = map["coordinates"];
+
+        // Keep track of the current coordinate index.
+        unsigned coord_idx = 0;
+
+        // Loop over all molecules in the system in MolIdx order.
+        for (int i = 0; i < system.nMolecules(); ++i)
+        {
+            // Extract the molecule and make it editable.
+            auto molecule = system.molecule(MolIdx(i)).molecule().edit();
+
+            // Loop over all atoms in the molecule.
+            for (int j = 0; j < molecule.nAtoms(); ++j)
+            {
+                // Construct the new coordinate.
+                const auto coord = Vector(coordinates[coord_idx + j][0],
+                                          coordinates[coord_idx + j][1],
+                                          coordinates[coord_idx + j][2]);
+
+                // Set the new coordinates.
+                molecule = molecule.edit()
+                                   .atom(AtomIdx(j))
+                                   .setProperty(coord_prop, coord)
+                                   .molecule();
+            }
+
+            // Update the molecule in the system.
+            system.update(molecule.commit());
+
+            // Update the coordinate index.
+            coord_idx += molecule.nAtoms();
+        }
+
+        return system;
+    }
+
     Vector cross(const Vector &v0, const Vector &v1)
     {
         double nx = v0.y() * v1.z() - v0.z() * v1.y();

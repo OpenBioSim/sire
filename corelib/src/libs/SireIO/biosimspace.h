@@ -351,6 +351,23 @@ namespace SireIO
     SIREIO_EXPORT Molecule createChlorineIon(
         const Vector &coords, const QString model, const PropertyMap &map = PropertyMap());
 
+    //! Set the coordinates of the entire system.
+    /* \param system
+            The molecular system of interest.
+
+        \param coordinates
+            The new coordinates for the system.
+
+        \param map
+            A dictionary of user-defined molecular property names.
+
+        \retval system
+            The system with updated coordinates.
+     */
+    SIREIO_EXPORT SireSystem::System setCoordinates(
+        SireSystem::System &system, const QVector<QVector<float>> &coordinates,
+        const PropertyMap &map = PropertyMap());
+
     Vector cross(const Vector &v0, const Vector &v1);
 } // namespace SireIO
 
@@ -366,6 +383,7 @@ SIRE_EXPOSE_FUNCTION(SireIO::updateAndPreserveOrder)
 SIRE_EXPOSE_FUNCTION(SireIO::updateCoordinatesAndVelocities)
 SIRE_EXPOSE_FUNCTION(SireIO::createSodiumIon)
 SIRE_EXPOSE_FUNCTION(SireIO::createChlorineIon)
+SIRE_EXPOSE_FUNCTION(SireIO::setCoordinates)
 
 SIRE_END_HEADER
 

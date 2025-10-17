@@ -75,6 +75,8 @@ namespace bp = boost::python;
 
 SireIO::PerturbationsLibrary __copy__(const SireIO::PerturbationsLibrary &other){ return SireIO::PerturbationsLibrary(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -183,9 +185,9 @@ void register_PerturbationsLibrary_class(){
         
         }
         PerturbationsLibrary_exposer.staticmethod( "typeName" );
-        PerturbationsLibrary_exposer.def( "__copy__", &__copy__);
-        PerturbationsLibrary_exposer.def( "__deepcopy__", &__copy__);
-        PerturbationsLibrary_exposer.def( "clone", &__copy__);
+        PerturbationsLibrary_exposer.def( "__copy__", &__copy__<SireIO::PerturbationsLibrary>);
+        PerturbationsLibrary_exposer.def( "__deepcopy__", &__copy__<SireIO::PerturbationsLibrary>);
+        PerturbationsLibrary_exposer.def( "clone", &__copy__<SireIO::PerturbationsLibrary>);
         PerturbationsLibrary_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::PerturbationsLibrary >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         PerturbationsLibrary_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::PerturbationsLibrary >,

@@ -91,6 +91,8 @@ namespace bp = boost::python;
 
 SireIO::ProtoMSParameters __copy__(const SireIO::ProtoMSParameters &other){ return SireIO::ProtoMSParameters(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireIO::ProtoMSParameters&){ return "SireIO::ProtoMSParameters";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -281,9 +283,9 @@ void register_ProtoMSParameters_class(){
                 , "Return the name of the property that will contain the\nz-matrix\n\ndefault == zmatrix\n" );
         
         }
-        ProtoMSParameters_exposer.def( "__copy__", &__copy__);
-        ProtoMSParameters_exposer.def( "__deepcopy__", &__copy__);
-        ProtoMSParameters_exposer.def( "clone", &__copy__);
+        ProtoMSParameters_exposer.def( "__copy__", &__copy__<SireIO::ProtoMSParameters>);
+        ProtoMSParameters_exposer.def( "__deepcopy__", &__copy__<SireIO::ProtoMSParameters>);
+        ProtoMSParameters_exposer.def( "clone", &__copy__<SireIO::ProtoMSParameters>);
         ProtoMSParameters_exposer.def( "__str__", &pvt_get_name);
         ProtoMSParameters_exposer.def( "__repr__", &pvt_get_name);
     }
