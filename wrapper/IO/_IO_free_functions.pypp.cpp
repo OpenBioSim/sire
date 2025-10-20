@@ -807,13 +807,13 @@ void register_free_functions(){
 
     { //::SireIO::setCoordinates
     
-        typedef ::SireSystem::System ( *setCoordinates_function_type )( ::SireSystem::System &,::QVector<QVector<float>> const &,::SireBase::PropertyMap const & );
+        typedef ::SireSystem::System ( *setCoordinates_function_type )( ::SireSystem::System &,::QVector<QVector<float>> const &,bool const,::SireBase::PropertyMap const & );
         setCoordinates_function_type setCoordinates_function_value( &::SireIO::setCoordinates );
         
         bp::def( 
             "setCoordinates"
             , setCoordinates_function_value
-            , ( bp::arg("system"), bp::arg("coordinates"), bp::arg("map")=SireBase::PropertyMap() )
+            , ( bp::arg("system"), bp::arg("coordinates"), bp::arg("is_lambda1")=(bool const)(false), bp::arg("map")=SireBase::PropertyMap() )
             , "Set the coordinates of the entire system.\nPar:am system\nThe molecular system of interest.\n\nPar:am coordinates\nThe new coordinates for the system.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated coordinates.\n" );
     
     }

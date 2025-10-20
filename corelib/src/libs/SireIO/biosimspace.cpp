@@ -1687,7 +1687,7 @@ namespace SireIO
         return ion;
     }
 
-    System setCoordinates(System &system, const QVector<QVector<float>> &coordinates, const PropertyMap &map)
+    System setCoordinates(System &system, const QVector<QVector<float>> &coordinates, const bool is_lambda1, const PropertyMap &map)
     {
         // Make sure that the number of coordinates matches the number of atoms.
         if (system.nAtoms() != coordinates.size())
@@ -1699,9 +1699,6 @@ namespace SireIO
                 CODELOC);
         }
 
-        // Store the coordinates property.
-        const auto coord_prop = map["coordinates"];
-
         // Keep track of the current coordinate index.
         unsigned coord_idx = 0;
 
@@ -1710,6 +1707,18 @@ namespace SireIO
         {
             // Extract the molecule and make it editable.
             auto molecule = system.molecule(MolIdx(i)).molecule().edit();
+
+            QString prop_name = "coordinates";
+            if (molecule.hasProperty("is_perturbable"))
+            {
+                if (is_lambda1)
+                    prop_name = "coordinates1";
+                else
+                    prop_name = "coordinates0";
+            }
+
+            // Get the coordinate property.
+            const auto coord_prop = map[prop_name];
 
             // Loop over all atoms in the molecule.
             for (int j = 0; j < molecule.nAtoms(); ++j)

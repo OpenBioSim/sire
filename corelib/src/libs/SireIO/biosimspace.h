@@ -358,6 +358,9 @@ namespace SireIO
         \param coordinates
             The new coordinates for the system.
 
+        \param is_lambda1
+            Whether this is for the lambda = 1 state.
+
         \param map
             A dictionary of user-defined molecular property names.
 
@@ -366,7 +369,7 @@ namespace SireIO
      */
     SIREIO_EXPORT SireSystem::System setCoordinates(
         SireSystem::System &system, const QVector<QVector<float>> &coordinates,
-        const PropertyMap &map = PropertyMap());
+        const bool is_lambda1 = false, const PropertyMap &map = PropertyMap());
 
     Vector cross(const Vector &v0, const Vector &v1);
 } // namespace SireIO
