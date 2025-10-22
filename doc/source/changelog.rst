@@ -21,6 +21,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Set appropriate default OpenMM box vectors when a system has no periodic space.
 
+* Make the result of ``Sire::Mol::Connectivity::findPath`` reproducible by sorting the
+  output paths.
+
+* Add missing dihedrals for all 1-4 atom paths in ``Sire::MM::AmberParams::validateAndFix``,
+  not just the first one found.
+
 `2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
 --------------------------------------------------------------------------------------------
 
