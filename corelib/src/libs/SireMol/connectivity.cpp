@@ -1066,6 +1066,9 @@ QList<AtomIdx> ConnectivityBase::findPath(AtomIdx atom0, AtomIdx atom1) const
 {
     QList<QList<AtomIdx>> paths = findPaths(atom0, atom1);
 
+    // Sort the paths so that the result is reproducible.
+    std::stable_sort(paths.begin(), paths.end());
+
     QList<AtomIdx> shortest;
 
     foreach (const QList<AtomIdx> &path, paths)
@@ -1086,6 +1089,9 @@ QList<AtomIdx> ConnectivityBase::findPath(AtomIdx atom0, AtomIdx atom1) const
 QList<AtomIdx> ConnectivityBase::findPath(AtomIdx atom0, AtomIdx atom1, int max_length) const
 {
     QList<QList<AtomIdx>> paths = findPaths(atom0, atom1, max_length);
+
+    // Sort the paths so that the result is reproducible.
+    std::stable_sort(paths.begin(), paths.end());
 
     QList<AtomIdx> shortest;
 
