@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 SireIO::Supplementary __copy__(const SireIO::Supplementary &other){ return SireIO::Supplementary(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -189,9 +191,9 @@ void register_Supplementary_class(){
         
         }
         Supplementary_exposer.staticmethod( "typeName" );
-        Supplementary_exposer.def( "__copy__", &__copy__);
-        Supplementary_exposer.def( "__deepcopy__", &__copy__);
-        Supplementary_exposer.def( "clone", &__copy__);
+        Supplementary_exposer.def( "__copy__", &__copy__<SireIO::Supplementary>);
+        Supplementary_exposer.def( "__deepcopy__", &__copy__<SireIO::Supplementary>);
+        Supplementary_exposer.def( "clone", &__copy__<SireIO::Supplementary>);
         Supplementary_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::Supplementary >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Supplementary_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::Supplementary >,

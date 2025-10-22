@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireIO::FlexibilityTemplate __copy__(const SireIO::FlexibilityTemplate &other){ return SireIO::FlexibilityTemplate(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireIO::FlexibilityTemplate&){ return "SireIO::FlexibilityTemplate";}
@@ -342,9 +344,9 @@ void register_FlexibilityTemplate_class(){
         
         }
         FlexibilityTemplate_exposer.staticmethod( "typeName" );
-        FlexibilityTemplate_exposer.def( "__copy__", &__copy__);
-        FlexibilityTemplate_exposer.def( "__deepcopy__", &__copy__);
-        FlexibilityTemplate_exposer.def( "clone", &__copy__);
+        FlexibilityTemplate_exposer.def( "__copy__", &__copy__<SireIO::FlexibilityTemplate>);
+        FlexibilityTemplate_exposer.def( "__deepcopy__", &__copy__<SireIO::FlexibilityTemplate>);
+        FlexibilityTemplate_exposer.def( "clone", &__copy__<SireIO::FlexibilityTemplate>);
         FlexibilityTemplate_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::FlexibilityTemplate >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         FlexibilityTemplate_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::FlexibilityTemplate >,

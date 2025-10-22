@@ -67,6 +67,8 @@ namespace bp = boost::python;
 
 SireIO::AmberTraj __copy__(const SireIO::AmberTraj &other){ return SireIO::AmberTraj(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -322,9 +324,9 @@ void register_AmberTraj_class(){
         }
         AmberTraj_exposer.staticmethod( "parse" );
         AmberTraj_exposer.staticmethod( "typeName" );
-        AmberTraj_exposer.def( "__copy__", &__copy__);
-        AmberTraj_exposer.def( "__deepcopy__", &__copy__);
-        AmberTraj_exposer.def( "clone", &__copy__);
+        AmberTraj_exposer.def( "__copy__", &__copy__<SireIO::AmberTraj>);
+        AmberTraj_exposer.def( "__deepcopy__", &__copy__<SireIO::AmberTraj>);
+        AmberTraj_exposer.def( "clone", &__copy__<SireIO::AmberTraj>);
         AmberTraj_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::AmberTraj >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AmberTraj_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::AmberTraj >,

@@ -29,6 +29,8 @@ namespace bp = boost::python;
 
 SireIO::IOParametersBase __copy__(const SireIO::IOParametersBase &other){ return SireIO::IOParametersBase(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireIO::IOParametersBase&){ return "SireIO::IOParametersBase";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -75,9 +77,9 @@ void register_IOParametersBase_class(){
                 , "Return the default source of the property into which\nthe chemical elements of each atom will be placed\n\ndefault == element\n" );
         
         }
-        IOParametersBase_exposer.def( "__copy__", &__copy__);
-        IOParametersBase_exposer.def( "__deepcopy__", &__copy__);
-        IOParametersBase_exposer.def( "clone", &__copy__);
+        IOParametersBase_exposer.def( "__copy__", &__copy__<SireIO::IOParametersBase>);
+        IOParametersBase_exposer.def( "__deepcopy__", &__copy__<SireIO::IOParametersBase>);
+        IOParametersBase_exposer.def( "clone", &__copy__<SireIO::IOParametersBase>);
         IOParametersBase_exposer.def( "__str__", &pvt_get_name);
         IOParametersBase_exposer.def( "__repr__", &pvt_get_name);
     }

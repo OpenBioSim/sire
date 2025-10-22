@@ -65,6 +65,8 @@ namespace bp = boost::python;
 
 SireIO::FileTrajectoryParser __copy__(const SireIO::FileTrajectoryParser &other){ return SireIO::FileTrajectoryParser(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -320,9 +322,9 @@ void register_FileTrajectoryParser_class(){
         }
         FileTrajectoryParser_exposer.staticmethod( "parse" );
         FileTrajectoryParser_exposer.staticmethod( "typeName" );
-        FileTrajectoryParser_exposer.def( "__copy__", &__copy__);
-        FileTrajectoryParser_exposer.def( "__deepcopy__", &__copy__);
-        FileTrajectoryParser_exposer.def( "clone", &__copy__);
+        FileTrajectoryParser_exposer.def( "__copy__", &__copy__<SireIO::FileTrajectoryParser>);
+        FileTrajectoryParser_exposer.def( "__deepcopy__", &__copy__<SireIO::FileTrajectoryParser>);
+        FileTrajectoryParser_exposer.def( "clone", &__copy__<SireIO::FileTrajectoryParser>);
         FileTrajectoryParser_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::FileTrajectoryParser >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         FileTrajectoryParser_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::FileTrajectoryParser >,
