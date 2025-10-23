@@ -1567,6 +1567,7 @@ def _dynamics(
     ignore_perturbations=None,
     temperature=None,
     pressure=None,
+    surface_tension=None,
     rest2_scale=None,
     rest2_selection=None,
     vacuum=None,
@@ -1687,6 +1688,10 @@ def _dynamics(
         The pressure at which to run the simulation. A
         microcanonical (NVE) or canonical (NVT) simulation will be
         run if the pressure is not set.
+
+    surface_tension: surface_tension
+        The surface tension to use if running a NPT simulation with
+        a membrane barostat.
 
     rest2_scale: float
         The scaling factor to apply when running a REST2 simulation
@@ -1877,6 +1882,10 @@ def _dynamics(
     if pressure is not None:
         pressure = u(pressure)
         map.set("pressure", pressure)
+
+    if surface_tension is not None:
+        surface_tension = u(surface_tension)
+        map.set("surface_tension", surface_tension)
 
     if rest2_scale is not None:
         map.set("rest2_scale", rest2_scale)

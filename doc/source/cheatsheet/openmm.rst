@@ -199,6 +199,9 @@ Available keys and allowable values are listed below.
 | space                        | Space in which the simulation should be conducted, e.g.  |
 |                              | `sr.vol.Cartesian`                                       |
 +------------------------------+----------------------------------------------------------+
+| surface_tension              | Surface tension for membrane simulations at constant     |
+|                              | pressure, e.g. ``0.05*sr.units.bar*sr.units.nanometer``  |
++------------------------------+----------------------------------------------------------+
 | swap_end_states              | Whether to swap the end states of a perturbable molecule |
 |                              | (i.e. treat the perturbed state as the reference state   |
 |                              | and vice versa). This defaults to False.                 |
