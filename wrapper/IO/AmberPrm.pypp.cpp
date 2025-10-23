@@ -11,6 +11,10 @@ namespace bp = boost::python;
 
 #include "SireBase/parallel.h"
 
+#include "SireBase/progressbar.h"
+
+#include "SireBase/propertylist.h"
+
 #include "SireBase/stringproperty.h"
 
 #include "SireBase/tempdir.h"
@@ -36,6 +40,8 @@ namespace bp = boost::python;
 #include "SireMM/cljnbpairs.h"
 
 #include "SireMM/internalff.h"
+
+#include "SireMM/lj1264parameter.h"
 
 #include "SireMM/ljparameter.h"
 
@@ -125,6 +131,8 @@ namespace bp = boost::python;
 
 SireIO::AmberPrm __copy__(const SireIO::AmberPrm &other){ return SireIO::AmberPrm(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -142,6 +150,7 @@ void register_AmberPrm_class(){
             .value("INTEGER", SireIO::AmberPrm::INTEGER)
             .value("FLOAT", SireIO::AmberPrm::FLOAT)
             .value("STRING", SireIO::AmberPrm::STRING)
+            .value("FFLOAT", SireIO::AmberPrm::FFLOAT)
             .export_values()
             ;
         AmberPrm_exposer.def( bp::init< QString const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("filename"), bp::arg("map")=SireBase::PropertyMap() ), "Construct by reading from the file called filename") );
@@ -604,6 +613,18 @@ void register_AmberPrm_class(){
                 , "" );
         
         }
+        { //::SireIO::AmberPrm::warnings
+        
+            typedef ::QStringList ( ::SireIO::AmberPrm::*warnings_function_type)(  ) const;
+            warnings_function_type warnings_function_value( &::SireIO::AmberPrm::warnings );
+            
+            AmberPrm_exposer.def( 
+                "warnings"
+                , warnings_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireIO::AmberPrm::what
         
             typedef char const * ( ::SireIO::AmberPrm::*what_function_type)(  ) const;
@@ -618,9 +639,9 @@ void register_AmberPrm_class(){
         }
         AmberPrm_exposer.staticmethod( "parse" );
         AmberPrm_exposer.staticmethod( "typeName" );
-        AmberPrm_exposer.def( "__copy__", &__copy__);
-        AmberPrm_exposer.def( "__deepcopy__", &__copy__);
-        AmberPrm_exposer.def( "clone", &__copy__);
+        AmberPrm_exposer.def( "__copy__", &__copy__<SireIO::AmberPrm>);
+        AmberPrm_exposer.def( "__deepcopy__", &__copy__<SireIO::AmberPrm>);
+        AmberPrm_exposer.def( "clone", &__copy__<SireIO::AmberPrm>);
         AmberPrm_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::AmberPrm >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AmberPrm_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::AmberPrm >,

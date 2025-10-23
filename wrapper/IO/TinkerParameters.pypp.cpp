@@ -39,6 +39,8 @@ namespace bp = boost::python;
 
 SireIO::TinkerParameters __copy__(const SireIO::TinkerParameters &other){ return SireIO::TinkerParameters(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireIO::TinkerParameters&){ return "SireIO::TinkerParameters";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -49,9 +51,9 @@ void register_TinkerParameters_class(){
         typedef bp::class_< SireIO::TinkerParameters, bp::bases< SireIO::IOParametersBase > > TinkerParameters_exposer_t;
         TinkerParameters_exposer_t TinkerParameters_exposer = TinkerParameters_exposer_t( "TinkerParameters", "This class holds all of the sources and default values of the\nproperties and parameters used by the Tinker readerwriter\n\nAuthor: Christopher Woods\n", bp::init< >("Constructor") );
         bp::scope TinkerParameters_scope( TinkerParameters_exposer );
-        TinkerParameters_exposer.def( "__copy__", &__copy__);
-        TinkerParameters_exposer.def( "__deepcopy__", &__copy__);
-        TinkerParameters_exposer.def( "clone", &__copy__);
+        TinkerParameters_exposer.def( "__copy__", &__copy__<SireIO::TinkerParameters>);
+        TinkerParameters_exposer.def( "__deepcopy__", &__copy__<SireIO::TinkerParameters>);
+        TinkerParameters_exposer.def( "clone", &__copy__<SireIO::TinkerParameters>);
         TinkerParameters_exposer.def( "__str__", &pvt_get_name);
         TinkerParameters_exposer.def( "__repr__", &pvt_get_name);
     }

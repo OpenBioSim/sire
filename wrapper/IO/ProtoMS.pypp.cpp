@@ -91,6 +91,8 @@ namespace bp = boost::python;
 
 SireIO::ProtoMS __copy__(const SireIO::ProtoMS &other){ return SireIO::ProtoMS(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireIO::ProtoMS&){ return "SireIO::ProtoMS";}
@@ -220,9 +222,9 @@ void register_ProtoMS_class(){
         }
         ProtoMS_exposer.staticmethod( "parameters" );
         ProtoMS_exposer.staticmethod( "typeName" );
-        ProtoMS_exposer.def( "__copy__", &__copy__);
-        ProtoMS_exposer.def( "__deepcopy__", &__copy__);
-        ProtoMS_exposer.def( "clone", &__copy__);
+        ProtoMS_exposer.def( "__copy__", &__copy__<SireIO::ProtoMS>);
+        ProtoMS_exposer.def( "__deepcopy__", &__copy__<SireIO::ProtoMS>);
+        ProtoMS_exposer.def( "clone", &__copy__<SireIO::ProtoMS>);
         ProtoMS_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::ProtoMS >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ProtoMS_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::ProtoMS >,

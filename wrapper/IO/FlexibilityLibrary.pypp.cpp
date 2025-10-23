@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireIO::FlexibilityLibrary __copy__(const SireIO::FlexibilityLibrary &other){ return SireIO::FlexibilityLibrary(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -157,9 +159,9 @@ void register_FlexibilityLibrary_class(){
         
         }
         FlexibilityLibrary_exposer.staticmethod( "typeName" );
-        FlexibilityLibrary_exposer.def( "__copy__", &__copy__);
-        FlexibilityLibrary_exposer.def( "__deepcopy__", &__copy__);
-        FlexibilityLibrary_exposer.def( "clone", &__copy__);
+        FlexibilityLibrary_exposer.def( "__copy__", &__copy__<SireIO::FlexibilityLibrary>);
+        FlexibilityLibrary_exposer.def( "__deepcopy__", &__copy__<SireIO::FlexibilityLibrary>);
+        FlexibilityLibrary_exposer.def( "clone", &__copy__<SireIO::FlexibilityLibrary>);
         FlexibilityLibrary_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::FlexibilityLibrary >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         FlexibilityLibrary_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::FlexibilityLibrary >,

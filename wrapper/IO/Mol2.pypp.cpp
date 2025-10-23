@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 SireIO::Mol2 __copy__(const SireIO::Mol2 &other){ return SireIO::Mol2(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -372,9 +374,9 @@ void register_Mol2_class(){
         
         }
         Mol2_exposer.staticmethod( "typeName" );
-        Mol2_exposer.def( "__copy__", &__copy__);
-        Mol2_exposer.def( "__deepcopy__", &__copy__);
-        Mol2_exposer.def( "clone", &__copy__);
+        Mol2_exposer.def( "__copy__", &__copy__<SireIO::Mol2>);
+        Mol2_exposer.def( "__deepcopy__", &__copy__<SireIO::Mol2>);
+        Mol2_exposer.def( "clone", &__copy__<SireIO::Mol2>);
         Mol2_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::Mol2 >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Mol2_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::Mol2 >,

@@ -69,6 +69,8 @@ namespace bp = boost::python;
 
 SireIO::Gro87 __copy__(const SireIO::Gro87 &other){ return SireIO::Gro87(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -569,9 +571,9 @@ void register_Gro87_class(){
         
         }
         Gro87_exposer.staticmethod( "typeName" );
-        Gro87_exposer.def( "__copy__", &__copy__);
-        Gro87_exposer.def( "__deepcopy__", &__copy__);
-        Gro87_exposer.def( "clone", &__copy__);
+        Gro87_exposer.def( "__copy__", &__copy__<SireIO::Gro87>);
+        Gro87_exposer.def( "__deepcopy__", &__copy__<SireIO::Gro87>);
+        Gro87_exposer.def( "clone", &__copy__<SireIO::Gro87>);
         Gro87_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::Gro87 >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Gro87_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::Gro87 >,
