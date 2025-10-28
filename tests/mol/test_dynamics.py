@@ -81,7 +81,7 @@ def test_cutoff_options(ala_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_sample_frequency(ala_mols):
+def test_sample_frequency(ala_mols, openmm_platform):
     """
     Test that energies and frames are saved at the correct frequency.
     """
@@ -92,7 +92,7 @@ def test_sample_frequency(ala_mols):
 
     mols = ala_mols
 
-    d = mols.dynamics(platform="Reference", timestep="1 fs")
+    d = mols.dynamics(platform=openmm_platform, timestep="1 fs")
 
     # Create a list of lambda windows.
     lambdas = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
@@ -145,3 +145,51 @@ def test_sample_frequency(ala_mols):
 
     # Check that the trajectory has 10 frames.
     assert new_mols.num_frames() == 10
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_crash_report(merged_ethane_methanol, openmm_platform):
+    """
+    Test that energies and frames are saved at the correct frequency.
+    """
+
+    import os
+    import glob
+    import tempfile
+    from sire.base import ProgressBar
+
+    ProgressBar.set_silent()
+
+    mols = merged_ethane_methanol.clone()
+    mols = sr.morph.link_to_reference(mols)
+
+    d = mols.dynamics(platform=openmm_platform)
+
+    # Run a short simulation within a temporary directory.
+    tmpdir = tempfile.TemporaryDirectory()
+
+    # Save the current directory.
+    old_dir = os.getcwd()
+
+    try:
+        # Change to the temporary directory.
+        os.chdir(tmpdir.name)
+
+        # Run a short simulation, forcing a crash.
+        d.run("1ps", save_crash_report=True)
+
+        # Glob for the crash report files.
+        crash_log = glob.glob("crash_*.log")
+        crash_system = glob.glob("system_*.xml")
+        crash_positions = glob.glob("positions_*.txt")
+
+        # Make sure we have one of each file.
+        assert len(crash_log) == 1
+        assert len(crash_system) == 1
+        assert len(crash_positions) == 1
+    finally:
+        # Change back to the old directory.
+        os.chdir(old_dir)

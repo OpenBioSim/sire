@@ -31,6 +31,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add support for ``openmm.MonteCarloMembraneBarostat`` in Sire-to-OpenMM conversion.
 
+* Added support for saving crash reports during Sire dynamics runs.
+
 `2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
 --------------------------------------------------------------------------------------------
 
