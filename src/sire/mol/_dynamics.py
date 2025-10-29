@@ -1776,7 +1776,8 @@ class Dynamics:
             instability. This will save a named log file containing the energy
             for each force, an XML file containing the OpenMM system at the
             start of the dynamics block, and a NumPy text file containing
-            the atomic positions at the start of the dynamics block.
+            the atomic positions at the start of the dynamics block. This
+            option is only used when auto_fix_minimise is True.
 
         auto_fix_minimise: bool
             Whether or not to automatically run minimisation if the
