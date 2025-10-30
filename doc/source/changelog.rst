@@ -33,6 +33,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added support for saving crash reports during Sire dynamics runs.
 
+* Fix missing ``Sire::IO::Gro87::getFrame`` implementation to allow creation of
+  trajectory frames from GROMACS coordinate file data.
+
 `2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
 --------------------------------------------------------------------------------------------
 
