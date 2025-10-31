@@ -157,5 +157,17 @@ System( name=output num_molecules=1 num_residues=3 num_atoms=22 ) 1000
    The individual frame files are named using the frame number plus
    the time in picoseconds for that frame.
 
+Rather than writing to a frame directory, it is also possible to use specific
+names for each frame file by passing a list of filenames to :func:`sire.save`,
+e.g.:
+
+>>> f = sr.save(mols[0].trajectory()[:2], ["cat.pdb", "dog.pdb"])
+>>> print(f)
+['cat.pdb', 'dog.pdb']
+
+When specifying frame names, the number of names provided must match the
+number of frames being saved. In addition, the frames must have a common
+file format (e.g. all PDB, or all GRO etc).
+
 :mod:`sire` has extensive support for trajectories. To learn more,
 check out the :doc:`detailed guide <../../cheatsheet/trajectory>`.
