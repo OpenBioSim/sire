@@ -693,7 +693,66 @@ Frame Gro87::getFrame(int i) const
 {
     i = SireID::Index(i).map(this->nFrames());
 
-    return SireMol::Frame();
+    QVector<Vector> frame_coords;
+    if (not this->coords.isEmpty())
+    {
+        frame_coords = this->coords[i];
+    }
+
+    QVector<Velocity3D> frame_vels;
+
+    if (not this->vels.isEmpty())
+    {
+        const auto velocities = this->vels[i];
+        const int nats = frame_vels.count();
+
+        frame_vels = QVector<Velocity3D>(nats);
+
+        auto velocities_data = frame_vels.data();
+        const auto vels_data = velocities.constData();
+
+        // velocity is Angstroms per 1/20.455 ps
+        const auto vel_unit = (1.0 / 20.455) * angstrom / picosecond;
+
+        for (int i = 0; i < nats; ++i)
+        {
+            const Vector &vel = vels_data[i];
+            velocities_data[i] = Velocity3D(vel.x() * vel_unit, vel.y() * vel_unit, vel.z() * vel_unit);
+        }
+    }
+
+    // Convert the box vectors into a Space object.
+    SpacePtr space;
+    if (not this->box_v1.isEmpty() and not this->box_v2.isEmpty() and not this->box_v3.isEmpty())
+    {
+        Vector v1 = this->box_v1[i];
+        Vector v2 = this->box_v2[i];
+        Vector v3 = this->box_v3[i];
+
+        if (v1.y() == 0 and v1.z() == 0 and v2.x() == 0 and v2.z() == 0 and v3.x() == 0 and v3.y() == 0)
+        {
+            // PeridicBox
+            space = SpacePtr(new PeriodicBox(Vector(v1.x(), v2.y(), v3.z())));
+        }
+        else
+        {
+            // TriclinicBox
+            space = SpacePtr(new TriclinicBox(v1, v2, v3));
+        }
+    }
+    else
+    {
+        // no box information
+        space = SpacePtr(new Cartesian());
+    }
+
+    Time frame_time;
+    if (not this->current_time.isEmpty())
+    {
+        frame_time = this->current_time[i] * SireUnits::picosecond;
+    }
+
+    return SireMol::Frame(frame_coords, frame_vels, space.read(), frame_time);
 }
 
 /** Return the Gro87 object that contains only the information for the ith
@@ -701,46 +760,8 @@ Frame Gro87::getFrame(int i) const
     from a trajectory */
 Gro87 Gro87::operator[](int i) const
 {
-    i = Index(i).map(this->nFrames());
-
-    if (nFrames() == 1)
-        return *this;
-
-    Gro87 ret(*this);
-
-    if (not coords.isEmpty())
-    {
-        ret.coords = {coords[i]};
-    }
-
-    if (not vels.isEmpty())
-    {
-        ret.vels = {vels[i]};
-    }
-
-    if (not current_time.isEmpty())
-    {
-        ret.current_time = {current_time[i]};
-    }
-
-    if (not box_v1.isEmpty())
-    {
-        ret.box_v1 = {box_v1[i]};
-    }
-
-    if (not box_v2.isEmpty())
-    {
-        ret.box_v2 = {box_v2[i]};
-    }
-
-    if (not box_v3.isEmpty())
-    {
-        ret.box_v3 = {box_v3[i]};
-    }
-
-    ret.assertSane();
-
-    return ret;
+    throw SireError::unsupported(
+        QObject::tr("Gro87::operator[] is not yet implemented!"), CODELOC);
 }
 
 /** Return the parser that has been constructed by reading in the passed
