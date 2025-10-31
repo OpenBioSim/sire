@@ -25,6 +25,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Add missing dihedrals for all 1-4 atom paths in ``Sire::MM::AmberParams::validateAndFix``,
   not just the first one found.
 
+* Fix missing ``Sire::IO::Gro87::getFrame`` implementation to allow creation of
+  trajectory frames from GROMACS coordinate file data.
+
 `2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
 --------------------------------------------------------------------------------------------
 
