@@ -36,6 +36,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fix missing ``Sire::IO::Gro87::getFrame`` implementation to allow creation of
   trajectory frames from GROMACS coordinate file data.
 
+* Add support for writing trajectory frames to user-defined file names.
+
 `2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
 --------------------------------------------------------------------------------------------
 
