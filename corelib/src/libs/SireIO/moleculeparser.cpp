@@ -1686,6 +1686,7 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
         for (auto &frame_name : frame_names)
         {
             frame_name = QDir(abs_path).filePath(frame_name.trimmed());
+            frame_name = QFileInfo(frame_name).absoluteFilePath();
         }
 
         if (frame_names.size() != frames_to_write.size())
