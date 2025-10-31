@@ -1679,14 +1679,10 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
         const QString frames_names_str = filename.section("frames_names:", 1);
         frame_names = frames_names_str.split(",", Qt::SkipEmptyParts);
 
-        // Now get the absolute path. (bit before "frames_names:")
-        const QString abs_path = filename.section("frames_names:", 0, 0);
-
-        // Append the absolute path to each frame name.
+        // Convert to absolute paths.
         for (auto &frame_name : frame_names)
         {
-            frame_name = QDir(abs_path).filePath(frame_name.trimmed());
-            frame_name = QFileInfo(frame_name).absoluteFilePath();
+            frame_name = QFileInfo(frame_name.trimmed()).absoluteFilePath();
         }
 
         if (frame_names.size() != frames_to_write.size())
