@@ -27,7 +27,9 @@
 #include "SireMM/inversebondrestraints.h"
 #include "SireMM/boreschrestraints.h"
 #include "SireMM/dihedralrestraints.h"
+#include "SireMM/morsepotentialrestraints.h"
 #include "SireMM/positionalrestraints.h"
+#include "SireMM/rmsdrestraints.h"
 #include "SireMM/selectorbond.h"
 
 #include "SireVol/periodicbox.h"
@@ -229,8 +231,6 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
     const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
 
-    auto cljff = lambda_lever.getForce<OpenMM::NonbondedForce>("clj", system);
-
     std::vector<double> custom_params = {1.0, 0.0, 0.0};
 
     for (const auto &restraint : atom_restraints)
@@ -327,6 +327,84 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
         restraintff->addBond(atom0_index, atom1_index, custom_params);
     }
 }
+
+/** Add all of the morse potential restraints from 'restraints' to the passed
+ *  system, which is acted on by the passed LambdaLever.
+ */
+void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &restraints,
+        OpenMM::System &system, LambdaLever &lambda_lever,
+        int natoms)
+{
+    if (restraints.isEmpty())
+    return;
+
+    if (restraints.hasCentroidRestraints())
+    {
+        throw SireError::unsupported(QObject::tr(
+                        "Centroid bond restraints aren't yet supported..."),
+                    CODELOC);
+    }
+
+    // energy expression of a harmonic bond potential, scaled by rho
+    // e_restraint = rho*DE*(1-exp(-Bij*dr))**2
+    // Bij = sqrt(k/2*DE)
+    // dr = (r - r0)
+
+    const auto energy_expression = QString(
+                                    "rho*e_restraint;"
+                                    "e_restraint=de*(1-exp(-sqrt(k/(2*de))*delta))^2;"
+                                    "delta=(r-r0)")
+                                    .toStdString();
+
+
+    auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
+    restraintff->setName("MorsePotentialRestraintForce");
+
+    restraintff->addPerBondParameter("rho");
+    restraintff->addPerBondParameter("k");
+    restraintff->addPerBondParameter("r0");
+    restraintff->addPerBondParameter("de");
+
+    restraintff->setUsesPeriodicBoundaryConditions(true);
+
+    lambda_lever.addRestraintIndex(restraints.name(),
+                system.addForce(restraintff));
+
+    const auto atom_restraints = restraints.atomRestraints();
+    const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+    const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
+    const double internal_to_de = (1 * SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
+
+    std::vector<double> custom_params = {1.0, 0.0, 0.0, 0.0};
+
+    for (const auto &restraint : atom_restraints)
+    {
+        int atom0_index = restraint.atom0();
+        int atom1_index = restraint.atom1();
+
+        if (atom0_index < 0 or atom0_index >= natoms)
+        throw SireError::invalid_index(QObject::tr(
+                                "Invalid particle index! %1 from %2")
+                                .arg(atom0_index)
+                                .arg(natoms),
+                            CODELOC);
+
+        if (atom1_index < 0 or atom1_index >= natoms)
+        throw SireError::invalid_index(QObject::tr(
+                                "Invalid particle index! %1 from %2")
+                                .arg(atom1_index)
+                                .arg(natoms),
+                            CODELOC);
+
+        custom_params[0] = 1.0;                                     // rho - always equal to 1 (scaled by lever)
+        custom_params[1] = restraint.k().value() * internal_to_k;   // k
+        custom_params[2] = restraint.r0().value() * internal_to_nm; // r0
+        custom_params[3] = restraint.de().value() * internal_to_de; // de
+
+        restraintff->addBond(atom0_index, atom1_index, custom_params);
+    }
+}
+
 /** Add all of the positional restraints from 'restraints' to the passed
  *  system, which is acted on by the passed LambdaLever. All of the
  *  existing anchor atoms are in 'anchor_coords', which this function
@@ -468,11 +546,102 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     }
 }
 
+void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
+                              OpenMM::System &system, LambdaLever &lambda_lever,
+                              int natoms)
+{
+    if (restraints.isEmpty())
+        return;
+
+    // Internal functions to convert to OpenMM units
+    const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+    const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
+
+    // Function to convert SireMaths::Vector to OpenMM::Vec3
+    auto to_vec3 = [](const SireMaths::Vector &coords)
+    {
+        const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+
+        return OpenMM::Vec3(internal_to_nm * coords.x(),
+                            internal_to_nm * coords.y(),
+                            internal_to_nm * coords.z());
+    };
+
+    // Count the number of existing RMSD forces in the system
+    std::vector<OpenMM::Force*> forces;
+
+    for (int i = 0; i < system.getNumForces(); ++i) {
+        forces.push_back(&system.getForce(i));
+    }
+
+    int n_CVForces = 0;
+
+    for (auto* force : forces) {
+        if (dynamic_cast<OpenMM::CustomCVForce*>(force)) {
+            n_CVForces++;
+        }
+    }
+
+    // Apply RMSD restraining potential using OpenMM::CustomCVForce
+    const auto atom_restraints = restraints.restraints();
+    for (const auto &restraint : atom_restraints)
+    {
+        // Define unique parameter names for rho, k and rmsd_b
+        std::string rho_unique = "rho_" + std::to_string(n_CVForces);
+        std::string k_unique = "k_" + std::to_string(n_CVForces);
+        std::string rmsd_b_unique = "rmsd_b_" + std::to_string(n_CVForces);
+        // Unique CV name
+        std::string rmsd_unique = "rmsd_" + std::to_string(n_CVForces);
+
+        // energy expression of a flat-bottom well potential, scaled by rho
+        const auto energy_expression = rho_unique + "*" + k_unique + "*step(delta)*delta*delta;" +
+            "delta=(" + rmsd_unique + "-" + rmsd_b_unique + ")";
+
+        double k = restraint.k().value() * internal_to_k;
+        double r0 = restraint.r0().value() * internal_to_nm;
+
+        // Extract indices of atoms to be restrained
+        const int n_particles = restraint.atoms().size();
+        std::vector<int> particles;
+        particles.resize(n_particles);
+
+        for (int i = 0; i < n_particles; ++i)
+        {
+            particles[i] = restraint.atoms()[i];
+        }
+
+        // Extract reference positions and convert to correct units
+        std::vector<OpenMM::Vec3> referencePositions;
+        const int n_total = restraint.ref_positions().size();
+        referencePositions.resize(n_total);
+
+        for (int i = 0; i < n_total; ++i)
+        {
+            referencePositions[i] = to_vec3(restraint.ref_positions()[i]);
+        }
+
+        auto *restraintff = new OpenMM::CustomCVForce(energy_expression);
+        restraintff->setName("RMSDRestraintForce");
+
+        restraintff->addGlobalParameter(rho_unique, 1.0);
+        restraintff->addGlobalParameter(k_unique, k);
+        restraintff->addGlobalParameter(rmsd_b_unique, r0);
+
+        auto *rmsdCV = new OpenMM::RMSDForce(referencePositions, particles);
+        restraintff->addCollectiveVariable(rmsd_unique, rmsdCV);
+
+        lambda_lever.addRestraintIndex(restraints.name(),
+                                    system.addForce(restraintff));
+
+        // Update the counter for number of CustomCVForces
+        n_CVForces++;
+    }
+}
+
 /** Add all of the angle restraints from 'restraints' to the passed
  *  system, which is acted on by the passed LambdaLever. The number
  *  of real (non-anchor) atoms in the OpenMM::System is 'natoms'
  */
-
 void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
                            OpenMM::System &system, LambdaLever &lambda_lever,
                            int natoms)
@@ -693,7 +862,9 @@ void _set_clj_cutoff(OpenMM::NonbondedForce &cljff,
  */
 std::shared_ptr<std::vector<OpenMM::Vec3>>
 _set_box_vectors(OpenMM::System &system,
-                 const ForceFieldInfo &ffinfo)
+                 const SelectorMol &mols,
+                 const ForceFieldInfo &ffinfo,
+                 const PropertyMap &map)
 {
     // create the periodic box vectors
     std::shared_ptr<std::vector<OpenMM::Vec3>> boxvecs;
@@ -739,6 +910,45 @@ _set_box_vectors(OpenMM::System &system,
             boxvecs_data[1] = OpenMM::Vec3(yx, yy, yz);
             boxvecs_data[2] = OpenMM::Vec3(zx, zy, zz);
         }
+
+        system.setDefaultPeriodicBoxVectors(boxvecs_data[0],
+                                            boxvecs_data[1],
+                                            boxvecs_data[2]);
+    }
+    else
+    {
+        // Set the box vectors based on the AABox of the system and nonbonded
+        // cutoff distance.
+
+        QVector<QVector<SireMaths::Vector>> all_coords;
+
+        // Get the coordinates from all of the molecules.
+        for (const auto &mol : mols)
+        {
+            const auto coords = mol.property(map["coordinates"]).asA<SireMol::AtomCoords>().toVector();
+            all_coords.append(coords);
+        }
+
+        // Create an AABox.
+        const auto aabox = SireVol::AABox(all_coords);
+
+        // Work out the minimum box size and convert from Angstroms to nm.
+        auto min_box = 2.0 * aabox.halfExtents() * 0.1;
+
+        // Adjust the box size based on the cutoff distance.
+        if (ffinfo.hasCutoff())
+        {
+            // Get the nonbonded cutoff.
+            const auto double_cutoff = 2.0 * ffinfo.cutoff().to(SireUnits::nanometers);
+            min_box += SireMaths::Vector(double_cutoff, double_cutoff, double_cutoff);
+        }
+
+        boxvecs.reset(new std::vector<OpenMM::Vec3>(3));
+        auto boxvecs_data = boxvecs->data();
+
+        boxvecs_data[0] = OpenMM::Vec3(min_box.x(), 0, 0);
+        boxvecs_data[1] = OpenMM::Vec3(0, min_box.y(), 0);
+        boxvecs_data[2] = OpenMM::Vec3(0, 0, min_box.z());
 
         system.setDefaultPeriodicBoxVectors(boxvecs_data[0],
                                             boxvecs_data[1],
@@ -844,7 +1054,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     }
 
     // set the box vectors for periodic spaces
-    auto boxvecs = _set_box_vectors(system, ffinfo);
+    auto boxvecs = _set_box_vectors(system, mols, ffinfo, map);
 
     // Are any of the molecules perturbable, and if they are,
     // should we just ignore perturbations?
@@ -1900,6 +2110,16 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             {
                 _add_positional_restraints(prop.read().asA<SireMM::PositionalRestraints>(),
                                            system, lambda_lever, anchor_coords, start_index);
+            }
+            else if (prop.read().isA<SireMM::MorsePotentialRestraints>())
+            {
+                _add_morse_potential_restraints(prop.read().asA<SireMM::MorsePotentialRestraints>(),
+                                     system, lambda_lever, start_index);
+            }
+            else if (prop.read().isA<SireMM::RMSDRestraints>())
+            {
+                _add_rmsd_restraints(prop.read().asA<SireMM::RMSDRestraints>(),
+                                           system, lambda_lever, start_index);
             }
             else if (prop.read().isA<SireMM::BondRestraints>())
             {

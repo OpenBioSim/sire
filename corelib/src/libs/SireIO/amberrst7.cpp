@@ -598,11 +598,11 @@ static QStringList toLines(const QVector<QVector<Vector>> &all_coords, const QVe
         }
     }
 
-    QStringList lines = writeFloatData(coords, AmberFormat(AmberPrm::FLOAT, 6, 12, 7), errors, false, 'f');
+    QStringList lines = writeFloatData(coords, AmberFormat(AmberPrm::FFLOAT, 6, 12, 7), errors, false);
 
     if (has_velocities)
     {
-        lines += writeFloatData(vels, AmberFormat(AmberPrm::FLOAT, 6, 12, 7), errors, false, 'f');
+        lines += writeFloatData(vels, AmberFormat(AmberPrm::FFLOAT, 6, 12, 7), errors, false);
     }
 
     return lines;
@@ -775,7 +775,7 @@ AmberRst7::AmberRst7(const System &system, const PropertyMap &map)
         boxdims[4] = cubic_angs.y();
         boxdims[5] = cubic_angs.z();
 
-        lines += writeFloatData(boxdims, AmberFormat(AmberPrm::FLOAT, 6, 12, 7), &errors, false, 'f');
+        lines += writeFloatData(boxdims, AmberFormat(AmberPrm::FFLOAT, 6, 12, 7), &errors, false);
     }
     else if (space.read().isA<TriclinicBox>())
     {
@@ -795,7 +795,7 @@ AmberRst7::AmberRst7(const System &system, const PropertyMap &map)
         boxdims[4] = beta;
         boxdims[5] = gamma;
 
-        lines += writeFloatData(boxdims, AmberFormat(AmberPrm::FLOAT, 6, 12, 7), &errors, false, 'f');
+        lines += writeFloatData(boxdims, AmberFormat(AmberPrm::FFLOAT, 6, 12, 7), &errors, false);
     }
 
     if (not errors.isEmpty())

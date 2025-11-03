@@ -378,9 +378,9 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
 
     for lam_val, nrg in expected_hbonds_not_perturbed.items():
         d.set_lambda(lam_val)
-        calc_hbonds_not_perturbed_no_energy[
-            lam_val
-        ] = d.current_potential_energy().value()
+        calc_hbonds_not_perturbed_no_energy[lam_val] = (
+            d.current_potential_energy().value()
+        )
 
     d = mols.dynamics(
         constraint="bonds-not-perturbed",
@@ -394,9 +394,9 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
 
     for lam_val, nrg in expected_hbonds_not_perturbed.items():
         d.set_lambda(lam_val)
-        calc_hbonds_not_perturbed_no_energy_swap[
-            lam_val
-        ] = d.current_potential_energy().value()
+        calc_hbonds_not_perturbed_no_energy_swap[lam_val] = (
+            d.current_potential_energy().value()
+        )
 
     d = mols.dynamics(
         constraint="h-bonds",
@@ -542,9 +542,9 @@ def test_neopentane_methane_scan_no_cutoff(neopentane_methane, openmm_platform):
 
     for lam_val, nrg in expected_hbonds_not_perturbed.items():
         d.set_lambda(lam_val)
-        calc_hbonds_not_perturbed_no_energy[
-            lam_val
-        ] = d.current_potential_energy().value()
+        calc_hbonds_not_perturbed_no_energy[lam_val] = (
+            d.current_potential_energy().value()
+        )
 
     d = mols.dynamics(
         constraint="bonds-not-perturbed",
@@ -558,9 +558,9 @@ def test_neopentane_methane_scan_no_cutoff(neopentane_methane, openmm_platform):
 
     for lam_val, nrg in expected_hbonds_not_perturbed.items():
         d.set_lambda(lam_val)
-        calc_hbonds_not_perturbed_no_energy_swap[
-            lam_val
-        ] = d.current_potential_energy().value()
+        calc_hbonds_not_perturbed_no_energy_swap[lam_val] = (
+            d.current_potential_energy().value()
+        )
 
     # should match the no_constraints somd energy at the end points
     assert calc_none[0.0] == pytest.approx(expected_none[0.0], abs=1e-2)

@@ -32,6 +32,8 @@ namespace bp = boost::python;
 
 SireMol::PerturbationSymbols __copy__(const SireMol::PerturbationSymbols &other){ return SireMol::PerturbationSymbols(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMol::PerturbationSymbols&){ return "SireMol::PerturbationSymbols";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -78,9 +80,9 @@ void register_PerturbationSymbols_class(){
                 , "Return the symbol used to represent the driving (reaction)\ncoordinate" );
         
         }
-        PerturbationSymbols_exposer.def( "__copy__", &__copy__);
-        PerturbationSymbols_exposer.def( "__deepcopy__", &__copy__);
-        PerturbationSymbols_exposer.def( "clone", &__copy__);
+        PerturbationSymbols_exposer.def( "__copy__", &__copy__<SireMol::PerturbationSymbols>);
+        PerturbationSymbols_exposer.def( "__deepcopy__", &__copy__<SireMol::PerturbationSymbols>);
+        PerturbationSymbols_exposer.def( "clone", &__copy__<SireMol::PerturbationSymbols>);
         PerturbationSymbols_exposer.def( "__str__", &pvt_get_name);
         PerturbationSymbols_exposer.def( "__repr__", &pvt_get_name);
     }

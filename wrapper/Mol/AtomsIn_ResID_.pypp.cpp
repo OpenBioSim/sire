@@ -55,6 +55,8 @@ namespace bp = boost::python;
 
 SireMol::AtomsIn<SireMol::ResID> __copy__(const SireMol::AtomsIn<SireMol::ResID> &other){ return SireMol::AtomsIn<SireMol::ResID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -169,9 +171,9 @@ void register_AtomsIn_ResID__class(){
         
         }
         AtomsIn_ResID__exposer.staticmethod( "typeName" );
-        AtomsIn_ResID__exposer.def( "__copy__", &__copy__);
-        AtomsIn_ResID__exposer.def( "__deepcopy__", &__copy__);
-        AtomsIn_ResID__exposer.def( "clone", &__copy__);
+        AtomsIn_ResID__exposer.def( "__copy__", &__copy__<SireMol::AtomsIn<SireMol::ResID>>);
+        AtomsIn_ResID__exposer.def( "__deepcopy__", &__copy__<SireMol::AtomsIn<SireMol::ResID>>);
+        AtomsIn_ResID__exposer.def( "clone", &__copy__<SireMol::AtomsIn<SireMol::ResID>>);
         AtomsIn_ResID__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomsIn<SireMol::ResID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomsIn_ResID__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomsIn<SireMol::ResID> >,

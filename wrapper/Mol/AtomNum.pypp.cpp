@@ -59,6 +59,8 @@ namespace bp = boost::python;
 
 SireMol::AtomNum __copy__(const SireMol::AtomNum &other){ return SireMol::AtomNum(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -168,9 +170,9 @@ void register_AtomNum_class(){
         
         }
         AtomNum_exposer.staticmethod( "typeName" );
-        AtomNum_exposer.def( "__copy__", &__copy__);
-        AtomNum_exposer.def( "__deepcopy__", &__copy__);
-        AtomNum_exposer.def( "clone", &__copy__);
+        AtomNum_exposer.def( "__copy__", &__copy__<SireMol::AtomNum>);
+        AtomNum_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomNum>);
+        AtomNum_exposer.def( "clone", &__copy__<SireMol::AtomNum>);
         AtomNum_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomNum >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomNum_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomNum >,

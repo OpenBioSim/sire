@@ -18,6 +18,8 @@ namespace bp = boost::python;
 
 SireMol::SegsWithAtoms __copy__(const SireMol::SegsWithAtoms &other){ return SireMol::SegsWithAtoms(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -135,9 +137,9 @@ void register_SegsWithAtoms_class(){
         
         }
         SegsWithAtoms_exposer.staticmethod( "typeName" );
-        SegsWithAtoms_exposer.def( "__copy__", &__copy__);
-        SegsWithAtoms_exposer.def( "__deepcopy__", &__copy__);
-        SegsWithAtoms_exposer.def( "clone", &__copy__);
+        SegsWithAtoms_exposer.def( "__copy__", &__copy__<SireMol::SegsWithAtoms>);
+        SegsWithAtoms_exposer.def( "__deepcopy__", &__copy__<SireMol::SegsWithAtoms>);
+        SegsWithAtoms_exposer.def( "clone", &__copy__<SireMol::SegsWithAtoms>);
         SegsWithAtoms_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::SegsWithAtoms >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SegsWithAtoms_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::SegsWithAtoms >,

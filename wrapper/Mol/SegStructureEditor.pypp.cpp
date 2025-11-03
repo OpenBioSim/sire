@@ -42,6 +42,8 @@ namespace bp = boost::python;
 
 SireMol::SegStructureEditor __copy__(const SireMol::SegStructureEditor &other){ return SireMol::SegStructureEditor(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -373,9 +375,9 @@ void register_SegStructureEditor_class(){
         
         }
         SegStructureEditor_exposer.staticmethod( "typeName" );
-        SegStructureEditor_exposer.def( "__copy__", &__copy__);
-        SegStructureEditor_exposer.def( "__deepcopy__", &__copy__);
-        SegStructureEditor_exposer.def( "clone", &__copy__);
+        SegStructureEditor_exposer.def( "__copy__", &__copy__<SireMol::SegStructureEditor>);
+        SegStructureEditor_exposer.def( "__deepcopy__", &__copy__<SireMol::SegStructureEditor>);
+        SegStructureEditor_exposer.def( "clone", &__copy__<SireMol::SegStructureEditor>);
         SegStructureEditor_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::SegStructureEditor >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SegStructureEditor_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::SegStructureEditor >,

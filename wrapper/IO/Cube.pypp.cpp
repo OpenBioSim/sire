@@ -31,6 +31,8 @@ namespace bp = boost::python;
 
 SireIO::Cube __copy__(const SireIO::Cube &other){ return SireIO::Cube(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireIO::Cube&){ return "SireIO::Cube";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -94,9 +96,9 @@ void register_Cube_class(){
                 , "" );
         
         }
-        Cube_exposer.def( "__copy__", &__copy__);
-        Cube_exposer.def( "__deepcopy__", &__copy__);
-        Cube_exposer.def( "clone", &__copy__);
+        Cube_exposer.def( "__copy__", &__copy__<SireIO::Cube>);
+        Cube_exposer.def( "__deepcopy__", &__copy__<SireIO::Cube>);
+        Cube_exposer.def( "clone", &__copy__<SireIO::Cube>);
         Cube_exposer.def( "__str__", &pvt_get_name);
         Cube_exposer.def( "__repr__", &pvt_get_name);
     }

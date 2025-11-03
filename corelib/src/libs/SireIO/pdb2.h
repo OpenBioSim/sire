@@ -297,6 +297,19 @@ namespace SireIO
         /** Additional atom velocity data. */
         QVector<SireMol::Velocity3D> velocities;
 
+        /** Whether a CRYST1 record was found in the file. */
+        bool has_cryst1;
+
+        /** Cell dimensions. */
+        double cell_x;
+        double cell_y;
+        double cell_z;
+
+        /** Cell angles. */
+        double cell_alpha;
+        double cell_beta;
+        double cell_gamma;
+
         /** Any warnings that were raised when reading the file. */
         QStringList parse_warnings;
     };

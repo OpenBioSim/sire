@@ -524,8 +524,9 @@ def save_to_string(
 
 def save(
     molecules,
-    filename: str,
+    filename: _Union[str, _List[str]],
     format: _Union[str, _List[str]] = None,
+    save_velocities: bool = True,
     show_warnings=True,
     silent: bool = False,
     directory: str = ".",
@@ -551,7 +552,9 @@ def save(
      filename (str):
          The name of the file to which to write the file. Extensions
          will be automatically added if they are needed to match
-         the formats of the file (or files) that are written.
+         the formats of the file (or files) that are written. If
+         'molecules' is a TrajectoryIterator, then this can also be
+         list of filenames, one for each frame of the trajectory.
 
      format (str or list(str)):
          The format (or formats) that should be used to write the
@@ -560,6 +563,9 @@ def save(
          If this doesn't have an extension, then it will be guessed
          based on the formats used to load the molecule originally.
          If it still isn't available, then PDB will be used.
+
+     save_velocities (bool):
+        Whether or not to save velocities.
 
       show_warnings (bool):
          Whether or not to write out any warnings that occur during save
@@ -597,6 +603,16 @@ def save(
 
     m = {"parallel": parallel, "show_warnings": show_warnings}
 
+    if not isinstance(save_velocities, bool):
+        raise TypeError(
+            f"'save_velocities' must be of type bool, not {type(save_velocities)}"
+        )
+
+    # remap the velocity property to a null value so that velocities
+    # are not saved to file
+    if not save_velocities:
+        m["velocity"] = "null"
+
     for key in kwargs.keys():
         m[key] = kwargs[key]
 
@@ -614,7 +630,11 @@ def save(
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        filename = os.path.join(directory, filename)
+        if isinstance(filename, str):
+            filename = os.path.join(directory, filename)
+        elif isinstance(filename, (list, tuple)):
+            for i in range(0, len(filename)):
+                filename[i] = os.path.join(directory, filename[i])
 
     if format is not None:
         if type(format) is str:
@@ -623,6 +643,37 @@ def save(
         map.set("fileformat", ",".join(format))
 
     if hasattr(molecules, "_is_trajectory_iterator"):
+        # The user has passed a list of filenames - one for each frame.
+        if isinstance(filename, (list, tuple)):
+            # Make sure the number of filenames matches the number of frames.
+            if len(filename) != molecules.num_frames():
+                raise ValueError(
+                    f"When saving a trajectory, if you pass a list of "
+                    f"filenames, there must be one for each frame. "
+                    f"You passed {len(filename)} filenames, but the "
+                    f"trajectory has {molecules.num_frames()} frames."
+                )
+
+            # Make sure the filenames have consistent extensions.
+            exts = set()
+            for fname in filename:
+                import os
+
+                exts.add(os.path.splitext(fname)[1])
+            if len(exts) != 1:
+                raise ValueError(
+                    "When saving a trajectory, if you pass a list of "
+                    "filenames, they must all have the same file "
+                    "extension."
+                )
+
+            # Set the 'frame_names' property in the map to the list of filenames.
+            map.set("frame_names", ",".join(filename))
+
+            # Set the filename to be the first filename in the list. This
+            # argument is redundant now, but MoleculeParser.save requires it.
+            filename = filename[0]
+
         # Doing it this way rather that using type(molecules)
         # as type(molecules) randomly fails, and because
         # this way is more pythonic

@@ -79,6 +79,8 @@ namespace bp = boost::python;
 
 SireIO::NullParser __copy__(const SireIO::NullParser &other){ return SireIO::NullParser(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -231,9 +233,9 @@ void register_NullParser_class(){
         
         }
         NullParser_exposer.staticmethod( "typeName" );
-        NullParser_exposer.def( "__copy__", &__copy__);
-        NullParser_exposer.def( "__deepcopy__", &__copy__);
-        NullParser_exposer.def( "clone", &__copy__);
+        NullParser_exposer.def( "__copy__", &__copy__<SireIO::NullParser>);
+        NullParser_exposer.def( "__deepcopy__", &__copy__<SireIO::NullParser>);
+        NullParser_exposer.def( "clone", &__copy__<SireIO::NullParser>);
         NullParser_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::NullParser >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         NullParser_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::NullParser >,

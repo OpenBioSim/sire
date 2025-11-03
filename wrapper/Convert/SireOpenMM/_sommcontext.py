@@ -309,6 +309,12 @@ class SOMMContext(_Context):
         """
         raise NotImplementedError("We can't yet set the pressure")
 
+    def set_surface_tension(self, surface_tension):
+        """
+        Set the target surface tension for the dynamics.
+        """
+        raise NotImplementedError("We can't yet set the surface tension")
+
     def get_potential_energy(self, to_sire_units: bool = True):
         """
         Calculate and return the potential energy of the system

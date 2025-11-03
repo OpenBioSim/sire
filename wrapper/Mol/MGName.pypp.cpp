@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 SireMol::MGName __copy__(const SireMol::MGName &other){ return SireMol::MGName(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -129,9 +131,9 @@ void register_MGName_class(){
         
         }
         MGName_exposer.staticmethod( "typeName" );
-        MGName_exposer.def( "__copy__", &__copy__);
-        MGName_exposer.def( "__deepcopy__", &__copy__);
-        MGName_exposer.def( "clone", &__copy__);
+        MGName_exposer.def( "__copy__", &__copy__<SireMol::MGName>);
+        MGName_exposer.def( "__deepcopy__", &__copy__<SireMol::MGName>);
+        MGName_exposer.def( "clone", &__copy__<SireMol::MGName>);
         MGName_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::MGName >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         MGName_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::MGName >,

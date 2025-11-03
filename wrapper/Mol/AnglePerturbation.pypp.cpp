@@ -32,6 +32,8 @@ namespace bp = boost::python;
 
 SireMol::AnglePerturbation __copy__(const SireMol::AnglePerturbation &other){ return SireMol::AnglePerturbation(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -138,9 +140,9 @@ void register_AnglePerturbation_class(){
         
         }
         AnglePerturbation_exposer.staticmethod( "typeName" );
-        AnglePerturbation_exposer.def( "__copy__", &__copy__);
-        AnglePerturbation_exposer.def( "__deepcopy__", &__copy__);
-        AnglePerturbation_exposer.def( "clone", &__copy__);
+        AnglePerturbation_exposer.def( "__copy__", &__copy__<SireMol::AnglePerturbation>);
+        AnglePerturbation_exposer.def( "__deepcopy__", &__copy__<SireMol::AnglePerturbation>);
+        AnglePerturbation_exposer.def( "clone", &__copy__<SireMol::AnglePerturbation>);
         AnglePerturbation_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AnglePerturbation >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AnglePerturbation_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AnglePerturbation >,

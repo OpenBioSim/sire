@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<0, 1, -1, 0, 0, 0, 0> > __copy__(const SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<0, 1, -1, 0, 0, 0, 0> > &other){ return SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<0, 1, -1, 0, 0, 0, 0> >(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -199,9 +201,9 @@ void register_Velocity3D_class(){
         
         }
         Velocity3D_exposer.staticmethod( "typeName" );
-        Velocity3D_exposer.def( "__copy__", &__copy__);
-        Velocity3D_exposer.def( "__deepcopy__", &__copy__);
-        Velocity3D_exposer.def( "clone", &__copy__);
+        Velocity3D_exposer.def( "__copy__", &__copy__<SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<0, 1, -1, 0, 0, 0, 0> >>);
+        Velocity3D_exposer.def( "__deepcopy__", &__copy__<SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<0, 1, -1, 0, 0, 0, 0> >>);
+        Velocity3D_exposer.def( "clone", &__copy__<SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<0, 1, -1, 0, 0, 0, 0> >>);
         Velocity3D_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<0, 1, -1, 0, 0, 0, 0> > >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Velocity3D_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<0, 1, -1, 0, 0, 0, 0> > >,

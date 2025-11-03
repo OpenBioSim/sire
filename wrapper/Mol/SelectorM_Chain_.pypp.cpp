@@ -55,6 +55,8 @@ namespace bp = boost::python;
 
 SireMol::SelectorM<SireMol::Chain> __copy__(const SireMol::SelectorM<SireMol::Chain> &other){ return SireMol::SelectorM<SireMol::Chain>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -1807,6 +1809,32 @@ void register_SelectorM_Chain__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Chain >::toSelectorList
+        
+            typedef SireMol::SelectorM< SireMol::Chain > exported_class_t;
+            typedef ::QList< SireMol::Selector< SireMol::Chain > > ( ::SireMol::SelectorM< SireMol::Chain >::*toSelectorList_function_type)(  ) const;
+            toSelectorList_function_type toSelectorList_function_value( &::SireMol::SelectorM< SireMol::Chain >::toSelectorList );
+            
+            SelectorM_Chain__exposer.def( 
+                "toSelectorList"
+                , toSelectorList_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Chain >::toSelectorVector
+        
+            typedef SireMol::SelectorM< SireMol::Chain > exported_class_t;
+            typedef ::QVector< SireMol::Selector< SireMol::Chain > > ( ::SireMol::SelectorM< SireMol::Chain >::*toSelectorVector_function_type)(  ) const;
+            toSelectorVector_function_type toSelectorVector_function_value( &::SireMol::SelectorM< SireMol::Chain >::toSelectorVector );
+            
+            SelectorM_Chain__exposer.def( 
+                "toSelectorVector"
+                , toSelectorVector_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Chain >::toSingleMolecule
         
             typedef SireMol::SelectorM< SireMol::Chain > exported_class_t;
@@ -1903,9 +1931,9 @@ void register_SelectorM_Chain__class(){
         
         }
         SelectorM_Chain__exposer.staticmethod( "typeName" );
-        SelectorM_Chain__exposer.def( "__copy__", &__copy__);
-        SelectorM_Chain__exposer.def( "__deepcopy__", &__copy__);
-        SelectorM_Chain__exposer.def( "clone", &__copy__);
+        SelectorM_Chain__exposer.def( "__copy__", &__copy__<SireMol::SelectorM<SireMol::Chain>>);
+        SelectorM_Chain__exposer.def( "__deepcopy__", &__copy__<SireMol::SelectorM<SireMol::Chain>>);
+        SelectorM_Chain__exposer.def( "clone", &__copy__<SireMol::SelectorM<SireMol::Chain>>);
         SelectorM_Chain__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::SelectorM<SireMol::Chain> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SelectorM_Chain__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::SelectorM<SireMol::Chain> >,

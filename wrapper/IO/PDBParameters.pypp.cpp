@@ -85,6 +85,8 @@ namespace bp = boost::python;
 
 SireIO::PDBParameters __copy__(const SireIO::PDBParameters &other){ return SireIO::PDBParameters(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireIO::PDBParameters&){ return "SireIO::PDBParameters";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -263,9 +265,9 @@ void register_PDBParameters_class(){
                 , "The function used to process segment names. Must be a StringMangler()\n\nsource  == segment-name-mangler\ndefault == TrimString()\n" );
         
         }
-        PDBParameters_exposer.def( "__copy__", &__copy__);
-        PDBParameters_exposer.def( "__deepcopy__", &__copy__);
-        PDBParameters_exposer.def( "clone", &__copy__);
+        PDBParameters_exposer.def( "__copy__", &__copy__<SireIO::PDBParameters>);
+        PDBParameters_exposer.def( "__deepcopy__", &__copy__<SireIO::PDBParameters>);
+        PDBParameters_exposer.def( "clone", &__copy__<SireIO::PDBParameters>);
         PDBParameters_exposer.def( "__str__", &pvt_get_name);
         PDBParameters_exposer.def( "__repr__", &pvt_get_name);
     }

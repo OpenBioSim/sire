@@ -1,4 +1,4 @@
-"""
+"""l
 Installation script for Sire
 
 This assumes that the python that is used to execute this script
@@ -383,6 +383,9 @@ def conda_install(
         dependencies_to_skip = []
 
     for dependency in dependencies:
+	# remove any quotes from the dependency
+        dependency = dependency.replace("\"", "")
+
         if dependency == "python" or is_installed(dependency, conda_exe):
             # no need to install again
             continue
@@ -399,10 +402,8 @@ def conda_install(
             continue
 
         # remove duplicates
-        dep = f'"{dependency}"'
-
-        if dep not in deps:
-            deps.append(dep)
+        if dependency not in deps:
+            deps.append(dependency)
 
     dependencies = deps
 
@@ -463,6 +464,23 @@ def install_requires(install_bss_reqs=False, install_emle_reqs=False, yes=True):
         except ImportError as e:
             print("\n\n[ERROR] ** You need to install pip-requirements-parser")
             print("Run `conda install -c conda-forge pip-requirements-parser\n\n")
+            raise e
+
+    try:
+        import pkg_resources
+    except Exception:
+        # this didn't import - we are missing setuptools
+        print("Installing setuptools")
+        conda_install(
+            ["setuptools"],
+            install_bss_reqs,
+            install_emle_reqs=False,
+            yes=yes)
+        try:
+            import pkg_resources
+        except Exception:
+            print("\n\n[ERROR] ** You need to install setuptools")
+            print("Run 'conda install -c conda-forge setuptools\n\n")
             raise e
 
     reqs = parse_requirements("requirements_host.txt")
@@ -562,6 +580,7 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     # get the compilers
     if conda_build:
         print("This is a conda build")
+
         CXX = os.environ["CXX"]
         CC = os.environ["CC"]
 

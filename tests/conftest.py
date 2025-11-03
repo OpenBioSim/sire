@@ -151,6 +151,11 @@ def ethane_12dichloroethane():
 
 
 @pytest.fixture(scope="session")
+def cyclopentane_cyclohexane():
+    return sr.load_test_files("cyclopentane_cyclohexane.bss")
+
+
+@pytest.fixture(scope="session")
 def pentane_cyclopentane():
     return sr.load_test_files("pentane_cyclopentane.bss")
 
@@ -243,6 +248,16 @@ def openmm_platform():
 @pytest.fixture(scope="session")
 def thrombin_complex():
     return sr.load_test_files("thrombin.top", "thrombin.rst7")
+
+
+@pytest.fixture(scope="session")
+def amber_cmap():
+    return sr.load_test_files("amber_cmap.prm7")
+
+
+@pytest.fixture(scope="session")
+def gromacs_cmap():
+    return sr.load_test_files("1aki.gro", "1aki.top")
 
 
 @pytest.fixture(scope="session")

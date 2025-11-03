@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::ChainProperty<SireBase::PropPtr<SireBase::Property> > __copy__(const SireMol::ChainProperty<SireBase::PropPtr<SireBase::Property> > &other){ return SireMol::ChainProperty<SireBase::PropPtr<SireBase::Property> >(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -393,9 +395,9 @@ void register_ChainPropertyProperty_class(){
         }
         ChainPropertyProperty_exposer.staticmethod( "fromVariant" );
         ChainPropertyProperty_exposer.staticmethod( "typeName" );
-        ChainPropertyProperty_exposer.def( "__copy__", &__copy__);
-        ChainPropertyProperty_exposer.def( "__deepcopy__", &__copy__);
-        ChainPropertyProperty_exposer.def( "clone", &__copy__);
+        ChainPropertyProperty_exposer.def( "__copy__", &__copy__<SireMol::ChainProperty<SireBase::PropPtr<SireBase::Property> >>);
+        ChainPropertyProperty_exposer.def( "__deepcopy__", &__copy__<SireMol::ChainProperty<SireBase::PropPtr<SireBase::Property> >>);
+        ChainPropertyProperty_exposer.def( "clone", &__copy__<SireMol::ChainProperty<SireBase::PropPtr<SireBase::Property> >>);
         ChainPropertyProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::ChainProperty<SireBase::PropPtr<SireBase::Property> > >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ChainPropertyProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::ChainProperty<SireBase::PropPtr<SireBase::Property> > >,

@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 SireMol::Selector<SireMol::Residue> __copy__(const SireMol::Selector<SireMol::Residue> &other){ return SireMol::Selector<SireMol::Residue>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -1097,9 +1099,9 @@ void register_Selector_Residue__class(){
         
         }
         Selector_Residue__exposer.staticmethod( "typeName" );
-        Selector_Residue__exposer.def( "__copy__", &__copy__);
-        Selector_Residue__exposer.def( "__deepcopy__", &__copy__);
-        Selector_Residue__exposer.def( "clone", &__copy__);
+        Selector_Residue__exposer.def( "__copy__", &__copy__<SireMol::Selector<SireMol::Residue>>);
+        Selector_Residue__exposer.def( "__deepcopy__", &__copy__<SireMol::Selector<SireMol::Residue>>);
+        Selector_Residue__exposer.def( "clone", &__copy__<SireMol::Selector<SireMol::Residue>>);
         Selector_Residue__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Selector<SireMol::Residue> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Selector_Residue__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Selector<SireMol::Residue> >,

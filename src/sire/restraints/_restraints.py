@@ -6,7 +6,9 @@ __all__ = [
     "distance",
     "inverse_bond",
     "inverse_distance",
+    "morse_potential",
     "positional",
+    "rmsd",
 ]
 
 from .. import u
@@ -24,7 +26,7 @@ def _to_atoms(mols, atoms):
 
 def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
     """
-    Create a set of anglel restraints from all of the atoms in 'atoms'
+    Create a set of angle restraints from all of the atoms in 'atoms'
     where all atoms are contained in the container 'mols', using the
     passed values of the force constant 'ktheta' and equilibrium
     angle value theta0.
@@ -54,7 +56,7 @@ def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
 
     Returns
     -------
-    AnglelRestraints : SireMM::AngleRestraints
+    AngleRestraints : SireMM::AngleRestraints
         A container of angle restraints, where the first restraint is
         the AngleRestraint created. The angle restraint created can be
         extracted with AngleRestraints[0].
@@ -665,6 +667,242 @@ def distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):
     return restraints
 
 
+def morse_potential(
+    mols,
+    atoms0=None,
+    atoms1=None,
+    r0=None,
+    k=None,
+    de=None,
+    name=None,
+    auto_parametrise=False,
+    map=None,
+):
+    """
+    Create a set of Morse restraints from all of the atoms in 'atoms'
+    where all atoms are contained in the container 'mols', using the
+    passed values of the force constant, 'k', equilibrium
+    distance value, r0, and well depth, de.
+
+    If r0 is None, then the current distance for
+    provided atoms will be used as the equilibium value.
+
+    The potential energy of the Morse potential is defined as:
+
+    e_morse=de*(1-exp(-sqrt(k/(2*de))*delta))^2
+    where, delta=(r-r0). Additionally, if alchemical Morse potential is used,
+    the potential is scaled as:
+
+    rho*e_morse
+    where rho is the lambda scaling parameter.
+
+    Parameters
+    ----------
+    mols : sire.system._system.System
+        The system containing the atoms.
+
+    atoms0 : SireMol::Selector<SireMol::Atom>
+        The first atom involved in the Morse restraint.
+
+    atoms1 : SireMol::Selector<SireMol::Atom>
+        The second atom involved in the Morse restraint.
+
+    k : str or SireUnits::Dimension::GeneralUnit,
+        The force constants for the Morse restraints. Optional if
+        auto_parametrise is True.
+        Default is None.
+
+    r0 : str or SireUnits::Dimension::GeneralUnit, optional
+        The equilibrium distance for the Morse restraints. If None, this
+        will be measured from the current coordinates of the atoms.
+        Default is None.
+
+    de : str or SireUnits::Dimension::GeneralUnit
+        The well depth (dissociation energy) for the Morse potential.
+        Default is 100 kcal mol-1.
+
+    name : str, optional
+        The name of the restraint.
+        Default is None.
+
+    auto_parametrise : bool, optional
+        If True, will attempt to automatically parametrise the Morse potential
+        from a perturbation that annihilates a bond. This requires that 'mols'
+        contains exactly one molecule that is perturbable, and that this
+        molecule contains exactly one bond that is annihilated at lambda=1.
+        The atoms involved in the annihilated bond will be used as 'atoms0'
+        and 'atoms1', the equilibrium distance r0 will be set to the original
+        bond length, and the force constant k will be set to the force constant
+        of the bond in the unperturbed state. Note that 'de' must still be provided.
+        Default is False.
+
+    Returns
+    -------
+    MorsePotentialRestraints : SireMM::MorsePotentialRestraints
+        A container of Morse restraints, where the first restraint is
+        the MorsePotentialRestraint created. The Morse restraint created can be
+        extracted with MorsePotentialRestraints[0].
+    """
+
+    from .. import u
+    from ..base import create_map
+    from ..mm import MorsePotentialRestraint, MorsePotentialRestraints
+    from ..morph import link_to_reference
+
+    map = create_map(map)
+
+    if auto_parametrise is False:
+        if atoms0 is None or atoms1 is None:
+            raise ValueError(
+                "If auto_parametrise is False, then atoms0 and atoms1 must be provided"
+            )
+        if k is None:
+            raise ValueError(
+                "If auto_parametrise is False, then the force constant k must be provided"
+            )
+        elif isinstance(k, list):
+            k = [u(x) for x in k]
+        else:
+            k = [u(k)]
+
+    else:
+        mol = mols.molecules("molecule property is_perturbable")
+        ref_mol = link_to_reference(mol)
+
+        if len(ref_mol) != 1:
+            raise ValueError(
+                "We need exactly one molecule that is perturbable to automatically "
+                "set up the Morse potential restraints"
+            )
+        perturbable_mol = ref_mol[0]
+        pert = perturbable_mol.perturbation(map=map)
+        pert_omm = pert.to_openmm()
+        changed_bonds = pert_omm.changed_bonds(to_pandas=False)
+
+        # Attempt to find the bond that is annihilated at lambda=1
+        for bond in changed_bonds:
+            bond_name, length0, length1, k0, k1 = bond
+            if k1 == 0:
+
+                atom0_idx = [bond_name.atom0().index().value()][0]
+                atom1_idx = [bond_name.atom1().index().value()][0]
+
+                length0 = u(f"{length0} nm")
+
+                # Divide k0 by 2 to convert from force constant to sire half
+                # force constant k
+                if k is None:
+                    k0 = k0 / 2.0
+                    k0 = u(f"{k0} kJ mol-1 nm-2")
+                    k = [k0]
+
+                # User can still override the force constant if they want, but
+                # we need to ensure it's a list of units
+                elif isinstance(k, list):
+                    k = [u(x) for x in k]
+                else:
+                    k = [u(k)]
+
+                # Translate the atom numbers to the original system indexes
+                atoms0 = mols[
+                    f"molecule property is_perturbable and atomidx {atom0_idx}"
+                ]
+                atoms1 = mols[
+                    f"molecule property is_perturbable and atomidx {atom1_idx}"
+                ]
+                break
+
+    try:
+        atoms0 = _to_atoms(mols, atoms0)
+        atoms1 = _to_atoms(mols, atoms1)
+    except:
+        raise ValueError("Unable to find atoms0 or atoms1 in the provided system")
+
+    if atoms0.is_empty() or atoms1.is_empty():
+        raise ValueError("We need at least one atom in each group")
+
+    if len(atoms0) != len(atoms1):
+        raise ValueError("atoms0 and atoms1 must be the same length")
+
+    if len(atoms0) > 1 or len(atoms1) > 1:
+        if not auto_parametrise:
+            raise ValueError(
+                "Setting up multiple Morse potential restraints at once is not currently supported."
+                "Please set up each restraint individually and then combine them into multiple restraints."
+            )
+
+    if r0 is None:
+        if auto_parametrise:
+            r0 = [length0]
+        else:
+            # calculate all of the current distances
+            from .. import measure
+
+            r0 = []
+            for atom0, atom1 in zip(atoms0, atoms1):
+                r0.append(measure(atom0, atom1))
+    elif type(r0) is list:
+        r0 = [u(x) for x in r0]
+    else:
+        try:
+            r0 = [u(r0)]
+        except:
+            raise ValueError(f"Unable to parse 'r0' as a Sire GeneralUnit: {r0}")
+
+    if de is None:
+        de = u("100 kcal mol-1")
+    else:
+        try:
+            de = u(de)
+        except:
+            raise ValueError(f"Unable to parse 'de' as a Sire GeneralUnit: {de}")
+
+    mols = mols.atoms()
+
+    if name is None:
+        restraints = MorsePotentialRestraints()
+    else:
+        restraints = MorsePotentialRestraints(name=name)
+
+    for i, (atom0, atom1) in enumerate(zip(atoms0, atoms1)):
+        idxs0 = mols.find(atom0)
+        idxs1 = mols.find(atom1)
+
+        if type(idxs0) is int:
+            idxs0 = [idxs0]
+
+        if type(idxs1) is int:
+            idxs1 = [idxs1]
+
+        if len(idxs0) == 0:
+            raise KeyError(
+                f"Could not find atom {atom0} in the molecules. Please ensure "
+                "that 'mols' contains all of that atoms, or else we can't "
+                "add the morse potential restraints."
+            )
+
+        if len(idxs1) == 0:
+            raise KeyError(
+                f"Could not find atom {atom1} in the molecules. Please ensure "
+                "that 'mols' contains all of that atoms, or else we can't "
+                "add the morse potential restraints."
+            )
+
+        if i < len(k):
+            ik = k[i]
+        else:
+            ik = k[-1]
+
+        if i < len(r0):
+            ir0 = r0[i]
+        else:
+            ir0 = r0[-1]
+
+        restraints.add(MorsePotentialRestraint(idxs0[0], idxs1[0], ik, ir0, de))
+
+    return restraints
+
+
 def bond(*args, **kwargs):
     """
     Synonym for distance(), as a bond restraint is treated the same
@@ -874,5 +1112,96 @@ def positional(mols, atoms, k=None, r0=None, position=None, name=None, map=None)
             )
         else:
             restraints.add(PositionalRestraint(idxs[0], position[i], ik, ir0))
+
+    return restraints
+
+
+def rmsd(mols, atoms, ref=None, k=None, r0=None, name=None, map=None):
+    """
+    Create a set of RMSD restraints for the atoms specified in
+    'atoms' that are contained in the container 'mols', using the
+    passed values of 'k' and flat-bottom potential
+    well-width 'r0' for the restraints. Note that 'k' values
+    correspond to half the force constants for the harmonic
+    restraints, because the harmonic restraint energy is defined as
+    k*(rmsd - r0)**2 (hence the force is defined as 2*(rmsd - r0)).
+
+    The RMSD calculation is perfomed by default using the position
+    of mols. Optionally, a different state of the system can be
+    supplied as a reference by passing the 'ref' argument.
+
+    If 'r0' is not specified, then a simple harmonic restraint
+    is used.
+
+    If 'k' is not specified, then a default of 150 kcal mol-1 A-2
+    will be used.
+
+    Parameters
+    ----------
+    mols : sire.system._system.System
+        The system containing the atoms.
+
+    atoms : SireMol::Selector<SireMol::Atom>
+        The atoms to restrain.
+
+    ref : sire.system._system.System
+        The system from which the reference positions for the RMSD calculation
+        are extracted from. If None, this will default to the current
+        state of mols.
+
+    k : str or SireUnits::Dimension::GeneralUnit or, optional
+        The force constant for the RMSD restraints.
+        If None, this will default to 150 kcal mol-1 A-2.
+        Default is None.
+
+    r0 : str or SireUnits::Dimension::GeneralUnit, optional
+        The width of the flat bottom restraint. If None, this is zero
+        and a simple harmonic restraint is used.
+        Default is None.
+
+    Returns
+    -------
+    RMSDRestraints : SireMM::RMSDRestraints
+        A container of RMSD restraints, where the first restraint is
+        the RMSDRestraint created. The RMSD restraint created can be
+        extracted with RMSDRestraints[0].
+    """
+    from .. import u
+    from ..base import create_map
+    from ..mm import RMSDRestraint, RMSDRestraints
+
+    map = create_map(map)
+
+    if k is None:
+        k = u("150 kcal mol-1 A-2")
+    else:
+        k = u(k)
+
+    if r0 is None:
+        r0 = u("0")
+    else:
+        r0 = u(r0)
+
+    atoms = _to_atoms(mols, atoms)
+    mols = mols.atoms()
+
+    if name is None:
+        restraints = RMSDRestraints()
+    else:
+        restraints = RMSDRestraints(name=name)
+
+    # Set default reference positions to mols
+    if ref is None:
+        ref = mols
+    else:
+        try:
+            ref = ref.atoms()
+        except AttributeError:
+            raise TypeError("The reference state must be a complete system.")
+
+    # Generate list of all positions as reference for RMSD calculation
+    ref_pos = ref.atoms().property("coordinates")
+
+    restraints.add(RMSDRestraint(mols.find(atoms), ref_pos, k, r0))
 
     return restraints

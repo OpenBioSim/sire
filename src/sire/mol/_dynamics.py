@@ -174,10 +174,17 @@ class DynamicsData:
 
             self._current_time = current_time
             self._current_step = 0
+            self._prev_step = 0
             self._elapsed_time = 0 * nanosecond
+            self._prev_current_time = 0 * nanosecond
+            self._prev_elapsed_time = 0 * nanosecond
             self._walltime = 0 * nanosecond
             self._is_running = False
             self._schedule_changed = False
+
+            # Initialise the GCMC sampler. This will be updated externally.
+            # if the dynamics object is coupled to a sampler.
+            self._gcmc_sampler = None
 
             # Check for a REST2 scaling factor.
             if map.specified("rest2_scale"):
@@ -280,6 +287,23 @@ class DynamicsData:
             self._sire_mols = None
             self._energy_trajectory = None
 
+        # Store the pressure value needed for the contribution to the reduced potential.
+        if self._map.specified("pressure"):
+            try:
+                from sire import u
+                from sire.units import mole
+
+                NA = 6.02214076e23 / mole
+                pressure = u(self._map["pressure"].source())
+                self._pressure = (pressure * NA).value()
+            except Exception as e:
+                raise ValueError(
+                    "'Unable to computed reduced pressure from 'pressure' "
+                    f"value: {self._map['pressure']}'"
+                ) from e
+        else:
+            self._pressure = None
+
     def is_null(self):
         return self._sire_mols is None
 
@@ -360,6 +384,8 @@ class DynamicsData:
         delta_lambda: float = None,
         num_energy_neighbours: int = None,
         null_energy: float = None,
+        excess_chemical_potential: float = None,
+        num_waters: int = None,
     ):
         if not self._is_running:
             raise SystemError("Cannot stop dynamics that is not running!")
@@ -418,6 +444,12 @@ class DynamicsData:
             sim_lambda_value = self._omm_mols.get_lambda()
             sim_rest2_scale = self._omm_mols.get_rest2_scale()
 
+            # Get the current volume.
+            if self._pressure is not None:
+                volume = self._omm_state.getPeriodicBoxVolume().value_in_unit(
+                    openmm.unit.angstrom**3
+                )
+
             # store the potential energy and accumulated non-equilibrium work
             if self._is_interpolate:
                 nrg = nrgs["potential"]
@@ -430,7 +462,12 @@ class DynamicsData:
                 self._nrg_prev = nrg
                 nrgs["work"] = self._work
             else:
-                nrgs[str(sim_lambda_value)] = nrgs["potential"]
+                nrg = (nrgs["potential"] / kcal_per_mol).value()
+                if self._pressure is not None:
+                    nrg += self._pressure * volume
+                if excess_chemical_potential is not None:
+                    nrg += excess_chemical_potential * num_waters
+                nrgs[str(sim_lambda_value)] = nrg * kcal_per_mol
 
                 if lambda_windows is not None:
                     # get the index of the simulation lambda value in the
@@ -454,12 +491,14 @@ class DynamicsData:
                                     rest2_scale=rest2_scale,
                                     update_constraints=False,
                                 )
-                                nrgs[str(lambda_value)] = (
-                                    self._omm_mols.get_potential_energy(
-                                        to_sire_units=False
-                                    ).value_in_unit(openmm.unit.kilocalorie_per_mole)
-                                    * kcal_per_mol
-                                )
+                                nrg = self._omm_mols.get_potential_energy(
+                                    to_sire_units=False
+                                ).value_in_unit(openmm.unit.kilocalorie_per_mole)
+                                if self._pressure is not None:
+                                    nrg += self._pressure * volume
+                                if excess_chemical_potential is not None:
+                                    nrg += excess_chemical_potential * num_waters
+                                nrgs[str(lambda_value)] = nrg * kcal_per_mol
                             else:
                                 nrgs[str(lambda_value)] = null_energy * kcal_per_mol
 
@@ -594,6 +633,13 @@ class DynamicsData:
             if ensemble.pressure() != self.ensemble().pressure():
                 self._map["pressure"] = ensemble.pressure()
                 self._omm_mols.set_pressure(ensemble.pressure())
+
+                from sire import u
+                from sire.units import mole
+
+                NA = 6.02214076e23 / mole
+                pressure = u(self._map["pressure"].source())
+                self._pressure = (pressure * NA).value()
 
     def set_temperature(self, temperature, rescale_velocities: bool = True):
         """
@@ -920,6 +966,51 @@ class DynamicsData:
 
         self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
+        # reset the water state
+        if self._gcmc_sampler is not None:
+            self._gcmc_sampler.push()
+            self._gcmc_sampler._set_water_state(self._omm_mols)
+            self._gcmc_sampler.pop()
+
+        if self._save_crash_report:
+            import openmm
+            import numpy as np
+            from copy import deepcopy
+            from uuid import uuid4
+
+            # Create a unique identifier for this crash report.
+            crash_id = str(uuid4())[:8]
+
+            # Get the current context and system.
+            context = self._omm_mols
+            system = deepcopy(context.getSystem())
+
+            # Add each force to a unique group.
+            for i, f in enumerate(system.getForces()):
+                f.setForceGroup(i)
+
+            # Create a new context.
+            new_context = openmm.Context(system, deepcopy(context.getIntegrator()))
+            new_context.setPositions(context.getState(getPositions=True).getPositions())
+
+            # Write the  energies for each force group.
+            with open(f"crash_{crash_id}.log", "w") as f:
+                f.write(f"Current lambda: {str(self.get_lambda())}\n")
+                for i, force in enumerate(system.getForces()):
+                    state = new_context.getState(getEnergy=True, groups={i})
+                    f.write(f"{force.getName()}, {state.getPotentialEnergy()}\n")
+
+            # Save the serialised system.
+            with open(f"system_{crash_id}.xml", "w") as f:
+                f.write(openmm.XmlSerializer.serialize(system))
+
+            # Save the positions.
+            positions = (
+                new_context.getState(getPositions=True).getPositions(asNumpy=True)
+                / openmm.unit.nanometer
+            )
+            np.savetxt(f"positions_{crash_id}.txt", positions)
+
         self.run_minimisation()
 
     def run(
@@ -936,6 +1027,9 @@ class DynamicsData:
         auto_fix_minimise: bool = True,
         num_energy_neighbours: int = None,
         null_energy: str = None,
+        excess_chemical_potential: float = None,
+        num_waters: int = None,
+        save_crash_report: bool = False,
     ):
         if self.is_null():
             return
@@ -953,6 +1047,9 @@ class DynamicsData:
             "auto_fix_minimise": auto_fix_minimise,
             "num_energy_neighbours": num_energy_neighbours,
             "null_energy": null_energy,
+            "excess_chemical_potential": excess_chemical_potential,
+            "num_waters": num_waters,
+            "save_crash_report": save_crash_report,
         }
 
         from concurrent.futures import ThreadPoolExecutor
@@ -982,6 +1079,22 @@ class DynamicsData:
                 num_energy_neighbours = int(num_energy_neighbours)
             except:
                 num_energy_neighbours = len(lambda_windows)
+
+        if excess_chemical_potential is not None:
+            excess_chemical_potential = u(excess_chemical_potential).value()
+
+        if num_waters is not None:
+            try:
+                num_waters = int(num_waters)
+            except:
+                raise ValueError("'num_waters' must be an integer")
+
+        if save_crash_report is not None:
+            if not isinstance(save_crash_report, bool):
+                raise ValueError("'save_crash_report' must be True or False")
+            self._save_crash_report = save_crash_report
+        else:
+            self._save_crash_report = False
 
         try:
             steps_to_run = int(time.to(picosecond) / self.timestep().to(picosecond))
@@ -1111,7 +1224,14 @@ class DynamicsData:
         class NeedsMinimiseError(Exception):
             pass
 
+        # store the previous time and number of steps to allow us to reset
+        # when a crash occurs
+        self._prev_current_time = self._current_time
+        self._prev_elapsed_time = self._elapsed_time
+        self._prev_step = self._current_step
+
         nsteps_before_run = self._current_step
+
         # if this is the first call, then set the save frequencies
         if nsteps_before_run == 0:
             self._next_save_frame = frame_frequency_steps
@@ -1290,6 +1410,8 @@ class DynamicsData:
                             delta_lambda=delta_lambda,
                             num_energy_neighbours=num_energy_neighbours,
                             null_energy=null_energy.value(),
+                            excess_chemical_potential=excess_chemical_potential,
+                            num_waters=num_waters,
                         )
 
                         saved_last_frame = False
@@ -1336,12 +1458,21 @@ class DynamicsData:
                 )
 
         except NeedsMinimiseError:
+            from openmm.unit import picosecond
+
             # try to fix this problem by minimising,
             # then running again
             self._is_running = False
             self._clear_state()
             self._rebuild_and_minimise()
             orig_args["auto_fix_minimise"] = False
+            self._current_step = self._prev_step
+            self._current_time = self._prev_current_time
+            self._elapsed_time = self._prev_elapsed_time
+            self._omm_mols.setTime(
+                self._prev_elapsed_time.to("picosecond") * picosecond
+            )
+
             self.run(**orig_args)
             return
 
@@ -1564,6 +1695,9 @@ class Dynamics:
         auto_fix_minimise: bool = True,
         num_energy_neighbours: int = None,
         null_energy: str = None,
+        excess_chemical_potential: str = None,
+        num_waters: int = None,
+        save_crash_report: bool = False,
     ):
         """
         Perform dynamics on the molecules.
@@ -1637,6 +1771,14 @@ class Dynamics:
             Whether to save the energy on exit, regardless of whether
             the energy frequency has been reached.
 
+        save_crash_report: bool
+            Whether to save a crash report if the dynamics fails due to an
+            instability. This will save a named log file containing the energy
+            for each force, an XML file containing the OpenMM system at the
+            start of the dynamics block, and a NumPy text file containing
+            the atomic positions at the start of the dynamics block. This
+            option is only used when auto_fix_minimise is True.
+
         auto_fix_minimise: bool
             Whether or not to automatically run minimisation if the
             trajectory exits with an error in the first few steps.
@@ -1665,6 +1807,16 @@ class Dynamics:
             being computed as part of the energy trajectory, i.e. when
             'num_energy_neighbours' is less than len(lambda_windows).
             By default, a value of '10000 kcal mol-1' is used.
+
+        excess_chemical_potential: str
+            The excess chemical potential of water. This is required when
+            running dynamics as part of a Grand Canonical water sampling
+            simulation.
+
+        num_waters: int
+            The current number of water molecules in the simulation box.
+            This is used to compute the Grand Canonical contribution to
+            the potential energy.
         """
         if not self._d.is_null():
             if save_velocities is None:
@@ -1672,6 +1824,14 @@ class Dynamics:
                     save_velocities = self._d._map["save_velocities"].value().as_bool()
                 else:
                     save_velocities = False
+
+            if save_crash_report is None:
+                if self._d._map.specified("save_crash_report"):
+                    save_crash_report = (
+                        self._d._map["save_crash_report"].value().as_bool()
+                    )
+                else:
+                    save_crash_report = False
 
             self._d.run(
                 time=time,
@@ -1683,9 +1843,12 @@ class Dynamics:
                 save_velocities=save_velocities,
                 save_frame_on_exit=save_frame_on_exit,
                 save_energy_on_exit=save_energy_on_exit,
+                save_crash_report=save_crash_report,
                 auto_fix_minimise=auto_fix_minimise,
                 num_energy_neighbours=num_energy_neighbours,
                 null_energy=null_energy,
+                excess_chemical_potential=excess_chemical_potential,
+                num_waters=num_waters,
             )
 
         return self

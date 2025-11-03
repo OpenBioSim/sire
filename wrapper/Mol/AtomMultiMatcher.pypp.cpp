@@ -47,6 +47,8 @@ namespace bp = boost::python;
 
 SireMol::AtomMultiMatcher __copy__(const SireMol::AtomMultiMatcher &other){ return SireMol::AtomMultiMatcher(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -126,9 +128,9 @@ void register_AtomMultiMatcher_class(){
         
         }
         AtomMultiMatcher_exposer.staticmethod( "typeName" );
-        AtomMultiMatcher_exposer.def( "__copy__", &__copy__);
-        AtomMultiMatcher_exposer.def( "__deepcopy__", &__copy__);
-        AtomMultiMatcher_exposer.def( "clone", &__copy__);
+        AtomMultiMatcher_exposer.def( "__copy__", &__copy__<SireMol::AtomMultiMatcher>);
+        AtomMultiMatcher_exposer.def( "__deepcopy__", &__copy__<SireMol::AtomMultiMatcher>);
+        AtomMultiMatcher_exposer.def( "clone", &__copy__<SireMol::AtomMultiMatcher>);
         AtomMultiMatcher_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::AtomMultiMatcher >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AtomMultiMatcher_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::AtomMultiMatcher >,

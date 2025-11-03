@@ -2,7 +2,7 @@
 # enable test to run to validate advanced functionality
 
 rdkit >=2023.0.0
-gemmi >=0.6.4
+gemmi >=0.6.4<0.7.0
 
 # kartograf on Windows pulls in an openfe that has an old / incompatble
 # ambertools

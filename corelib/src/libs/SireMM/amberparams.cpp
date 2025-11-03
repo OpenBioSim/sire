@@ -1266,14 +1266,15 @@ static const RegisterMetaType<AmberParams> r_amberparam;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const AmberParams &amberparam)
 {
-    writeHeader(ds, r_amberparam, 2);
+    writeHeader(ds, r_amberparam, 3);
 
     SharedDataStream sds(ds);
 
     sds << amberparam.molinfo << amberparam.amber_charges << amberparam.amber_ljs << amberparam.amber_masses
         << amberparam.amber_elements << amberparam.amber_types << amberparam.born_radii << amberparam.amber_screens
         << amberparam.amber_treechains << amberparam.exc_atoms << amberparam.amber_bonds << amberparam.amber_angles
-        << amberparam.amber_dihedrals << amberparam.amber_impropers << amberparam.amber_nb14s << amberparam.radius_set
+        << amberparam.amber_dihedrals << amberparam.amber_impropers << amberparam.amber_nb14s
+        << amberparam.cmap_funcs << amberparam.radius_set
         << amberparam.propmap << static_cast<const MoleculeProperty &>(amberparam);
 
     return ds;
@@ -1284,9 +1285,22 @@ QDataStream &operator>>(QDataStream &ds, AmberParams &amberparam)
 {
     VersionID v = readHeader(ds, r_amberparam);
 
-    if (v == 2)
+    if (v == 3)
     {
         SharedDataStream sds(ds);
+
+        sds >> amberparam.molinfo >> amberparam.amber_charges >> amberparam.amber_ljs >> amberparam.amber_masses >>
+            amberparam.amber_elements >> amberparam.amber_types >> amberparam.born_radii >> amberparam.amber_screens >>
+            amberparam.amber_treechains >> amberparam.exc_atoms >> amberparam.amber_bonds >> amberparam.amber_angles >>
+            amberparam.amber_dihedrals >> amberparam.amber_impropers >> amberparam.amber_nb14s >>
+            amberparam.cmap_funcs >>
+            amberparam.radius_set >> amberparam.propmap >> static_cast<MoleculeProperty &>(amberparam);
+    }
+    else if (v == 2)
+    {
+        SharedDataStream sds(ds);
+
+        amberparam.cmap_funcs.clear();
 
         sds >> amberparam.molinfo >> amberparam.amber_charges >> amberparam.amber_ljs >> amberparam.amber_masses >>
             amberparam.amber_elements >> amberparam.amber_types >> amberparam.born_radii >> amberparam.amber_screens >>
@@ -1295,7 +1309,7 @@ QDataStream &operator>>(QDataStream &ds, AmberParams &amberparam)
             amberparam.radius_set >> amberparam.propmap >> static_cast<MoleculeProperty &>(amberparam);
     }
     else
-        throw version_error(v, "2", r_amberparam, CODELOC);
+        throw version_error(v, "2,3", r_amberparam, CODELOC);
 
     return ds;
 }
@@ -1356,7 +1370,8 @@ AmberParams::AmberParams(const AmberParams &other)
       amber_types(other.amber_types), born_radii(other.born_radii), amber_screens(other.amber_screens),
       amber_treechains(other.amber_treechains), exc_atoms(other.exc_atoms), amber_bonds(other.amber_bonds),
       amber_angles(other.amber_angles), amber_dihedrals(other.amber_dihedrals), amber_impropers(other.amber_impropers),
-      amber_nb14s(other.amber_nb14s), radius_set(other.radius_set), propmap(other.propmap)
+      amber_nb14s(other.amber_nb14s), cmap_funcs(other.cmap_funcs),
+      radius_set(other.radius_set), propmap(other.propmap)
 {
 }
 
@@ -1381,6 +1396,7 @@ AmberParams &AmberParams::operator=(const AmberParams &other)
         amber_dihedrals = other.amber_dihedrals;
         amber_impropers = other.amber_impropers;
         amber_nb14s = other.amber_nb14s;
+        cmap_funcs = other.cmap_funcs;
         radius_set = other.radius_set;
         propmap = other.propmap;
     }
@@ -1402,7 +1418,8 @@ bool AmberParams::operator==(const AmberParams &other) const
             amber_screens == other.amber_screens and amber_treechains == other.amber_treechains and
             exc_atoms == other.exc_atoms and amber_bonds == other.amber_bonds and amber_angles == other.amber_angles and
             amber_dihedrals == other.amber_dihedrals and amber_impropers == other.amber_impropers and
-            amber_nb14s == other.amber_nb14s and radius_set == other.radius_set and propmap == other.propmap);
+            amber_nb14s == other.amber_nb14s and cmap_funcs == other.cmap_funcs and
+            radius_set == other.radius_set and propmap == other.propmap);
 }
 
 /** Comparison operator */
@@ -1504,59 +1521,66 @@ QStringList AmberParams::validateAndFix()
                                     }
                                 }
 
-                                // find the shortest bonded path between these two atoms
-                                const auto path = conn.findPath(atm0, atm3, 4);
+                                // find the shortest bonded paths between these two atoms
+                                const auto paths = conn.findPaths(atm0, atm3, 4);
 
-                                if (path.count() != 4)
+                                for (const auto &path : paths)
                                 {
+                                    if (path.count() != 4)
+                                    {
+                                        QMutexLocker lkr(&mutex);
+                                        errors.append(
+                                            QObject::tr("Have a 1-4 scaling factor (%1/%2) "
+                                                        "between atoms %3:%4 and %5:%6 despite there being no physical "
+                                                        "dihedral between these two atoms. All 1-4 scaling factors MUST "
+                                                        "be associated with "
+                                                        "physical dihedrals. The shortest path is %7")
+                                                .arg(s.coulomb())
+                                                .arg(s.lj())
+                                                .arg(molinfo.name(atm0).value())
+                                                .arg(atm0.value())
+                                                .arg(molinfo.name(atm3).value())
+                                                .arg(atm3.value())
+                                                .arg(Sire::toString(path)));
+                                        continue;
+                                    }
+
+                                    // convert the atom IDs into a canonical form
+                                    auto dih = this->convert(DihedralID(path[0], path[1], path[2], path[3]));
+
+                                    // skip if we already have this dihedral
+                                    if (new_dihedrals.contains(dih))
+                                        continue;
+
+                                    // qDebug() << "ADDING NULL DIHEDRAL FOR" << dih.toString();
+
+                                    // does this bond involve hydrogen?
+                                    //- this relies on "AtomElements" being full
+                                    bool contains_hydrogen = false;
+
+                                    if (not amber_elements.isEmpty())
+                                    {
+                                        contains_hydrogen =
+                                            (amber_elements.at(molinfo.cgAtomIdx(dih.atom0())).nProtons() < 2) or
+                                            (amber_elements.at(molinfo.cgAtomIdx(dih.atom1())).nProtons() < 2) or
+                                            (amber_elements.at(molinfo.cgAtomIdx(dih.atom2())).nProtons() < 2) or
+                                            (amber_elements.at(molinfo.cgAtomIdx(dih.atom3())).nProtons() < 2);
+                                    }
+
+                                    // create a null dihedral parameter and add this to the set
                                     QMutexLocker lkr(&mutex);
-                                    errors.append(
-                                        QObject::tr("Have a 1-4 scaling factor (%1/%2) "
-                                                    "between atoms %3:%4 and %5:%6 despite there being no physical "
-                                                    "dihedral between these two atoms. All 1-4 scaling factors MUST "
-                                                    "be associated with "
-                                                    "physical dihedrals. The shortest path is %7")
-                                            .arg(s.coulomb())
-                                            .arg(s.lj())
-                                            .arg(molinfo.name(atm0).value())
-                                            .arg(atm0.value())
-                                            .arg(molinfo.name(atm3).value())
-                                            .arg(atm3.value())
-                                            .arg(Sire::toString(path)));
-                                    continue;
+                                    new_dihedrals.insert(
+                                        dih, qMakePair(AmberDihedral(Expression(0), Symbol("phi")), contains_hydrogen));
+
+                                    // now add in the 1-4 pair
+                                    BondID nb14pair = this->convert(BondID(dih.atom0(), dih.atom3()));
+
+                                    // add them to the list of 14 scale factors
+                                    new_nb14s.insert(nb14pair, AmberNB14(s.coulomb(), s.lj()));
+
+                                    // and remove them from the excluded atoms list
+                                    new_exc.set(nb14pair.atom0(), nb14pair.atom1(), CLJScaleFactor(0));
                                 }
-
-                                // convert the atom IDs into a canonical form
-                                auto dih = this->convert(DihedralID(path[0], path[1], path[2], path[3]));
-
-                                // qDebug() << "ADDING NULL DIHEDRAL FOR" << dih.toString();
-
-                                // does this bond involve hydrogen?
-                                //- this relies on "AtomElements" being full
-                                bool contains_hydrogen = false;
-
-                                if (not amber_elements.isEmpty())
-                                {
-                                    contains_hydrogen =
-                                        (amber_elements.at(molinfo.cgAtomIdx(dih.atom0())).nProtons() < 2) or
-                                        (amber_elements.at(molinfo.cgAtomIdx(dih.atom1())).nProtons() < 2) or
-                                        (amber_elements.at(molinfo.cgAtomIdx(dih.atom2())).nProtons() < 2) or
-                                        (amber_elements.at(molinfo.cgAtomIdx(dih.atom3())).nProtons() < 2);
-                                }
-
-                                // create a null dihedral parameter and add this to the set
-                                QMutexLocker lkr(&mutex);
-                                new_dihedrals.insert(
-                                    dih, qMakePair(AmberDihedral(Expression(0), Symbol("phi")), contains_hydrogen));
-
-                                // now add in the 1-4 pair
-                                BondID nb14pair = this->convert(BondID(dih.atom0(), dih.atom3()));
-
-                                // add them to the list of 14 scale factors
-                                new_nb14s.insert(nb14pair, AmberNB14(s.coulomb(), s.lj()));
-
-                                // and remove them from the excluded atoms list
-                                new_exc.set(nb14pair.atom0(), nb14pair.atom1(), CLJScaleFactor(0));
                             }
                         }
                     }
@@ -2006,6 +2030,60 @@ FourAtomFunctions AmberParams::improperFunctions() const
     return improperFunctions(Symbol("phi"));
 }
 
+/** Return all of the CMAP functions for the molecule. This will be empty
+ *  if there are no CMAP functions for this molecule
+ */
+CMAPFunctions AmberParams::cmapFunctions() const
+{
+    return this->cmap_funcs;
+}
+
+/** Add the passed CMAP parameter for this set of 5 atoms. This will replace
+ *  any existing CMAP parameter for this set of atoms
+ */
+void AmberParams::add(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                      const AtomID &atom3, const AtomID &atom4,
+                      const CMAPParameter &cmap)
+{
+    if (cmap_funcs.isEmpty())
+    {
+        cmap_funcs = CMAPFunctions(molinfo);
+    }
+
+    cmap_funcs.set(atom0, atom1, atom2, atom3, atom4, cmap);
+}
+
+/** Remove the CMAP function from the passed set of 5 atoms */
+void AmberParams::removeCMAP(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                             const AtomID &atom3, const AtomID &atom4)
+{
+    if (cmap_funcs.isEmpty())
+    {
+        return;
+    }
+
+    cmap_funcs.clear(atom0, atom1, atom2, atom3, atom4);
+
+    if (cmap_funcs.isEmpty())
+    {
+        cmap_funcs = CMAPFunctions();
+    }
+}
+
+/** Return the CMAP parameter for the passed 5 atoms. This returns a null
+ *  parameter if there is no matching CMAP parameter for this set of atoms
+ */
+CMAPParameter AmberParams::getCMAP(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                                   const AtomID &atom3, const AtomID &atom4) const
+{
+    if (cmap_funcs.isEmpty())
+    {
+        return CMAPParameter();
+    }
+
+    return cmap_funcs.parameter(atom0, atom1, atom2, atom3, atom4);
+}
+
 void AmberParams::addNB14(const BondID &pair, double cscl, double ljscl)
 {
     amber_nb14s.insert(this->convert(pair), AmberNB14(cscl, ljscl));
@@ -2129,6 +2207,18 @@ AmberParams &AmberParams::operator+=(const AmberParams &other)
         for (auto it = other.amber_impropers.constBegin(); it != other.amber_impropers.constEnd(); ++it)
         {
             amber_impropers.insert(it.key(), it.value());
+        }
+    }
+
+    if (cmap_funcs.isEmpty())
+    {
+        cmap_funcs = other.cmap_funcs;
+    }
+    else if (not other.cmap_funcs.isEmpty())
+    {
+        for (auto param : other.cmap_funcs.parameters())
+        {
+            cmap_funcs.set(param);
         }
     }
 
@@ -2607,7 +2697,7 @@ void AmberParams::_pvt_createFrom(const MoleculeData &moldata)
     }
 
     // now lets get the bonded parameters (if they exist...)
-    bool has_bonds, has_ubs, has_angles, has_dihedrals, has_impropers, has_nbpairs;
+    bool has_bonds, has_ubs, has_angles, has_dihedrals, has_impropers, has_nbpairs, has_cmaps;
 
     const auto bonds = getProperty<TwoAtomFunctions>(map["bond"], moldata, &has_bonds);
     const auto ub_bonds = getProperty<TwoAtomFunctions>(map["urey_bradley"], moldata, &has_ubs);
@@ -2615,6 +2705,7 @@ void AmberParams::_pvt_createFrom(const MoleculeData &moldata)
     const auto dihedrals = getProperty<FourAtomFunctions>(map["dihedral"], moldata, &has_dihedrals);
     const auto impropers = getProperty<FourAtomFunctions>(map["improper"], moldata, &has_impropers);
     const auto nbpairs = getProperty<CLJNBPairs>(map["intrascale"], moldata, &has_nbpairs);
+    const auto cmaps = getProperty<CMAPFunctions>(map["cmap"], moldata, &has_cmaps);
 
     // get all of the atoms that contain hydrogen
     QVector<bool> is_hydrogen;
@@ -2641,6 +2732,15 @@ void AmberParams::_pvt_createFrom(const MoleculeData &moldata)
                 is_hydrogen_data[i] = elements_data[i].nProtons() == 1;
             }
         }
+    }
+
+    if (has_cmaps and not cmaps.isEmpty())
+    {
+        cmap_funcs = cmaps;
+    }
+    else
+    {
+        cmap_funcs = CMAPFunctions();
     }
 
     QVector<std::function<void()>> nb_functions;

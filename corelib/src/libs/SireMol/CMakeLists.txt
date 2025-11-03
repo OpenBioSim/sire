@@ -74,6 +74,7 @@ set ( SIREMOL_HEADERS
       chainresid.h
       chargeperturbation.h
       chirality.h
+      cmapid.h
       connectivity.h
       core.h
       cutgroup.h
@@ -204,6 +205,7 @@ set ( SIREMOL_SOURCES
       chainresid.cpp
       chargeperturbation.cpp
       chirality.cpp
+      cmapid.cpp
       connectivity.cpp
       cutgroup.cpp
       cuttingfunction.cpp

@@ -21,9 +21,7 @@ class Table:
     def __init__(self, title=None, show_footer=False, show_edge=True):
         from rich.table import Table as _Table
 
-        self._table = _Table(
-            title=title, show_edge=show_edge, show_footer=show_footer
-        )
+        self._table = _Table(title=title, show_edge=show_edge, show_footer=show_footer)
 
     def add_column(
         self, header, justify="center", style=None, no_wrap=False, footer=None
@@ -209,13 +207,9 @@ class Console:
         # https://stackoverflow.com/questions/18425225/getting-the-name-of-a-variable-as-a-string
         import inspect
 
-        callers_local_vars = (
-            inspect.currentframe().f_back.f_back.f_locals.items()
-        )
+        callers_local_vars = inspect.currentframe().f_back.f_back.f_locals.items()
         return [
-            var_name
-            for var_name, var_val in callers_local_vars
-            if var_val is variable
+            var_name for var_name, var_val in callers_local_vars if var_val is variable
         ][-1]
 
     @staticmethod
@@ -265,9 +259,7 @@ class Console:
             callers_local_vars = inspect.currentframe().f_back.f_locals.items()
 
             table = Table(box=box.MINIMAL_DOUBLE_HEAD, style="on magenta")
-            table.add_column(
-                "Name", justify="right", style="cyan", no_wrap=True
-            )
+            table.add_column("Name", justify="right", style="cyan", no_wrap=True)
             table.add_column("Value", justify="left", style="green")
 
             for variable in variables:
@@ -317,9 +309,7 @@ class Console:
             if isinstance(text, str):
                 # try to print this as latin-1
                 try:
-                    text = text.encode("latin-1", errors="replace").decode(
-                        "latin-1"
-                    )
+                    text = text.encode("latin-1", errors="replace").decode("latin-1")
                     Console._get_console().print(text, markup=markup)
                 except Exception:
                     # accept that this isn't going to be printable
@@ -450,7 +440,5 @@ class Console:
             except UnicodeEncodeError:
                 # this still didn't work - use a latin-1 round-robin
                 # to make everything ascii...
-                text = text.encode("latin-1", errors="replace").decode(
-                    "latin-1"
-                )
+                text = text.encode("latin-1", errors="replace").decode("latin-1")
                 file.write(text)

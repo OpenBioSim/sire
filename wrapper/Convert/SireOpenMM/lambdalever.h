@@ -201,6 +201,12 @@ namespace SireOpenMM
     }
 
     template <>
+    inline QString _get_typename<OpenMM::CustomCVForce>()
+    {
+        return "OpenMM::CustomCVForce";
+    }
+
+    template <>
     inline QString _get_typename<SireOpenMM::QMForce>()
     {
         return "SireOpenMM::QMForce";

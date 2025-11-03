@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 SireMol::Element __copy__(const SireMol::Element &other){ return SireMol::Element(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -438,9 +440,9 @@ void register_Element_class(){
         Element_exposer.staticmethod( "setElementIsBiological" );
         Element_exposer.staticmethod( "setElementIsNotBiological" );
         Element_exposer.staticmethod( "typeName" );
-        Element_exposer.def( "__copy__", &__copy__);
-        Element_exposer.def( "__deepcopy__", &__copy__);
-        Element_exposer.def( "clone", &__copy__);
+        Element_exposer.def( "__copy__", &__copy__<SireMol::Element>);
+        Element_exposer.def( "__deepcopy__", &__copy__<SireMol::Element>);
+        Element_exposer.def( "clone", &__copy__<SireMol::Element>);
         Element_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Element >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Element_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Element >,

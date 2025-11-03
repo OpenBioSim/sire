@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMol::SegProperty<SireBase::PropPtr<SireBase::Property> > __copy__(const SireMol::SegProperty<SireBase::PropPtr<SireBase::Property> > &other){ return SireMol::SegProperty<SireBase::PropPtr<SireBase::Property> >(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -393,9 +395,9 @@ void register_SegPropertyProperty_class(){
         }
         SegPropertyProperty_exposer.staticmethod( "fromVariant" );
         SegPropertyProperty_exposer.staticmethod( "typeName" );
-        SegPropertyProperty_exposer.def( "__copy__", &__copy__);
-        SegPropertyProperty_exposer.def( "__deepcopy__", &__copy__);
-        SegPropertyProperty_exposer.def( "clone", &__copy__);
+        SegPropertyProperty_exposer.def( "__copy__", &__copy__<SireMol::SegProperty<SireBase::PropPtr<SireBase::Property> >>);
+        SegPropertyProperty_exposer.def( "__deepcopy__", &__copy__<SireMol::SegProperty<SireBase::PropPtr<SireBase::Property> >>);
+        SegPropertyProperty_exposer.def( "clone", &__copy__<SireMol::SegProperty<SireBase::PropPtr<SireBase::Property> >>);
         SegPropertyProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::SegProperty<SireBase::PropPtr<SireBase::Property> > >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SegPropertyProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::SegProperty<SireBase::PropPtr<SireBase::Property> > >,

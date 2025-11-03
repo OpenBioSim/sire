@@ -26,6 +26,8 @@ namespace bp = boost::python;
 
 #include "SireStream/datastream.h"
 
+#include "SireStream/magic_error.h"
+
 #include "SireStream/shareddatastream.h"
 
 #include "SireUnits/dimensions.h"
@@ -43,6 +45,8 @@ namespace bp = boost::python;
 #include "trajectory.h"
 
 SireMol::Frame __copy__(const SireMol::Frame &other){ return SireMol::Frame(other); }
+
+#include "Helpers/copy.hpp"
 
 #include "Qt/qdatastream.hpp"
 
@@ -83,6 +87,19 @@ void register_Frame_class(){
             Frame_exposer.def( 
                 "forces"
                 , forces_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Frame::fromByteArray
+        
+            typedef ::SireMol::Frame ( *fromByteArray_function_type )( ::QByteArray const & );
+            fromByteArray_function_type fromByteArray_function_value( &::SireMol::Frame::fromByteArray );
+            
+            Frame_exposer.def( 
+                "fromByteArray"
+                , fromByteArray_function_value
+                , ( bp::arg("data") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -350,6 +367,18 @@ void register_Frame_class(){
                 , "" );
         
         }
+        { //::SireMol::Frame::toByteArray
+        
+            typedef ::QByteArray ( ::SireMol::Frame::*toByteArray_function_type)(  ) const;
+            toByteArray_function_type toByteArray_function_value( &::SireMol::Frame::toByteArray );
+            
+            Frame_exposer.def( 
+                "toByteArray"
+                , toByteArray_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::Frame::toString
         
             typedef ::QString ( ::SireMol::Frame::*toString_function_type)(  ) const;
@@ -411,11 +440,12 @@ void register_Frame_class(){
                 , "" );
         
         }
+        Frame_exposer.staticmethod( "fromByteArray" );
         Frame_exposer.staticmethod( "join" );
         Frame_exposer.staticmethod( "typeName" );
-        Frame_exposer.def( "__copy__", &__copy__);
-        Frame_exposer.def( "__deepcopy__", &__copy__);
-        Frame_exposer.def( "clone", &__copy__);
+        Frame_exposer.def( "__copy__", &__copy__<SireMol::Frame>);
+        Frame_exposer.def( "__deepcopy__", &__copy__<SireMol::Frame>);
+        Frame_exposer.def( "clone", &__copy__<SireMol::Frame>);
         Frame_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMol::Frame >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Frame_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMol::Frame >,
