@@ -247,3 +247,64 @@ def test_openmm_named_restraints(ala_mols, openmm_platform):
     d.set_lambda(2.0 / 3.0)
 
     assert d.current_potential_energy().value() == pytest.approx(nrg_0.value(), 1e-6)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+@pytest.mark.parametrize(
+    "restraint,default_pbc",
+    [
+        ("distance", True),
+        ("bond", False),
+    ],
+)
+def test_openmm_restraints_pbc(ala_mols, restraint, default_pbc, openmm_platform):
+    mols = ala_mols
+
+    # get the restraint class
+    restraint_class = getattr(sr.restraints, restraint)
+
+    # create a distance restraint between the first and last atom
+    restraints = restraint_class(
+        mols,
+        atoms0=mols[0][0],
+        atoms1=mols[-1][0],
+        r0="5A",
+    )
+
+    # make sure the _use_pbc flag is set to the default value
+    assert restraints._use_pbc == default_pbc
+
+    # create a dynamics object
+    d = mols.dynamics(restraints=restraints, platform=openmm_platform)
+
+    # find the restraint force
+    for force in d.context().getSystem().getForces():
+        if force.getName() == "BondRestraintForce":
+            restraint_force = force
+            break
+
+    # check that the force is using periodic boundary conditions
+    assert restraint_force.usesPeriodicBoundaryConditions() == default_pbc
+
+    # now create a distance restraint with _use_pbc set to the non-default value
+    restraints = restraint_class(
+        mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A", use_pbc=not default_pbc
+    )
+
+    # make sure the _use_pbc flag is set to False
+    assert restraints._use_pbc == (not default_pbc)
+
+    # create a dynamics object
+    d = mols.dynamics(restraints=restraints, platform=openmm_platform)
+
+    # find the restraint force
+    for force in d.context().getSystem().getForces():
+        if force.getName() == "BondRestraintForce":
+            restraint_force = force
+            break
+
+    # check that the force is not using periodic boundary conditions
+    assert restraint_force.usesPeriodicBoundaryConditions() == (not default_pbc)

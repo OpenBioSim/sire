@@ -40,7 +40,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add inverse distance restraint to keep atoms apart during OpenMM dyanmics.
 
-* Disable periodic boundary conditions for OpenMM bonded restraints.
+* Allow user to specify whether OpenMM restraints use periodic boundary conditions.
 
 `2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
 --------------------------------------------------------------------------------------------

@@ -71,7 +71,7 @@ using namespace SireOpenMM;
  */
 void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
                              OpenMM::System &system, LambdaLever &lambda_lever,
-                             int natoms)
+                             int natoms, bool use_pbc)
 {
     if (restraints.isEmpty())
         return;
@@ -134,7 +134,7 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
     restraintff->addPerBondParameter("kphi_C");
     restraintff->addPerBondParameter("phi0_C");
 
-    restraintff->setUsesPeriodicBoundaryConditions(false);
+    restraintff->setUsesPeriodicBoundaryConditions(use_pbc);
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -196,7 +196,7 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
  */
 void _add_bond_restraints(const SireMM::BondRestraints &restraints,
                           OpenMM::System &system, LambdaLever &lambda_lever,
-                          int natoms)
+                          int natoms, bool use_pbc)
 {
     if (restraints.isEmpty())
         return;
@@ -221,7 +221,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
     restraintff->addPerBondParameter("k");
     restraintff->addPerBondParameter("r0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(false);
+    restraintff->setUsesPeriodicBoundaryConditions(use_pbc);
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -262,7 +262,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
 
 void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraints,
                                 OpenMM::System &system, LambdaLever &lambda_lever,
-                                int natoms)
+                                int natoms, bool use_pbc)
 {
     if (restraints.isEmpty())
         return;
@@ -287,7 +287,7 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
     restraintff->addPerBondParameter("k");
     restraintff->addPerBondParameter("r0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(false);
+    restraintff->setUsesPeriodicBoundaryConditions(use_pbc);
 
     lambda_lever.addRestraintIndex(restraints.name(),
     system.addForce(restraintff));
@@ -333,7 +333,7 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
  */
 void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &restraints,
         OpenMM::System &system, LambdaLever &lambda_lever,
-        int natoms)
+        int natoms, bool use_pbc)
 {
     if (restraints.isEmpty())
     return;
@@ -365,7 +365,7 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
     restraintff->addPerBondParameter("r0");
     restraintff->addPerBondParameter("de");
 
-    restraintff->setUsesPeriodicBoundaryConditions(false);
+    restraintff->setUsesPeriodicBoundaryConditions(use_pbc);
 
     lambda_lever.addRestraintIndex(restraints.name(),
                 system.addForce(restraintff));
@@ -414,7 +414,7 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
 void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
                                 OpenMM::System &system, LambdaLever &lambda_lever,
                                 std::vector<OpenMM::Vec3> &anchor_coords,
-                                int natoms)
+                                int natoms, bool use_pbc)
 {
     if (restraints.isEmpty())
         return;
@@ -439,7 +439,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     restraintff->addPerBondParameter("k");
     restraintff->addPerBondParameter("rb");
 
-    restraintff->setUsesPeriodicBoundaryConditions(false);
+    restraintff->setUsesPeriodicBoundaryConditions(use_pbc);
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -644,7 +644,7 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
  */
 void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
                            OpenMM::System &system, LambdaLever &lambda_lever,
-                           int natoms)
+                           int natoms, bool use_pbc)
 {
     if (restraints.isEmpty())
         return;
@@ -669,7 +669,7 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
     restraintff->addPerAngleParameter("k");
     restraintff->addPerAngleParameter("theta0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(false);
+    restraintff->setUsesPeriodicBoundaryConditions(use_pbc);
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -702,7 +702,7 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
 
 void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
                               OpenMM::System &system, LambdaLever &lambda_lever,
-                              int natoms)
+                              int natoms, bool use_pbc)
 {
     if (restraints.isEmpty())
         return;
@@ -732,7 +732,7 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
     restraintff->addPerTorsionParameter("k");
     restraintff->addPerTorsionParameter("theta0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(false);
+    restraintff->setUsesPeriodicBoundaryConditions(use_pbc);
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -2086,6 +2086,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // PropertyList first
         auto all_restraints = map["restraints"].value().asAnArray();
 
+        // whether or not to use periodic boundary conditions for restraints
+        bool use_pbc = false;
+        if (map.specified("use_pbc"))
+        {
+            use_pbc = map["use_pbc"].value().asABoolean();
+        }
+
         // loop over all of the restraints groups and add them
         for (const auto &prop : all_restraints.toList())
         {
@@ -2099,22 +2106,22 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             if (prop.read().isA<SireMM::DihedralRestraints>())
             {
                 _add_dihedral_restraints(prop.read().asA<SireMM::DihedralRestraints>(),
-                                         system, lambda_lever, start_index);
+                                         system, lambda_lever, start_index, use_pbc);
             }
             else if (prop.read().isA<SireMM::AngleRestraints>())
             {
                 _add_angle_restraints(prop.read().asA<SireMM::AngleRestraints>(),
-                                      system, lambda_lever, start_index);
+                                      system, lambda_lever, start_index, use_pbc);
             }
             else if (prop.read().isA<SireMM::PositionalRestraints>())
             {
                 _add_positional_restraints(prop.read().asA<SireMM::PositionalRestraints>(),
-                                           system, lambda_lever, anchor_coords, start_index);
+                                           system, lambda_lever, anchor_coords, start_index, use_pbc);
             }
             else if (prop.read().isA<SireMM::MorsePotentialRestraints>())
             {
                 _add_morse_potential_restraints(prop.read().asA<SireMM::MorsePotentialRestraints>(),
-                                     system, lambda_lever, start_index);
+                                     system, lambda_lever, start_index, use_pbc);
             }
             else if (prop.read().isA<SireMM::RMSDRestraints>())
             {
@@ -2124,17 +2131,17 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             else if (prop.read().isA<SireMM::BondRestraints>())
             {
                 _add_bond_restraints(prop.read().asA<SireMM::BondRestraints>(),
-                                     system, lambda_lever, start_index);
+                                     system, lambda_lever, start_index, use_pbc);
             }
             else if (prop.read().isA<SireMM::InverseBondRestraints>())
             {
                 _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
-                                     system, lambda_lever, start_index);
+                                     system, lambda_lever, start_index, use_pbc);
             }
             else if (prop.read().isA<SireMM::BoreschRestraints>())
             {
                 _add_boresch_restraints(prop.read().asA<SireMM::BoreschRestraints>(),
-                                        system, lambda_lever, start_index);
+                                        system, lambda_lever, start_index, use_pbc);
             }
         }
     }

@@ -1579,6 +1579,12 @@ class Dynamics:
         _add_extra(extras, "qm_engine", qm_engine)
         _add_extra(extras, "lambda_interpolate", lambda_interpolate)
 
+        if restraints is not None:
+            if hasattr(restraints, "_use_pbc"):
+                extras["use_pbc"] = restraints._use_pbc
+            else:
+                extras["use_pbc"] = True
+
         map = create_map(map, extras)
 
         self._d = DynamicsData(mols=mols, map=map)
