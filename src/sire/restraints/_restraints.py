@@ -1150,6 +1150,8 @@ def positional(
     if use_pbc is not None:
         if not isinstance(use_pbc, bool):
             raise ValueError("'use_pbc' must be of type 'bool'")
+    else:
+        use_pbc = True
 
     atoms = _to_atoms(mols, atoms)
 
