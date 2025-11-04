@@ -168,6 +168,9 @@ Available keys and allowable values are listed below.
 | lambda                       | The λ-value at which to set up the system (assuming this |
 |                              | contains any perturbable molecules or restraints)        |
 +------------------------------+----------------------------------------------------------+
+| opencl_platform_index        | The OpenCL platform index to use if the multiple OpenCL  |
+|                              | implementations are available.                           |
++------------------------------+----------------------------------------------------------+
 | perturbable_constraint       | The constraint to use for perturbable molecules. These   |
 |                              | are the same options as ``constraint``, and will         |
 |                              | override that choice for perturbable molecules if this   |

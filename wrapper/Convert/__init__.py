@@ -471,6 +471,20 @@ try:
             usecpu = int(map["cpu_pme"].value().as_boolean())
             platform.setPropertyDefaultValue("UseCpuPme", str(usecpu).lower())
 
+        if "OpenCLPlatformIndex" in supported_properties and map.specified(
+            "opencl_platform_index"
+        ):
+            try:
+                opencl_platform_index = (
+                    map["opencl_platform_index"].value().as_integer()
+                )
+            except Exception:
+                opencl_platform_index = map["opencl_platform_index"].source()
+
+            platform.setPropertyDefaultValue(
+                "OpenCLPlatformIndex", str(opencl_platform_index)
+            )
+
         try:
             from ._sommcontext import SOMMContext
 
