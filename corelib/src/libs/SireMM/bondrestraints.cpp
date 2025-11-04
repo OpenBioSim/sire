@@ -431,7 +431,7 @@ BondRestraints::BondRestraints(const QString &name,
 }
 
 BondRestraints::BondRestraints(const BondRestraints &other)
-    : ConcreteProperty<BondRestraints, Restraints>(other), r(other.r)
+    : ConcreteProperty<BondRestraints, Restraints>(other), r(other.r), use_pbc(other.use_pbc)
 {
 }
 

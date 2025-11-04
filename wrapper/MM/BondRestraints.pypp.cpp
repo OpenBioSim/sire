@@ -123,6 +123,18 @@ void register_BondRestraints_class(){
                 , "Return the number of restraints" );
         
         }
+        { //::SireMM::BondRestraints::getUsesPeriodicBoundaryConditions
+        
+            typedef bool ( ::SireMM::BondRestraints::*getUsesPeriodicBoundaryConditions_function_type)(  ) const;
+            getUsesPeriodicBoundaryConditions_function_type getUsesPeriodicBoundaryConditions_function_value( &::SireMM::BondRestraints::getUsesPeriodicBoundaryConditions );
+            
+            BondRestraints_exposer.def( 
+                "getUsesPeriodicBoundaryConditions"
+                , getUsesPeriodicBoundaryConditions_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not periodic boundary conditions are to be used" );
+        
+        }
         { //::SireMM::BondRestraints::hasAtomRestraints
         
             typedef bool ( ::SireMM::BondRestraints::*hasAtomRestraints_function_type)(  ) const;
@@ -247,6 +259,19 @@ void register_BondRestraints_class(){
                 , restraints_function_value
                 , bp::release_gil_policy()
                 , "Return all of the restraints" );
+        
+        }
+        { //::SireMM::BondRestraints::setUsesPeriodicBoundaryConditions
+        
+            typedef void ( ::SireMM::BondRestraints::*setUsesPeriodicBoundaryConditions_function_type)( bool ) ;
+            setUsesPeriodicBoundaryConditions_function_type setUsesPeriodicBoundaryConditions_function_value( &::SireMM::BondRestraints::setUsesPeriodicBoundaryConditions );
+            
+            BondRestraints_exposer.def( 
+                "setUsesPeriodicBoundaryConditions"
+                , setUsesPeriodicBoundaryConditions_function_value
+                , ( bp::arg("use_pbc") )
+                , bp::release_gil_policy()
+                , "Set whether or not periodic boundary conditions are to be used" );
         
         }
         { //::SireMM::BondRestraints::size

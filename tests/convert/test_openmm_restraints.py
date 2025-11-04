@@ -60,7 +60,8 @@ def test_openmm_distance_restraints(ala_mols, openmm_platform):
 
     # check that we get the same result using bond restraints
     restraints2 = sr.restraints.bond(
-        mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A"
+        mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A",
+        use_pbc=True
     )
 
     assert len(restraints2) == 1
@@ -275,7 +276,7 @@ def test_openmm_restraints_pbc(ala_mols, restraint, default_pbc, openmm_platform
     )
 
     # make sure the _use_pbc flag is set to the default value
-    assert restraints._use_pbc == default_pbc
+    assert restraints.get_uses_periodic_boundary_conditions() == default_pbc
 
     # create a dynamics object
     d = mols.dynamics(restraints=restraints, platform=openmm_platform)
@@ -289,13 +290,13 @@ def test_openmm_restraints_pbc(ala_mols, restraint, default_pbc, openmm_platform
     # check that the force is using periodic boundary conditions
     assert restraint_force.usesPeriodicBoundaryConditions() == default_pbc
 
-    # now create a distance restraint with _use_pbc set to the non-default value
+    # now create a distance restraint with use_pbc set to the non-default value
     restraints = restraint_class(
         mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A", use_pbc=not default_pbc
     )
 
     # make sure the _use_pbc flag is set to False
-    assert restraints._use_pbc == (not default_pbc)
+    assert restraints.get_uses_periodic_boundary_conditions() == (not default_pbc)
 
     # create a dynamics object
     d = mols.dynamics(restraints=restraints, platform=openmm_platform)

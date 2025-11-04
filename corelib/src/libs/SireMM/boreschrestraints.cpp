@@ -74,7 +74,9 @@ QDataStream &operator>>(QDataStream &ds, BoreschRestraint &borrest)
     {
         SharedDataStream sds(ds);
 
-        sds >> borrest.receptor_atms >> borrest.ligand_atms >> borrest._r0 >> borrest._theta0 >> borrest._phi0 >> borrest._kr >> borrest._ktheta >> borrest._kphi >> static_cast<Property &>(borrest);
+        sds >> borrest.receptor_atms >> borrest.ligand_atms >> borrest._r0
+            >> borrest._theta0 >> borrest._phi0 >> borrest._kr >> borrest._ktheta
+            >> borrest._kphi >> static_cast<Property &>(borrest);
     }
     else
         throw version_error(v, "1", r_borrest, CODELOC);

@@ -134,7 +134,7 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
     restraintff->addPerBondParameter("kphi_C");
     restraintff->addPerBondParameter("phi0_C");
 
-    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsePBC());
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsesPeriodicBoundaryConditions());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -221,7 +221,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
     restraintff->addPerBondParameter("k");
     restraintff->addPerBondParameter("r0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsePBC());
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsesPeriodicBoundaryConditions());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -287,7 +287,7 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
     restraintff->addPerBondParameter("k");
     restraintff->addPerBondParameter("r0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsePBC());
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsesPeriodicBoundaryConditions());
 
     lambda_lever.addRestraintIndex(restraints.name(),
     system.addForce(restraintff));
@@ -365,7 +365,7 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
     restraintff->addPerBondParameter("r0");
     restraintff->addPerBondParameter("de");
 
-    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsePBC());
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsesPeriodicBoundaryConditions());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                 system.addForce(restraintff));
@@ -439,7 +439,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     restraintff->addPerBondParameter("k");
     restraintff->addPerBondParameter("rb");
 
-    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsePBC());
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsesPeriodicBoundaryConditions());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -669,7 +669,7 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
     restraintff->addPerAngleParameter("k");
     restraintff->addPerAngleParameter("theta0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsePBC());
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsesPeriodicBoundaryConditions());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -732,7 +732,7 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
     restraintff->addPerTorsionParameter("k");
     restraintff->addPerTorsionParameter("theta0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsePBC());
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.getUsesPeriodicBoundaryConditions());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));

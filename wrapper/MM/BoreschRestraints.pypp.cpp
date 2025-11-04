@@ -99,6 +99,18 @@ void register_BoreschRestraints_class(){
                 , "Return the number of restraints" );
         
         }
+        { //::SireMM::BoreschRestraints::getUsesPeriodicBoundaryConditions
+        
+            typedef bool ( ::SireMM::BoreschRestraints::*getUsesPeriodicBoundaryConditions_function_type)(  ) const;
+            getUsesPeriodicBoundaryConditions_function_type getUsesPeriodicBoundaryConditions_function_value( &::SireMM::BoreschRestraints::getUsesPeriodicBoundaryConditions );
+            
+            BoreschRestraints_exposer.def( 
+                "getUsesPeriodicBoundaryConditions"
+                , getUsesPeriodicBoundaryConditions_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not periodic boundary conditions are to be used" );
+        
+        }
         { //::SireMM::BoreschRestraints::isEmpty
         
             typedef bool ( ::SireMM::BoreschRestraints::*isEmpty_function_type)(  ) const;
@@ -175,6 +187,19 @@ void register_BoreschRestraints_class(){
                 , restraints_function_value
                 , bp::release_gil_policy()
                 , "Return all of the restraints" );
+        
+        }
+        { //::SireMM::BoreschRestraints::setUsesPeriodicBoundaryConditions
+        
+            typedef void ( ::SireMM::BoreschRestraints::*setUsesPeriodicBoundaryConditions_function_type)( bool ) ;
+            setUsesPeriodicBoundaryConditions_function_type setUsesPeriodicBoundaryConditions_function_value( &::SireMM::BoreschRestraints::setUsesPeriodicBoundaryConditions );
+            
+            BoreschRestraints_exposer.def( 
+                "setUsesPeriodicBoundaryConditions"
+                , setUsesPeriodicBoundaryConditions_function_value
+                , ( bp::arg("use_pbc") )
+                , bp::release_gil_policy()
+                , "Set whether or not periodic boundary conditions are to be used" );
         
         }
         { //::SireMM::BoreschRestraints::size

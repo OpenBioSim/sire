@@ -123,6 +123,18 @@ void register_InverseBondRestraints_class(){
                 , "Return the number of restraints" );
         
         }
+        { //::SireMM::InverseBondRestraints::getUsesPeriodicBoundaryConditions
+        
+            typedef bool ( ::SireMM::InverseBondRestraints::*getUsesPeriodicBoundaryConditions_function_type)(  ) const;
+            getUsesPeriodicBoundaryConditions_function_type getUsesPeriodicBoundaryConditions_function_value( &::SireMM::InverseBondRestraints::getUsesPeriodicBoundaryConditions );
+            
+            InverseBondRestraints_exposer.def( 
+                "getUsesPeriodicBoundaryConditions"
+                , getUsesPeriodicBoundaryConditions_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not periodic boundary conditions are to be used" );
+        
+        }
         { //::SireMM::InverseBondRestraints::hasAtomRestraints
         
             typedef bool ( ::SireMM::InverseBondRestraints::*hasAtomRestraints_function_type)(  ) const;
@@ -247,6 +259,19 @@ void register_InverseBondRestraints_class(){
                 , restraints_function_value
                 , bp::release_gil_policy()
                 , "Return all of the restraints" );
+        
+        }
+        { //::SireMM::InverseBondRestraints::setUsesPeriodicBoundaryConditions
+        
+            typedef void ( ::SireMM::InverseBondRestraints::*setUsesPeriodicBoundaryConditions_function_type)( bool ) ;
+            setUsesPeriodicBoundaryConditions_function_type setUsesPeriodicBoundaryConditions_function_value( &::SireMM::InverseBondRestraints::setUsesPeriodicBoundaryConditions );
+            
+            InverseBondRestraints_exposer.def( 
+                "setUsesPeriodicBoundaryConditions"
+                , setUsesPeriodicBoundaryConditions_function_value
+                , ( bp::arg("use_pbc") )
+                , bp::release_gil_policy()
+                , "Set whether or not periodic boundary conditions are to be used" );
         
         }
         { //::SireMM::InverseBondRestraints::size
