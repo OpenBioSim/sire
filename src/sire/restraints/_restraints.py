@@ -124,7 +124,7 @@ def angle(mols, atoms, theta0=None, ktheta=None, use_pbc=None, name=None, map=No
     restraints.add(AngleRestraint(mols.find(atoms), theta0, ktheta))
 
     # Set the use_pbc flag.
-    restraints.set_uses_periodic_boundary_conditions(use_pbc)
+    restraints.set_uses_pbc(use_pbc)
 
     return restraints
 
@@ -605,7 +605,7 @@ def dihedral(mols, atoms, phi0=None, kphi=None, use_pbc=None, name=None, map=Non
     restraints.add(DihedralRestraint(mols.find(atoms), phi0, kphi))
 
     # Set the use_pbc flag.
-    restraints.set_uses_periodic_boundary_conditions(use_pbc)
+    restraints.set_uses_pbc(use_pbc)
 
     return restraints
 
@@ -718,7 +718,7 @@ def distance(mols, atoms0, atoms1, r0=None, k=None, use_pbc=None, name=None, map
         restraints.add(BondRestraint(idxs0[0], idxs1[0], ik, ir0))
 
     # Set the use_pbc flag.
-    restraints.set_uses_periodic_boundary_conditions(use_pbc)
+    restraints.set_uses_pbc(use_pbc)
 
     return restraints
 
@@ -968,7 +968,7 @@ def morse_potential(
         restraints.add(MorsePotentialRestraint(idxs0[0], idxs1[0], ik, ir0, de))
 
     # Set the use_pbc flag.
-    restraints.set_uses_periodic_boundary_conditions(use_pbc)
+    restraints.set_uses_pbc(use_pbc)
 
     return restraints
 
@@ -1091,7 +1091,7 @@ def inverse_distance(
         restraints.add(InverseBondRestraint(idxs0[0], idxs1[0], ik, ir0))
 
     # Set the use_pbc flag.
-    restraints.set_uses_periodic_boundary_conditions(use_pbc)
+    restraints.set_uses_pbc(use_pbc)
 
     return restraints
 
@@ -1203,7 +1203,7 @@ def positional(
             restraints.add(PositionalRestraint(idxs[0], position[i], ik, ir0))
 
     # Set the use_pbc flag.
-    restraints.set_uses_periodic_boundary_conditions(use_pbc)
+    restraints.set_uses_pbc(use_pbc)
 
     return restraints
 

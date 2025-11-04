@@ -193,8 +193,8 @@ namespace SireMM
         MorsePotentialRestraints operator+(const MorsePotentialRestraint &restraint) const;
         MorsePotentialRestraints operator+(const MorsePotentialRestraints &restraints) const;
 
-        void setUsesPeriodicBoundaryConditions(bool use_pbc);
-        bool getUsesPeriodicBoundaryConditions() const;
+        void setUsesPbc(bool use_pbc);
+        bool usesPbc() const;
 
     private:
         /** The actual list of restraints*/

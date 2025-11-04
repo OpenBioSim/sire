@@ -123,14 +123,14 @@ void register_MorsePotentialRestraints_class(){
                 , "Return the number of restraints" );
         
         }
-        { //::SireMM::MorsePotentialRestraints::getUsesPeriodicBoundaryConditions
+        { //::SireMM::MorsePotentialRestraints::usesPbc
         
-            typedef bool ( ::SireMM::MorsePotentialRestraints::*getUsesPeriodicBoundaryConditions_function_type)(  ) const;
-            getUsesPeriodicBoundaryConditions_function_type getUsesPeriodicBoundaryConditions_function_value( &::SireMM::MorsePotentialRestraints::getUsesPeriodicBoundaryConditions );
+            typedef bool ( ::SireMM::MorsePotentialRestraints::*usesPbc_function_type)(  ) const;
+            usesPbc_function_type usesPbc_function_value( &::SireMM::MorsePotentialRestraints::usesPbc );
             
             MorsePotentialRestraints_exposer.def( 
-                "getUsesPeriodicBoundaryConditions"
-                , getUsesPeriodicBoundaryConditions_function_value
+                "usesPbc"
+                , usesPbc_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not periodic boundary conditions are to be used" );
         
@@ -261,14 +261,14 @@ void register_MorsePotentialRestraints_class(){
                 , "Return all of the restraints" );
         
         }
-        { //::SireMM::MorsePotentialRestraints::setUsesPeriodicBoundaryConditions
+        { //::SireMM::MorsePotentialRestraints::setUsesPbc
         
-            typedef void ( ::SireMM::MorsePotentialRestraints::*setUsesPeriodicBoundaryConditions_function_type)( bool ) ;
-            setUsesPeriodicBoundaryConditions_function_type setUsesPeriodicBoundaryConditions_function_value( &::SireMM::MorsePotentialRestraints::setUsesPeriodicBoundaryConditions );
+            typedef void ( ::SireMM::MorsePotentialRestraints::*setUsesPbc_function_type)( bool ) ;
+            setUsesPbc_function_type setUsesPbc_function_value( &::SireMM::MorsePotentialRestraints::setUsesPbc );
             
             MorsePotentialRestraints_exposer.def( 
-                "setUsesPeriodicBoundaryConditions"
-                , setUsesPeriodicBoundaryConditions_function_value
+                "setUsesPbc"
+                , setUsesPbc_function_value
                 , ( bp::arg("use_pbc") )
                 , bp::release_gil_policy()
                 , "Set whether or not periodic boundary conditions are to be used" );

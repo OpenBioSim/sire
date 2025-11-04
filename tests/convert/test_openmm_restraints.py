@@ -276,7 +276,7 @@ def test_openmm_restraints_pbc(ala_mols, restraint, default_pbc, openmm_platform
     )
 
     # make sure the _use_pbc flag is set to the default value
-    assert restraints.get_uses_periodic_boundary_conditions() == default_pbc
+    assert restraints.uses_pbc() == default_pbc
 
     # create a dynamics object
     d = mols.dynamics(restraints=restraints, platform=openmm_platform)
@@ -296,7 +296,7 @@ def test_openmm_restraints_pbc(ala_mols, restraint, default_pbc, openmm_platform
     )
 
     # make sure the _use_pbc flag is set to False
-    assert restraints.get_uses_periodic_boundary_conditions() == (not default_pbc)
+    assert restraints.uses_pbc() == (not default_pbc)
 
     # create a dynamics object
     d = mols.dynamics(restraints=restraints, platform=openmm_platform)

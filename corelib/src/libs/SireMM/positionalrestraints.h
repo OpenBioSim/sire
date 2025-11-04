@@ -191,8 +191,8 @@ namespace SireMM
         PositionalRestraints operator+(const PositionalRestraint &restraint) const;
         PositionalRestraints operator+(const PositionalRestraints &restraints) const;
 
-        void setUsesPeriodicBoundaryConditions(bool use_pbc);
-        bool getUsesPeriodicBoundaryConditions() const;
+        void setUsesPbc(bool use_pbc);
+        bool usesPbc() const;
 
     private:
         /** The actual list of restraints*/

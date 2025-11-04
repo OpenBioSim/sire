@@ -692,13 +692,13 @@ InverseBondRestraints InverseBondRestraints::operator+(const InverseBondRestrain
 }
 
 /** Set whether or not periodic boundary conditions are to be used */
-void InverseBondRestraints::setUsesPeriodicBoundaryConditions(bool use_pbc)
+void InverseBondRestraints::setUsesPbc(bool use_pbc)
 {
     this->use_pbc = use_pbc;
 }
 
 /** Return whether or not periodic boundary conditions are to be used */
-bool InverseBondRestraints::getUsesPeriodicBoundaryConditions() const
+bool InverseBondRestraints::usesPbc() const
 {
     return this->use_pbc;
 }

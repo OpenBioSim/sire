@@ -488,13 +488,13 @@ AngleRestraints AngleRestraints::operator+(const AngleRestraints &restraints) co
 }
 
 /** Set whether or not periodic boundary conditions are to be used */
-void AngleRestraints::setUsesPeriodicBoundaryConditions(bool use_pbc)
+void AngleRestraints::setUsesPbc(bool use_pbc)
 {
     this->use_pbc = use_pbc;
 }
 
 /** Return whether or not periodic boundary conditions are to be used */
-bool AngleRestraints::getUsesPeriodicBoundaryConditions() const
+bool AngleRestraints::usesPbc() const
 {
     return this->use_pbc;
 }

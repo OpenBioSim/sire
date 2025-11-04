@@ -692,13 +692,13 @@ BondRestraints BondRestraints::operator+(const BondRestraints &restraints) const
 }
 
 /** Set whether or not periodic boundary conditions are to be used */
-void BondRestraints::setUsesPeriodicBoundaryConditions(bool use_pbc)
+void BondRestraints::setUsesPbc(bool use_pbc)
 {
     this->use_pbc = use_pbc;
 }
 
 /** Return whether or not periodic boundary conditions are to be used */
-bool BondRestraints::getUsesPeriodicBoundaryConditions() const
+bool BondRestraints::usesPbc() const
 {
     return this->use_pbc;
 }

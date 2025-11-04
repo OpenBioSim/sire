@@ -191,8 +191,8 @@ namespace SireMM
         InverseBondRestraints operator+(const InverseBondRestraint &restraint) const;
         InverseBondRestraints operator+(const InverseBondRestraints &restraints) const;
 
-        void setUsesPeriodicBoundaryConditions(bool use_pbc);
-        bool getUsesPeriodicBoundaryConditions() const;
+        void setUsesPbc(bool use_pbc);
+        bool usesPbc() const;
 
     private:
         /** The actual list of restraints*/

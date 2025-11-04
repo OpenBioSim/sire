@@ -194,8 +194,8 @@ namespace SireMM
         BoreschRestraints operator+(const BoreschRestraint &restraint) const;
         BoreschRestraints operator+(const BoreschRestraints &restraints) const;
 
-        void setUsesPeriodicBoundaryConditions(bool use_pbc);
-        bool getUsesPeriodicBoundaryConditions() const;
+        void setUsesPbc(bool use_pbc);
+        bool usesPbc() const;
 
     private:
         /** The actual list of restraints*/

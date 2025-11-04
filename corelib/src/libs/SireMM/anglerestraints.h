@@ -161,8 +161,8 @@ namespace SireMM
         AngleRestraints operator+(const AngleRestraint &restraint) const;
         AngleRestraints operator+(const AngleRestraints &restraints) const;
 
-        void setUsesPeriodicBoundaryConditions(bool use_pbc);
-        bool getUsesPeriodicBoundaryConditions() const;
+        void setUsesPbc(bool use_pbc);
+        bool usesPbc() const;
 
     private:
         /** List of restraints */

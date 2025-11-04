@@ -704,13 +704,13 @@ MorsePotentialRestraints MorsePotentialRestraints::operator+(const MorsePotentia
 }
 
 /** Set whether or not periodic boundary conditions are to be used */
-void MorsePotentialRestraints::setUsesPeriodicBoundaryConditions(bool use_pbc)
+void MorsePotentialRestraints::setUsesPbc(bool use_pbc)
 {
     this->use_pbc = use_pbc;
 }
 
 /** Return whether or not periodic boundary conditions are to be used */
-bool MorsePotentialRestraints::getUsesPeriodicBoundaryConditions() const
+bool MorsePotentialRestraints::usesPbc() const
 {
     return this->use_pbc;
 }

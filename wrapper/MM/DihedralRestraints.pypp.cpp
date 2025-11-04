@@ -99,14 +99,14 @@ void register_DihedralRestraints_class(){
                 , "Return the number of restraints" );
         
         }
-        { //::SireMM::DihedralRestraints::getUsesPeriodicBoundaryConditions
+        { //::SireMM::DihedralRestraints::usesPbc
         
-            typedef bool ( ::SireMM::DihedralRestraints::*getUsesPeriodicBoundaryConditions_function_type)(  ) const;
-            getUsesPeriodicBoundaryConditions_function_type getUsesPeriodicBoundaryConditions_function_value( &::SireMM::DihedralRestraints::getUsesPeriodicBoundaryConditions );
+            typedef bool ( ::SireMM::DihedralRestraints::*usesPbc_function_type)(  ) const;
+            usesPbc_function_type usesPbc_function_value( &::SireMM::DihedralRestraints::usesPbc );
             
             DihedralRestraints_exposer.def( 
-                "getUsesPeriodicBoundaryConditions"
-                , getUsesPeriodicBoundaryConditions_function_value
+                "usesPbc"
+                , usesPbc_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not periodic boundary conditions are to be used" );
         
@@ -189,14 +189,14 @@ void register_DihedralRestraints_class(){
                 , "Return all of the restraints" );
         
         }
-        { //::SireMM::DihedralRestraints::setUsesPeriodicBoundaryConditions
+        { //::SireMM::DihedralRestraints::setUsesPbc
         
-            typedef void ( ::SireMM::DihedralRestraints::*setUsesPeriodicBoundaryConditions_function_type)( bool ) ;
-            setUsesPeriodicBoundaryConditions_function_type setUsesPeriodicBoundaryConditions_function_value( &::SireMM::DihedralRestraints::setUsesPeriodicBoundaryConditions );
+            typedef void ( ::SireMM::DihedralRestraints::*setUsesPbc_function_type)( bool ) ;
+            setUsesPbc_function_type setUsesPbc_function_value( &::SireMM::DihedralRestraints::setUsesPbc );
             
             DihedralRestraints_exposer.def( 
-                "setUsesPeriodicBoundaryConditions"
-                , setUsesPeriodicBoundaryConditions_function_value
+                "setUsesPbc"
+                , setUsesPbc_function_value
                 , ( bp::arg("use_pbc") )
                 , bp::release_gil_policy()
                 , "Set whether or not periodic boundary conditions are to be used" );

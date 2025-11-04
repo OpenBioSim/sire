@@ -487,13 +487,13 @@ DihedralRestraints DihedralRestraints::operator+(const DihedralRestraints &restr
 }
 
 /** Set whether or not periodic boundary conditions are to be used */
-void DihedralRestraints::setUsesPeriodicBoundaryConditions(bool use_pbc)
+void DihedralRestraints::setUsesPbc(bool use_pbc)
 {
     this->use_pbc = use_pbc;
 }
 
 /** Return whether or not periodic boundary conditions are to be used */
-bool DihedralRestraints::getUsesPeriodicBoundaryConditions() const
+bool DihedralRestraints::usesPbc() const
 {
     return this->use_pbc;
 }
