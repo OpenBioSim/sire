@@ -161,9 +161,15 @@ namespace SireMM
         DihedralRestraints operator+(const DihedralRestraint &restraint) const;
         DihedralRestraints operator+(const DihedralRestraints &restraints) const;
 
+        void setUsesPeriodicBoundaryConditions(bool use_pbc);
+        bool getUsesPeriodicBoundaryConditions() const;
+
     private:
         /** List of restraints */
         QList<DihedralRestraint> r;
+
+        /** Whether the restraints use periodic boundary conditions */
+        bool use_pbc = false;
     };
 }
 

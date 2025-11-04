@@ -350,11 +350,11 @@ static const RegisterMetaType<InverseBondRestraints> r_bndrests;
 
 QDataStream &operator<<(QDataStream &ds, const InverseBondRestraints &bndrests)
 {
-    writeHeader(ds, r_bndrests, 1);
+    writeHeader(ds, r_bndrests, 2);
 
     SharedDataStream sds(ds);
 
-    sds << bndrests.r
+    sds << bndrests.r << bndrests.use_pbc
         << static_cast<const Restraints &>(bndrests);
 
     return ds;
@@ -369,6 +369,13 @@ QDataStream &operator>>(QDataStream &ds, InverseBondRestraints &bndrests)
         SharedDataStream sds(ds);
 
         sds >> bndrests.r >> static_cast<Restraints &>(bndrests);
+    }
+    else if (v == 2)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> bndrests.r >> bndrests.use_pbc
+            >> static_cast<Restraints &>(bndrests);
     }
     else
         throw version_error(v, "1", r_bndrests, CODELOC);
@@ -424,7 +431,7 @@ InverseBondRestraints::InverseBondRestraints(const QString &name,
 }
 
 InverseBondRestraints::InverseBondRestraints(const InverseBondRestraints &other)
-    : ConcreteProperty<InverseBondRestraints, Restraints>(other), r(other.r)
+    : ConcreteProperty<InverseBondRestraints, Restraints>(other), r(other.r), use_pbc(other.use_pbc)
 {
 }
 
@@ -435,6 +442,7 @@ InverseBondRestraints::~InverseBondRestraints()
 InverseBondRestraints &InverseBondRestraints::operator=(const InverseBondRestraints &other)
 {
     r = other.r;
+    use_pbc = other.use_pbc;
     Restraints::operator=(other);
     return *this;
 }
@@ -495,7 +503,11 @@ QString InverseBondRestraints::toString() const
         }
     }
 
-    return QObject::tr("InverseBondRestraints( name=%1, size=%2\n%3\n)").arg(this->name()).arg(n).arg(parts.join("\n"));
+    return QObject::tr("InverseBondRestraints( name=%1, size=%2, use_pbc=%3\n%4\n)")
+            .arg(this->name())
+            .arg(n)
+            .arg(this->use_pbc ? "true" : "false")
+            .arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */
@@ -677,4 +689,16 @@ InverseBondRestraints InverseBondRestraints::operator+(const InverseBondRestrain
     InverseBondRestraints ret(*this);
     ret += restraints;
     return *this;
+}
+
+/** Set whether or not periodic boundary conditions are to be used */
+void InverseBondRestraints::setUsesPeriodicBoundaryConditions(bool use_pbc)
+{
+    this->use_pbc = use_pbc;
+}
+
+/** Return whether or not periodic boundary conditions are to be used */
+bool InverseBondRestraints::getUsesPeriodicBoundaryConditions() const
+{
+    return this->use_pbc;
 }

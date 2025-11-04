@@ -343,11 +343,11 @@ static const RegisterMetaType<BoreschRestraints> r_borrests;
 
 QDataStream &operator<<(QDataStream &ds, const BoreschRestraints &borrests)
 {
-    writeHeader(ds, r_borrests, 1);
+    writeHeader(ds, r_borrests, 2);
 
     SharedDataStream sds(ds);
 
-    sds << borrests.r
+    sds << borrests.r << borrests.use_pbc
         << static_cast<const Restraints &>(borrests);
 
     return ds;
@@ -363,8 +363,15 @@ QDataStream &operator>>(QDataStream &ds, BoreschRestraints &borrests)
 
         sds >> borrests.r >> static_cast<Restraints &>(borrests);
     }
+    else if (v == 2)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> borrests.r >> borrests.use_pbc
+            >> static_cast<Restraints &>(borrests);
+    }
     else
-        throw version_error(v, "1", r_borrests, CODELOC);
+        throw version_error(v, "1,2", r_borrests, CODELOC);
 
     return ds;
 }
@@ -417,7 +424,7 @@ BoreschRestraints::BoreschRestraints(const QString &name,
 }
 
 BoreschRestraints::BoreschRestraints(const BoreschRestraints &other)
-    : ConcreteProperty<BoreschRestraints, Restraints>(other), r(other.r)
+    : ConcreteProperty<BoreschRestraints, Restraints>(other), r(other.r), use_pbc(other.use_pbc)
 {
 }
 
@@ -428,13 +435,15 @@ BoreschRestraints::~BoreschRestraints()
 BoreschRestraints &BoreschRestraints::operator=(const BoreschRestraints &other)
 {
     r = other.r;
+    use_pbc = other.use_pbc;
     Restraints::operator=(other);
     return *this;
 }
 
 bool BoreschRestraints::operator==(const BoreschRestraints &other) const
 {
-    return r == other.r and Restraints::operator==(other);
+    return r == other.r and Restraints::operator==(other) and
+           use_pbc == other.use_pbc;
 }
 
 bool BoreschRestraints::operator!=(const BoreschRestraints &other) const
@@ -488,7 +497,11 @@ QString BoreschRestraints::toString() const
         }
     }
 
-    return QObject::tr("BoreschRestraints( name=%1, size=%2\n%3\n)").arg(this->name()).arg(n).arg(parts.join("\n"));
+    return QObject::tr("BoreschRestraints( name=%1, size=%2, use_pbc=%3\n%4\n)")
+            .arg(this->name())
+            .arg(n)
+            .arg(this->use_pbc ? "true" : "false")
+            .arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */
@@ -582,4 +595,16 @@ BoreschRestraints BoreschRestraints::operator+(const BoreschRestraints &restrain
     BoreschRestraints ret(*this);
     ret += restraints;
     return *this;
+}
+
+/** Set whether or not periodic boundary conditions are to be used */
+void BoreschRestraints::setUsesPeriodicBoundaryConditions(bool use_pbc)
+{
+    this->use_pbc = use_pbc;
+}
+
+/** Return whether or not periodic boundary conditions are to be used */
+bool BoreschRestraints::getUsesPeriodicBoundaryConditions() const
+{
+    return this->use_pbc;
 }

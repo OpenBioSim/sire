@@ -193,9 +193,15 @@ namespace SireMM
         MorsePotentialRestraints operator+(const MorsePotentialRestraint &restraint) const;
         MorsePotentialRestraints operator+(const MorsePotentialRestraints &restraints) const;
 
+        void setUsesPeriodicBoundaryConditions(bool use_pbc);
+        bool getUsesPeriodicBoundaryConditions() const;
+
     private:
         /** The actual list of restraints*/
         QList<MorsePotentialRestraint> r;
+
+        /** Whether the restraints use periodic boundary conditions */
+        bool use_pbc = false;
     };
 
 }

@@ -191,9 +191,15 @@ namespace SireMM
         BondRestraints operator+(const BondRestraint &restraint) const;
         BondRestraints operator+(const BondRestraints &restraints) const;
 
+        void setUsesPeriodicBoundaryConditions(bool use_pbc);
+        bool getUsesPeriodicBoundaryConditions() const;
+
     private:
         /** The actual list of restraints*/
         QList<BondRestraint> r;
+
+        /** Whether the restraints use periodic boundary conditions */
+        bool use_pbc = false;
     };
 
 }

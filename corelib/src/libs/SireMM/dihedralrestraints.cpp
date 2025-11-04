@@ -225,11 +225,11 @@ static const RegisterMetaType<DihedralRestraints> r_dihrests;
 
 QDataStream &operator<<(QDataStream &ds, const DihedralRestraints &dihrests)
 {
-    writeHeader(ds, r_dihrests, 1);
+    writeHeader(ds, r_dihrests, 2);
 
     SharedDataStream sds(ds);
 
-    sds << dihrests.r
+    sds << dihrests.r << dihrests.use_pbc
         << static_cast<const Restraints &>(dihrests);
 
     return ds;
@@ -247,8 +247,15 @@ QDataStream &operator>>(QDataStream &ds, DihedralRestraints &dihrests)
         sds >> dihrests.r >>
             static_cast<Restraints &>(dihrests);
     }
+    else if (v == 2)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> dihrests.r >> dihrests.use_pbc
+            >> static_cast<Restraints &>(dihrests);
+    }
     else
-        throw version_error(v, "1", r_dihrests, CODELOC);
+        throw version_error(v, "1,2", r_dihrests, CODELOC);
 
     return ds;
 }
@@ -301,7 +308,7 @@ DihedralRestraints::DihedralRestraints(const QString &name,
 }
 
 DihedralRestraints::DihedralRestraints(const DihedralRestraints &other)
-    : ConcreteProperty<DihedralRestraints, Restraints>(other), r(other.r)
+    : ConcreteProperty<DihedralRestraints, Restraints>(other), r(other.r), use_pbc(other.use_pbc)
 {
 }
 
@@ -316,6 +323,7 @@ DihedralRestraints &DihedralRestraints::operator=(const DihedralRestraints &othe
     {
         Restraints::operator=(other);
         r = other.r;
+        use_pbc = other.use_pbc;
     }
 
     return *this;
@@ -323,7 +331,8 @@ DihedralRestraints &DihedralRestraints::operator=(const DihedralRestraints &othe
 
 bool DihedralRestraints::operator==(const DihedralRestraints &other) const
 {
-    return r == other.r and Restraints::operator==(other);
+    return r == other.r and Restraints::operator==(other) and
+           use_pbc == other.use_pbc;
 }
 
 bool DihedralRestraints::operator!=(const DihedralRestraints &other) const
@@ -377,9 +386,10 @@ QString DihedralRestraints::toString() const
         }
     }
 
-    return QObject::tr("DihedralRestraints( name=%1, size=%2\n%3\n )")
+    return QObject::tr("DihedralRestraints( name=%1, size=%2, use_pbc=%3\n%4\n )")
         .arg(this->name())
         .arg(n)
+        .arg(this->use_pbc ? "true" : "false")
         .arg(parts.join("\n"));
 }
 
@@ -474,4 +484,16 @@ DihedralRestraints DihedralRestraints::operator+(const DihedralRestraints &restr
     DihedralRestraints ret(*this);
     ret += restraints;
     return *this;
+}
+
+/** Set whether or not periodic boundary conditions are to be used */
+void DihedralRestraints::setUsesPeriodicBoundaryConditions(bool use_pbc)
+{
+    this->use_pbc = use_pbc;
+}
+
+/** Return whether or not periodic boundary conditions are to be used */
+bool DihedralRestraints::getUsesPeriodicBoundaryConditions() const
+{
+    return this->use_pbc;
 }

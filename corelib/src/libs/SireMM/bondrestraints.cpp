@@ -350,11 +350,11 @@ static const RegisterMetaType<BondRestraints> r_bndrests;
 
 QDataStream &operator<<(QDataStream &ds, const BondRestraints &bndrests)
 {
-    writeHeader(ds, r_bndrests, 1);
+    writeHeader(ds, r_bndrests, 2);
 
     SharedDataStream sds(ds);
 
-    sds << bndrests.r
+    sds << bndrests.r << bndrests.use_pbc
         << static_cast<const Restraints &>(bndrests);
 
     return ds;
@@ -370,8 +370,15 @@ QDataStream &operator>>(QDataStream &ds, BondRestraints &bndrests)
 
         sds >> bndrests.r >> static_cast<Restraints &>(bndrests);
     }
+    else if (v == 2)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> bndrests.r >> bndrests.use_pbc
+            >> static_cast<Restraints &>(bndrests);
+    }
     else
-        throw version_error(v, "1", r_bndrests, CODELOC);
+        throw version_error(v, "1,2", r_bndrests, CODELOC);
 
     return ds;
 }
@@ -435,13 +442,14 @@ BondRestraints::~BondRestraints()
 BondRestraints &BondRestraints::operator=(const BondRestraints &other)
 {
     r = other.r;
+    use_pbc = other.use_pbc;
     Restraints::operator=(other);
     return *this;
 }
 
 bool BondRestraints::operator==(const BondRestraints &other) const
 {
-    return r == other.r and Restraints::operator==(other);
+    return r == other.r and Restraints::operator==(other) and use_pbc == other.use_pbc;
 }
 
 bool BondRestraints::operator!=(const BondRestraints &other) const
@@ -495,7 +503,11 @@ QString BondRestraints::toString() const
         }
     }
 
-    return QObject::tr("BondRestraints( name=%1, size=%2\n%3\n)").arg(this->name()).arg(n).arg(parts.join("\n"));
+    return QObject::tr("BondRestraints( name=%1, size=%2, use_pbc=$3\n%4\n)")
+            .arg(this->name())
+            .arg(n)
+            .arg(this->use_pbc ? "true" : "false")
+            .arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */
@@ -677,4 +689,16 @@ BondRestraints BondRestraints::operator+(const BondRestraints &restraints) const
     BondRestraints ret(*this);
     ret += restraints;
     return *this;
+}
+
+/** Set whether or not periodic boundary conditions are to be used */
+void BondRestraints::setUsesPeriodicBoundaryConditions(bool use_pbc)
+{
+    this->use_pbc = use_pbc;
+}
+
+/** Return whether or not periodic boundary conditions are to be used */
+bool BondRestraints::getUsesPeriodicBoundaryConditions() const
+{
+    return this->use_pbc;
 }

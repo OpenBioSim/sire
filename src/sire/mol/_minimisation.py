@@ -50,12 +50,6 @@ class Minimisation:
         _add_extra(extras, "restraints", restraints)
         _add_extra(extras, "fixed", fixed)
 
-        if restraints is not None:
-            if hasattr(restraints, "_use_pbc"):
-                extras["use_pbc"] = restraints._use_pbc
-            else:
-                extras["use_pbc"] = True
-
         map = create_map(map, extras)
 
         self._d = DynamicsData(mols=mols, map=map)

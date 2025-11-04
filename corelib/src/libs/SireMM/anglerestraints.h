@@ -161,9 +161,15 @@ namespace SireMM
         AngleRestraints operator+(const AngleRestraint &restraint) const;
         AngleRestraints operator+(const AngleRestraints &restraints) const;
 
+        void setUsesPeriodicBoundaryConditions(bool use_pbc);
+        bool getUsesPeriodicBoundaryConditions() const;
+
     private:
         /** List of restraints */
         QList<AngleRestraint> r;
+
+        /** Whether the restraints use periodic boundary conditions */
+        bool use_pbc = false;
     };
 }
 

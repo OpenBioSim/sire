@@ -191,9 +191,15 @@ namespace SireMM
         InverseBondRestraints operator+(const InverseBondRestraint &restraint) const;
         InverseBondRestraints operator+(const InverseBondRestraints &restraints) const;
 
+        void setUsesPeriodicBoundaryConditions(bool use_pbc);
+        bool getUsesPeriodicBoundaryConditions() const;
+
     private:
         /** The actual list of restraints*/
         QList<InverseBondRestraint> r;
+
+        /** Whether the restraints use periodic boundary conditions */
+        bool use_pbc = false;
     };
 
 }

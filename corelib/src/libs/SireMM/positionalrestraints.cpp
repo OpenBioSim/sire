@@ -289,11 +289,11 @@ static const RegisterMetaType<PositionalRestraints> r_posrests;
 
 QDataStream &operator<<(QDataStream &ds, const PositionalRestraints &posrests)
 {
-    writeHeader(ds, r_posrests, 1);
+    writeHeader(ds, r_posrests, 2);
 
     SharedDataStream sds(ds);
 
-    sds << posrests.r
+    sds << posrests.r << posrests.use_pbc
         << static_cast<const Restraints &>(posrests);
 
     return ds;
@@ -309,8 +309,15 @@ QDataStream &operator>>(QDataStream &ds, PositionalRestraints &posrests)
 
         sds >> posrests.r >> static_cast<Restraints &>(posrests);
     }
+    else if (v == 2)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> posrests.r >> posrests.use_pbc
+            >> static_cast<Restraints &>(posrests);
+    }
     else
-        throw version_error(v, "1", r_posrests, CODELOC);
+        throw version_error(v, "1,2", r_posrests, CODELOC);
 
     return ds;
 }
@@ -363,7 +370,7 @@ PositionalRestraints::PositionalRestraints(const QString &name,
 }
 
 PositionalRestraints::PositionalRestraints(const PositionalRestraints &other)
-    : ConcreteProperty<PositionalRestraints, Restraints>(other), r(other.r)
+    : ConcreteProperty<PositionalRestraints, Restraints>(other), r(other.r), use_pbc(other.use_pbc)
 {
 }
 
@@ -374,13 +381,14 @@ PositionalRestraints::~PositionalRestraints()
 PositionalRestraints &PositionalRestraints::operator=(const PositionalRestraints &other)
 {
     r = other.r;
+    use_pbc = other.use_pbc;
     Restraints::operator=(other);
     return *this;
 }
 
 bool PositionalRestraints::operator==(const PositionalRestraints &other) const
 {
-    return r == other.r and Restraints::operator==(other);
+    return r == other.r and Restraints::operator==(other) and use_pbc == other.use_pbc;
 }
 
 bool PositionalRestraints::operator!=(const PositionalRestraints &other) const
@@ -434,7 +442,11 @@ QString PositionalRestraints::toString() const
         }
     }
 
-    return QObject::tr("PositionalRestraints( name=%1, size=%2\n%3\n)").arg(this->name()).arg(n).arg(parts.join("\n"));
+    return QObject::tr("PositionalRestraints( name=%1, size=%2, use_pbc=%3\n%4\n)")
+            .arg(this->name())
+            .arg(n)
+            .arg(this->use_pbc ? "true" : "false")
+            .arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */
@@ -616,4 +628,16 @@ PositionalRestraints PositionalRestraints::operator+(const PositionalRestraints 
     PositionalRestraints ret(*this);
     ret += restraints;
     return *this;
+}
+
+/** Set whether or not periodic boundary conditions are to be used */
+void PositionalRestraints::setUsesPeriodicBoundaryConditions(bool use_pbc)
+{
+    this->use_pbc = use_pbc;
+}
+
+/** Return whether or not periodic boundary conditions are to be used */
+bool PositionalRestraints::getUsesPeriodicBoundaryConditions() const
+{
+    return this->use_pbc;
 }
