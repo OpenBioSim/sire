@@ -1072,7 +1072,7 @@ class DynamicsData:
         if null_energy is not None:
             null_energy = u(null_energy)
         else:
-            null_energy = u("10000 kcal/mol")
+            null_energy = u("1e6 kcal/mol")
 
         if num_energy_neighbours is not None:
             try:
