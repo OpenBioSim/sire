@@ -38,6 +38,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add support for writing trajectory frames to user-defined file names.
 
+* Add inverse distance restraint to keep atoms apart during OpenMM dyanmics.
+
+* Allow user to specify whether OpenMM restraints use periodic boundary conditions.
+
+* Allow user to specify the OpenCL platform index when creating an OpenMM context.
+
 `2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
 --------------------------------------------------------------------------------------------
 

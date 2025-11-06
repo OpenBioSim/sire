@@ -191,9 +191,15 @@ namespace SireMM
         PositionalRestraints operator+(const PositionalRestraint &restraint) const;
         PositionalRestraints operator+(const PositionalRestraints &restraints) const;
 
+        void setUsesPbc(bool use_pbc);
+        bool usesPbc() const;
+
     private:
         /** The actual list of restraints*/
         QList<PositionalRestraint> r;
+
+        /** Whether the restraints use periodic boundary conditions */
+        bool use_pbc = true;
     };
 
 }

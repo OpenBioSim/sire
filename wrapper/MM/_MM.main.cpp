@@ -307,6 +307,10 @@
 
 #include "IntraSoftCLJFFBase.pypp.hpp"
 
+#include "InverseBondRestraint.pypp.hpp"
+
+#include "InverseBondRestraints.pypp.hpp"
+
 #include "LJ1264Parameter.pypp.hpp"
 
 #include "LJComponent.pypp.hpp"
@@ -787,6 +791,10 @@ BOOST_PYTHON_MODULE(_MM){
     register_IntraFF_class();
 
     register_IntraGroupFF_class();
+
+    register_InverseBondRestraint_class();
+
+    register_InverseBondRestraints_class();
 
     register_LJ1264Parameter_class();
 

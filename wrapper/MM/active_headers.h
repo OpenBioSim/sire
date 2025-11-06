@@ -57,6 +57,7 @@
 #include "intragroupff.h"
 #include "intraljff.h"
 #include "intrasoftcljff.h"
+#include "inversebondrestraints.h"
 #include "lj1264parameter.h"
 #include "ljpair.h"
 #include "ljparameter.h"

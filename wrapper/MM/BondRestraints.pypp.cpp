@@ -123,6 +123,18 @@ void register_BondRestraints_class(){
                 , "Return the number of restraints" );
         
         }
+        { //::SireMM::BondRestraints::usesPbc
+        
+            typedef bool ( ::SireMM::BondRestraints::*usesPbc_function_type)(  ) const;
+            usesPbc_function_type usesPbc_function_value( &::SireMM::BondRestraints::usesPbc );
+            
+            BondRestraints_exposer.def( 
+                "usesPbc"
+                , usesPbc_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not periodic boundary conditions are to be used" );
+        
+        }
         { //::SireMM::BondRestraints::hasAtomRestraints
         
             typedef bool ( ::SireMM::BondRestraints::*hasAtomRestraints_function_type)(  ) const;
@@ -247,6 +259,19 @@ void register_BondRestraints_class(){
                 , restraints_function_value
                 , bp::release_gil_policy()
                 , "Return all of the restraints" );
+        
+        }
+        { //::SireMM::BondRestraints::setUsesPbc
+        
+            typedef void ( ::SireMM::BondRestraints::*setUsesPbc_function_type)( bool ) ;
+            setUsesPbc_function_type setUsesPbc_function_value( &::SireMM::BondRestraints::setUsesPbc );
+            
+            BondRestraints_exposer.def( 
+                "setUsesPbc"
+                , setUsesPbc_function_value
+                , ( bp::arg("use_pbc") )
+                , bp::release_gil_policy()
+                , "Set whether or not periodic boundary conditions are to be used" );
         
         }
         { //::SireMM::BondRestraints::size

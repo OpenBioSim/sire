@@ -227,11 +227,11 @@ static const RegisterMetaType<AngleRestraints> r_angrests;
 
 QDataStream &operator<<(QDataStream &ds, const AngleRestraints &angrests)
 {
-    writeHeader(ds, r_angrests, 1);
+    writeHeader(ds, r_angrests, 2);
 
     SharedDataStream sds(ds);
 
-    sds << angrests.r
+    sds << angrests.r << angrests.use_pbc
         << static_cast<const Restraints &>(angrests);
 
     return ds;
@@ -249,8 +249,15 @@ QDataStream &operator>>(QDataStream &ds, AngleRestraints &angrests)
         sds >> angrests.r >>
             static_cast<Restraints &>(angrests);
     }
+    else if (v == 2)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> angrests.r >> angrests.use_pbc
+            >> static_cast<Restraints &>(angrests);
+    }
     else
-        throw version_error(v, "1", r_angrests, CODELOC);
+        throw version_error(v, "1,2", r_angrests, CODELOC);
 
     return ds;
 }
@@ -303,7 +310,7 @@ AngleRestraints::AngleRestraints(const QString &name,
 }
 
 AngleRestraints::AngleRestraints(const AngleRestraints &other)
-    : ConcreteProperty<AngleRestraints, Restraints>(other), r(other.r)
+    : ConcreteProperty<AngleRestraints, Restraints>(other), r(other.r), use_pbc(other.use_pbc)
 {
 }
 
@@ -318,6 +325,7 @@ AngleRestraints &AngleRestraints::operator=(const AngleRestraints &other)
     {
         Restraints::operator=(other);
         r = other.r;
+        use_pbc = other.use_pbc;
     }
 
     return *this;
@@ -325,7 +333,7 @@ AngleRestraints &AngleRestraints::operator=(const AngleRestraints &other)
 
 bool AngleRestraints::operator==(const AngleRestraints &other) const
 {
-    return r == other.r and Restraints::operator==(other);
+    return r == other.r and Restraints::operator==(other) and use_pbc == other.use_pbc;
 }
 
 bool AngleRestraints::operator!=(const AngleRestraints &other) const
@@ -379,9 +387,10 @@ QString AngleRestraints::toString() const
         }
     }
 
-    return QObject::tr("AngleRestraints( name=%1, size=%2\n%3\n )")
+    return QObject::tr("AngleRestraints( name=%1, size=%2, use_pbc=%3\n%4\n )")
         .arg(this->name())
         .arg(n)
+        .arg(this->use_pbc ? "true" : "false")
         .arg(parts.join("\n"));
 }
 
@@ -476,4 +485,16 @@ AngleRestraints AngleRestraints::operator+(const AngleRestraints &restraints) co
     AngleRestraints ret(*this);
     ret += restraints;
     return *this;
+}
+
+/** Set whether or not periodic boundary conditions are to be used */
+void AngleRestraints::setUsesPbc(bool use_pbc)
+{
+    this->use_pbc = use_pbc;
+}
+
+/** Return whether or not periodic boundary conditions are to be used */
+bool AngleRestraints::usesPbc() const
+{
+    return this->use_pbc;
 }

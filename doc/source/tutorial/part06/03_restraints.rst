@@ -20,6 +20,12 @@ needs to be passed to OpenMM to add the restraints to the system.
    ``k`` values supplied to the restraints functions are half the value of the force
    constants.
 
+.. note::
+
+   Where appropriate, whether periodic boundary conditions are applied to the restraints
+   can be controlled via the ``use_pbc`` keyword argument. By default, this is set to
+   ``True`` for positional and distance restraints, and ``False`` for all bonded restraints.
+
 Positional Restraints
 ---------------------
 
@@ -156,7 +162,7 @@ SireMol::SelectorM<SireMol::Atom>( size=358
 )
 
 RMSD Restraints
----------------------
+---------------
 
 RMSD restraints are similar to positional restraints, but rather than atoms being
 restrained with respect to fixed positions in space, they are restrained relative

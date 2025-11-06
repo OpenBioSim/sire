@@ -2088,9 +2088,9 @@ void _update_restraint_in_context(OpenMM::CustomCVForce *ff, double rho,
     // First global param corresponds to rho.
     double current_rho = context.getParameter(rho_name);
     if (current_rho == rho)
-        return; 
+        return;
 
-    // Update the value of rho 
+    // Update the value of rho
     context.setParameter(rho_name, rho);
 
     ff->updateParametersInContext(context);
@@ -2104,7 +2104,10 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
     // what is the type of this force...?
     const auto ff_type = ff.getName();
 
-    if (ff_type == "BondRestraintForce" or ff_type == "PositionalRestraintForce" or ff_type == "MorsePotentialRestraintForce")
+    if (ff_type == "BondRestraintForce" or
+        ff_type == "PositionalRestraintForce" or
+        ff_type == "MorsePotentialRestraintForce" or
+        ff_type == "InverseBondRestraintForce")
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomBondForce *>(&ff),
