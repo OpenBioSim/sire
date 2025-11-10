@@ -223,6 +223,12 @@ try:
 
         friction = friction.to(1.0 / picosecond) / openmm.unit.picosecond
 
+        if map.specified("surface_tension"):
+            surface_tension = map["surface_tension"].value()
+            surface_tension = surface_tension.to("bar * nanometer")
+        else:
+            surface_tension = None
+
         use_andersen = False
         temperature = None
 
@@ -354,7 +360,19 @@ try:
 
             pressure = ensemble.pressure().to(atm) * openmm.unit.atmosphere
 
-            barostat = openmm.MonteCarloBarostat(pressure, temperature, barostat_freq)
+            if surface_tension is not None:
+                barostat = openmm.MonteCarloMembraneBarostat(
+                    pressure,
+                    surface_tension,
+                    temperature,
+                    openmm.MonteCarloMembraneBarostat.XYIsotropic,
+                    openmm.MonteCarloMembraneBarostat.ZFree,
+                    barostat_freq,
+                )
+            else:
+                barostat = openmm.MonteCarloBarostat(
+                    pressure, temperature, barostat_freq
+                )
 
             system.addForce(barostat)
 
@@ -452,6 +470,20 @@ try:
         if map.specified("cpu_pme") and "UseCpuPme" in supported_properties:
             usecpu = int(map["cpu_pme"].value().as_boolean())
             platform.setPropertyDefaultValue("UseCpuPme", str(usecpu).lower())
+
+        if "OpenCLPlatformIndex" in supported_properties and map.specified(
+            "opencl_platform_index"
+        ):
+            try:
+                opencl_platform_index = (
+                    map["opencl_platform_index"].value().as_integer()
+                )
+            except Exception:
+                opencl_platform_index = map["opencl_platform_index"].source()
+
+            platform.setPropertyDefaultValue(
+                "OpenCLPlatformIndex", str(opencl_platform_index)
+            )
 
         try:
             from ._sommcontext import SOMMContext

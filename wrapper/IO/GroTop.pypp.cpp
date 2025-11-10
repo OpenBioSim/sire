@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 #include "SireMM/cljnbpairs.h"
 
+#include "SireMM/cmapfunctions.h"
+
 #include "SireMM/fouratomfunctions.h"
 
 #include "SireMM/internalff.h"
@@ -76,6 +78,8 @@ namespace bp = boost::python;
 #include "grotop.h"
 
 SireIO::GroTop __copy__(const SireIO::GroTop &other){ return SireIO::GroTop(other); }
+
+#include "Helpers/copy.hpp"
 
 #include "Qt/qdatastream.hpp"
 
@@ -192,6 +196,19 @@ void register_GroTop_class(){
                 , ( bp::arg("atm0"), bp::arg("atm1"), bp::arg("func") )
                 , bp::release_gil_policy()
                 , "Return the bond potential data for the passed pair of atoms. This returns\na list of all associated parameters" );
+        
+        }
+        { //::SireIO::GroTop::cmaps
+        
+            typedef ::QList< SireMM::CMAPParameter > ( ::SireIO::GroTop::*cmaps_function_type)( ::QString const &,::QString const &,::QString const &,::QString const &,::QString const &,int ) const;
+            cmaps_function_type cmaps_function_value( &::SireIO::GroTop::cmaps );
+            
+            GroTop_exposer.def( 
+                "cmaps"
+                , cmaps_function_value
+                , ( bp::arg("atm0"), bp::arg("atm1"), bp::arg("atm2"), bp::arg("atm3"), bp::arg("atm4"), bp::arg("func") )
+                , bp::release_gil_policy()
+                , "Return all of the CMAP potentials for the passed quint of atom types, for the\n  passed function type. This returns a list of all associated parameters\n  (or an empty list if none exist)" );
         
         }
         { //::SireIO::GroTop::combiningRules
@@ -528,9 +545,9 @@ void register_GroTop_class(){
         
         }
         GroTop_exposer.staticmethod( "typeName" );
-        GroTop_exposer.def( "__copy__", &__copy__);
-        GroTop_exposer.def( "__deepcopy__", &__copy__);
-        GroTop_exposer.def( "clone", &__copy__);
+        GroTop_exposer.def( "__copy__", &__copy__<SireIO::GroTop>);
+        GroTop_exposer.def( "__deepcopy__", &__copy__<SireIO::GroTop>);
+        GroTop_exposer.def( "clone", &__copy__<SireIO::GroTop>);
         GroTop_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::GroTop >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         GroTop_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::GroTop >,

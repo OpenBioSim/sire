@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 #include "SireMM/cljnbpairs.h"
 
+#include "SireMM/cmapfunctions.h"
+
 #include "SireMM/fouratomfunctions.h"
 
 #include "SireMM/internalff.h"
@@ -76,6 +78,8 @@ namespace bp = boost::python;
 #include "grotop.h"
 
 SireIO::GroMolType __copy__(const SireIO::GroMolType &other){ return SireIO::GroMolType(other); }
+
+#include "Helpers/copy.hpp"
 
 #include "Qt/qdatastream.hpp"
 
@@ -149,6 +153,18 @@ void register_GroMolType_class(){
                 , addBonds_function_value
                 , ( bp::arg("bonds"), bp::arg("is_lambda1")=(bool)(false) )
                 , "Add the passed bonds to the molecule" );
+        
+        }
+        { //::SireIO::GroMolType::addCMAPs
+        
+            typedef void ( ::SireIO::GroMolType::*addCMAPs_function_type)( ::QHash< SireMol::CMAPID, QString > const &,bool ) ;
+            addCMAPs_function_type addCMAPs_function_value( &::SireIO::GroMolType::addCMAPs );
+            
+            GroMolType_exposer.def( 
+                "addCMAPs"
+                , addCMAPs_function_value
+                , ( bp::arg("cmaps"), bp::arg("is_lambda1")=(bool)(false) )
+                , "Add the passed CMAPs to the molecule" );
         
         }
         { //::SireIO::GroMolType::addDihedral
@@ -308,6 +324,18 @@ void register_GroMolType_class(){
                 , "Return all of the bonds" );
         
         }
+        { //::SireIO::GroMolType::cmaps
+        
+            typedef ::QHash< SireMol::CMAPID, QString > ( ::SireIO::GroMolType::*cmaps_function_type)( bool ) const;
+            cmaps_function_type cmaps_function_value( &::SireIO::GroMolType::cmaps );
+            
+            GroMolType_exposer.def( 
+                "cmaps"
+                , cmaps_function_value
+                , ( bp::arg("is_lambda1")=(bool)(false) )
+                , "Return all of the cmaps" );
+        
+        }
         { //::SireIO::GroMolType::dihedrals
         
             typedef ::QMultiHash< SireMol::DihedralID, SireMM::GromacsDihedral > ( ::SireIO::GroMolType::*dihedrals_function_type)( bool ) const;
@@ -455,6 +483,30 @@ void register_GroMolType_class(){
                 , "Sanitise this moleculetype. This assumes that the moleculetype has\nbeen fully specified, so it collects everything together and checks that the\nmolecule makes sense. Any warnings generated can be retrieved using the\nwarnings function. It also uses the passed defaults from the top file,\ntogether with the information in the molecule to guess the forcefield for\nthe molecule" );
         
         }
+        { //::SireIO::GroMolType::sanitiseCMAPs
+        
+            typedef void ( ::SireIO::GroMolType::*sanitiseCMAPs_function_type)( bool ) ;
+            sanitiseCMAPs_function_type sanitiseCMAPs_function_value( &::SireIO::GroMolType::sanitiseCMAPs );
+            
+            GroMolType_exposer.def( 
+                "sanitiseCMAPs"
+                , sanitiseCMAPs_function_value
+                , ( bp::arg("is_lambda1")=(bool)(false) )
+                , "Sanitise all of the CMAP terms - this sets the string equal to 1,\n  as the information contained previously has already been read\n" );
+        
+        }
+        { //::SireIO::GroMolType::setAtomType
+        
+            typedef void ( ::SireIO::GroMolType::*setAtomType_function_type)( ::SireMol::AtomIdx const &,::QString const &,bool ) ;
+            setAtomType_function_type setAtomType_function_value( &::SireIO::GroMolType::setAtomType );
+            
+            GroMolType_exposer.def( 
+                "setAtomType"
+                , setAtomType_function_value
+                , ( bp::arg("atomidx"), bp::arg("atomtype"), bp::arg("is_lambda1")=(bool)(false) )
+                , "Set the atom type of the specified atom" );
+        
+        }
         { //::SireIO::GroMolType::setAtoms
         
             typedef void ( ::SireIO::GroMolType::*setAtoms_function_type)( ::QVector< SireIO::GroAtom > const &,bool ) ;
@@ -553,9 +605,9 @@ void register_GroMolType_class(){
         
         }
         GroMolType_exposer.staticmethod( "typeName" );
-        GroMolType_exposer.def( "__copy__", &__copy__);
-        GroMolType_exposer.def( "__deepcopy__", &__copy__);
-        GroMolType_exposer.def( "clone", &__copy__);
+        GroMolType_exposer.def( "__copy__", &__copy__<SireIO::GroMolType>);
+        GroMolType_exposer.def( "__deepcopy__", &__copy__<SireIO::GroMolType>);
+        GroMolType_exposer.def( "clone", &__copy__<SireIO::GroMolType>);
         GroMolType_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::GroMolType >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         GroMolType_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::GroMolType >,

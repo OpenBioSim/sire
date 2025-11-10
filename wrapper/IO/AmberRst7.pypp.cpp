@@ -55,6 +55,8 @@ namespace bp = boost::python;
 
 SireIO::AmberRst7 __copy__(const SireIO::AmberRst7 &other){ return SireIO::AmberRst7(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -345,9 +347,9 @@ void register_AmberRst7_class(){
         }
         AmberRst7_exposer.staticmethod( "parse" );
         AmberRst7_exposer.staticmethod( "typeName" );
-        AmberRst7_exposer.def( "__copy__", &__copy__);
-        AmberRst7_exposer.def( "__deepcopy__", &__copy__);
-        AmberRst7_exposer.def( "clone", &__copy__);
+        AmberRst7_exposer.def( "__copy__", &__copy__<SireIO::AmberRst7>);
+        AmberRst7_exposer.def( "__deepcopy__", &__copy__<SireIO::AmberRst7>);
+        AmberRst7_exposer.def( "clone", &__copy__<SireIO::AmberRst7>);
         AmberRst7_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::AmberRst7 >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AmberRst7_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::AmberRst7 >,

@@ -29,6 +29,8 @@ namespace bp = boost::python;
 
 SireIO::NullIO __copy__(const SireIO::NullIO &other){ return SireIO::NullIO(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -70,9 +72,9 @@ void register_NullIO_class(){
         
         }
         NullIO_exposer.staticmethod( "typeName" );
-        NullIO_exposer.def( "__copy__", &__copy__);
-        NullIO_exposer.def( "__deepcopy__", &__copy__);
-        NullIO_exposer.def( "clone", &__copy__);
+        NullIO_exposer.def( "__copy__", &__copy__<SireIO::NullIO>);
+        NullIO_exposer.def( "__deepcopy__", &__copy__<SireIO::NullIO>);
+        NullIO_exposer.def( "clone", &__copy__<SireIO::NullIO>);
         NullIO_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::NullIO >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         NullIO_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::NullIO >,

@@ -12,7 +12,7 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2025.3.0 <https://github.com/openbiosim/sire/compare/2025.2.0...2025.3.0>`__ - December 2025
+`2025.3.0 <https://github.com/openbiosim/sire/compare/2025.2.0...2025.3.0>`__ - November 2025
 ---------------------------------------------------------------------------------------------
 
 * Reset GCMC water state prior to minimisation following a dynamics crash.
@@ -25,8 +25,22 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Add missing dihedrals for all 1-4 atom paths in ``Sire::MM::AmberParams::validateAndFix``,
   not just the first one found.
 
+* Added :func:`Sire::IO::setCoordinates` function to set atom coordinates of an entire system.
+
+* Add support for ``openmm.MonteCarloMembraneBarostat`` in Sire-to-OpenMM conversion.
+
+* Added support for saving crash reports during Sire dynamics runs.
+
 * Fix missing ``Sire::IO::Gro87::getFrame`` implementation to allow creation of
   trajectory frames from GROMACS coordinate file data.
+
+* Add support for writing trajectory frames to user-defined file names.
+
+* Add inverse distance restraint to keep atoms apart during OpenMM dyanmics.
+
+* Allow user to specify whether OpenMM restraints use periodic boundary conditions.
+
+* Allow user to specify the OpenCL platform index when creating an OpenMM context.
 
 `2025.2.0 <https://github.com/openbiosim/sire/compare/2025.1.0...2025.2.0>`__ - October 2025
 --------------------------------------------------------------------------------------------

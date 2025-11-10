@@ -99,6 +99,18 @@ void register_AngleRestraints_class(){
                 , "Return the number of restraints" );
         
         }
+        { //::SireMM::AngleRestraints::usesPbc
+        
+            typedef bool ( ::SireMM::AngleRestraints::*usesPbc_function_type)(  ) const;
+            usesPbc_function_type usesPbc_function_value( &::SireMM::AngleRestraints::usesPbc );
+            
+            AngleRestraints_exposer.def( 
+                "usesPbc"
+                , usesPbc_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not periodic boundary conditions are to be used" );
+        
+        }
         { //::SireMM::AngleRestraints::isEmpty
         
             typedef bool ( ::SireMM::AngleRestraints::*isEmpty_function_type)(  ) const;
@@ -175,6 +187,19 @@ void register_AngleRestraints_class(){
                 , restraints_function_value
                 , bp::release_gil_policy()
                 , "Return all of the restraints" );
+        
+        }
+        { //::SireMM::AngleRestraints::setUsesPbc
+        
+            typedef void ( ::SireMM::AngleRestraints::*setUsesPbc_function_type)( bool ) ;
+            setUsesPbc_function_type setUsesPbc_function_value( &::SireMM::AngleRestraints::setUsesPbc );
+            
+            AngleRestraints_exposer.def( 
+                "setUsesPbc"
+                , setUsesPbc_function_value
+                , ( bp::arg("use_pbc") )
+                , bp::release_gil_policy()
+                , "Set whether or not periodic boundary conditions are to be used" );
         
         }
         { //::SireMM::AngleRestraints::size

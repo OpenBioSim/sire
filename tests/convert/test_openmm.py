@@ -447,3 +447,45 @@ def test_openmm_default_box_vectors(ala_mols, openmm_platform):
     # Check that the box vectors match the expected values.
     for i, vec in enumerate(box_vectors):
         assert vec[i].value_in_unit(angstrom) == pytest.approx(box[i].value(), abs=1e-3)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_membrane_barostat(ala_mols, openmm_platform):
+    from openmm import MonteCarloMembraneBarostat
+    from openmm import unit
+
+    mols = ala_mols.clone()
+
+    # Create a dynamics object with a membrane barostat.
+    d = mols.dynamics(
+        pressure="1atm",
+        temperature="298K",
+        surface_tension="1 angstrom*atm",
+        platform=openmm_platform,
+        barostat_frequency=50,
+    )
+
+    # Find the barostat.
+    barostat = None
+    for force in d.context().getSystem().getForces():
+        if force.getName() == "MonteCarloMembraneBarostat":
+            barostat = force
+            break
+    assert barostat is not None
+
+    # Check the barostat parameters.
+    assert barostat.getDefaultPressure().value_in_unit(
+        unit.atmosphere
+    ) == pytest.approx(1.0, abs=1e-3)
+    assert barostat.getDefaultSurfaceTension().value_in_unit(
+        unit.angstrom * unit.atmosphere
+    ) == pytest.approx(1.0, abs=1e-3)
+    assert barostat.getDefaultTemperature().value_in_unit(unit.kelvin) == pytest.approx(
+        298.0, abs=1e-3
+    )
+    assert barostat.getXYMode() == MonteCarloMembraneBarostat.XYIsotropic
+    assert barostat.getZMode() == MonteCarloMembraneBarostat.ZFree
+    assert barostat.getFrequency() == 50

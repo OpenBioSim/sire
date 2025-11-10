@@ -4,6 +4,8 @@ __all__ = [
     "bond",
     "dihedral",
     "distance",
+    "inverse_bond",
+    "inverse_distance",
     "morse_potential",
     "positional",
     "rmsd",
@@ -22,7 +24,7 @@ def _to_atoms(mols, atoms):
     return selection_to_atoms(mols, atoms)
 
 
-def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
+def angle(mols, atoms, theta0=None, ktheta=None, use_pbc=None, name=None, map=None):
     """
     Create a set of angle restraints from all of the atoms in 'atoms'
     where all atoms are contained in the container 'mols', using the
@@ -52,6 +54,10 @@ def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
         will be measured from the current coordinates of the atoms.
         Default is None.
 
+    use_pbc : bool, optional
+        Whether to use periodic boundary conditions when calculating
+        the angle. Default is None.
+
     Returns
     -------
     AngleRestraints : SireMM::AngleRestraints
@@ -67,7 +73,14 @@ def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
     map_dict = map.to_dict()
     ktheta = ktheta if ktheta is not None else map_dict.get("ktheta", None)
     theta0 = theta0 if theta0 is not None else map_dict.get("theta0", None)
+    use_pbc = use_pbc if use_pbc is not None else map_dict.get("use_pbc", None)
     name = name if name is not None else map_dict.get("name", None)
+
+    if use_pbc is not None:
+        if not isinstance(use_pbc, bool):
+            raise ValueError("'use_pbc' must be of type 'bool'")
+    else:
+        use_pbc = False
 
     atoms = _to_atoms(mols, atoms)
 
@@ -109,6 +122,10 @@ def angle(mols, atoms, theta0=None, ktheta=None, name=None, map=None):
         restraints = AngleRestraints(name=name)
 
     restraints.add(AngleRestraint(mols.find(atoms), theta0, ktheta))
+
+    # Set the use_pbc flag.
+    restraints.set_uses_pbc(use_pbc)
+
     return restraints
 
 
@@ -122,6 +139,7 @@ def boresch(
     r0=None,
     theta0=None,
     phi0=None,
+    use_pbc=None,
     name=None,
     map=None,
     temperature=u("298 K"),
@@ -196,6 +214,10 @@ def boresch(
         list, then this should be a list of length 3 containing the
         equilibrium angles for the three torsion restraints. Default is None.
 
+    use_pbc : bool, optional
+        Whether to use periodic boundary conditions when calculating
+        the distance, angles, and torsions. Default is None.
+
     name : str, optional
         The name of the restraint. If None, then a default name will be
         used. Default is None.
@@ -250,6 +272,7 @@ def boresch(
     r0 = r0 if r0 is not None else map_dict.get("r0", None)
     theta0 = theta0 if theta0 is not None else map_dict.get("theta0", None)
     phi0 = phi0 if phi0 is not None else map_dict.get("phi0", None)
+    use_pbc = use_pbc if use_pbc is not None else map_dict.get("use_pbc", None)
     name = name if name is not None else map_dict.get("name", None)
     temperature = (
         temperature if temperature is not None else map_dict.get("temperature", None)
@@ -266,6 +289,12 @@ def boresch(
             f"but only {len(receptor)} receptor atoms and {len(ligand)} "
             f"ligand atoms were provided."
         )
+
+    if use_pbc is not None:
+        if not isinstance(use_pbc, bool):
+            raise ValueError("'use_pbc' must be of type 'bool'")
+    else:
+        use_pbc = False
 
     from .. import measure
 
@@ -413,9 +442,14 @@ def boresch(
     )
 
     if name is None:
-        return BoreschRestraints(b)
+        b = BoreschRestraints(b)
     else:
-        return BoreschRestraints(name, b)
+        b = BoreschRestraints(name, b)
+
+    # Set the use_pbc flag.
+    b._use_pbc = use_pbc
+
+    return b
 
 
 def _check_stability_boresch_restraint(restraint_components, temperature=u("298 K")):
@@ -471,7 +505,7 @@ def _check_stability_boresch_restraint(restraint_components, temperature=u("298 
                 )
 
 
-def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
+def dihedral(mols, atoms, phi0=None, kphi=None, use_pbc=None, name=None, map=None):
     """
     Create a set of dihedral restraints from all of the atoms in 'atoms'
     where all atoms are contained in the container 'mols', using the
@@ -501,6 +535,10 @@ def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
         will be measured from the current coordinates of the atoms.
         Default is None.
 
+    use_pbc : bool, optional
+        Whether to use periodic boundary conditions when calculating
+        the dihedral. Default is None.
+
     Returns
     -------
     DihedralRestraints : SireMM::DihedralRestraints
@@ -516,6 +554,7 @@ def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
     map_dict = map.to_dict()
     kphi = kphi if kphi is not None else map_dict.get("kphi", None)
     phi0 = phi0 if phi0 is not None else map_dict.get("phi0", None)
+    use_pbc = use_pbc if use_pbc is not None else map_dict.get("use_pbc", None)
     name = name if name is not None else map_dict.get("name", None)
 
     atoms = _to_atoms(mols, atoms)
@@ -525,6 +564,12 @@ def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
             "You need to provide 4 atoms to create a dihedral restraint"
             f"whereas {len(atoms)} atoms were provided."
         )
+
+    if use_pbc is not None:
+        if not isinstance(use_pbc, bool):
+            raise ValueError("'use_pbc' must be of type 'bool'")
+    else:
+        use_pbc = False
 
     from .. import measure
 
@@ -558,10 +603,14 @@ def dihedral(mols, atoms, phi0=None, kphi=None, name=None, map=None):
         restraints = DihedralRestraints(name=name)
 
     restraints.add(DihedralRestraint(mols.find(atoms), phi0, kphi))
+
+    # Set the use_pbc flag.
+    restraints.set_uses_pbc(use_pbc)
+
     return restraints
 
 
-def distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):
+def distance(mols, atoms0, atoms1, r0=None, k=None, use_pbc=None, name=None, map=None):
     """
     Create a set of distance restraints from all of the atoms in 'atoms0'
     to all of the atoms in 'atoms1' where all atoms are
@@ -597,6 +646,12 @@ def distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):
 
     atoms0 = _to_atoms(mols, atoms0)
     atoms1 = _to_atoms(mols, atoms1)
+
+    if use_pbc is not None:
+        if not isinstance(use_pbc, bool):
+            raise ValueError("'use_pbc' must be of type 'bool'")
+    else:
+        use_pbc = True
 
     if atoms0.is_empty() or atoms1.is_empty():
         raise ValueError("We need at least one atom in each group")
@@ -662,6 +717,9 @@ def distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):
 
         restraints.add(BondRestraint(idxs0[0], idxs1[0], ik, ir0))
 
+    # Set the use_pbc flag.
+    restraints.set_uses_pbc(use_pbc)
+
     return restraints
 
 
@@ -672,6 +730,7 @@ def morse_potential(
     r0=None,
     k=None,
     de=None,
+    use_pbc=None,
     name=None,
     auto_parametrise=False,
     map=None,
@@ -719,6 +778,10 @@ def morse_potential(
         The well depth (dissociation energy) for the Morse potential.
         Default is 100 kcal mol-1.
 
+    use_pbc : bool, optional
+        Whether to use periodic boundary conditions when calculating
+        the distance. Default is None.
+
     name : str, optional
         The name of the restraint.
         Default is None.
@@ -748,6 +811,12 @@ def morse_potential(
     from ..morph import link_to_reference
 
     map = create_map(map)
+
+    if use_pbc is not None:
+        if not isinstance(use_pbc, bool):
+            raise ValueError("'use_pbc' must be of type 'bool'")
+    else:
+        use_pbc = False
 
     if auto_parametrise is False:
         if atoms0 is None or atoms1 is None:
@@ -898,18 +967,146 @@ def morse_potential(
 
         restraints.add(MorsePotentialRestraint(idxs0[0], idxs1[0], ik, ir0, de))
 
+    # Set the use_pbc flag.
+    restraints.set_uses_pbc(use_pbc)
+
     return restraints
 
 
-def bond(*args, **kwargs):
+def bond(*args, use_pbc=False, **kwargs):
     """
     Synonym for distance(), as a bond restraint is treated the same
     as a distance restraint
     """
-    return distance(*args, **kwargs)
+    return distance(*args, use_pbc=use_pbc, **kwargs)
 
 
-def positional(mols, atoms, k=None, r0=None, position=None, name=None, map=None):
+def inverse_distance(
+    mols, atoms0, atoms1, r0=None, k=None, use_pbc=None, name=None, map=None
+):
+    """
+    Create a set of inverse distance restraints from all of the atoms in 'atoms0'
+    to all of the atoms in 'atoms1' where all atoms are
+    contained in the container 'mols', using the
+    passed values of 'k' and radius r0.
+    Note that 'k' corresponds to half the force constant, because
+    the restraint energy is defined as k*(r - r0)**2 (hence the force is
+    defined as 2*k*(r-r0)).
+
+    These restraints will be per atom-atom distance. If a list of k and/or r0
+    values are passed, then different values could be used for
+    different atom-atom distances (assuming the same number as the number of
+    atom-atom distances). Otherwise, all atom-atom distances will use the
+    same parameters.
+
+    If r0 is None, then the current atom-atom distance for
+    each atom-atom pair will be used as the equilibium value.
+
+    If k is None, then a default value of 150 kcal mol-1 A-2 will be used
+    """
+    from .. import u
+    from ..base import create_map
+    from ..mm import InverseBondRestraint, InverseBondRestraints
+
+    map = create_map(map)
+
+    if k is None:
+        k = [u("150 kcal mol-1 A-2")]
+    elif type(k) is list:
+        k = [u(x) for x in k]
+    else:
+        k = [u(k)]
+
+    if use_pbc is not None:
+        if not isinstance(use_pbc, bool):
+            raise ValueError("'use_pbc' must be of type 'bool'")
+    else:
+        use_pbc = True
+
+    atoms0 = _to_atoms(mols, atoms0)
+    atoms1 = _to_atoms(mols, atoms1)
+
+    if atoms0.is_empty() or atoms1.is_empty():
+        raise ValueError("We need at least one atom in each group")
+
+    while len(atoms0) < len(atoms1):
+        atoms0 += atoms0[-1]
+
+    while len(atoms1) < len(atoms0):
+        atoms1 += atoms1[-1]
+
+    if r0 is None:
+        # calculate all of the current distances
+        from .. import measure
+
+        r0 = []
+        for atom0, atom1 in zip(atoms0, atoms1):
+            r0.append(measure(atom0, atom1))
+    elif type(r0) is list:
+        r0 = [u(x) for x in r0]
+    else:
+        r0 = [u(r0)]
+
+    mols = mols.atoms()
+
+    if name is None:
+        restraints = InverseBondRestraints()
+    else:
+        restraints = InverseBondRestraints(name=name)
+
+    for i, (atom0, atom1) in enumerate(zip(atoms0, atoms1)):
+        idxs0 = mols.find(atom0)
+        idxs1 = mols.find(atom1)
+
+        if type(idxs0) is int:
+            idxs0 = [idxs0]
+
+        if type(idxs1) is int:
+            idxs1 = [idxs1]
+
+        if len(idxs0) == 0:
+            raise KeyError(
+                f"Could not find atom {atom0} in the molecules. Please ensure "
+                "that 'mols' contains all of that atoms, or else we can't "
+                "add the positional restraints."
+            )
+
+        if len(idxs1) == 0:
+            raise KeyError(
+                f"Could not find atom {atom1} in the molecules. Please ensure "
+                "that 'mols' contains all of that atoms, or else we can't "
+                "add the positional restraints."
+            )
+
+        if i < len(k):
+            ik = k[i]
+        else:
+            ik = k[-1]
+
+        if i < len(r0):
+            ir0 = r0[i]
+        else:
+            ir0 = r0[-1]
+
+        restraints.add(InverseBondRestraint(idxs0[0], idxs1[0], ik, ir0))
+
+    # Set the use_pbc flag.
+    restraints.set_uses_pbc(use_pbc)
+
+    return restraints
+
+
+def inverse_bond(*args, use_pbc=False, **kwargs):
+    """
+    Synonym for distance(), as a bond restraint is treated the same
+    as a distance restraint
+    """
+    return inverse_distance(*args, use_pbc=use_pbc, **kwargs)
+
+
+def positional(
+    mols, atoms, k=None, r0=None, position=None, use_pbc=None, name=None, map=None
+):
     """
     Create a set of position restraints for the atoms specified in
     'atoms' that are contained in the container 'mols', using the
@@ -949,6 +1146,12 @@ def positional(mols, atoms, k=None, r0=None, position=None, name=None, map=None)
         r0 = [u(x) for x in r0]
     else:
         r0 = [u(r0)]
+
+    if use_pbc is not None:
+        if not isinstance(use_pbc, bool):
+            raise ValueError("'use_pbc' must be of type 'bool'")
+    else:
+        use_pbc = True
 
     atoms = _to_atoms(mols, atoms)
 
@@ -998,6 +1201,9 @@ def positional(mols, atoms, k=None, r0=None, position=None, name=None, map=None)
             )
         else:
             restraints.add(PositionalRestraint(idxs[0], position[i], ik, ir0))
+
+    # Set the use_pbc flag.
+    restraints.set_uses_pbc(use_pbc)
 
     return restraints
 

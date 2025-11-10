@@ -1669,7 +1669,35 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
 
     QStringList written_files;
 
-    createDirectoryForFile(filename);
+    // Check whether list of trajectory frames have been specified via the map.
+    // If so, then the name will be prefixed with "frames_names:"
+    QStringList frame_names;
+    if (filename.contains("frames_names:"))
+    {
+        // Split the part of the string following "frames_names:" by commas to get
+        // individual frame names.
+        const QString frames_names_str = filename.section("frames_names:", 1);
+        frame_names = frames_names_str.split(",", Qt::SkipEmptyParts);
+
+        // Convert to absolute paths.
+        for (auto &frame_name : frame_names)
+        {
+            frame_name = QFileInfo(frame_name.trimmed()).absoluteFilePath();
+        }
+
+        if (frame_names.size() != frames_to_write.size())
+        {
+            throw SireError::program_bug(
+                QObject::tr("The number of frame names provided (%1) does not match the number of frames to write (%2).")
+                    .arg(frame_names.size())
+                    .arg(frames_to_write.size()),
+                CODELOC);
+        }
+    }
+    else
+    {
+        createDirectoryForFile(filename);
+    }
 
     if (this->writingTrajectory() and this->isFrame())
     {
@@ -1694,51 +1722,61 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
 
         const int padding = QString::number(largest_frame).length();
 
-        // in this case, we are going to create a directory named after the
-        // filename, into which all the frames will be written
-        auto fileinfo = QFileInfo(filename);
+        QDir framedir;
+        QFileInfo fileinfo;
+        bool write_to_frame_dir = false;
 
-        if (fileinfo.exists())
+        if (frame_names.isEmpty())
         {
-            // by default, we support overwriting of files - so remove this if it is a file
-            if (fileinfo.isDir())
+            fileinfo = QFileInfo(filename);
+            write_to_frame_dir = true;
+
+            // in this case, we are going to create a directory named after the
+            // filename, into which all the frames will be written
+            fileinfo = QFileInfo(filename);
+
+            if (fileinfo.exists())
             {
-                _check_and_remove_frame_dir(fileinfo);
+                // by default, we support overwriting of files - so remove this if it is a file
+                if (fileinfo.isDir())
+                {
+                    _check_and_remove_frame_dir(fileinfo);
 
-                // rebuild so it is not cached
-                fileinfo = QFileInfo(filename);
+                    // rebuild so it is not cached
+                    fileinfo = QFileInfo(filename);
 
-                if (fileinfo.exists())
-                    throw SireError::file_error(QObject::tr(
-                                                    "Could not write the trajectory for file '%1' as there "
-                                                    "is already a directory with this name that contains "
-                                                    "files that don't appear to have been created by sire.")
-                                                    .arg(filename),
-                                                CODELOC);
+                    if (fileinfo.exists())
+                        throw SireError::file_error(QObject::tr(
+                                                        "Could not write the trajectory for file '%1' as there "
+                                                        "is already a directory with this name that contains "
+                                                        "files that don't appear to have been created by sire.")
+                                                        .arg(filename),
+                                                    CODELOC);
+                }
+                else
+                {
+                    auto dir = fileinfo.absoluteDir();
+
+                    if (not dir.remove(fileinfo.fileName()))
+                        throw SireError::file_error(QObject::tr(
+                                                        "Could not write the trajectory for file '%1' as "
+                                                        "we don't have permission to remove the existing "
+                                                        "file with this name.")
+                                                        .arg(filename),
+                                                    CODELOC);
+                }
             }
-            else
-            {
-                auto dir = fileinfo.absoluteDir();
 
-                if (not dir.remove(fileinfo.fileName()))
-                    throw SireError::file_error(QObject::tr(
-                                                    "Could not write the trajectory for file '%1' as "
-                                                    "we don't have permission to remove the existing "
-                                                    "file with this name.")
-                                                    .arg(filename),
-                                                CODELOC);
-            }
+            framedir = QDir(fileinfo.absoluteFilePath());
+
+            if (not framedir.mkpath("."))
+                throw SireError::file_error(QObject::tr(
+                                                "Could not create the directory into which to write the "
+                                                "trajectory for '%1'. Check that there is enough space "
+                                                "and you have the correct permissions.")
+                                                .arg(framedir.absolutePath()),
+                                            CODELOC);
         }
-
-        QDir framedir(fileinfo.absoluteFilePath());
-
-        if (not framedir.mkpath("."))
-            throw SireError::file_error(QObject::tr(
-                                            "Could not create the directory into which to write the "
-                                            "trajectory for '%1'. Check that there is enough space "
-                                            "and you have the correct permissions.")
-                                            .arg(framedir.absolutePath()),
-                                        CODELOC);
 
         const auto suffix = fileinfo.completeSuffix();
 
@@ -1765,13 +1803,26 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
                     // construct a copy of this parser for this frame
                     auto parser = this->construct(thread_s, m);
 
-                    // now write it to the file, numbered by the frame number and time
-                    QString frame_filename = framedir.filePath(
-                        "frame_" +
-                        QString::number(i).rightJustified(padding, '0') +
-                        "_" +
-                        QString::number(time).replace(".", "-") +
-                        "." + suffix);
+                    QString frame_filename;
+
+                    if (write_to_frame_dir)
+                    {
+                        // now write it to the file, numbered by the frame number and time
+                        QDir framedir(fileinfo.absoluteFilePath());
+
+                        frame_filename = framedir.filePath(
+                            "frame_" +
+                            QString::number(i).rightJustified(padding, '0') +
+                            "_" +
+                            QString::number(time).replace(".", "-") +
+                            "." + suffix);
+                    }
+                    else
+                    {
+                        // write to the specified frame name
+                        frame_filename = frame_names[i];
+                        createDirectoryForFile(frame_filename);
+                    }
 
                     parser.read().writeToFile(frame_filename);
 
@@ -1792,13 +1843,26 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
                 // construct a copy of this parser for this frame
                 auto parser = this->construct(s, m);
 
-                // now write it to the file, numbered by the frame number
-                QString frame_filename = framedir.filePath(
-                    "frame_" +
-                    QString::number(i).rightJustified(padding, '0') +
-                    "_" +
-                    QString::number(time).replace(".", "-") +
-                    "." + suffix);
+                QString frame_filename;
+
+                if (write_to_frame_dir)
+                {
+                    // now write it to the file, numbered by the frame number
+                    QDir framedir(fileinfo.absoluteFilePath());
+
+                    frame_filename = framedir.filePath(
+                        "frame_" +
+                        QString::number(i).rightJustified(padding, '0') +
+                        "_" +
+                        QString::number(time).replace(".", "-") +
+                        "." + suffix);
+                }
+                else
+                {
+                    // write to the specified frame name
+                    frame_filename = frame_names[i];
+                    createDirectoryForFile(frame_filename);
+                }
 
                 parser.read().writeToFile(frame_filename);
 
@@ -1810,7 +1874,14 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
 
         // only return the directory name, as we can handle
         // reading all the frames contained therein
-        written_files.append(framedir.absolutePath());
+        if (write_to_frame_dir)
+        {
+            written_files.append(framedir.absolutePath());
+        }
+        else
+        {
+            written_files.append(frame_names);
+        }
     }
     else
     {
@@ -2450,6 +2521,38 @@ QStringList MoleculeParser::write(const System &system, const QString &filename,
             filenames.append(filename);
             fileformats.append(extension.toUpper());
         }
+    }
+
+    // Check for a frame_names property in the map, which is used to control the naming of
+    // specific frames when writing trajectories.
+    if (map.specified("frame_names"))
+    {
+        const auto frame_names_property = map["frame_names"];
+
+        QStringList frame_names;
+
+        if (frame_names_property.hasSource())
+        {
+            frame_names = frame_names_property.source().split(",");
+        }
+        else
+        {
+            try
+            {
+                frame_names = frame_names_property.value().asA<StringProperty>().toString().split(",");
+            }
+            catch (...)
+            {
+                throw SireError::incompatible_error(
+                    QObject::tr("The 'frame_names' property must be a StringProperty containing "
+                                "a comma-separated list of filenames to use for each frame when "
+                                "writing trajectories."),
+                    CODELOC);
+            }
+        }
+
+        // add the special prefix to the first filename
+        filenames[0] = "frames_names:" + frame_names.join(",");
     }
 
     // now we have a list of filenames and associated formats, actually

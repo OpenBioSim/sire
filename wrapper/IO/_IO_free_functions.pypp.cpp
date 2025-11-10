@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireBase/getinstalldir.h"
 
+#include "SireBase/parallel.h"
+
 #include "SireError/errors.h"
 
 #include "SireMol/atomelements.h"
@@ -40,6 +42,8 @@ namespace bp = boost::python;
 #include "biosimspace.h"
 
 #include "SireBase/getinstalldir.h"
+
+#include "SireBase/parallel.h"
 
 #include "SireError/errors.h"
 
@@ -109,37 +113,7 @@ namespace bp = boost::python;
 
 #include "SireBase/getinstalldir.h"
 
-#include "SireError/errors.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/mgname.h"
-
-#include "SireMol/moleditor.h"
-
-#include "SireMol/molidx.h"
-
-#include "SireSystem/system.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "biosimspace.h"
-
-#include "moleculeparser.h"
-
-#include "biosimspace.h"
-
-#include "SireBase/getinstalldir.h"
+#include "SireBase/parallel.h"
 
 #include "SireError/errors.h"
 
@@ -173,37 +147,7 @@ namespace bp = boost::python;
 
 #include "SireBase/getinstalldir.h"
 
-#include "SireError/errors.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/mgname.h"
-
-#include "SireMol/moleditor.h"
-
-#include "SireMol/molidx.h"
-
-#include "SireSystem/system.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "biosimspace.h"
-
-#include "moleculeparser.h"
-
-#include "biosimspace.h"
-
-#include "SireBase/getinstalldir.h"
+#include "SireBase/parallel.h"
 
 #include "SireError/errors.h"
 
@@ -237,37 +181,7 @@ namespace bp = boost::python;
 
 #include "SireBase/getinstalldir.h"
 
-#include "SireError/errors.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/mgname.h"
-
-#include "SireMol/moleditor.h"
-
-#include "SireMol/molidx.h"
-
-#include "SireSystem/system.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "biosimspace.h"
-
-#include "moleculeparser.h"
-
-#include "biosimspace.h"
-
-#include "SireBase/getinstalldir.h"
+#include "SireBase/parallel.h"
 
 #include "SireError/errors.h"
 
@@ -301,37 +215,7 @@ namespace bp = boost::python;
 
 #include "SireBase/getinstalldir.h"
 
-#include "SireError/errors.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/mgname.h"
-
-#include "SireMol/moleditor.h"
-
-#include "SireMol/molidx.h"
-
-#include "SireSystem/system.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "biosimspace.h"
-
-#include "moleculeparser.h"
-
-#include "biosimspace.h"
-
-#include "SireBase/getinstalldir.h"
+#include "SireBase/parallel.h"
 
 #include "SireError/errors.h"
 
@@ -365,37 +249,7 @@ namespace bp = boost::python;
 
 #include "SireBase/getinstalldir.h"
 
-#include "SireError/errors.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/mgname.h"
-
-#include "SireMol/moleditor.h"
-
-#include "SireMol/molidx.h"
-
-#include "SireSystem/system.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "biosimspace.h"
-
-#include "moleculeparser.h"
-
-#include "biosimspace.h"
-
-#include "SireBase/getinstalldir.h"
+#include "SireBase/parallel.h"
 
 #include "SireError/errors.h"
 
@@ -429,37 +283,7 @@ namespace bp = boost::python;
 
 #include "SireBase/getinstalldir.h"
 
-#include "SireError/errors.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/mgname.h"
-
-#include "SireMol/moleditor.h"
-
-#include "SireMol/molidx.h"
-
-#include "SireSystem/system.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "biosimspace.h"
-
-#include "moleculeparser.h"
-
-#include "biosimspace.h"
-
-#include "SireBase/getinstalldir.h"
+#include "SireBase/parallel.h"
 
 #include "SireError/errors.h"
 
@@ -493,6 +317,8 @@ namespace bp = boost::python;
 
 #include "SireBase/getinstalldir.h"
 
+#include "SireBase/parallel.h"
+
 #include "SireError/errors.h"
 
 #include "SireMol/atomelements.h"
@@ -524,6 +350,246 @@ namespace bp = boost::python;
 #include "biosimspace.h"
 
 #include "SireBase/getinstalldir.h"
+
+#include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/mgname.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/molidx.h"
+
+#include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "biosimspace.h"
+
+#include "moleculeparser.h"
+
+#include "biosimspace.h"
+
+#include "SireBase/getinstalldir.h"
+
+#include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/mgname.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/molidx.h"
+
+#include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "biosimspace.h"
+
+#include "moleculeparser.h"
+
+#include "biosimspace.h"
+
+#include "SireBase/getinstalldir.h"
+
+#include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/mgname.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/molidx.h"
+
+#include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "biosimspace.h"
+
+#include "moleculeparser.h"
+
+#include "biosimspace.h"
+
+#include "SireBase/getinstalldir.h"
+
+#include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/mgname.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/molidx.h"
+
+#include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "biosimspace.h"
+
+#include "moleculeparser.h"
+
+#include "biosimspace.h"
+
+#include "SireBase/getinstalldir.h"
+
+#include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/mgname.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/molidx.h"
+
+#include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "biosimspace.h"
+
+#include "moleculeparser.h"
+
+#include "biosimspace.h"
+
+#include "SireBase/getinstalldir.h"
+
+#include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/mgname.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/molidx.h"
+
+#include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "biosimspace.h"
+
+#include "moleculeparser.h"
+
+#include "biosimspace.h"
+
+#include "SireBase/getinstalldir.h"
+
+#include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/mgname.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/molidx.h"
+
+#include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "biosimspace.h"
+
+#include "moleculeparser.h"
+
+#include "biosimspace.h"
+
+#include "SireBase/getinstalldir.h"
+
+#include "SireBase/parallel.h"
 
 #include "SireError/errors.h"
 
@@ -736,6 +802,19 @@ void register_free_functions(){
             , setAmberWater_function_value
             , ( bp::arg("molecules"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap() )
             , "Set all water molecules in the passed system to the appropriate AMBER\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated water topology.\n" );
+    
+    }
+
+    { //::SireIO::setCoordinates
+    
+        typedef ::SireSystem::System ( *setCoordinates_function_type )( ::SireSystem::System &,::QVector<QVector<float>> const &,bool const,::SireBase::PropertyMap const & );
+        setCoordinates_function_type setCoordinates_function_value( &::SireIO::setCoordinates );
+        
+        bp::def( 
+            "setCoordinates"
+            , setCoordinates_function_value
+            , ( bp::arg("system"), bp::arg("coordinates"), bp::arg("is_lambda1")=(bool const)(false), bp::arg("map")=SireBase::PropertyMap() )
+            , "Set the coordinates of the entire system.\nPar:am system\nThe molecular system of interest.\n\nPar:am coordinates\nThe new coordinates for the system.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated coordinates.\n" );
     
     }
 

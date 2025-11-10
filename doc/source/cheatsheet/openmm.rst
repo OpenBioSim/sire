@@ -168,6 +168,9 @@ Available keys and allowable values are listed below.
 | lambda                       | The λ-value at which to set up the system (assuming this |
 |                              | contains any perturbable molecules or restraints)        |
 +------------------------------+----------------------------------------------------------+
+| opencl_platform_index        | The OpenCL platform index to use if the multiple OpenCL  |
+|                              | implementations are available.                           |
++------------------------------+----------------------------------------------------------+
 | perturbable_constraint       | The constraint to use for perturbable molecules. These   |
 |                              | are the same options as ``constraint``, and will         |
 |                              | override that choice for perturbable molecules if this   |
@@ -198,6 +201,9 @@ Available keys and allowable values are listed below.
 +------------------------------+----------------------------------------------------------+
 | space                        | Space in which the simulation should be conducted, e.g.  |
 |                              | `sr.vol.Cartesian`                                       |
++------------------------------+----------------------------------------------------------+
+| surface_tension              | Surface tension for membrane simulations at constant     |
+|                              | pressure, e.g. ``0.05*sr.units.bar*sr.units.nanometer``  |
 +------------------------------+----------------------------------------------------------+
 | swap_end_states              | Whether to swap the end states of a perturbable molecule |
 |                              | (i.e. treat the perturbed state as the reference state   |

@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 #include "SireMM/cljnbpairs.h"
 
+#include "SireMM/cmapfunctions.h"
+
 #include "SireMM/fouratomfunctions.h"
 
 #include "SireMM/internalff.h"
@@ -76,6 +78,8 @@ namespace bp = boost::python;
 #include "grotop.h"
 
 SireIO::GroAtom __copy__(const SireIO::GroAtom &other){ return SireIO::GroAtom(other); }
+
+#include "Helpers/copy.hpp"
 
 #include "Qt/qdatastream.hpp"
 
@@ -404,9 +408,9 @@ void register_GroAtom_class(){
         
         }
         GroAtom_exposer.staticmethod( "typeName" );
-        GroAtom_exposer.def( "__copy__", &__copy__);
-        GroAtom_exposer.def( "__deepcopy__", &__copy__);
-        GroAtom_exposer.def( "clone", &__copy__);
+        GroAtom_exposer.def( "__copy__", &__copy__<SireIO::GroAtom>);
+        GroAtom_exposer.def( "__deepcopy__", &__copy__<SireIO::GroAtom>);
+        GroAtom_exposer.def( "clone", &__copy__<SireIO::GroAtom>);
         GroAtom_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::GroAtom >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         GroAtom_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::GroAtom >,

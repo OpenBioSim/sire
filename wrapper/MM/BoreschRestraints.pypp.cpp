@@ -99,6 +99,18 @@ void register_BoreschRestraints_class(){
                 , "Return the number of restraints" );
         
         }
+        { //::SireMM::BoreschRestraints::usesPbc
+        
+            typedef bool ( ::SireMM::BoreschRestraints::*usesPbc_function_type)(  ) const;
+            usesPbc_function_type usesPbc_function_value( &::SireMM::BoreschRestraints::usesPbc );
+            
+            BoreschRestraints_exposer.def( 
+                "usesPbc"
+                , usesPbc_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not periodic boundary conditions are to be used" );
+        
+        }
         { //::SireMM::BoreschRestraints::isEmpty
         
             typedef bool ( ::SireMM::BoreschRestraints::*isEmpty_function_type)(  ) const;
@@ -175,6 +187,19 @@ void register_BoreschRestraints_class(){
                 , restraints_function_value
                 , bp::release_gil_policy()
                 , "Return all of the restraints" );
+        
+        }
+        { //::SireMM::BoreschRestraints::setUsesPbc
+        
+            typedef void ( ::SireMM::BoreschRestraints::*setUsesPbc_function_type)( bool ) ;
+            setUsesPbc_function_type setUsesPbc_function_value( &::SireMM::BoreschRestraints::setUsesPbc );
+            
+            BoreschRestraints_exposer.def( 
+                "setUsesPbc"
+                , setUsesPbc_function_value
+                , ( bp::arg("use_pbc") )
+                , bp::release_gil_policy()
+                , "Set whether or not periodic boundary conditions are to be used" );
         
         }
         { //::SireMM::BoreschRestraints::size

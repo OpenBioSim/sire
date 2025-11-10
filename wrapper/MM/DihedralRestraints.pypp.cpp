@@ -99,6 +99,18 @@ void register_DihedralRestraints_class(){
                 , "Return the number of restraints" );
         
         }
+        { //::SireMM::DihedralRestraints::usesPbc
+        
+            typedef bool ( ::SireMM::DihedralRestraints::*usesPbc_function_type)(  ) const;
+            usesPbc_function_type usesPbc_function_value( &::SireMM::DihedralRestraints::usesPbc );
+            
+            DihedralRestraints_exposer.def( 
+                "usesPbc"
+                , usesPbc_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not periodic boundary conditions are to be used" );
+        
+        }
         { //::SireMM::DihedralRestraints::isEmpty
         
             typedef bool ( ::SireMM::DihedralRestraints::*isEmpty_function_type)(  ) const;
@@ -175,6 +187,19 @@ void register_DihedralRestraints_class(){
                 , restraints_function_value
                 , bp::release_gil_policy()
                 , "Return all of the restraints" );
+        
+        }
+        { //::SireMM::DihedralRestraints::setUsesPbc
+        
+            typedef void ( ::SireMM::DihedralRestraints::*setUsesPbc_function_type)( bool ) ;
+            setUsesPbc_function_type setUsesPbc_function_value( &::SireMM::DihedralRestraints::setUsesPbc );
+            
+            DihedralRestraints_exposer.def( 
+                "setUsesPbc"
+                , setUsesPbc_function_value
+                , ( bp::arg("use_pbc") )
+                , bp::release_gil_policy()
+                , "Set whether or not periodic boundary conditions are to be used" );
         
         }
         { //::SireMM::DihedralRestraints::size

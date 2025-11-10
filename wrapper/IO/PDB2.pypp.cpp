@@ -41,6 +41,10 @@ namespace bp = boost::python;
 
 #include "SireUnits/units.h"
 
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
 #include "pdb2.h"
 
 #include <QFile>
@@ -50,6 +54,8 @@ namespace bp = boost::python;
 #include "pdb2.h"
 
 SireIO::PDB2 __copy__(const SireIO::PDB2 &other){ return SireIO::PDB2(other); }
+
+#include "Helpers/copy.hpp"
 
 #include "Qt/qdatastream.hpp"
 
@@ -355,9 +361,9 @@ void register_PDB2_class(){
         
         }
         PDB2_exposer.staticmethod( "typeName" );
-        PDB2_exposer.def( "__copy__", &__copy__);
-        PDB2_exposer.def( "__deepcopy__", &__copy__);
-        PDB2_exposer.def( "clone", &__copy__);
+        PDB2_exposer.def( "__copy__", &__copy__<SireIO::PDB2>);
+        PDB2_exposer.def( "__deepcopy__", &__copy__<SireIO::PDB2>);
+        PDB2_exposer.def( "clone", &__copy__<SireIO::PDB2>);
         PDB2_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::PDB2 >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         PDB2_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::PDB2 >,

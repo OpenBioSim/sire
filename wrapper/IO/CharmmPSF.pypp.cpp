@@ -73,6 +73,8 @@ namespace bp = boost::python;
 
 SireIO::CharmmPSF __copy__(const SireIO::CharmmPSF &other){ return SireIO::CharmmPSF(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -452,9 +454,9 @@ void register_CharmmPSF_class(){
         
         }
         CharmmPSF_exposer.staticmethod( "typeName" );
-        CharmmPSF_exposer.def( "__copy__", &__copy__);
-        CharmmPSF_exposer.def( "__deepcopy__", &__copy__);
-        CharmmPSF_exposer.def( "clone", &__copy__);
+        CharmmPSF_exposer.def( "__copy__", &__copy__<SireIO::CharmmPSF>);
+        CharmmPSF_exposer.def( "__deepcopy__", &__copy__<SireIO::CharmmPSF>);
+        CharmmPSF_exposer.def( "clone", &__copy__<SireIO::CharmmPSF>);
         CharmmPSF_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::CharmmPSF >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CharmmPSF_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::CharmmPSF >,

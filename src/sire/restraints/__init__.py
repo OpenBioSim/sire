@@ -1,12 +1,14 @@
 __all__ = [
     "angle",
     "positional",
-    "rmsd",
     "bond",
     "dihedral",
     "distance",
-    "morse_potential",
     "boresch",
+    "inverse_bond",
+    "inverse_distance",
+    "rmsd",
+    "morse_potential",
     "get_standard_state_correction",
 ]
 
@@ -16,6 +18,8 @@ from ._restraints import (
     boresch,
     dihedral,
     distance,
+    inverse_bond,
+    inverse_distance,
     positional,
     morse_potential,
     rmsd,
