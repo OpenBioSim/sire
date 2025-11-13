@@ -40,7 +40,7 @@ void register_MorsePotentialRestraints_class(){
 
     { //::SireMM::MorsePotentialRestraints
         typedef bp::class_< SireMM::MorsePotentialRestraints, bp::bases< SireMM::Restraints, SireBase::Property > > MorsePotentialRestraints_exposer_t;
-        MorsePotentialRestraints_exposer_t MorsePotentialRestraints_exposer = MorsePotentialRestraints_exposer_t( "MorsePotentialRestraints", "This class provides the information for a collection of Moving Harmonic Restraints\nrestraints that can be added to a collection of molecules. Each\nrestraint can act on a pair of particles.\n", bp::init< >("Null constructor") );
+        MorsePotentialRestraints_exposer_t MorsePotentialRestraints_exposer = MorsePotentialRestraints_exposer_t( "MorsePotentialRestraints", "This class provides the information for a collection of Morse potential\nrestraints that can be added to a collection of molecules. Each\nrestraint can act on a pair of particles.\n", bp::init< >("Null constructor") );
         bp::scope MorsePotentialRestraints_scope( MorsePotentialRestraints_exposer );
         MorsePotentialRestraints_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "") );
         MorsePotentialRestraints_exposer.def( bp::init< SireMM::MorsePotentialRestraint const & >(( bp::arg("restraint") ), "") );
@@ -121,6 +121,18 @@ void register_MorsePotentialRestraints_class(){
                 , count_function_value
                 , bp::release_gil_policy()
                 , "Return the number of restraints" );
+        
+        }
+        { //::SireMM::MorsePotentialRestraints::usesPbc
+        
+            typedef bool ( ::SireMM::MorsePotentialRestraints::*usesPbc_function_type)(  ) const;
+            usesPbc_function_type usesPbc_function_value( &::SireMM::MorsePotentialRestraints::usesPbc );
+            
+            MorsePotentialRestraints_exposer.def( 
+                "usesPbc"
+                , usesPbc_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not periodic boundary conditions are to be used" );
         
         }
         { //::SireMM::MorsePotentialRestraints::hasAtomRestraints
@@ -247,6 +259,19 @@ void register_MorsePotentialRestraints_class(){
                 , restraints_function_value
                 , bp::release_gil_policy()
                 , "Return all of the restraints" );
+        
+        }
+        { //::SireMM::MorsePotentialRestraints::setUsesPbc
+        
+            typedef void ( ::SireMM::MorsePotentialRestraints::*setUsesPbc_function_type)( bool ) ;
+            setUsesPbc_function_type setUsesPbc_function_value( &::SireMM::MorsePotentialRestraints::setUsesPbc );
+            
+            MorsePotentialRestraints_exposer.def( 
+                "setUsesPbc"
+                , setUsesPbc_function_value
+                , ( bp::arg("use_pbc") )
+                , bp::release_gil_policy()
+                , "Set whether or not periodic boundary conditions are to be used" );
         
         }
         { //::SireMM::MorsePotentialRestraints::size

@@ -26,7 +26,7 @@
   *
 \*********************************************/
 
-#include "bondrestraints.h"
+#include "inversebondrestraints.h"
 
 #include "SireUnits/units.h"
 
@@ -47,12 +47,12 @@ using namespace SireUnits::Dimension;
 using namespace SireStream;
 
 ///////
-/////// Implementation of BondRestraint
+/////// Implementation of InverseBondRestraint
 ///////
 
-static const RegisterMetaType<BondRestraint> r_bndrest;
+static const RegisterMetaType<InverseBondRestraint> r_bndrest;
 
-QDataStream &operator<<(QDataStream &ds, const BondRestraint &bndrest)
+QDataStream &operator<<(QDataStream &ds, const InverseBondRestraint &bndrest)
 {
     writeHeader(ds, r_bndrest, 1);
 
@@ -64,7 +64,7 @@ QDataStream &operator<<(QDataStream &ds, const BondRestraint &bndrest)
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, BondRestraint &bndrest)
+QDataStream &operator>>(QDataStream &ds, InverseBondRestraint &bndrest)
 {
     VersionID v = readHeader(ds, r_bndrest);
 
@@ -81,8 +81,8 @@ QDataStream &operator>>(QDataStream &ds, BondRestraint &bndrest)
 }
 
 /** Null constructor */
-BondRestraint::BondRestraint()
-    : ConcreteProperty<BondRestraint, Property>(),
+InverseBondRestraint::InverseBondRestraint()
+    : ConcreteProperty<InverseBondRestraint, Property>(),
       _k(0), _r0(0)
 {
 }
@@ -90,10 +90,10 @@ BondRestraint::BondRestraint()
 /** Construct to restrain the atom at index 'atom' to the specified position
  *  using the specified force constant and flat-bottom well-width
  */
-BondRestraint::BondRestraint(qint64 atom0, qint64 atom1,
+InverseBondRestraint::InverseBondRestraint(qint64 atom0, qint64 atom1,
                              const SireUnits::Dimension::HarmonicBondConstant &k,
                              const SireUnits::Dimension::Length &r0)
-    : ConcreteProperty<BondRestraint, Property>(),
+    : ConcreteProperty<InverseBondRestraint, Property>(),
       _k(k), _r0(r0)
 {
     if (atom0 == atom1)
@@ -114,11 +114,11 @@ BondRestraint::BondRestraint(qint64 atom0, qint64 atom1,
  *  in 'atoms' to the specified position using the specified force constant
  *  and flat-bottom well width
  */
-BondRestraint::BondRestraint(const QList<qint64> &atoms0,
+InverseBondRestraint::InverseBondRestraint(const QList<qint64> &atoms0,
                              const QList<qint64> &atoms1,
                              const SireUnits::Dimension::HarmonicBondConstant &k,
                              const SireUnits::Dimension::Length &r0)
-    : ConcreteProperty<BondRestraint, Property>(),
+    : ConcreteProperty<InverseBondRestraint, Property>(),
       _k(k), _r0(r0)
 {
     if (atoms0.isEmpty() or atoms1.isEmpty())
@@ -174,17 +174,17 @@ BondRestraint::BondRestraint(const QList<qint64> &atoms0,
 }
 
 /** Copy constructor */
-BondRestraint::BondRestraint(const BondRestraint &other)
-    : ConcreteProperty<BondRestraint, Property>(other),
+InverseBondRestraint::InverseBondRestraint(const InverseBondRestraint &other)
+    : ConcreteProperty<InverseBondRestraint, Property>(other),
       atms0(other.atms0), atms1(other.atms1), _k(other._k), _r0(other._r0)
 {
 }
 
-BondRestraint::~BondRestraint()
+InverseBondRestraint::~InverseBondRestraint()
 {
 }
 
-BondRestraint &BondRestraint::operator=(const BondRestraint &other)
+InverseBondRestraint &InverseBondRestraint::operator=(const InverseBondRestraint &other)
 {
     if (this != &other)
     {
@@ -197,55 +197,55 @@ BondRestraint &BondRestraint::operator=(const BondRestraint &other)
     return *this;
 }
 
-bool BondRestraint::operator==(const BondRestraint &other) const
+bool InverseBondRestraint::operator==(const InverseBondRestraint &other) const
 {
     return atms0 == other.atms0 and atms1 == other.atms1 and
            _k == other._k and _r0 == other._r0;
 }
 
-bool BondRestraint::operator!=(const BondRestraint &other) const
+bool InverseBondRestraint::operator!=(const InverseBondRestraint &other) const
 {
     return not operator==(other);
 }
 
-BondRestraints BondRestraint::operator+(const BondRestraint &other) const
+InverseBondRestraints InverseBondRestraint::operator+(const InverseBondRestraint &other) const
 {
-    return BondRestraints(*this) + other;
+    return InverseBondRestraints(*this) + other;
 }
 
-BondRestraints BondRestraint::operator+(const BondRestraints &other) const
+InverseBondRestraints InverseBondRestraint::operator+(const InverseBondRestraints &other) const
 {
-    return BondRestraints(*this) + other;
+    return InverseBondRestraints(*this) + other;
 }
 
-const char *BondRestraint::typeName()
+const char *InverseBondRestraint::typeName()
 {
-    return QMetaType::typeName(qMetaTypeId<BondRestraint>());
+    return QMetaType::typeName(qMetaTypeId<InverseBondRestraint>());
 }
 
-const char *BondRestraint::what() const
+const char *InverseBondRestraint::what() const
 {
-    return BondRestraint::typeName();
+    return InverseBondRestraint::typeName();
 }
 
-BondRestraint *BondRestraint::clone() const
+InverseBondRestraint *InverseBondRestraint::clone() const
 {
-    return new BondRestraint(*this);
+    return new InverseBondRestraint(*this);
 }
 
-bool BondRestraint::isNull() const
+bool InverseBondRestraint::isNull() const
 {
     return atms0.isEmpty() or atms1.isEmpty();
 }
 
-QString BondRestraint::toString() const
+QString InverseBondRestraint::toString() const
 {
     if (this->isNull())
-        return QObject::tr("BondRestraint::null");
+        return QObject::tr("InverseBondRestraint::null");
 
     else if (this->isAtomRestraint())
     {
-        return QString("BondRestraint( %1 <=> %2, k=%3 : r0=%4 )")
+        return QString("InverseBondRestraint( %1 <=> %2, k=%3 : r0=%4 )")
             .arg(this->atom0())
             .arg(this->atom1())
             .arg(_k.toString())
@@ -265,7 +265,7 @@ QString BondRestraint::toString() const
             a1.append(QString::number(atom));
         }
 
-        return QString("BondRestraint( [%1] <=> [%2], k=%3 : r0=%4 )")
+        return QString("InverseBondRestraint( [%1] <=> [%2], k=%3 : r0=%4 )")
             .arg(a0.join(", "))
             .arg(a1.join(", "))
             .arg(_k.toString())
@@ -274,20 +274,20 @@ QString BondRestraint::toString() const
 }
 
 /** Return whether this is a single-atom restraint */
-bool BondRestraint::isAtomRestraint() const
+bool InverseBondRestraint::isAtomRestraint() const
 {
     return atms0.count() == 1 and atms1.count() == 1;
 }
 
 /** Return whether this restraint acts on the centroid of a group
  *  of atoms */
-bool BondRestraint::isCentroidRestraint() const
+bool InverseBondRestraint::isCentroidRestraint() const
 {
     return atms0.count() > 1 or atms1.count() > 1;
 }
 
 /** Return the index of the atom if this is a single-atom restraint */
-qint64 BondRestraint::atom0() const
+qint64 InverseBondRestraint::atom0() const
 {
     if (not this->isAtomRestraint())
         throw SireError::incompatible_error(QObject::tr(
@@ -298,7 +298,7 @@ qint64 BondRestraint::atom0() const
 }
 
 /** Return the index of the atom if this is a single-atom restraint */
-qint64 BondRestraint::atom1() const
+qint64 InverseBondRestraint::atom1() const
 {
     if (not this->isAtomRestraint())
         throw SireError::incompatible_error(QObject::tr(
@@ -309,7 +309,7 @@ qint64 BondRestraint::atom1() const
 }
 
 /** Return the indexes of the atoms whose centroid is to be restrained */
-QVector<qint64> BondRestraint::atoms0() const
+QVector<qint64> InverseBondRestraint::atoms0() const
 {
     if (not this->isCentroidRestraint())
         throw SireError::incompatible_error(QObject::tr(
@@ -320,7 +320,7 @@ QVector<qint64> BondRestraint::atoms0() const
 }
 
 /** Return the indexes of the atoms whose centroid is to be restrained */
-QVector<qint64> BondRestraint::atoms1() const
+QVector<qint64> InverseBondRestraint::atoms1() const
 {
     if (not this->isCentroidRestraint())
         throw SireError::incompatible_error(QObject::tr(
@@ -331,24 +331,24 @@ QVector<qint64> BondRestraint::atoms1() const
 }
 
 /** Return the force constant for the restraint */
-SireUnits::Dimension::HarmonicBondConstant BondRestraint::k() const
+SireUnits::Dimension::HarmonicBondConstant InverseBondRestraint::k() const
 {
     return this->_k;
 }
 
 /** Return the width of the harmonic bond. */
-SireUnits::Dimension::Length BondRestraint::r0() const
+SireUnits::Dimension::Length InverseBondRestraint::r0() const
 {
     return this->_r0;
 }
 
 ///////
-/////// Implementation of BondRestraints
+/////// Implementation of InverseBondRestraints
 ///////
 
-static const RegisterMetaType<BondRestraints> r_bndrests;
+static const RegisterMetaType<InverseBondRestraints> r_bndrests;
 
-QDataStream &operator<<(QDataStream &ds, const BondRestraints &bndrests)
+QDataStream &operator<<(QDataStream &ds, const InverseBondRestraints &bndrests)
 {
     writeHeader(ds, r_bndrests, 2);
 
@@ -360,7 +360,7 @@ QDataStream &operator<<(QDataStream &ds, const BondRestraints &bndrests)
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, BondRestraints &bndrests)
+QDataStream &operator>>(QDataStream &ds, InverseBondRestraints &bndrests)
 {
     VersionID v = readHeader(ds, r_bndrests);
 
@@ -378,31 +378,31 @@ QDataStream &operator>>(QDataStream &ds, BondRestraints &bndrests)
             >> static_cast<Restraints &>(bndrests);
     }
     else
-        throw version_error(v, "1,2", r_bndrests, CODELOC);
+        throw version_error(v, "1", r_bndrests, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
-BondRestraints::BondRestraints()
-    : ConcreteProperty<BondRestraints, Restraints>()
+InverseBondRestraints::InverseBondRestraints()
+    : ConcreteProperty<InverseBondRestraints, Restraints>()
 {
 }
 
-BondRestraints::BondRestraints(const QString &name)
-    : ConcreteProperty<BondRestraints, Restraints>(name)
+InverseBondRestraints::InverseBondRestraints(const QString &name)
+    : ConcreteProperty<InverseBondRestraints, Restraints>(name)
 {
 }
 
-BondRestraints::BondRestraints(const BondRestraint &restraint)
-    : ConcreteProperty<BondRestraints, Restraints>()
+InverseBondRestraints::InverseBondRestraints(const InverseBondRestraint &restraint)
+    : ConcreteProperty<InverseBondRestraints, Restraints>()
 {
     if (not restraint.isNull())
         r.append(restraint);
 }
 
-BondRestraints::BondRestraints(const QList<BondRestraint> &restraints)
-    : ConcreteProperty<BondRestraints, Restraints>()
+InverseBondRestraints::InverseBondRestraints(const QList<InverseBondRestraint> &restraints)
+    : ConcreteProperty<InverseBondRestraints, Restraints>()
 {
     for (const auto &restraint : restraints)
     {
@@ -411,17 +411,17 @@ BondRestraints::BondRestraints(const QList<BondRestraint> &restraints)
     }
 }
 
-BondRestraints::BondRestraints(const QString &name,
-                               const BondRestraint &restraint)
-    : ConcreteProperty<BondRestraints, Restraints>(name)
+InverseBondRestraints::InverseBondRestraints(const QString &name,
+                               const InverseBondRestraint &restraint)
+    : ConcreteProperty<InverseBondRestraints, Restraints>(name)
 {
     if (not restraint.isNull())
         r.append(restraint);
 }
 
-BondRestraints::BondRestraints(const QString &name,
-                               const QList<BondRestraint> &restraints)
-    : ConcreteProperty<BondRestraints, Restraints>(name)
+InverseBondRestraints::InverseBondRestraints(const QString &name,
+                               const QList<InverseBondRestraint> &restraints)
+    : ConcreteProperty<InverseBondRestraints, Restraints>(name)
 {
     for (const auto &restraint : restraints)
     {
@@ -430,16 +430,16 @@ BondRestraints::BondRestraints(const QString &name,
     }
 }
 
-BondRestraints::BondRestraints(const BondRestraints &other)
-    : ConcreteProperty<BondRestraints, Restraints>(other), r(other.r), use_pbc(other.use_pbc)
+InverseBondRestraints::InverseBondRestraints(const InverseBondRestraints &other)
+    : ConcreteProperty<InverseBondRestraints, Restraints>(other), r(other.r), use_pbc(other.use_pbc)
 {
 }
 
-BondRestraints::~BondRestraints()
+InverseBondRestraints::~InverseBondRestraints()
 {
 }
 
-BondRestraints &BondRestraints::operator=(const BondRestraints &other)
+InverseBondRestraints &InverseBondRestraints::operator=(const InverseBondRestraints &other)
 {
     r = other.r;
     use_pbc = other.use_pbc;
@@ -447,35 +447,35 @@ BondRestraints &BondRestraints::operator=(const BondRestraints &other)
     return *this;
 }
 
-bool BondRestraints::operator==(const BondRestraints &other) const
+bool InverseBondRestraints::operator==(const InverseBondRestraints &other) const
 {
-    return r == other.r and Restraints::operator==(other) and use_pbc == other.use_pbc;
+    return r == other.r and Restraints::operator==(other);
 }
 
-bool BondRestraints::operator!=(const BondRestraints &other) const
+bool InverseBondRestraints::operator!=(const InverseBondRestraints &other) const
 {
     return not operator==(other);
 }
 
-const char *BondRestraints::typeName()
+const char *InverseBondRestraints::typeName()
 {
-    return QMetaType::typeName(qMetaTypeId<BondRestraints>());
+    return QMetaType::typeName(qMetaTypeId<InverseBondRestraints>());
 }
 
-const char *BondRestraints::what() const
+const char *InverseBondRestraints::what() const
 {
-    return BondRestraints::typeName();
+    return InverseBondRestraints::typeName();
 }
 
-BondRestraints *BondRestraints::clone() const
+InverseBondRestraints *InverseBondRestraints::clone() const
 {
-    return new BondRestraints(*this);
+    return new InverseBondRestraints(*this);
 }
 
-QString BondRestraints::toString() const
+QString InverseBondRestraints::toString() const
 {
     if (this->isEmpty())
-        return QObject::tr("BondRestraints::null");
+        return QObject::tr("InverseBondRestraints::null");
 
     QStringList parts;
 
@@ -503,7 +503,7 @@ QString BondRestraints::toString() const
         }
     }
 
-    return QObject::tr("BondRestraints( name=%1, size=%2, use_pbc=$3\n%4\n)")
+    return QObject::tr("InverseBondRestraints( name=%1, size=%2, use_pbc=%3\n%4\n)")
             .arg(this->name())
             .arg(n)
             .arg(this->use_pbc ? "true" : "false")
@@ -511,37 +511,37 @@ QString BondRestraints::toString() const
 }
 
 /** Return whether or not this is empty */
-bool BondRestraints::isEmpty() const
+bool InverseBondRestraints::isEmpty() const
 {
     return this->r.isEmpty();
 }
 
 /** Return whether or not this is empty */
-bool BondRestraints::isNull() const
+bool InverseBondRestraints::isNull() const
 {
     return this->isEmpty();
 }
 
 /** Return the number of restraints */
-int BondRestraints::nRestraints() const
+int InverseBondRestraints::nRestraints() const
 {
     return this->r.count();
 }
 
 /** Return the number of restraints */
-int BondRestraints::count() const
+int InverseBondRestraints::count() const
 {
     return this->nRestraints();
 }
 
 /** Return the number of restraints */
-int BondRestraints::size() const
+int InverseBondRestraints::size() const
 {
     return this->nRestraints();
 }
 
 /** Return the number of atom restraints */
-int BondRestraints::nAtomRestraints() const
+int InverseBondRestraints::nAtomRestraints() const
 {
     int n = 0;
 
@@ -554,7 +554,7 @@ int BondRestraints::nAtomRestraints() const
 }
 
 /** Return the number of centroid restraints */
-int BondRestraints::nCentroidRestraints() const
+int InverseBondRestraints::nCentroidRestraints() const
 {
     int n = 0;
 
@@ -567,7 +567,7 @@ int BondRestraints::nCentroidRestraints() const
 }
 
 /** Return whether or not there are any atom restraints */
-bool BondRestraints::hasAtomRestraints() const
+bool InverseBondRestraints::hasAtomRestraints() const
 {
     for (const auto &restraint : this->r)
     {
@@ -579,7 +579,7 @@ bool BondRestraints::hasAtomRestraints() const
 }
 
 /** Return whether or not there are any centroid restraints */
-bool BondRestraints::hasCentroidRestraints() const
+bool InverseBondRestraints::hasCentroidRestraints() const
 {
     for (const auto &restraint : this->r)
     {
@@ -591,7 +591,7 @@ bool BondRestraints::hasCentroidRestraints() const
 }
 
 /** Return the ith restraint */
-const BondRestraint &BondRestraints::at(int i) const
+const InverseBondRestraint &InverseBondRestraints::at(int i) const
 {
     i = SireID::Index(i).map(this->r.count());
 
@@ -599,23 +599,23 @@ const BondRestraint &BondRestraints::at(int i) const
 }
 
 /** Return the ith restraint */
-const BondRestraint &BondRestraints::operator[](int i) const
+const InverseBondRestraint &InverseBondRestraints::operator[](int i) const
 {
     return this->at(i);
 }
 
 /** Return all of the restraints */
-QList<BondRestraint> BondRestraints::restraints() const
+QList<InverseBondRestraint> InverseBondRestraints::restraints() const
 {
     return this->r;
 }
 
 /** Return all of the atom restraints */
-QList<BondRestraint> BondRestraints::atomRestraints() const
+QList<InverseBondRestraint> InverseBondRestraints::atomRestraints() const
 {
     if (this->hasCentroidRestraints())
     {
-        QList<BondRestraint> ar;
+        QList<InverseBondRestraint> ar;
 
         for (const auto &restraint : this->r)
         {
@@ -630,11 +630,11 @@ QList<BondRestraint> BondRestraints::atomRestraints() const
 }
 
 /** Return all of the centroid restraints */
-QList<BondRestraint> BondRestraints::centroidRestraints() const
+QList<InverseBondRestraint> InverseBondRestraints::centroidRestraints() const
 {
     if (this->hasAtomRestraints())
     {
-        QList<BondRestraint> cr;
+        QList<InverseBondRestraint> cr;
 
         for (const auto &restraint : this->r)
         {
@@ -649,56 +649,56 @@ QList<BondRestraint> BondRestraints::centroidRestraints() const
 }
 
 /** Add a restraint onto the list */
-void BondRestraints::add(const BondRestraint &restraint)
+void InverseBondRestraints::add(const InverseBondRestraint &restraint)
 {
     if (not restraint.isNull())
         this->r.append(restraint);
 }
 
 /** Add a restraint onto the list */
-void BondRestraints::add(const BondRestraints &restraints)
+void InverseBondRestraints::add(const InverseBondRestraints &restraints)
 {
     this->r += restraints.r;
 }
 
 /** Add a restraint onto the list */
-BondRestraints &BondRestraints::operator+=(const BondRestraint &restraint)
+InverseBondRestraints &InverseBondRestraints::operator+=(const InverseBondRestraint &restraint)
 {
     this->add(restraint);
     return *this;
 }
 
 /** Add a restraint onto the list */
-BondRestraints BondRestraints::operator+(const BondRestraint &restraint) const
+InverseBondRestraints InverseBondRestraints::operator+(const InverseBondRestraint &restraint) const
 {
-    BondRestraints ret(*this);
+    InverseBondRestraints ret(*this);
     ret += restraint;
     return *this;
 }
 
 /** Add restraints onto the list */
-BondRestraints &BondRestraints::operator+=(const BondRestraints &restraints)
+InverseBondRestraints &InverseBondRestraints::operator+=(const InverseBondRestraints &restraints)
 {
     this->add(restraints);
     return *this;
 }
 
 /** Add restraints onto the list */
-BondRestraints BondRestraints::operator+(const BondRestraints &restraints) const
+InverseBondRestraints InverseBondRestraints::operator+(const InverseBondRestraints &restraints) const
 {
-    BondRestraints ret(*this);
+    InverseBondRestraints ret(*this);
     ret += restraints;
     return *this;
 }
 
 /** Set whether or not periodic boundary conditions are to be used */
-void BondRestraints::setUsesPbc(bool use_pbc)
+void InverseBondRestraints::setUsesPbc(bool use_pbc)
 {
     this->use_pbc = use_pbc;
 }
 
 /** Return whether or not periodic boundary conditions are to be used */
-bool BondRestraints::usesPbc() const
+bool InverseBondRestraints::usesPbc() const
 {
     return this->use_pbc;
 }

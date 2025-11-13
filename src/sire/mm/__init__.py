@@ -9,6 +9,8 @@ __all__ = [
     "Bond",
     "BondRestraint",
     "BondRestraints",
+    "InverseBondRestraint",
+    "InverseBondRestraints",
     "CMAPParameter",
     "Dihedral",
     "Improper",
@@ -45,6 +47,9 @@ AngleRestraints = _MM.AngleRestraints
 # but there is already a legacy Sire.MM class with this name
 BondRestraint = _MM.BondRestraint
 BondRestraints = _MM.BondRestraints
+
+InverseBondRestraint = _MM.InverseBondRestraint
+InverseBondRestraints = _MM.InverseBondRestraints
 
 BoreschRestraint = _MM.BoreschRestraint
 BoreschRestraints = _MM.BoreschRestraints

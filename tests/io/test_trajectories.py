@@ -128,3 +128,32 @@ def test_trajectories(tmpdir, ala_traj):
         assert_space_equal(m.property("space"), m2.property("space"), precision)
 
         assert_coords_equal(m[0], m2[0], precision)
+
+
+def test_frame_names(tmpdir, ala_traj):
+    mols = ala_traj.clone()
+
+    d = tmpdir.mkdir("test_frame_names")
+
+    # First, write two trajectory frames to named Gro87 files.
+    sr.save(mols.trajectory()[0:2], [d.join("cat.gro"), d.join("dog.gro")])
+
+    # Make sure the output files exist.
+    cat_path = d.join("cat.gro")
+    dog_path = d.join("dog.gro")
+    assert cat_path.check()
+    assert dog_path.check()
+
+    # Try writing to mixed formats. This should raise a ValueError.
+    with pytest.raises(ValueError):
+        sr.save(
+            mols.trajectory()[0:2],
+            [d.join("cat.gro"), d.join("dog.rst7")],
+        )
+
+    # Try writing with mismatched number of frames and filenames.
+    with pytest.raises(ValueError):
+        sr.save(
+            mols.trajectory()[0:3],
+            [d.join("cat.gro"), d.join("dog.gro")],
+        )

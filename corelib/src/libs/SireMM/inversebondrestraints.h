@@ -26,8 +26,8 @@
   *
 \*********************************************/
 
-#ifndef SIREMM_BONDRESTRAINTS_H
-#define SIREMM_BONDRESTRAINTS_H
+#ifndef SIREMM_INVERSEBONDRESTRAINTS_H
+#define SIREMM_INVERSEBONDRESTRAINTS_H
 
 #include "restraints.h"
 
@@ -38,15 +38,15 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-    class BondRestraint;
-    class BondRestraints;
+    class InverseBondRestraint;
+    class InverseBondRestraints;
 }
 
-SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::BondRestraint &);
-SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::BondRestraint &);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::InverseBondRestraint &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::InverseBondRestraint &);
 
-SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::BondRestraints &);
-SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::BondRestraints &);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::InverseBondRestraints &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::InverseBondRestraints &);
 
 namespace SireMM
 {
@@ -55,39 +55,39 @@ namespace SireMM
      *  atoms in a system (or between the centroids of any two groups
      *  of atoms in a system)
      */
-    class SIREMM_EXPORT BondRestraint
-        : public SireBase::ConcreteProperty<BondRestraint, SireBase::Property>
+    class SIREMM_EXPORT InverseBondRestraint
+        : public SireBase::ConcreteProperty<InverseBondRestraint, SireBase::Property>
     {
-        friend QDataStream & ::operator<<(QDataStream &, const SireMM::BondRestraint &);
-        friend QDataStream & ::operator>>(QDataStream &, SireMM::BondRestraint &);
+        friend QDataStream & ::operator<<(QDataStream &, const SireMM::InverseBondRestraint &);
+        friend QDataStream & ::operator>>(QDataStream &, SireMM::InverseBondRestraint &);
 
     public:
-        BondRestraint();
-        BondRestraint(qint64 atom0, qint64 atom1,
+        InverseBondRestraint();
+        InverseBondRestraint(qint64 atom0, qint64 atom1,
                       const SireUnits::Dimension::HarmonicBondConstant &k,
                       const SireUnits::Dimension::Length &r0);
 
-        BondRestraint(const QList<qint64> &atoms0,
+        InverseBondRestraint(const QList<qint64> &atoms0,
                       const QList<qint64> &atoms1,
                       const SireUnits::Dimension::HarmonicBondConstant &k,
                       const SireUnits::Dimension::Length &r0);
 
-        BondRestraint(const BondRestraint &other);
+        InverseBondRestraint(const InverseBondRestraint &other);
 
-        ~BondRestraint();
+        ~InverseBondRestraint();
 
-        BondRestraint &operator=(const BondRestraint &other);
+        InverseBondRestraint &operator=(const InverseBondRestraint &other);
 
-        bool operator==(const BondRestraint &other) const;
-        bool operator!=(const BondRestraint &other) const;
+        bool operator==(const InverseBondRestraint &other) const;
+        bool operator!=(const InverseBondRestraint &other) const;
 
-        BondRestraints operator+(const BondRestraint &other) const;
-        BondRestraints operator+(const BondRestraints &other) const;
+        InverseBondRestraints operator+(const InverseBondRestraint &other) const;
+        InverseBondRestraints operator+(const InverseBondRestraints &other) const;
 
         static const char *typeName();
         const char *what() const;
 
-        BondRestraint *clone() const;
+        InverseBondRestraint *clone() const;
 
         QString toString() const;
 
@@ -126,38 +126,38 @@ namespace SireMM
      *  The restaints are spherically symmetric, and
      *  are simple harmonic potentials
      */
-    class SIREMM_EXPORT BondRestraints
-        : public SireBase::ConcreteProperty<BondRestraints, Restraints>
+    class SIREMM_EXPORT InverseBondRestraints
+        : public SireBase::ConcreteProperty<InverseBondRestraints, Restraints>
     {
-        friend QDataStream & ::operator<<(QDataStream &, const SireMM::BondRestraints &);
-        friend QDataStream & ::operator>>(QDataStream &, SireMM::BondRestraints &);
+        friend QDataStream & ::operator<<(QDataStream &, const SireMM::InverseBondRestraints &);
+        friend QDataStream & ::operator>>(QDataStream &, SireMM::InverseBondRestraints &);
 
     public:
-        BondRestraints();
-        BondRestraints(const QString &name);
+        InverseBondRestraints();
+        InverseBondRestraints(const QString &name);
 
-        BondRestraints(const BondRestraint &restraint);
-        BondRestraints(const QList<BondRestraint> &restraints);
+        InverseBondRestraints(const InverseBondRestraint &restraint);
+        InverseBondRestraints(const QList<InverseBondRestraint> &restraints);
 
-        BondRestraints(const QString &name,
-                       const BondRestraint &restraint);
+        InverseBondRestraints(const QString &name,
+                       const InverseBondRestraint &restraint);
 
-        BondRestraints(const QString &name,
-                       const QList<BondRestraint> &restraints);
+        InverseBondRestraints(const QString &name,
+                       const QList<InverseBondRestraint> &restraints);
 
-        BondRestraints(const BondRestraints &other);
+        InverseBondRestraints(const InverseBondRestraints &other);
 
-        ~BondRestraints();
+        ~InverseBondRestraints();
 
-        BondRestraints &operator=(const BondRestraints &other);
+        InverseBondRestraints &operator=(const InverseBondRestraints &other);
 
-        bool operator==(const BondRestraints &other) const;
-        bool operator!=(const BondRestraints &other) const;
+        bool operator==(const InverseBondRestraints &other) const;
+        bool operator!=(const InverseBondRestraints &other) const;
 
         static const char *typeName();
         const char *what() const;
 
-        BondRestraints *clone() const;
+        InverseBondRestraints *clone() const;
 
         QString toString() const;
 
@@ -174,29 +174,29 @@ namespace SireMM
         bool hasAtomRestraints() const;
         bool hasCentroidRestraints() const;
 
-        const BondRestraint &at(int i) const;
-        const BondRestraint &operator[](int i) const;
+        const InverseBondRestraint &at(int i) const;
+        const InverseBondRestraint &operator[](int i) const;
 
-        QList<BondRestraint> restraints() const;
+        QList<InverseBondRestraint> restraints() const;
 
-        QList<BondRestraint> atomRestraints() const;
-        QList<BondRestraint> centroidRestraints() const;
+        QList<InverseBondRestraint> atomRestraints() const;
+        QList<InverseBondRestraint> centroidRestraints() const;
 
-        void add(const BondRestraint &restraint);
-        void add(const BondRestraints &restraints);
+        void add(const InverseBondRestraint &restraint);
+        void add(const InverseBondRestraints &restraints);
 
-        BondRestraints &operator+=(const BondRestraint &restraint);
-        BondRestraints &operator+=(const BondRestraints &restraints);
+        InverseBondRestraints &operator+=(const InverseBondRestraint &restraint);
+        InverseBondRestraints &operator+=(const InverseBondRestraints &restraints);
 
-        BondRestraints operator+(const BondRestraint &restraint) const;
-        BondRestraints operator+(const BondRestraints &restraints) const;
+        InverseBondRestraints operator+(const InverseBondRestraint &restraint) const;
+        InverseBondRestraints operator+(const InverseBondRestraints &restraints) const;
 
         void setUsesPbc(bool use_pbc);
         bool usesPbc() const;
 
     private:
         /** The actual list of restraints*/
-        QList<BondRestraint> r;
+        QList<InverseBondRestraint> r;
 
         /** Whether the restraints use periodic boundary conditions */
         bool use_pbc = false;
@@ -204,11 +204,11 @@ namespace SireMM
 
 }
 
-Q_DECLARE_METATYPE(SireMM::BondRestraint)
-Q_DECLARE_METATYPE(SireMM::BondRestraints)
+Q_DECLARE_METATYPE(SireMM::InverseBondRestraint)
+Q_DECLARE_METATYPE(SireMM::InverseBondRestraints)
 
-SIRE_EXPOSE_CLASS(SireMM::BondRestraint)
-SIRE_EXPOSE_CLASS(SireMM::BondRestraints)
+SIRE_EXPOSE_CLASS(SireMM::InverseBondRestraint)
+SIRE_EXPOSE_CLASS(SireMM::InverseBondRestraints)
 
 SIRE_END_HEADER
 

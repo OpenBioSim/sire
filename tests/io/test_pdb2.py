@@ -2,6 +2,7 @@ import pytest
 import sire as sr
 import tempfile
 
+
 def test_pdb_space():
     """
     Test that we can parse CRYST1 records in a PDB file and that they

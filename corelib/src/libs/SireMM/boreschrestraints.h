@@ -194,9 +194,15 @@ namespace SireMM
         BoreschRestraints operator+(const BoreschRestraint &restraint) const;
         BoreschRestraints operator+(const BoreschRestraints &restraints) const;
 
+        void setUsesPbc(bool use_pbc);
+        bool usesPbc() const;
+
     private:
         /** The actual list of restraints*/
         QList<BoreschRestraint> r;
+
+        /** Whether the restraints use periodic boundary conditions */
+        bool use_pbc = false;
     };
 
 }

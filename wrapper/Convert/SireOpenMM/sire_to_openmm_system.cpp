@@ -23,6 +23,7 @@
 #include "SireMM/anglerestraints.h"
 #include "SireMM/atomljs.h"
 #include "SireMM/bondrestraints.h"
+#include "SireMM/inversebondrestraints.h"
 #include "SireMM/boreschrestraints.h"
 #include "SireMM/dihedralrestraints.h"
 #include "SireMM/morsepotentialrestraints.h"
@@ -132,7 +133,7 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
     restraintff->addPerBondParameter("kphi_C");
     restraintff->addPerBondParameter("phi0_C");
 
-    restraintff->setUsesPeriodicBoundaryConditions(true);
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -219,7 +220,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
     restraintff->addPerBondParameter("k");
     restraintff->addPerBondParameter("r0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(true);
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -249,6 +250,74 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
                                                .arg(atom1_index)
                                                .arg(natoms),
                                            CODELOC);
+
+        custom_params[0] = 1.0;                                     // rho - always equal to 1 (scaled by lever)
+        custom_params[1] = restraint.k().value() * internal_to_k;   // k
+        custom_params[2] = restraint.r0().value() * internal_to_nm; // rb
+
+        restraintff->addBond(atom0_index, atom1_index, custom_params);
+    }
+}
+
+void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraints,
+                                OpenMM::System &system, LambdaLever &lambda_lever,
+                                int natoms)
+{
+    if (restraints.isEmpty())
+        return;
+
+    if (restraints.hasCentroidRestraints())
+    {
+        throw SireError::unsupported(QObject::tr(
+                                         "Centroid bond restraints aren't yet supported..."),
+                                     CODELOC);
+    }
+
+    const auto energy_expression = QString(
+        "rho*k*delta*delta*step;"
+        "delta=(r-r0);"
+        "step=max(0,min(1,(r0 - r)))")
+        .toStdString();
+
+    auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
+    restraintff->setName("InverseBondRestraintForce");
+
+    restraintff->addPerBondParameter("rho");
+    restraintff->addPerBondParameter("k");
+    restraintff->addPerBondParameter("r0");
+
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
+
+    lambda_lever.addRestraintIndex(restraints.name(),
+    system.addForce(restraintff));
+
+    const auto atom_restraints = restraints.atomRestraints();
+
+    const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+    const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
+
+    auto cljff = lambda_lever.getForce<OpenMM::NonbondedForce>("clj", system);
+
+    std::vector<double> custom_params = {1.0, 0.0, 0.0};
+
+    for (const auto &restraint : atom_restraints)
+    {
+        int atom0_index = restraint.atom0();
+        int atom1_index = restraint.atom1();
+
+        if (atom0_index < 0 or atom0_index >= natoms)
+        throw SireError::invalid_index(QObject::tr(
+                        "Invalid particle index! %1 from %2")
+                        .arg(atom0_index)
+                        .arg(natoms),
+                    CODELOC);
+
+        if (atom1_index < 0 or atom1_index >= natoms)
+        throw SireError::invalid_index(QObject::tr(
+                        "Invalid particle index! %1 from %2")
+                        .arg(atom1_index)
+                        .arg(natoms),
+                    CODELOC);
 
         custom_params[0] = 1.0;                                     // rho - always equal to 1 (scaled by lever)
         custom_params[1] = restraint.k().value() * internal_to_k;   // k
@@ -295,7 +364,7 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
     restraintff->addPerBondParameter("r0");
     restraintff->addPerBondParameter("de");
 
-    restraintff->setUsesPeriodicBoundaryConditions(true);
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                 system.addForce(restraintff));
@@ -369,7 +438,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     restraintff->addPerBondParameter("k");
     restraintff->addPerBondParameter("rb");
 
-    restraintff->setUsesPeriodicBoundaryConditions(true);
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -599,7 +668,7 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
     restraintff->addPerAngleParameter("k");
     restraintff->addPerAngleParameter("theta0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(true);
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -662,7 +731,7 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
     restraintff->addPerTorsionParameter("k");
     restraintff->addPerTorsionParameter("theta0");
 
-    restraintff->setUsesPeriodicBoundaryConditions(true);
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
@@ -2211,10 +2280,40 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 _add_bond_restraints(prop.read().asA<SireMM::BondRestraints>(),
                                      system, lambda_lever, start_index, real_atoms);
             }
+            else if (prop.read().isA<SireMM::InverseBondRestraints>())
+            {
+                _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
+                                     system, lambda_lever, start_index);
+            }
             else if (prop.read().isA<SireMM::BoreschRestraints>())
             {
                 _add_boresch_restraints(prop.read().asA<SireMM::BoreschRestraints>(),
                                         system, lambda_lever, start_index, real_atoms);
+            }
+        }
+    }
+    if (map.specified("coalchemical_restraints"))
+    {
+        // All restraints are provided via the "coalchemical_restraints" key in the map.
+        // This should either be a single Restraints object, or a
+        // PropertyList - the easiest thing is to turn this into a
+        // PropertyList first
+        auto all_restraints = map["coalchemical_restraints"].value().asAnArray();
+
+        // loop over all of the restraints groups and add them
+        for (const auto &prop : all_restraints.toList())
+        {
+            if (not prop.read().isA<SireMM::Restraints>())
+                throw SireError::invalid_cast(QObject::tr(
+                                                  "Cannot convert an object of type %1 to a SireMM::Restraints")
+                                                  .arg(prop.read().what()),
+                                              CODELOC);
+
+            // we now need to choose what to do based on the type of restraint...
+            if (prop.read().isA<SireMM::InverseBondRestraints>())
+            {
+                _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
+                                         system, lambda_lever, start_index);
             }
         }
     }

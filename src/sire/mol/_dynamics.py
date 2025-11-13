@@ -976,6 +976,45 @@ class DynamicsData:
             self._gcmc_sampler._set_water_state(self._omm_mols)
             self._gcmc_sampler.pop()
 
+        if self._save_crash_report:
+            import openmm
+            import numpy as np
+            from copy import deepcopy
+            from uuid import uuid4
+
+            # Create a unique identifier for this crash report.
+            crash_id = str(uuid4())[:8]
+
+            # Get the current context and system.
+            context = self._omm_mols
+            system = deepcopy(context.getSystem())
+
+            # Add each force to a unique group.
+            for i, f in enumerate(system.getForces()):
+                f.setForceGroup(i)
+
+            # Create a new context.
+            new_context = openmm.Context(system, deepcopy(context.getIntegrator()))
+            new_context.setPositions(context.getState(getPositions=True).getPositions())
+
+            # Write the  energies for each force group.
+            with open(f"crash_{crash_id}.log", "w") as f:
+                f.write(f"Current lambda: {str(self.get_lambda())}\n")
+                for i, force in enumerate(system.getForces()):
+                    state = new_context.getState(getEnergy=True, groups={i})
+                    f.write(f"{force.getName()}, {state.getPotentialEnergy()}\n")
+
+            # Save the serialised system.
+            with open(f"system_{crash_id}.xml", "w") as f:
+                f.write(openmm.XmlSerializer.serialize(system))
+
+            # Save the positions.
+            positions = (
+                new_context.getState(getPositions=True).getPositions(asNumpy=True)
+                / openmm.unit.nanometer
+            )
+            np.savetxt(f"positions_{crash_id}.txt", positions)
+
         self.run_minimisation()
 
     def run(
@@ -994,6 +1033,7 @@ class DynamicsData:
         null_energy: str = None,
         excess_chemical_potential: float = None,
         num_waters: int = None,
+        save_crash_report: bool = False,
     ):
         if self.is_null():
             return
@@ -1013,6 +1053,7 @@ class DynamicsData:
             "null_energy": null_energy,
             "excess_chemical_potential": excess_chemical_potential,
             "num_waters": num_waters,
+            "save_crash_report": save_crash_report,
         }
 
         from concurrent.futures import ThreadPoolExecutor
@@ -1035,7 +1076,7 @@ class DynamicsData:
         if null_energy is not None:
             null_energy = u(null_energy)
         else:
-            null_energy = u("10000 kcal/mol")
+            null_energy = u("1e6 kcal/mol")
 
         if num_energy_neighbours is not None:
             try:
@@ -1051,6 +1092,13 @@ class DynamicsData:
                 num_waters = int(num_waters)
             except:
                 raise ValueError("'num_waters' must be an integer")
+
+        if save_crash_report is not None:
+            if not isinstance(save_crash_report, bool):
+                raise ValueError("'save_crash_report' must be True or False")
+            self._save_crash_report = save_crash_report
+        else:
+            self._save_crash_report = False
 
         try:
             steps_to_run = int(time.to(picosecond) / self.timestep().to(picosecond))
@@ -1653,6 +1701,7 @@ class Dynamics:
         null_energy: str = None,
         excess_chemical_potential: str = None,
         num_waters: int = None,
+        save_crash_report: bool = False,
     ):
         """
         Perform dynamics on the molecules.
@@ -1726,6 +1775,14 @@ class Dynamics:
             Whether to save the energy on exit, regardless of whether
             the energy frequency has been reached.
 
+        save_crash_report: bool
+            Whether to save a crash report if the dynamics fails due to an
+            instability. This will save a named log file containing the energy
+            for each force, an XML file containing the OpenMM system at the
+            start of the dynamics block, and a NumPy text file containing
+            the atomic positions at the start of the dynamics block. This
+            option is only used when auto_fix_minimise is True.
+
         auto_fix_minimise: bool
             Whether or not to automatically run minimisation if the
             trajectory exits with an error in the first few steps.
@@ -1772,6 +1829,14 @@ class Dynamics:
                 else:
                     save_velocities = False
 
+            if save_crash_report is None:
+                if self._d._map.specified("save_crash_report"):
+                    save_crash_report = (
+                        self._d._map["save_crash_report"].value().as_bool()
+                    )
+                else:
+                    save_crash_report = False
+
             self._d.run(
                 time=time,
                 save_frequency=save_frequency,
@@ -1782,6 +1847,7 @@ class Dynamics:
                 save_velocities=save_velocities,
                 save_frame_on_exit=save_frame_on_exit,
                 save_energy_on_exit=save_energy_on_exit,
+                save_crash_report=save_crash_report,
                 auto_fix_minimise=auto_fix_minimise,
                 num_energy_neighbours=num_energy_neighbours,
                 null_energy=null_energy,
