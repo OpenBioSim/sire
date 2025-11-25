@@ -17,7 +17,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
-* Use `"0"` for null EMLE interpolation force since `""` causes issues on some platforms.
+* Use ``"0"`` for null EMLE interpolation force since ``""`` causes issues on some platforms.
+
+* Fix ``delta`` parameter in soft-core Coulomb potential.
 
 `2025.3.0 <https://github.com/openbiosim/sire/compare/2025.2.0...2025.3.0>`__ - November 2025
 ---------------------------------------------------------------------------------------------
