@@ -1359,7 +1359,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha*alpha)+r_safe^2))-(kappa/r_safe));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r_safe^2))-(kappa/r_safe));"
                                   "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                   "sig6=(sigma^6)/(%3*sigma^6 + r_safe^6);"
                                   "r_safe=max(r, 0.001);")
@@ -1372,7 +1372,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha*alpha)+r_safe^2))-(kappa/r_safe));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r_safe^2))-(kappa/r_safe));"
                                   "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                   "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
                                   "r_safe=max(r, 0.001);"
