@@ -45,7 +45,7 @@ class EMLEEngine(_Convert._SireOpenMM.PyQMEngine):
 
         # Create a null CustomBondForce to add the EMLE interpolation
         # parameter.
-        interpolation_force = _CustomBondForce("")
+        interpolation_force = _CustomBondForce("0")
         interpolation_force.addGlobalParameter("lambda_emle", 1.0)
 
         # Return the forces.
@@ -94,7 +94,7 @@ class TorchEMLEEngine(_Convert._SireOpenMM.TorchQMEngine):
 
         # Create a null CustomBondForce to add the EMLE interpolation
         # parameter.
-        interpolation_force = _CustomBondForce("")
+        interpolation_force = _CustomBondForce("0")
         interpolation_force.addGlobalParameter("lambda_emle", 1.0)
 
         # Return the forces.
