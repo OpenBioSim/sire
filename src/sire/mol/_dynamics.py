@@ -304,6 +304,14 @@ class DynamicsData:
         else:
             self._pressure = None
 
+        # Try importing the SOMD2 logger.
+        try:
+            from somd2 import _logger as somd2_logger
+
+            self._somd2_logger = somd2_logger
+        except:
+            self._somd2_logger = None
+
     def is_null(self):
         return self._sire_mols is None
 
@@ -953,13 +961,18 @@ class DynamicsData:
 
         from ..utils import Console
 
-        Console.warning(
+        msg = (
             "Something went wrong when running dynamics. The system will be "
             "minimised, and then dynamics will be attempted again. If an "
             "error still occurs, then it is likely that the step size is too "
             "large, the molecules are over-constrained, or there is something "
-            "more fundemental going wrong..."
+            "more fundamental going wrong..."
         )
+
+        if self._somd2_logger is not None:
+            self._somd2_logger.warning(msg)
+        else:
+            Console.warning(msg)
 
         # rebuild the molecules
         from ..convert import to

@@ -21,6 +21,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fix ``delta`` parameter in soft-core Coulomb potential.
 
+* When possible, use the ``SOMD2`` logger for dynamics warnings.
+
 `2025.3.0 <https://github.com/openbiosim/sire/compare/2025.2.0...2025.3.0>`__ - November 2025
 ---------------------------------------------------------------------------------------------
 
