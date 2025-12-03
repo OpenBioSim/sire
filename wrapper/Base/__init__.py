@@ -39,7 +39,7 @@ def wrap(value):
         u = _Units.GeneralUnit(value)
 
         if not u.is_dimensionless():
-            return wrap(u)
+            return _base_wrap(u)
     except Exception:
         pass
 
