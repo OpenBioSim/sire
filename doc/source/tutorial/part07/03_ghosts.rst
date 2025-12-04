@@ -68,7 +68,7 @@ It is based on the following electrostatic and Lennard-Jones potentials:
 
 .. math::
 
-   V_{\text{elec}}(r) = q_i q_j \left[ \frac{(1 - \alpha)^n}{\sqrt{r^2 + \delta_\text{coulomb}^2}} - \frac{\kappa}{r} \right]
+   V_{\text{elec}}(r) = q_i q_j \left[ \frac{(1 - \alpha)^n}{\sqrt{r^2 + \delta_\text{coulomb}}} - \frac{\kappa}{r} \right]
 
    V_{\text{LJ}}(r) = 4\epsilon \left[ \frac{\sigma^{12}}{(\delta_\text{LJ} \sigma + r^2)^6} - \frac{\sigma^6}{(\delta_\text{LJ} \sigma + r^2)^3} \right]
 
@@ -76,7 +76,7 @@ where
 
 .. math::
 
-    \delta_\text{coulomb} = \alpha \times \text{shift_coulomb}
+    \delta_\text{coulomb} = \alpha \times \text{shift_coulomb}^2
 
     \delta_\text{LJ} = \alpha \times \text{shift_LJ}
 
