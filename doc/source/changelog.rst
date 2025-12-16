@@ -27,6 +27,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add support for passing cell vectors to ``PyQMForce`` and ``TorchQMForce``.
 
+* Add ``--install-metadata`` option to ``setup.py`` to register development source installations
+  with ``conda``.
+
 `2025.3.0 <https://github.com/openbiosim/sire/compare/2025.2.0...2025.3.0>`__ - November 2025
 ---------------------------------------------------------------------------------------------
 
