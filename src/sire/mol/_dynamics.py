@@ -304,6 +304,14 @@ class DynamicsData:
         else:
             self._pressure = None
 
+        # Try importing the SOMD2 logger.
+        try:
+            from somd2 import _logger as somd2_logger
+
+            self._somd2_logger = somd2_logger
+        except:
+            self._somd2_logger = None
+
     def is_null(self):
         return self._sire_mols is None
 
@@ -754,6 +762,15 @@ class DynamicsData:
         else:
             return self._omm_mols.getIntegrator()
 
+    def get_rest2_scale(self):
+        """
+        Return the current REST2 scaling factor.
+        """
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.get_rest2_scale()
+
     def info(self):
         if self.is_null():
             return None
@@ -953,13 +970,18 @@ class DynamicsData:
 
         from ..utils import Console
 
-        Console.warning(
+        msg = (
             "Something went wrong when running dynamics. The system will be "
             "minimised, and then dynamics will be attempted again. If an "
             "error still occurs, then it is likely that the step size is too "
             "large, the molecules are over-constrained, or there is something "
-            "more fundemental going wrong..."
+            "more fundamental going wrong..."
         )
+
+        if self._somd2_logger is not None:
+            self._somd2_logger.warning(msg)
+        else:
+            Console.warning(msg)
 
         # rebuild the molecules
         from ..convert import to
@@ -1909,15 +1931,7 @@ class Dynamics:
         """
         Return the current REST2 scaling factor.
         """
-        if self.is_null():
-            return None
         return self._d.get_rest2_scale()
-
-    def set_rest2_scale(self, rest2_scale: float):
-        """
-        Set the current REST2 scaling factor.
-        """
-        self._d.set_rest2_scale(rest2_scale=rest2_scale)
 
     def ensemble(self):
         """
