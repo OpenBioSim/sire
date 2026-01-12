@@ -421,7 +421,7 @@ def test_create_engine(ala_mols):
     """
 
     # A test callback function. Returns a known energy and dummy forces.
-    def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm, idx_mm=None):
+    def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell=None, idx_mm=None):
         return (42, xyz_qm, xyz_mm)
 
     # Create a local copy of the test system.
