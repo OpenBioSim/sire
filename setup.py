@@ -588,24 +588,32 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     if conda_build:
         print("This is a conda build")
 
-        CXX = os.environ["CXX"]
-        CC = os.environ["CC"]
+        # Try to get compilers from environment
+        CXX = os.environ.get("CXX")
+        CC = os.environ.get("CC")
 
-        # make sure that these compilers are in the path
-        CXX_bin = shutil.which(CXX)
-        CC_bin = shutil.which(CC)
-
-        print(f"{CXX} => {CXX_bin}")
-        print(f"{CC} => {CC_bin}")
-
-        if CXX_bin is None or CC_bin is None:
-            print("Cannot find the compilers requested by conda-build in the PATH")
-            print("Please check that the compilers are installed and available.")
-            sys.exit(-1)
-
-        # use the full paths, in case CMake struggles
-        CXX = CXX_bin
-        CC = CC_bin
+        # Fallback to finding cl.exe on Windows
+        if (CXX is None or CC is None) and is_windows:
+            import shutil
+            cl_path = shutil.which("cl.exe") or shutil.which("cl")
+            if cl_path:
+                print(f"Compiler not in environment, using found compiler: {cl_path}")
+                if CXX is None:
+                    CXX = cl_path
+                if CC is None:
+                    CC = cl_path
+            else:
+                raise ValueError(
+                    "Conda build on Windows requires CXX and CC environment variables. "
+                    "Ensure your conda recipe includes {{ compiler('c') }} and {{ compiler('cxx') }} "
+                    "in build requirements and that Visual Studio is properly installed."
+                )
+        elif CXX is None or CC is None:
+            raise ValueError(
+                f"Conda build detected but compiler environment variables not set. "
+                f"CXX={CXX}, CC={CC}. "
+                f"Ensure your conda recipe includes compiler requirements."
+            )
 
     elif is_macos:
         try:
