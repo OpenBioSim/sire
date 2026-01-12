@@ -25,6 +25,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fix recursion bug in :func:`sire.base.wrap()` function.
 
+* Add support for passing cell vectors to ``PyQMForce`` and ``TorchQMForce``.
+
+* Add ``--install-metadata`` option to ``setup.py`` to register development source installations
+  with ``conda``.
+
 * Fix :meth:`Dynamics.get_rest2_scale()` method.
 
 `2025.3.0 <https://github.com/openbiosim/sire/compare/2025.2.0...2025.3.0>`__ - November 2025

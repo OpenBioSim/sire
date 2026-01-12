@@ -20,12 +20,13 @@ You can use `--skip-deps` to skip the installation of the conda dependencies
 You can use `--skip-build` to skip the building of the corelib and wrappers
 """
 
-import sys
+import glob
+import json
 import os
 import platform
 import subprocess
 import shutil
-import glob
+import sys
 
 try:
     # We have to check the version, but we can't do this by
@@ -283,6 +284,14 @@ def parse_args():
         "the C++ code is already built)",
     )
     parser.add_argument(
+        "--install-metadata",
+        action="store_true",
+        default=False,
+        help="Install package metadata. This is useful when you are building "
+        "from source but still want to be able to query the installation using "
+        "conda list sire.",
+    )
+    parser.add_argument(
         "action",
         nargs="*",
         help="Should be one of 'install_requires', 'build', 'install' or 'install_module'.\n"
@@ -383,8 +392,8 @@ def conda_install(
         dependencies_to_skip = []
 
     for dependency in dependencies:
-	# remove any quotes from the dependency
-        dependency = dependency.replace("\"", "")
+        # remove any quotes from the dependency
+        dependency = dependency.replace('"', "")
 
         if dependency == "python" or is_installed(dependency, conda_exe):
             # no need to install again
@@ -472,10 +481,8 @@ def install_requires(install_bss_reqs=False, install_emle_reqs=False, yes=True):
         # this didn't import - we are missing setuptools
         print("Installing setuptools")
         conda_install(
-            ["setuptools"],
-            install_bss_reqs,
-            install_emle_reqs=False,
-            yes=yes)
+            ["setuptools"], install_bss_reqs, install_emle_reqs=False, yes=yes
+        )
         try:
             import pkg_resources
         except Exception:
@@ -581,24 +588,32 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     if conda_build:
         print("This is a conda build")
 
-        CXX = os.environ["CXX"]
-        CC = os.environ["CC"]
+        # Try to get compilers from environment
+        CXX = os.environ.get("CXX")
+        CC = os.environ.get("CC")
 
-        # make sure that these compilers are in the path
-        CXX_bin = shutil.which(CXX)
-        CC_bin = shutil.which(CC)
-
-        print(f"{CXX} => {CXX_bin}")
-        print(f"{CC} => {CC_bin}")
-
-        if CXX_bin is None or CC_bin is None:
-            print("Cannot find the compilers requested by conda-build in the PATH")
-            print("Please check that the compilers are installed and available.")
-            sys.exit(-1)
-
-        # use the full paths, in case CMake struggles
-        CXX = CXX_bin
-        CC = CC_bin
+        # Fallback to finding cl.exe on Windows
+        if (CXX is None or CC is None) and is_windows:
+            import shutil
+            cl_path = shutil.which("cl.exe") or shutil.which("cl")
+            if cl_path:
+                print(f"Compiler not in environment, using found compiler: {cl_path}")
+                if CXX is None:
+                    CXX = cl_path
+                if CC is None:
+                    CC = cl_path
+            else:
+                raise ValueError(
+                    "Conda build on Windows requires CXX and CC environment variables. "
+                    "Ensure your conda recipe includes {{ compiler('c') }} and {{ compiler('cxx') }} "
+                    "in build requirements and that Visual Studio is properly installed."
+                )
+        elif CXX is None or CC is None:
+            raise ValueError(
+                f"Conda build detected but compiler environment variables not set. "
+                f"CXX={CXX}, CC={CC}. "
+                f"Ensure your conda recipe includes compiler requirements."
+            )
 
     elif is_macos:
         try:
@@ -920,6 +935,8 @@ def install(ncores: int = 1, npycores: int = 1):
 
 
 if __name__ == "__main__":
+    OLDPWD = os.getcwd()
+
     args = parse_args()
 
     if len(args.action) != 1:
@@ -985,3 +1002,28 @@ if __name__ == "__main__":
             f"Unrecognised action '{action}'. Please use 'install_requires', "
             "'build', 'install' or 'install_module'"
         )
+
+    # Create minimist package metadata so that 'conda list sire' works.
+    if args.install_metadata:
+        os.chdir(OLDPWD)
+        if "CONDA_PREFIX" in os.environ:
+            metadata_dir = os.path.join(os.environ["CONDA_PREFIX"], "conda-meta")
+            if os.path.exists(metadata_dir):
+                # Get the Python version.
+                pyver = f"py{sys.version_info.major}{sys.version_info.minor}"
+                metadata = {
+                    "name": "sire",
+                    "version": open("version.txt").readline().strip(),
+                    "build": pyver,
+                    "build_number": 0,
+                    "channel": "local",
+                    "size": 0,
+                    "license": "GPL-3.0-or-later",
+                    "subdir": platform_string,
+                }
+                metadata_file = os.path.join(
+                    metadata_dir, f"sire-{metadata['version']}-{pyver}.json"
+                )
+                with open(metadata_file, "w") as f:
+                    json.dump(metadata, f, indent=2)
+                print(f"Created conda package metadata file: {metadata_file}")
