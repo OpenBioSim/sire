@@ -762,6 +762,15 @@ class DynamicsData:
         else:
             return self._omm_mols.getIntegrator()
 
+    def get_rest2_scale(self):
+        """
+        Return the current REST2 scaling factor.
+        """
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.get_rest2_scale()
+
     def info(self):
         if self.is_null():
             return None
@@ -1922,15 +1931,7 @@ class Dynamics:
         """
         Return the current REST2 scaling factor.
         """
-        if self.is_null():
-            return None
         return self._d.get_rest2_scale()
-
-    def set_rest2_scale(self, rest2_scale: float):
-        """
-        Set the current REST2 scaling factor.
-        """
-        self._d.set_rest2_scale(rest2_scale=rest2_scale)
 
     def ensemble(self):
         """
