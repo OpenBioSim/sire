@@ -588,32 +588,14 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     if conda_build:
         print("This is a conda build")
 
-        # Try to get compilers from environment
-        CXX = os.environ.get("CXX")
-        CC = os.environ.get("CC")
-
-        # Fallback to finding cl.exe on Windows
-        if (CXX is None or CC is None) and is_windows:
-            import shutil
-            cl_path = shutil.which("cl.exe") or shutil.which("cl")
-            if cl_path:
-                print(f"Compiler not in environment, using found compiler: {cl_path}")
-                if CXX is None:
-                    CXX = cl_path
-                if CC is None:
-                    CC = cl_path
-            else:
-                raise ValueError(
-                    "Conda build on Windows requires CXX and CC environment variables. "
-                    "Ensure your conda recipe includes {{ compiler('c') }} and {{ compiler('cxx') }} "
-                    "in build requirements and that Visual Studio is properly installed."
-                )
-        elif CXX is None or CC is None:
-            raise ValueError(
-                f"Conda build detected but compiler environment variables not set. "
-                f"CXX={CXX}, CC={CC}. "
-                f"Ensure your conda recipe includes compiler requirements."
-            )
+        if is_windows:
+            # Windiws: vcvars is activated, let CMake find the MSCV.
+            CXX = None
+            CC = None
+        else:
+            # Try to get compilers from environment
+            CXX = os.environ.get("CXX")
+            CC = os.environ.get("CC")
 
     elif is_macos:
         try:
@@ -647,7 +629,8 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
                 print("conda install gcc gxx")
                 sys.exit(-1)
 
-    print(f"Using compilers {CC} | {CXX}")
+    if CC is not None and CXX is not None:
+        print(f"Using compilers {CC} | {CXX}")
 
     # Make sure all of the above output is printed to the screen
     # before we start running any actual compilation
@@ -708,9 +691,9 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
             sourcedir,
         ]
 
-        if CC:
+        if CC is not None:
             os.environ["CC"] = CC
-        if CXX:
+        if CXX is not None:
             os.environ["CXX"] = CXX
 
         print(" ".join(cmake_cmd))
