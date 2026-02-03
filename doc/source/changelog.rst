@@ -32,6 +32,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fix :meth:`Dynamics.get_rest2_scale()` method.
 
+* Add automatic parametrisation for Morse potential restraints when bonds are
+  being created in alchemical simulations.
+
 `2025.3.0 <https://github.com/openbiosim/sire/compare/2025.2.0...2025.3.0>`__ - November 2025
 ---------------------------------------------------------------------------------------------
 
