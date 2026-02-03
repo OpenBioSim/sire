@@ -869,7 +869,6 @@ def morse_potential(
                 if k0 == 0:
                     length0 = length1
                     k0 = k1
-                
 
                 length0 = u(f"{length0} nm")
 
