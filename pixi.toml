@@ -1,0 +1,153 @@
+[project]
+name = "sire"
+channels = ["conda-forge", "openbiosim/label/dev"]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64", "win-64"]
+
+# All core dependencies needed to build and run sire.
+# The generate_recipe.py script categorises these into build/host/run
+# sections when generating the rattler-build recipe.
+[dependencies]
+python = "*"
+cmake = ">=3.30.0"
+git = "*"
+pybind11 = "*"
+gsl = "*"
+lazy_import = "*"
+libboost-devel = "*"
+libboost-python-devel = "*"
+libcblas = "*"
+libnetcdf = "*"
+librdkit-dev = ">2024.09.6"
+openmm = ">=8.1"
+pandas = "*"
+qt-main = "*"
+rich = "*"
+tbb = "*"
+tbb-devel = "*"
+gemmi = ">=0.6.4,<0.7.0"
+
+# Unix build tools
+[target.linux-64.dependencies]
+make = "*"
+libtool = "*"
+sysroot_linux-64 = "==2.17"
+kartograf = ">=1.0.0"
+
+[target.linux-aarch64.dependencies]
+make = "*"
+libtool = "*"
+kartograf = ">=1.0.0"
+
+[target.osx-arm64.dependencies]
+make = "*"
+libtool = "*"
+kartograf = ">=1.0.0"
+
+# Windows needs a pinned pybind11 version
+[target.win-64.dependencies]
+pybind11 = "==2.11.1"
+
+# =============================================================================
+# BSS (BioSimSpace) feature
+# These aren't needed by Sire, but allow it to be built in a self-consistent
+# way so that BioSimSpace can be installed on top of it.
+# =============================================================================
+[feature.bss.dependencies]
+openmmtools = ">=0.21.5"
+configargparse = "*"
+ipywidgets = "*"
+kcombu_bss = "*"
+lomap2 = "*"
+nglview = "*"
+openff-interchange-base = "*"
+openff-toolkit-base = "*"
+parmed = "*"
+py3dmol = "*"
+pydot = "*"
+pygtail = "*"
+pyyaml = "*"
+
+[feature.bss.target.linux-64.dependencies]
+ambertools = ">=22"
+gromacs = "*"
+alchemlyb = "*"
+mdtraj = "*"
+mdanalysis = "*"
+
+[feature.bss.target.linux-aarch64.dependencies]
+ambertools = ">=22"
+gromacs = "*"
+# alchemlyb, mdtraj, mdanalysis not available on linux-aarch64
+
+[feature.bss.target.osx-arm64.dependencies]
+ambertools = ">=22"
+# gromacs not available on osx-arm64
+alchemlyb = "*"
+mdtraj = "*"
+mdanalysis = "*"
+
+[feature.bss.target.win-64.dependencies]
+# ambertools and gromacs not available on Windows
+alchemlyb = "*"
+mdtraj = "*"
+mdanalysis = "*"
+
+# =============================================================================
+# EMLE (emle-engine) feature
+# =============================================================================
+[feature.emle.dependencies]
+ase = "*"
+loguru = "*"
+pygit2 = "*"
+pyyaml = "*"
+
+[feature.emle.target.linux-64.dependencies]
+ambertools = ">=22"
+deepmd-kit = "*"
+nnpops = "*"
+pytorch = "*"
+
+[feature.emle.target.linux-aarch64.dependencies]
+ambertools = ">=22"
+pytorch = "*"
+# deepmd-kit, nnpops not available on linux-aarch64
+
+[feature.emle.target.osx-arm64.dependencies]
+ambertools = ">=22"
+deepmd-kit = "*"
+nnpops = "*"
+pytorch = "*"
+torchani = "*"
+xtb-python = "*"  # Note: not compatible with Python 3.12
+
+# EMLE has no Windows-specific deps (ambertools, pytorch etc. excluded on Windows)
+
+# =============================================================================
+# Test feature
+# =============================================================================
+[feature.test.dependencies]
+pytest = "*"
+rdkit = ">=2023.0.0"
+gemmi = ">=0.6.4,<0.7.0"
+
+[feature.test.target.linux-64.dependencies]
+kartograf = ">=1.0.0"
+
+[feature.test.target.linux-aarch64.dependencies]
+kartograf = ">=1.0.0"
+
+[feature.test.target.osx-arm64.dependencies]
+kartograf = ">=1.0.0"
+
+# kartograf excluded from Windows test deps
+
+# =============================================================================
+# Environments
+# =============================================================================
+[environments]
+default = []
+bss = ["bss"]
+emle = ["emle"]
+full = ["bss", "emle"]
+test = ["test"]
+dev = ["bss", "emle", "test"]

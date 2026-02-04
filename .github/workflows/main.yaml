@@ -2,8 +2,8 @@ name: Release Main
 
 # Note that push and pull-request builds are automatically
 # now skipped by GitHub if
-# [skip ci], [ci skip], [no ci], [skip actions], or [actions skip]
-# are in the commit message. We don't need to check for this ourselves.
+# [skip ci], [ci skip], [no ci], [skip actions], or [actions skip]
+# are in the commit message. We don't need to check for this ourselves.
 
 # Only allow this action to run on a manual run.
 # We should specify when run whether or not we want
@@ -45,32 +45,31 @@ jobs:
       REPO: "${{ github.event.pull_request.head.repo.full_name || github.repository }}"
     steps:
       #
-      - uses: conda-incubator/setup-miniconda@v3
+      - uses: actions/checkout@v4
         with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-          activate-environment: sire_build
-          miniforge-version: latest
+          ref: main
       #
-      - name: Clone the main branch (push to main)
-        run: git clone -b main https://github.com/openbiosim/sire sire
+      - name: Install rattler-build
+        uses: prefix-dev/rattler-build-action@v0.2.34
+        with:
+          tool-version: latest
+          build-args: --help
       #
-      - name: Setup Conda
-        run: conda install -y -c conda-forge conda-build boa anaconda-client packaging pip-requirements-parser
+      - name: Generate recipe
+        run: python ${{ github.workspace }}/actions/generate_recipe.py --features bss emle
       #
-      - name: Update Conda recipe
-        run: python ${{ github.workspace }}/sire/actions/update_recipe.py
+      - name: Write Python variant config
+        shell: bash
+        run: printf 'python:\n  - "${{ matrix.python-version }}"\n' > "${{ github.workspace }}/python_variant.yaml"
       #
-      - name: Prepare build location
-        run: mkdir ${{ github.workspace }}/build
+      - name: Build package using rattler-build
+        shell: bash
+        run: rattler-build build --recipe "${{ github.workspace }}/recipes/sire" -c conda-forge -c openbiosim/label/dev --variant-config "${{ github.workspace }}/python_variant.yaml"
       #
-      - name: Build Conda package using conda build
-        run: conda build -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
-      #
-      - name: Upload Conda package
+      - name: Upload package
         # upload to the 'test' channel
-        run: python ${{ github.workspace }}/sire/actions/upload_package.py test
+        run: python ${{ github.workspace }}/actions/upload_package.py test
         env:
-          SRC_DIR: ${{ github.workspace }}/sire
+          SRC_DIR: ${{ github.workspace }}
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
         if: github.event.inputs.upload_packages == 'yes'

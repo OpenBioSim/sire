@@ -2,8 +2,8 @@ name: Pull-Request
 
 # Note that push and pull-request builds are automatically
 # now skipped by GitHub if
-# [skip ci], [ci skip], [no ci], [skip actions], or [actions skip]
-# are in the commit message. We don't need to check for this ourselves.
+# [skip ci], [ci skip], [no ci], [skip actions], or [actions skip]
+# are in the commit message. We don't need to check for this ourselves.
 
 on:
   pull_request:
@@ -32,7 +32,7 @@ jobs:
             python-version: "3.10"
           - platform:
               { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
-            python-version: "3.12"  # MacOS can't run 3.12 yet...
+            python-version: "3.12"  # MacOS can't run 3.12 yet...
           - platform: { name: "windows", os: "windows-latest", shell: "pwsh" }
             python-version: "3.11"
     environment:
@@ -47,24 +47,21 @@ jobs:
       REPO: "${{ github.event.pull_request.head.repo.full_name || github.repository }}"
     steps:
       #
-      - uses: conda-incubator/setup-miniconda@v3
+      - uses: actions/checkout@v4
+      #
+      - name: Install rattler-build
+        uses: prefix-dev/rattler-build-action@v0.2.34
         with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-          activate-environment: sire_build
-          miniforge-version: latest
+          tool-version: latest
+          build-args: --help
       #
-      - name: Clone the feature branch (pull request to devel)
-        run: git clone -b ${{ github.head_ref }} --single-branch https://github.com/${{ env.REPO }} sire
+      - name: Generate recipe
+        run: python ${{ github.workspace }}/actions/generate_recipe.py --features bss emle
       #
-      - name: Setup Conda
-        run: conda install -y -c conda-forge conda-build boa anaconda-client packaging pip-requirements-parser
+      - name: Write Python variant config
+        shell: bash
+        run: printf 'python:\n  - "${{ matrix.python-version }}"\n' > "${{ github.workspace }}/python_variant.yaml"
       #
-      - name: Update Conda recipe
-        run: python ${{ github.workspace }}/sire/actions/update_recipe.py
-      #
-      - name: Prepare build location
-        run: mkdir ${{ github.workspace }}/build
-      #
-      - name: Build Conda package using conda build
-        run: conda build -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
+      - name: Build package using rattler-build
+        shell: bash
+        run: rattler-build build --recipe "${{ github.workspace }}/recipes/sire" -c conda-forge -c openbiosim/label/dev --variant-config "${{ github.workspace }}/python_variant.yaml"

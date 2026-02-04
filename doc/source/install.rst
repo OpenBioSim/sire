@@ -253,14 +253,30 @@ operating system, or because you want to use a newer version
 (e.g. code from the ``devel`` branch, or from your own feature
 branch if you are a developer).
 
-You compile :mod:`sire` into an existing anaconda / miniconda environment.
-Please create and activate an environment, e.g. by following
-`the instructions <_Install_miniforge>` to install a fresh ``miniforge`` and
-then creating and activating Python 3.11 environment called
-``openbiosim``.
+Prerequisites
+-------------
 
-Next, download the source code. You could download the latest development
-version of :mod:`sire` by typing;
+You need `pixi <https://pixi.sh>`__ installed to manage the build
+environment and dependencies. Follow the
+`pixi installation instructions <https://pixi.sh/latest/#installation>`__
+for your platform.
+
+.. note::
+
+   You need to have Visual Studio C++ (2017 or newer) installed to compile on Windows.
+   The easiest way to do this is to install the free
+   `Visual Studio 2022 Community Edition <https://visualstudio.microsoft.com/vs/community>`__.
+   Make sure to install "Desktop development with C++",
+   including the options "MSVC v143 - VS 2022 C++ x64/x86 build tools (v14.30)",
+   "C++ CMake tools for Windows", and at least one of "Windows 11 SDK" and/or
+   "Windows 10 SDK" (any version will do). Currently only the X64 compilers
+   have been tested - we are interested to try Windows/ARM64 once more of
+   the dependencies are available.
+
+Download the source code
+------------------------
+
+Download the latest development version of :mod:`sire` by typing;
 
 .. code-block:: bash
 
@@ -268,12 +284,6 @@ version of :mod:`sire` by typing;
 
 This will download into a directory called :mod:`sire`. Navigate into
 this directory (e.g. ``cd sire``).
-
-.. note::
-
-   This will fail if ``git`` is not installed on your computer.
-   You can easily install ``git`` using ``conda``, e.g.
-   run ``conda install git``.
 
 You can change to a different branch using the ``git checkout BRANCH``
 command, e.g.
@@ -293,6 +303,33 @@ feature branch using
 where ``feat_name`` should be replaced by the name of the feature
 branch you want to compile.
 
+Create the build environment
+-----------------------------
+
+Use ``pixi`` to create and activate the development environment. This will
+install all required dependencies, including compilers:
+
+.. code-block:: bash
+
+   $ pixi install -e dev
+   $ pixi shell -e dev
+
+Several environments are available depending on your needs:
+
+* ``default`` - core sire dependencies only
+* ``bss`` - include `BioSimSpace <https://biosimspace.org>`__ compatibility dependencies
+* ``emle`` - include EMLE engine dependencies
+* ``full`` - include both BSS and EMLE dependencies
+* ``dev`` - all of the above plus test dependencies
+
+If you plan to install `BioSimSpace <https://biosimspace.org>`__ on
+top of :mod:`sire`, use at least the ``bss`` or ``dev`` environment.
+This ensures that incompatible versions of shared dependencies are not
+accidentally installed.
+
+Compile and install
+-------------------
+
 Compilation and installation of :mod:`sire` is managed via the
 `setup.py <https://github.com/openbiosim/sire/blob/devel/setup.py>`__
 script.
@@ -303,7 +340,7 @@ Run
 
    $ python setup.py --help
 
-to get a help on all of the options.
+to get help on all of the options.
 
 Typically, you just want to compile and install :mod:`sire`. To do this,
 type
@@ -312,34 +349,8 @@ type
 
    $ python setup.py install
 
-This will download and install all of the dependencies via ``conda``. It will then compile
-the :mod:`sire` C++ libraries, and then the Python wrappers. Be patient,
-as compilation can take quite a while!
-
-.. note::
-
-   You need to have Visual Studio C++ (2017 or newer) installed to compile on Windows.
-   The easiest way to do this is to install the free
-   `Visual Studio 2022 Community Edition <https://visualstudio.microsoft.com/vs/community>`__.
-   Make sure to install "Desktop development with C++",
-   including the options "MSVC v143 - VS 2022 C++ x64/x86 build tools (v14.30)",
-   "C++ CMake tools for Windows", and at least one of "Windows 11 SDK" and/or
-   "Windows 10 SDK" (any version will do). You can, optionally, install the
-   older C++ compilers too, e.g. "MSVC v142 - VS 2019 C++ x64/x86 build tools (v14.29)",
-   and/or "MSVC v141 - VS 2017 C++ x64/x86 build tools (v14.16)". Currently
-   only the X64 compilers have been tested - we are interested to try
-   Windows/ARM64 once more of the dependencies are available.
-
-If you plan to install `BioSimSpace <https://biosimspace.org>`__ on
-top of :mod:`sire`, then you should install using;
-
-.. code-block:: bash
-
-   $ python --install-bss-deps install
-
-This will use ``conda`` to download and install all of
-BioSimSpace's dependencies as well. This ensures that incompatible versions
-of shared dependencies are not accidentally installed.
+This will compile the :mod:`sire` C++ libraries and then the Python
+wrappers. Be patient, as compilation can take quite a while!
 
 Once :mod:`sire` has installed, you can import it in a ``python``,
 ``ipython`` or ``jupyter lab`` session by typing
@@ -355,165 +366,74 @@ Please take a look at our :doc:`developer guide <contributing/development>`
 for more information on how to develop and contribute new code
 to :mod:`sire`.
 
-5. Hardest install - build your own custom conda packages
-=========================================================
+5. Hardest install - build your own conda packages
+===================================================
 
-The :mod:`sire` conda packages that we build have a lot of dependencies that
-may conflict with your own environment. This is because we build :mod:`sire`
-to be compatible with the latest version of `BioSimSpace <https://biosimspace.openbiosim.org>`__,
-which itself optionally depends on a large number of simulation packages.
+You can build your own :mod:`sire` conda package using
+`rattler-build <https://rattler-build.readthedocs.io>`__. This is useful if
+you want a package with different dependencies to the one we distribute.
 
-You can build your own :mod:`sire` conda package that has fewer dependencies,
-or which is compatible with the packages already installed in your conda
-environment. There are a few steps you need to complete.
-
-A. Define your runtime environment
+A. Check out the sire source code
 ----------------------------------
-
-The first step is to describe the desired runtime environment for the package.
-The easiest way to do this is to create that environment, e.g. by installing
-the packages you want, and to then create an ``environment.yml`` file
-that describes that environment. You can do this by running
-
-.. code-block:: bash
-
-   $ conda env export -f environment.yml
-
-This will create an environment file called ``environment.yml``
-that creates pins for the exact version of all of the packages installed
-in your environment.
-
-If you want, you can edit this file to add or remove pins. Simply delete
-lines describing the version of packages that you don't need pinned,
-add new lines if there are additional packages that you do want pinned,
-or even update the version number of the pins if you can allow more
-flexibility for the installation.
-
-B. Check out the sire source code
----------------------------------
-
-The next step is to check out the :mod:`sire` source code (if you haven't
-already).
 
 .. code-block:: bash
 
    $ git clone https://github.com/openbiosim/sire -b main
+   $ cd sire
 
-This checks the ``main`` branch of the code out into a directory called
-``sire``. You can build a package for any branch of the code. Typically,
-you will want to choose the ``main`` branch, as this always corresponds to the
-last release. You can checkout the ``main`` branch by changing into the
-``sire`` directory and running;
+You can build a package for any branch of the code. The ``main`` branch
+always corresponds to the last release.
 
-.. code-block:: bash
+B. Install rattler-build
+-------------------------
 
-   $ git checkout main
-
-C. Create the conda build environment
--------------------------------------
-
-While you could build in your existing environment, it is cleaner to
-build in a dedicated build environment. Here, we will create a build
-environment called ``build_sire``. You can use any name you want.
+Install ``rattler-build`` via ``pixi``:
 
 .. code-block:: bash
 
-   $ conda env create -n build_sire -f environment.yml
+   $ pixi global install rattler-build
 
-Activate that environment
+Or follow the
+`rattler-build installation instructions <https://rattler-build.readthedocs.io>`__.
 
-.. code-block:: bash
-
-   $ conda activate build_sire
-
-And then install the tools needed to run conda-build
-
-.. code-block:: bash
-
-   $ conda install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser
-
-D. Create the conda recipe
---------------------------
-
-Next, we need to create the conda recipe to build the package. We do this by
-running the script ``actions/update_recipe.py``. You can add the path to
-your ``environment.yml`` file as an argument. This tells the script to
-create a recipe that includes all of the pins in the ``environment.yml``.
-For example;
-
-.. code-block:: bash
-
-   $ python actions/update_recipe.py environment.yml
-
-would create the recipe using the pins in ``environment.yml`` (assuming this
-file was in the current directory).
-
-The recipe is written to ``recipes/sire/meta.yaml``. You can (optionally)
-edit the pins in this file too, if you want to do some fine-tuning.
-
-.. note::
-
-   You may need to edit the recipe to fix version inconsistencies.
-   This is especially the case for ``rdkit`` - you need to to make
-   sure that if you specify a version for ``rdkit`` in your
-   ``environment.yml`` that you also use the same version
-   for the ``rdkit-devel`` package.
-
-E. Building the package
+C. Generate the recipe
 -----------------------
 
-You can now run ``conda-build`` to create the package.
+Generate the rattler-build recipe from the ``pixi.toml`` dependency
+definitions:
 
 .. code-block:: bash
 
-   $ conda build -c conda-forge -c openbiosim/label/dev recipes/sire
+   $ python actions/generate_recipe.py --features bss emle
 
-This will take a while. At the end, it will print out the location of the
-sire conda package, e.g.
+This creates ``recipes/sire/recipe.yaml``. The ``--features`` flag controls
+which optional dependency groups are included. Omit features to build a
+lighter package:
 
-.. note::
+.. code-block:: bash
 
-   The above command assumes that you don't need any other channels included
-   to install all of the packages included in your ``environment.yml``.
-   The ``actions/update_recipe.py`` script will print out the correct
-   ``conda build`` command at the end, which includes any extra
-   channels that are needed.
+   $ python actions/generate_recipe.py              # core only
+   $ python actions/generate_recipe.py --features bss   # core + BioSimSpace
 
-::
+You can edit the generated ``recipe.yaml`` to further customise the
+dependency pins if needed.
 
-   # To have conda build upload to anaconda.org automatically, use
-   # conda config --set anaconda_upload yes
-   anaconda upload \
-       /path/to/miniforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_25.tar.bz2
-   anaconda_upload is not set.  Not uploading wheels: []
+D. Build the package
+---------------------
 
-   INFO :: The inputs making up the hashes for the built packages are as follows:
-   {
-     "sire-2023.3.0-py310hf95ea87_25": {
-       "recipe": {
-         "c_compiler": "clang",
-         "cxx_compiler": "clangxx",
-         "numpy": "1.22",
-         "target_platform": "osx-64"
-       }
-     }
-   }
+.. code-block:: bash
 
-In this case, you can see that the package is the file
-``/path/to/miniforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_25.tar.bz2``.
+   $ rattler-build build --recipe recipes/sire -c conda-forge -c openbiosim/label/dev
 
-Copy this conda package to wherever you need (e.g. into a channel, upload
-to conda, etc.).
+This will take a while. The built package will be placed in the ``output/``
+directory.
+
+You can then install it directly or upload it to a conda channel.
 
 .. note::
 
    A full set of tests will be run on the package after it has been built.
-   Some of these tests may fail if you have edited the recipe to remove
-   some of the dependencies. If this happens, you can decide to ignore
-   the tests, e.g. by removing them from the conda recipe (``meta.yml``)
-   or by just copying the file that is produced and has been placed into
-   the ``conda-bld/broken`` directory.
-
-You can then install it, either via the channel you've uploaded to, or by
-directly running ``conda install`` on the package file itself.
+   Some tests may fail if you have removed dependencies. If this happens,
+   you can edit the generated ``recipe.yaml`` to remove or adjust the
+   test section.
 

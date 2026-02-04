@@ -1,23 +1,20 @@
-"""l
+"""
 Installation script for Sire
 
 This assumes that the python that is used to execute this script
-is the conda / miniconda / miniforge environment into
-which you want to install Sire.
+is within a conda / pixi environment that already has all of the
+required dependencies installed. Use pixi to create the environment
+before running this script, e.g.:
+
+    pixi install -e dev
 
 USAGE:
 
-    python setup.py install_requires   : Will install all of the dependencies
+    python setup.py build              : Compile sire (takes a long time!)
 
-    python setup.py build              : Will install requires and will then
-                                         compile sire (takes a long time!)
-
-    python setup.py install            : Will build sire and will then install
+    python setup.py install            : Will build sire and then install
 
     python setup.py install_module     : Will only install the Python module
-
-You can use `--skip-deps` to skip the installation of the conda dependencies
-You can use `--skip-build` to skip the building of the corelib and wrappers
 """
 
 import glob
@@ -69,10 +66,6 @@ try:
 except Exception:
     total_memory_gb = None
 
-# Debug - we need to print out all of the environment variables
-# for key, value in os.environ.items():
-#     print(f"{key}\n{value}\n")
-
 # We can only run this script from the sire directory
 curdir = os.path.abspath(".")
 
@@ -80,56 +73,38 @@ if os.path.abspath(os.path.dirname(sys.argv[0])) != curdir:
     print("You can only run this script from the sire directory")
     sys.exit(-1)
 
-# We need to import the 'parse_requirements' function to get the list
-# of requirements - this will be in the 'actions' directory
-sys.path.insert(0, os.path.join(curdir, "actions"))
-
-# We need to verify that this is a Python that is part of a
-# conda installation
-
+# Detect the environment prefix (conda or pixi)
 if "PREFIX" in os.environ and "BUILD_PREFIX" in os.environ:
-    print("This a build initiated by conda-build")
+    print("This a build initiated by conda-build or rattler-build")
     conda_base = os.path.abspath(os.environ["PREFIX"])
     print(f"Setting conda-base to {conda_base}")
 else:
-    # Find the path to the conda executable
+    # Find the prefix from the Python executable
     conda_base = os.path.abspath(os.path.dirname(sys.executable))
 
     if os.path.basename(conda_base) == "bin":
         conda_base = os.path.dirname(conda_base)
-
-python_exe = None
-conda = None
-
-if "CONDA_EXE" in os.environ:
-    conda = os.environ["CONDA_EXE"]
-else:
-    conda = None
 
 if "CONDA_DEFAULT_ENV" in os.environ:
     conda_env = os.environ["CONDA_DEFAULT_ENV"]
 else:
     conda_env = None
 
+python_exe = None
+
 if os.path.exists(os.path.join(conda_base, "python.exe")):
     # Windows
     conda_bin = os.path.join(conda_base, "Library", "bin")
     python_exe = os.path.join(conda_base, "python.exe")
-
-    if conda is None:
-        conda = os.path.join(conda_base, "Scripts", "conda.exe")
 elif os.path.exists(os.path.join(conda_base, "bin", "python")):
     # MacOS and Linux
     conda_bin = os.path.join(conda_base, "bin")
     python_exe = os.path.join(conda_bin, "python")
-
-    if conda is None:
-        conda = os.path.join(conda_bin, "conda")
 else:
     print(
         "Cannot find a 'python' binary in directory '%s'. "
         "Are you running this script using the python executable "
-        "from a valid miniconda or anaconda installation?" % conda_base
+        "from a valid conda or pixi environment?" % conda_base
     )
     sys.exit(-1)
 
@@ -250,33 +225,6 @@ def parse_args():
         "(defaults to the number of CPU cores used for compiling corelib)",
     )
     parser.add_argument(
-        "--install-bss-deps",
-        action="store_true",
-        default=False,
-        help="Install BioSimSpace's dependencies too. This helps ensure "
-        "compatibility between Sire's and BioSimSpace's dependencies.",
-    )
-    parser.add_argument(
-        "--install-emle-deps",
-        action="store_true",
-        default=False,
-        help="Install emle-engine's dependencies too.",
-    )
-    parser.add_argument(
-        "--skip-deps",
-        action="store_true",
-        default=False,
-        help="Skip the installation of the dependencies (only use if you know "
-        "that they are already installed)",
-    )
-    parser.add_argument(
-        "--skip-dep",
-        action="append",
-        help="List of dependencies to skip when installing. This is useful when "
-        "you know that a particular dependency is already installed or "
-        "it is uninstallable on your system.",
-    )
-    parser.add_argument(
         "--skip-build",
         action="store_true",
         default=False,
@@ -294,216 +242,12 @@ def parse_args():
     parser.add_argument(
         "action",
         nargs="*",
-        help="Should be one of 'install_requires', 'build', 'install' or 'install_module'.\n"
-        "\n [install_requires] : Just install the conda dependencies.\n"
-        " [build] : 'install_requires' plus compile and install corelib, and just compile the wrappers.\n"
+        help="Should be one of 'build', 'install' or 'install_module'.\n"
+        "\n [build] : Compile and install corelib, and just compile the wrappers.\n"
         " [install] : 'build' plus install the wrappers and install the module.\n"
-        " [install_module] : Just install the module (no compilation or conda dependencies).",
+        " [install_module] : Just install the module (no compilation).",
     )
     return parser.parse_args()
-
-
-_installed_deps = None
-
-
-def _get_installed(conda: str):
-    """Return the list of installed conda dependencies"""
-    global _installed_deps
-
-    if _installed_deps is None:
-        p = subprocess.Popen([conda, "list"], stdout=subprocess.PIPE)
-        _installed_deps = str(p.stdout.read())
-
-    return _installed_deps
-
-
-def is_installed(dep: str, conda: str) -> bool:
-    """Return whether or not the passed dependency is installed"""
-    installed = _get_installed(conda=conda)
-    return installed.find(dep) != -1
-
-
-def _add_to_dependencies(dependencies, lines):
-    import re
-
-    for line in lines:
-        line = line.lstrip().rstrip()
-
-        words = re.split("[<>]*=", line)
-
-        if len(words) > 0:
-            package = words[0]
-            dependencies[package] = line
-
-
-_is_conda_prepped = False
-
-dependencies_to_skip = []
-
-
-def conda_install(
-    dependencies, install_bss_reqs=False, install_emle_reqs=False, yes=True
-):
-    """Install the passed list of dependencies using conda"""
-
-    conda_exe = conda
-
-    global _is_conda_prepped
-
-    if not _is_conda_prepped:
-        if install_bss_reqs:
-            cmd = "%s config --prepend channels openbiosim/label/dev" % conda_exe
-            print("Activating openbiosim channel channel using: '%s'" % cmd)
-            status = subprocess.run(cmd.split())
-            if status.returncode != 0:
-                print("Failed to add openbiosim channel!")
-                sys.exit(-1)
-
-        print("\nSetting channel priorities to favour conda-forge")
-        cmd = "%s config --prepend channels conda-forge" % conda_exe
-        print("Activating conda-forge channel using: '%s'" % cmd)
-        status = subprocess.run(cmd.split())
-        if status.returncode != 0:
-            print("Failed to add conda-forge channel!")
-            sys.exit(-1)
-
-        cmd = "%s config --set channel_priority strict" % conda_exe
-        print("Setting channel priority to strict using: '%s'" % cmd)
-        status = subprocess.run(cmd.split())
-        if status.returncode != 0:
-            print("Failed to set channel priority!")
-            sys.exit(-1)
-
-        _is_conda_prepped = True
-
-    conda_install = [conda, "install"]
-
-    if yes:
-        conda_install.append("--yes")
-
-    deps = []
-
-    global dependencies_to_skip
-
-    try:
-        if len(dependencies_to_skip) > 0:
-            print(f"Skipping the following dependencies: {dependencies_to_skip}")
-    except Exception:
-        dependencies_to_skip = []
-
-    for dependency in dependencies:
-        # remove any quotes from the dependency
-        dependency = dependency.replace('"', "")
-
-        if dependency == "python" or is_installed(dependency, conda_exe):
-            # no need to install again
-            continue
-
-        skip_dep = False
-
-        for skip in dependencies_to_skip:
-            if dependency.find(skip) != -1:
-                skip_dep = True
-                break
-
-        if skip_dep:
-            print(f"Skipping {dependency}")
-            continue
-
-        # remove duplicates
-        if dependency not in deps:
-            deps.append(dependency)
-
-    dependencies = deps
-
-    cmd = [*conda_install, *dependencies]
-    print("\nInstalling packages using:\n\n%s\n\n" % " ".join(cmd))
-    status = subprocess.run(cmd)
-
-    if status.returncode != 0:
-        print("Something went wrong installing dependencies!")
-        print("If the python or conda executables were updated")
-        print("in the last install, then this can prevent them")
-        print("from running again. Please re-execute this script.")
-        sys.exit(-1)
-
-    # Install emle-engine.
-    if install_emle_reqs:
-        cmd = [
-            "pip",
-            "install",
-            "git+https://github.com/chemle/emle-engine.git",
-        ]
-        status = subprocess.run(cmd)
-        if status.returncode != 0:
-            print("Something went wrong installing emle-engine!")
-            sys.exit(-1)
-
-
-def install_requires(install_bss_reqs=False, install_emle_reqs=False, yes=True):
-    """Installs all of the dependencies. This can safely be called
-    multiple times, as it will cache the result to prevent future
-    installs taking too long
-    """
-    print(f"Installing requirements for {platform_string}")
-
-    if not os.path.exists(conda):
-        print("\nSire can only be installed into a conda or miniconda environment.")
-        print(
-            "Please install conda, miniconda, miniforge or similar, then "
-            "activate the conda environment, then rerun this installation "
-            "script."
-        )
-        sys.exit(-1)
-
-    try:
-        import pip_requirements_parser as _pip_requirements_parser
-        from parse_requirements import parse_requirements
-    except Exception:
-        # this didn't import - maybe we are missing pip-requirements-parser
-        print("Installing pip-requirements-parser")
-        conda_install(
-            ["pip-requirements-parser"],
-            install_bss_reqs,
-            install_emle_reqs=False,
-            yes=yes,
-        )
-        try:
-            from parse_requirements import parse_requirements
-        except ImportError as e:
-            print("\n\n[ERROR] ** You need to install pip-requirements-parser")
-            print("Run `conda install -c conda-forge pip-requirements-parser\n\n")
-            raise e
-
-    try:
-        import pkg_resources
-    except Exception:
-        # this didn't import - we are missing setuptools
-        print("Installing setuptools")
-        conda_install(
-            ["setuptools"], install_bss_reqs, install_emle_reqs=False, yes=yes
-        )
-        try:
-            import pkg_resources
-        except Exception:
-            print("\n\n[ERROR] ** You need to install setuptools")
-            print("Run 'conda install -c conda-forge setuptools\n\n")
-            raise e
-
-    reqs = parse_requirements("requirements_host.txt")
-    build_reqs = parse_requirements("requirements_build.txt")
-
-    if install_bss_reqs:
-        bss_reqs = parse_requirements("requirements_bss.txt")
-        reqs = reqs + bss_reqs
-
-    if install_emle_reqs:
-        emle_reqs = parse_requirements("requirements_emle.txt")
-        reqs = reqs + emle_reqs
-
-    dependencies = build_reqs + reqs
-    conda_install(dependencies, install_bss_reqs, install_emle_reqs, yes=yes)
-    conda_install(dependencies, install_bss_reqs, yes=yes)
 
 
 def add_default_cmake_defs(cmake_defs, ncores):
@@ -586,10 +330,10 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
 
     # get the compilers
     if conda_build:
-        print("This is a conda build")
+        print("This is a conda/rattler build")
 
         if is_windows:
-            # Windiws: vcvars is activated, let CMake find the MSCV.
+            # Windows: vcvars is activated, let CMake find the MSVC.
             CXX = None
             CC = None
         else:
@@ -602,32 +346,20 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
             CXX = glob.glob(os.path.join(bindir, "clang++"))[0]
             CC = glob.glob(os.path.join(bindir, "clang"))[0]
         except Exception:
-            conda_install(["clang", "clangxx"], False, yes=True)
-            try:
-                CXX = glob.glob(os.path.join(bindir, "clang++"))[0]
-                CC = glob.glob(os.path.join(bindir, "clang"))[0]
-            except Exception:
-                print("Cannot find the conda clang++ binaries!")
-                print("Please install these, e.g. via")
-                print("conda install clang clangxx")
-                sys.exit(-1)
+            print("Cannot find the conda clang++ binaries!")
+            print("Please ensure your environment has clang and clangxx installed.")
+            print("If using pixi, run: pixi install -e dev")
+            sys.exit(-1)
 
     elif is_linux:
         try:
             CXX = glob.glob(os.path.join(bindir, "*-g++"))[0]
             CC = glob.glob(os.path.join(bindir, "*-gcc"))[0]
         except Exception:
-            # Need this version of gcc to stay compatible with conda-forge
-            # (i.e. gemmi needs the exact same compiler version)
-            conda_install(["gcc==12.3.0", "gxx==12.3.0"], False, yes=True)
-            try:
-                CXX = glob.glob(os.path.join(bindir, "*-g++"))[0]
-                CC = glob.glob(os.path.join(bindir, "*-gcc"))[0]
-            except Exception:
-                print("Cannot find the conda g++ binaries!")
-                print("Please install these, e.g. via")
-                print("conda install gcc gxx")
-                sys.exit(-1)
+            print("Cannot find the conda g++ binaries!")
+            print("Please ensure your environment has gcc and gxx installed.")
+            print("If using pixi, run: pixi install -e dev")
+            sys.exit(-1)
 
     if CC is not None and CXX is not None:
         print(f"Using compilers {CC} | {CXX}")
@@ -923,17 +655,8 @@ if __name__ == "__main__":
     args = parse_args()
 
     if len(args.action) != 1:
-        print("Please use either 'install_requires', 'build' or 'install'")
+        print("Please use either 'build', 'install' or 'install_module'")
         sys.exit(-1)
-
-    install_bss = args.install_bss_deps
-    install_emle = args.install_emle_deps
-
-    if install_emle and is_windows:
-        raise NotImplementedError("EMLE is current not supported on Windows")
-
-    if args.skip_dep is not None:
-        dependencies_to_skip = args.skip_dep
 
     action = args.action[0]
 
@@ -946,11 +669,6 @@ if __name__ == "__main__":
             os.environ["INSTALL_NAME_TOOL"] = "install_name_tool"
 
     if action == "install":
-        if not (args.skip_deps or args.skip_build):
-            install_requires(
-                install_bss_reqs=install_bss, install_emle_reqs=install_emle
-            )
-
         if not args.skip_build:
             build(
                 ncores=args.ncores[0],
@@ -962,9 +680,6 @@ if __name__ == "__main__":
         install(ncores=args.ncores[0], npycores=args.npycores[0])
 
     elif action == "build":
-        if not args.skip_deps:
-            install_requires(install_bss_reqs=install_bss)
-
         build(
             ncores=args.ncores[0],
             npycores=args.npycores[0],
@@ -972,17 +687,12 @@ if __name__ == "__main__":
             pydefs=args.wrapper,
         )
 
-    elif action == "install_requires":
-        install_requires(
-            install_bss_reqs=install_bss, install_emle_reqs=install_emle, yes=False
-        )
-
     elif action == "install_module":
         install_module(ncores=args.ncores[0])
 
     else:
         print(
-            f"Unrecognised action '{action}'. Please use 'install_requires', "
+            f"Unrecognised action '{action}'. Please use "
             "'build', 'install' or 'install_module'"
         )
 
