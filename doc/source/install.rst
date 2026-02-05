@@ -317,13 +317,13 @@ install all required dependencies, including compilers:
 Several environments are available depending on your needs:
 
 * ``default`` - core sire dependencies only
-* ``bss`` - include `BioSimSpace <https://biosimspace.org>`__ compatibility dependencies
+* ``obs`` - include downstream OpenBioSim package dependencies (e.g. BioSimSpace)
 * ``emle`` - include EMLE engine dependencies
-* ``full`` - include both BSS and EMLE dependencies
+* ``full`` - include both OBS and EMLE dependencies
 * ``dev`` - all of the above plus test dependencies
 
 If you plan to install `BioSimSpace <https://biosimspace.org>`__ on
-top of :mod:`sire`, use at least the ``bss`` or ``dev`` environment.
+top of :mod:`sire`, use at least the ``obs`` or ``dev`` environment.
 This ensures that incompatible versions of shared dependencies are not
 accidentally installed.
 
@@ -404,7 +404,7 @@ definitions:
 
 .. code-block:: bash
 
-   $ python actions/generate_recipe.py --features bss emle
+   $ python actions/generate_recipe.py --features obs emle
 
 This creates ``recipes/sire/recipe.yaml``. The ``--features`` flag controls
 which optional dependency groups are included. Omit features to build a
@@ -413,7 +413,7 @@ lighter package:
 .. code-block:: bash
 
    $ python actions/generate_recipe.py              # core only
-   $ python actions/generate_recipe.py --features bss   # core + BioSimSpace
+   $ python actions/generate_recipe.py --features obs   # core + BioSimSpace
 
 You can edit the generated ``recipe.yaml`` to further customise the
 dependency pins if needed.

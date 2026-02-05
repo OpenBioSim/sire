@@ -133,7 +133,7 @@ A small word of warning, the compilation can easily take over an hour!
 Other pixi environments are available depending on your needs:
 
 * ``pixi install -e default`` - core sire dependencies only
-* ``pixi install -e bss`` - include BioSimSpace compatibility dependencies
+* ``pixi install -e obs`` - include downstream OpenBioSim package dependencies
 * ``pixi install -e emle`` - include EMLE engine dependencies
 * ``pixi install -e dev`` - all of the above plus test dependencies
 

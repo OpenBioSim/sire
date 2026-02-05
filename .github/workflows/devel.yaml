@@ -54,7 +54,7 @@ jobs:
           build-args: --help
       #
       - name: Generate recipe
-        run: python ${{ github.workspace }}/actions/generate_recipe.py --features bss emle
+        run: python ${{ github.workspace }}/actions/generate_recipe.py --features obs emle
       #
       - name: Write Python variant config
         shell: bash

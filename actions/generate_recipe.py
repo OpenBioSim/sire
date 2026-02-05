@@ -5,7 +5,7 @@ dependencies) and generates a rattler-build recipe.yaml with the
 appropriate if/then conditional blocks for platform-specific dependencies.
 
 Usage:
-    python actions/generate_recipe.py [--features bss emle]
+    python actions/generate_recipe.py [--features obs emle]
 
 The --features flag controls which optional dependency groups are
 included in the host section of the recipe.
@@ -66,7 +66,7 @@ def parse_args():
         "--features",
         nargs="*",
         default=[],
-        help="Optional feature groups to include (e.g. bss emle)",
+        help="Optional feature groups to include (e.g. obs emle)",
     )
     parser.add_argument(
         "--pixi-toml",

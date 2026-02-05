@@ -52,17 +52,18 @@ kartograf = ">=1.0.0"
 pybind11 = "==2.11.1"
 
 # =============================================================================
-# BSS (BioSimSpace) feature
-# These aren't needed by Sire, but allow it to be built in a self-consistent
-# way so that BioSimSpace can be installed on top of it.
+# OBS (OpenBioSim) feature
+# Dependencies for downstream OpenBioSim packages (biosimspace, ghostly, loch, somd2).
 # =============================================================================
-[feature.bss.dependencies]
+[feature.obs.dependencies]
 openmmtools = ">=0.21.5"
 configargparse = "*"
 ipywidgets = "*"
 kcombu_bss = "*"
+loguru = "*"
 lomap2 = "*"
 nglview = "*"
+numba = "*"
 openff-interchange-base = "*"
 openff-toolkit-base = "*"
 parmed = "*"
@@ -71,26 +72,30 @@ pydot = "*"
 pygtail = "*"
 pyyaml = "*"
 
-[feature.bss.target.linux-64.dependencies]
+[feature.obs.target.linux-64.dependencies]
 ambertools = ">=22"
 gromacs = "*"
 alchemlyb = "*"
 mdtraj = "*"
 mdanalysis = "*"
+# loch/somd2 deps (pycuda/pyopencl only available on linux-64)
+pyopencl = "*"
+pycuda = "*"
+nvidia-ml-py = "*"
 
-[feature.bss.target.linux-aarch64.dependencies]
+[feature.obs.target.linux-aarch64.dependencies]
 ambertools = ">=22"
 gromacs = "*"
 # alchemlyb, mdtraj, mdanalysis not available on linux-aarch64
 
-[feature.bss.target.osx-arm64.dependencies]
+[feature.obs.target.osx-arm64.dependencies]
 ambertools = ">=22"
 # gromacs not available on osx-arm64
 alchemlyb = "*"
 mdtraj = "*"
 mdanalysis = "*"
 
-[feature.bss.target.win-64.dependencies]
+[feature.obs.target.win-64.dependencies]
 # ambertools and gromacs not available on Windows
 alchemlyb = "*"
 mdtraj = "*"
@@ -150,8 +155,8 @@ kartograf = ">=1.0.0"
 # =============================================================================
 [environments]
 default = []
-bss = ["bss"]
+obs = ["obs"]
 emle = ["emle"]
-full = ["bss", "emle"]
+full = ["obs", "emle"]
 test = ["test"]
-dev = ["bss", "emle", "test"]
+dev = ["obs", "emle", "test"]
