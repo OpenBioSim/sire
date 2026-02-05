@@ -33,6 +33,10 @@ libtool = "*"
 sysroot_linux-64 = "==2.17"
 kartograf = ">=1.0.0"
 
+# Host dependencies for local source builds (not used by generate_recipe.py)
+[target.linux-64.host-dependencies]
+sysroot_linux-64 = ">=2.34"
+
 [target.linux-aarch64.dependencies]
 make = "*"
 libtool = "*"
