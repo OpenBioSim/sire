@@ -16,6 +16,7 @@ def test_charge():
 
     from math import isclose
 
+    import os
     import tempfile
 
     # SDF format has a weird mapping for formal charge. Here the keys are
@@ -34,12 +35,15 @@ def test_charge():
     for c0, c1 in zip(mol.property("formal_charge").to_list(), mapping.values()):
         assert isclose(c0.value(), c1)
 
-    # Write back to file.
-    with tempfile.NamedTemporaryFile(suffix=".sdf") as f:
-        sr.save(mol, f.name)
+    # Write back to file. Use TemporaryDirectory to avoid Windows file locking
+    # issues with NamedTemporaryFile.
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = os.path.join(tmpdir, "test.sdf")
+        sr.save(mol, path)
 
         # Read back in and check that the charges are still correct.
-        for c0, c1 in zip(mol.property("formal_charge").to_list(), mapping.values()):
+        mol2 = sr.load(path)[0]
+        for c0, c1 in zip(mol2.property("formal_charge").to_list(), mapping.values()):
             assert isclose(c0.value(), c1)
 
 
