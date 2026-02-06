@@ -24,7 +24,6 @@ qt-main = "*"
 rich = "*"
 tbb = "*"
 tbb-devel = "*"
-gemmi = ">=0.6.4,<0.7.0"
 
 # Unix build tools
 [target.linux-64.dependencies]
@@ -32,6 +31,7 @@ make = "*"
 libtool = "*"
 sysroot_linux-64 = "==2.17"
 kartograf = ">=1.0.0"
+gemmi = ">=0.6.4,<0.7.0"
 
 # Host dependencies for local source builds (not used by generate_recipe.py)
 [target.linux-64.host-dependencies]
@@ -52,6 +52,7 @@ cxx-compiler = "*"
 make = "*"
 libtool = "*"
 kartograf = ">=1.0.0"
+gemmi = ">=0.6.4,<0.7.0"
 
 [target.osx-arm64.host-dependencies]
 c-compiler = "*"
@@ -60,6 +61,7 @@ cxx-compiler = "*"
 # Windows needs a pinned pybind11 version
 [target.win-64.dependencies]
 pybind11 = "==2.11.1"
+gemmi = ">=0.6.4,<0.7.0"
 
 [target.win-64.host-dependencies]
 c-compiler = "*"
@@ -102,9 +104,8 @@ pycuda = "*"
 nvidia-ml-py = "*"
 
 [feature.obs.target.linux-aarch64.dependencies]
-ambertools = ">=22"
 gromacs = "*"
-# alchemlyb, mdtraj, mdanalysis not available on linux-aarch64
+# ambertools, alchemlyb, mdtraj, mdanalysis not available on linux-aarch64
 
 [feature.obs.target.osx-arm64.dependencies]
 ambertools = ">=22"
@@ -135,9 +136,8 @@ nnpops = "*"
 pytorch = "*"
 
 [feature.emle.target.linux-aarch64.dependencies]
-ambertools = ">=22"
 pytorch = "*"
-# deepmd-kit, nnpops not available on linux-aarch64
+# ambertools, deepmd-kit, nnpops not available on linux-aarch64
 
 [feature.emle.target.osx-arm64.dependencies]
 ambertools = ">=22"
@@ -155,16 +155,20 @@ xtb-python = "*"  # Note: not compatible with Python 3.12
 [feature.test.dependencies]
 pytest = "*"
 rdkit = ">=2023.0.0"
-gemmi = ">=0.6.4,<0.7.0"
 
 [feature.test.target.linux-64.dependencies]
 kartograf = ">=1.0.0"
+gemmi = ">=0.6.4,<0.7.0"
 
 [feature.test.target.linux-aarch64.dependencies]
 kartograf = ">=1.0.0"
 
 [feature.test.target.osx-arm64.dependencies]
 kartograf = ">=1.0.0"
+gemmi = ">=0.6.4,<0.7.0"
+
+[feature.test.target.win-64.dependencies]
+gemmi = ">=0.6.4,<0.7.0"
 
 # kartograf excluded from Windows test deps
 
