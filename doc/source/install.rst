@@ -327,6 +327,12 @@ top of :mod:`sire`, use at least the ``obs`` or ``dev`` environment.
 This ensures that incompatible versions of shared dependencies are not
 accidentally installed.
 
+Any additional startup commands can be specified in the ``pixi.sh`` file 
+in the root of the sire repository. This file is automatically sourced when
+you activate the pixi environment, so you can add any additional environment
+variables or startup commands here. (Note that you might see a warning if
+you haven't created this file.)
+
 Compile and install
 -------------------
 

@@ -137,6 +137,12 @@ Other pixi environments are available depending on your needs:
 * ``pixi install -e emle`` - include EMLE engine dependencies
 * ``pixi install -e dev`` - all of the above plus test dependencies
 
+Any additional startup commands can be specified in the ``pixi.sh`` file 
+in the root of the sire repository. This file is automatically sourced when
+you activate the pixi environment, so you can add any additional environment
+variables or startup commands here. (Note that you might see a warning if
+you haven't created this file.)
+
 Support and Development
 =======================
 
