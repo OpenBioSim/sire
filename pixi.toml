@@ -153,6 +153,7 @@ xtb-python = "*"  # Note: not compatible with Python 3.12
 # Test feature
 # =============================================================================
 [feature.test.dependencies]
+black = "*"
 pytest = "*"
 rdkit = ">=2023.0.0"
 
