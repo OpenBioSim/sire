@@ -318,7 +318,7 @@ Several environments are available depending on your needs:
 
 * ``default`` - core sire dependencies only
 * ``obs`` - include downstream OpenBioSim package dependencies (e.g. BioSimSpace)
-* ``emle`` - include EMLE engine dependencies
+* ``emle`` - include `emle-engine <https://github.com/chemle/emle-engine>`__ dependencies
 * ``full`` - include both OBS and EMLE dependencies
 * ``dev`` - all of the above plus test dependencies
 

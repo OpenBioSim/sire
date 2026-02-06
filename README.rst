@@ -134,7 +134,7 @@ Other pixi environments are available depending on your needs:
 
 * ``pixi install -e default`` - core sire dependencies only
 * ``pixi install -e obs`` - include downstream OpenBioSim package dependencies
-* ``pixi install -e emle`` - include EMLE engine dependencies
+* ``pixi install -e emle`` - include `emle-engine <https://github.com/chemle/emle-engine>`__ dependencies
 * ``pixi install -e dev`` - all of the above plus test dependencies
 
 Any additional startup commands can be specified in the ``pixi.sh`` file 
