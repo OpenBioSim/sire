@@ -287,13 +287,12 @@ def make_cmd(ncores, install=False):
 def _get_build_ext():
     if "CONDA_BUILD" in os.environ and os.environ["CONDA_BUILD"] == "1":
         return "conda_build"
+    elif "PIXI_ENVIRONMENT_NAME" in os.environ:
+        return os.environ["PIXI_ENVIRONMENT_NAME"]
+    elif conda_env is not None:
+        return conda_env
     else:
-        if conda_env is not None:
-            ext = "_" + conda_env.replace(" ", "_").replace(".", "_")
-        else:
-            ext = ""
-
-        return os.path.basename(conda_base.replace(" ", "_").replace(".", "_")) + ext
+        return os.path.basename(conda_base.replace(" ", "_").replace(".", "_"))
 
 
 def _get_bin_dir():
