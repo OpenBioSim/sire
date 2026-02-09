@@ -35,6 +35,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Add automatic parametrisation for Morse potential restraints when bonds are
   being created in alchemical simulations.
 
+* Switch build system to ``pixi`` and ``rattler-build``.
+
 `2025.3.0 <https://github.com/openbiosim/sire/compare/2025.2.0...2025.3.0>`__ - November 2025
 ---------------------------------------------------------------------------------------------
 

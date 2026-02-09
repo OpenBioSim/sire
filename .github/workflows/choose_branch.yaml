@@ -2,8 +2,8 @@ name: Release Branch
 
 # Note that push and pull-request builds are automatically
 # now skipped by GitHub if
-# [skip ci], [ci skip], [no ci], [skip actions], or [actions skip]
-# are in the commit message. We don't need to check for this ourselves.
+# [skip ci], [ci skip], [no ci], [skip actions], or [actions skip]
+# are in the commit message. We don't need to check for this ourselves.
 
 on:
   workflow_dispatch:
@@ -35,7 +35,7 @@ jobs:
             python-version: "3.10"
           - platform:
               { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
-            python-version: "3.12"  # MacOS can't run 3.12 yet...
+            python-version: "3.12"  # MacOS can't run 3.12 yet...
           - platform: { name: "windows", os: "windows-latest", shell: "pwsh" }
             python-version: "3.11"
     environment:
@@ -50,31 +50,32 @@ jobs:
       REPO: "${{ github.repository }}"
     steps:
       #
-      - uses: conda-incubator/setup-miniconda@v3
+      - uses: actions/checkout@v4
         with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-          activate-environment: sire_build
-          miniforge-version: latest
+          ref: ${{ github.event.inputs.branch }}
       #
-      - name: Clone the desired branch
-        run: git clone https://github.com/${{ env.REPO }} -b ${{ github.event.inputs.branch }} sire
+      - name: Install rattler-build
+        uses: prefix-dev/rattler-build-action@v0.2.34
+        with:
+          tool-version: latest
+          build-args: --help
       #
-      - name: Setup Conda
-        run: conda install -y -c conda-forge conda-build boa anaconda-client packaging pip-requirements-parser
+      - name: Generate recipe
+        run: python ${{ github.workspace }}/actions/generate_recipe.py --features obs emle
       #
-      - name: Update Conda recipe
-        run: python ${{ github.workspace }}/sire/actions/update_recipe.py
+      - name: Write Python variant config
+        shell: bash
+        run: printf 'python:\n  - "${{ matrix.python-version }}"\n' > "${{ github.workspace }}/python_variant.yaml"
       #
-      - name: Prepare build location
-        run: mkdir ${{ github.workspace }}/build
+      - name: Build package using rattler-build
+        shell: bash
+        run: rattler-build build --recipe "${{ github.workspace }}/recipes/sire" -c conda-forge -c openbiosim/label/dev --variant-config "${{ github.workspace }}/python_variant.yaml"
       #
-      - name: Build Conda package using conda build
-        run: conda build -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
+      - name: Install anaconda-client
+        run: python -m pip install anaconda-client
       #
-      - name: Upload Conda package
-        # Maybe add the logic here that this is a dev package?
-        run: python ${{ github.workspace }}/sire/actions/upload_package.py
+      - name: Upload package
+        run: python ${{ github.workspace }}/actions/upload_package.py
         env:
-          SRC_DIR: ${{ github.workspace }}/sire
+          SRC_DIR: ${{ github.workspace }}
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}

@@ -104,59 +104,44 @@ Installation from source
 
 However, as you are here, it is likely you want to download the latest,
 greatest version of the code, which you will need to compile. To compile
-sire,
-you need a git client to download the source, and a working internet connection
-(needed by the sire compilation scripts to download additional dependencies).
+sire, you need a git client to download the source and
+`pixi <https://pixi.sh>`__ to manage the build environment.
 
-First, you need to create and activate a conda environment, e.g.
-
-.. code-block:: bash
-
-    conda create -n openbiosim-dev "python<3.12"
-    conda activate openbiosim-dev
-
-Next, you need to install the Sire build dependencies.
+First, clone the sire source code and change into the directory:
 
 .. code-block:: bash
-
-    conda install cmake pip-requirements-parser
-
-You will also need to install compilers, e.g. on Linux use
-
-.. code-block:: bash
-
-    conda install gcc gxx
-
-on MacOS use
-
-.. code-block:: bash
-
-    conda install clang clangxx
-
-and on Windows use
-
-.. code-block:: bash
-
-    conda install conda-build
-
-Next, you can clone the sire source code and compile and install sire::
 
     git clone https://github.com/OpenBioSim/sire
     cd sire
+
+Next, use pixi to create and activate the development environment. This
+will install all required dependencies, including compilers:
+
+.. code-block:: bash
+
+    pixi install -e dev
+    pixi shell -e dev
+
+Now compile and install sire:
+
+.. code-block:: bash
+
     python setup.py install
 
 A small word of warning, the compilation can easily take over an hour!
 
-The above will compile sire in your existing conda environment.
+Other pixi environments are available depending on your needs:
 
-If you plan to build `BioSimSpace <https://github.com/openbiosim/biosimspace>`__
-on top of sire, then you will need to resolve BioSimSpace's dependencies at
-the time sire is installed to ensure that it is built in a self-consistent way.
-This can be achieved as follows:
+* ``pixi install -e default`` - core sire dependencies only
+* ``pixi install -e obs`` - include downstream OpenBioSim package dependencies
+* ``pixi install -e emle`` - include `emle-engine <https://github.com/chemle/emle-engine>`__ dependencies
+* ``pixi install -e dev`` - all of the above plus test dependencies
 
-.. code-block:: bash
-
-    python setup.py --install-bss-deps install
+Any additional startup commands can be specified in the ``pixi.sh`` file 
+in the root of the sire repository. This file is automatically sourced when
+you activate the pixi environment, so you can add any additional environment
+variables or startup commands here. (Note that you might see a warning if
+you haven't created this file.)
 
 Support and Development
 =======================

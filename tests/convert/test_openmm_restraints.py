@@ -60,8 +60,7 @@ def test_openmm_distance_restraints(ala_mols, openmm_platform):
 
     # check that we get the same result using bond restraints
     restraints2 = sr.restraints.bond(
-        mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A",
-        use_pbc=True
+        mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A", use_pbc=True
     )
 
     assert len(restraints2) == 1

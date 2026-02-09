@@ -36,6 +36,7 @@ def test_morse_potential_restraint_annihiliation_auto_param(cyclopentane_cyclohe
     assert restraints[0].k().value() == pytest.approx(228.89, rel=0.1)
     assert restraints[0].de().value() == 25.0
 
+
 def test_morse_potential_restraint_creation_auto_param(propane_cyclopropane):
     """Tests that morse_potential restraints can be set up correctly with automatic parametrisation
     when a bond is to be created."""
