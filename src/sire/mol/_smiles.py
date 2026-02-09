@@ -292,7 +292,7 @@ if _has_rdkit:
         if filename is not None:
             import os
 
-            (basename, format) = os.path.splitext(os.path.abspath(filename))
+            basename, format = os.path.splitext(os.path.abspath(filename))
 
             while format.startswith("."):
                 format = format[1:]
@@ -509,7 +509,7 @@ if _has_rdkit:
         if filename is not None:
             import os
 
-            (basename, format) = os.path.splitext(os.path.abspath(filename))
+            basename, format = os.path.splitext(os.path.abspath(filename))
 
             while format.startswith("."):
                 format = format[1:]
