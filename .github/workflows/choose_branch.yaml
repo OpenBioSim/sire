@@ -53,6 +53,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
       #
       - name: Install rattler-build
         uses: prefix-dev/rattler-build-action@v0.2.34
