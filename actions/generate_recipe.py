@@ -117,7 +117,23 @@ def get_git_info(srcdir):
             if "-" in branch:
                 raise RuntimeError("Cannot perform a tag build from a non-tag commit!")
 
-    return remote, branch
+    # Get the most recent tag for specifying the version in the recipe. If there are
+    # no tags, use "PR".
+    version = run_cmd(
+        f"git --git-dir={gitdir} --work-tree={srcdir} describe --tags --abbrev=0"
+    )
+    if not version:
+        version = "PR"
+
+    # Work out the build number as the number of commits since the most recent tag,
+    # or "0" if there are no commits.
+    build = run_cmd(
+        f"git --git-dir={gitdir} --work-tree={srcdir} rev-list --count {version}.."
+    )
+    if not build:
+        build = "0"
+
+    return remote, branch, version, build
 
 
 def load_pixi_toml(path):
@@ -210,7 +226,7 @@ def platform_conditional_block(platform, deps, indent=4):
     return lines
 
 
-def generate_recipe(data, features, git_remote, git_branch):
+def generate_recipe(data, features, git_remote, git_branch, git_version, git_number):
     """Generate the complete recipe.yaml content."""
     # Extract core (all-platform) dependencies
     core_deps = extract_deps(data, "dependencies")
@@ -278,7 +294,7 @@ def generate_recipe(data, features, git_remote, git_branch):
     # Package
     lines.append("package:")
     lines.append("  name: ${{ name }}")
-    lines.append("  version: ${{ env.get('GIT_DESCRIBE_TAG', default='PR') }}")
+    lines.append(f"  version: {git_version}")
     lines.append("")
 
     # Source
@@ -289,7 +305,7 @@ def generate_recipe(data, features, git_remote, git_branch):
 
     # Build
     lines.append("build:")
-    lines.append("  number: ${{ env.get('GIT_DESCRIBE_NUMBER', default='0') }}")
+    lines.append(f"  number: {git_number}")
     lines.append("")
 
     # Requirements
@@ -404,12 +420,16 @@ def main():
     print(f"Features: {args.features or '(none)'}")
 
     data = load_pixi_toml(pixi_path)
-    git_remote, git_branch = get_git_info(srcdir)
+    git_remote, git_branch, git_version, git_number = get_git_info(srcdir)
 
     print(f"Git remote: {git_remote}")
     print(f"Git branch: {git_branch}")
+    print(f"Git version: {git_version}")
+    print(f"Git build number: {git_number}")
 
-    recipe = generate_recipe(data, args.features, git_remote, git_branch)
+    recipe = generate_recipe(
+        data, args.features, git_remote, git_branch, git_version, git_number
+    )
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w") as f:
