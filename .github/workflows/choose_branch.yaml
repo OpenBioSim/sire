@@ -55,11 +55,14 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
           fetch-depth: 0
       #
-      - name: Install rattler-build
-        uses: prefix-dev/rattler-build-action@v0.2.34
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.4
         with:
-          tool-version: latest
-          build-args: --help
+          run-install: false
+      #
+      - name: Install rattler-build
+        shell: bash
+        run: pixi global install rattler-build
       #
       - name: Generate recipe
         run: python ${{ github.workspace }}/actions/generate_recipe.py --features obs emle
