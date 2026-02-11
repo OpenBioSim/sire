@@ -174,6 +174,13 @@ gemmi = ">=0.6.4,<0.7.0"
 # kartograf excluded from Windows test deps
 
 # =============================================================================
+# Lint feature (local development only, not included in recipes)
+# =============================================================================
+[feature.lint.dependencies]
+pre-commit = "*"
+ruff = "*"
+
+# =============================================================================
 # Environments
 # =============================================================================
 [environments]
@@ -182,7 +189,7 @@ obs = ["obs"]
 emle = ["emle"]
 full = ["obs", "emle"]
 test = ["test"]
-dev = ["obs", "emle", "test"]
+dev = ["obs", "emle", "test", "lint"]
 
 [activation]
 scripts = ["pixi.sh"]
