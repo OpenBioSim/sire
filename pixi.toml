@@ -97,9 +97,11 @@ gromacs = "*"
 alchemlyb = "*"
 mdtraj = "*"
 mdanalysis = "*"
-# loch (pycuda/pyopencl only available on linux-64)
+# loch
 pyopencl = "*"
 pycuda = "*"
+ocl-icd = "*"
+ocl-icd-system = "*"
 # somd2
 nvidia-ml-py = "*"
 
@@ -113,12 +115,20 @@ ambertools = ">=22"
 alchemlyb = "*"
 mdtraj = "*"
 mdanalysis = "*"
+# loch
+pyopencl = "*"
+khronos-opencl-icd-loader = "*"
+ocl_icd_wrapper_apple = "*"
 
 [feature.obs.target.win-64.dependencies]
 # ambertools and gromacs not available on Windows
 alchemlyb = "*"
 mdtraj = "*"
 mdanalysis = "*"
+# loch
+pycuda = "*"
+pyopencl = "*"
+khronos-opencl-icd-loader = "*"
 
 # =============================================================================
 # EMLE (emle-engine) feature
