@@ -86,9 +86,10 @@ py3dmol = "*"
 pydot = "*"
 pygtail = "*"
 pyyaml = "*"
-# ghostly / loch / somd2
+# somd2
 loguru = "*"
 numba = "*"
+nvidia-ml-py = "*"
 
 [feature.obs.target.linux-64.dependencies]
 # biosimspace
@@ -102,8 +103,6 @@ pyopencl = "*"
 pycuda = "*"
 ocl-icd = "*"
 ocl-icd-system = "*"
-# somd2
-nvidia-ml-py = "*"
 
 [feature.obs.target.linux-aarch64.dependencies]
 gromacs = "*"
