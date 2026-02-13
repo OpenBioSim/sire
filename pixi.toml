@@ -73,7 +73,6 @@ cxx-compiler = "*"
 # =============================================================================
 [feature.obs.dependencies]
 # biosimspace
-openmmtools = ">=0.21.5"
 configargparse = "*"
 ipywidgets = "*"
 kcombu_bss = "*"
