@@ -137,11 +137,22 @@ Other pixi environments are available depending on your needs:
 * ``pixi install -e emle`` - include `emle-engine <https://github.com/chemle/emle-engine>`__ dependencies
 * ``pixi install -e dev`` - all of the above plus test dependencies
 
-Any additional startup commands can be specified in the ``pixi.sh`` file 
+Any additional startup commands can be specified in the ``pixi.sh`` file
 in the root of the sire repository. This file is automatically sourced when
 you activate the pixi environment, so you can add any additional environment
 variables or startup commands here. (Note that you might see a warning if
 you haven't created this file.)
+
+If you need OpenCL support (e.g. for OpenMM), note that pixi does not run
+conda post-link scripts, so the ``ocl-icd-system`` symlink won't be created
+automatically. Add the following to your ``pixi.sh`` to fix this:
+
+.. code-block:: bash
+
+    # Create OpenCL ICD symlink (pixi doesn't run post-link scripts)
+    if [ -d /etc/OpenCL/vendors ] && [ ! -e "${CONDA_PREFIX}/etc/OpenCL/vendors/ocl-icd-system" ]; then
+        ln -s /etc/OpenCL/vendors "${CONDA_PREFIX}/etc/OpenCL/vendors/ocl-icd-system" 2>/dev/null || true
+    fi
 
 Support and Development
 =======================
