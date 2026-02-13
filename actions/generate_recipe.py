@@ -306,6 +306,9 @@ def generate_recipe(data, features, git_remote, git_branch, git_version, git_num
     # Build
     lines.append("build:")
     lines.append(f"  number: {git_number}")
+    lines.append("  files:")
+    lines.append("    exclude:")
+    lines.append("      - etc/OpenCL/")
     lines.append("")
 
     # Requirements
