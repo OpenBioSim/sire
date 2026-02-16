@@ -28,7 +28,6 @@ except ImportError:
 
 import sire as sr
 
-
 try:
     _wget = sr.legacy.Base.findExe("wget")
     have_wget = True

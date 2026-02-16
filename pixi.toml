@@ -1,0 +1,197 @@
+[workspace]
+name = "sire"
+channels = ["conda-forge", "openbiosim/label/dev"]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64", "win-64"]
+
+# All core dependencies needed to build and run sire.
+# The generate_recipe.py script categorises these into build/host/run
+# sections when generating the rattler-build recipe.
+[dependencies]
+python = "*"
+cmake = ">=3.30.0"
+git = "*"
+pybind11 = "*"
+gsl = "*"
+lazy_import = "*"
+libboost-devel = "*"
+libboost-python-devel = "*"
+libcblas = "*"
+libnetcdf = "*"
+librdkit-dev = ">2024.09.6"
+openmm = ">=8.1"
+pandas = "*"
+qt-main = "*"
+rich = "*"
+tbb = "*"
+tbb-devel = "*"
+
+# Unix build tools
+[target.linux-64.dependencies]
+make = "*"
+libtool = "*"
+sysroot_linux-64 = "==2.17"
+kartograf = ">=1.0.0"
+gemmi = ">=0.6.4,<0.7.0"
+
+# Host dependencies for local source builds (not used by generate_recipe.py)
+[target.linux-64.host-dependencies]
+sysroot_linux-64 = ">=2.34"
+c-compiler = "*"
+cxx-compiler = "*"
+
+[target.linux-aarch64.dependencies]
+make = "*"
+libtool = "*"
+kartograf = ">=1.0.0"
+
+[target.linux-aarch64.host-dependencies]
+c-compiler = "*"
+cxx-compiler = "*"
+
+[target.osx-arm64.dependencies]
+make = "*"
+libtool = "*"
+kartograf = ">=1.0.0"
+gemmi = ">=0.6.4,<0.7.0"
+
+[target.osx-arm64.host-dependencies]
+c-compiler = "*"
+cxx-compiler = "*"
+
+[target.win-64.dependencies]
+gemmi = ">=0.6.4,<0.7.0"
+
+[target.win-64.host-dependencies]
+c-compiler = "*"
+cxx-compiler = "*"
+
+# =============================================================================
+# OBS (OpenBioSim) feature
+# Dependencies for downstream OpenBioSim packages (biosimspace, ghostly, loch, somd2).
+# =============================================================================
+[feature.obs.dependencies]
+# biosimspace
+configargparse = "*"
+ipywidgets = "*"
+kcombu_bss = "*"
+lomap2 = "*"
+nglview = "*"
+openff-interchange-base = "*"
+openff-toolkit-base = "*"
+parmed = "*"
+py3dmol = "*"
+pydot = "*"
+pygtail = "*"
+pyyaml = "*"
+# somd2
+loguru = "*"
+numba = "*"
+nvidia-ml-py = "*"
+
+[feature.obs.target.linux-64.dependencies]
+# biosimspace
+ambertools = ">=22"
+gromacs = "*"
+alchemlyb = "*"
+mdtraj = "*"
+mdanalysis = "*"
+# loch
+pyopencl = "*"
+pycuda = "*"
+
+[feature.obs.target.linux-aarch64.dependencies]
+gromacs = "*"
+# ambertools, alchemlyb, mdtraj, mdanalysis not available on linux-aarch64
+
+[feature.obs.target.osx-arm64.dependencies]
+ambertools = ">=22"
+# gromacs not available on osx-arm64
+alchemlyb = "*"
+mdtraj = "*"
+mdanalysis = "*"
+# loch
+pyopencl = "*"
+
+[feature.obs.target.win-64.dependencies]
+# ambertools and gromacs not available on Windows
+alchemlyb = "*"
+mdtraj = "*"
+mdanalysis = "*"
+# loch
+pycuda = "*"
+pyopencl = "*"
+
+# =============================================================================
+# EMLE (emle-engine) feature
+# =============================================================================
+[feature.emle.dependencies]
+ase = "*"
+loguru = "*"
+pygit2 = "*"
+pyyaml = "*"
+
+[feature.emle.target.linux-64.dependencies]
+ambertools = ">=22"
+deepmd-kit = "*"
+nnpops = "*"
+pytorch = "*"
+
+[feature.emle.target.linux-aarch64.dependencies]
+pytorch = "*"
+# ambertools, deepmd-kit, nnpops not available on linux-aarch64
+
+[feature.emle.target.osx-arm64.dependencies]
+ambertools = ">=22"
+deepmd-kit = "*"
+nnpops = "*"
+pytorch = "*"
+torchani = "*"
+xtb-python = "*"
+
+# EMLE has no Windows-specific deps (ambertools, pytorch etc. excluded on Windows)
+
+# =============================================================================
+# Test feature
+# =============================================================================
+[feature.test.dependencies]
+black = "*"
+pytest = "*"
+rdkit = ">=2023.0.0"
+
+[feature.test.target.linux-64.dependencies]
+kartograf = ">=1.0.0"
+gemmi = ">=0.6.4,<0.7.0"
+
+[feature.test.target.linux-aarch64.dependencies]
+kartograf = ">=1.0.0"
+
+[feature.test.target.osx-arm64.dependencies]
+kartograf = ">=1.0.0"
+gemmi = ">=0.6.4,<0.7.0"
+
+[feature.test.target.win-64.dependencies]
+gemmi = ">=0.6.4,<0.7.0"
+
+# kartograf excluded from Windows test deps
+
+# =============================================================================
+# Lint feature (local development only, not included in recipes)
+# =============================================================================
+[feature.lint.dependencies]
+pre-commit = "*"
+rattler-build = "*"
+ruff = "*"
+
+# =============================================================================
+# Environments
+# =============================================================================
+[environments]
+default = []
+obs = ["obs"]
+emle = ["emle"]
+full = ["obs", "emle"]
+test = ["test"]
+dev = ["obs", "emle", "test", "lint"]
+
+[activation]
+scripts = ["pixi.sh"]

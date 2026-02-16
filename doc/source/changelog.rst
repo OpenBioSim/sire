@@ -12,10 +12,8 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - December 2025
+`2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
-
-* Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
 * Use ``"0"`` for null EMLE interpolation force since ``""`` causes issues on some platforms.
 
@@ -25,7 +23,17 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fix recursion bug in :func:`sire.base.wrap()` function.
 
+* Add support for passing cell vectors to ``PyQMForce`` and ``TorchQMForce``.
+
+* Add ``--install-metadata`` option to ``setup.py`` to register development source installations
+  with ``conda``.
+
 * Fix :meth:`Dynamics.get_rest2_scale()` method.
+
+* Add automatic parametrisation for Morse potential restraints when bonds are
+  being created in alchemical simulations.
+
+* Switch build system to ``pixi`` and ``rattler-build``.
 
 `2025.3.0 <https://github.com/openbiosim/sire/compare/2025.2.0...2025.3.0>`__ - November 2025
 ---------------------------------------------------------------------------------------------

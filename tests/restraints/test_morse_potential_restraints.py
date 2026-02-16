@@ -21,8 +21,9 @@ def test_morse_potential_restraints_setup(cyclopentane_cyclohexane):
     assert restraints[0].de().value() == 50.0
 
 
-def test_morse_potential_restraint_auto_param(cyclopentane_cyclohexane):
-    """Tests that morse_potential restraints can be set up correctly with automatic parametrisation."""
+def test_morse_potential_restraint_annihiliation_auto_param(cyclopentane_cyclohexane):
+    """Tests that morse_potential restraints can be set up correctly with automatic parametrisation
+    when a bond is to be annihilated."""
     mols = cyclopentane_cyclohexane.clone()
     restraints = sr.restraints.morse_potential(
         mols,
@@ -34,6 +35,20 @@ def test_morse_potential_restraint_auto_param(cyclopentane_cyclohexane):
     assert restraints[0].atom1() == 4
     assert restraints[0].k().value() == pytest.approx(228.89, rel=0.1)
     assert restraints[0].de().value() == 25.0
+
+
+def test_morse_potential_restraint_creation_auto_param(propane_cyclopropane):
+    """Tests that morse_potential restraints can be set up correctly with automatic parametrisation
+    when a bond is to be created."""
+    mols = propane_cyclopropane.clone()
+    restraints = sr.restraints.morse_potential(
+        mols,
+        de="25 kcal mol-1",
+        auto_parametrise=True,
+    )
+    assert restraints.num_restraints() == 1
+    assert restraints[0].atom0() == 0
+    assert restraints[0].atom1() == 2
 
 
 def test_morse_potential_restraint_auto_param_override(cyclopentane_cyclohexane):

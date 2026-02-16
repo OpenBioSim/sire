@@ -156,6 +156,11 @@ def cyclopentane_cyclohexane():
 
 
 @pytest.fixture(scope="session")
+def propane_cyclopropane():
+    return sr.load_test_files("propane_cyclopropane.bss")
+
+
+@pytest.fixture(scope="session")
 def pentane_cyclopentane():
     return sr.load_test_files("pentane_cyclopentane.bss")
 
