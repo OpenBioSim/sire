@@ -58,9 +58,7 @@ gemmi = ">=0.6.4,<0.7.0"
 c-compiler = "*"
 cxx-compiler = "*"
 
-# Windows needs a pinned pybind11 version
 [target.win-64.dependencies]
-pybind11 = "==2.11.1"
 gemmi = ">=0.6.4,<0.7.0"
 
 [target.win-64.host-dependencies]
@@ -148,7 +146,7 @@ deepmd-kit = "*"
 nnpops = "*"
 pytorch = "*"
 torchani = "*"
-xtb-python = "*"  # Note: not compatible with Python 3.12
+xtb-python = "*"
 
 # EMLE has no Windows-specific deps (ambertools, pytorch etc. excluded on Windows)
 
