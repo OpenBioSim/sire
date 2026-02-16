@@ -54,7 +54,8 @@ if curver:
         raise EnvironmentError(
             f"This environment already contains an install of Sire version {curver}. "
             "Please delete the installation or create a new environment before "
-            f"installing version {ver}. Also remove old build directories from 'build'."
+            f"installing version {ver}. If you are using pixi, run: pixi clean -e dev. "
+            "Also remove old build directories from 'build'. "
         )
 
 try:
