@@ -12,10 +12,8 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - December 2025
+`2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
-
-* Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
 * Use ``"0"`` for null EMLE interpolation force since ``""`` causes issues on some platforms.
 
