@@ -429,6 +429,13 @@ double TorchQMForceImpl::computeForce(
         Vector(10*box_z[0], 10*box_z[1], 10*box_z[2])
     );
 
+    // Store the cell vectors in Angstrom.
+    QVector<QVector<double>> cell = {
+        {10*box_x[0], 10*box_x[1], 10*box_x[2]},
+        {10*box_y[0], 10*box_y[1], 10*box_y[2]},
+        {10*box_z[0], 10*box_z[1], 10*box_z[2]}
+    };
+
     // Store the QM atomic indices and numbers.
     auto qm_atoms = this->owner.getAtoms();
     auto numbers = this->owner.getNumbers();
@@ -715,12 +722,19 @@ double TorchQMForceImpl::computeForce(
                               .to(device);
     xyz_mm_torch.requires_grad_(true);
 
+    // Cell vectors.
+    torch::Tensor cell_torch = torch::from_blob(cell.data(), {3, 3},
+        torch::TensorOptions().dtype(torch::kFloat64))
+                              .to(torch::kFloat32).to(device);
+    cell_torch.requires_grad_(false);
+
     // Create the input vector.
     auto input = std::vector<torch::jit::IValue>{
         atomic_numbers_torch,
         charges_mm_torch,
         xyz_qm_torch,
-        xyz_mm_torch
+        xyz_mm_torch,
+        cell_torch
     };
 
     // Compute the energies.

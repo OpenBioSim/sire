@@ -213,7 +213,7 @@ def v(x, y=None, z=None, units=None):
                 "You cannot specify y or z values when passing a list or tuple."
             )
 
-        (x, y, z) = (x[0], x[1], x[2])
+        x, y, z = (x[0], x[1], x[2])
 
     else:
         if y is None:
@@ -338,7 +338,7 @@ def molid(
             name = num
             num = None
         elif type(name) is int:
-            (num, name) = (name, num)
+            num, name = (name, num)
         else:
             raise TypeError("The number cannot be a string.")
 
@@ -395,7 +395,7 @@ def atomid(num: int = None, name: str = None, idx: int = None, case_sensitive=Tr
             name = num
             num = None
         elif type(name) is int:
-            (num, name) = (name, num)
+            num, name = (name, num)
         else:
             raise TypeError("The number cannot be a string.")
 
@@ -452,7 +452,7 @@ def resid(num: int = None, name: str = None, idx: int = None, case_sensitive=Tru
             name = num
             num = None
         elif type(name) is int:
-            (num, name) = (name, num)
+            num, name = (name, num)
         else:
             raise TypeError("The number cannot be a string.")
 
@@ -508,7 +508,7 @@ def chainid(idx: int = None, name: str = None, case_sensitive: bool = True):
             name = idx
             idx = None
         elif type(name) is int:
-            (idx, name) = (name, idx)
+            idx, name = (name, idx)
         else:
             raise TypeError("The index cannot be a string.")
 
@@ -558,7 +558,7 @@ def segid(idx: int = None, name: str = None, case_sensitive: bool = True):
             name = idx
             idx = None
         elif type(name) is int:
-            (idx, name) = (name, idx)
+            idx, name = (name, idx)
         else:
             raise TypeError("The index cannot be a string.")
 

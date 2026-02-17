@@ -4,7 +4,6 @@ from typing import IO as _IO
 
 from contextlib import contextmanager as _contextmanager
 
-
 __all__ = ["Console", "Table"]
 
 

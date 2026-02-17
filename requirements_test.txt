@@ -1,9 +1,0 @@
-# Test requirements. These aren't needed by Sire, but if installed, will
-# enable test to run to validate advanced functionality
-
-rdkit >=2023.0.0
-gemmi >=0.6.4<0.7.0
-
-# kartograf on Windows pulls in an openfe that has an old / incompatble
-# ambertools
-kartograf >= 1.0.0 ; sys_platform != "win32"

@@ -88,6 +88,7 @@ namespace SireOpenMM
                     - charges_mm: A list of the MM charges in mod electron charge.
                     - xyz_qm: A list of positions for the atoms in the ML region in Angstrom.
                     - xyz_mm: A list of positions for the atoms in the MM region in Angstrom.
+                    - cell:   A list of the 3 cell vectors in Angstrom.
                     - idx_mm: A list of indices for MM atom indices in the QM/MM region.
                 The callback should return a tuple containing:
                     - The energy in kJ/mol.
@@ -110,6 +111,9 @@ namespace SireOpenMM
             \param xyz_mm
                 A vector of positions for the atoms in the MM region in Angstrom.
 
+            \param cell
+                A vector of the 3 cell vectors in Angstrom.
+
             \param idx_mm
                 A vector of MM atom indices. Note that len(idx_mm) <= len(charges_mm)
                 since it only contains the indices of true MM atoms, not link atoms
@@ -126,6 +130,7 @@ namespace SireOpenMM
                 QVector<double> charges_mm,
                 QVector<QVector<double>> xyz_qm,
                 QVector<QVector<double>> xyz_mm,
+                QVector<QVector<double>> cell,
                 QVector<int> idx_mm
         ) const;
 
@@ -323,6 +328,9 @@ namespace SireOpenMM
             \param xyz_mm
                 A vector of positions for the atoms in the MM region in Angstrom.
 
+            \param cell
+                A vector of the 3 cell vectors in Angstrom.
+
             \param idx_mm
                 A vector of MM atom indices. Note that len(idx_mm) <= len(charges_mm)
                 since it only contains the indices of true MM atoms, not link atoms
@@ -339,6 +347,7 @@ namespace SireOpenMM
                 QVector<double> charges_mm,
                 QVector<QVector<double>> xyz_qm,
                 QVector<QVector<double>> xyz_mm,
+                QVector<QVector<double>> cell,
                 QVector<int> idx_mm
         ) const;
 
@@ -590,6 +599,9 @@ namespace SireOpenMM
             \param xyz_mm
                 A vector of positions for the atoms in the MM region in Angstrom.
 
+            \param cell
+                A vector of the 3 cell vectors in Angstrom.
+
             \param idx_mm
                 A vector of MM atom indices. Note that len(idx_mm) <= len(charges_mm)
                 since it only contains the indices of true MM atoms, not link atoms
@@ -606,6 +618,7 @@ namespace SireOpenMM
                 QVector<double> charges_mm,
                 QVector<QVector<double>> xyz_qm,
                 QVector<QVector<double>> xyz_mm,
+                QVector<QVector<double>> cell,
                 QVector<int> idx_mm
         ) const;
 

@@ -360,14 +360,14 @@ Morse Potential Restraints
 ---------------------------
 
 The :func:`sire.restraints.morse_potential` function is used to create Morse potential restraints,
-which can be used to carry harmonic bond annihilations alchemical relative binding free energy calculations.
+which can be used to carry harmonic bond annihilations or creations in alchemical relative binding free energy calculations.
 
 To create a Morse potential restraint, you need to specify the two atoms to be restrained. Like the distance restraints,
 the atoms can be specified using a search string, passing lists of atom indexes, or
 molecule views holding the atoms. You have to specify the bond force constants,
 equilibrium bond distance value and the dissociation energy for the restraints.
 If not supplied, automatic parametrisation feature can be used, which will detect the bond being alchemically
-annihilated and set the parameters accordingly (dissociation energy value still needs to be provided). For example,
+annihilated or created and set the parameters accordingly (dissociation energy value still needs to be provided). For example,
 
 >>> mols = sr.load_test_files("cyclopentane_cyclohexane.bss")
 >>> morse_restraints = sr.restraints.morse_potential(

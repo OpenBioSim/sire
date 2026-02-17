@@ -153,6 +153,7 @@ PyQMCallback::call(
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
     QVector<QVector<double>> xyz_mm,
+    QVector<QVector<double>> cell,
     QVector<int> idx_mm) const
 {
 
@@ -170,6 +171,7 @@ PyQMCallback::call(
                 charges_mm,
                 xyz_qm,
                 xyz_mm,
+                cell,
                 idx_mm
             );
         }
@@ -191,6 +193,7 @@ PyQMCallback::call(
                 charges_mm,
                 xyz_qm,
                 xyz_mm,
+                cell,
                 idx_mm
             );
         }
@@ -403,9 +406,10 @@ PyQMForce::call(
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
     QVector<QVector<double>> xyz_mm,
+    QVector<QVector<double>> cell,
     QVector<int> idx_mm) const
 {
-    return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm, idx_mm);
+    return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell, idx_mm);
 }
 
 /////////
@@ -545,6 +549,13 @@ double PyQMForceImpl::computeForce(
         Vector(10*box_y[0], 10*box_y[1], 10*box_y[2]),
         Vector(10*box_z[0], 10*box_z[1], 10*box_z[2])
     );
+
+    // Store the cell vectors in Angstrom.
+    QVector<QVector<double>> cell = {
+        {10*box_x[0], 10*box_x[1], 10*box_x[2]},
+        {10*box_y[0], 10*box_y[1], 10*box_y[2]},
+        {10*box_z[0], 10*box_z[1], 10*box_z[2]}
+    };
 
     // Store the QM atomic indices and numbers.
     auto qm_atoms = this->owner.getAtoms();
@@ -786,6 +797,7 @@ double PyQMForceImpl::computeForce(
         charges_mm,
         xyz_qm,
         xyz_mm,
+        cell,
         idx_mm
     );
 
@@ -1073,9 +1085,10 @@ PyQMEngine::call(
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
     QVector<QVector<double>> xyz_mm,
+    QVector<QVector<double>> cell,
     QVector<int> idx_mm) const
 {
-    return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm, idx_mm);
+    return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell, idx_mm);
 }
 
 QMForce* PyQMEngine::createForce() const

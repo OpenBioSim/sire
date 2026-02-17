@@ -63,6 +63,7 @@ signature:
         charges_mm: List[float],
         xyz_qm: List[List[float]],
         xyz_mm: List[List[float]],
+        cell: Optional[List[List[float]]] = None,
         idx_mm: Optional[List[int]] = None,
     ) -> Tuple[float, List[List[float]], List[List[float]]]:
 

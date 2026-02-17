@@ -790,8 +790,8 @@ def morse_potential(
         If True, will attempt to automatically parametrise the Morse potential
         from a perturbation that annihilates a bond. This requires that 'mols'
         contains exactly one molecule that is perturbable, and that this
-        molecule contains exactly one bond that is annihilated at lambda=1.
-        The atoms involved in the annihilated bond will be used as 'atoms0'
+        molecule contains exactly one bond that is annihilated or created.
+        The atoms involved in this bond will be used as 'atoms0'
         and 'atoms1', the equilibrium distance r0 will be set to the original
         bond length, and the force constant k will be set to the force constant
         of the bond in the unperturbed state. Note that 'de' must still be provided.
@@ -838,23 +838,42 @@ def morse_potential(
 
         if len(ref_mol) != 1:
             raise ValueError(
-                "We need exactly one molecule that is perturbable to automatically "
+                "Exactly one perturbable molecule is required to automatically "
                 "set up the Morse potential restraints"
             )
         perturbable_mol = ref_mol[0]
         pert = perturbable_mol.perturbation(map=map)
         pert_omm = pert.to_openmm()
         changed_bonds = pert_omm.changed_bonds(to_pandas=False)
+        changed_bonds_df = pert_omm.changed_bonds(to_pandas=True)
 
-        # Attempt to find the bond that is annihilated at lambda=1
+        # Check that exactly one bond is being created or annihilated, i.e that k0 column
+        # or k1 column has exactly one zero value
+        n_bonds_created = (changed_bonds_df["k0"] == 0).sum()
+        n_bonds_annihilated = (changed_bonds_df["k1"] == 0).sum()
+        if n_bonds_created + n_bonds_annihilated != 1:
+            raise ValueError(
+                "Exactly one bond must be created or annihilated to automatically "
+                "set up the Morse potential restraints"
+            )
+
+        # Attempt to find this bond now
         for bond in changed_bonds:
             bond_name, length0, length1, k0, k1 = bond
-            if k1 == 0:
+            if k1 == 0 or k0 == 0:
+
+                # If the bond is being created (k0 == 0), then we should
+                # use the parameters from the final state (length1, k1).
+                # If the bond is being annihilated (k1 == 0), then we don't
+                # need to do anything as length0 and k0 are already selected.
+                if k0 == 0:
+                    length0 = length1
+                    k0 = k1
+
+                length0 = u(f"{length0} nm")
 
                 atom0_idx = [bond_name.atom0().index().value()][0]
                 atom1_idx = [bond_name.atom1().index().value()][0]
-
-                length0 = u(f"{length0} nm")
 
                 # Divide k0 by 2 to convert from force constant to sire half
                 # force constant k

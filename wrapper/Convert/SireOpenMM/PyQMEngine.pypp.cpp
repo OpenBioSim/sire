@@ -67,15 +67,15 @@ void register_PyQMEngine_class(){
         PyQMEngine_exposer.def( bp::init< SireOpenMM::PyQMEngine const & >(( bp::arg("other") ), "Copy constructor.") );
         { //::SireOpenMM::PyQMEngine::call
         
-            typedef ::boost::tuples::tuple< double, QVector< QVector< double > >, QVector< QVector< double > >, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireOpenMM::PyQMEngine::*call_function_type)( ::QVector< int >,::QVector< double >,::QVector< QVector< double > >,::QVector< QVector< double > >,::QVector < int > ) const;
+            typedef ::boost::tuples::tuple< double, QVector< QVector< double > >, QVector< QVector< double > >, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireOpenMM::PyQMEngine::*call_function_type)( ::QVector< int >,::QVector< double >,::QVector< QVector< double > >,::QVector< QVector< double > >,::QVector< QVector< double > >,::QVector < int > ) const;
             call_function_type call_function_value( &::SireOpenMM::PyQMEngine::call );
             
             PyQMEngine_exposer.def( 
                 "call"
                 , call_function_value
-                , ( bp::arg("numbers_qm"), bp::arg("charges_mm"), bp::arg("xyz_qm"), bp::arg("xyz_mm"), bp::arg("idx_mm") )
+                , ( bp::arg("numbers_qm"), bp::arg("charges_mm"), bp::arg("xyz_qm"), bp::arg("xyz_mm"), bp::arg("cell"), bp::arg("idx_mm") )
                 , bp::release_gil_policy()
-                , "Call the callback function.\nPar:am numbers_qm\nA vector of atomic numbers for the atoms in the ML region.\n\nPar:am charges_mm\nA vector of the charges on the MM atoms in mod electron charge.\n\nPar:am xyz_qm\nA vector of positions for the atoms in the ML region in Angstrom.\n\nPar:am xyz_mm\nA vector of positions for the atoms in the MM region in Angstrom.\n\nPar:am idx_mm A vector of indices for the MM atoms in the QM/MM region. Note that len(idx_mm) <= len(charges_mm) since it only contains the indices of the true MM atoms, not link atoms or virtual charges.\n\nReturn:s\nA tuple containing:\n- The energy in kJmol.\n- A vector of forces for the QM atoms in kJmolnm.\n- A vector of forces for the MM atoms in kJmolnm.\n" );
+                , "Call the callback function.\nPar:am numbers_qm\nA vector of atomic numbers for the atoms in the ML region.\n\nPar:am charges_mm\nA vector of the charges on the MM atoms in mod electron charge.\n\nPar:am xyz_qm\nA vector of positions for the atoms in the ML region in Angstrom.\n\nPar:am xyz_mm\nA vector of positions for the atoms in the MM region in Angstrom.\n\nPar:am cell A list of cell vectors in Angstrom.\n\nPar:am idx_mm A vector of indices for the MM atoms in the QM/MM region. Note that len(idx_mm) <= len(charges_mm) since it only contains the indices of the true MM atoms, not link atoms or virtual charges.\n\nReturn:s\nA tuple containing:\n- The energy in kJmol.\n- A vector of forces for the QM atoms in kJmolnm.\n- A vector of forces for the MM atoms in kJmolnm.\n" );
         
         }
         { //::SireOpenMM::PyQMEngine::getAtoms

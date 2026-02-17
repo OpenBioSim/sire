@@ -22,20 +22,21 @@ if "ANACONDA_TOKEN" in os.environ:
 else:
     conda_token = "TEST"
 
-# get the root conda directory
-conda = os.environ["CONDA"]
+# rattler-build outputs to an 'output' directory by default.
+# Try rattler-build output first, fall back to conda-bld.
+output_dir = os.path.join(srcdir, "output")
 
-# Set the path to the conda-bld directory.
-conda_bld = os.path.join(conda, "envs", "sire_build", "conda-bld")
-
-print(f"conda_bld = {conda_bld}")
-
-# Find the packages to upload
-sire_pkg = glob.glob(os.path.join(conda_bld, "*-*", "sire-*.tar.bz2"))
+sire_pkg = glob.glob(os.path.join(output_dir, "**", "sire-*.conda"), recursive=True)
 
 if len(sire_pkg) == 0:
-    print("No sire packages to upload?")
-    sys.exit(-1)
+    # Fall back to conda-bld location (legacy)
+    if "CONDA" in os.environ:
+        conda_bld = os.path.join(os.environ["CONDA"], "envs", "sire_build", "conda-bld")
+        sire_pkg = glob.glob(os.path.join(conda_bld, "*-*", "sire-*.tar.bz2"))
+
+    if len(sire_pkg) == 0:
+        print("No sire packages to upload?")
+        sys.exit(-1)
 
 packages = sire_pkg
 
@@ -57,9 +58,9 @@ gitdir = os.path.join(srcdir, ".git")
 tag = run_cmd(f"git --git-dir={gitdir} --work-tree={srcdir} tag --contains")
 
 # The channel has been specified as an extra argument
-# This will either be 'test' for main releases, or 
+# This will either be 'test' for main releases, or
 # 'dev' for dev releases (the default)
-channel = channel.lstrip().rstrip().replace(" ","_").lower()
+channel = channel.lstrip().rstrip().replace(" ", "_").lower()
 
 if len(channel) == 0:
     channel = "dev"

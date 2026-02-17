@@ -114,7 +114,7 @@ class TrajectoryIterator:
             from ..legacy.Mol import TrajectoryAligner
 
             if align is not None:
-                (align, reference) = _get_align_atoms_and_reference(
+                align, reference = _get_align_atoms_and_reference(
                     view=self._view,
                     align=align,
                     mapping=mapping,
@@ -927,7 +927,7 @@ class TrajectoryIterator:
             else:
                 align = True
 
-        (atoms, reference) = _get_align_atoms_and_reference(
+        atoms, reference = _get_align_atoms_and_reference(
             view=self.current(),
             align=reference,
             frame=frame,

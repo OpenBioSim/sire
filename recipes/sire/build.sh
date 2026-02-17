@@ -6,4 +6,4 @@
 set -e
 
 # Build/install Sire.
-python setup.py install --skip-deps
+python setup.py install

@@ -1667,9 +1667,10 @@ def _dynamics(
         Whether or not to swap the end states. If this is True, then
         the perturbation will run from the perturbed back to the
         reference molecule (the perturbed molecule will be at lambda=0,
-        while the reference molecule will be at lambda=1). This will
-        use the coordinates of the perturbed molecule as the
-        starting point.
+        while the reference molecule will be at lambda=1). Note that this
+        will still use the coordinates of the reference state as the
+        starting point for the simulation, since it is assumed that
+        this reflects the current equilibrated state of the system.
 
     ignore_perturbations: bool
         Whether or not to ignore perturbations. If this is True, then
