@@ -261,6 +261,11 @@ def amber_cmap():
 
 
 @pytest.fixture(scope="session")
+def multichain_cmap():
+    return sr.load_test_files("multichain_cmap.prm7", "multichain_cmap.rst7")
+
+
+@pytest.fixture(scope="session")
 def gromacs_cmap():
     return sr.load_test_files("1aki.gro", "1aki.top")
 

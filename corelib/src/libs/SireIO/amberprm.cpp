@@ -337,11 +337,14 @@ QVector<QVector<int>> indexCMAPs(const QVector<qint64> &cmaps, const QVector<int
     for (int i = 0; i < cmaps.count(); i += 6)
     {
         // format is atom0-atom1-atom2-atom3-atom4-parameter
-        int mol0 = atom_to_mol_data[cmaps_data[i]];     // DO NOT DIVIDE BY THREE
-        int mol1 = atom_to_mol_data[cmaps_data[i + 1]]; // THIS IS THE RAW ATOM INDEX
-        int mol2 = atom_to_mol_data[cmaps_data[i + 2]];
-        int mol3 = atom_to_mol_data[cmaps_data[i + 3]];
-        int mol4 = atom_to_mol_data[cmaps_data[i + 4]];
+        // CMAP indices are plain 1-based atom numbers (unlike bonds/angles/dihedrals
+        // which are 3×(atom_0based)).  Subtract 1 to convert to the 0-based index
+        // used by atom_to_mol.
+        int mol0 = atom_to_mol_data[cmaps_data[i] - 1];
+        int mol1 = atom_to_mol_data[cmaps_data[i + 1] - 1];
+        int mol2 = atom_to_mol_data[cmaps_data[i + 2] - 1];
+        int mol3 = atom_to_mol_data[cmaps_data[i + 3] - 1];
+        int mol4 = atom_to_mol_data[cmaps_data[i + 4] - 1];
 
         if (mol0 != mol1 or mol0 != mol2 or mol0 != mol3 or mol0 != mol4)
             throw SireIO::parse_error(
@@ -2249,7 +2252,10 @@ std::tuple<QVector<qint64>, QHash<CMAPParameter, qint64>> getCMAPData(const Ambe
     QHash<CMAPParameter, qint64> param_to_idx;
     QVector<qint64> cmap_idxs;
 
-    start_idx /= 3;
+    // NOTE: start_idx is in atom units (0-based count of atoms before this
+    // molecule).  CMAP indices in the prmtop file are plain 1-based atom
+    // numbers (NOT multiplied by 3 as bonds/angles/dihedrals are).
+    // Do NOT divide by 3 here.
 
     const auto info = params.info();
     const auto cmaps = params.cmapFunctions().parameters();
