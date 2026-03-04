@@ -525,6 +525,9 @@ class DynamicsData:
                     self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
                 )
 
+            # Store the current energies.
+            self._nrgs = nrgs
+
             # update the interpolation lambda value
             if self._is_interpolate:
                 if delta_lambda:
@@ -860,6 +863,12 @@ class DynamicsData:
 
     def energy_trajectory(self):
         return self._energy_trajectory.clone()
+
+    def current_energies(self):
+        try:
+            return self._nrgs
+        except Exception:
+            return {}
 
     def step(self, num_steps: int = 1):
         """
@@ -2194,6 +2203,12 @@ class Dynamics:
             )
         else:
             return t
+
+    def current_energies(self):
+        """
+        Return a dictionary of the most recent energy trajectory entry.
+        """
+        return self._d.current_energies()
 
     def to_xml(self, f=None):
         """
