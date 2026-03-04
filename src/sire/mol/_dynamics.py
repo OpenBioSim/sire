@@ -475,7 +475,7 @@ class DynamicsData:
                     nrg += self._pressure * volume
                 if excess_chemical_potential is not None:
                     nrg += excess_chemical_potential * num_waters
-                nrgs[str(sim_lambda_value)] = nrg * kcal_per_mol
+                nrgs[f"{sim_lambda_value:.5f}"] = nrg * kcal_per_mol
 
                 if lambda_windows is not None:
                     # get the index of the simulation lambda value in the
@@ -494,6 +494,7 @@ class DynamicsData:
                                 not has_lambda_index
                                 or abs(lambda_index - i) <= num_energy_neighbours
                             ):
+                                key = f"{lambda_value:.5f}"
                                 self._omm_mols.set_lambda(
                                     lambda_value,
                                     rest2_scale=rest2_scale,
@@ -506,9 +507,9 @@ class DynamicsData:
                                     nrg += self._pressure * volume
                                 if excess_chemical_potential is not None:
                                     nrg += excess_chemical_potential * num_waters
-                                nrgs[str(lambda_value)] = nrg * kcal_per_mol
+                                nrgs[key] = nrg * kcal_per_mol
                             else:
-                                nrgs[str(lambda_value)] = null_energy * kcal_per_mol
+                                nrgs[key] = null_energy * kcal_per_mol
 
                 self._omm_mols.set_lambda(
                     sim_lambda_value,
@@ -866,7 +867,10 @@ class DynamicsData:
 
     def current_energies(self):
         try:
-            return self._nrgs
+            # Sort the energies by key to ensure consistent ordering.
+            nrgs = self._nrgs.copy()
+            nrgs = dict(sorted(nrgs.items(), key=lambda item: item[0]))
+            return nrgs
         except Exception:
             return {}
 
