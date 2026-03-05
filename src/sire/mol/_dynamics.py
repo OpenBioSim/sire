@@ -1,4 +1,4 @@
-__all__ = ["Dynamics":
+__all__ = ["Dynamics"]
 
 
 class DynamicsData:
