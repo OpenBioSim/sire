@@ -1,4 +1,4 @@
-__all__ = ["Dynamics"]
+__all__ = ["Dynamics":
 
 
 class DynamicsData:
@@ -475,7 +475,8 @@ class DynamicsData:
                     nrg += self._pressure * volume
                 if excess_chemical_potential is not None:
                     nrg += excess_chemical_potential * num_waters
-                nrgs[f"{sim_lambda_value:.5f}"] = nrg * kcal_per_mol
+                # Store the potential energy for the current lambda value.
+                nrg_sim_lambda_value = nrg
 
                 if lambda_windows is not None:
                     # get the index of the simulation lambda value in the
@@ -510,6 +511,10 @@ class DynamicsData:
                                 nrgs[key] = nrg * kcal_per_mol
                             else:
                                 nrgs[key] = null_energy * kcal_per_mol
+                        else:
+                            nrgs[f"{sim_lambda_value:.5f}"] = (
+                                nrg_sim_lambda_value * kcal_per_mol
+                            )
 
                 self._omm_mols.set_lambda(
                     sim_lambda_value,
@@ -865,12 +870,15 @@ class DynamicsData:
     def energy_trajectory(self):
         return self._energy_trajectory.clone()
 
-    def current_energies(self):
+    def current_energies(self, sort: bool = False):
         try:
-            # Sort the energies by key to ensure consistent ordering.
-            nrgs = self._nrgs.copy()
-            nrgs = dict(sorted(nrgs.items(), key=lambda item: item[0]))
-            return nrgs
+            if sort:
+                nrgs = self._nrgs.copy()
+                sorted_items = sorted(list(nrgs.items())[2:], key=lambda x: x[0])
+                nrgs = dict(list(nrgs.items())[:2] + sorted_items)
+                return nrgs
+            else:
+                return self._nrgs
         except Exception:
             return {}
 
@@ -2208,11 +2216,12 @@ class Dynamics:
         else:
             return t
 
-    def current_energies(self):
+    def current_energies(self, sort: bool = False):
         """
         Return a dictionary of the most recent energy trajectory entry.
+        If 'sort' is True, then the dictionary will be sorted by key.
         """
-        return self._d.current_energies()
+        return self._d.current_energies(sort=sort)
 
     def to_xml(self, f=None):
         """
