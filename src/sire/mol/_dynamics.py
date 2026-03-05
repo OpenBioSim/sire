@@ -434,6 +434,7 @@ class DynamicsData:
         if save_energy:
             # should save energy here
             nrgs = {}
+            nrgs_array = []
 
             nrgs["kinetic"] = (
                 self._omm_state.getKineticEnergy().value_in_unit(
@@ -509,12 +510,15 @@ class DynamicsData:
                                 if excess_chemical_potential is not None:
                                     nrg += excess_chemical_potential * num_waters
                                 nrgs[key] = nrg * kcal_per_mol
+                                nrgs_array.append(nrg)
                             else:
+                                nrgs_array.append(null_energy)
                                 nrgs[key] = null_energy * kcal_per_mol
                         else:
                             nrgs[f"{sim_lambda_value:.5f}"] = (
                                 nrg_sim_lambda_value * kcal_per_mol
                             )
+                            nrgs_array.append(nrg_sim_lambda_value)
 
                 self._omm_mols.set_lambda(
                     sim_lambda_value,
@@ -533,6 +537,7 @@ class DynamicsData:
 
             # Store the current energies.
             self._nrgs = nrgs
+            self._nrgs_array = nrgs_array
 
             # update the interpolation lambda value
             if self._is_interpolate:
@@ -870,17 +875,13 @@ class DynamicsData:
     def energy_trajectory(self):
         return self._energy_trajectory.clone()
 
-    def current_energies(self, sort: bool = False):
+    def _current_energy_array(self):
         try:
-            if sort:
-                nrgs = self._nrgs.copy()
-                sorted_items = sorted(list(nrgs.items())[2:], key=lambda x: x[0])
-                nrgs = dict(list(nrgs.items())[:2] + sorted_items)
-                return nrgs
-            else:
-                return self._nrgs
+            import numpy as np
+
+            return np.array(self._nrgs_array)
         except Exception:
-            return {}
+            return None
 
     def step(self, num_steps: int = 1):
         """
@@ -2216,12 +2217,12 @@ class Dynamics:
         else:
             return t
 
-    def current_energies(self, sort: bool = False):
+    def _current_energy_array(self):
         """
-        Return a dictionary of the most recent energy trajectory entry.
-        If 'sort' is True, then the dictionary will be sorted by key.
+        Return the current energies as a numpy array, in the same order
+        as the energy trajectory columns.
         """
-        return self._d.current_energies(sort=sort)
+        return self._d._current_energy_array()
 
     def to_xml(self, f=None):
         """
