@@ -434,6 +434,7 @@ class DynamicsData:
         if save_energy:
             # should save energy here
             nrgs = {}
+            nrgs_array = []
 
             nrgs["kinetic"] = (
                 self._omm_state.getKineticEnergy().value_in_unit(
@@ -475,7 +476,8 @@ class DynamicsData:
                     nrg += self._pressure * volume
                 if excess_chemical_potential is not None:
                     nrg += excess_chemical_potential * num_waters
-                nrgs[str(sim_lambda_value)] = nrg * kcal_per_mol
+                # Store the potential energy for the current lambda value.
+                nrg_sim_lambda_value = nrg
 
                 if lambda_windows is not None:
                     # get the index of the simulation lambda value in the
@@ -494,6 +496,7 @@ class DynamicsData:
                                 not has_lambda_index
                                 or abs(lambda_index - i) <= num_energy_neighbours
                             ):
+                                key = f"{lambda_value:.5f}"
                                 self._omm_mols.set_lambda(
                                     lambda_value,
                                     rest2_scale=rest2_scale,
@@ -506,9 +509,16 @@ class DynamicsData:
                                     nrg += self._pressure * volume
                                 if excess_chemical_potential is not None:
                                     nrg += excess_chemical_potential * num_waters
-                                nrgs[str(lambda_value)] = nrg * kcal_per_mol
+                                nrgs[key] = nrg * kcal_per_mol
+                                nrgs_array.append(nrg)
                             else:
-                                nrgs[str(lambda_value)] = null_energy * kcal_per_mol
+                                nrgs_array.append(null_energy)
+                                nrgs[key] = null_energy * kcal_per_mol
+                        else:
+                            nrgs[f"{sim_lambda_value:.5f}"] = (
+                                nrg_sim_lambda_value * kcal_per_mol
+                            )
+                            nrgs_array.append(nrg_sim_lambda_value)
 
                 self._omm_mols.set_lambda(
                     sim_lambda_value,
@@ -524,6 +534,10 @@ class DynamicsData:
                 self._energy_trajectory.set(
                     self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
                 )
+
+            # Store the current energies.
+            self._nrgs = nrgs
+            self._nrgs_array = nrgs_array
 
             # update the interpolation lambda value
             if self._is_interpolate:
@@ -860,6 +874,14 @@ class DynamicsData:
 
     def energy_trajectory(self):
         return self._energy_trajectory.clone()
+
+    def _current_energy_array(self):
+        try:
+            import numpy as np
+
+            return np.array(self._nrgs_array)
+        except Exception:
+            return None
 
     def step(self, num_steps: int = 1):
         """
@@ -2194,6 +2216,13 @@ class Dynamics:
             )
         else:
             return t
+
+    def _current_energy_array(self):
+        """
+        Return the current energies as a numpy array, in the same order
+        as the energy trajectory columns.
+        """
+        return self._d._current_energy_array()
 
     def to_xml(self, f=None):
         """
