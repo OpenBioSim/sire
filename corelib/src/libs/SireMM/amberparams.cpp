@@ -1505,7 +1505,10 @@ QStringList AmberParams::validateAndFix()
                         {
                             const auto s = group_pairs.get(i, j);
 
-                            if ((not(s.coulomb() == 0 or s.coulomb() == 1)) or (not(s.lj() == 0 or s.lj() == 1)))
+                            // Process any non-zero 1-4 pair that isn't purely excluded (0,0).
+                            // This includes both partial-scaling pairs (e.g. 0.833, 0.5 for standard AMBER)
+                            // and full-interaction pairs (1.0, 1.0 for GLYCAM SCNB=1.0/SCEE=1.0).
+                            if (not(s.coulomb() == 0.0 and s.lj() == 0.0))
                             {
                                 const auto atm0 = molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i)));
                                 const auto atm3 = molinfo.atomIdx(CGAtomIdx(CGIdx(jcg), Index(j)));
@@ -2587,24 +2590,15 @@ void AmberParams::getAmberNBsFrom(const CLJNBPairs &nbpairs, const FourAtomFunct
             // extract the nb14 term from exc_atoms
             auto nbscl = nbpairs.get(nb14pair.atom0(), nb14pair.atom1());
 
-            if (nbscl.coulomb() != 1.0 or nbscl.lj() != 1.0)
+            if (nbscl.coulomb() != 0.0 or nbscl.lj() != 0.0)
             {
-                if (nbscl.coulomb() != 0.0 or nbscl.lj() != 0.0)
-                {
-                    // add them to the list of 14 scale factors
-                    new_nb14s.insert(nb14pair, AmberNB14(nbscl.coulomb(), nbscl.lj()));
+                // add them to the list of 14 scale factors.
+                // This handles both standard AMBER (e.g. 0.833, 0.5) and
+                // GLYCAM-style (1.0, 1.0) where SCEE=1.0 and SCNB=1.0.
+                new_nb14s.insert(nb14pair, AmberNB14(nbscl.coulomb(), nbscl.lj()));
 
-                    // and remove them from the excluded atoms list
-                    exc_atoms.set(nb14pair.atom0(), nb14pair.atom1(), CLJScaleFactor(0));
-                }
-                else
-                {
-                    const auto tscl = nbpairs.get(nb14pair.atom0(), nb14pair.atom1());
-                }
-            }
-            else
-            {
-                const auto tscl = nbpairs.get(nb14pair.atom0(), nb14pair.atom1());
+                // and remove them from the excluded atoms list
+                exc_atoms.set(nb14pair.atom0(), nb14pair.atom1(), CLJScaleFactor(0));
             }
         }
     }

@@ -375,3 +375,104 @@ def test_grotop_water(tmpdir, water_model):
                 is_settles = True
             if line.startswith("[ vsite3 ]"):
                 is_vsite = True
+
+
+def test_glycam(tmpdir):
+    """Test that a topology using the GLYCAM force field (SCEE=1.0, SCNB=1.0)
+    is read and written correctly.
+
+    GLYCAM uses full 1-4 interactions (no scaling), unlike standard AMBER
+    which uses SCEE=1.2, SCNB=2.0. In GROMACS this is represented by funct=2
+    pairs with explicit LJ parameters rather than funct=1 which would apply
+    the global fudgeLJ/fudgeQQ scaling.
+    """
+
+    # Load the GLYCAM topology and coordinates.
+    mols = sr.load_test_files("glycam.top", "glycam.gro")
+
+    # The system contains a protein (PROA) and a glycan (CARB).
+    # Find them by molecule name.
+    glycan = mols["molname CARB"]
+    protein = mols["molname PROA"]
+
+    # The glycan should use GLYCAM-style full 1-4 interactions.
+    # Its LJ property should be readable and non-trivial.
+    glycan_lj = glycan.property("LJ")
+    assert glycan_lj is not None
+
+    protein_lj = protein.property("LJ")
+    assert protein_lj is not None
+
+    # Write the whole system to GROMACS topology + coordinate files.
+    d = tmpdir.mkdir("test_glycam")
+    f = sr.save(mols, d.join("glycam_out"), format=["GroTop", "Gro87"])
+
+    # Parse the written file to verify the [pairs] sections are correct.
+    # The glycan (CARB) molecule type must use funct=2 (explicit LJ pairs,
+    # fudgeQQ=1.0) because its 1-4 interactions are unscaled.
+    # The protein (PROA) molecule type uses funct=1 (standard AMBER scaling).
+    current_moltype = None
+    expect_moltype_name = False
+    in_pairs = False
+    carb_funct2_count = 0
+    carb_funct1_count = 0
+    proa_funct1_count = 0
+
+    with open(f[0], "r") as fh:
+        for line in fh:
+            stripped = line.strip()
+            if not stripped or stripped.startswith(";"):
+                continue
+            if stripped == "[ moleculetype ]":
+                expect_moltype_name = True
+                in_pairs = False
+                continue
+            if expect_moltype_name:
+                current_moltype = stripped.split()[0]
+                expect_moltype_name = False
+                continue
+            if stripped.startswith("["):
+                in_pairs = stripped == "[ pairs ]"
+                continue
+            if in_pairs:
+                words = stripped.split()
+                if len(words) >= 3:
+                    funct = int(words[2])
+                    if current_moltype == "CARB":
+                        if funct == 2:
+                            carb_funct2_count += 1
+                        else:
+                            carb_funct1_count += 1
+                    elif current_moltype == "PROA":
+                        if funct == 1:
+                            proa_funct1_count += 1
+
+    # The CARB glycan uses GLYCAM (SCEE=1.0, SCNB=1.0), so the vast majority
+    # of its 1-4 pairs must be funct=2. The original topology has exactly one
+    # funct=1 pair (atoms 8-14), which is preserved as funct=1.
+    assert carb_funct2_count > 0, "No funct=2 pairs found for CARB glycan"
+    assert (
+        carb_funct2_count > carb_funct1_count
+    ), "CARB glycan has more funct=1 pairs than funct=2; GLYCAM scaling not applied"
+
+    # Protein pairs must use funct=1 (standard AMBER scaling).
+    assert proa_funct1_count > 0, "No funct=1 pairs found for PROA protein"
+
+    # Reload and verify the energy is self-consistent after the GROMACS roundtrip.
+    # Before the fix, funct=2 pairs were written as funct=1, which would apply
+    # fudgeLJ=0.5 to the glycan 1-4 LJ interactions and give a different energy.
+    mols2 = sr.load(f, show_warnings=False)
+    glycan2 = mols2["molname CARB"]
+
+    glycan_lj2 = glycan2.property("LJ")
+
+    # Check a representative atom (index 1, type Oh) whose sigma and epsilon
+    # survive the roundtrip within floating-point formatting precision.
+    assert glycan_lj2[1].sigma().value() == pytest.approx(
+        glycan_lj[1].sigma().value(), rel=1e-3
+    )
+    assert glycan_lj2[1].epsilon().value() == pytest.approx(
+        glycan_lj[1].epsilon().value(), rel=1e-3
+    )
+
+    assert mols2.energy().value() == pytest.approx(mols.energy().value(), rel=1e-3)
