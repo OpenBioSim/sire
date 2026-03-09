@@ -23,6 +23,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add convenience function to ``sire.mol.dynamics`` to get current energy trajectory records.
 
+* Fixed parsing of AMBER and GROMACS GLYCAM force field topologies.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 

@@ -46,11 +46,11 @@
 
 #include "SireMM/atomljs.h"
 #include "SireMM/cljnbpairs.h"
+#include "SireMM/cmapfunctions.h"
 #include "SireMM/fouratomfunctions.h"
 #include "SireMM/internalff.h"
 #include "SireMM/threeatomfunctions.h"
 #include "SireMM/twoatomfunctions.h"
-#include "SireMM/cmapfunctions.h"
 
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
@@ -82,265 +82,195 @@ using namespace SireStream;
 
 static const RegisterMetaType<GroAtom> r_groatom(NO_ROOT);
 
-QDataStream &operator<<(QDataStream &ds, const GroAtom &atom)
-{
-    writeHeader(ds, r_groatom, 3);
+QDataStream &operator<<(QDataStream &ds, const GroAtom &atom) {
+  writeHeader(ds, r_groatom, 3);
 
-    SharedDataStream sds(ds);
+  SharedDataStream sds(ds);
 
-    sds << atom.atmname << atom.resname << atom.chainname << atom.atmtyp << atom.bndtyp << atom.atmnum << atom.resnum
-        << atom.chggrp << atom.chg.to(mod_electron) << atom.mss.to(g_per_mol);
+  sds << atom.atmname << atom.resname << atom.chainname << atom.atmtyp
+      << atom.bndtyp << atom.atmnum << atom.resnum << atom.chggrp
+      << atom.chg.to(mod_electron) << atom.mss.to(g_per_mol);
 
-    return ds;
+  return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, GroAtom &atom)
-{
-    VersionID v = readHeader(ds, r_groatom);
+QDataStream &operator>>(QDataStream &ds, GroAtom &atom) {
+  VersionID v = readHeader(ds, r_groatom);
 
-    if (v == 3)
-    {
-        SharedDataStream sds(ds);
+  if (v == 3) {
+    SharedDataStream sds(ds);
 
-        double chg, mass;
+    double chg, mass;
 
-        sds >> atom.atmname >> atom.resname >> atom.chainname >> atom.atmtyp >> atom.bndtyp >> atom.atmnum >>
-            atom.resnum >> atom.chggrp >> chg >> mass;
+    sds >> atom.atmname >> atom.resname >> atom.chainname >> atom.atmtyp >>
+        atom.bndtyp >> atom.atmnum >> atom.resnum >> atom.chggrp >> chg >> mass;
 
-        atom.chg = chg * mod_electron;
-        atom.mss = mass * g_per_mol;
-    }
-    else if (v == 2)
-    {
-        SharedDataStream sds(ds);
+    atom.chg = chg * mod_electron;
+    atom.mss = mass * g_per_mol;
+  } else if (v == 2) {
+    SharedDataStream sds(ds);
 
-        double chg, mass;
+    double chg, mass;
 
-        sds >> atom.atmname >> atom.resname >> atom.atmtyp >> atom.bndtyp >> atom.atmnum >> atom.resnum >>
-            atom.chggrp >> chg >> mass;
+    sds >> atom.atmname >> atom.resname >> atom.atmtyp >> atom.bndtyp >>
+        atom.atmnum >> atom.resnum >> atom.chggrp >> chg >> mass;
 
-        atom.chg = chg * mod_electron;
-        atom.mss = mass * g_per_mol;
-    }
-    else if (v == 1)
-    {
-        SharedDataStream sds(ds);
+    atom.chg = chg * mod_electron;
+    atom.mss = mass * g_per_mol;
+  } else if (v == 1) {
+    SharedDataStream sds(ds);
 
-        double chg, mass;
+    double chg, mass;
 
-        sds >> atom.atmname >> atom.resname >> atom.atmtyp >> atom.atmnum >> atom.resnum >> atom.chggrp >> chg >> mass;
+    sds >> atom.atmname >> atom.resname >> atom.atmtyp >> atom.atmnum >>
+        atom.resnum >> atom.chggrp >> chg >> mass;
 
-        atom.bndtyp = atom.atmtyp;
-        atom.chg = chg * mod_electron;
-        atom.mss = mass * g_per_mol;
-    }
-    else
-        throw version_error(v, "1,2", r_groatom, CODELOC);
+    atom.bndtyp = atom.atmtyp;
+    atom.chg = chg * mod_electron;
+    atom.mss = mass * g_per_mol;
+  } else
+    throw version_error(v, "1,2", r_groatom, CODELOC);
 
-    return ds;
+  return ds;
 }
 
 /** Constructor */
-GroAtom::GroAtom() : atmnum(-1), resnum(-1), chggrp(-1), chg(0), mss(0)
-{
-}
+GroAtom::GroAtom() : atmnum(-1), resnum(-1), chggrp(-1), chg(0), mss(0) {}
 
 /** Copy constructor */
 GroAtom::GroAtom(const GroAtom &other)
-    : atmname(other.atmname), resname(other.resname), chainname(other.chainname), atmtyp(other.atmtyp),
-      bndtyp(other.bndtyp), atmnum(other.atmnum), resnum(other.resnum), chggrp(other.chggrp), chg(other.chg),
-      mss(other.mss)
-{
-}
+    : atmname(other.atmname), resname(other.resname),
+      chainname(other.chainname), atmtyp(other.atmtyp), bndtyp(other.bndtyp),
+      atmnum(other.atmnum), resnum(other.resnum), chggrp(other.chggrp),
+      chg(other.chg), mss(other.mss) {}
 
 /** Destructor */
-GroAtom::~GroAtom()
-{
-}
+GroAtom::~GroAtom() {}
 
 /** Copy assignment operator */
-GroAtom &GroAtom::operator=(const GroAtom &other)
-{
-    if (this != &other)
-    {
-        atmname = other.atmname;
-        resname = other.resname;
-        chainname = other.chainname;
-        atmtyp = other.atmtyp;
-        bndtyp = other.bndtyp;
-        atmnum = other.atmnum;
-        resnum = other.resnum;
-        chggrp = other.chggrp;
-        chg = other.chg;
-        mss = other.mss;
-    }
+GroAtom &GroAtom::operator=(const GroAtom &other) {
+  if (this != &other) {
+    atmname = other.atmname;
+    resname = other.resname;
+    chainname = other.chainname;
+    atmtyp = other.atmtyp;
+    bndtyp = other.bndtyp;
+    atmnum = other.atmnum;
+    resnum = other.resnum;
+    chggrp = other.chggrp;
+    chg = other.chg;
+    mss = other.mss;
+  }
 
-    return *this;
+  return *this;
 }
 
 /** Comparison operator */
-bool GroAtom::operator==(const GroAtom &other) const
-{
-    return atmname == other.atmname and resname == other.resname and chainname == other.chainname and
-           atmtyp == other.atmtyp and bndtyp == other.bndtyp and atmnum == other.atmnum and resnum == other.resnum and
-           chggrp == other.chggrp and chg == other.chg and mss == other.mss;
+bool GroAtom::operator==(const GroAtom &other) const {
+  return atmname == other.atmname and resname == other.resname and
+         chainname == other.chainname and atmtyp == other.atmtyp and
+         bndtyp == other.bndtyp and atmnum == other.atmnum and
+         resnum == other.resnum and chggrp == other.chggrp and
+         chg == other.chg and mss == other.mss;
 }
 
 /** Comparison operator */
-bool GroAtom::operator!=(const GroAtom &other) const
-{
-    return not operator==(other);
+bool GroAtom::operator!=(const GroAtom &other) const {
+  return not operator==(other);
 }
 
-const char *GroAtom::typeName()
-{
-    return QMetaType::typeName(qMetaTypeId<GroAtom>());
+const char *GroAtom::typeName() {
+  return QMetaType::typeName(qMetaTypeId<GroAtom>());
 }
 
-const char *GroAtom::what() const
-{
-    return GroAtom::typeName();
-}
+const char *GroAtom::what() const { return GroAtom::typeName(); }
 
-QString GroAtom::toString() const
-{
-    if (isNull())
-        return QObject::tr("GroAtom::null");
-    else
-        return QObject::tr("GroAtom( name() = %1, number() = %2 )").arg(atmname).arg(atmnum);
+QString GroAtom::toString() const {
+  if (isNull())
+    return QObject::tr("GroAtom::null");
+  else
+    return QObject::tr("GroAtom( name() = %1, number() = %2 )")
+        .arg(atmname)
+        .arg(atmnum);
 }
 
 /** Return whether or not this atom is null */
-bool GroAtom::isNull() const
-{
-    return operator==(GroAtom());
-}
+bool GroAtom::isNull() const { return operator==(GroAtom()); }
 
 /** Return the name of the atom */
-AtomName GroAtom::name() const
-{
-    return AtomName(atmname);
-}
+AtomName GroAtom::name() const { return AtomName(atmname); }
 
 /** Return the number of the atom */
-AtomNum GroAtom::number() const
-{
-    return AtomNum(atmnum);
-}
+AtomNum GroAtom::number() const { return AtomNum(atmnum); }
 
 /** Return the name of the residue that contains this atom */
-ResName GroAtom::residueName() const
-{
-    return ResName(resname);
-}
+ResName GroAtom::residueName() const { return ResName(resname); }
 
 /** Return the number of the residue that contains this atom */
-ResNum GroAtom::residueNumber() const
-{
-    return ResNum(resnum);
-}
+ResNum GroAtom::residueNumber() const { return ResNum(resnum); }
 
 /** Return the name of the chain that contains this atom. This will
     be an empty name if a chain isn't specified */
-ChainName GroAtom::chainName() const
-{
-    return ChainName(chainname);
-}
+ChainName GroAtom::chainName() const { return ChainName(chainname); }
 
 /** Return the charge group of this atom */
-qint64 GroAtom::chargeGroup() const
-{
-    return chggrp;
-}
+qint64 GroAtom::chargeGroup() const { return chggrp; }
 
 /** Return the atom type of this atom */
-QString GroAtom::atomType() const
-{
-    return atmtyp;
-}
+QString GroAtom::atomType() const { return atmtyp; }
 
-/** Return the bond type of this atom. This is normally the same as the atom type */
-QString GroAtom::bondType() const
-{
-    return bndtyp;
-}
+/** Return the bond type of this atom. This is normally the same as the atom
+ * type */
+QString GroAtom::bondType() const { return bndtyp; }
 
 /** Return the charge on this atom */
-SireUnits::Dimension::Charge GroAtom::charge() const
-{
-    return chg;
-}
+SireUnits::Dimension::Charge GroAtom::charge() const { return chg; }
 
 /** Return the mass of this atom */
-SireUnits::Dimension::MolarMass GroAtom::mass() const
-{
-    return mss;
-}
+SireUnits::Dimension::MolarMass GroAtom::mass() const { return mss; }
 
 /** Set the name of this atom */
-void GroAtom::setName(const QString &name)
-{
-    atmname = name;
-}
+void GroAtom::setName(const QString &name) { atmname = name; }
 
 /** Set the number of this atom */
-void GroAtom::setNumber(qint64 number)
-{
-    if (number >= 0)
-        atmnum = number;
+void GroAtom::setNumber(qint64 number) {
+  if (number >= 0)
+    atmnum = number;
 }
 
 /** Set the name of the residue containing this atom */
-void GroAtom::setResidueName(const QString &name)
-{
-    resname = name;
-}
+void GroAtom::setResidueName(const QString &name) { resname = name; }
 
 /** Set the number of the residue containing this atom */
-void GroAtom::setResidueNumber(qint64 number)
-{
-    resnum = number;
-}
+void GroAtom::setResidueNumber(qint64 number) { resnum = number; }
 
 /** Set the name of the chain containing this atom */
-void GroAtom::setChainName(const QString &name)
-{
-    chainname = name;
-}
+void GroAtom::setChainName(const QString &name) { chainname = name; }
 
 /** Set the charge group of this atom */
-void GroAtom::setChargeGroup(qint64 grp)
-{
-    if (grp >= 0)
-        chggrp = grp;
+void GroAtom::setChargeGroup(qint64 grp) {
+  if (grp >= 0)
+    chggrp = grp;
 }
 
 /** Set the atom type and bond type of this atom. To set
     the bond type separately, you need to set it after calling
     this function */
-void GroAtom::setAtomType(const QString &atomtype)
-{
-    atmtyp = atomtype;
-    bndtyp = atomtype;
+void GroAtom::setAtomType(const QString &atomtype) {
+  atmtyp = atomtype;
+  bndtyp = atomtype;
 }
 
 /** Set the bond type of this atom */
-void GroAtom::setBondType(const QString &bondtype)
-{
-    bndtyp = bondtype;
-}
+void GroAtom::setBondType(const QString &bondtype) { bndtyp = bondtype; }
 
 /** Set the charge on this atom */
-void GroAtom::setCharge(SireUnits::Dimension::Charge charge)
-{
-    chg = charge;
-}
+void GroAtom::setCharge(SireUnits::Dimension::Charge charge) { chg = charge; }
 
 /** Set the mass of this atom */
-void GroAtom::setMass(SireUnits::Dimension::MolarMass mass)
-{
-    if (mass.value() >= 0)
-        mss = mass;
+void GroAtom::setMass(SireUnits::Dimension::MolarMass mass) {
+  if (mass.value() >= 0)
+    mss = mass;
 }
 
 ////////////////
@@ -349,1871 +279,1606 @@ void GroAtom::setMass(SireUnits::Dimension::MolarMass mass)
 
 static const RegisterMetaType<GroMolType> r_gromoltyp(NO_ROOT);
 
-QDataStream &operator<<(QDataStream &ds, const GroMolType &moltyp)
-{
-    writeHeader(ds, r_gromoltyp, 3);
+QDataStream &operator<<(QDataStream &ds, const GroMolType &moltyp) {
+  writeHeader(ds, r_gromoltyp, 3);
 
-    SharedDataStream sds(ds);
+  SharedDataStream sds(ds);
 
-    sds << moltyp.nme << moltyp.warns << moltyp.atms0 << moltyp.atms1 << moltyp.bnds0 << moltyp.bnds1 << moltyp.angs0
-        << moltyp.angs1 << moltyp.dihs0 << moltyp.dihs1
-        << moltyp.cmaps0 << moltyp.cmaps1 << moltyp.first_atoms0 << moltyp.first_atoms1 << moltyp.ffield0
-        << moltyp.ffield1 << moltyp.nexcl0 << moltyp.nexcl1 << moltyp.is_perturbable;
+  sds << moltyp.nme << moltyp.warns << moltyp.atms0 << moltyp.atms1
+      << moltyp.bnds0 << moltyp.bnds1 << moltyp.angs0 << moltyp.angs1
+      << moltyp.dihs0 << moltyp.dihs1 << moltyp.cmaps0 << moltyp.cmaps1
+      << moltyp.first_atoms0 << moltyp.first_atoms1 << moltyp.ffield0
+      << moltyp.ffield1 << moltyp.nexcl0 << moltyp.nexcl1
+      << moltyp.is_perturbable;
 
-    return ds;
+  return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, GroMolType &moltyp)
-{
-    VersionID v = readHeader(ds, r_gromoltyp);
+QDataStream &operator>>(QDataStream &ds, GroMolType &moltyp) {
+  VersionID v = readHeader(ds, r_gromoltyp);
 
-    if (v == 1 or v == 2 or v == 3)
-    {
-        SharedDataStream sds(ds);
+  if (v == 1 or v == 2 or v == 3) {
+    SharedDataStream sds(ds);
 
-        sds >> moltyp.nme >> moltyp.warns >> moltyp.atms0 >> moltyp.atms1 >> moltyp.bnds0 >> moltyp.bnds1 >>
-            moltyp.angs0 >> moltyp.angs1 >> moltyp.dihs0 >> moltyp.dihs1;
+    sds >> moltyp.nme >> moltyp.warns >> moltyp.atms0 >> moltyp.atms1 >>
+        moltyp.bnds0 >> moltyp.bnds1 >> moltyp.angs0 >> moltyp.angs1 >>
+        moltyp.dihs0 >> moltyp.dihs1;
 
-        if (v == 3)
-        {
-            sds >> moltyp.cmaps0 >> moltyp.cmaps1;
-        }
-        else
-        {
-            moltyp.cmaps0 = QHash<SireMol::CMAPID, QString>();
-            moltyp.cmaps1 = QHash<SireMol::CMAPID, QString>();
-        }
-
-        sds >> moltyp.first_atoms0 >> moltyp.first_atoms1;
-
-        if (v == 2)
-            sds >> moltyp.ffield0 >> moltyp.ffield1;
-        else
-        {
-            moltyp.ffield0 = MMDetail();
-            moltyp.ffield1 = MMDetail();
-        }
-
-        sds >> moltyp.nexcl0 >> moltyp.nexcl1 >> moltyp.is_perturbable;
+    if (v == 3) {
+      sds >> moltyp.cmaps0 >> moltyp.cmaps1;
+    } else {
+      moltyp.cmaps0 = QHash<SireMol::CMAPID, QString>();
+      moltyp.cmaps1 = QHash<SireMol::CMAPID, QString>();
     }
-    else
-        throw version_error(v, "1,2,3", r_gromoltyp, CODELOC);
 
-    return ds;
+    sds >> moltyp.first_atoms0 >> moltyp.first_atoms1;
+
+    if (v == 2)
+      sds >> moltyp.ffield0 >> moltyp.ffield1;
+    else {
+      moltyp.ffield0 = MMDetail();
+      moltyp.ffield1 = MMDetail();
+    }
+
+    sds >> moltyp.nexcl0 >> moltyp.nexcl1 >> moltyp.is_perturbable;
+  } else
+    throw version_error(v, "1,2,3", r_gromoltyp, CODELOC);
+
+  return ds;
 }
 
 /** Constructor */
 GroMolType::GroMolType()
     : nexcl0(3), nexcl1(3), // default to 3 as this is normal for most molecules
       is_perturbable(false) // default to a non-perturbable molecule
-{
+{}
+
+/** Return the ID string for the cmap atom types 'atm0' 'atm1' 'atm2' 'atm3'
+   'atm4'. This creates the string 'atm0;atm1;atm2;atm3;atm4' or
+   'atm4;atm3;atm2;atm1;atm0' depending on which of the atoms is lower. The ';'
+   character is used as a separator as it cannot be in the atom names, as it is
+   used as a comment character in the Gromacs Top file */
+static QString get_cmap_id(const QString &atm0, const QString &atm1,
+                           const QString &atm2, const QString &atm3,
+                           const QString &atm4, int func_type) {
+  if ((atm0 < atm4) or (atm0 == atm4 and atm1 <= atm3)) {
+    return QString("%1;%2;%3;%4;%5;%6")
+        .arg(atm0, atm1, atm2, atm3, atm4)
+        .arg(func_type);
+  } else {
+    return QString("%1;%2;%3;%4;%5;%6")
+        .arg(atm4, atm3, atm2, atm1, atm0)
+        .arg(func_type);
+  }
 }
 
-/** Return the ID string for the cmap atom types 'atm0' 'atm1' 'atm2' 'atm3' 'atm4'. This
-    creates the string 'atm0;atm1;atm2;atm3;atm4' or 'atm4;atm3;atm2;atm1;atm0' depending on which
-    of the atoms is lower. The ';' character is used as a separator
-    as it cannot be in the atom names, as it is used as a comment
-    character in the Gromacs Top file */
-static QString get_cmap_id(const QString &atm0, const QString &atm1, const QString &atm2,
-                           const QString &atm3, const QString &atm4, int func_type)
-{
-    if ((atm0 < atm4) or (atm0 == atm4 and atm1 <= atm3))
-    {
-        return QString("%1;%2;%3;%4;%5;%6").arg(atm0, atm1, atm2, atm3, atm4).arg(func_type);
-    }
-    else
-    {
-        return QString("%1;%2;%3;%4;%5;%6").arg(atm4, atm3, atm2, atm1, atm0).arg(func_type);
-    }
+static QList<QString> cmap_id_to_atomtypes(const QString &cmap_id) {
+  // split the string by the ';' character
+  QStringList parts = cmap_id.split(";");
+
+  if (parts.size() != 6) {
+    throw SireError::incompatible_error(
+        QObject::tr("Invalid CMAP ID '%1'. Expected format: "
+                    "'atm0;atm1;atm2;atm3;atm4;func_type'")
+            .arg(cmap_id),
+        CODELOC);
+  }
+
+  // return the first 5 parts as a list of atom types
+  return parts.mid(0, 5);
 }
 
-static QList<QString> cmap_id_to_atomtypes(const QString &cmap_id)
-{
-    // split the string by the ';' character
-    QStringList parts = cmap_id.split(";");
+static QString cmap_to_string(const CMAPParameter &cmap) {
+  // format is "1 nRows nCols param param param..."
+  QStringList params;
+  params.append(QString("%1 %2").arg(cmap.nRows(), 2).arg(cmap.nColumns(), 2));
 
-    if (parts.size() != 6)
-    {
-        throw SireError::incompatible_error(QObject::tr("Invalid CMAP ID '%1'. Expected format: 'atm0;atm1;atm2;atm3;atm4;func_type'")
-                                                .arg(cmap_id),
-                                            CODELOC);
+  // write as 10 values per line
+  // (this is the format used by Gromacs)
+  const auto vals = cmap.grid().toColumnMajorVector();
+
+  QStringList line;
+
+  for (int i = 0; i < vals.size(); ++i) {
+    line.append(QString::number(vals[i], 'f', 8));
+
+    if (line.count() == 10) {
+      params.append(line.join(" "));
+      line.clear();
     }
+  }
 
-    // return the first 5 parts as a list of atom types
-    return parts.mid(0, 5);
+  if (not line.isEmpty()) {
+    params.append(line.join(" "));
+  }
+
+  return params.join("\\\n");
 }
 
-static QString cmap_to_string(const CMAPParameter &cmap)
-{
-    // format is "1 nRows nCols param param param..."
-    QStringList params;
-    params.append(QString("%1 %2").arg(cmap.nRows(), 2).arg(cmap.nColumns(), 2));
+static CMAPParameter string_to_cmap(QString params) {
+  params = params.trimmed().replace("\\\n", " ");
 
-    // write as 10 values per line
-    // (this is the format used by Gromacs)
-    const auto vals = cmap.grid().toColumnMajorVector();
+  QStringList parts = params.split(" ", Qt::SkipEmptyParts);
 
-    QStringList line;
+  if (parts.size() < 3) {
+    throw SireError::incompatible_error(
+        QObject::tr("Invalid CMAP parameter string '%1'. Expected format: '1 "
+                    "nRows nCols param param ...'")
+            .arg(params),
+        CODELOC);
+  }
 
-    for (int i = 0; i < vals.size(); ++i)
-    {
-        line.append(QString::number(vals[i], 'f', 8));
+  bool ok_rows, ok_cols;
 
-        if (line.count() == 10)
-        {
-            params.append(line.join(" "));
-            line.clear();
-        }
+  int nRows = parts[0].toInt(&ok_rows);
+  int nCols = parts[1].toInt(&ok_cols);
+
+  if (!ok_rows || !ok_cols || nRows <= 0 || nCols <= 0) {
+    throw SireError::incompatible_error(
+        QObject::tr("Invalid CMAP parameter string '%1'. "
+                    "Expected positive integers for nRows and nCols.")
+            .arg(params),
+        CODELOC);
+  }
+
+  if (parts.size() != 2 + nRows * nCols) {
+    throw SireError::incompatible_error(
+        QObject::tr("Invalid CMAP parameter string '%1'. Expected %2 "
+                    "parameters, got %3.")
+            .arg(params)
+            .arg(2 + nRows * nCols)
+            .arg(parts.size()),
+        CODELOC);
+  }
+
+  QVector<double> grid(nRows * nCols);
+
+  for (int i = 0; i < nRows * nCols; ++i) {
+    bool ok;
+    double value = parts[2 + i].toDouble(&ok);
+
+    if (!ok) {
+      throw SireError::incompatible_error(
+          QObject::tr("Invalid CMAP parameter string '%1'. "
+                      "Expected floating-point values for parameters.")
+              .arg(params),
+          CODELOC);
     }
 
-    if (not line.isEmpty())
-    {
-        params.append(line.join(" "));
-    }
+    grid[i] = value;
+  }
 
-    return params.join("\\\n");
-}
-
-static CMAPParameter string_to_cmap(QString params)
-{
-    params = params.trimmed().replace("\\\n", " ");
-
-    QStringList parts = params.split(" ", Qt::SkipEmptyParts);
-
-    if (parts.size() < 3)
-    {
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Invalid CMAP parameter string '%1'. Expected format: '1 nRows nCols param param ...'")
-                                                .arg(params),
-                                            CODELOC);
-    }
-
-    bool ok_rows, ok_cols;
-
-    int nRows = parts[0].toInt(&ok_rows);
-    int nCols = parts[1].toInt(&ok_cols);
-
-    if (!ok_rows || !ok_cols || nRows <= 0 || nCols <= 0)
-    {
-        throw SireError::incompatible_error(QObject::tr("Invalid CMAP parameter string '%1'. "
-                                                        "Expected positive integers for nRows and nCols.")
-                                                .arg(params),
-                                            CODELOC);
-    }
-
-    if (parts.size() != 2 + nRows * nCols)
-    {
-        throw SireError::incompatible_error(QObject::tr(
-                                                "Invalid CMAP parameter string '%1'. Expected %2 parameters, got %3.")
-                                                .arg(params)
-                                                .arg(2 + nRows * nCols)
-                                                .arg(parts.size()),
-                                            CODELOC);
-    }
-
-    QVector<double> grid(nRows * nCols);
-
-    for (int i = 0; i < nRows * nCols; ++i)
-    {
-        bool ok;
-        double value = parts[2 + i].toDouble(&ok);
-
-        if (!ok)
-        {
-            throw SireError::incompatible_error(QObject::tr("Invalid CMAP parameter string '%1'. "
-                                                            "Expected floating-point values for parameters.")
-                                                    .arg(params),
-                                                CODELOC);
-        }
-
-        grid[i] = value;
-    }
-
-    return CMAPParameter(Array2D<double>::fromColumnMajorVector(grid, nRows, nCols));
+  return CMAPParameter(
+      Array2D<double>::fromColumnMajorVector(grid, nRows, nCols));
 }
 
 /** Construct from the passed molecule */
 GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
-    : nexcl0(3), nexcl1(3), // default to '3' as this is normal for most molecules
+    : nexcl0(3),
+      nexcl1(3), // default to '3' as this is normal for most molecules
       is_perturbable(false) // default to a non-perturbable molecule
 {
-    if (mol.nAtoms() == 0)
+  if (mol.nAtoms() == 0)
+    return;
+
+  // Try to see if this molecule is perturbable.
+  try {
+    is_perturbable = mol.property(map["is_perturbable"]).asABoolean();
+  } catch (...) {
+  }
+
+  // Perturbable molecule.
+  if (is_perturbable) {
+    // For perturbable molecules we don't user the user PropertyMap to extract
+    // properties since the naming must be consistent for the properties at
+    // lambda = 0 and lambda = 1, e.g. "charge0" and "charge1".
+
+    // get the name either from the molecule name or the name of the first
+    // residue
+    nme = mol.name();
+
+    if (nme.isEmpty()) {
+      nme = mol.residue(ResIdx(0)).name();
+    }
+
+    // replace any strings in the name with underscores
+    nme = nme.simplified().replace(" ", "_");
+
+    // get the forcefields for this molecule
+    try {
+      ffield0 = mol.property(map["forcefield0"]).asA<MMDetail>();
+    } catch (...) {
+      warns.append(QObject::tr("Cannot find a valid MM forcefield for this "
+                               "molecule at lambda = 0!"));
+    }
+    try {
+      ffield1 = mol.property(map["forcefield1"]).asA<MMDetail>();
+    } catch (...) {
+      warns.append(QObject::tr("Cannot find a valid MM forcefield for this "
+                               "molecule at lambda = 1!"));
+    }
+
+    const auto molinfo = mol.info();
+
+    bool uses_parallel = true;
+    if (map["parallel"].hasValue()) {
+      uses_parallel = map["parallel"].value().asA<BooleanProperty>().value();
+    }
+
+    // get information about all atoms in this molecule
+    auto extract_atoms = [&](bool is_lambda1) {
+      if (is_lambda1)
+        atms1 = QVector<GroAtom>(molinfo.nAtoms());
+      else
+        atms0 = QVector<GroAtom>(molinfo.nAtoms());
+
+      AtomMasses masses;
+      AtomElements elements;
+      AtomCharges charges;
+      AtomIntProperty groups;
+      AtomStringProperty atomtypes;
+      AtomStringProperty bondtypes;
+
+      bool has_mass(false), has_elem(false), has_chg(false), has_type(false),
+          has_bondtype(false);
+
+      try {
+        if (is_lambda1)
+          masses = mol.property(map["mass1"]).asA<AtomMasses>();
+        else
+          masses = mol.property(map["mass0"]).asA<AtomMasses>();
+        has_mass = true;
+      } catch (...) {
+      }
+
+      if (not has_mass) {
+        try {
+          if (is_lambda1)
+            elements = mol.property(map["element1"]).asA<AtomElements>();
+          else
+            elements = mol.property(map["element0"]).asA<AtomElements>();
+          has_elem = true;
+        } catch (...) {
+        }
+      }
+
+      try {
+        if (is_lambda1)
+          charges = mol.property(map["charge1"]).asA<AtomCharges>();
+        else
+          charges = mol.property(map["charge0"]).asA<AtomCharges>();
+        has_chg = true;
+      } catch (...) {
+      }
+
+      try {
+        if (is_lambda1)
+          atomtypes = mol.property(map["atomtype1"]).asA<AtomStringProperty>();
+        else
+          atomtypes = mol.property(map["atomtype0"]).asA<AtomStringProperty>();
+        has_type = true;
+      } catch (...) {
+      }
+
+      try {
+        if (is_lambda1)
+          bondtypes = mol.property(map["bondtype1"]).asA<AtomStringProperty>();
+        else
+          bondtypes = mol.property(map["bondtype0"]).asA<AtomStringProperty>();
+        has_bondtype = true;
+      } catch (...) {
+      }
+
+      if (not(has_chg and has_type and (has_elem or has_mass))) {
+        warns.append(
+            QObject::tr(
+                "Cannot find valid charge, atomtype and (element or mass) "
+                "properties for the molecule. These are needed! "
+                "has_charge=%1, has_atomtype=%2, has_mass=%3, has_element=%4")
+                .arg(has_chg)
+                .arg(has_type)
+                .arg(has_mass)
+                .arg(has_elem));
         return;
+      }
 
-    // Try to see if this molecule is perturbable.
-    try
-    {
-        is_perturbable = mol.property(map["is_perturbable"]).asABoolean();
-    }
-    catch (...)
-    {
-    }
+      // run through the atoms in AtomIdx order
+      auto extract_atom = [&](int iatm, bool is_lambda1) {
+        AtomIdx i(iatm);
 
-    // Perturbable molecule.
-    if (is_perturbable)
-    {
-        // For perturbable molecules we don't user the user PropertyMap to extract
-        // properties since the naming must be consistent for the properties at
-        // lambda = 0 and lambda = 1, e.g. "charge0" and "charge1".
+        const auto cgatomidx = molinfo.cgAtomIdx(i);
+        const auto residx = molinfo.parentResidue(i);
 
-        // get the name either from the molecule name or the name of the first
-        // residue
-        nme = mol.name();
+        QString chainname;
 
-        if (nme.isEmpty())
-        {
-            nme = mol.residue(ResIdx(0)).name();
+        if (molinfo.isWithinChain(residx)) {
+          chainname = molinfo.name(molinfo.parentChain(residx)).value();
         }
 
-        // replace any strings in the name with underscores
-        nme = nme.simplified().replace(" ", "_");
+        // atom numbers have to count up sequentially from 1
+        int atomnum = i + 1;
+        QString atomnam = molinfo.name(i);
 
-        // get the forcefields for this molecule
-        try
-        {
-            ffield0 = mol.property(map["forcefield0"]).asA<MMDetail>();
-        }
-        catch (...)
-        {
-            warns.append(QObject::tr("Cannot find a valid MM forcefield for this molecule at lambda = 0!"));
-        }
-        try
-        {
-            ffield1 = mol.property(map["forcefield1"]).asA<MMDetail>();
-        }
-        catch (...)
-        {
-            warns.append(QObject::tr("Cannot find a valid MM forcefield for this molecule at lambda = 1!"));
+        // assuming that residues are in the same order as the atoms
+        int resnum = residx + 1;
+        QString resnam = molinfo.name(residx);
+
+        // people like to preserve the residue numbers of ligands and
+        // proteins. This is very challenging for the gromacs topology,
+        // as it would force a different topology for every solvent molecule,
+        // so deciding on the difference between protein/ligand and solvent
+        // is tough. Will preserve the residue number if the number of
+        // residues is greater than 1 and the number of atoms is greater
+        // than 32 (so octanol is a solvent)
+        if (molinfo.nResidues() > 1 or molinfo.nAtoms() > 32) {
+          resnum = molinfo.number(residx).value();
         }
 
-        const auto molinfo = mol.info();
+        // Just use the atom number as the charge group for perturbable
+        // molecules.
+        int group = atomnum;
 
-        bool uses_parallel = true;
-        if (map["parallel"].hasValue())
-        {
-            uses_parallel = map["parallel"].value().asA<BooleanProperty>().value();
+        auto charge = charges[cgatomidx];
+
+        SireUnits::Dimension::MolarMass mass;
+
+        if (has_mass) {
+          mass = masses[cgatomidx];
+        } else {
+          mass = elements[cgatomidx].mass();
         }
 
-        // get information about all atoms in this molecule
-        auto extract_atoms = [&](bool is_lambda1)
-        {
+        if (mass < 0) {
+          // not allowed to have a negative mass
+          mass = 1.0 * g_per_mol;
+        }
+
+        QString atomtype = atomtypes[cgatomidx];
+
+        if (is_lambda1) {
+          auto &atom = atms1[i];
+
+          atom.setName(atomnam);
+          atom.setNumber(atomnum);
+          atom.setResidueName(resnam);
+          atom.setResidueNumber(resnum);
+          atom.setChainName(chainname);
+          atom.setChargeGroup(group);
+          atom.setCharge(charge);
+          atom.setMass(mass);
+          atom.setAtomType(atomtype);
+
+          if (has_bondtype) {
+            atom.setBondType(bondtypes[cgatomidx]);
+          } else {
+            atom.setBondType(atomtype);
+          }
+        } else {
+          auto &atom = atms0[i];
+
+          atom.setName(atomnam);
+          atom.setNumber(atomnum);
+          atom.setResidueName(resnam);
+          atom.setResidueNumber(resnum);
+          atom.setChainName(chainname);
+          atom.setChargeGroup(group);
+          atom.setCharge(charge);
+          atom.setMass(mass);
+          atom.setAtomType(atomtype);
+
+          if (has_bondtype) {
+            atom.setBondType(bondtypes[cgatomidx]);
+          } else {
+            atom.setBondType(atomtype);
+          }
+        }
+      };
+
+      if (uses_parallel) {
+        tbb::parallel_for(tbb::blocked_range<int>(0, molinfo.nAtoms()),
+                          [&](const tbb::blocked_range<int> &r) {
+                            for (int i = r.begin(); i < r.end(); ++i) {
+                              extract_atom(i, is_lambda1);
+                            }
+                          });
+      } else {
+        for (int i = 0; i < molinfo.nAtoms(); ++i) {
+          extract_atom(i, is_lambda1);
+        }
+      }
+    };
+
+    // get all of the bonds in this molecule
+    auto extract_bonds = [&](bool is_lambda1) {
+      bool has_conn(false), has_funcs(false);
+
+      TwoAtomFunctions funcs;
+      Connectivity conn;
+
+      const auto R = InternalPotential::symbols().bond().r();
+
+      try {
+        if (is_lambda1)
+          funcs = mol.property(map["bond1"]).asA<TwoAtomFunctions>();
+        else
+          funcs = mol.property(map["bond0"]).asA<TwoAtomFunctions>();
+        has_funcs = true;
+      } catch (...) {
+      }
+
+      try {
+        conn = mol.property(map["connectivity"]).asA<Connectivity>();
+        has_conn = true;
+      } catch (...) {
+      }
+
+      // get the bond potentials first
+      if (has_funcs) {
+        for (const auto &bond : funcs.potentials()) {
+          AtomIdx atom0 = molinfo.atomIdx(bond.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(bond.atom1());
+
+          if (atom0 > atom1)
+            qSwap(atom0, atom1);
+
+          if (is_lambda1)
+            bnds1.insert(BondID(atom0, atom1), GromacsBond(bond.function(), R));
+          else
+            bnds0.insert(BondID(atom0, atom1), GromacsBond(bond.function(), R));
+        }
+      }
+
+      // now fill in any missing bonded atoms with null bonds
+      if (has_conn) {
+        for (const auto &bond : conn.getBonds()) {
+          AtomIdx atom0 = molinfo.atomIdx(bond.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(bond.atom1());
+
+          if (atom0 > atom1)
+            qSwap(atom0, atom1);
+
+          BondID b(atom0, atom1);
+
+          if (is_lambda1) {
+            if (not bnds1.contains(b))
+              bnds1.insert(b,
+                           GromacsBond(5)); // function 5 is a simple connection
+          } else {
+            if (not bnds0.contains(b))
+              bnds0.insert(b,
+                           GromacsBond(5)); // function 5 is a simple connection
+          }
+        }
+      }
+    };
+
+    // get all of the angles in this molecule
+    auto extract_angles = [&](bool is_lambda1) {
+      bool has_funcs(false);
+
+      ThreeAtomFunctions funcs;
+
+      const auto theta = InternalPotential::symbols().angle().theta();
+
+      try {
+        if (is_lambda1)
+          funcs = mol.property(map["angle1"]).asA<ThreeAtomFunctions>();
+        else
+          funcs = mol.property(map["angle0"]).asA<ThreeAtomFunctions>();
+        has_funcs = true;
+      } catch (...) {
+      }
+
+      if (has_funcs) {
+        for (const auto &angle : funcs.potentials()) {
+          AtomIdx atom0 = molinfo.atomIdx(angle.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(angle.atom1());
+          AtomIdx atom2 = molinfo.atomIdx(angle.atom2());
+
+          if (atom0 > atom2)
+            qSwap(atom0, atom2);
+
+          if (is_lambda1) {
+            angs1.insert(AngleID(atom0, atom1, atom2),
+                         GromacsAngle(angle.function(), theta));
+          } else {
+            angs0.insert(AngleID(atom0, atom1, atom2),
+                         GromacsAngle(angle.function(), theta));
+          }
+        }
+      }
+    };
+
+    // get all of the dihedrals in this molecule
+    auto extract_dihedrals = [&](bool is_lambda1) {
+      bool has_funcs(false);
+
+      FourAtomFunctions funcs;
+
+      const auto phi = InternalPotential::symbols().dihedral().phi();
+      const auto theta = InternalPotential::symbols().improper().theta();
+
+      try {
+        if (is_lambda1)
+          funcs = mol.property(map["dihedral1"]).asA<FourAtomFunctions>();
+        else
+          funcs = mol.property(map["dihedral0"]).asA<FourAtomFunctions>();
+        has_funcs = true;
+      } catch (...) {
+      }
+
+      if (has_funcs) {
+        for (const auto &dihedral : funcs.potentials()) {
+          AtomIdx atom0 = molinfo.atomIdx(dihedral.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(dihedral.atom1());
+          AtomIdx atom2 = molinfo.atomIdx(dihedral.atom2());
+          AtomIdx atom3 = molinfo.atomIdx(dihedral.atom3());
+
+          if (atom0 > atom3) {
+            qSwap(atom0, atom3);
+            qSwap(atom1, atom2);
+          }
+
+          // get all of the dihedral terms (could be a lot)
+          auto parts = GromacsDihedral::construct(dihedral.function(), phi);
+
+          DihedralID dihid(atom0, atom1, atom2, atom3);
+
+          for (const auto &part : parts) {
             if (is_lambda1)
-                atms1 = QVector<GroAtom>(molinfo.nAtoms());
+              dihs1.insert(dihid, part);
             else
-                atms0 = QVector<GroAtom>(molinfo.nAtoms());
-
-            AtomMasses masses;
-            AtomElements elements;
-            AtomCharges charges;
-            AtomIntProperty groups;
-            AtomStringProperty atomtypes;
-            AtomStringProperty bondtypes;
-
-            bool has_mass(false), has_elem(false), has_chg(false), has_type(false), has_bondtype(false);
-
-            try
-            {
-                if (is_lambda1)
-                    masses = mol.property(map["mass1"]).asA<AtomMasses>();
-                else
-                    masses = mol.property(map["mass0"]).asA<AtomMasses>();
-                has_mass = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (not has_mass)
-            {
-                try
-                {
-                    if (is_lambda1)
-                        elements = mol.property(map["element1"]).asA<AtomElements>();
-                    else
-                        elements = mol.property(map["element0"]).asA<AtomElements>();
-                    has_elem = true;
-                }
-                catch (...)
-                {
-                }
-            }
-
-            try
-            {
-                if (is_lambda1)
-                    charges = mol.property(map["charge1"]).asA<AtomCharges>();
-                else
-                    charges = mol.property(map["charge0"]).asA<AtomCharges>();
-                has_chg = true;
-            }
-            catch (...)
-            {
-            }
-
-            try
-            {
-                if (is_lambda1)
-                    atomtypes = mol.property(map["atomtype1"]).asA<AtomStringProperty>();
-                else
-                    atomtypes = mol.property(map["atomtype0"]).asA<AtomStringProperty>();
-                has_type = true;
-            }
-            catch (...)
-            {
-            }
-
-            try
-            {
-                if (is_lambda1)
-                    bondtypes = mol.property(map["bondtype1"]).asA<AtomStringProperty>();
-                else
-                    bondtypes = mol.property(map["bondtype0"]).asA<AtomStringProperty>();
-                has_bondtype = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (not(has_chg and has_type and (has_elem or has_mass)))
-            {
-                warns.append(QObject::tr("Cannot find valid charge, atomtype and (element or mass) "
-                                         "properties for the molecule. These are needed! "
-                                         "has_charge=%1, has_atomtype=%2, has_mass=%3, has_element=%4")
-                                 .arg(has_chg)
-                                 .arg(has_type)
-                                 .arg(has_mass)
-                                 .arg(has_elem));
-                return;
-            }
-
-            // run through the atoms in AtomIdx order
-            auto extract_atom = [&](int iatm, bool is_lambda1)
-            {
-                AtomIdx i(iatm);
-
-                const auto cgatomidx = molinfo.cgAtomIdx(i);
-                const auto residx = molinfo.parentResidue(i);
-
-                QString chainname;
-
-                if (molinfo.isWithinChain(residx))
-                {
-                    chainname = molinfo.name(molinfo.parentChain(residx)).value();
-                }
-
-                // atom numbers have to count up sequentially from 1
-                int atomnum = i + 1;
-                QString atomnam = molinfo.name(i);
-
-                // assuming that residues are in the same order as the atoms
-                int resnum = residx + 1;
-                QString resnam = molinfo.name(residx);
-
-                // people like to preserve the residue numbers of ligands and
-                // proteins. This is very challenging for the gromacs topology,
-                // as it would force a different topology for every solvent molecule,
-                // so deciding on the difference between protein/ligand and solvent
-                // is tough. Will preserve the residue number if the number of
-                // residues is greater than 1 and the number of atoms is greater
-                // than 32 (so octanol is a solvent)
-                if (molinfo.nResidues() > 1 or molinfo.nAtoms() > 32)
-                {
-                    resnum = molinfo.number(residx).value();
-                }
-
-                // Just use the atom number as the charge group for perturbable molecules.
-                int group = atomnum;
-
-                auto charge = charges[cgatomidx];
-
-                SireUnits::Dimension::MolarMass mass;
-
-                if (has_mass)
-                {
-                    mass = masses[cgatomidx];
-                }
-                else
-                {
-                    mass = elements[cgatomidx].mass();
-                }
-
-                if (mass < 0)
-                {
-                    // not allowed to have a negative mass
-                    mass = 1.0 * g_per_mol;
-                }
-
-                QString atomtype = atomtypes[cgatomidx];
-
-                if (is_lambda1)
-                {
-                    auto &atom = atms1[i];
-
-                    atom.setName(atomnam);
-                    atom.setNumber(atomnum);
-                    atom.setResidueName(resnam);
-                    atom.setResidueNumber(resnum);
-                    atom.setChainName(chainname);
-                    atom.setChargeGroup(group);
-                    atom.setCharge(charge);
-                    atom.setMass(mass);
-                    atom.setAtomType(atomtype);
-
-                    if (has_bondtype)
-                    {
-                        atom.setBondType(bondtypes[cgatomidx]);
-                    }
-                    else
-                    {
-                        atom.setBondType(atomtype);
-                    }
-                }
-                else
-                {
-                    auto &atom = atms0[i];
-
-                    atom.setName(atomnam);
-                    atom.setNumber(atomnum);
-                    atom.setResidueName(resnam);
-                    atom.setResidueNumber(resnum);
-                    atom.setChainName(chainname);
-                    atom.setChargeGroup(group);
-                    atom.setCharge(charge);
-                    atom.setMass(mass);
-                    atom.setAtomType(atomtype);
-
-                    if (has_bondtype)
-                    {
-                        atom.setBondType(bondtypes[cgatomidx]);
-                    }
-                    else
-                    {
-                        atom.setBondType(atomtype);
-                    }
-                }
-            };
-
-            if (uses_parallel)
-            {
-                tbb::parallel_for(tbb::blocked_range<int>(0, molinfo.nAtoms()), [&](const tbb::blocked_range<int> &r)
-                                  {
-                    for (int i = r.begin(); i < r.end(); ++i)
-                    {
-                        extract_atom(i, is_lambda1);
-                    } });
-            }
-            else
-            {
-                for (int i = 0; i < molinfo.nAtoms(); ++i)
-                {
-                    extract_atom(i, is_lambda1);
-                }
-            }
-        };
-
-        // get all of the bonds in this molecule
-        auto extract_bonds = [&](bool is_lambda1)
-        {
-            bool has_conn(false), has_funcs(false);
-
-            TwoAtomFunctions funcs;
-            Connectivity conn;
-
-            const auto R = InternalPotential::symbols().bond().r();
-
-            try
-            {
-                if (is_lambda1)
-                    funcs = mol.property(map["bond1"]).asA<TwoAtomFunctions>();
-                else
-                    funcs = mol.property(map["bond0"]).asA<TwoAtomFunctions>();
-                has_funcs = true;
-            }
-            catch (...)
-            {
-            }
-
-            try
-            {
-                conn = mol.property(map["connectivity"]).asA<Connectivity>();
-                has_conn = true;
-            }
-            catch (...)
-            {
-            }
-
-            // get the bond potentials first
-            if (has_funcs)
-            {
-                for (const auto &bond : funcs.potentials())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(bond.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(bond.atom1());
-
-                    if (atom0 > atom1)
-                        qSwap(atom0, atom1);
-
-                    if (is_lambda1)
-                        bnds1.insert(BondID(atom0, atom1), GromacsBond(bond.function(), R));
-                    else
-                        bnds0.insert(BondID(atom0, atom1), GromacsBond(bond.function(), R));
-                }
-            }
-
-            // now fill in any missing bonded atoms with null bonds
-            if (has_conn)
-            {
-                for (const auto &bond : conn.getBonds())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(bond.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(bond.atom1());
-
-                    if (atom0 > atom1)
-                        qSwap(atom0, atom1);
-
-                    BondID b(atom0, atom1);
-
-                    if (is_lambda1)
-                    {
-                        if (not bnds1.contains(b))
-                            bnds1.insert(b, GromacsBond(5)); // function 5 is a simple connection
-                    }
-                    else
-                    {
-                        if (not bnds0.contains(b))
-                            bnds0.insert(b, GromacsBond(5)); // function 5 is a simple connection
-                    }
-                }
-            }
-        };
-
-        // get all of the angles in this molecule
-        auto extract_angles = [&](bool is_lambda1)
-        {
-            bool has_funcs(false);
-
-            ThreeAtomFunctions funcs;
-
-            const auto theta = InternalPotential::symbols().angle().theta();
-
-            try
-            {
-                if (is_lambda1)
-                    funcs = mol.property(map["angle1"]).asA<ThreeAtomFunctions>();
-                else
-                    funcs = mol.property(map["angle0"]).asA<ThreeAtomFunctions>();
-                has_funcs = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (has_funcs)
-            {
-                for (const auto &angle : funcs.potentials())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(angle.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(angle.atom1());
-                    AtomIdx atom2 = molinfo.atomIdx(angle.atom2());
-
-                    if (atom0 > atom2)
-                        qSwap(atom0, atom2);
-
-                    if (is_lambda1)
-                    {
-                        angs1.insert(AngleID(atom0, atom1, atom2), GromacsAngle(angle.function(), theta));
-                    }
-                    else
-                    {
-                        angs0.insert(AngleID(atom0, atom1, atom2), GromacsAngle(angle.function(), theta));
-                    }
-                }
-            }
-        };
-
-        // get all of the dihedrals in this molecule
-        auto extract_dihedrals = [&](bool is_lambda1)
-        {
-            bool has_funcs(false);
-
-            FourAtomFunctions funcs;
-
-            const auto phi = InternalPotential::symbols().dihedral().phi();
-            const auto theta = InternalPotential::symbols().improper().theta();
-
-            try
-            {
-                if (is_lambda1)
-                    funcs = mol.property(map["dihedral1"]).asA<FourAtomFunctions>();
-                else
-                    funcs = mol.property(map["dihedral0"]).asA<FourAtomFunctions>();
-                has_funcs = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (has_funcs)
-            {
-                for (const auto &dihedral : funcs.potentials())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(dihedral.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(dihedral.atom1());
-                    AtomIdx atom2 = molinfo.atomIdx(dihedral.atom2());
-                    AtomIdx atom3 = molinfo.atomIdx(dihedral.atom3());
-
-                    if (atom0 > atom3)
-                    {
-                        qSwap(atom0, atom3);
-                        qSwap(atom1, atom2);
-                    }
-
-                    // get all of the dihedral terms (could be a lot)
-                    auto parts = GromacsDihedral::construct(dihedral.function(), phi);
-
-                    DihedralID dihid(atom0, atom1, atom2, atom3);
-
-                    for (const auto &part : parts)
-                    {
-                        if (is_lambda1)
-                            dihs1.insert(dihid, part);
-                        else
-                            dihs0.insert(dihid, part);
-                    }
-                }
-            }
-
-            bool has_imps(false);
-
-            FourAtomFunctions imps;
-
-            try
-            {
-                if (is_lambda1)
-                    imps = mol.property(map["improper1"]).asA<FourAtomFunctions>();
-                else
-                    imps = mol.property(map["improper0"]).asA<FourAtomFunctions>();
-                has_imps = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (has_imps)
-            {
-                for (const auto &improper : imps.potentials())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(improper.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(improper.atom1());
-                    AtomIdx atom2 = molinfo.atomIdx(improper.atom2());
-                    AtomIdx atom3 = molinfo.atomIdx(improper.atom3());
-
-                    // get all of the dihedral terms (could be a lot)
-                    auto parts = GromacsDihedral::constructImproper(improper.function(), phi, theta);
-
-                    DihedralID impid(atom0, atom1, atom2, atom3);
-
-                    for (const auto &part : parts)
-                    {
-                        if (is_lambda1)
-                            dihs1.insert(impid, part);
-                        else
-                            dihs0.insert(impid, part);
-                    }
-                }
-            }
-        };
-
-        // get all of the CMAP terms in this molecule
-        auto extract_cmaps = [&](bool is_lambda1)
-        {
-            bool has_cmaps(false);
-            CMAPFunctions cmaps;
-
-            try
-            {
-                if (is_lambda1)
-                    cmaps = mol.property(map["cmap1"]).asA<CMAPFunctions>();
-                else
-                    cmaps = mol.property(map["cmap0"]).asA<CMAPFunctions>();
-
-                has_cmaps = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (has_cmaps)
-            {
-                QHash<CMAPParameter, QString> cmap_params;
-
-                for (const auto &cmap : cmaps.parameters())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(cmap.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(cmap.atom1());
-                    AtomIdx atom2 = molinfo.atomIdx(cmap.atom2());
-                    AtomIdx atom3 = molinfo.atomIdx(cmap.atom3());
-                    AtomIdx atom4 = molinfo.atomIdx(cmap.atom4());
-
-                    if ((atom0 > atom4) or (atom0 == atom4 and atom1 > atom2))
-                    {
-                        qSwap(atom0, atom4);
-                        qSwap(atom1, atom2);
-                    }
-
-                    // we will store the CMAP parameter as a string - this
-                    // will let us de-duplicate parameters later
-                    if (cmap_params.contains(cmap.parameter()))
-                    {
-                        if (is_lambda1)
-                            cmaps1.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
-                                          cmap_params[cmap.parameter()]);
-                        else
-                            cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
-                                          cmap_params[cmap.parameter()]);
-                    }
-                    else
-                    {
-                        // store the parameter as a string
-                        QString param_str = cmap_to_string(cmap.parameter());
-                        cmap_params.insert(cmap.parameter(), param_str);
-
-                        if (is_lambda1)
-                            cmaps1.insert(CMAPID(atom0, atom1, atom2, atom3, atom4), param_str);
-                        else
-                            cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4), param_str);
-                    }
-                }
-            }
-        };
-
-        const QVector<std::function<void(bool)>> functions = {extract_atoms, extract_bonds, extract_angles,
-                                                              extract_dihedrals, extract_cmaps};
-
-        if (uses_parallel)
-        {
-            tbb::parallel_for(tbb::blocked_range<int>(0, functions.count(), 1), [&](const tbb::blocked_range<int> &r)
-                              {
-                for (int i = r.begin(); i < r.end(); ++i)
-                {
-                    functions[i](false);
-                    functions[i](true);
-                } });
+              dihs0.insert(dihid, part);
+          }
         }
+      }
+
+      bool has_imps(false);
+
+      FourAtomFunctions imps;
+
+      try {
+        if (is_lambda1)
+          imps = mol.property(map["improper1"]).asA<FourAtomFunctions>();
         else
-        {
-            for (int i = 0; i < functions.count(); ++i)
-            {
-                functions[i](false);
-                functions[i](true);
-            }
-        }
+          imps = mol.property(map["improper0"]).asA<FourAtomFunctions>();
+        has_imps = true;
+      } catch (...) {
+      }
 
-        // sanitise this object
-        this->_pvt_sanitise();
-        this->_pvt_sanitise(true);
+      if (has_imps) {
+        for (const auto &improper : imps.potentials()) {
+          AtomIdx atom0 = molinfo.atomIdx(improper.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(improper.atom1());
+          AtomIdx atom2 = molinfo.atomIdx(improper.atom2());
+          AtomIdx atom3 = molinfo.atomIdx(improper.atom3());
+
+          // get all of the dihedral terms (could be a lot)
+          auto parts = GromacsDihedral::constructImproper(improper.function(),
+                                                          phi, theta);
+
+          DihedralID impid(atom0, atom1, atom2, atom3);
+
+          for (const auto &part : parts) {
+            if (is_lambda1)
+              dihs1.insert(impid, part);
+            else
+              dihs0.insert(impid, part);
+          }
+        }
+      }
+    };
+
+    // get all of the CMAP terms in this molecule
+    auto extract_cmaps = [&](bool is_lambda1) {
+      bool has_cmaps(false);
+      CMAPFunctions cmaps;
+
+      try {
+        if (is_lambda1)
+          cmaps = mol.property(map["cmap1"]).asA<CMAPFunctions>();
+        else
+          cmaps = mol.property(map["cmap0"]).asA<CMAPFunctions>();
+
+        has_cmaps = true;
+      } catch (...) {
+      }
+
+      if (has_cmaps) {
+        QHash<CMAPParameter, QString> cmap_params;
+
+        for (const auto &cmap : cmaps.parameters()) {
+          AtomIdx atom0 = molinfo.atomIdx(cmap.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(cmap.atom1());
+          AtomIdx atom2 = molinfo.atomIdx(cmap.atom2());
+          AtomIdx atom3 = molinfo.atomIdx(cmap.atom3());
+          AtomIdx atom4 = molinfo.atomIdx(cmap.atom4());
+
+          if ((atom0 > atom4) or (atom0 == atom4 and atom1 > atom2)) {
+            qSwap(atom0, atom4);
+            qSwap(atom1, atom2);
+          }
+
+          // we will store the CMAP parameter as a string - this
+          // will let us de-duplicate parameters later
+          if (cmap_params.contains(cmap.parameter())) {
+            if (is_lambda1)
+              cmaps1.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
+                            cmap_params[cmap.parameter()]);
+            else
+              cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
+                            cmap_params[cmap.parameter()]);
+          } else {
+            // store the parameter as a string
+            QString param_str = cmap_to_string(cmap.parameter());
+            cmap_params.insert(cmap.parameter(), param_str);
+
+            if (is_lambda1)
+              cmaps1.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
+                            param_str);
+            else
+              cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
+                            param_str);
+          }
+        }
+      }
+    };
+
+    const QVector<std::function<void(bool)>> functions = {
+        extract_atoms, extract_bonds, extract_angles, extract_dihedrals,
+        extract_cmaps};
+
+    if (uses_parallel) {
+      tbb::parallel_for(tbb::blocked_range<int>(0, functions.count(), 1),
+                        [&](const tbb::blocked_range<int> &r) {
+                          for (int i = r.begin(); i < r.end(); ++i) {
+                            functions[i](false);
+                            functions[i](true);
+                          }
+                        });
+    } else {
+      for (int i = 0; i < functions.count(); ++i) {
+        functions[i](false);
+        functions[i](true);
+      }
     }
 
-    // Regular molecule.
-    else
-    {
-        // get the name either from the molecule name or the name of the first
-        // residue
-        nme = mol.name();
-
-        if (nme.isEmpty())
-        {
-            nme = mol.residue(ResIdx(0)).name();
-        }
-
-        // replace any strings in the name with underscores
-        nme = nme.simplified().replace(" ", "_");
-
-        // get the forcefield for this molecule
-        try
-        {
-            ffield0 = mol.property(map["forcefield"]).asA<MMDetail>();
-        }
-        catch (...)
-        {
-            warns.append(QObject::tr("Cannot find a valid MM forcefield for this molecule!"));
-        }
-
-        const auto molinfo = mol.info();
-
-        bool uses_parallel = true;
-        if (map["parallel"].hasValue())
-        {
-            uses_parallel = map["parallel"].value().asA<BooleanProperty>().value();
-        }
-
-        // get information about all atoms in this molecule
-        auto extract_atoms = [&]()
-        {
-            atms0 = QVector<GroAtom>(molinfo.nAtoms());
-
-            AtomMasses masses;
-            AtomElements elements;
-            AtomCharges charges;
-            AtomIntProperty groups;
-            AtomStringProperty atomtypes;
-            AtomStringProperty bondtypes;
-
-            bool has_mass(false), has_elem(false), has_chg(false), has_group(false), has_type(false);
-            bool has_bondtype(false);
-
-            try
-            {
-                masses = mol.property(map["mass"]).asA<AtomMasses>();
-                has_mass = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (not has_mass)
-            {
-                try
-                {
-                    elements = mol.property(map["element"]).asA<AtomElements>();
-                    has_elem = true;
-                }
-                catch (...)
-                {
-                }
-            }
-
-            try
-            {
-                charges = mol.property(map["charge"]).asA<AtomCharges>();
-                has_chg = true;
-            }
-            catch (...)
-            {
-            }
-
-            try
-            {
-                groups = mol.property(map["charge_group"]).asA<AtomIntProperty>();
-                has_group = true;
-            }
-            catch (...)
-            {
-            }
-
-            try
-            {
-                atomtypes = mol.property(map["atomtype"]).asA<AtomStringProperty>();
-                has_type = true;
-            }
-            catch (...)
-            {
-            }
-
-            try
-            {
-                bondtypes = mol.property(map["bondtype"]).asA<AtomStringProperty>();
-                has_bondtype = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (not(has_chg and has_type and (has_elem or has_mass)))
-            {
-                warns.append(QObject::tr("Cannot find valid charge, atomtype and (element or mass) "
-                                         "properties for the molecule. These are needed! "
-                                         "has_charge=%1, has_atomtype=%2, has_mass=%3, has_element=%4")
-                                 .arg(has_chg)
-                                 .arg(has_type)
-                                 .arg(has_mass)
-                                 .arg(has_elem));
-                return;
-            }
-
-            // run through the atoms in AtomIdx order
-            auto extract_atom = [&](int iatm)
-            {
-                AtomIdx i(iatm);
-
-                const auto cgatomidx = molinfo.cgAtomIdx(i);
-                const auto residx = molinfo.parentResidue(i);
-
-                QString chainname;
-
-                if (molinfo.isWithinChain(residx))
-                {
-                    chainname = molinfo.name(molinfo.parentChain(residx)).value();
-                }
-
-                // atom numbers have to count up sequentially from 1
-                int atomnum = i + 1;
-                QString atomnam = molinfo.name(i);
-
-                // assuming that residues are in the same order as the atoms
-                int resnum = residx + 1;
-                QString resnam = molinfo.name(residx);
-
-                // people like to preserve the residue numbers of ligands and
-                // proteins. This is very challenging for the gromacs topology,
-                // as it would force a different topology for every solvent molecule,
-                // so deciding on the difference between protein/ligand and solvent
-                // is tough. Will preserve the residue number if the number of
-                // residues is greater than 1 and the number of atoms is greater
-                // than 32 (so octanol is a solvent)
-                if (molinfo.nResidues() > 1 or molinfo.nAtoms() > 32)
-                {
-                    resnum = molinfo.number(residx).value();
-                }
-
-                int group = atomnum;
-
-                if (has_group)
-                {
-                    group = groups[cgatomidx];
-                }
-
-                auto charge = charges[cgatomidx];
-
-                SireUnits::Dimension::MolarMass mass;
-
-                if (has_mass)
-                {
-                    mass = masses[cgatomidx];
-                }
-                else
-                {
-                    mass = elements[cgatomidx].mass();
-                }
-
-                if (mass < 0)
-                {
-                    // not allowed to have a negative mass
-                    mass = 1.0 * g_per_mol;
-                }
-
-                QString atomtype = atomtypes[cgatomidx];
-
-                auto &atom = atms0[i];
-                atom.setName(atomnam);
-                atom.setNumber(atomnum);
-                atom.setResidueName(resnam);
-                atom.setResidueNumber(resnum);
-                atom.setChainName(chainname);
-                atom.setChargeGroup(group);
-                atom.setCharge(charge);
-                atom.setMass(mass);
-                atom.setAtomType(atomtype);
-
-                if (has_bondtype)
-                {
-                    atom.setBondType(bondtypes[cgatomidx]);
-                }
-                else
-                {
-                    atom.setBondType(atomtype);
-                }
-            };
-
-            if (uses_parallel)
-            {
-                tbb::parallel_for(tbb::blocked_range<int>(0, molinfo.nAtoms()), [&](const tbb::blocked_range<int> &r)
-                                  {
-                    for (int i = r.begin(); i < r.end(); ++i)
-                    {
-                        extract_atom(i);
-                    } });
-            }
-            else
-            {
-                for (int i = 0; i < molinfo.nAtoms(); ++i)
-                {
-                    extract_atom(i);
-                }
-            }
-        };
-
-        // get all of the bonds in this molecule
-        auto extract_bonds = [&]()
-        {
-            bool has_conn(false), has_funcs(false);
-
-            TwoAtomFunctions funcs;
-            Connectivity conn;
-
-            const auto R = InternalPotential::symbols().bond().r();
-
-            try
-            {
-                funcs = mol.property(map["bond"]).asA<TwoAtomFunctions>();
-                has_funcs = true;
-            }
-            catch (...)
-            {
-            }
-
-            try
-            {
-                conn = mol.property(map["connectivity"]).asA<Connectivity>();
-                has_conn = true;
-            }
-            catch (...)
-            {
-            }
-
-            // get the bond potentials first
-            if (has_funcs)
-            {
-                for (const auto &bond : funcs.potentials())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(bond.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(bond.atom1());
-
-                    if (atom0 > atom1)
-                        qSwap(atom0, atom1);
-
-                    bnds0.insert(BondID(atom0, atom1), GromacsBond(bond.function(), R));
-                }
-            }
-
-            // now fill in any missing bonded atoms with null bonds
-            if (has_conn)
-            {
-                for (const auto &bond : conn.getBonds())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(bond.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(bond.atom1());
-
-                    if (atom0 > atom1)
-                        qSwap(atom0, atom1);
-
-                    BondID b(atom0, atom1);
-
-                    if (not bnds0.contains(b))
-                    {
-                        bnds0.insert(b, GromacsBond(5)); // function 5 is a simple connection
-                    }
-                }
-            }
-        };
-
-        // get all of the angles in this molecule
-        auto extract_angles = [&]()
-        {
-            bool has_funcs(false);
-            bool has_ubfuncs(false);
-
-            ThreeAtomFunctions funcs;
-            TwoAtomFunctions ubfuncs;
-
-            const auto theta = InternalPotential::symbols().angle().theta();
-            const auto r = InternalPotential::symbols().ureyBradley().r();
-
-            try
-            {
-                funcs = mol.property(map["angle"]).asA<ThreeAtomFunctions>();
-                has_funcs = true;
-            }
-            catch (...)
-            {
-            }
-
-            try
-            {
-                ubfuncs = mol.property(map["urey-bradley"]).asA<TwoAtomFunctions>();
-                has_ubfuncs = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (has_funcs)
-            {
-                for (const auto &angle : funcs.potentials())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(angle.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(angle.atom1());
-                    AtomIdx atom2 = molinfo.atomIdx(angle.atom2());
-
-                    if (atom0 > atom2)
-                        qSwap(atom0, atom2);
-
-                    if (has_ubfuncs)
-                    {
-                        angs0.insert(AngleID(atom0, atom1, atom2),
-                                     GromacsAngle(angle.function(), theta,
-                                                  ubfuncs.potential(atom0, atom2), r));
-                    }
-                    else
-                    {
-                        angs0.insert(AngleID(atom0, atom1, atom2),
-                                     GromacsAngle(angle.function(), theta));
-                    }
-                }
-            }
-        };
-
-        // get all of the dihedrals in this molecule
-        auto extract_dihedrals = [&]()
-        {
-            bool has_funcs(false);
-
-            FourAtomFunctions funcs;
-
-            const auto phi = InternalPotential::symbols().dihedral().phi();
-            const auto theta = InternalPotential::symbols().improper().theta();
-
-            try
-            {
-                funcs = mol.property(map["dihedral"]).asA<FourAtomFunctions>();
-                has_funcs = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (has_funcs)
-            {
-                for (const auto &dihedral : funcs.potentials())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(dihedral.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(dihedral.atom1());
-                    AtomIdx atom2 = molinfo.atomIdx(dihedral.atom2());
-                    AtomIdx atom3 = molinfo.atomIdx(dihedral.atom3());
-
-                    if (atom0 > atom3)
-                    {
-                        qSwap(atom0, atom3);
-                        qSwap(atom1, atom2);
-                    }
-
-                    // get all of the dihedral terms (could be a lot)
-                    auto parts = GromacsDihedral::construct(dihedral.function(), phi);
-
-                    DihedralID dihid(atom0, atom1, atom2, atom3);
-
-                    for (const auto &part : parts)
-                    {
-                        dihs0.insert(dihid, part);
-                    }
-                }
-            }
-
-            bool has_imps(false);
-
-            FourAtomFunctions imps;
-
-            try
-            {
-                imps = mol.property(map["improper"]).asA<FourAtomFunctions>();
-                has_imps = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (has_imps)
-            {
-
-                for (const auto &improper : imps.potentials())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(improper.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(improper.atom1());
-                    AtomIdx atom2 = molinfo.atomIdx(improper.atom2());
-                    AtomIdx atom3 = molinfo.atomIdx(improper.atom3());
-
-                    // get all of the dihedral terms (could be a lot)
-                    auto parts = GromacsDihedral::constructImproper(improper.function(), phi, theta);
-
-                    DihedralID impid(atom0, atom1, atom2, atom3);
-
-                    for (const auto &part : parts)
-                    {
-                        dihs0.insert(impid, part);
-                    }
-                }
-            }
-        };
-
-        // get all of the CMAP terms in this molecule
-        auto extract_cmaps = [&]()
-        {
-            bool has_cmaps(false);
-            CMAPFunctions cmaps;
-
-            try
-            {
-                cmaps = mol.property(map["cmap"]).asA<CMAPFunctions>();
-                has_cmaps = true;
-            }
-            catch (...)
-            {
-            }
-
-            if (has_cmaps)
-            {
-                QHash<CMAPParameter, QString> cmap_params;
-
-                for (const auto &cmap : cmaps.parameters())
-                {
-                    AtomIdx atom0 = molinfo.atomIdx(cmap.atom0());
-                    AtomIdx atom1 = molinfo.atomIdx(cmap.atom1());
-                    AtomIdx atom2 = molinfo.atomIdx(cmap.atom2());
-                    AtomIdx atom3 = molinfo.atomIdx(cmap.atom3());
-                    AtomIdx atom4 = molinfo.atomIdx(cmap.atom4());
-
-                    if ((atom0 > atom4) or (atom0 == atom4 and atom1 > atom2))
-                    {
-                        qSwap(atom0, atom4);
-                        qSwap(atom1, atom2);
-                    }
-
-                    // we will store the CMAP parameter as a string - this
-                    // will let us de-duplicate parameters later
-                    if (cmap_params.contains(cmap.parameter()))
-                    {
-                        cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
-                                      cmap_params[cmap.parameter()]);
-                    }
-                    else
-                    {
-                        // store the parameter as a string
-                        QString param_str = cmap_to_string(cmap.parameter());
-                        cmap_params.insert(cmap.parameter(), param_str);
-
-                        cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4), param_str);
-                    }
-                }
-            }
-        };
-
-        const QVector<std::function<void()>> functions = {extract_atoms, extract_bonds, extract_angles,
-                                                          extract_dihedrals, extract_cmaps};
-
-        if (uses_parallel)
-        {
-            tbb::parallel_for(tbb::blocked_range<int>(0, functions.count(), 1), [&](const tbb::blocked_range<int> &r)
-                              {
-                for (int i = r.begin(); i < r.end(); ++i)
-                {
-                    functions[i]();
-                } });
-        }
-        else
-        {
-            for (int i = 0; i < functions.count(); ++i)
-            {
-                functions[i]();
-            }
-        }
-
-        // sanitise this object
-        this->_pvt_sanitise();
+    // sanitise this object
+    this->_pvt_sanitise();
+    this->_pvt_sanitise(true);
+  }
+
+  // Regular molecule.
+  else {
+    // get the name either from the molecule name or the name of the first
+    // residue
+    nme = mol.name();
+
+    if (nme.isEmpty()) {
+      nme = mol.residue(ResIdx(0)).name();
     }
+
+    // replace any strings in the name with underscores
+    nme = nme.simplified().replace(" ", "_");
+
+    // get the forcefield for this molecule
+    try {
+      ffield0 = mol.property(map["forcefield"]).asA<MMDetail>();
+    } catch (...) {
+      warns.append(
+          QObject::tr("Cannot find a valid MM forcefield for this molecule!"));
+    }
+
+    const auto molinfo = mol.info();
+
+    bool uses_parallel = true;
+    if (map["parallel"].hasValue()) {
+      uses_parallel = map["parallel"].value().asA<BooleanProperty>().value();
+    }
+
+    // get information about all atoms in this molecule
+    auto extract_atoms = [&]() {
+      atms0 = QVector<GroAtom>(molinfo.nAtoms());
+
+      AtomMasses masses;
+      AtomElements elements;
+      AtomCharges charges;
+      AtomIntProperty groups;
+      AtomStringProperty atomtypes;
+      AtomStringProperty bondtypes;
+
+      bool has_mass(false), has_elem(false), has_chg(false), has_group(false),
+          has_type(false);
+      bool has_bondtype(false);
+
+      try {
+        masses = mol.property(map["mass"]).asA<AtomMasses>();
+        has_mass = true;
+      } catch (...) {
+      }
+
+      if (not has_mass) {
+        try {
+          elements = mol.property(map["element"]).asA<AtomElements>();
+          has_elem = true;
+        } catch (...) {
+        }
+      }
+
+      try {
+        charges = mol.property(map["charge"]).asA<AtomCharges>();
+        has_chg = true;
+      } catch (...) {
+      }
+
+      try {
+        groups = mol.property(map["charge_group"]).asA<AtomIntProperty>();
+        has_group = true;
+      } catch (...) {
+      }
+
+      try {
+        atomtypes = mol.property(map["atomtype"]).asA<AtomStringProperty>();
+        has_type = true;
+      } catch (...) {
+      }
+
+      try {
+        bondtypes = mol.property(map["bondtype"]).asA<AtomStringProperty>();
+        has_bondtype = true;
+      } catch (...) {
+      }
+
+      if (not(has_chg and has_type and (has_elem or has_mass))) {
+        warns.append(
+            QObject::tr(
+                "Cannot find valid charge, atomtype and (element or mass) "
+                "properties for the molecule. These are needed! "
+                "has_charge=%1, has_atomtype=%2, has_mass=%3, has_element=%4")
+                .arg(has_chg)
+                .arg(has_type)
+                .arg(has_mass)
+                .arg(has_elem));
+        return;
+      }
+
+      // run through the atoms in AtomIdx order
+      auto extract_atom = [&](int iatm) {
+        AtomIdx i(iatm);
+
+        const auto cgatomidx = molinfo.cgAtomIdx(i);
+        const auto residx = molinfo.parentResidue(i);
+
+        QString chainname;
+
+        if (molinfo.isWithinChain(residx)) {
+          chainname = molinfo.name(molinfo.parentChain(residx)).value();
+        }
+
+        // atom numbers have to count up sequentially from 1
+        int atomnum = i + 1;
+        QString atomnam = molinfo.name(i);
+
+        // assuming that residues are in the same order as the atoms
+        int resnum = residx + 1;
+        QString resnam = molinfo.name(residx);
+
+        // people like to preserve the residue numbers of ligands and
+        // proteins. This is very challenging for the gromacs topology,
+        // as it would force a different topology for every solvent molecule,
+        // so deciding on the difference between protein/ligand and solvent
+        // is tough. Will preserve the residue number if the number of
+        // residues is greater than 1 and the number of atoms is greater
+        // than 32 (so octanol is a solvent)
+        if (molinfo.nResidues() > 1 or molinfo.nAtoms() > 32) {
+          resnum = molinfo.number(residx).value();
+        }
+
+        int group = atomnum;
+
+        if (has_group) {
+          group = groups[cgatomidx];
+        }
+
+        auto charge = charges[cgatomidx];
+
+        SireUnits::Dimension::MolarMass mass;
+
+        if (has_mass) {
+          mass = masses[cgatomidx];
+        } else {
+          mass = elements[cgatomidx].mass();
+        }
+
+        if (mass < 0) {
+          // not allowed to have a negative mass
+          mass = 1.0 * g_per_mol;
+        }
+
+        QString atomtype = atomtypes[cgatomidx];
+
+        auto &atom = atms0[i];
+        atom.setName(atomnam);
+        atom.setNumber(atomnum);
+        atom.setResidueName(resnam);
+        atom.setResidueNumber(resnum);
+        atom.setChainName(chainname);
+        atom.setChargeGroup(group);
+        atom.setCharge(charge);
+        atom.setMass(mass);
+        atom.setAtomType(atomtype);
+
+        if (has_bondtype) {
+          atom.setBondType(bondtypes[cgatomidx]);
+        } else {
+          atom.setBondType(atomtype);
+        }
+      };
+
+      if (uses_parallel) {
+        tbb::parallel_for(tbb::blocked_range<int>(0, molinfo.nAtoms()),
+                          [&](const tbb::blocked_range<int> &r) {
+                            for (int i = r.begin(); i < r.end(); ++i) {
+                              extract_atom(i);
+                            }
+                          });
+      } else {
+        for (int i = 0; i < molinfo.nAtoms(); ++i) {
+          extract_atom(i);
+        }
+      }
+    };
+
+    // get all of the bonds in this molecule
+    auto extract_bonds = [&]() {
+      bool has_conn(false), has_funcs(false);
+
+      TwoAtomFunctions funcs;
+      Connectivity conn;
+
+      const auto R = InternalPotential::symbols().bond().r();
+
+      try {
+        funcs = mol.property(map["bond"]).asA<TwoAtomFunctions>();
+        has_funcs = true;
+      } catch (...) {
+      }
+
+      try {
+        conn = mol.property(map["connectivity"]).asA<Connectivity>();
+        has_conn = true;
+      } catch (...) {
+      }
+
+      // get the bond potentials first
+      if (has_funcs) {
+        for (const auto &bond : funcs.potentials()) {
+          AtomIdx atom0 = molinfo.atomIdx(bond.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(bond.atom1());
+
+          if (atom0 > atom1)
+            qSwap(atom0, atom1);
+
+          bnds0.insert(BondID(atom0, atom1), GromacsBond(bond.function(), R));
+        }
+      }
+
+      // now fill in any missing bonded atoms with null bonds
+      if (has_conn) {
+        for (const auto &bond : conn.getBonds()) {
+          AtomIdx atom0 = molinfo.atomIdx(bond.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(bond.atom1());
+
+          if (atom0 > atom1)
+            qSwap(atom0, atom1);
+
+          BondID b(atom0, atom1);
+
+          if (not bnds0.contains(b)) {
+            bnds0.insert(b,
+                         GromacsBond(5)); // function 5 is a simple connection
+          }
+        }
+      }
+    };
+
+    // get all of the angles in this molecule
+    auto extract_angles = [&]() {
+      bool has_funcs(false);
+      bool has_ubfuncs(false);
+
+      ThreeAtomFunctions funcs;
+      TwoAtomFunctions ubfuncs;
+
+      const auto theta = InternalPotential::symbols().angle().theta();
+      const auto r = InternalPotential::symbols().ureyBradley().r();
+
+      try {
+        funcs = mol.property(map["angle"]).asA<ThreeAtomFunctions>();
+        has_funcs = true;
+      } catch (...) {
+      }
+
+      try {
+        ubfuncs = mol.property(map["urey-bradley"]).asA<TwoAtomFunctions>();
+        has_ubfuncs = true;
+      } catch (...) {
+      }
+
+      if (has_funcs) {
+        for (const auto &angle : funcs.potentials()) {
+          AtomIdx atom0 = molinfo.atomIdx(angle.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(angle.atom1());
+          AtomIdx atom2 = molinfo.atomIdx(angle.atom2());
+
+          if (atom0 > atom2)
+            qSwap(atom0, atom2);
+
+          if (has_ubfuncs) {
+            angs0.insert(AngleID(atom0, atom1, atom2),
+                         GromacsAngle(angle.function(), theta,
+                                      ubfuncs.potential(atom0, atom2), r));
+          } else {
+            angs0.insert(AngleID(atom0, atom1, atom2),
+                         GromacsAngle(angle.function(), theta));
+          }
+        }
+      }
+    };
+
+    // get all of the dihedrals in this molecule
+    auto extract_dihedrals = [&]() {
+      bool has_funcs(false);
+
+      FourAtomFunctions funcs;
+
+      const auto phi = InternalPotential::symbols().dihedral().phi();
+      const auto theta = InternalPotential::symbols().improper().theta();
+
+      try {
+        funcs = mol.property(map["dihedral"]).asA<FourAtomFunctions>();
+        has_funcs = true;
+      } catch (...) {
+      }
+
+      if (has_funcs) {
+        for (const auto &dihedral : funcs.potentials()) {
+          AtomIdx atom0 = molinfo.atomIdx(dihedral.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(dihedral.atom1());
+          AtomIdx atom2 = molinfo.atomIdx(dihedral.atom2());
+          AtomIdx atom3 = molinfo.atomIdx(dihedral.atom3());
+
+          if (atom0 > atom3) {
+            qSwap(atom0, atom3);
+            qSwap(atom1, atom2);
+          }
+
+          // get all of the dihedral terms (could be a lot)
+          auto parts = GromacsDihedral::construct(dihedral.function(), phi);
+
+          DihedralID dihid(atom0, atom1, atom2, atom3);
+
+          for (const auto &part : parts) {
+            dihs0.insert(dihid, part);
+          }
+        }
+      }
+
+      bool has_imps(false);
+
+      FourAtomFunctions imps;
+
+      try {
+        imps = mol.property(map["improper"]).asA<FourAtomFunctions>();
+        has_imps = true;
+      } catch (...) {
+      }
+
+      if (has_imps) {
+
+        for (const auto &improper : imps.potentials()) {
+          AtomIdx atom0 = molinfo.atomIdx(improper.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(improper.atom1());
+          AtomIdx atom2 = molinfo.atomIdx(improper.atom2());
+          AtomIdx atom3 = molinfo.atomIdx(improper.atom3());
+
+          // get all of the dihedral terms (could be a lot)
+          auto parts = GromacsDihedral::constructImproper(improper.function(),
+                                                          phi, theta);
+
+          DihedralID impid(atom0, atom1, atom2, atom3);
+
+          for (const auto &part : parts) {
+            dihs0.insert(impid, part);
+          }
+        }
+      }
+    };
+
+    // get all of the CMAP terms in this molecule
+    auto extract_cmaps = [&]() {
+      bool has_cmaps(false);
+      CMAPFunctions cmaps;
+
+      try {
+        cmaps = mol.property(map["cmap"]).asA<CMAPFunctions>();
+        has_cmaps = true;
+      } catch (...) {
+      }
+
+      if (has_cmaps) {
+        QHash<CMAPParameter, QString> cmap_params;
+
+        for (const auto &cmap : cmaps.parameters()) {
+          AtomIdx atom0 = molinfo.atomIdx(cmap.atom0());
+          AtomIdx atom1 = molinfo.atomIdx(cmap.atom1());
+          AtomIdx atom2 = molinfo.atomIdx(cmap.atom2());
+          AtomIdx atom3 = molinfo.atomIdx(cmap.atom3());
+          AtomIdx atom4 = molinfo.atomIdx(cmap.atom4());
+
+          if ((atom0 > atom4) or (atom0 == atom4 and atom1 > atom2)) {
+            qSwap(atom0, atom4);
+            qSwap(atom1, atom2);
+          }
+
+          // we will store the CMAP parameter as a string - this
+          // will let us de-duplicate parameters later
+          if (cmap_params.contains(cmap.parameter())) {
+            cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4),
+                          cmap_params[cmap.parameter()]);
+          } else {
+            // store the parameter as a string
+            QString param_str = cmap_to_string(cmap.parameter());
+            cmap_params.insert(cmap.parameter(), param_str);
+
+            cmaps0.insert(CMAPID(atom0, atom1, atom2, atom3, atom4), param_str);
+          }
+        }
+      }
+    };
+
+    const QVector<std::function<void()>> functions = {
+        extract_atoms, extract_bonds, extract_angles, extract_dihedrals,
+        extract_cmaps};
+
+    if (uses_parallel) {
+      tbb::parallel_for(tbb::blocked_range<int>(0, functions.count(), 1),
+                        [&](const tbb::blocked_range<int> &r) {
+                          for (int i = r.begin(); i < r.end(); ++i) {
+                            functions[i]();
+                          }
+                        });
+    } else {
+      for (int i = 0; i < functions.count(); ++i) {
+        functions[i]();
+      }
+    }
+
+    // sanitise this object
+    this->_pvt_sanitise();
+  }
 }
 
 /** Copy constructor */
 GroMolType::GroMolType(const GroMolType &other)
-    : nme(other.nme), warns(other.warns), atms0(other.atms0), atms1(other.atms1), first_atoms0(other.first_atoms0),
-      first_atoms1(other.first_atoms1), bnds0(other.bnds0), bnds1(other.bnds1), angs0(other.angs0), angs1(other.angs1),
-      dihs0(other.dihs0), dihs1(other.dihs1), cmaps0(other.cmaps0), cmaps1(other.cmaps1),
-      explicit_pairs(other.explicit_pairs),
-      ffield0(other.ffield0), ffield1(other.ffield1), nexcl0(other.nexcl0),
-      nexcl1(other.nexcl1), is_perturbable(other.is_perturbable)
-{
-}
+    : nme(other.nme), warns(other.warns), atms0(other.atms0),
+      atms1(other.atms1), first_atoms0(other.first_atoms0),
+      first_atoms1(other.first_atoms1), bnds0(other.bnds0), bnds1(other.bnds1),
+      angs0(other.angs0), angs1(other.angs1), dihs0(other.dihs0),
+      dihs1(other.dihs1), cmaps0(other.cmaps0), cmaps1(other.cmaps1),
+      explicit_pairs(other.explicit_pairs), ffield0(other.ffield0),
+      ffield1(other.ffield1), nexcl0(other.nexcl0), nexcl1(other.nexcl1),
+      is_perturbable(other.is_perturbable) {}
 
 /** Destructor */
-GroMolType::~GroMolType()
-{
-}
+GroMolType::~GroMolType() {}
 
 /** Copy assignment operator */
-GroMolType &GroMolType::operator=(const GroMolType &other)
-{
-    if (this != &other)
-    {
-        nme = other.nme;
-        warns = other.warns;
-        atms0 = other.atms0;
-        atms1 = other.atms1;
-        first_atoms0 = other.first_atoms0;
-        first_atoms1 = other.first_atoms1;
-        bnds0 = other.bnds0;
-        bnds1 = other.bnds1;
-        angs0 = other.angs0;
-        angs1 = other.angs1;
-        dihs0 = other.dihs0;
-        dihs1 = other.dihs1;
-        cmaps0 = other.cmaps0;
-        cmaps1 = other.cmaps1;
-        explicit_pairs = other.explicit_pairs;
-        ffield0 = other.ffield0;
-        ffield1 = other.ffield1;
-        nexcl0 = other.nexcl0;
-        nexcl0 = other.nexcl1;
-        is_perturbable = other.is_perturbable;
-    }
+GroMolType &GroMolType::operator=(const GroMolType &other) {
+  if (this != &other) {
+    nme = other.nme;
+    warns = other.warns;
+    atms0 = other.atms0;
+    atms1 = other.atms1;
+    first_atoms0 = other.first_atoms0;
+    first_atoms1 = other.first_atoms1;
+    bnds0 = other.bnds0;
+    bnds1 = other.bnds1;
+    angs0 = other.angs0;
+    angs1 = other.angs1;
+    dihs0 = other.dihs0;
+    dihs1 = other.dihs1;
+    cmaps0 = other.cmaps0;
+    cmaps1 = other.cmaps1;
+    explicit_pairs = other.explicit_pairs;
+    ffield0 = other.ffield0;
+    ffield1 = other.ffield1;
+    nexcl0 = other.nexcl0;
+    nexcl0 = other.nexcl1;
+    is_perturbable = other.is_perturbable;
+  }
 
-    return *this;
+  return *this;
 }
 
 /** Comparison operator */
-bool GroMolType::operator==(const GroMolType &other) const
-{
-    return nme == other.nme and warns == other.warns and atms0 == other.atms0 and atms1 == other.atms1 and
-           first_atoms0 == other.first_atoms0 and first_atoms1 == other.first_atoms1 and bnds0 == other.bnds0 and
-           bnds1 == other.bnds1 and angs0 == other.angs0 and angs1 == other.angs1 and dihs0 == other.dihs0 and
-           dihs1 == other.dihs1 and cmaps0 == other.cmaps0 and cmaps1 == other.cmaps1 and
-           explicit_pairs == other.explicit_pairs and
-           nexcl0 == other.nexcl0 and nexcl1 == other.nexcl1 and
-           is_perturbable == other.is_perturbable;
+bool GroMolType::operator==(const GroMolType &other) const {
+  return nme == other.nme and warns == other.warns and atms0 == other.atms0 and
+         atms1 == other.atms1 and first_atoms0 == other.first_atoms0 and
+         first_atoms1 == other.first_atoms1 and bnds0 == other.bnds0 and
+         bnds1 == other.bnds1 and angs0 == other.angs0 and
+         angs1 == other.angs1 and dihs0 == other.dihs0 and
+         dihs1 == other.dihs1 and cmaps0 == other.cmaps0 and
+         cmaps1 == other.cmaps1 and explicit_pairs == other.explicit_pairs and
+         nexcl0 == other.nexcl0 and nexcl1 == other.nexcl1 and
+         is_perturbable == other.is_perturbable;
 }
 
 /** Comparison operator */
-bool GroMolType::operator!=(const GroMolType &other) const
-{
-    return not operator==(other);
+bool GroMolType::operator!=(const GroMolType &other) const {
+  return not operator==(other);
 }
 
-const char *GroMolType::typeName()
-{
-    return QMetaType::typeName(qMetaTypeId<GroMolType>());
+const char *GroMolType::typeName() {
+  return QMetaType::typeName(qMetaTypeId<GroMolType>());
 }
 
-const char *GroMolType::what() const
-{
-    return GroMolType::typeName();
-}
+const char *GroMolType::what() const { return GroMolType::typeName(); }
 
 /** Return whether or not this object is null */
-bool GroMolType::isNull() const
-{
-    return this->operator==(GroMolType());
-}
+bool GroMolType::isNull() const { return this->operator==(GroMolType()); }
 
 /** Return whether or not this molecule is perturbable. */
-bool GroMolType::isPerturbable() const
-{
-    return this->is_perturbable;
-}
+bool GroMolType::isPerturbable() const { return this->is_perturbable; }
 
 /** Return a string form for this object */
-QString GroMolType::toString() const
-{
-    if (this->isNull())
-        return QObject::tr("GroMolType::null");
+QString GroMolType::toString() const {
+  if (this->isNull())
+    return QObject::tr("GroMolType::null");
 
-    return QObject::tr("GroMolType( name() = '%1', nExcludedAtoms() = %2 )").arg(name()).arg(nExcludedAtoms());
+  return QObject::tr("GroMolType( name() = '%1', nExcludedAtoms() = %2 )")
+      .arg(name())
+      .arg(nExcludedAtoms());
 }
 
 /** Set the name of this moleculetype */
-void GroMolType::setName(const QString &name)
-{
-    nme = name;
-}
+void GroMolType::setName(const QString &name) { nme = name; }
 
 /** Return the name of this moleculetype */
-QString GroMolType::name() const
-{
-    return nme;
-}
+QString GroMolType::name() const { return nme; }
 
 /** Return the guessed forcefield for this molecule type */
-MMDetail GroMolType::forcefield(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot extract forcefield. The molecule isn't perturbable!"));
+MMDetail GroMolType::forcefield(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot extract forcefield. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        return ffield1;
-    else
-        return ffield0;
+  if (is_lambda1)
+    return ffield1;
+  else
+    return ffield0;
 }
 
 /** Set the number of excluded atoms */
-void GroMolType::setNExcludedAtoms(qint64 n, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot set excluded atoms. The molecule isn't perturbable!"));
+void GroMolType::setNExcludedAtoms(qint64 n, bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot set excluded atoms. The molecule isn't perturbable!"));
 
-    if (n >= 0)
-        if (is_lambda1)
-            nexcl1 = n;
-        else
-            nexcl0 = n;
+  if (n >= 0)
+    if (is_lambda1)
+      nexcl1 = n;
     else
-    {
-        if (is_lambda1)
-            nexcl1 = 0;
-        else
-            nexcl0 = 0;
-    }
+      nexcl0 = n;
+  else {
+    if (is_lambda1)
+      nexcl1 = 0;
+    else
+      nexcl0 = 0;
+  }
 }
 
 /** Return the number of excluded atoms */
-qint64 GroMolType::nExcludedAtoms(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get excluded atoms. The molecule isn't perturbable!"));
+qint64 GroMolType::nExcludedAtoms(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot get excluded atoms. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        return nexcl1;
-    else
-        return nexcl0;
+  if (is_lambda1)
+    return nexcl1;
+  else
+    return nexcl0;
 }
 
 /** Add an atom to this moleculetype, with specified atom type, residue number,
     residue name, atom name, charge group, charge and mass */
-void GroMolType::addAtom(const GroAtom &atom, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot add atom. The molecule isn't perturbable!"));
+void GroMolType::addAtom(const GroAtom &atom, bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot add atom. The molecule isn't perturbable!"));
 
-    if (not atom.isNull())
-    {
-        if (is_lambda1)
-            atms1.append(atom);
-        else
-            atms0.append(atom);
-    }
+  if (not atom.isNull()) {
+    if (is_lambda1)
+      atms1.append(atom);
+    else
+      atms0.append(atom);
+  }
 }
 
 /** Return whether or not this molecule needs sanitising */
-bool GroMolType::needsSanitising(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot check needs sanitise. The molecule isn't perturbable!"));
+bool GroMolType::needsSanitising(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot check needs sanitise. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-    {
-        if (atms1.isEmpty())
-            return false;
-        else
-            return ffield1.isNull() or first_atoms1.isEmpty();
-    }
+  if (is_lambda1) {
+    if (atms1.isEmpty())
+      return false;
     else
-    {
-        if (atms0.isEmpty())
-            return false;
-        else
-            return ffield0.isNull() or first_atoms0.isEmpty();
-    }
+      return ffield1.isNull() or first_atoms1.isEmpty();
+  } else {
+    if (atms0.isEmpty())
+      return false;
+    else
+      return ffield0.isNull() or first_atoms0.isEmpty();
+  }
 }
 
 /** Return the number of atoms in this molecule */
-int GroMolType::nAtoms(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get number of atoms. The molecule isn't perturbable!"));
+int GroMolType::nAtoms(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot get number of atoms. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        return other.nAtoms(is_lambda1);
-    }
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    return other.nAtoms(is_lambda1);
+  } else {
+    if (is_lambda1)
+      return atms1.count();
     else
-    {
-        if (is_lambda1)
-            return atms1.count();
-        else
-            return atms0.count();
-    }
+      return atms0.count();
+  }
 }
 
 /** Return the number of residues in this molecule */
-int GroMolType::nResidues(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get number of residues. The molecule isn't perturbable!"));
+int GroMolType::nResidues(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot get number of residues. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        return other.nResidues(is_lambda1);
-    }
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    return other.nResidues(is_lambda1);
+  } else {
+    if (is_lambda1)
+      return first_atoms1.count();
     else
-    {
-        if (is_lambda1)
-            return first_atoms1.count();
-        else
-            return first_atoms0.count();
-    }
+      return first_atoms0.count();
+  }
 }
 
 /** Return the atom at index 'atomidx' */
-GroAtom GroMolType::atom(const AtomIdx &atomidx, bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get atom. The molecule isn't perturbable!"));
+GroAtom GroMolType::atom(const AtomIdx &atomidx, bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot get atom. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        return other.atom(atomidx, is_lambda1);
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    return other.atom(atomidx, is_lambda1);
+  } else {
+    if (is_lambda1) {
+      int i = atomidx.map(atms1.count());
+      return atms1.constData()[i];
+    } else {
+      int i = atomidx.map(atms0.count());
+      return atms0.constData()[i];
     }
-    else
-    {
-        if (is_lambda1)
-        {
-            int i = atomidx.map(atms1.count());
-            return atms1.constData()[i];
-        }
-        else
-        {
-            int i = atomidx.map(atms0.count());
-            return atms0.constData()[i];
-        }
-    }
+  }
 }
 
 /** Return the atom with number 'atomnum' */
-GroAtom GroMolType::atom(const AtomNum &atomnum, bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get atom by number. The molecule isn't perturbable!"));
+GroAtom GroMolType::atom(const AtomNum &atomnum, bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot get atom by number. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        return other.atom(atomnum, is_lambda1);
-    }
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    return other.atom(atomnum, is_lambda1);
+  }
 
-    if (is_lambda1)
-    {
-        for (int i = 0; i < atms1.count(); ++i)
-        {
-            if (atms1.constData()[i].number() == atomnum)
-            {
-                return atms1.constData()[i];
-            }
-        }
+  if (is_lambda1) {
+    for (int i = 0; i < atms1.count(); ++i) {
+      if (atms1.constData()[i].number() == atomnum) {
+        return atms1.constData()[i];
+      }
     }
-    else
-    {
-        for (int i = 0; i < atms0.count(); ++i)
-        {
-            if (atms0.constData()[i].number() == atomnum)
-            {
-                return atms0.constData()[i];
-            }
-        }
+  } else {
+    for (int i = 0; i < atms0.count(); ++i) {
+      if (atms0.constData()[i].number() == atomnum) {
+        return atms0.constData()[i];
+      }
     }
+  }
 
-    throw SireMol::missing_atom(QObject::tr("There is no atom with number '%1' in this molecule '%2'")
-                                    .arg(atomnum.toString())
-                                    .arg(this->toString()),
-                                CODELOC);
+  throw SireMol::missing_atom(
+      QObject::tr("There is no atom with number '%1' in this molecule '%2'")
+          .arg(atomnum.toString())
+          .arg(this->toString()),
+      CODELOC);
 }
 
 /** Return the first atom with name 'atomnam'. If you want all atoms
     with this name then call 'atoms(AtomName atomname)' */
-GroAtom GroMolType::atom(const AtomName &atomnam, bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get atom by name. The molecule isn't perturbable!"));
+GroAtom GroMolType::atom(const AtomName &atomnam, bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot get atom by name. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        return other.atom(atomnam, is_lambda1);
-    }
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    return other.atom(atomnam, is_lambda1);
+  }
 
-    if (is_lambda1)
-    {
-        for (int i = 0; i < atms1.count(); ++i)
-        {
-            if (atms1.constData()[i].name() == atomnam)
-            {
-                return atms1.constData()[i];
-            }
-        }
+  if (is_lambda1) {
+    for (int i = 0; i < atms1.count(); ++i) {
+      if (atms1.constData()[i].name() == atomnam) {
+        return atms1.constData()[i];
+      }
     }
-    else
-    {
-        for (int i = 0; i < atms0.count(); ++i)
-        {
-            if (atms0.constData()[i].name() == atomnam)
-            {
-                return atms0.constData()[i];
-            }
-        }
+  } else {
+    for (int i = 0; i < atms0.count(); ++i) {
+      if (atms0.constData()[i].name() == atomnam) {
+        return atms0.constData()[i];
+      }
     }
+  }
 
-    throw SireMol::missing_atom(QObject::tr("There is no atom with name '%1' in this molecule '%2'")
-                                    .arg(atomnam.toString())
-                                    .arg(this->toString()),
-                                CODELOC);
+  throw SireMol::missing_atom(
+      QObject::tr("There is no atom with name '%1' in this molecule '%2'")
+          .arg(atomnam.toString())
+          .arg(this->toString()),
+      CODELOC);
 }
 
 /** Set the atom type of the specified atom */
-void GroMolType::setAtomType(const AtomIdx &atomidx, const QString &atomtype, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot set atom type. The molecule isn't perturbable!"));
+void GroMolType::setAtomType(const AtomIdx &atomidx, const QString &atomtype,
+                             bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot set atom type. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        other.setAtomType(atomidx, atomtype, is_lambda1);
-        return;
-    }
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    other.setAtomType(atomidx, atomtype, is_lambda1);
+    return;
+  }
 
-    if (is_lambda1)
-    {
-        atms1[atomidx.map(atms1.count())].setAtomType(atomtype);
-    }
-    else
-    {
-        atms0[atomidx.map(atms0.count())].setAtomType(atomtype);
-    }
+  if (is_lambda1) {
+    atms1[atomidx.map(atms1.count())].setAtomType(atomtype);
+  } else {
+    atms0[atomidx.map(atms0.count())].setAtomType(atomtype);
+  }
 }
 
 /** Return all atoms that have the passed name. Returns an empty
     list if there are no atoms with this name */
-QVector<GroAtom> GroMolType::atoms(const AtomName &atomnam, bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get atoms by name. The molecule isn't perturbable!"));
+QVector<GroAtom> GroMolType::atoms(const AtomName &atomnam,
+                                   bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot get atoms by name. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        return other.atoms(atomnam, is_lambda1);
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    return other.atoms(atomnam, is_lambda1);
+  }
+
+  QVector<GroAtom> ret;
+
+  if (is_lambda1) {
+    for (int i = 0; i < atms1.count(); ++i) {
+      if (atms1.constData()[i].name() == atomnam) {
+        ret.append(atms1.constData()[i]);
+      }
     }
-
-    QVector<GroAtom> ret;
-
-    if (is_lambda1)
-    {
-        for (int i = 0; i < atms1.count(); ++i)
-        {
-            if (atms1.constData()[i].name() == atomnam)
-            {
-                ret.append(atms1.constData()[i]);
-            }
-        }
+  } else {
+    for (int i = 0; i < atms0.count(); ++i) {
+      if (atms0.constData()[i].name() == atomnam) {
+        ret.append(atms0.constData()[i]);
+      }
     }
-    else
-    {
-        for (int i = 0; i < atms0.count(); ++i)
-        {
-            if (atms0.constData()[i].name() == atomnam)
-            {
-                ret.append(atms0.constData()[i]);
-            }
-        }
-    }
+  }
 
-    return ret;
+  return ret;
 }
 
 /** Return all of the atoms in this molecule */
-QVector<GroAtom> GroMolType::atoms(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get atoms. The molecule isn't perturbable!"));
+QVector<GroAtom> GroMolType::atoms(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot get atoms. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        return other.atoms(is_lambda1);
-    }
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    return other.atoms(is_lambda1);
+  }
 
-    if (is_lambda1)
-        return this->atms1;
-    else
-        return this->atms0;
+  if (is_lambda1)
+    return this->atms1;
+  else
+    return this->atms0;
 }
 
 /** Set the atoms to the passed vector */
-void GroMolType::setAtoms(const QVector<GroAtom> &atoms, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot set atoms. The molecule isn't perturbable!"));
+void GroMolType::setAtoms(const QVector<GroAtom> &atoms, bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot set atoms. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        this->atms1 = atoms;
-    else
-        this->atms0 = atoms;
+  if (is_lambda1)
+    this->atms1 = atoms;
+  else
+    this->atms0 = atoms;
 }
 
 /** Return all of the atoms in the specified residue */
-QVector<GroAtom> GroMolType::atoms(const ResIdx &residx, bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get atoms by residue. The molecule isn't perturbable!"));
+QVector<GroAtom> GroMolType::atoms(const ResIdx &residx,
+                                   bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot get atoms by residue. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        return other.atoms(residx, is_lambda1);
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    return other.atoms(residx, is_lambda1);
+  }
+
+  if (is_lambda1) {
+    int ires = residx.map(first_atoms1.count());
+
+    int start = first_atoms1.constData()[ires];
+    int end = atms1.count();
+
+    if (ires + 1 < first_atoms1.count()) {
+      end = first_atoms1.constData()[ires + 1];
     }
 
-    if (is_lambda1)
-    {
-        int ires = residx.map(first_atoms1.count());
+    return atms1.mid(start, end);
+  } else {
+    int ires = residx.map(first_atoms0.count());
 
-        int start = first_atoms1.constData()[ires];
-        int end = atms1.count();
+    int start = first_atoms0.constData()[ires];
+    int end = atms0.count();
 
-        if (ires + 1 < first_atoms1.count())
-        {
-            end = first_atoms1.constData()[ires + 1];
-        }
-
-        return atms1.mid(start, end);
+    if (ires + 1 < first_atoms0.count()) {
+      end = first_atoms0.constData()[ires + 1];
     }
-    else
-    {
-        int ires = residx.map(first_atoms0.count());
 
-        int start = first_atoms0.constData()[ires];
-        int end = atms0.count();
-
-        if (ires + 1 < first_atoms0.count())
-        {
-            end = first_atoms0.constData()[ires + 1];
-        }
-
-        return atms0.mid(start, end);
-    }
+    return atms0.mid(start, end);
+  }
 }
 
 /** Return all of the atoms in the specified residue(s) */
-QVector<GroAtom> GroMolType::atoms(const ResNum &resnum, bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get atoms by residue number. The molecule isn't perturbable!"));
+QVector<GroAtom> GroMolType::atoms(const ResNum &resnum,
+                                   bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot get atoms by residue number. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        return other.atoms(resnum, is_lambda1);
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    return other.atoms(resnum, is_lambda1);
+  }
+
+  // find the indicies all all matching residues
+  QList<ResIdx> idxs;
+
+  if (is_lambda1) {
+    for (int idx = 0; idx < first_atoms1.count(); ++idx) {
+      if (atms1[first_atoms1.at(idx)].residueNumber() == resnum) {
+        idxs.append(ResIdx(idx));
+      }
     }
-
-    // find the indicies all all matching residues
-    QList<ResIdx> idxs;
-
-    if (is_lambda1)
-    {
-        for (int idx = 0; idx < first_atoms1.count(); ++idx)
-        {
-            if (atms1[first_atoms1.at(idx)].residueNumber() == resnum)
-            {
-                idxs.append(ResIdx(idx));
-            }
-        }
+  } else {
+    for (int idx = 0; idx < first_atoms0.count(); ++idx) {
+      if (atms0[first_atoms0.at(idx)].residueNumber() == resnum) {
+        idxs.append(ResIdx(idx));
+      }
     }
-    else
-    {
-        for (int idx = 0; idx < first_atoms0.count(); ++idx)
-        {
-            if (atms0[first_atoms0.at(idx)].residueNumber() == resnum)
-            {
-                idxs.append(ResIdx(idx));
-            }
-        }
-    }
+  }
 
-    QVector<GroAtom> ret;
+  QVector<GroAtom> ret;
 
-    for (const auto &idx : idxs)
-    {
-        ret += this->atoms(idx, is_lambda1);
-    }
+  for (const auto &idx : idxs) {
+    ret += this->atoms(idx, is_lambda1);
+  }
 
-    return ret;
+  return ret;
 }
 
 /** Return all of the atoms in the specified residue(s) */
-QVector<GroAtom> GroMolType::atoms(const ResName &resnam, bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get atoms by residue name. The molecule isn't perturbable!"));
+QVector<GroAtom> GroMolType::atoms(const ResName &resnam,
+                                   bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(QObject::tr(
+        "Cannot get atoms by residue name. The molecule isn't perturbable!"));
 
-    if (needsSanitising(is_lambda1))
-    {
-        GroMolType other(*this);
-        other._pvt_sanitise(is_lambda1);
-        return other.atoms(resnam, is_lambda1);
+  if (needsSanitising(is_lambda1)) {
+    GroMolType other(*this);
+    other._pvt_sanitise(is_lambda1);
+    return other.atoms(resnam, is_lambda1);
+  }
+
+  // find the indicies all all matching residues
+  QList<ResIdx> idxs;
+
+  if (is_lambda1) {
+    for (int idx = 0; idx < first_atoms1.count(); ++idx) {
+      if (atms1[first_atoms1.at(idx)].residueName() == resnam) {
+        idxs.append(ResIdx(idx));
+      }
     }
-
-    // find the indicies all all matching residues
-    QList<ResIdx> idxs;
-
-    if (is_lambda1)
-    {
-        for (int idx = 0; idx < first_atoms1.count(); ++idx)
-        {
-            if (atms1[first_atoms1.at(idx)].residueName() == resnam)
-            {
-                idxs.append(ResIdx(idx));
-            }
-        }
+  } else {
+    for (int idx = 0; idx < first_atoms0.count(); ++idx) {
+      if (atms0[first_atoms0.at(idx)].residueName() == resnam) {
+        idxs.append(ResIdx(idx));
+      }
     }
-    else
-    {
-        for (int idx = 0; idx < first_atoms0.count(); ++idx)
-        {
-            if (atms0[first_atoms0.at(idx)].residueName() == resnam)
-            {
-                idxs.append(ResIdx(idx));
-            }
-        }
-    }
+  }
 
-    QVector<GroAtom> ret;
+  QVector<GroAtom> ret;
 
-    for (const auto &idx : idxs)
-    {
-        ret += this->atoms(idx, is_lambda1);
-    }
+  for (const auto &idx : idxs) {
+    ret += this->atoms(idx, is_lambda1);
+  }
 
-    return ret;
+  return ret;
 }
 
 /** Internal function to do the non-forcefield parts of sanitising */
-void GroMolType::_pvt_sanitise(bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot sanitise. The molecule isn't perturbable!"));
+void GroMolType::_pvt_sanitise(bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot sanitise. The molecule isn't perturbable!"));
 
-    // sort the atoms so that they are in residue number / atom number order, and
-    // we check and remove duplicate atom numbers
+  // sort the atoms so that they are in residue number / atom number order, and
+  // we check and remove duplicate atom numbers
 
-    if (is_lambda1)
-        first_atoms1.append(0);
-    else
-        first_atoms0.append(0);
+  if (is_lambda1)
+    first_atoms1.append(0);
+  else
+    first_atoms0.append(0);
 }
 
 /** Sanitise this moleculetype. This assumes that the moleculetype has
@@ -2222,520 +1887,476 @@ void GroMolType::_pvt_sanitise(bool is_lambda1)
     'warnings' function. It also uses the passed defaults from the top file,
     together with the information in the molecule to guess the forcefield for
     the molecule */
-void GroMolType::sanitise(QString elecstyle, QString vdwstyle, QString combrule, double elec14, double vdw14,
-                          bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot call sanitise. The molecule isn't perturbable!"));
+void GroMolType::sanitise(QString elecstyle, QString vdwstyle, QString combrule,
+                          double elec14, double vdw14, bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot call sanitise. The molecule isn't perturbable!"));
 
-    if (not needsSanitising(is_lambda1))
-        return;
+  if (not needsSanitising(is_lambda1))
+    return;
 
-    this->_pvt_sanitise(is_lambda1);
+  this->_pvt_sanitise(is_lambda1);
 
-    // also check that the bonds/angles/dihedrals all refer to actual atoms...
+  // also check that the bonds/angles/dihedrals all refer to actual atoms...
 
-    // work out the bond, angle and dihedral function styles. We will
-    // do this assuming that anything other than simple harmonic/cosine is
-    // an "interesting" gromacs-style forcefield
-    QString bondstyle = "harmonic";
+  // work out the bond, angle and dihedral function styles. We will
+  // do this assuming that anything other than simple harmonic/cosine is
+  // an "interesting" gromacs-style forcefield
+  QString bondstyle = "harmonic";
 
-    if (is_lambda1)
-    {
-        for (auto it = bnds1.constBegin(); it != bnds1.constEnd(); ++it)
-        {
-            if (not(it.value().isSimple() and it.value().isHarmonic()))
-            {
-                bondstyle = "gromacs";
-                break;
-            }
-        }
-
-        QString anglestyle = "harmonic";
-
-        for (auto it = angs1.constBegin(); it != angs1.constEnd(); ++it)
-        {
-            if (not(it.value().isSimple() and it.value().isHarmonic()))
-            {
-                anglestyle = "gromacs";
-                break;
-            }
-        }
-
-        QString dihedralstyle = "cosine";
-
-        for (auto it = dihs1.constBegin(); it != dihs1.constEnd(); ++it)
-        {
-            if (not(it.value().isSimple() and it.value().isCosine()))
-            {
-                dihedralstyle = "gromacs";
-                break;
-            }
-        }
-
-        // finally generate a forcefield description for this molecule based on the
-        // passed defaults and the functional forms of the internals
-        ffield1 =
-            MMDetail::guessFrom(combrule, elecstyle, vdwstyle, elec14, vdw14, bondstyle, anglestyle, dihedralstyle);
+  if (is_lambda1) {
+    for (auto it = bnds1.constBegin(); it != bnds1.constEnd(); ++it) {
+      if (not(it.value().isSimple() and it.value().isHarmonic())) {
+        bondstyle = "gromacs";
+        break;
+      }
     }
-    else
-    {
-        for (auto it = bnds0.constBegin(); it != bnds0.constEnd(); ++it)
-        {
-            if (not(it.value().isSimple() and it.value().isHarmonic()))
-            {
-                bondstyle = "gromacs";
-                break;
-            }
-        }
 
-        QString anglestyle = "harmonic";
+    QString anglestyle = "harmonic";
 
-        for (auto it = angs0.constBegin(); it != angs0.constEnd(); ++it)
-        {
-            if (not(it.value().isSimple() and it.value().isHarmonic()))
-            {
-                anglestyle = "gromacs";
-                break;
-            }
-        }
-
-        QString dihedralstyle = "cosine";
-
-        for (auto it = dihs0.constBegin(); it != dihs0.constEnd(); ++it)
-        {
-            if (not(it.value().isSimple() and it.value().isCosine()))
-            {
-                dihedralstyle = "gromacs";
-                break;
-            }
-        }
-
-        // finally generate a forcefield description for this molecule based on the
-        // passed defaults and the functional forms of the internals
-        ffield0 =
-            MMDetail::guessFrom(combrule, elecstyle, vdwstyle, elec14, vdw14, bondstyle, anglestyle, dihedralstyle);
+    for (auto it = angs1.constBegin(); it != angs1.constEnd(); ++it) {
+      if (not(it.value().isSimple() and it.value().isHarmonic())) {
+        anglestyle = "gromacs";
+        break;
+      }
     }
+
+    QString dihedralstyle = "cosine";
+
+    for (auto it = dihs1.constBegin(); it != dihs1.constEnd(); ++it) {
+      if (not(it.value().isSimple() and it.value().isCosine())) {
+        dihedralstyle = "gromacs";
+        break;
+      }
+    }
+
+    // finally generate a forcefield description for this molecule based on the
+    // passed defaults and the functional forms of the internals
+    ffield1 = MMDetail::guessFrom(combrule, elecstyle, vdwstyle, elec14, vdw14,
+                                  bondstyle, anglestyle, dihedralstyle);
+  } else {
+    for (auto it = bnds0.constBegin(); it != bnds0.constEnd(); ++it) {
+      if (not(it.value().isSimple() and it.value().isHarmonic())) {
+        bondstyle = "gromacs";
+        break;
+      }
+    }
+
+    QString anglestyle = "harmonic";
+
+    for (auto it = angs0.constBegin(); it != angs0.constEnd(); ++it) {
+      if (not(it.value().isSimple() and it.value().isHarmonic())) {
+        anglestyle = "gromacs";
+        break;
+      }
+    }
+
+    QString dihedralstyle = "cosine";
+
+    for (auto it = dihs0.constBegin(); it != dihs0.constEnd(); ++it) {
+      if (not(it.value().isSimple() and it.value().isCosine())) {
+        dihedralstyle = "gromacs";
+        break;
+      }
+    }
+
+    // finally generate a forcefield description for this molecule based on the
+    // passed defaults and the functional forms of the internals
+    ffield0 = MMDetail::guessFrom(combrule, elecstyle, vdwstyle, elec14, vdw14,
+                                  bondstyle, anglestyle, dihedralstyle);
+  }
 }
 
-/** Add a warning that has been generated while parsing or creatig this object */
-void GroMolType::addWarning(const QString &warning)
-{
-    warns.append(warning);
-}
+/** Add a warning that has been generated while parsing or creatig this object
+ */
+void GroMolType::addWarning(const QString &warning) { warns.append(warning); }
 
 /** Return any warnings associated with this moleculetype */
-QStringList GroMolType::warnings() const
-{
-    return warns;
-}
+QStringList GroMolType::warnings() const { return warns; }
 
 /** Add the passed bond to the molecule */
-void GroMolType::addBond(const BondID &bond, const GromacsBond &param, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot add bond. The molecule isn't perturbable!"));
+void GroMolType::addBond(const BondID &bond, const GromacsBond &param,
+                         bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot add bond. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        bnds1.insert(bond, param);
-    else
-        bnds0.insert(bond, param);
+  if (is_lambda1)
+    bnds1.insert(bond, param);
+  else
+    bnds0.insert(bond, param);
 }
 
 /** Add the passed angle to the molecule */
-void GroMolType::addAngle(const AngleID &angle, const GromacsAngle &param, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot add angle. The molecule isn't perturbable!"));
+void GroMolType::addAngle(const AngleID &angle, const GromacsAngle &param,
+                          bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot add angle. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        angs1.insert(angle, param);
-    else
-        angs0.insert(angle, param);
+  if (is_lambda1)
+    angs1.insert(angle, param);
+  else
+    angs0.insert(angle, param);
 }
 
 /** Add the passed dihedral to the molecule */
-void GroMolType::addDihedral(const DihedralID &dihedral, const GromacsDihedral &param, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot add dihedral. The molecule isn't perturbable!"));
+void GroMolType::addDihedral(const DihedralID &dihedral,
+                             const GromacsDihedral &param, bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot add dihedral. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        dihs1.insert(dihedral, param);
-    else
-        dihs0.insert(dihedral, param);
+  if (is_lambda1)
+    dihs1.insert(dihedral, param);
+  else
+    dihs0.insert(dihedral, param);
 }
 
 /** Add the passed bonds to the molecule */
-void GroMolType::addBonds(const QMultiHash<BondID, GromacsBond> &bonds, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot add bonds. The molecule isn't perturbable!"));
+void GroMolType::addBonds(const QMultiHash<BondID, GromacsBond> &bonds,
+                          bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot add bonds. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        bnds1 += bonds;
-    else
-        bnds0 += bonds;
+  if (is_lambda1)
+    bnds1 += bonds;
+  else
+    bnds0 += bonds;
 }
 
 /** Add the passed angles to the molecule */
-void GroMolType::addAngles(const QMultiHash<AngleID, GromacsAngle> &angles, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot add angles. The molecule isn't perturbable!"));
+void GroMolType::addAngles(const QMultiHash<AngleID, GromacsAngle> &angles,
+                           bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot add angles. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        angs1 += angles;
-    else
-        angs0 += angles;
+  if (is_lambda1)
+    angs1 += angles;
+  else
+    angs0 += angles;
 }
 
 /** Add the passed dihedrals to the molecule */
-void GroMolType::addDihedrals(const QMultiHash<DihedralID, GromacsDihedral> &dihedrals, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot add dihedrals. The molecule isn't perturbable!"));
+void GroMolType::addDihedrals(
+    const QMultiHash<DihedralID, GromacsDihedral> &dihedrals, bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot add dihedrals. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        dihs1 += dihedrals;
-    else
-        dihs0 += dihedrals;
+  if (is_lambda1)
+    dihs1 += dihedrals;
+  else
+    dihs0 += dihedrals;
 }
 
 /** Add the passed CMAPs to the molecule */
-void GroMolType::addCMAPs(const QHash<CMAPID, QString> &cmaps, bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-    {
-        throw SireError::incompatible_error(QObject::tr("Cannot add CMAPs. The molecule isn't perturbable!"));
-    }
+void GroMolType::addCMAPs(const QHash<CMAPID, QString> &cmaps,
+                          bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable) {
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot add CMAPs. The molecule isn't perturbable!"));
+  }
 
-    if (is_lambda1)
-    {
-        for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
-        {
-            cmaps1.insert(it.key(), it.value());
-        }
+  if (is_lambda1) {
+    for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it) {
+      cmaps1.insert(it.key(), it.value());
     }
-    else
-    {
-        for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
-        {
-            cmaps0.insert(it.key(), it.value());
-        }
+  } else {
+    for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it) {
+      cmaps0.insert(it.key(), it.value());
     }
+  }
 }
 
 /** Return all of the bonds */
-QMultiHash<BondID, GromacsBond> GroMolType::bonds(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get bonds. The molecule isn't perturbable!"));
+QMultiHash<BondID, GromacsBond> GroMolType::bonds(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot get bonds. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        return bnds1;
-    else
-        return bnds0;
+  if (is_lambda1)
+    return bnds1;
+  else
+    return bnds0;
 }
 
 /** Return all of the angles */
-QMultiHash<AngleID, GromacsAngle> GroMolType::angles(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get angles. The molecule isn't perturbable!"));
+QMultiHash<AngleID, GromacsAngle> GroMolType::angles(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot get angles. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        return angs1;
-    else
-        return angs0;
+  if (is_lambda1)
+    return angs1;
+  else
+    return angs0;
 }
 
 /** Return all of the dihedrals */
-QMultiHash<DihedralID, GromacsDihedral> GroMolType::dihedrals(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get dihedrals. The molecule isn't perturbable!"));
+QMultiHash<DihedralID, GromacsDihedral>
+GroMolType::dihedrals(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot get dihedrals. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        return dihs1;
-    else
-        return dihs0;
+  if (is_lambda1)
+    return dihs1;
+  else
+    return dihs0;
 }
 
 /** Return all of the cmaps */
-QHash<CMAPID, QString> GroMolType::cmaps(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot get CMAPs. The molecule isn't perturbable!"));
+QHash<CMAPID, QString> GroMolType::cmaps(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot get CMAPs. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-        return cmaps1;
-    else
-        return cmaps0;
+  if (is_lambda1)
+    return cmaps1;
+  else
+    return cmaps0;
 }
 
 /** Add an explicit 1-4 pair (from a [pairs] funct=2 line) with given
  *  coulomb and LJ scale factors */
-void GroMolType::addExplicitPair(const BondID &pair, double cscl, double ljscl)
-{
-    explicit_pairs.insert(pair, qMakePair(cscl, ljscl));
+void GroMolType::addExplicitPair(const BondID &pair, double cscl,
+                                 double ljscl) {
+  explicit_pairs.insert(pair, qMakePair(cscl, ljscl));
 }
 
 /** Return the explicit 1-4 pair scale factors (from [pairs] funct=2) */
-QHash<BondID, QPair<double, double>> GroMolType::explicitPairs() const
-{
-    return explicit_pairs;
+QHash<BondID, QPair<double, double>> GroMolType::explicitPairs() const {
+  return explicit_pairs;
 }
 
 /** Sanitise all of the CMAP terms - this sets the string equal to "1",
  *  as the information contained previously has already been read
  */
-void GroMolType::sanitiseCMAPs(bool is_lambda1)
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot sanitise CMAPs. The molecule isn't perturbable!"));
+void GroMolType::sanitiseCMAPs(bool is_lambda1) {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot sanitise CMAPs. The molecule isn't perturbable!"));
 
-    if (is_lambda1)
-    {
-        for (auto it = cmaps1.begin(); it != cmaps1.end(); ++it)
-        {
-            it.value() = "1";
-        }
+  if (is_lambda1) {
+    for (auto it = cmaps1.begin(); it != cmaps1.end(); ++it) {
+      it.value() = "1";
     }
-    else
-    {
-        for (auto it = cmaps0.begin(); it != cmaps0.end(); ++it)
-        {
-            it.value() = "1";
-        }
+  } else {
+    for (auto it = cmaps0.begin(); it != cmaps0.end(); ++it) {
+      it.value() = "1";
     }
+  }
 }
 
 /** Return whether or not this is a topology for water. This should
     return true for all water models (including TIP4P and TIP5P) */
-bool GroMolType::isWater(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot check water. The molecule isn't perturbable!"));
+bool GroMolType::isWater(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot check water. The molecule isn't perturbable!"));
 
-    if (nResidues(is_lambda1) == 1)
+  if (nResidues(is_lambda1) == 1) {
+    if (nAtoms(is_lambda1) >= 3 and
+        nAtoms(is_lambda1) <= 5) // catch SPC/TIP3P to TIP5P
     {
-        if (nAtoms(is_lambda1) >= 3 and nAtoms(is_lambda1) <= 5) // catch SPC/TIP3P to TIP5P
-        {
-            // the total mass of the molecule should be 18 (rounded)
-            // and the number of oxygens should be 1 and hydrogens should be 2
-            int noxy = 0;
-            int nhyd = 0;
-            int total_mass = 0;
+      // the total mass of the molecule should be 18 (rounded)
+      // and the number of oxygens should be 1 and hydrogens should be 2
+      int noxy = 0;
+      int nhyd = 0;
+      int total_mass = 0;
 
-            if (is_lambda1)
-            {
-                for (const auto &atm : atms1)
-                {
-                    // round down the mass to the nearest integer unit, so to
-                    // exclude isotopes
-                    const int mass = int(std::floor(atm.mass().value()));
+      if (is_lambda1) {
+        for (const auto &atm : atms1) {
+          // round down the mass to the nearest integer unit, so to
+          // exclude isotopes
+          const int mass = int(std::floor(atm.mass().value()));
 
-                    total_mass += mass;
+          total_mass += mass;
 
-                    if (total_mass > 18)
-                        return false;
+          if (total_mass > 18)
+            return false;
 
-                    if (mass == 16)
-                    {
-                        noxy += 1;
-                        if (noxy > 1)
-                            return false;
-                    }
-                    else if (mass == 1)
-                    {
-                        nhyd += 1;
-                        if (nhyd > 2)
-                            return false;
-                    }
-                }
-
-                if (noxy == 1 and nhyd == 2)
-                    return true;
-                else
-                    return false;
-            }
-            else
-            {
-                for (const auto &atm : atms0)
-                {
-                    // round down the mass to the nearest integer unit, so to
-                    // exclude isotopes
-                    const int mass = int(std::floor(atm.mass().value()));
-
-                    total_mass += mass;
-
-                    if (total_mass > 18)
-                        return false;
-
-                    if (mass == 16)
-                    {
-                        noxy += 1;
-                        if (noxy > 1)
-                            return false;
-                    }
-                    else if (mass == 1)
-                    {
-                        nhyd += 1;
-                        if (nhyd > 2)
-                            return false;
-                    }
-                }
-
-                if (noxy == 1 and nhyd == 2)
-                    return true;
-                else
-                    return false;
-            }
+          if (mass == 16) {
+            noxy += 1;
+            if (noxy > 1)
+              return false;
+          } else if (mass == 1) {
+            nhyd += 1;
+            if (nhyd > 2)
+              return false;
+          }
         }
-    }
 
-    return false;
+        if (noxy == 1 and nhyd == 2)
+          return true;
+        else
+          return false;
+      } else {
+        for (const auto &atm : atms0) {
+          // round down the mass to the nearest integer unit, so to
+          // exclude isotopes
+          const int mass = int(std::floor(atm.mass().value()));
+
+          total_mass += mass;
+
+          if (total_mass > 18)
+            return false;
+
+          if (mass == 16) {
+            noxy += 1;
+            if (noxy > 1)
+              return false;
+          } else if (mass == 1) {
+            nhyd += 1;
+            if (nhyd > 2)
+              return false;
+          }
+        }
+
+        if (noxy == 1 and nhyd == 2)
+          return true;
+        else
+          return false;
+      }
+    }
+  }
+
+  return false;
 }
 
 /** Return the settles lines for this molecule. This currently only returns
     settles lines for water molecules. These lines are used to constrain the
     bonds/angles of the water molecule */
-QStringList GroMolType::settlesLines(bool is_lambda1) const
-{
-    // The molecule is not perturbable!
-    if (is_lambda1 and not this->is_perturbable)
-        throw SireError::incompatible_error(QObject::tr("Cannot check settles. The molecule isn't perturbable!"));
+QStringList GroMolType::settlesLines(bool is_lambda1) const {
+  // The molecule is not perturbable!
+  if (is_lambda1 and not this->is_perturbable)
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot check settles. The molecule isn't perturbable!"));
 
-    if (not this->isWater(is_lambda1))
-        return QStringList();
+  if (not this->isWater(is_lambda1))
+    return QStringList();
 
-    QStringList lines;
+  QStringList lines;
 
-    // lambda function to check whether a four point water model
-    // is OPC water, which is determined by the virtual site charge
-    // value being < -1.1
-    auto is_opc = [this, is_lambda1]() -> bool {
-        if (is_lambda1)
+  // lambda function to check whether a four point water model
+  // is OPC water, which is determined by the virtual site charge
+  // value being < -1.1
+  auto is_opc = [this, is_lambda1]() -> bool {
+    if (is_lambda1) {
+      for (const auto &atm : atms1) {
+        if (atm.mass().value() < 1.0) // virtual site
         {
-            for (const auto &atm : atms1)
-            {
-                if (atm.mass().value() < 1.0) // virtual site
-                {
-                    if (atm.charge().value() < -1.1)
-                        return true;
-                    else
-                        return false;
-                }
-            }
+          if (atm.charge().value() < -1.1)
+            return true;
+          else
+            return false;
         }
-        else
+      }
+    } else {
+      for (const auto &atm : atms0) {
+        if (atm.mass().value() < 1.0) // virtual site
         {
-            for (const auto &atm : atms0)
-            {
-                if (atm.mass().value() < 1.0) // virtual site
-                {
-                    if (atm.charge().value() < -1.1)
-                        return true;
-                    else
-                        return false;
-                }
-            }
+          if (atm.charge().value() < -1.1)
+            return true;
+          else
+            return false;
         }
-
-        return false;
-    };
-
-    lines.append("[ settles ]");
-    lines.append("; OW    funct   doh dhh");
-
-    // Equilibrium OH and HH bond lengths. (Default to TIP3P values).
-    double hh_length = 0.15136000;
-    double oh_length = 0.09572000;
-
-    if (nAtoms(is_lambda1) == 4)
-    {
-        // TIP4P/OPC
-        if (is_opc())
-        {
-            oh_length = 0.08724331;
-            hh_length = 0.1371205;
-        }
-        else
-        {
-            hh_length = 0.15139;
-        }
-    }
-    else if (nAtoms(is_lambda1) == 5)
-    {
-        // TIP5P
-        hh_length = 0.15139;
+      }
     }
 
-    lines.append(QString("1       1       %1 %2").arg(oh_length, 7, 'f', 5).arg(hh_length, 7, 'f', 5));
+    return false;
+  };
 
+  lines.append("[ settles ]");
+  lines.append("; OW    funct   doh dhh");
+
+  // Equilibrium OH and HH bond lengths. (Default to TIP3P values).
+  double hh_length = 0.15136000;
+  double oh_length = 0.09572000;
+
+  if (nAtoms(is_lambda1) == 4) {
+    // TIP4P/OPC
+    if (is_opc()) {
+      oh_length = 0.08724331;
+      hh_length = 0.1371205;
+    } else {
+      hh_length = 0.15139;
+    }
+  } else if (nAtoms(is_lambda1) == 5) {
+    // TIP5P
+    hh_length = 0.15139;
+  }
+
+  lines.append(QString("1       1       %1 %2")
+                   .arg(oh_length, 7, 'f', 5)
+                   .arg(hh_length, 7, 'f', 5));
+
+  lines.append("");
+  lines.append("[ exclusions ]");
+
+  if (nAtoms(is_lambda1) == 3) {
+    // TIP3P or SPC
+    lines.append("1   2   3");
+    lines.append("2   1   3");
+    lines.append("3   1   2");
+  } else if (nAtoms(is_lambda1) == 4) {
+
+    // TIP4P/OPC
+    lines.append("1   2   3   4");
+    lines.append("2   1   3   4");
+    lines.append("3   1   2   4");
+    lines.append("4   1   2   3");
+
+    // Add virtual site information.
     lines.append("");
-    lines.append("[ exclusions ]");
+    lines.append("[ virtual_sites3 ]");
+    lines.append("; Vsite from                    funct   a               b");
 
-    if (nAtoms(is_lambda1) == 3)
-    {
-        // TIP3P or SPC
-        lines.append("1   2   3");
-        lines.append("2   1   3");
-        lines.append("3   1   2");
-    }
-    else if (nAtoms(is_lambda1) == 4)
-    {
+    // Check for OPC water.
+    if (is_opc())
+      lines.append(
+          "4       1       2       3       1       0.1477224       0.1477224");
+    else
+      lines.append("4       1       2       3       1       0.128012065     "
+                   "0.128012065");
+  } else if (nAtoms(is_lambda1) == 5) {
+    // TIP5P
+    lines.append("1   2   3   4   5");
+    lines.append("2   1   3   4   5");
+    lines.append("3   1   2   4   5");
+    lines.append("4   1   2   3   5");
+    lines.append("5   1   2   3   4");
 
-        // TIP4P/OPC
-        lines.append("1   2   3   4");
-        lines.append("2   1   3   4");
-        lines.append("3   1   2   4");
-        lines.append("4   1   2   3");
+    // Add virtual site information.
+    lines.append("");
+    lines.append("[ virtual_sites3 ]");
+    lines.append("; Vsite from                    funct   a               b    "
+                 "           c");
+    lines.append("4      1       2       3       4        -0.344908262    "
+                 "-0.34490826     -6.4437903493");
+    lines.append("5      1       2       3       4        -0.344908262    "
+                 "-0.34490826     6.4437903493");
+  }
 
-        // Add virtual site information.
-        lines.append("");
-        lines.append("[ virtual_sites3 ]");
-        lines.append("; Vsite from                    funct   a               b");
-
-        // Check for OPC water.
-        if (is_opc())
-            lines.append("4       1       2       3       1       0.1477224       0.1477224");
-        else
-            lines.append("4       1       2       3       1       0.128012065     0.128012065");
-    }
-    else if (nAtoms(is_lambda1) == 5)
-    {
-        // TIP5P
-        lines.append("1   2   3   4   5");
-        lines.append("2   1   3   4   5");
-        lines.append("3   1   2   4   5");
-        lines.append("4   1   2   3   5");
-        lines.append("5   1   2   3   4");
-
-        // Add virtual site information.
-        lines.append("");
-        lines.append("[ virtual_sites3 ]");
-        lines.append("; Vsite from                    funct   a               b               c");
-        lines.append("4      1       2       3       4        -0.344908262    -0.34490826     -6.4437903493");
-        lines.append("5      1       2       3       4        -0.344908262    -0.34490826     6.4437903493");
-    }
-
-    return lines;
+  return lines;
 }
 
 ////////////////
@@ -2744,224 +2365,167 @@ QStringList GroMolType::settlesLines(bool is_lambda1) const
 
 static const RegisterMetaType<GroSystem> r_grosys(NO_ROOT);
 
-QDataStream &operator<<(QDataStream &ds, const GroSystem &grosys)
-{
-    writeHeader(ds, r_grosys, 1);
+QDataStream &operator<<(QDataStream &ds, const GroSystem &grosys) {
+  writeHeader(ds, r_grosys, 1);
 
-    SharedDataStream sds(ds);
+  SharedDataStream sds(ds);
 
-    sds << grosys.nme << grosys.moltypes << grosys.nmols;
+  sds << grosys.nme << grosys.moltypes << grosys.nmols;
 
-    return ds;
+  return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, GroSystem &grosys)
-{
-    VersionID v = readHeader(ds, r_grosys);
+QDataStream &operator>>(QDataStream &ds, GroSystem &grosys) {
+  VersionID v = readHeader(ds, r_grosys);
 
-    if (v == 1)
-    {
-        SharedDataStream sds(ds);
+  if (v == 1) {
+    SharedDataStream sds(ds);
 
-        sds >> grosys.nme >> grosys.moltypes >> grosys.nmols;
+    sds >> grosys.nme >> grosys.moltypes >> grosys.nmols;
 
-        grosys.total_nmols = 0;
+    grosys.total_nmols = 0;
 
-        for (auto it = grosys.nmols.constBegin(); it != grosys.nmols.constEnd(); ++it)
-        {
-            grosys.total_nmols += *it;
-        }
+    for (auto it = grosys.nmols.constBegin(); it != grosys.nmols.constEnd();
+         ++it) {
+      grosys.total_nmols += *it;
     }
-    else
-        throw version_error(v, "1", r_grosys, CODELOC);
+  } else
+    throw version_error(v, "1", r_grosys, CODELOC);
 
-    return ds;
+  return ds;
 }
 
 /** Construct a null GroSystem */
-GroSystem::GroSystem() : total_nmols(0)
-{
-}
+GroSystem::GroSystem() : total_nmols(0) {}
 
 /** Construct a GroSystem with the passed name */
-GroSystem::GroSystem(const QString &name) : nme(name), total_nmols(0)
-{
-}
+GroSystem::GroSystem(const QString &name) : nme(name), total_nmols(0) {}
 
 /** Copy constructor */
 GroSystem::GroSystem(const GroSystem &other)
-    : nme(other.nme), moltypes(other.moltypes), nmols(other.nmols), total_nmols(other.total_nmols)
-{
-}
+    : nme(other.nme), moltypes(other.moltypes), nmols(other.nmols),
+      total_nmols(other.total_nmols) {}
 
 /** Destructor */
-GroSystem::~GroSystem()
-{
-}
+GroSystem::~GroSystem() {}
 
 /** Copy assignment operator */
-GroSystem &GroSystem::operator=(const GroSystem &other)
-{
-    nme = other.nme;
-    moltypes = other.moltypes;
-    nmols = other.nmols;
-    total_nmols = other.total_nmols;
-    return *this;
+GroSystem &GroSystem::operator=(const GroSystem &other) {
+  nme = other.nme;
+  moltypes = other.moltypes;
+  nmols = other.nmols;
+  total_nmols = other.total_nmols;
+  return *this;
 }
 
 /** Comparison operator */
-bool GroSystem::operator==(const GroSystem &other) const
-{
-    return nme == other.nme and total_nmols == other.total_nmols and moltypes == other.moltypes and
-           nmols == other.nmols;
+bool GroSystem::operator==(const GroSystem &other) const {
+  return nme == other.nme and total_nmols == other.total_nmols and
+         moltypes == other.moltypes and nmols == other.nmols;
 }
 
 /** Comparison operator */
-bool GroSystem::operator!=(const GroSystem &other) const
-{
-    return not operator==(other);
+bool GroSystem::operator!=(const GroSystem &other) const {
+  return not operator==(other);
 }
 
 /** Return the molecule type of the ith molecule */
-QString GroSystem::operator[](int i) const
-{
-    i = Index(i).map(total_nmols);
+QString GroSystem::operator[](int i) const {
+  i = Index(i).map(total_nmols);
 
-    auto it2 = moltypes.constBegin();
-    for (auto it = nmols.constBegin(); it != nmols.constEnd(); ++it)
-    {
-        if (i < *it)
-        {
-            return *it2;
-        }
-        else
-        {
-            i -= *it;
-            ++it2;
-        }
+  auto it2 = moltypes.constBegin();
+  for (auto it = nmols.constBegin(); it != nmols.constEnd(); ++it) {
+    if (i < *it) {
+      return *it2;
+    } else {
+      i -= *it;
+      ++it2;
     }
+  }
 
-    // we should never get here...
-    throw SireError::program_bug(QObject::tr("How did we get here? %1 : %2 : %3")
-                                     .arg(i)
-                                     .arg(Sire::toString(moltypes))
-                                     .arg(Sire::toString(nmols)),
-                                 CODELOC);
+  // we should never get here...
+  throw SireError::program_bug(QObject::tr("How did we get here? %1 : %2 : %3")
+                                   .arg(i)
+                                   .arg(Sire::toString(moltypes))
+                                   .arg(Sire::toString(nmols)),
+                               CODELOC);
 
-    return QString();
+  return QString();
 }
 
 /** Return the molecule type of the ith molecule */
-QString GroSystem::at(int i) const
-{
-    return operator[](i);
-}
+QString GroSystem::at(int i) const { return operator[](i); }
 
 /** Return the number of molecules in the system */
-int GroSystem::size() const
-{
-    return total_nmols;
-}
+int GroSystem::size() const { return total_nmols; }
 
 /** Return the number of molecules in the system */
-int GroSystem::count() const
-{
-    return size();
-}
+int GroSystem::count() const { return size(); }
 
 /** Return the number of molecules in the system */
-int GroSystem::nMolecules() const
-{
-    return size();
+int GroSystem::nMolecules() const { return size(); }
+
+const char *GroSystem::typeName() {
+  return QMetaType::typeName(qMetaTypeId<GroSystem>());
 }
 
-const char *GroSystem::typeName()
-{
-    return QMetaType::typeName(qMetaTypeId<GroSystem>());
-}
-
-const char *GroSystem::what() const
-{
-    return GroSystem::typeName();
-}
+const char *GroSystem::what() const { return GroSystem::typeName(); }
 
 /** Return the name of the system */
-QString GroSystem::name() const
-{
-    return nme;
-}
+QString GroSystem::name() const { return nme; }
 
 /** Set the name of the system */
-void GroSystem::setName(QString name)
-{
-    nme = name;
-}
+void GroSystem::setName(QString name) { nme = name; }
 
 /** Return a string representation of this system */
-QString GroSystem::toString() const
-{
-    if (this->isNull())
-    {
-        return QObject::tr("GroSystem::null");
-    }
-    else if (this->isEmpty())
-    {
-        return QObject::tr("GroSystem( %1 : empty )").arg(this->name());
-    }
-    else
-    {
-        return QObject::tr("GroSystem( %1 : nMolecules()=%2 )").arg(this->name()).arg(this->nMolecules());
-    }
+QString GroSystem::toString() const {
+  if (this->isNull()) {
+    return QObject::tr("GroSystem::null");
+  } else if (this->isEmpty()) {
+    return QObject::tr("GroSystem( %1 : empty )").arg(this->name());
+  } else {
+    return QObject::tr("GroSystem( %1 : nMolecules()=%2 )")
+        .arg(this->name())
+        .arg(this->nMolecules());
+  }
 }
 
 /** Return whether or not this is a null GroSystem */
-bool GroSystem::isNull() const
-{
-    return nme.isNull() and total_nmols == 0;
-}
+bool GroSystem::isNull() const { return nme.isNull() and total_nmols == 0; }
 
 /** Return whether or not this is an empty system (no molecules) */
-bool GroSystem::isEmpty() const
-{
-    return total_nmols == 0;
-}
+bool GroSystem::isEmpty() const { return total_nmols == 0; }
 
 /** Return the list of unique molecule types held in the system */
-QStringList GroSystem::uniqueTypes() const
-{
-    QStringList typs;
+QStringList GroSystem::uniqueTypes() const {
+  QStringList typs;
 
-    for (const auto &moltype : moltypes)
-    {
-        if (not typs.contains(moltype))
-        {
-            typs.append(moltype);
-        }
+  for (const auto &moltype : moltypes) {
+    if (not typs.contains(moltype)) {
+      typs.append(moltype);
     }
+  }
 
-    return typs;
+  return typs;
 }
 
 /** Add (optionally ncopies) copies of the molecule with type 'moltype'
     to the system */
-void GroSystem::add(QString moltype, int ncopies)
-{
-    if (ncopies <= 0)
-        return;
+void GroSystem::add(QString moltype, int ncopies) {
+  if (ncopies <= 0)
+    return;
 
-    if (total_nmols > 0)
-    {
-        if (moltypes.back() == moltype)
-        {
-            nmols.back() += ncopies;
-            total_nmols += ncopies;
-            return;
-        }
+  if (total_nmols > 0) {
+    if (moltypes.back() == moltype) {
+      nmols.back() += ncopies;
+      total_nmols += ncopies;
+      return;
     }
+  }
 
-    moltypes.append(moltype);
-    nmols.append(ncopies);
-    total_nmols += ncopies;
+  moltypes.append(moltype);
+  nmols.append(ncopies);
+  total_nmols += ncopies;
 }
 
 ////////////////
@@ -2971,2108 +2535,1979 @@ void GroSystem::add(QString moltype, int ncopies)
 const RegisterParser<GroTop> register_grotop;
 static const RegisterMetaType<GroTop> r_grotop;
 
-QDataStream &operator<<(QDataStream &ds, const GroTop &grotop)
-{
-    writeHeader(ds, r_grotop, 2);
+QDataStream &operator<<(QDataStream &ds, const GroTop &grotop) {
+  writeHeader(ds, r_grotop, 2);
 
+  SharedDataStream sds(ds);
+
+  sds << grotop.include_path << grotop.included_files << grotop.expanded_lines
+      << grotop.atom_types << grotop.bond_potentials << grotop.ang_potentials
+      << grotop.dih_potentials << grotop.cmap_potentials << grotop.moltypes
+      << grotop.grosys << grotop.nb_func_type << grotop.combining_rule
+      << grotop.fudge_lj << grotop.fudge_qq << grotop.parse_warnings
+      << grotop.generate_pairs << static_cast<const MoleculeParser &>(grotop);
+
+  return ds;
+}
+
+QDataStream &operator>>(QDataStream &ds, GroTop &grotop) {
+  VersionID v = readHeader(ds, r_grotop);
+
+  if (v == 1 or v == 2) {
     SharedDataStream sds(ds);
 
-    sds << grotop.include_path << grotop.included_files << grotop.expanded_lines << grotop.atom_types
-        << grotop.bond_potentials << grotop.ang_potentials << grotop.dih_potentials
-        << grotop.cmap_potentials << grotop.moltypes << grotop.grosys
-        << grotop.nb_func_type << grotop.combining_rule << grotop.fudge_lj << grotop.fudge_qq << grotop.parse_warnings
-        << grotop.generate_pairs << static_cast<const MoleculeParser &>(grotop);
+    sds >> grotop.include_path >> grotop.included_files >>
+        grotop.expanded_lines >> grotop.atom_types >> grotop.bond_potentials >>
+        grotop.ang_potentials >> grotop.dih_potentials;
 
-    return ds;
-}
-
-QDataStream &operator>>(QDataStream &ds, GroTop &grotop)
-{
-    VersionID v = readHeader(ds, r_grotop);
-
-    if (v == 1 or v == 2)
-    {
-        SharedDataStream sds(ds);
-
-        sds >> grotop.include_path >> grotop.included_files >> grotop.expanded_lines >> grotop.atom_types >>
-            grotop.bond_potentials >> grotop.ang_potentials >> grotop.dih_potentials;
-
-        if (v == 2)
-            sds >> grotop.cmap_potentials;
-        else
-            grotop.cmap_potentials.clear();
-
-        sds >> grotop.moltypes >> grotop.grosys >> grotop.nb_func_type >>
-            grotop.combining_rule >> grotop.fudge_lj >> grotop.fudge_qq >>
-            grotop.parse_warnings >> grotop.generate_pairs >> static_cast<MoleculeParser &>(grotop);
-    }
+    if (v == 2)
+      sds >> grotop.cmap_potentials;
     else
-        throw version_error(v, "1", r_grotop, CODELOC);
+      grotop.cmap_potentials.clear();
 
-    return ds;
+    sds >> grotop.moltypes >> grotop.grosys >> grotop.nb_func_type >>
+        grotop.combining_rule >> grotop.fudge_lj >> grotop.fudge_qq >>
+        grotop.parse_warnings >> grotop.generate_pairs >>
+        static_cast<MoleculeParser &>(grotop);
+  } else
+    throw version_error(v, "1", r_grotop, CODELOC);
+
+  return ds;
 }
 
-// first thing is to parse in the gromacs files. These use #include, #define, #if etc.
-// so we need to pull all of them together into a single set of lines
+// first thing is to parse in the gromacs files. These use #include, #define,
+// #if etc. so we need to pull all of them together into a single set of lines
 
 /** Internal function to return a LJParameter from the passed W and V values
     for the passed Gromacs combining rule */
-static LJParameter toLJParameter(double v, double w, int rule)
-{
-    if (rule == 2 or rule == 3)
-    {
-        // v = sigma in nm, and w = epsilon in kJ mol-1
-        return LJParameter::fromSigmaAndEpsilon(v * nanometer, w * kJ_per_mol);
-    }
-    else
-    {
-        // v = 4 epsilon sigma^6 in kJ mol-1 nm^6, w = 4 epsilon sigma^12 in kJ mol-1 nm^12
-        // so sigma = (w/v)^1/6 and epsilon = v^2 / 4w
-        return LJParameter::fromSigmaAndEpsilon(std::pow(w / v, 1.0 / 6.0) * nanometer,
-                                                (v * v / (4.0 * w)) * kJ_per_mol);
-    }
+static LJParameter toLJParameter(double v, double w, int rule) {
+  if (rule == 2 or rule == 3) {
+    // v = sigma in nm, and w = epsilon in kJ mol-1
+    return LJParameter::fromSigmaAndEpsilon(v * nanometer, w * kJ_per_mol);
+  } else {
+    // v = 4 epsilon sigma^6 in kJ mol-1 nm^6, w = 4 epsilon sigma^12 in kJ
+    // mol-1 nm^12 so sigma = (w/v)^1/6 and epsilon = v^2 / 4w
+    return LJParameter::fromSigmaAndEpsilon(std::pow(w / v, 1.0 / 6.0) *
+                                                nanometer,
+                                            (v * v / (4.0 * w)) * kJ_per_mol);
+  }
 }
 
-/** Internal function to convert a LJParameter to V and W based on the passed gromacs
-    combining rule */
-static std::tuple<double, double> fromLJParameter(const LJParameter &lj, int rule)
-{
-    const double sigma = lj.sigma().to(nanometer);
-    const double epsilon = lj.epsilon().to(kJ_per_mol);
+/** Internal function to convert a LJParameter to V and W based on the passed
+   gromacs combining rule */
+static std::tuple<double, double> fromLJParameter(const LJParameter &lj,
+                                                  int rule) {
+  const double sigma = lj.sigma().to(nanometer);
+  const double epsilon = lj.epsilon().to(kJ_per_mol);
 
-    if (rule == 2 or rule == 3)
-    {
-        return std::make_tuple(sigma, epsilon);
-    }
-    else
-    {
-        double sig6 = SireMaths::pow(sigma, 6);
-        double v = 4.0 * epsilon * sig6;
-        double w = v * sig6;
+  if (rule == 2 or rule == 3) {
+    return std::make_tuple(sigma, epsilon);
+  } else {
+    double sig6 = SireMaths::pow(sigma, 6);
+    double v = 4.0 * epsilon * sig6;
+    double w = v * sig6;
 
-        return std::make_tuple(v, w);
-    }
+    return std::make_tuple(v, w);
+  }
 }
 
 /** Internal function to create a string version of the LJ function type */
-static QString _getVDWStyle(int type)
-{
-    if (type == 1)
-        return "lj";
-    else if (type == 2)
-        return "buckingham";
-    else
-        throw SireError::invalid_arg(
-            QObject::tr("Cannot find the VDW function type from value '%1'. Should be 1 or 2.").arg(type), CODELOC);
+static QString _getVDWStyle(int type) {
+  if (type == 1)
+    return "lj";
+  else if (type == 2)
+    return "buckingham";
+  else
+    throw SireError::invalid_arg(
+        QObject::tr("Cannot find the VDW function type from value '%1'. Should "
+                    "be 1 or 2.")
+            .arg(type),
+        CODELOC);
 
-    return QString();
+  return QString();
 }
 
-/** Internal function to convert a MMDetail description of the LJ function type back
-    to the gromacs integer */
-static int _getVDWStyleFromFF(const MMDetail &ffield)
-{
-    if (ffield.usesLJTerm())
-        return 1;
-    else if (ffield.usesBuckinghamTerm())
-        return 2;
-    else
-        throw SireError::invalid_arg(QObject::tr("Cannot find the VDW function type for forcefield\n%1\n. "
-                                                 "This writer only support LJ or Buckingham VDW terms.")
-                                         .arg(ffield.toString()),
-                                     CODELOC);
+/** Internal function to convert a MMDetail description of the LJ function type
+   back to the gromacs integer */
+static int _getVDWStyleFromFF(const MMDetail &ffield) {
+  if (ffield.usesLJTerm())
+    return 1;
+  else if (ffield.usesBuckinghamTerm())
+    return 2;
+  else
+    throw SireError::invalid_arg(
+        QObject::tr("Cannot find the VDW function type for forcefield\n%1\n. "
+                    "This writer only support LJ or Buckingham VDW terms.")
+            .arg(ffield.toString()),
+        CODELOC);
 
-    return 0;
+  return 0;
 }
 
 /** Internal function to create the string version of the combining rules */
-static QString _getCombiningRules(int type)
-{
-    if (type == 1 or type == 3)
-        return "geometric";
-    else if (type == 2)
-        return "arithmetic";
-    else
-        throw SireError::invalid_arg(
-            QObject::tr("Cannot find the combining rules type from value '%1'. Should be 1, 2 or 3.").arg(type),
-            CODELOC);
+static QString _getCombiningRules(int type) {
+  if (type == 1 or type == 3)
+    return "geometric";
+  else if (type == 2)
+    return "arithmetic";
+  else
+    throw SireError::invalid_arg(
+        QObject::tr("Cannot find the combining rules type from value '%1'. "
+                    "Should be 1, 2 or 3.")
+            .arg(type),
+        CODELOC);
 
-    return QString();
+  return QString();
 }
 
-/** Internal function to create the combining rules from the passed forcefield */
-int _getCombiningRulesFromFF(const MMDetail &ffield)
-{
-    if (ffield.usesGeometricCombiningRules())
-        return 1; // I don't know what 3 is...
-    else if (ffield.usesArithmeticCombiningRules())
-        return 2;
-    else
-        throw SireError::invalid_arg(QObject::tr("Cannot find the combining rules to match the forcefield\n%1\n"
-                                                 "Valid options are arithmetic or geometric.")
-                                         .arg(ffield.toString()),
-                                     CODELOC);
+/** Internal function to create the combining rules from the passed forcefield
+ */
+int _getCombiningRulesFromFF(const MMDetail &ffield) {
+  if (ffield.usesGeometricCombiningRules())
+    return 1; // I don't know what 3 is...
+  else if (ffield.usesArithmeticCombiningRules())
+    return 2;
+  else
+    throw SireError::invalid_arg(
+        QObject::tr(
+            "Cannot find the combining rules to match the forcefield\n%1\n"
+            "Valid options are arithmetic or geometric.")
+            .arg(ffield.toString()),
+        CODELOC);
 
-    return 0;
+  return 0;
 }
 
 /** Constructor */
 GroTop::GroTop()
-    : ConcreteProperty<GroTop, MoleculeParser>(), nb_func_type(0), combining_rule(0), fudge_lj(0), fudge_qq(0),
-      generate_pairs(false)
-{
-}
+    : ConcreteProperty<GroTop, MoleculeParser>(), nb_func_type(0),
+      combining_rule(0), fudge_lj(0), fudge_qq(0), generate_pairs(false) {}
 
 /** This function gets the gromacs include path from the passed property map,
     as well as the current system environment */
-void GroTop::getIncludePath(const PropertyMap &map)
-{
-    QStringList path;
+void GroTop::getIncludePath(const PropertyMap &map) {
+  QStringList path;
 
-    // now, see if the path is given in "GROMACS_PATH" in map
-    try
-    {
-        const auto p = map["GROMACS_PATH"];
+  // now, see if the path is given in "GROMACS_PATH" in map
+  try {
+    const auto p = map["GROMACS_PATH"];
 
-        if (p.hasValue())
-        {
-            path += p.value().asA<StringProperty>().toString().split(":", Qt::SkipEmptyParts);
-        }
-        else if (p.source() != "GROMACS_PATH")
-        {
-            path += p.source().split(":", Qt::SkipEmptyParts);
-        }
+    if (p.hasValue()) {
+      path += p.value().asA<StringProperty>().toString().split(
+          ":", Qt::SkipEmptyParts);
+    } else if (p.source() != "GROMACS_PATH") {
+      path += p.source().split(":", Qt::SkipEmptyParts);
     }
-    catch (...)
-    {
-    }
+  } catch (...) {
+  }
 
-    // now, see if the path is given in the "GROMACS_PATH" environment variable
-    QString val = QString::fromLocal8Bit(qgetenv("GROMACS_PATH"));
+  // now, see if the path is given in the "GROMACS_PATH" environment variable
+  QString val = QString::fromLocal8Bit(qgetenv("GROMACS_PATH"));
 
-    if (not val.isEmpty())
-    {
-        path += val.split(":", Qt::SkipEmptyParts);
-    }
+  if (not val.isEmpty()) {
+    path += val.split(":", Qt::SkipEmptyParts);
+  }
 
-    // now go through each path and convert it into an absolute path based on the
-    // current directory
-    for (const auto &p : path)
-    {
-        include_path.append(QFileInfo(p).canonicalFilePath());
-    }
+  // now go through each path and convert it into an absolute path based on the
+  // current directory
+  for (const auto &p : path) {
+    include_path.append(QFileInfo(p).canonicalFilePath());
+  }
 }
 
 /** Construct to read in the data from the file called 'filename'. The
     passed property map can be used to pass extra parameters to control
     the parsing */
 GroTop::GroTop(const QString &filename, const PropertyMap &map)
-    : ConcreteProperty<GroTop, MoleculeParser>(filename, map), nb_func_type(0), combining_rule(0), fudge_lj(0),
-      fudge_qq(0), generate_pairs(false)
-{
-    this->getIncludePath(map);
+    : ConcreteProperty<GroTop, MoleculeParser>(filename, map), nb_func_type(0),
+      combining_rule(0), fudge_lj(0), fudge_qq(0), generate_pairs(false) {
+  this->getIncludePath(map);
 
-    // parse the data in the parse function, passing in the absolute path
-    // to the directory that contains this file
-    this->parseLines(QFileInfo(filename).absolutePath(), map);
+  // parse the data in the parse function, passing in the absolute path
+  // to the directory that contains this file
+  this->parseLines(QFileInfo(filename).absolutePath(), map);
 
-    // now make sure that everything is correct with this object
-    this->assertSane();
+  // now make sure that everything is correct with this object
+  this->assertSane();
 }
 
 /** Construct to read in the data from the passed text lines. The
     passed property map can be used to pass extra parameters to control
     the parsing */
 GroTop::GroTop(const QStringList &lines, const PropertyMap &map)
-    : ConcreteProperty<GroTop, MoleculeParser>(lines, map), nb_func_type(0), combining_rule(0), fudge_lj(0),
-      fudge_qq(0), generate_pairs(false)
-{
-    this->getIncludePath(map);
+    : ConcreteProperty<GroTop, MoleculeParser>(lines, map), nb_func_type(0),
+      combining_rule(0), fudge_lj(0), fudge_qq(0), generate_pairs(false) {
+  this->getIncludePath(map);
 
-    // parse the data in the parse function, assuming the file has
-    // come from the current directory
-    this->parseLines(QDir::current().absolutePath(), map);
+  // parse the data in the parse function, assuming the file has
+  // come from the current directory
+  this->parseLines(QDir::current().absolutePath(), map);
 
-    // now make sure that everything is correct with this object
-    this->assertSane();
+  // now make sure that everything is correct with this object
+  this->assertSane();
 }
 
 /** Internal function used to generate the lines for the defaults section */
-static QStringList writeDefaults(const MMDetail &ffield)
-{
-    QStringList lines;
-    lines.append("; Gromacs Topology File written by Sire");
-    lines.append(QString("; File written %1").arg(QDateTime::currentDateTime().toString("MM/dd/yy  hh:mm:ss")));
+static QStringList writeDefaults(const MMDetail &ffield) {
+  QStringList lines;
+  lines.append("; Gromacs Topology File written by Sire");
+  lines.append(
+      QString("; File written %1")
+          .arg(QDateTime::currentDateTime().toString("MM/dd/yy  hh:mm:ss")));
 
-    lines.append("[ defaults ]");
-    lines.append("; nbfunc      comb-rule       gen-pairs      fudgeLJ     fudgeQQ");
+  lines.append("[ defaults ]");
+  lines.append(
+      "; nbfunc      comb-rule       gen-pairs      fudgeLJ     fudgeQQ");
 
-    // all forcefields we support have gen-pairs = true (gromacs only understands 'yes' and 'no')
-    const QString gen_pairs = "yes";
+  // all forcefields we support have gen-pairs = true (gromacs only understands
+  // 'yes' and 'no')
+  const QString gen_pairs = "yes";
 
-    lines.append(QString("  %1           %2               %3            %4         %5")
-                     .arg(_getVDWStyleFromFF(ffield))
-                     .arg(_getCombiningRulesFromFF(ffield))
-                     .arg(gen_pairs)
-                     .arg(ffield.vdw14ScaleFactor())
-                     .arg(ffield.electrostatic14ScaleFactor()));
+  lines.append(
+      QString("  %1           %2               %3            %4         %5")
+          .arg(_getVDWStyleFromFF(ffield))
+          .arg(_getCombiningRulesFromFF(ffield))
+          .arg(gen_pairs)
+          .arg(ffield.vdw14ScaleFactor())
+          .arg(ffield.electrostatic14ScaleFactor()));
 
-    lines.append("");
+  lines.append("");
 
-    return lines;
+  return lines;
 }
 
-/** Internal function used to write all of the atom types. This function requires
-    that the atom types for all molecules are all consistent, i.e. atom type
-    X has the same mass, vdw parameters, element type etc. for all molecules */
-static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps,
-                                  QHash<QString, CMAPParameter> &cmap_potentials,
-                                  const QMap<QPair<int, QString>, Molecule> &molecules, const MMDetail &ffield,
-                                  const PropertyMap &map)
-{
-    // first, get a list of all atom types involved in CMAP parameters
-    // (I've passed this in as a reference, in case in the future we can fix this
-    //  problem and update the CMAP parameters being written out. For now, we
-    //  just raise an exception if this is detected as a problem)
-    QSet<QString> cmap_atom_types;
+/** Internal function used to write all of the atom types. This function
+   requires that the atom types for all molecules are all consistent, i.e. atom
+   type X has the same mass, vdw parameters, element type etc. for all molecules
+ */
+static QStringList
+writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps,
+               QHash<QString, CMAPParameter> &cmap_potentials,
+               const QMap<QPair<int, QString>, Molecule> &molecules,
+               const MMDetail &ffield, const PropertyMap &map) {
+  // first, get a list of all atom types involved in CMAP parameters
+  // (I've passed this in as a reference, in case in the future we can fix this
+  //  problem and update the CMAP parameters being written out. For now, we
+  //  just raise an exception if this is detected as a problem)
+  QSet<QString> cmap_atom_types;
 
-    for (auto it = cmap_potentials.constBegin(); it != cmap_potentials.constEnd(); ++it)
-    {
-        for (const auto &atom_type : cmap_id_to_atomtypes(it.key()))
-        {
-            cmap_atom_types.insert(atom_type);
-        }
+  for (auto it = cmap_potentials.constBegin(); it != cmap_potentials.constEnd();
+       ++it) {
+    for (const auto &atom_type : cmap_id_to_atomtypes(it.key())) {
+      cmap_atom_types.insert(atom_type);
+    }
+  }
+
+  // next, build up a dictionary of all of the unique atom types
+  QHash<QString, QString> atomtypes;
+  QHash<QString, QString> param_hash;
+
+  auto elemprop = map["element"];
+  auto massprop = map["mass"];
+  auto ljprop = map["LJ"];
+
+  // get the combining rules - these determine the format of the LJ parameter in
+  // the file
+  const int combining_rules = _getCombiningRulesFromFF(ffield);
+
+  for (auto it = moltyps.begin(); it != moltyps.end(); ++it) {
+    auto moltyp = it.value();
+
+    // Store whether the molecule is perturbable.
+    const auto is_perturbable = moltyp.isPerturbable();
+
+    // Rename property keys.
+    if (is_perturbable) {
+      elemprop = "element0";
+      massprop = "mass0";
+      ljprop = "LJ0";
+    } else {
+      elemprop = map["element"];
+      massprop = map["mass"];
+      ljprop = map["LJ"];
     }
 
-    // next, build up a dictionary of all of the unique atom types
-    QHash<QString, QString> atomtypes;
-    QHash<QString, QString> param_hash;
+    // Whether we need to update the atoms.
+    bool update_atoms0 = false;
+    bool update_atoms1 = false;
 
-    auto elemprop = map["element"];
-    auto massprop = map["mass"];
-    auto ljprop = map["LJ"];
+    auto atoms = moltyp.atoms();
 
-    // get the combining rules - these determine the format of the LJ parameter in the file
-    const int combining_rules = _getCombiningRulesFromFF(ffield);
+    for (int i = 0; i < atoms.count(); ++i) {
+      auto atom = atoms[i];
+      auto atomtype = atom.atomType();
 
-    for (auto it = moltyps.begin(); it != moltyps.end(); ++it)
-    {
-        auto moltyp = it.value();
+      // Get the corresponding atom in the molecule.
+      const auto mol = molecules[it.key()];
+      const auto cgatomidx = mol.info().cgAtomIdx(AtomIdx(i));
 
-        // Store whether the molecule is perturbable.
-        const auto is_perturbable = moltyp.isPerturbable();
+      // Was this formerly a perturbable molecule.
+      const bool was_perturbable = mol.hasProperty("was_perturbable");
 
-        // Rename property keys.
+      // now get the corresponding Element and LJ properties for this atom
+      Element elem;
+
+      try {
+        elem = mol.property(elemprop).asA<AtomElements>()[cgatomidx];
+      } catch (...) {
+        elem = Element::elementWithMass(
+            mol.property(massprop).asA<AtomMasses>()[cgatomidx]);
+      }
+
+      double chg =
+          0; // always use a zero charge as this will be supplied with the atom
+
+      auto lj = mol.property(ljprop).asA<AtomLJs>()[cgatomidx];
+      auto ljparams = ::fromLJParameter(lj, combining_rules);
+
+      QString particle_type = "A"; // A is for Atom
+
+      // This is a dummy atom.
+      if (elem.nProtons() == 0 and lj.isDummy()) {
         if (is_perturbable)
-        {
-            elemprop = "element0";
-            massprop = "mass0";
-            ljprop = "LJ0";
-        }
-        else
-        {
-            elemprop = map["element"];
-            massprop = map["mass"];
-            ljprop = map["LJ"];
-        }
+          atomtype += "_du";
 
-        // Whether we need to update the atoms.
-        bool update_atoms0 = false;
-        bool update_atoms1 = false;
+        // Only label dummies for regular simulations.
+        else if (not was_perturbable)
+          particle_type = "D";
 
-        auto atoms = moltyp.atoms();
-
-        for (int i = 0; i < atoms.count(); ++i)
-        {
-            auto atom = atoms[i];
-            auto atomtype = atom.atomType();
-
-            // Get the corresponding atom in the molecule.
-            const auto mol = molecules[it.key()];
-            const auto cgatomidx = mol.info().cgAtomIdx(AtomIdx(i));
-
-            // Was this formerly a perturbable molecule.
-            const bool was_perturbable = mol.hasProperty("was_perturbable");
-
-            // now get the corresponding Element and LJ properties for this atom
-            Element elem;
-
-            try
-            {
-                elem = mol.property(elemprop).asA<AtomElements>()[cgatomidx];
-            }
-            catch (...)
-            {
-                elem = Element::elementWithMass(mol.property(massprop).asA<AtomMasses>()[cgatomidx]);
-            }
-
-            double chg = 0; // always use a zero charge as this will be supplied with the atom
-
-            auto lj = mol.property(ljprop).asA<AtomLJs>()[cgatomidx];
-            auto ljparams = ::fromLJParameter(lj, combining_rules);
-
-            QString particle_type = "A"; // A is for Atom
-
-            // This is a dummy atom.
-            if (elem.nProtons() == 0 and lj.isDummy())
-            {
-                if (is_perturbable)
-                    atomtype += "_du";
-
-                // Only label dummies for regular simulations.
-                else if (not was_perturbable)
-                    particle_type = "D";
-
-                if (cmap_atom_types.contains(atomtype))
-                {
-                    throw SireError::incompatible_error(
-                        QObject::tr("Cannot write a dummy atom type '%1' for a CMAP parameter.").arg(atomtype),
-                        CODELOC);
-                }
-
-                // Flag that we need to update the atoms.
-                update_atoms0 = true;
-            }
-
-            // This is a new atom type.
-            if (not atomtypes.contains(atomtype))
-            {
-                atomtypes.insert(atomtype, QString(" %1        %2  %3  %4  %5  %6  %7")
-                                               .arg(atomtype, 5)
-                                               .arg(elem.nProtons(), 4)
-                                               .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
-                                               .arg(chg, 10, 'f', 6)
-                                               .arg(particle_type, 6)
-                                               .arg(std::get<0>(ljparams), 10, 'f', 6)
-                                               .arg(std::get<1>(ljparams), 10, 'f', 6));
-
-                // Hash the atom type against its parameter string, minus the type.
-                param_hash.insert(atomtypes[atomtype].mid(6), atomtype);
-
-                if (update_atoms0)
-                {
-                    // Set the type.
-                    atom.setAtomType(atomtype);
-
-                    // Update the atoms in the vector.
-                    atoms[i] = atom;
-                }
-            }
-            // This type has been seen before.
-            else
-            {
-                // Create the type string.
-                auto type_string = QString(" %1        %2  %3  %4  %5  %6  %7")
-                                       .arg(atomtype, 5)
-                                       .arg(elem.nProtons(), 4)
-                                       .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
-                                       .arg(chg, 10, 'f', 6)
-                                       .arg(particle_type, 6)
-                                       .arg(std::get<0>(ljparams), 10, 'f', 6)
-                                       .arg(std::get<1>(ljparams), 10, 'f', 6);
-
-                // The parameters for this type differ.
-                if (atomtypes[atomtype] != type_string)
-                {
-                    if (cmap_atom_types.contains(atomtype))
-                    {
-                        throw SireError::incompatible_error(
-                            QObject::tr("Cannot write a CMAP parameter for atom type '%1' with different "
-                                        "parameters.")
-                                .arg(atomtype),
-                            CODELOC);
-                    }
-
-                    // First check the values to see if there's an existing type
-                    // with these parameters.
-                    const auto params = param_hash.keys();
-                    const auto param_string = type_string.mid(6);
-
-                    // A type already exists with these parameters.
-                    if (params.contains(type_string.mid(6)))
-                    {
-                        // Use the existing type.
-                        atomtype = param_hash[param_string];
-
-                        // Set the type.
-                        atom.setAtomType(atomtype);
-
-                        // Update the atoms in the vector.
-                        atoms[i] = atom;
-
-                        // Flag that the atoms need to be updated.
-                        update_atoms0 = true;
-                    }
-
-                    // Create a new type.
-                    else
-                    {
-                        // Whether this type has already been added.
-                        bool is_added = false;
-
-                        // Append "x" until we have a new type.
-                        while (atomtypes.contains(atomtype))
-                        {
-                            atomtype += "x";
-
-                            // Recreate the type string.
-                            type_string = QString(" %1        %2  %3  %4  %5  %6  %7")
-                                              .arg(atomtype, 5)
-                                              .arg(elem.nProtons(), 4)
-                                              .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
-                                              .arg(chg, 10, 'f', 6)
-                                              .arg(particle_type, 6)
-                                              .arg(std::get<0>(ljparams), 10, 'f', 6)
-                                              .arg(std::get<1>(ljparams), 10, 'f', 6);
-
-                            // Make sure we haven't already added this type.
-                            if (atomtypes.contains(atomtype) and atomtypes[atomtype] == type_string)
-                            {
-                                is_added = true;
-                                break;
-                            }
-                        }
-
-                        // Set the type.
-                        atom.setAtomType(atomtype);
-
-                        // Add the new type.
-                        if (not is_added)
-                        {
-                            atomtypes.insert(atomtype, type_string);
-                            param_hash.insert(type_string.mid(6), atomtype);
-                        }
-
-                        // Update the atoms in the vector.
-                        atoms[i] = atom;
-
-                        // Flag that the atoms need to be updated.
-                        update_atoms0 = true;
-                    }
-                }
-                else
-                {
-                    if (update_atoms0)
-                    {
-                        // Set the type.
-                        atom.setAtomType(atomtype);
-
-                        // Update the atoms in the vector.
-                        atoms[i] = atom;
-                    }
-                }
-            }
+        if (cmap_atom_types.contains(atomtype)) {
+          throw SireError::incompatible_error(
+              QObject::tr(
+                  "Cannot write a dummy atom type '%1' for a CMAP parameter.")
+                  .arg(atomtype),
+              CODELOC);
         }
 
-        // Update the atoms.
-        if (update_atoms0)
-        {
-            moltyp.setAtoms(atoms);
+        // Flag that we need to update the atoms.
+        update_atoms0 = true;
+      }
+
+      // This is a new atom type.
+      if (not atomtypes.contains(atomtype)) {
+        atomtypes.insert(atomtype,
+                         QString(" %1        %2  %3  %4  %5  %6  %7")
+                             .arg(atomtype, 5)
+                             .arg(elem.nProtons(), 4)
+                             .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
+                             .arg(chg, 10, 'f', 6)
+                             .arg(particle_type, 6)
+                             .arg(std::get<0>(ljparams), 10, 'f', 6)
+                             .arg(std::get<1>(ljparams), 10, 'f', 6));
+
+        // Hash the atom type against its parameter string, minus the type.
+        param_hash.insert(atomtypes[atomtype].mid(6), atomtype);
+
+        if (update_atoms0) {
+          // Set the type.
+          atom.setAtomType(atomtype);
+
+          // Update the atoms in the vector.
+          atoms[i] = atom;
         }
+      }
+      // This type has been seen before.
+      else {
+        // Create the type string.
+        auto type_string = QString(" %1        %2  %3  %4  %5  %6  %7")
+                               .arg(atomtype, 5)
+                               .arg(elem.nProtons(), 4)
+                               .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
+                               .arg(chg, 10, 'f', 6)
+                               .arg(particle_type, 6)
+                               .arg(std::get<0>(ljparams), 10, 'f', 6)
+                               .arg(std::get<1>(ljparams), 10, 'f', 6);
 
-        // Add additional atom types from lambda = 1.
-        if (is_perturbable)
-        {
-            auto atoms = moltyp.atoms(true);
+        // The parameters for this type differ.
+        if (atomtypes[atomtype] != type_string) {
+          if (cmap_atom_types.contains(atomtype)) {
+            throw SireError::incompatible_error(
+                QObject::tr("Cannot write a CMAP parameter for atom type '%1' "
+                            "with different "
+                            "parameters.")
+                    .arg(atomtype),
+                CODELOC);
+          }
 
-            for (int i = 0; i < atoms.count(); ++i)
-            {
-                auto atom = atoms[i];
-                auto atomtype = atom.atomType();
+          // First check the values to see if there's an existing type
+          // with these parameters.
+          const auto params = param_hash.keys();
+          const auto param_string = type_string.mid(6);
 
-                // Get the corresponding atom in the molecule.
-                const auto mol = molecules[it.key()];
-                const auto cgatomidx = mol.info().cgAtomIdx(AtomIdx(i));
+          // A type already exists with these parameters.
+          if (params.contains(type_string.mid(6))) {
+            // Use the existing type.
+            atomtype = param_hash[param_string];
 
-                // now get the corresponding Element and LJ properties for this atom
-                Element elem;
+            // Set the type.
+            atom.setAtomType(atomtype);
 
-                try
-                {
-                    elem = mol.property("element1").asA<AtomElements>()[cgatomidx];
-                }
-                catch (...)
-                {
-                    elem = Element::elementWithMass(mol.property("mass1").asA<AtomMasses>()[cgatomidx]);
-                }
+            // Update the atoms in the vector.
+            atoms[i] = atom;
 
-                double chg = 0; // always use a zero charge as this will be supplied with the atom
+            // Flag that the atoms need to be updated.
+            update_atoms0 = true;
+          }
 
-                auto lj = mol.property("LJ1").asA<AtomLJs>()[cgatomidx];
-                auto ljparams = ::fromLJParameter(lj, combining_rules);
+          // Create a new type.
+          else {
+            // Whether this type has already been added.
+            bool is_added = false;
 
-                QString particle_type = "A"; // A is for Atom
+            // Append "x" until we have a new type.
+            while (atomtypes.contains(atomtype)) {
+              atomtype += "x";
 
-                // This is a dummy atom.
-                if (elem.nProtons() == 0 and lj.isDummy())
-                {
-                    if (cmap_atom_types.contains(atomtype))
-                    {
-                        throw SireError::incompatible_error(
-                            QObject::tr("Cannot write a dummy atom type '%1' for a CMAP parameter.").arg(atomtype),
-                            CODELOC);
-                    }
+              // Recreate the type string.
+              type_string = QString(" %1        %2  %3  %4  %5  %6  %7")
+                                .arg(atomtype, 5)
+                                .arg(elem.nProtons(), 4)
+                                .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
+                                .arg(chg, 10, 'f', 6)
+                                .arg(particle_type, 6)
+                                .arg(std::get<0>(ljparams), 10, 'f', 6)
+                                .arg(std::get<1>(ljparams), 10, 'f', 6);
 
-                    atomtype += "_du";
-
-                    // Flag that we need to update the atoms.
-                    update_atoms1 = true;
-                }
-
-                // This is a new atom type.
-                if (not atomtypes.contains(atomtype))
-                {
-                    atomtypes.insert(atomtype, QString(" %1        %2  %3  %4  %5  %6  %7")
-                                                   .arg(atomtype, 5)
-                                                   .arg(elem.nProtons(), 4)
-                                                   .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
-                                                   .arg(chg, 10, 'f', 6)
-                                                   .arg(particle_type, 6)
-                                                   .arg(std::get<0>(ljparams), 10, 'f', 6)
-                                                   .arg(std::get<1>(ljparams), 10, 'f', 6));
-
-                    // Hash the atom type against its parameter string, minus the type.
-                    param_hash.insert(atomtypes[atomtype].mid(6), atomtype);
-
-                    if (update_atoms1)
-                    {
-                        // Set the type.
-                        atom.setAtomType(atomtype);
-
-                        // Update the atoms in the vector.
-                        atoms[i] = atom;
-                    }
-                }
-
-                // This type has been seen before.
-                else
-                {
-                    // Create the type string.
-                    auto type_string = QString(" %1        %2  %3  %4  %5  %6  %7")
-                                           .arg(atomtype, 5)
-                                           .arg(elem.nProtons(), 4)
-                                           .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
-                                           .arg(chg, 10, 'f', 6)
-                                           .arg(particle_type, 6)
-                                           .arg(std::get<0>(ljparams), 10, 'f', 6)
-                                           .arg(std::get<1>(ljparams), 10, 'f', 6);
-
-                    // The parameters for this type differ.
-                    if (atomtypes[atomtype] != type_string)
-                    {
-                        if (cmap_atom_types.contains(atomtype))
-                        {
-                            throw SireError::incompatible_error(
-                                QObject::tr("Cannot write a CMAP parameter for atom type '%1' with different "
-                                            "parameters.")
-                                    .arg(atomtype),
-                                CODELOC);
-                        }
-
-                        // First check the values to see if there's an existing type
-                        // with these parameters.
-                        const auto params = param_hash.keys();
-                        const auto param_string = type_string.mid(6);
-
-                        // A type already exists with these parameters.
-                        if (params.contains(type_string.mid(6)))
-                        {
-                            // Use the existing type.
-                            atomtype = param_hash[param_string];
-
-                            // Set the type.
-                            atom.setAtomType(atomtype);
-
-                            // Update the atoms in the vector.
-                            atoms[i] = atom;
-
-                            // Flag that the atoms need to be updated.
-                            update_atoms1 = true;
-                        }
-
-                        // Create a new type.
-                        else
-                        {
-                            // Whether this type has already been added.
-                            bool is_added = false;
-
-                            // Append "x" until we have a new type.
-                            while (atomtypes.contains(atomtype))
-                            {
-                                atomtype += "x";
-
-                                // Recreate the type string.
-                                type_string = QString(" %1        %2  %3  %4  %5  %6  %7")
-                                                  .arg(atomtype, 5)
-                                                  .arg(elem.nProtons(), 4)
-                                                  .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
-                                                  .arg(chg, 10, 'f', 6)
-                                                  .arg(particle_type, 6)
-                                                  .arg(std::get<0>(ljparams), 10, 'f', 6)
-                                                  .arg(std::get<1>(ljparams), 10, 'f', 6);
-
-                                // Make sure we haven't already added this type.
-                                if (atomtypes.contains(atomtype) and atomtypes[atomtype] == type_string)
-                                {
-                                    is_added = true;
-                                    break;
-                                }
-                            }
-
-                            // Set the type.
-                            atom.setAtomType(atomtype);
-
-                            // Add the new type.
-                            if (not is_added)
-                            {
-                                atomtypes.insert(atomtype, type_string);
-                                param_hash.insert(type_string.mid(6), atomtype);
-                            }
-
-                            // Update the atoms in the vector.
-                            atoms[i] = atom;
-
-                            // Flag that the atoms need to be updated.
-                            update_atoms1 = true;
-                        }
-                    }
-                    else
-                    {
-                        if (update_atoms1)
-                        {
-                            // Set the type.
-                            atom.setAtomType(atomtype);
-
-                            // Update the atoms in the vector.
-                            atoms[i] = atom;
-                        }
-                    }
-                }
+              // Make sure we haven't already added this type.
+              if (atomtypes.contains(atomtype) and
+                  atomtypes[atomtype] == type_string) {
+                is_added = true;
+                break;
+              }
             }
 
-            // Update the atoms.
-            if (update_atoms1)
-            {
-                moltyp.setAtoms(atoms, true);
-            }
-        }
+            // Set the type.
+            atom.setAtomType(atomtype);
 
-        // Update the map.
-        if (update_atoms0 or update_atoms1)
-        {
-            moltyps[it.key()] = moltyp;
+            // Add the new type.
+            if (not is_added) {
+              atomtypes.insert(atomtype, type_string);
+              param_hash.insert(type_string.mid(6), atomtype);
+            }
+
+            // Update the atoms in the vector.
+            atoms[i] = atom;
+
+            // Flag that the atoms need to be updated.
+            update_atoms0 = true;
+          }
+        } else {
+          if (update_atoms0) {
+            // Set the type.
+            atom.setAtomType(atomtype);
+
+            // Update the atoms in the vector.
+            atoms[i] = atom;
+          }
         }
+      }
     }
 
-    // now sort and write all of the atomtypes
-    QStringList lines;
-    auto keys = atomtypes.keys();
-    std::sort(keys.begin(), keys.end());
-
-    lines.append("[ atomtypes ]");
-    lines.append("; name      at.num        mass      charge   ptype       sigma     epsilon");
-
-    for (const auto &key : keys)
-    {
-        lines.append(atomtypes[key]);
+    // Update the atoms.
+    if (update_atoms0) {
+      moltyp.setAtoms(atoms);
     }
 
-    lines.append("");
+    // Add additional atom types from lambda = 1.
+    if (is_perturbable) {
+      auto atoms = moltyp.atoms(true);
 
-    return lines;
+      for (int i = 0; i < atoms.count(); ++i) {
+        auto atom = atoms[i];
+        auto atomtype = atom.atomType();
+
+        // Get the corresponding atom in the molecule.
+        const auto mol = molecules[it.key()];
+        const auto cgatomidx = mol.info().cgAtomIdx(AtomIdx(i));
+
+        // now get the corresponding Element and LJ properties for this atom
+        Element elem;
+
+        try {
+          elem = mol.property("element1").asA<AtomElements>()[cgatomidx];
+        } catch (...) {
+          elem = Element::elementWithMass(
+              mol.property("mass1").asA<AtomMasses>()[cgatomidx]);
+        }
+
+        double chg = 0; // always use a zero charge as this will be supplied
+                        // with the atom
+
+        auto lj = mol.property("LJ1").asA<AtomLJs>()[cgatomidx];
+        auto ljparams = ::fromLJParameter(lj, combining_rules);
+
+        QString particle_type = "A"; // A is for Atom
+
+        // This is a dummy atom.
+        if (elem.nProtons() == 0 and lj.isDummy()) {
+          if (cmap_atom_types.contains(atomtype)) {
+            throw SireError::incompatible_error(
+                QObject::tr(
+                    "Cannot write a dummy atom type '%1' for a CMAP parameter.")
+                    .arg(atomtype),
+                CODELOC);
+          }
+
+          atomtype += "_du";
+
+          // Flag that we need to update the atoms.
+          update_atoms1 = true;
+        }
+
+        // This is a new atom type.
+        if (not atomtypes.contains(atomtype)) {
+          atomtypes.insert(atomtype,
+                           QString(" %1        %2  %3  %4  %5  %6  %7")
+                               .arg(atomtype, 5)
+                               .arg(elem.nProtons(), 4)
+                               .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
+                               .arg(chg, 10, 'f', 6)
+                               .arg(particle_type, 6)
+                               .arg(std::get<0>(ljparams), 10, 'f', 6)
+                               .arg(std::get<1>(ljparams), 10, 'f', 6));
+
+          // Hash the atom type against its parameter string, minus the type.
+          param_hash.insert(atomtypes[atomtype].mid(6), atomtype);
+
+          if (update_atoms1) {
+            // Set the type.
+            atom.setAtomType(atomtype);
+
+            // Update the atoms in the vector.
+            atoms[i] = atom;
+          }
+        }
+
+        // This type has been seen before.
+        else {
+          // Create the type string.
+          auto type_string = QString(" %1        %2  %3  %4  %5  %6  %7")
+                                 .arg(atomtype, 5)
+                                 .arg(elem.nProtons(), 4)
+                                 .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
+                                 .arg(chg, 10, 'f', 6)
+                                 .arg(particle_type, 6)
+                                 .arg(std::get<0>(ljparams), 10, 'f', 6)
+                                 .arg(std::get<1>(ljparams), 10, 'f', 6);
+
+          // The parameters for this type differ.
+          if (atomtypes[atomtype] != type_string) {
+            if (cmap_atom_types.contains(atomtype)) {
+              throw SireError::incompatible_error(
+                  QObject::tr("Cannot write a CMAP parameter for atom type "
+                              "'%1' with different "
+                              "parameters.")
+                      .arg(atomtype),
+                  CODELOC);
+            }
+
+            // First check the values to see if there's an existing type
+            // with these parameters.
+            const auto params = param_hash.keys();
+            const auto param_string = type_string.mid(6);
+
+            // A type already exists with these parameters.
+            if (params.contains(type_string.mid(6))) {
+              // Use the existing type.
+              atomtype = param_hash[param_string];
+
+              // Set the type.
+              atom.setAtomType(atomtype);
+
+              // Update the atoms in the vector.
+              atoms[i] = atom;
+
+              // Flag that the atoms need to be updated.
+              update_atoms1 = true;
+            }
+
+            // Create a new type.
+            else {
+              // Whether this type has already been added.
+              bool is_added = false;
+
+              // Append "x" until we have a new type.
+              while (atomtypes.contains(atomtype)) {
+                atomtype += "x";
+
+                // Recreate the type string.
+                type_string = QString(" %1        %2  %3  %4  %5  %6  %7")
+                                  .arg(atomtype, 5)
+                                  .arg(elem.nProtons(), 4)
+                                  .arg(elem.mass().to(g_per_mol), 10, 'f', 6)
+                                  .arg(chg, 10, 'f', 6)
+                                  .arg(particle_type, 6)
+                                  .arg(std::get<0>(ljparams), 10, 'f', 6)
+                                  .arg(std::get<1>(ljparams), 10, 'f', 6);
+
+                // Make sure we haven't already added this type.
+                if (atomtypes.contains(atomtype) and
+                    atomtypes[atomtype] == type_string) {
+                  is_added = true;
+                  break;
+                }
+              }
+
+              // Set the type.
+              atom.setAtomType(atomtype);
+
+              // Add the new type.
+              if (not is_added) {
+                atomtypes.insert(atomtype, type_string);
+                param_hash.insert(type_string.mid(6), atomtype);
+              }
+
+              // Update the atoms in the vector.
+              atoms[i] = atom;
+
+              // Flag that the atoms need to be updated.
+              update_atoms1 = true;
+            }
+          } else {
+            if (update_atoms1) {
+              // Set the type.
+              atom.setAtomType(atomtype);
+
+              // Update the atoms in the vector.
+              atoms[i] = atom;
+            }
+          }
+        }
+      }
+
+      // Update the atoms.
+      if (update_atoms1) {
+        moltyp.setAtoms(atoms, true);
+      }
+    }
+
+    // Update the map.
+    if (update_atoms0 or update_atoms1) {
+      moltyps[it.key()] = moltyp;
+    }
+  }
+
+  // now sort and write all of the atomtypes
+  QStringList lines;
+  auto keys = atomtypes.keys();
+  std::sort(keys.begin(), keys.end());
+
+  lines.append("[ atomtypes ]");
+  lines.append("; name      at.num        mass      charge   ptype       sigma "
+               "    epsilon");
+
+  for (const auto &key : keys) {
+    lines.append(atomtypes[key]);
+  }
+
+  lines.append("");
+
+  return lines;
 }
 
 /** Write all of the CMAP types */
-static QStringList writeCMAPTypes(const QHash<QString, CMAPParameter> &cmap_params)
-{
-    QStringList lines;
+static QStringList
+writeCMAPTypes(const QHash<QString, CMAPParameter> &cmap_params) {
+  QStringList lines;
 
-    if (cmap_params.isEmpty())
-    {
-        return lines; // no cmap parameters
-    }
+  if (cmap_params.isEmpty()) {
+    return lines; // no cmap parameters
+  }
 
-    lines.append("[ cmaptypes ]");
+  lines.append("[ cmaptypes ]");
 
-    auto keys = cmap_params.keys();
-    std::sort(keys.begin(), keys.end());
+  auto keys = cmap_params.keys();
+  std::sort(keys.begin(), keys.end());
 
-    for (auto key : keys)
-    {
-        const auto &cmap = cmap_params[key];
-        key = key.replace(";", " ");
+  for (auto key : keys) {
+    const auto &cmap = cmap_params[key];
+    key = key.replace(";", " ");
 
-        // Create the line with the parameters.
-        lines.append(QString("%1 %2")
-                         .arg(key)
-                         .arg(cmap_to_string(cmap)));
-    }
+    // Create the line with the parameters.
+    lines.append(QString("%1 %2").arg(key).arg(cmap_to_string(cmap)));
+  }
 
-    lines.append("");
+  lines.append("");
 
-    return lines;
+  return lines;
 }
 
 /** Internal function used to convert a Gromacs Moltyp to a set of lines */
-static QStringList writeMolType(const QString &name, const GroMolType &moltype, const Molecule &mol,
-                                bool uses_parallel, int combining_rules = 2)
-{
-    QStringList lines;
+static QStringList writeMolType(const QString &name, const GroMolType &moltype,
+                                const Molecule &mol, bool uses_parallel,
+                                int combining_rules = 2) {
+  QStringList lines;
 
-    lines.append("[ moleculetype ]");
-    lines.append("; name  nrexcl");
-    lines.append(QString("%1  %2").arg(name).arg(moltype.nExcludedAtoms()));
-    lines.append("");
+  lines.append("[ moleculetype ]");
+  lines.append("; name  nrexcl");
+  lines.append(QString("%1  %2").arg(name).arg(moltype.nExcludedAtoms()));
+  lines.append("");
 
-    QStringList atomlines, bondlines, anglines, dihlines, cmaplines, scllines;
+  QStringList atomlines, bondlines, anglines, dihlines, cmaplines, scllines;
 
-    // Store whether the molecule is perturbable.
-    const auto is_perturbable = moltype.isPerturbable();
+  // Store whether the molecule is perturbable.
+  const auto is_perturbable = moltype.isPerturbable();
 
-    // write all of the atoms
-    auto write_atoms = [&]()
-    {
-        if (is_perturbable)
-        {
-            // Get the atoms from the molecule.
-            const auto &atoms0 = moltype.atoms();
-            const auto &atoms1 = moltype.atoms(true);
+  // write all of the atoms
+  auto write_atoms = [&]() {
+    if (is_perturbable) {
+      // Get the atoms from the molecule.
+      const auto &atoms0 = moltype.atoms();
+      const auto &atoms1 = moltype.atoms(true);
 
-            // Loop over all of the atoms.
-            for (int i = 0; i < atoms0.count(); ++i)
-            {
-                const auto &atom0 = atoms0[i];
-                const auto &atom1 = atoms1[i];
+      // Loop over all of the atoms.
+      for (int i = 0; i < atoms0.count(); ++i) {
+        const auto &atom0 = atoms0[i];
+        const auto &atom1 = atoms1[i];
 
-                // Extract the atom types.
-                auto atomtype0 = atom0.atomType();
-                auto atomtype1 = atom1.atomType();
+        // Extract the atom types.
+        auto atomtype0 = atom0.atomType();
+        auto atomtype1 = atom1.atomType();
 
-                // Get the corresponding atom in the molecule.
-                const auto cgatomidx = mol.info().cgAtomIdx(AtomIdx(i));
+        // Get the corresponding atom in the molecule.
+        const auto cgatomidx = mol.info().cgAtomIdx(AtomIdx(i));
 
-                // Get the element property at each end state.
+        // Get the element property at each end state.
 
-                Element elem0;
-                Element elem1;
+        Element elem0;
+        Element elem1;
 
-                try
-                {
-                    elem0 = mol.property("element0").asA<AtomElements>()[cgatomidx];
-                }
-                catch (...)
-                {
-                    elem0 = Element::elementWithMass(mol.property("mass0").asA<AtomMasses>()[cgatomidx]);
-                }
-
-                try
-                {
-                    elem1 = mol.property("element1").asA<AtomElements>()[cgatomidx];
-                }
-                catch (...)
-                {
-                    elem1 = Element::elementWithMass(mol.property("mass1").asA<AtomMasses>()[cgatomidx]);
-                }
-
-                QString resnum = QString::number(atom0.residueNumber().value());
-
-                if (not atom0.chainName().isNull())
-                {
-                    resnum += atom0.chainName().value();
-                }
-
-                atomlines.append(QString("%1   %2 %3    %4  %5   %6 %7   %8   %9 %10   %11")
-                                     .arg(atom0.number().value(), 6)
-                                     .arg(atomtype0, 5)
-                                     .arg(resnum, 6)
-                                     .arg(atom0.residueName().value(), 4)
-                                     .arg(atom0.name().value(), 4)
-                                     .arg(atom0.chargeGroup(), 4)
-                                     .arg(atom0.charge().to(mod_electron), 10, 'f', 6)
-                                     .arg(atom0.mass().to(g_per_mol), 10, 'f', 6)
-                                     .arg(atomtype1, 5)
-                                     .arg(atom1.charge().to(mod_electron), 10, 'f', 6)
-                                     .arg(atom1.mass().to(g_per_mol), 10, 'f', 6));
-            }
+        try {
+          elem0 = mol.property("element0").asA<AtomElements>()[cgatomidx];
+        } catch (...) {
+          elem0 = Element::elementWithMass(
+              mol.property("mass0").asA<AtomMasses>()[cgatomidx]);
         }
+
+        try {
+          elem1 = mol.property("element1").asA<AtomElements>()[cgatomidx];
+        } catch (...) {
+          elem1 = Element::elementWithMass(
+              mol.property("mass1").asA<AtomMasses>()[cgatomidx]);
+        }
+
+        QString resnum = QString::number(atom0.residueNumber().value());
+
+        if (not atom0.chainName().isNull()) {
+          resnum += atom0.chainName().value();
+        }
+
+        atomlines.append(
+            QString("%1   %2 %3    %4  %5   %6 %7   %8   %9 %10   %11")
+                .arg(atom0.number().value(), 6)
+                .arg(atomtype0, 5)
+                .arg(resnum, 6)
+                .arg(atom0.residueName().value(), 4)
+                .arg(atom0.name().value(), 4)
+                .arg(atom0.chargeGroup(), 4)
+                .arg(atom0.charge().to(mod_electron), 10, 'f', 6)
+                .arg(atom0.mass().to(g_per_mol), 10, 'f', 6)
+                .arg(atomtype1, 5)
+                .arg(atom1.charge().to(mod_electron), 10, 'f', 6)
+                .arg(atom1.mass().to(g_per_mol), 10, 'f', 6));
+      }
+    } else {
+      // Get the atoms from the molecule.
+      const auto &atoms = moltype.atoms();
+
+      // Loop over all of the atoms.
+      for (int i = 0; i < atoms.count(); ++i) {
+        const auto &atom = atoms[i];
+
+        QString resnum = QString::number(atom.residueNumber().value());
+
+        if (not atom.chainName().isNull()) {
+          resnum += atom.chainName().value();
+        }
+
+        atomlines.append(QString("%1   %2 %3    %4  %5   %6 %7   %8")
+                             .arg(atom.number().value(), 6)
+                             .arg(atom.atomType(), 4)
+                             .arg(resnum, 6)
+                             .arg(atom.residueName().value(), 4)
+                             .arg(atom.name().value(), 4)
+                             .arg(atom.chargeGroup(), 4)
+                             .arg(atom.charge().to(mod_electron), 10, 'f', 6)
+                             .arg(atom.mass().to(g_per_mol), 10, 'f', 6));
+      }
+    }
+
+    atomlines.append("");
+  };
+
+  // write all of the bonds
+  auto write_bonds = [&]() {
+    if (is_perturbable) {
+      // Get the bonds from the molecule.
+      const auto &bonds0 = moltype.bonds();
+      const auto &bonds1 = moltype.bonds(true);
+
+      // Sets to contain the BondIDs at lambda = 0 and lambda = 1.
+      QSet<BondID> bonds0_idx;
+      QSet<BondID> bonds1_idx;
+
+      // Loop over all bonds at lambda = 0.
+      for (const auto &idx : bonds0.uniqueKeys())
+        bonds0_idx.insert(idx);
+
+      // Loop over all bonds at lambda = 1.
+      for (const auto &idx : bonds1.uniqueKeys()) {
+        if (bonds0_idx.contains(idx.mirror()))
+          bonds1_idx.insert(idx.mirror());
         else
-        {
-            // Get the atoms from the molecule.
-            const auto &atoms = moltype.atoms();
+          bonds1_idx.insert(idx);
+      }
 
-            // Loop over all of the atoms.
-            for (int i = 0; i < atoms.count(); ++i)
-            {
-                const auto &atom = atoms[i];
+      // Now work out the BondIDs that are unique at lambda = 0 and lambda = 1,
+      // as well as those that are shared.
+      QSet<BondID> bonds0_uniq_idx;
+      QSet<BondID> bonds1_uniq_idx;
+      QSet<BondID> bonds_shared_idx;
 
-                QString resnum = QString::number(atom.residueNumber().value());
-
-                if (not atom.chainName().isNull())
-                {
-                    resnum += atom.chainName().value();
-                }
-
-                atomlines.append(QString("%1   %2 %3    %4  %5   %6 %7   %8")
-                                     .arg(atom.number().value(), 6)
-                                     .arg(atom.atomType(), 4)
-                                     .arg(resnum, 6)
-                                     .arg(atom.residueName().value(), 4)
-                                     .arg(atom.name().value(), 4)
-                                     .arg(atom.chargeGroup(), 4)
-                                     .arg(atom.charge().to(mod_electron), 10, 'f', 6)
-                                     .arg(atom.mass().to(g_per_mol), 10, 'f', 6));
-            }
-        }
-
-        atomlines.append("");
-    };
-
-    // write all of the bonds
-    auto write_bonds = [&]()
-    {
-        if (is_perturbable)
-        {
-            // Get the bonds from the molecule.
-            const auto &bonds0 = moltype.bonds();
-            const auto &bonds1 = moltype.bonds(true);
-
-            // Sets to contain the BondIDs at lambda = 0 and lambda = 1.
-            QSet<BondID> bonds0_idx;
-            QSet<BondID> bonds1_idx;
-
-            // Loop over all bonds at lambda = 0.
-            for (const auto &idx : bonds0.uniqueKeys())
-                bonds0_idx.insert(idx);
-
-            // Loop over all bonds at lambda = 1.
-            for (const auto &idx : bonds1.uniqueKeys())
-            {
-                if (bonds0_idx.contains(idx.mirror()))
-                    bonds1_idx.insert(idx.mirror());
-                else
-                    bonds1_idx.insert(idx);
-            }
-
-            // Now work out the BondIDs that are unique at lambda = 0 and lambda = 1,
-            // as well as those that are shared.
-            QSet<BondID> bonds0_uniq_idx;
-            QSet<BondID> bonds1_uniq_idx;
-            QSet<BondID> bonds_shared_idx;
-
-            // lambda = 0
-            for (const auto &idx : bonds0_idx)
-            {
-                if (not bonds1_idx.contains(idx))
-                    bonds0_uniq_idx.insert(idx);
-                else
-                    bonds_shared_idx.insert(idx);
-            }
-
-            // lambda = 1
-            for (const auto &idx : bonds1_idx)
-            {
-                if (not bonds0_idx.contains(idx))
-                    bonds1_uniq_idx.insert(idx);
-                else
-                    bonds_shared_idx.insert(idx);
-            }
-
-            // First create parameter records for the bonds unique to lambda = 0/1.
-
-            // lambda = 0
-            for (const auto &idx : bonds0_uniq_idx)
-            {
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
-
-                // Get all of the parameters for this BondID.
-                const auto &params = bonds0.values(idx);
-
-                // Loop over all of the parameters.
-                for (const auto &param : params)
-                {
-                    QStringList param_string;
-                    for (const auto &p : param.parameters())
-                        param_string.append(QString::number(p));
-
-                    bondlines.append(QString("%1 %2 %3  %4  0.0000  0.0000")
-                                         .arg(atom0, 6)
-                                         .arg(atom1, 6)
-                                         .arg(param.functionType(), 6)
-                                         .arg(param_string.join("  ")));
-                }
-            }
-
-            // lambda = 1
-            for (const auto &idx : bonds1_uniq_idx)
-            {
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
-
-                // Get all of the parameters for this BondID.
-                const auto &params = bonds1.values(idx);
-
-                // Loop over all of the parameters.
-                for (const auto &param : params)
-                {
-                    QStringList param_string;
-                    for (const auto &p : param.parameters())
-                        param_string.append(QString::number(p));
-
-                    bondlines.append(QString("%1 %2 %3  0.0000  0.0000  %4")
-                                         .arg(atom0, 6)
-                                         .arg(atom1, 6)
-                                         .arg(param.functionType(), 6)
-                                         .arg(param_string.join("  ")));
-                }
-            }
-
-            // Next add the shared bond parameters.
-
-            for (auto idx : bonds_shared_idx)
-            {
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
-
-                // Get a list of the parameters at lambda = 0.
-                const auto &params0 = bonds0.values(idx);
-
-                // Invert the index.
-                if (not bonds1.contains(idx))
-                    idx = idx.mirror();
-
-                // Get a list of the parameters at lambda = 1.
-                const auto &params1 = bonds1.values(idx);
-
-                // More or same number of records at lambda = 0.
-                if (params0.count() >= params1.count())
-                {
-                    for (int i = 0; i < params1.count(); ++i)
-                    {
-                        QStringList param_string0;
-                        for (const auto &p : params0[i].parameters())
-                            param_string0.append(QString::number(p));
-
-                        QStringList param_string1;
-                        for (const auto &p : params1[i].parameters())
-                            param_string1.append(QString::number(p));
-
-                        bondlines.append(QString("%1 %2 %3  %4  %5")
-                                             .arg(atom0, 6)
-                                             .arg(atom1, 6)
-                                             .arg(params0[i].functionType(), 6)
-                                             .arg(param_string0.join("  "))
-                                             .arg(param_string1.join("  ")));
-                    }
-
-                    // Now add parameters for which there is no matching record
-                    // at lambda = 1.
-                    for (int i = params1.count(); i < params0.count(); ++i)
-                    {
-                        QStringList param_string;
-                        for (const auto &p : params0[i].parameters())
-                            param_string.append(QString::number(p));
-
-                        bondlines.append(QString("%1 %2 %3  %4  0.0000  0.0000")
-                                             .arg(atom0, 6)
-                                             .arg(atom1, 6)
-                                             .arg(params0[i].functionType(), 6)
-                                             .arg(param_string.join("  ")));
-                    }
-                }
-
-                // More records at lambda = 1.
-                else
-                {
-                    for (int i = 0; i < params0.count(); ++i)
-                    {
-                        QStringList param_string0;
-                        for (const auto &p : params0[i].parameters())
-                            param_string0.append(QString::number(p));
-
-                        QStringList param_string1;
-                        for (const auto &p : params1[i].parameters())
-                            param_string1.append(QString::number(p));
-
-                        bondlines.append(QString("%1 %2 %3  %4  %5")
-                                             .arg(atom0, 6)
-                                             .arg(atom1, 6)
-                                             .arg(params1[i].functionType(), 6)
-                                             .arg(param_string0.join("  "))
-                                             .arg(param_string1.join("  ")));
-                    }
-
-                    // Now add parameters for which there is no matching record
-                    // at lambda = 0.
-                    for (int i = params0.count(); i < params1.count(); ++i)
-                    {
-                        QStringList param_string;
-                        for (const auto &p : params1[i].parameters())
-                            param_string.append(QString::number(p));
-
-                        bondlines.append(QString("%1 %2 %3  0.0000  0.0000  %4")
-                                             .arg(atom0, 6)
-                                             .arg(atom1, 6)
-                                             .arg(params1[i].functionType(), 6)
-                                             .arg(param_string.join("  ")));
-                    }
-                }
-            }
-        }
+      // lambda = 0
+      for (const auto &idx : bonds0_idx) {
+        if (not bonds1_idx.contains(idx))
+          bonds0_uniq_idx.insert(idx);
         else
-        {
-            // Get the bonds from the molecule.
-            const auto &bonds = moltype.bonds();
+          bonds_shared_idx.insert(idx);
+      }
 
-            for (auto it = bonds.constBegin(); it != bonds.constEnd(); ++it)
-            {
-                const auto &bond = it.key();
-                const auto &param = it.value();
-
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = bond.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = bond.atom1().asA<AtomIdx>().value() + 1;
-
-                QStringList params;
-                for (const auto &p : param.parameters())
-                    params.append(QString::number(p));
-
-                bondlines.append(QString("%1 %2 %3  %4")
-                                     .arg(atom0, 6)
-                                     .arg(atom1, 6)
-                                     .arg(param.functionType(), 6)
-                                     .arg(params.join("  ")));
-            }
-        }
-
-        std::sort(bondlines.begin(), bondlines.end());
-    };
-
-    // write all of the angles
-    auto write_angs = [&]()
-    {
-        if (is_perturbable)
-        {
-            // Get the angles from the molecule.
-            const auto &angles0 = moltype.angles();
-            const auto &angles1 = moltype.angles(true);
-
-            // Sets to contain the AngleIDs at lambda = 0 and lambda = 1.
-            QSet<AngleID> angles0_idx;
-            QSet<AngleID> angles1_idx;
-
-            // Loop over all angles at lambda = 0.
-            for (const auto &idx : angles0.uniqueKeys())
-                angles0_idx.insert(idx);
-
-            // Loop over all angles at lambda = 1.
-            for (const auto &idx : angles1.uniqueKeys())
-            {
-                if (angles0_idx.contains(idx.mirror()))
-                    angles1_idx.insert(idx.mirror());
-                else
-                    angles1_idx.insert(idx);
-            }
-
-            // Now work out the AngleIDs that are unique at lambda = 0 and lambda = 1,
-            // as well as those that are shared.
-            QSet<AngleID> angles0_uniq_idx;
-            QSet<AngleID> angles1_uniq_idx;
-            QSet<AngleID> angles_shared_idx;
-
-            // lambda = 0
-            for (const auto &idx : angles0_idx)
-            {
-                if (not angles1_idx.contains(idx))
-                    angles0_uniq_idx.insert(idx);
-                else
-                    angles_shared_idx.insert(idx);
-            }
-
-            // lambda = 1
-            for (const auto &idx : angles1_idx)
-            {
-                if (not angles0_idx.contains(idx))
-                    angles1_uniq_idx.insert(idx);
-                else
-                    angles_shared_idx.insert(idx);
-            }
-
-            // First create parameter records for the angles unique to lambda = 0/1.
-
-            // lambda = 0
-            for (const auto &idx : angles0_uniq_idx)
-            {
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
-                int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
-
-                // Get all of the parameters for this AngleID.
-                const auto &params = angles0.values(idx);
-
-                // Loop over all of the parameters.
-                for (const auto &param : params)
-                {
-                    QStringList param_string;
-                    for (const auto &p : param.parameters())
-                        param_string.append(QString::number(p));
-
-                    anglines.append(QString("%1 %2 %3 %4   %5  0.0000  0.0000")
-                                        .arg(atom0, 6)
-                                        .arg(atom1, 6)
-                                        .arg(atom2, 6)
-                                        .arg(param.functionType(), 7)
-                                        .arg(param_string.join("  ")));
-                }
-            }
-
-            // lambda = 1
-            for (const auto &idx : angles1_uniq_idx)
-            {
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
-                int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
-
-                // Get all of the parameters for this AngleID.
-                const auto &params = angles1.values(idx);
-
-                // Loop over all of the parameters.
-                for (const auto &param : params)
-                {
-                    QStringList param_string;
-                    for (const auto &p : param.parameters())
-                        param_string.append(QString::number(p));
-
-                    anglines.append(QString("%1 %2 %3 %4   0.0000  0.0000  %5")
-                                        .arg(atom0, 6)
-                                        .arg(atom1, 6)
-                                        .arg(atom2, 6)
-                                        .arg(param.functionType(), 7)
-                                        .arg(param_string.join("  ")));
-                }
-            }
-
-            // Next add the shared angle parameters.
-
-            for (auto idx : angles_shared_idx)
-            {
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
-                int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
-
-                // Get a list of the parameters at lambda = 0.
-                const auto &params0 = angles0.values(idx);
-
-                // Invert the index.
-                if (not angles1.contains(idx))
-                    idx = idx.mirror();
-
-                // Get a list of the parameters at lambda = 1.
-                const auto &params1 = angles1.values(idx);
-
-                // More or same number of records at lambda = 0.
-                if (params0.count() >= params1.count())
-                {
-                    for (int i = 0; i < params1.count(); ++i)
-                    {
-                        QStringList param_string0;
-                        for (const auto &p : params0[i].parameters())
-                            param_string0.append(QString::number(p));
-
-                        QStringList param_string1;
-                        for (const auto &p : params1[i].parameters())
-                            param_string1.append(QString::number(p));
-
-                        anglines.append(QString("%1 %2 %3 %4   %5  %6")
-                                            .arg(atom0, 6)
-                                            .arg(atom1, 6)
-                                            .arg(atom2, 6)
-                                            .arg(params0[i].functionType(), 7)
-                                            .arg(param_string0.join("  "))
-                                            .arg(param_string1.join("  ")));
-                    }
-
-                    // Now add parameters for which there is no matching record
-                    // at lambda = 1.
-                    for (int i = params1.count(); i < params0.count(); ++i)
-                    {
-                        QStringList param_string;
-                        for (const auto &p : params0[i].parameters())
-                            param_string.append(QString::number(p));
-
-                        anglines.append(QString("%1 %2 %3 %4   %5  0.0000  0.0000")
-                                            .arg(atom0, 6)
-                                            .arg(atom1, 6)
-                                            .arg(atom2, 6)
-                                            .arg(params0[i].functionType(), 7)
-                                            .arg(param_string.join("  ")));
-                    }
-                }
-
-                // More records at lambda = 1.
-                else
-                {
-                    for (int i = 0; i < params0.count(); ++i)
-                    {
-                        QStringList param_string0;
-                        for (const auto &p : params0[i].parameters())
-                            param_string0.append(QString::number(p));
-
-                        QStringList param_string1;
-                        for (const auto &p : params1[i].parameters())
-                            param_string1.append(QString::number(p));
-
-                        anglines.append(QString("%1 %2 %3 %4   %5  %6")
-                                            .arg(atom0, 6)
-                                            .arg(atom1, 6)
-                                            .arg(atom2, 6)
-                                            .arg(params1[i].functionType(), 7)
-                                            .arg(param_string0.join("  "))
-                                            .arg(param_string1.join("  ")));
-                    }
-
-                    // Now add parameters for which there is no matching record
-                    // at lambda = 0.
-                    for (int i = params0.count(); i < params1.count(); ++i)
-                    {
-                        QStringList param_string;
-                        for (const auto &p : params1[i].parameters())
-                            param_string.append(QString::number(p));
-
-                        anglines.append(QString("%1 %2 %3 %4   0.0000  0.0000  %5")
-                                            .arg(atom0, 6)
-                                            .arg(atom1, 6)
-                                            .arg(atom2, 6)
-                                            .arg(params1[i].functionType(), 7)
-                                            .arg(param_string.join("  ")));
-                    }
-                }
-            }
-        }
+      // lambda = 1
+      for (const auto &idx : bonds1_idx) {
+        if (not bonds0_idx.contains(idx))
+          bonds1_uniq_idx.insert(idx);
         else
-        {
-            // Get the angles from the molecule.
-            const auto &angles = moltype.angles();
+          bonds_shared_idx.insert(idx);
+      }
 
-            for (auto it = angles.constBegin(); it != angles.constEnd(); ++it)
-            {
-                const auto &angle = it.key();
-                const auto &param = it.value();
+      // First create parameter records for the bonds unique to lambda = 0/1.
 
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = angle.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = angle.atom1().asA<AtomIdx>().value() + 1;
-                int atom2 = angle.atom2().asA<AtomIdx>().value() + 1;
+      // lambda = 0
+      for (const auto &idx : bonds0_uniq_idx) {
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
 
-                QStringList params;
-                for (const auto &p : param.parameters())
-                    params.append(QString::number(p));
+        // Get all of the parameters for this BondID.
+        const auto &params = bonds0.values(idx);
 
-                anglines.append(QString("%1 %2 %3 %4   %5")
-                                    .arg(atom0, 6)
-                                    .arg(atom1, 6)
-                                    .arg(atom2, 6)
-                                    .arg(param.functionType(), 7)
-                                    .arg(params.join("  ")));
-            }
+        // Loop over all of the parameters.
+        for (const auto &param : params) {
+          QStringList param_string;
+          for (const auto &p : param.parameters())
+            param_string.append(QString::number(p));
+
+          bondlines.append(QString("%1 %2 %3  %4  0.0000  0.0000")
+                               .arg(atom0, 6)
+                               .arg(atom1, 6)
+                               .arg(param.functionType(), 6)
+                               .arg(param_string.join("  ")));
         }
+      }
 
-        std::sort(anglines.begin(), anglines.end());
-    };
+      // lambda = 1
+      for (const auto &idx : bonds1_uniq_idx) {
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
 
-    // write all of the dihedrals/impropers (they are merged)
-    auto write_dihs = [&]()
-    {
-        if (is_perturbable)
-        {
-            // Get the dihedrals from the molecule.
-            const auto &dihedrals0 = moltype.dihedrals();
-            const auto &dihedrals1 = moltype.dihedrals(true);
+        // Get all of the parameters for this BondID.
+        const auto &params = bonds1.values(idx);
 
-            // Sets to contain the DihedralID at lambda = 0 and lambda = 1.
-            QSet<DihedralID> dihedrals0_idx;
-            QSet<DihedralID> dihedrals1_idx;
+        // Loop over all of the parameters.
+        for (const auto &param : params) {
+          QStringList param_string;
+          for (const auto &p : param.parameters())
+            param_string.append(QString::number(p));
 
-            // Loop over all dihedrals at lambda = 0.
-            for (const auto &idx : dihedrals0.uniqueKeys())
-                dihedrals0_idx.insert(idx);
-
-            // Loop over all dihedrals at lambda = 1.
-            for (const auto &idx : dihedrals1.uniqueKeys())
-            {
-                if (dihedrals0_idx.contains(idx.mirror()))
-                    dihedrals1_idx.insert(idx.mirror());
-                else
-                    dihedrals1_idx.insert(idx);
-            }
-
-            // Now work out the DihedralIDs that are unique at lambda = 0 and lambda = 1,
-            // as well as those that are shared.
-            QSet<DihedralID> dihedrals0_uniq_idx;
-            QSet<DihedralID> dihedrals1_uniq_idx;
-            QSet<DihedralID> dihedrals_shared_idx;
-
-            // lambda = 0
-            for (const auto &idx : dihedrals0_idx)
-            {
-                if (not dihedrals1_idx.contains(idx))
-                    dihedrals0_uniq_idx.insert(idx);
-                else
-                    dihedrals_shared_idx.insert(idx);
-            }
-
-            // lambda = 1
-            for (const auto &idx : dihedrals1_idx)
-            {
-                if (not dihedrals0_idx.contains(idx))
-                    dihedrals1_uniq_idx.insert(idx);
-                else
-                    dihedrals_shared_idx.insert(idx);
-            }
-
-            // First create parameter records for the dihedrals unique to lambda = 0/1.
-
-            // lambda = 0
-            for (const auto &idx : dihedrals0_uniq_idx)
-            {
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
-                int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
-                int atom3 = idx.atom3().asA<AtomIdx>().value() + 1;
-
-                // Get all of the parameters for this DihedralID.
-                const auto &params = dihedrals0.values(idx);
-
-                // Loop over all of the parameters.
-                for (const auto &param : params)
-                {
-                    QStringList param_string;
-                    for (const auto &p : param.parameters())
-                        param_string.append(QString::number(p));
-
-                    // Get the periodicity of the dihedral term. This is the last
-                    // parameter entry.
-                    auto periodicity = param.parameters().last();
-
-                    dihlines.append(QString("%1 %2 %3 %4 %5  %6  0  0.0000  %7")
-                                        .arg(atom0, 6)
-                                        .arg(atom1, 6)
-                                        .arg(atom2, 6)
-                                        .arg(atom3, 6)
-                                        .arg(param.functionType(), 6)
-                                        .arg(param_string.join("  "))
-                                        .arg(periodicity));
-                }
-            }
-
-            // lambda = 1
-            for (const auto &idx : dihedrals1_uniq_idx)
-            {
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
-                int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
-                int atom3 = idx.atom3().asA<AtomIdx>().value() + 1;
-
-                // Get all of the parameters for this AngleID.
-                const auto &params = dihedrals1.values(idx);
-
-                // Loop over all of the parameters.
-                for (const auto &param : params)
-                {
-                    QStringList param_string;
-                    for (const auto &p : param.parameters())
-                        param_string.append(QString::number(p));
-
-                    // Get the periodicity of the dihedral term. This is the last
-                    // parameter entry.
-                    auto periodicity = param.parameters().last();
-
-                    dihlines.append(QString("%1 %2 %3 %4 %5  0  0.0000  %6  %7")
-                                        .arg(atom0, 6)
-                                        .arg(atom1, 6)
-                                        .arg(atom2, 6)
-                                        .arg(atom3, 6)
-                                        .arg(param.functionType(), 6)
-                                        .arg(periodicity)
-                                        .arg(param_string.join("  ")));
-                }
-            }
-
-            // Next add the shared dihedral parameters.
-
-            for (auto idx : dihedrals_shared_idx)
-            {
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
-                int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
-                int atom3 = idx.atom3().asA<AtomIdx>().value() + 1;
-
-                // Get a list of the parameters at lambda = 0.
-                const auto &params0 = dihedrals0.values(idx);
-
-                // Invert the index.
-                if (not dihedrals1.contains(idx))
-                    idx = idx.mirror();
-
-                // Get a list of the parameters at lambda = 1.
-                const auto &params1 = dihedrals1.values(idx);
-
-                // Create two hashes between the periodicity of each dihedral
-                // term and its corresponding parameters.
-
-                // The maximum periodicity recorded.
-                int max_per = 0;
-
-                // lambda = 0
-                QHash<int, GromacsDihedral> params0_hash;
-                for (const auto &param : params0)
-                {
-                    // Extract the periodicity and update the hash.
-                    int periodicity = int(param.parameters().last());
-                    params0_hash.insert(periodicity, param);
-
-                    // If necessary, update the maximum periodicity.
-                    if (periodicity > max_per)
-                        max_per = periodicity;
-                }
-
-                // lambda = 1
-                QHash<int, GromacsDihedral> params1_hash;
-                for (const auto &param : params1)
-                {
-                    // Extract the periodicity and update the hash.
-                    int periodicity = int(param.parameters().last());
-                    params1_hash.insert(periodicity, param);
-
-                    // If necessary, update the maximum periodicity.
-                    if (periodicity > max_per)
-                        max_per = periodicity;
-                }
-
-                // Loop over the range of dihedral periodicities observed.
-                for (int i = 0; i <= max_per; ++i)
-                {
-                    // There is a term at lambda = 0 with this periodicity.
-                    if (params0_hash.contains(i))
-                    {
-                        QStringList param_string0;
-                        QStringList param_string1;
-                        for (const auto &p : params0_hash[i].parameters())
-                            param_string0.append(QString::number(p));
-
-                        // There is a term at lambda = 1 with this periodicity.
-                        if (params1_hash.contains(i))
-                        {
-                            for (const auto &p : params1_hash[i].parameters())
-                                param_string1.append(QString::number(p));
-                        }
-                        // No term, create a zero term with the same periodicity.
-                        else
-                        {
-                            param_string1.append(QString::number(0));
-                            param_string1.append(QString::number(0.0000));
-                            param_string1.append(QString::number(i));
-                        }
-
-                        // Append the dihedral term.
-                        dihlines.append(QString("%1 %2 %3 %4 %5  %6  %7")
-                                            .arg(atom0, 6)
-                                            .arg(atom1, 6)
-                                            .arg(atom2, 6)
-                                            .arg(atom3, 6)
-                                            .arg(params0_hash[i].functionType(), 6)
-                                            .arg(param_string0.join("  "))
-                                            .arg(param_string1.join("  ")));
-                    }
-                    else
-                    {
-                        // There is a term at lambda = 1 with this periodicity.
-                        if (params1_hash.contains(i))
-                        {
-                            QStringList param_string0;
-                            QStringList param_string1;
-
-                            // No lambda = 0 term, create a zero term with the same periodicity.
-                            param_string0.append(QString::number(0));
-                            param_string0.append(QString::number(0.0000));
-                            param_string0.append(QString::number(i));
-
-                            for (const auto &p : params1_hash[i].parameters())
-                                param_string1.append(QString::number(p));
-
-                            // Append the dihedral term.
-                            dihlines.append(QString("%1 %2 %3 %4 %5  %6  %7")
-                                                .arg(atom0, 6)
-                                                .arg(atom1, 6)
-                                                .arg(atom2, 6)
-                                                .arg(atom3, 6)
-                                                .arg(params1_hash[i].functionType(), 6)
-                                                .arg(param_string0.join("  "))
-                                                .arg(param_string1.join("  ")));
-                        }
-                    }
-                }
-            }
+          bondlines.append(QString("%1 %2 %3  0.0000  0.0000  %4")
+                               .arg(atom0, 6)
+                               .arg(atom1, 6)
+                               .arg(param.functionType(), 6)
+                               .arg(param_string.join("  ")));
         }
-        else
-        {
-            // Get the dihedrals from the molecule.
-            const auto &dihedrals = moltype.dihedrals();
+      }
 
-            for (auto it = dihedrals.constBegin(); it != dihedrals.constEnd(); ++it)
-            {
-                const auto &dihedral = it.key();
-                const auto &param = it.value();
+      // Next add the shared bond parameters.
 
-                // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-                int atom0 = dihedral.atom0().asA<AtomIdx>().value() + 1;
-                int atom1 = dihedral.atom1().asA<AtomIdx>().value() + 1;
-                int atom2 = dihedral.atom2().asA<AtomIdx>().value() + 1;
-                int atom3 = dihedral.atom3().asA<AtomIdx>().value() + 1;
+      for (auto idx : bonds_shared_idx) {
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
 
-                QStringList params;
-                for (const auto &p : param.parameters())
-                    params.append(QString::number(p));
+        // Get a list of the parameters at lambda = 0.
+        const auto &params0 = bonds0.values(idx);
 
-                dihlines.append(QString("%1 %2 %3 %4 %5  %6")
-                                    .arg(atom0, 6)
-                                    .arg(atom1, 6)
-                                    .arg(atom2, 6)
-                                    .arg(atom3, 6)
-                                    .arg(param.functionType(), 6)
-                                    .arg(params.join("  ")));
-            }
-        }
+        // Invert the index.
+        if (not bonds1.contains(idx))
+          idx = idx.mirror();
 
-        std::sort(dihlines.begin(), dihlines.end());
-    };
+        // Get a list of the parameters at lambda = 1.
+        const auto &params1 = bonds1.values(idx);
 
-    // write all of the cmaps
-    auto write_cmaps = [&]()
-    {
-        if (is_perturbable)
-        {
-            const auto cmaps0 = moltype.cmaps();
-            const auto cmaps1 = moltype.cmaps(true);
+        // More or same number of records at lambda = 0.
+        if (params0.count() >= params1.count()) {
+          for (int i = 0; i < params1.count(); ++i) {
+            QStringList param_string0;
+            for (const auto &p : params0[i].parameters())
+              param_string0.append(QString::number(p));
 
-            if (cmaps0 != cmaps1)
-            {
-                throw SireError::unsupported(
-                    QObject::tr("The molecule '%1' has different CMAP parameters at lambda = 0 and lambda = 1. "
-                                "This is not supported yet by the Sire parser!")
-                        .arg(moltype.name()),
-                    CODELOC);
-            }
-        }
+            QStringList param_string1;
+            for (const auto &p : params1[i].parameters())
+              param_string1.append(QString::number(p));
 
-        const auto cmaps = moltype.cmaps();
-
-        for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
-        {
-            const auto &cmap = it.key();
-            const auto &param = it.value();
-
-            // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
-            int atom0 = cmap.atom0().asA<AtomIdx>().value() + 1;
-            int atom1 = cmap.atom1().asA<AtomIdx>().value() + 1;
-            int atom2 = cmap.atom2().asA<AtomIdx>().value() + 1;
-            int atom3 = cmap.atom3().asA<AtomIdx>().value() + 1;
-            int atom4 = cmap.atom4().asA<AtomIdx>().value() + 1;
-
-            bool ok;
-            int function_type = param.toInt(&ok);
-
-            if (not ok)
-            {
-                throw SireError::program_bug(QObject::tr(
-                                                 "The CMAP parameter '%2' for %1 is not a valid integer. "
-                                                 "This is a bug in Sire, please report it.")
-                                                 .arg(cmap.toString())
-                                                 .arg(param),
-                                             CODELOC);
-            }
-
-            // format is the index of each atom, plus the function type,
-            cmaplines.append(QString("%1 %2 %3 %4 %5 %6")
+            bondlines.append(QString("%1 %2 %3  %4  %5")
                                  .arg(atom0, 6)
                                  .arg(atom1, 6)
-                                 .arg(atom2, 6)
-                                 .arg(atom3, 6)
-                                 .arg(atom4, 6)
-                                 .arg(function_type, 6));
+                                 .arg(params0[i].functionType(), 6)
+                                 .arg(param_string0.join("  "))
+                                 .arg(param_string1.join("  ")));
+          }
+
+          // Now add parameters for which there is no matching record
+          // at lambda = 1.
+          for (int i = params1.count(); i < params0.count(); ++i) {
+            QStringList param_string;
+            for (const auto &p : params0[i].parameters())
+              param_string.append(QString::number(p));
+
+            bondlines.append(QString("%1 %2 %3  %4  0.0000  0.0000")
+                                 .arg(atom0, 6)
+                                 .arg(atom1, 6)
+                                 .arg(params0[i].functionType(), 6)
+                                 .arg(param_string.join("  ")));
+          }
         }
 
-        std::sort(cmaplines.begin(), cmaplines.end());
-    };
+        // More records at lambda = 1.
+        else {
+          for (int i = 0; i < params0.count(); ++i) {
+            QStringList param_string0;
+            for (const auto &p : params0[i].parameters())
+              param_string0.append(QString::number(p));
 
-    // write all of the pairs (1-4 scaling factors). This is needed even though
-    // we have set autogenerate pairs to "yes"
-    auto write_pairs = [&]()
-    {
-        // Store the molinfo object;
-        const auto molinfo = mol.info();
+            QStringList param_string1;
+            for (const auto &p : params1[i].parameters())
+              param_string1.append(QString::number(p));
 
-        if (is_perturbable)
-        {
-            CLJNBPairs scl0;
-            CLJNBPairs scl1;
+            bondlines.append(QString("%1 %2 %3  %4  %5")
+                                 .arg(atom0, 6)
+                                 .arg(atom1, 6)
+                                 .arg(params1[i].functionType(), 6)
+                                 .arg(param_string0.join("  "))
+                                 .arg(param_string1.join("  ")));
+          }
 
-            try
-            {
-                scl0 = mol.property("intrascale0").asA<CLJNBPairs>();
-            }
-            catch (...)
-            {
-                return;
-            }
+          // Now add parameters for which there is no matching record
+          // at lambda = 0.
+          for (int i = params0.count(); i < params1.count(); ++i) {
+            QStringList param_string;
+            for (const auto &p : params1[i].parameters())
+              param_string.append(QString::number(p));
 
-            try
-            {
-                scl1 = mol.property("intrascale1").asA<CLJNBPairs>();
-            }
-            catch (...)
-            {
-                return;
-            }
-
-            AtomLJs ljs0;
-            AtomLJs ljs1;
-
-            try
-            {
-                ljs0 = mol.property("LJ0").asA<AtomLJs>();
-            }
-            catch (...)
-            {
-            }
-
-            try
-            {
-                ljs1 = mol.property("LJ1").asA<AtomLJs>();
-            }
-            catch (...)
-            {
-            }
-
-            // A set of recorded 1-4 pairs.
-            QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
-
-            bool fix_null_perturbable_14s = false;
-
-            if (mol.hasProperty("fix_null_perturbable_14s"))
-                fix_null_perturbable_14s = mol.property("fix_null_perturbable_14s").asA<BooleanProperty>().value();
-
-            // Must record every pair that has a non-default scaling factor.
-            // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
-            for (int i = 0; i < scl0.nGroups(); ++i)
-            {
-                for (int j = 0; j < scl0.nGroups(); ++j)
-                {
-                    const auto s0 = scl0.get(CGIdx(i), CGIdx(j));
-                    const auto s1 = scl1.get(CGIdx(i), CGIdx(j));
-
-                    if (not s0.isEmpty() and not s1.isEmpty())
-                    {
-                        const auto idxs0 = molinfo.getAtomsIn(CGIdx(i));
-                        const auto idxs1 = molinfo.getAtomsIn(CGIdx(j));
-
-                        for (const auto &idx0 : idxs0)
-                        {
-                            for (const auto &idx1 : idxs1)
-                            {
-                                QPair<AtomIdx, AtomIdx> pair = QPair<AtomIdx, AtomIdx>(idx0, idx1);
-
-                                // Make sure this is a new atom pair.
-                                if (not recorded_pairs.contains(pair))
-                                {
-                                    // Insert the pair and its inverse.
-                                    recorded_pairs.insert(pair);
-                                    pair = QPair<AtomIdx, AtomIdx>(idx1, idx0);
-                                    recorded_pairs.insert(pair);
-
-                                    const auto s0 = scl0.get(idx0, idx1);
-                                    const auto s1 = scl1.get(idx0, idx1);
-
-                                    if (not((s0.coulomb() == 0 and s0.lj() == 0 and s1.coulomb() == 0 and
-                                             s1.lj() == 0) or
-                                            (s0.coulomb() == 1 and s0.lj() == 1 and s1.coulomb() == 1 and
-                                             s1.lj() == 1)))
-                                    {
-                                        // This is a non-default pair.
-                                        if (fix_null_perturbable_14s)
-                                        {
-                                            // get the initial and perturbed charge and LJ parameters
-                                            const auto &lj0_0 = ljs0.get(idx0);
-                                            const auto &lj0_1 = ljs1.get(idx0);
-                                            const auto &lj1_0 = ljs0.get(idx1);
-                                            const auto &lj1_1 = ljs1.get(idx1);
-
-                                            if (lj0_0.epsilon().value() == 0 or lj0_1.epsilon().value() == 0 or
-                                                lj1_0.epsilon().value() == 0 or lj1_1.epsilon().value() == 0)
-                                            {
-                                                // we need to avoid having a null 1-4 LJ parameter, so use the non-dummy state
-                                                LJParameter lj0, lj1;
-
-                                                if (lj0_0.epsilon().value() == 0)
-                                                    lj0 = lj0_1;
-                                                else
-                                                    lj0 = lj0_0;
-
-                                                if (lj1_0.epsilon().value() == 0)
-                                                    lj1 = lj1_1;
-                                                else
-                                                    lj1 = lj1_0;
-
-                                                auto lj = lj0.combineArithmetic(lj1);
-
-                                                double scl = s0.lj();
-
-                                                if (scl == 0)
-                                                    scl = s1.lj();
-
-                                                scllines.append(QString("%1 %2     1  %3  %4  %3  %4")
-                                                                    .arg(idx0 + 1, 6)
-                                                                    .arg(idx1 + 1, 6)
-                                                                    .arg(lj.sigma().to(nanometer), 11, 'f', 5)
-                                                                    .arg(scl * lj.epsilon().to(kJ_per_mol), 11, 'f', 5));
-
-                                                continue;
-                                            }
-                                        }
-
-                                        scllines.append(QString("%1 %2     1").arg(idx0 + 1, 6).arg(idx1 + 1, 6));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            bondlines.append(QString("%1 %2 %3  0.0000  0.0000  %4")
+                                 .arg(atom0, 6)
+                                 .arg(atom1, 6)
+                                 .arg(params1[i].functionType(), 6)
+                                 .arg(param_string.join("  ")));
+          }
         }
+      }
+    } else {
+      // Get the bonds from the molecule.
+      const auto &bonds = moltype.bonds();
+
+      for (auto it = bonds.constBegin(); it != bonds.constEnd(); ++it) {
+        const auto &bond = it.key();
+        const auto &param = it.value();
+
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = bond.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = bond.atom1().asA<AtomIdx>().value() + 1;
+
+        QStringList params;
+        for (const auto &p : param.parameters())
+          params.append(QString::number(p));
+
+        bondlines.append(QString("%1 %2 %3  %4")
+                             .arg(atom0, 6)
+                             .arg(atom1, 6)
+                             .arg(param.functionType(), 6)
+                             .arg(params.join("  ")));
+      }
+    }
+
+    std::sort(bondlines.begin(), bondlines.end());
+  };
+
+  // write all of the angles
+  auto write_angs = [&]() {
+    if (is_perturbable) {
+      // Get the angles from the molecule.
+      const auto &angles0 = moltype.angles();
+      const auto &angles1 = moltype.angles(true);
+
+      // Sets to contain the AngleIDs at lambda = 0 and lambda = 1.
+      QSet<AngleID> angles0_idx;
+      QSet<AngleID> angles1_idx;
+
+      // Loop over all angles at lambda = 0.
+      for (const auto &idx : angles0.uniqueKeys())
+        angles0_idx.insert(idx);
+
+      // Loop over all angles at lambda = 1.
+      for (const auto &idx : angles1.uniqueKeys()) {
+        if (angles0_idx.contains(idx.mirror()))
+          angles1_idx.insert(idx.mirror());
         else
-        {
-            CLJNBPairs scl;
+          angles1_idx.insert(idx);
+      }
 
-            try
-            {
-                scl = mol.property("intrascale").asA<CLJNBPairs>();
+      // Now work out the AngleIDs that are unique at lambda = 0 and lambda = 1,
+      // as well as those that are shared.
+      QSet<AngleID> angles0_uniq_idx;
+      QSet<AngleID> angles1_uniq_idx;
+      QSet<AngleID> angles_shared_idx;
+
+      // lambda = 0
+      for (const auto &idx : angles0_idx) {
+        if (not angles1_idx.contains(idx))
+          angles0_uniq_idx.insert(idx);
+        else
+          angles_shared_idx.insert(idx);
+      }
+
+      // lambda = 1
+      for (const auto &idx : angles1_idx) {
+        if (not angles0_idx.contains(idx))
+          angles1_uniq_idx.insert(idx);
+        else
+          angles_shared_idx.insert(idx);
+      }
+
+      // First create parameter records for the angles unique to lambda = 0/1.
+
+      // lambda = 0
+      for (const auto &idx : angles0_uniq_idx) {
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
+        int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
+
+        // Get all of the parameters for this AngleID.
+        const auto &params = angles0.values(idx);
+
+        // Loop over all of the parameters.
+        for (const auto &param : params) {
+          QStringList param_string;
+          for (const auto &p : param.parameters())
+            param_string.append(QString::number(p));
+
+          anglines.append(QString("%1 %2 %3 %4   %5  0.0000  0.0000")
+                              .arg(atom0, 6)
+                              .arg(atom1, 6)
+                              .arg(atom2, 6)
+                              .arg(param.functionType(), 7)
+                              .arg(param_string.join("  ")));
+        }
+      }
+
+      // lambda = 1
+      for (const auto &idx : angles1_uniq_idx) {
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
+        int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
+
+        // Get all of the parameters for this AngleID.
+        const auto &params = angles1.values(idx);
+
+        // Loop over all of the parameters.
+        for (const auto &param : params) {
+          QStringList param_string;
+          for (const auto &p : param.parameters())
+            param_string.append(QString::number(p));
+
+          anglines.append(QString("%1 %2 %3 %4   0.0000  0.0000  %5")
+                              .arg(atom0, 6)
+                              .arg(atom1, 6)
+                              .arg(atom2, 6)
+                              .arg(param.functionType(), 7)
+                              .arg(param_string.join("  ")));
+        }
+      }
+
+      // Next add the shared angle parameters.
+
+      for (auto idx : angles_shared_idx) {
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
+        int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
+
+        // Get a list of the parameters at lambda = 0.
+        const auto &params0 = angles0.values(idx);
+
+        // Invert the index.
+        if (not angles1.contains(idx))
+          idx = idx.mirror();
+
+        // Get a list of the parameters at lambda = 1.
+        const auto &params1 = angles1.values(idx);
+
+        // More or same number of records at lambda = 0.
+        if (params0.count() >= params1.count()) {
+          for (int i = 0; i < params1.count(); ++i) {
+            QStringList param_string0;
+            for (const auto &p : params0[i].parameters())
+              param_string0.append(QString::number(p));
+
+            QStringList param_string1;
+            for (const auto &p : params1[i].parameters())
+              param_string1.append(QString::number(p));
+
+            anglines.append(QString("%1 %2 %3 %4   %5  %6")
+                                .arg(atom0, 6)
+                                .arg(atom1, 6)
+                                .arg(atom2, 6)
+                                .arg(params0[i].functionType(), 7)
+                                .arg(param_string0.join("  "))
+                                .arg(param_string1.join("  ")));
+          }
+
+          // Now add parameters for which there is no matching record
+          // at lambda = 1.
+          for (int i = params1.count(); i < params0.count(); ++i) {
+            QStringList param_string;
+            for (const auto &p : params0[i].parameters())
+              param_string.append(QString::number(p));
+
+            anglines.append(QString("%1 %2 %3 %4   %5  0.0000  0.0000")
+                                .arg(atom0, 6)
+                                .arg(atom1, 6)
+                                .arg(atom2, 6)
+                                .arg(params0[i].functionType(), 7)
+                                .arg(param_string.join("  ")));
+          }
+        }
+
+        // More records at lambda = 1.
+        else {
+          for (int i = 0; i < params0.count(); ++i) {
+            QStringList param_string0;
+            for (const auto &p : params0[i].parameters())
+              param_string0.append(QString::number(p));
+
+            QStringList param_string1;
+            for (const auto &p : params1[i].parameters())
+              param_string1.append(QString::number(p));
+
+            anglines.append(QString("%1 %2 %3 %4   %5  %6")
+                                .arg(atom0, 6)
+                                .arg(atom1, 6)
+                                .arg(atom2, 6)
+                                .arg(params1[i].functionType(), 7)
+                                .arg(param_string0.join("  "))
+                                .arg(param_string1.join("  ")));
+          }
+
+          // Now add parameters for which there is no matching record
+          // at lambda = 0.
+          for (int i = params0.count(); i < params1.count(); ++i) {
+            QStringList param_string;
+            for (const auto &p : params1[i].parameters())
+              param_string.append(QString::number(p));
+
+            anglines.append(QString("%1 %2 %3 %4   0.0000  0.0000  %5")
+                                .arg(atom0, 6)
+                                .arg(atom1, 6)
+                                .arg(atom2, 6)
+                                .arg(params1[i].functionType(), 7)
+                                .arg(param_string.join("  ")));
+          }
+        }
+      }
+    } else {
+      // Get the angles from the molecule.
+      const auto &angles = moltype.angles();
+
+      for (auto it = angles.constBegin(); it != angles.constEnd(); ++it) {
+        const auto &angle = it.key();
+        const auto &param = it.value();
+
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = angle.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = angle.atom1().asA<AtomIdx>().value() + 1;
+        int atom2 = angle.atom2().asA<AtomIdx>().value() + 1;
+
+        QStringList params;
+        for (const auto &p : param.parameters())
+          params.append(QString::number(p));
+
+        anglines.append(QString("%1 %2 %3 %4   %5")
+                            .arg(atom0, 6)
+                            .arg(atom1, 6)
+                            .arg(atom2, 6)
+                            .arg(param.functionType(), 7)
+                            .arg(params.join("  ")));
+      }
+    }
+
+    std::sort(anglines.begin(), anglines.end());
+  };
+
+  // write all of the dihedrals/impropers (they are merged)
+  auto write_dihs = [&]() {
+    if (is_perturbable) {
+      // Get the dihedrals from the molecule.
+      const auto &dihedrals0 = moltype.dihedrals();
+      const auto &dihedrals1 = moltype.dihedrals(true);
+
+      // Sets to contain the DihedralID at lambda = 0 and lambda = 1.
+      QSet<DihedralID> dihedrals0_idx;
+      QSet<DihedralID> dihedrals1_idx;
+
+      // Loop over all dihedrals at lambda = 0.
+      for (const auto &idx : dihedrals0.uniqueKeys())
+        dihedrals0_idx.insert(idx);
+
+      // Loop over all dihedrals at lambda = 1.
+      for (const auto &idx : dihedrals1.uniqueKeys()) {
+        if (dihedrals0_idx.contains(idx.mirror()))
+          dihedrals1_idx.insert(idx.mirror());
+        else
+          dihedrals1_idx.insert(idx);
+      }
+
+      // Now work out the DihedralIDs that are unique at lambda = 0 and lambda =
+      // 1, as well as those that are shared.
+      QSet<DihedralID> dihedrals0_uniq_idx;
+      QSet<DihedralID> dihedrals1_uniq_idx;
+      QSet<DihedralID> dihedrals_shared_idx;
+
+      // lambda = 0
+      for (const auto &idx : dihedrals0_idx) {
+        if (not dihedrals1_idx.contains(idx))
+          dihedrals0_uniq_idx.insert(idx);
+        else
+          dihedrals_shared_idx.insert(idx);
+      }
+
+      // lambda = 1
+      for (const auto &idx : dihedrals1_idx) {
+        if (not dihedrals0_idx.contains(idx))
+          dihedrals1_uniq_idx.insert(idx);
+        else
+          dihedrals_shared_idx.insert(idx);
+      }
+
+      // First create parameter records for the dihedrals unique to lambda =
+      // 0/1.
+
+      // lambda = 0
+      for (const auto &idx : dihedrals0_uniq_idx) {
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
+        int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
+        int atom3 = idx.atom3().asA<AtomIdx>().value() + 1;
+
+        // Get all of the parameters for this DihedralID.
+        const auto &params = dihedrals0.values(idx);
+
+        // Loop over all of the parameters.
+        for (const auto &param : params) {
+          QStringList param_string;
+          for (const auto &p : param.parameters())
+            param_string.append(QString::number(p));
+
+          // Get the periodicity of the dihedral term. This is the last
+          // parameter entry.
+          auto periodicity = param.parameters().last();
+
+          dihlines.append(QString("%1 %2 %3 %4 %5  %6  0  0.0000  %7")
+                              .arg(atom0, 6)
+                              .arg(atom1, 6)
+                              .arg(atom2, 6)
+                              .arg(atom3, 6)
+                              .arg(param.functionType(), 6)
+                              .arg(param_string.join("  "))
+                              .arg(periodicity));
+        }
+      }
+
+      // lambda = 1
+      for (const auto &idx : dihedrals1_uniq_idx) {
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
+        int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
+        int atom3 = idx.atom3().asA<AtomIdx>().value() + 1;
+
+        // Get all of the parameters for this AngleID.
+        const auto &params = dihedrals1.values(idx);
+
+        // Loop over all of the parameters.
+        for (const auto &param : params) {
+          QStringList param_string;
+          for (const auto &p : param.parameters())
+            param_string.append(QString::number(p));
+
+          // Get the periodicity of the dihedral term. This is the last
+          // parameter entry.
+          auto periodicity = param.parameters().last();
+
+          dihlines.append(QString("%1 %2 %3 %4 %5  0  0.0000  %6  %7")
+                              .arg(atom0, 6)
+                              .arg(atom1, 6)
+                              .arg(atom2, 6)
+                              .arg(atom3, 6)
+                              .arg(param.functionType(), 6)
+                              .arg(periodicity)
+                              .arg(param_string.join("  ")));
+        }
+      }
+
+      // Next add the shared dihedral parameters.
+
+      for (auto idx : dihedrals_shared_idx) {
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = idx.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = idx.atom1().asA<AtomIdx>().value() + 1;
+        int atom2 = idx.atom2().asA<AtomIdx>().value() + 1;
+        int atom3 = idx.atom3().asA<AtomIdx>().value() + 1;
+
+        // Get a list of the parameters at lambda = 0.
+        const auto &params0 = dihedrals0.values(idx);
+
+        // Invert the index.
+        if (not dihedrals1.contains(idx))
+          idx = idx.mirror();
+
+        // Get a list of the parameters at lambda = 1.
+        const auto &params1 = dihedrals1.values(idx);
+
+        // Create two hashes between the periodicity of each dihedral
+        // term and its corresponding parameters.
+
+        // The maximum periodicity recorded.
+        int max_per = 0;
+
+        // lambda = 0
+        QHash<int, GromacsDihedral> params0_hash;
+        for (const auto &param : params0) {
+          // Extract the periodicity and update the hash.
+          int periodicity = int(param.parameters().last());
+          params0_hash.insert(periodicity, param);
+
+          // If necessary, update the maximum periodicity.
+          if (periodicity > max_per)
+            max_per = periodicity;
+        }
+
+        // lambda = 1
+        QHash<int, GromacsDihedral> params1_hash;
+        for (const auto &param : params1) {
+          // Extract the periodicity and update the hash.
+          int periodicity = int(param.parameters().last());
+          params1_hash.insert(periodicity, param);
+
+          // If necessary, update the maximum periodicity.
+          if (periodicity > max_per)
+            max_per = periodicity;
+        }
+
+        // Loop over the range of dihedral periodicities observed.
+        for (int i = 0; i <= max_per; ++i) {
+          // There is a term at lambda = 0 with this periodicity.
+          if (params0_hash.contains(i)) {
+            QStringList param_string0;
+            QStringList param_string1;
+            for (const auto &p : params0_hash[i].parameters())
+              param_string0.append(QString::number(p));
+
+            // There is a term at lambda = 1 with this periodicity.
+            if (params1_hash.contains(i)) {
+              for (const auto &p : params1_hash[i].parameters())
+                param_string1.append(QString::number(p));
             }
-            catch (...)
-            {
-                return;
+            // No term, create a zero term with the same periodicity.
+            else {
+              param_string1.append(QString::number(0));
+              param_string1.append(QString::number(0.0000));
+              param_string1.append(QString::number(i));
             }
 
-            // Get LJ and charge properties for writing funct=2 explicit pairs.
-            AtomLJs ljs;
-            AtomCharges charges;
-            bool has_ljs = false;
-            bool has_charges = false;
+            // Append the dihedral term.
+            dihlines.append(QString("%1 %2 %3 %4 %5  %6  %7")
+                                .arg(atom0, 6)
+                                .arg(atom1, 6)
+                                .arg(atom2, 6)
+                                .arg(atom3, 6)
+                                .arg(params0_hash[i].functionType(), 6)
+                                .arg(param_string0.join("  "))
+                                .arg(param_string1.join("  ")));
+          } else {
+            // There is a term at lambda = 1 with this periodicity.
+            if (params1_hash.contains(i)) {
+              QStringList param_string0;
+              QStringList param_string1;
 
-            // Determine the combining rules from the forcefield (default to arithmetic = 2).
-            const int local_combining_rules = combining_rules;
+              // No lambda = 0 term, create a zero term with the same
+              // periodicity.
+              param_string0.append(QString::number(0));
+              param_string0.append(QString::number(0.0000));
+              param_string0.append(QString::number(i));
 
-            try
-            {
-                ljs = mol.property("LJ").asA<AtomLJs>();
-                has_ljs = true;
+              for (const auto &p : params1_hash[i].parameters())
+                param_string1.append(QString::number(p));
+
+              // Append the dihedral term.
+              dihlines.append(QString("%1 %2 %3 %4 %5  %6  %7")
+                                  .arg(atom0, 6)
+                                  .arg(atom1, 6)
+                                  .arg(atom2, 6)
+                                  .arg(atom3, 6)
+                                  .arg(params1_hash[i].functionType(), 6)
+                                  .arg(param_string0.join("  "))
+                                  .arg(param_string1.join("  ")));
             }
-            catch (...)
-            {
-            }
+          }
+        }
+      }
+    } else {
+      // Get the dihedrals from the molecule.
+      const auto &dihedrals = moltype.dihedrals();
 
-            try
-            {
-                charges = mol.property("charge").asA<AtomCharges>();
-                has_charges = true;
-            }
-            catch (...)
-            {
-            }
+      for (auto it = dihedrals.constBegin(); it != dihedrals.constEnd(); ++it) {
+        const auto &dihedral = it.key();
+        const auto &param = it.value();
 
-            // A set of recorded 1-4 pairs.
-            QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
+        // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+        int atom0 = dihedral.atom0().asA<AtomIdx>().value() + 1;
+        int atom1 = dihedral.atom1().asA<AtomIdx>().value() + 1;
+        int atom2 = dihedral.atom2().asA<AtomIdx>().value() + 1;
+        int atom3 = dihedral.atom3().asA<AtomIdx>().value() + 1;
 
-            // Must record every pair that has a non-default scaling factor.
-            // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
-            for (int i = 0; i < scl.nGroups(); ++i)
-            {
-                for (int j = 0; j < scl.nGroups(); ++j)
-                {
-                    const auto s = scl.get(CGIdx(i), CGIdx(j));
+        QStringList params;
+        for (const auto &p : param.parameters())
+          params.append(QString::number(p));
 
-                    if (not s.isEmpty())
-                    {
-                        const auto idxs0 = molinfo.getAtomsIn(CGIdx(i));
-                        const auto idxs1 = molinfo.getAtomsIn(CGIdx(j));
+        dihlines.append(QString("%1 %2 %3 %4 %5  %6")
+                            .arg(atom0, 6)
+                            .arg(atom1, 6)
+                            .arg(atom2, 6)
+                            .arg(atom3, 6)
+                            .arg(param.functionType(), 6)
+                            .arg(params.join("  ")));
+      }
+    }
 
-                        for (const auto &idx0 : idxs0)
-                        {
-                            for (const auto &idx1 : idxs1)
-                            {
-                                QPair<AtomIdx, AtomIdx> pair = QPair<AtomIdx, AtomIdx>(idx0, idx1);
+    std::sort(dihlines.begin(), dihlines.end());
+  };
 
-                                // Make sure this is a new atom pair.
-                                if (not recorded_pairs.contains(pair))
-                                {
-                                    // Insert the pair and its inverse.
-                                    recorded_pairs.insert(pair);
-                                    pair = QPair<AtomIdx, AtomIdx>(idx1, idx0);
-                                    recorded_pairs.insert(pair);
+  // write all of the cmaps
+  auto write_cmaps = [&]() {
+    if (is_perturbable) {
+      const auto cmaps0 = moltype.cmaps();
+      const auto cmaps1 = moltype.cmaps(true);
 
-                                    const auto s = scl.get(idx0, idx1);
+      if (cmaps0 != cmaps1) {
+        throw SireError::unsupported(
+            QObject::tr("The molecule '%1' has different CMAP parameters at "
+                        "lambda = 0 and lambda = 1. "
+                        "This is not supported yet by the Sire parser!")
+                .arg(moltype.name()),
+            CODELOC);
+      }
+    }
 
-                                    if (s.coulomb() == 0 and s.lj() == 0)
-                                    {
-                                        // Fully excluded: don't write.
-                                    }
-                                    else if (s.coulomb() == 1 and s.lj() == 1)
-                                    {
-                                        // Full 1-4 interaction (e.g. GLYCAM with SCNB=1.0, SCEE=1.0).
-                                        // Must write as funct=2 with explicit LJ parameters because
-                                        // funct=1 with gen-pairs would apply fudgeLJ and reduce the
-                                        // interaction, and not listing the pair would give zero interaction.
-                                        if (has_ljs and has_charges)
-                                        {
-                                            const auto cgidx0 = molinfo.cgAtomIdx(idx0);
-                                            const auto cgidx1 = molinfo.cgAtomIdx(idx1);
+    const auto cmaps = moltype.cmaps();
 
-                                            const auto &lj0 = ljs.at(cgidx0);
-                                            const auto &lj1 = ljs.at(cgidx1);
+    for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it) {
+      const auto &cmap = it.key();
+      const auto &param = it.value();
 
-                                            LJParameter lj_ij;
-                                            if (local_combining_rules == 2)
-                                                lj_ij = lj0.combineArithmetic(lj1);
-                                            else
-                                                lj_ij = lj0.combineGeometric(lj1);
+      // AtomID is AtomIdx. Add 1, as gromacs is 1-indexed
+      int atom0 = cmap.atom0().asA<AtomIdx>().value() + 1;
+      int atom1 = cmap.atom1().asA<AtomIdx>().value() + 1;
+      int atom2 = cmap.atom2().asA<AtomIdx>().value() + 1;
+      int atom3 = cmap.atom3().asA<AtomIdx>().value() + 1;
+      int atom4 = cmap.atom4().asA<AtomIdx>().value() + 1;
 
-                                            const double qi =
-                                                charges.at(cgidx0).to(mod_electron);
-                                            const double qj =
-                                                charges.at(cgidx1).to(mod_electron);
+      bool ok;
+      int function_type = param.toInt(&ok);
 
-                                            scllines.append(
-                                                QString("%1 %2     2  1.0  %3  %4  %5  %6")
-                                                    .arg(idx0 + 1, 6)
-                                                    .arg(idx1 + 1, 6)
-                                                    .arg(qi, 11, 'f', 6)
-                                                    .arg(qj, 11, 'f', 6)
-                                                    .arg(lj_ij.sigma().to(nanometer), 18, 'e', 11)
-                                                    .arg(lj_ij.epsilon().to(kJ_per_mol), 18, 'e', 11));
-                                        }
-                                        else
-                                        {
-                                            // Fall back to funct=1; the energy will be wrong if
-                                            // fudgeLJ != 1.0, but we have no LJ parameters to use.
-                                            scllines.append(
-                                                QString("%1 %2     1").arg(idx0 + 1, 6).arg(idx1 + 1, 6));
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // Standard partial 1-4 (e.g. fudgeQQ/fudgeLJ): write as funct=1.
-                                        scllines.append(
-                                            QString("%1 %2     1").arg(idx0 + 1, 6).arg(idx1 + 1, 6));
-                                    }
-                                }
-                            }
-                        }
+      if (not ok) {
+        throw SireError::program_bug(
+            QObject::tr(
+                "The CMAP parameter '%2' for %1 is not a valid integer. "
+                "This is a bug in Sire, please report it.")
+                .arg(cmap.toString())
+                .arg(param),
+            CODELOC);
+      }
+
+      // format is the index of each atom, plus the function type,
+      cmaplines.append(QString("%1 %2 %3 %4 %5 %6")
+                           .arg(atom0, 6)
+                           .arg(atom1, 6)
+                           .arg(atom2, 6)
+                           .arg(atom3, 6)
+                           .arg(atom4, 6)
+                           .arg(function_type, 6));
+    }
+
+    std::sort(cmaplines.begin(), cmaplines.end());
+  };
+
+  // write all of the pairs (1-4 scaling factors). This is needed even though
+  // we have set autogenerate pairs to "yes"
+  auto write_pairs = [&]() {
+    // Store the molinfo object;
+    const auto molinfo = mol.info();
+
+    if (is_perturbable) {
+      CLJNBPairs scl0;
+      CLJNBPairs scl1;
+
+      try {
+        scl0 = mol.property("intrascale0").asA<CLJNBPairs>();
+      } catch (...) {
+        return;
+      }
+
+      try {
+        scl1 = mol.property("intrascale1").asA<CLJNBPairs>();
+      } catch (...) {
+        return;
+      }
+
+      AtomLJs ljs0;
+      AtomLJs ljs1;
+      AtomCharges charges0;
+      AtomCharges charges1;
+      bool has_ljs = false;
+      bool has_charges = false;
+
+      try {
+        ljs0 = mol.property("LJ0").asA<AtomLJs>();
+        ljs1 = mol.property("LJ1").asA<AtomLJs>();
+        has_ljs = true;
+      } catch (...) {
+      }
+
+      try {
+        charges0 = mol.property("charge0").asA<AtomCharges>();
+        charges1 = mol.property("charge1").asA<AtomCharges>();
+        has_charges = true;
+      } catch (...) {
+      }
+
+      // A set of recorded 1-4 pairs.
+      QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
+
+      bool fix_null_perturbable_14s = false;
+
+      if (mol.hasProperty("fix_null_perturbable_14s"))
+        fix_null_perturbable_14s = mol.property("fix_null_perturbable_14s")
+                                       .asA<BooleanProperty>()
+                                       .value();
+
+      // Must record every pair that has a non-default scaling factor.
+      // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
+      for (int i = 0; i < scl0.nGroups(); ++i) {
+        for (int j = 0; j < scl0.nGroups(); ++j) {
+          const auto s0 = scl0.get(CGIdx(i), CGIdx(j));
+          const auto s1 = scl1.get(CGIdx(i), CGIdx(j));
+
+          if (not s0.isEmpty() and not s1.isEmpty()) {
+            const auto idxs0 = molinfo.getAtomsIn(CGIdx(i));
+            const auto idxs1 = molinfo.getAtomsIn(CGIdx(j));
+
+            for (const auto &idx0 : idxs0) {
+              for (const auto &idx1 : idxs1) {
+                QPair<AtomIdx, AtomIdx> pair =
+                    QPair<AtomIdx, AtomIdx>(idx0, idx1);
+
+                // Make sure this is a new atom pair.
+                if (not recorded_pairs.contains(pair)) {
+                  // Insert the pair and its inverse.
+                  recorded_pairs.insert(pair);
+                  pair = QPair<AtomIdx, AtomIdx>(idx1, idx0);
+                  recorded_pairs.insert(pair);
+
+                  const auto s0 = scl0.get(idx0, idx1);
+                  const auto s1 = scl1.get(idx0, idx1);
+
+                  if (s0.coulomb() == 1 and s0.lj() == 1 and
+                      s1.coulomb() == 1 and s1.lj() == 1) {
+                    // Both endstates have full 1-4 interaction (e.g. GLYCAM
+                    // SCNB=1.0/SCEE=1.0). Write as funct=2 with explicit LJ
+                    // parameters from state 0 (identical in both states).
+                    if (has_ljs and has_charges) {
+                      const auto cgidx0 = molinfo.cgAtomIdx(idx0);
+                      const auto cgidx1 = molinfo.cgAtomIdx(idx1);
+
+                      const auto &lj0 = ljs0.at(cgidx0);
+                      const auto &lj1 = ljs0.at(cgidx1);
+
+                      LJParameter lj_ij;
+                      if (combining_rules == 2)
+                        lj_ij = lj0.combineArithmetic(lj1);
+                      else
+                        lj_ij = lj0.combineGeometric(lj1);
+
+                      const double qi = charges0.at(cgidx0).to(mod_electron);
+                      const double qj = charges0.at(cgidx1).to(mod_electron);
+
+                      scllines.append(
+                          QString("%1 %2     2  1.0  %3  %4  %5  %6")
+                              .arg(idx0 + 1, 6)
+                              .arg(idx1 + 1, 6)
+                              .arg(qi, 11, 'f', 6)
+                              .arg(qj, 11, 'f', 6)
+                              .arg(lj_ij.sigma().to(nanometer), 18, 'e', 11)
+                              .arg(lj_ij.epsilon().to(kJ_per_mol), 18, 'e',
+                                   11));
+                    } else {
+                      scllines.append(QString("%1 %2     1")
+                                          .arg(idx0 + 1, 6)
+                                          .arg(idx1 + 1, 6));
                     }
+                  } else if (not(s0.coulomb() == 0 and s0.lj() == 0 and
+                                 s1.coulomb() == 0 and s1.lj() == 0)) {
+                    // This is a non-default, non-full pair (e.g. standard AMBER
+                    // partial scaling, or a mixed perturbation).
+                    if (fix_null_perturbable_14s) {
+                      // get the initial and perturbed charge and LJ parameters
+                      const auto &lj0_0 = ljs0.get(idx0);
+                      const auto &lj0_1 = ljs1.get(idx0);
+                      const auto &lj1_0 = ljs0.get(idx1);
+                      const auto &lj1_1 = ljs1.get(idx1);
+
+                      if (lj0_0.epsilon().value() == 0 or
+                          lj0_1.epsilon().value() == 0 or
+                          lj1_0.epsilon().value() == 0 or
+                          lj1_1.epsilon().value() == 0) {
+                        // we need to avoid having a null 1-4 LJ parameter, so
+                        // use the non-dummy state
+                        LJParameter lj0, lj1;
+
+                        if (lj0_0.epsilon().value() == 0)
+                          lj0 = lj0_1;
+                        else
+                          lj0 = lj0_0;
+
+                        if (lj1_0.epsilon().value() == 0)
+                          lj1 = lj1_1;
+                        else
+                          lj1 = lj1_0;
+
+                        auto lj = (combining_rules == 2) ? lj0.combineArithmetic(lj1)
+                                                          : lj0.combineGeometric(lj1);
+
+                        double scl = s0.lj();
+
+                        if (scl == 0)
+                          scl = s1.lj();
+
+                        scllines.append(
+                            QString("%1 %2     1  %3  %4  %3  %4")
+                                .arg(idx0 + 1, 6)
+                                .arg(idx1 + 1, 6)
+                                .arg(lj.sigma().to(nanometer), 11, 'f', 5)
+                                .arg(scl * lj.epsilon().to(kJ_per_mol), 11, 'f',
+                                     5));
+
+                        continue;
+                      }
+                    }
+
+                    scllines.append(QString("%1 %2     1")
+                                        .arg(idx0 + 1, 6)
+                                        .arg(idx1 + 1, 6));
+                  }
                 }
+              }
             }
+          }
         }
-    };
+      }
+    } else {
+      CLJNBPairs scl;
 
-    const QVector<std::function<void()>> funcs = {write_atoms, write_bonds, write_angs,
-                                                  write_dihs, write_cmaps, write_pairs};
+      try {
+        scl = mol.property("intrascale").asA<CLJNBPairs>();
+      } catch (...) {
+        return;
+      }
 
-    if (uses_parallel)
-    {
-        tbb::parallel_for(tbb::blocked_range<int>(0, funcs.count(), 1), [&](const tbb::blocked_range<int> &r)
-                          {
-            for (int i = r.begin(); i < r.end(); ++i)
-            {
-                funcs[i]();
-            } });
-    }
-    else
-    {
-        for (int i = 0; i < funcs.count(); ++i)
-        {
-            funcs[i]();
+      // Get LJ and charge properties for writing funct=2 explicit pairs.
+      AtomLJs ljs;
+      AtomCharges charges;
+      bool has_ljs = false;
+      bool has_charges = false;
+
+
+      try {
+        ljs = mol.property("LJ").asA<AtomLJs>();
+        has_ljs = true;
+      } catch (...) {
+      }
+
+      try {
+        charges = mol.property("charge").asA<AtomCharges>();
+        has_charges = true;
+      } catch (...) {
+      }
+
+      // A set of recorded 1-4 pairs.
+      QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
+
+      // Must record every pair that has a non-default scaling factor.
+      // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
+      for (int i = 0; i < scl.nGroups(); ++i) {
+        for (int j = 0; j < scl.nGroups(); ++j) {
+          const auto s = scl.get(CGIdx(i), CGIdx(j));
+
+          if (not s.isEmpty()) {
+            const auto idxs0 = molinfo.getAtomsIn(CGIdx(i));
+            const auto idxs1 = molinfo.getAtomsIn(CGIdx(j));
+
+            for (const auto &idx0 : idxs0) {
+              for (const auto &idx1 : idxs1) {
+                QPair<AtomIdx, AtomIdx> pair =
+                    QPair<AtomIdx, AtomIdx>(idx0, idx1);
+
+                // Make sure this is a new atom pair.
+                if (not recorded_pairs.contains(pair)) {
+                  // Insert the pair and its inverse.
+                  recorded_pairs.insert(pair);
+                  pair = QPair<AtomIdx, AtomIdx>(idx1, idx0);
+                  recorded_pairs.insert(pair);
+
+                  const auto s = scl.get(idx0, idx1);
+
+                  if (s.coulomb() == 0 and s.lj() == 0) {
+                    // Fully excluded: don't write.
+                  } else if (s.coulomb() == 1 and s.lj() == 1) {
+                    // Full 1-4 interaction (e.g. GLYCAM with SCNB=1.0,
+                    // SCEE=1.0). Must write as funct=2 with explicit LJ
+                    // parameters because funct=1 with gen-pairs would apply
+                    // fudgeLJ and reduce the interaction, and not listing the
+                    // pair would give zero interaction.
+                    if (has_ljs and has_charges) {
+                      const auto cgidx0 = molinfo.cgAtomIdx(idx0);
+                      const auto cgidx1 = molinfo.cgAtomIdx(idx1);
+
+                      const auto &lj0 = ljs.at(cgidx0);
+                      const auto &lj1 = ljs.at(cgidx1);
+
+                      LJParameter lj_ij;
+                      if (combining_rules == 2)
+                        lj_ij = lj0.combineArithmetic(lj1);
+                      else
+                        lj_ij = lj0.combineGeometric(lj1);
+
+                      const double qi = charges.at(cgidx0).to(mod_electron);
+                      const double qj = charges.at(cgidx1).to(mod_electron);
+
+                      scllines.append(
+                          QString("%1 %2     2  1.0  %3  %4  %5  %6")
+                              .arg(idx0 + 1, 6)
+                              .arg(idx1 + 1, 6)
+                              .arg(qi, 11, 'f', 6)
+                              .arg(qj, 11, 'f', 6)
+                              .arg(lj_ij.sigma().to(nanometer), 18, 'e', 11)
+                              .arg(lj_ij.epsilon().to(kJ_per_mol), 18, 'e',
+                                   11));
+                    } else {
+                      // Fall back to funct=1; the energy will be wrong if
+                      // fudgeLJ != 1.0, but we have no LJ parameters to use.
+                      scllines.append(QString("%1 %2     1")
+                                          .arg(idx0 + 1, 6)
+                                          .arg(idx1 + 1, 6));
+                    }
+                  } else {
+                    // Standard partial 1-4 (e.g. fudgeQQ/fudgeLJ): write as
+                    // funct=1.
+                    scllines.append(QString("%1 %2     1")
+                                        .arg(idx0 + 1, 6)
+                                        .arg(idx1 + 1, 6));
+                  }
+                }
+              }
+            }
+          }
         }
+      }
     }
+  };
 
-    lines.append("[ atoms ]");
-    if (is_perturbable)
-        lines.append(
-            ";   nr   type0  resnr residue  atom   cgnr    charge0        mass0   type1    charge1        mass1");
-    else
-        lines.append(";   nr   type  resnr residue  atom   cgnr     charge         mass");
-    lines.append(atomlines);
+  const QVector<std::function<void()>> funcs = {write_atoms, write_bonds,
+                                                write_angs,  write_dihs,
+                                                write_cmaps, write_pairs};
 
-    // we need to detect whether this is a water molecule. If so, then we
-    // need to add in "settles" lines to constrain bonds / angles of the
-    // water molecule
-    const bool is_water = moltype.isWater();
-
-    if (is_water)
-    {
-        lines.append("#ifdef FLEXIBLE");
+  if (uses_parallel) {
+    tbb::parallel_for(tbb::blocked_range<int>(0, funcs.count(), 1),
+                      [&](const tbb::blocked_range<int> &r) {
+                        for (int i = r.begin(); i < r.end(); ++i) {
+                          funcs[i]();
+                        }
+                      });
+  } else {
+    for (int i = 0; i < funcs.count(); ++i) {
+      funcs[i]();
     }
+  }
 
-    if (not bondlines.isEmpty())
-    {
-        lines.append("[ bonds ]");
-        lines.append(";   ai     aj  funct  parameters");
-        lines += bondlines;
-        lines.append("");
-    }
+  lines.append("[ atoms ]");
+  if (is_perturbable)
+    lines.append(";   nr   type0  resnr residue  atom   cgnr    charge0        "
+                 "mass0   type1    charge1        mass1");
+  else
+    lines.append(
+        ";   nr   type  resnr residue  atom   cgnr     charge         mass");
+  lines.append(atomlines);
 
-    if (not scllines.isEmpty())
-    {
-        lines.append("[ pairs ]");
-        lines.append(";   ai     aj funct ");
-        lines += scllines;
-        lines.append("");
-    }
+  // we need to detect whether this is a water molecule. If so, then we
+  // need to add in "settles" lines to constrain bonds / angles of the
+  // water molecule
+  const bool is_water = moltype.isWater();
 
-    if (not anglines.isEmpty())
-    {
-        lines.append("[ angles ]");
-        lines.append(";   ai     aj     ak   funct   parameters");
-        lines += anglines;
-        lines.append("");
-    }
+  if (is_water) {
+    lines.append("#ifdef FLEXIBLE");
+  }
 
-    if (not dihlines.isEmpty())
-    {
-        lines.append("[ dihedrals ]");
-        lines.append(";   ai     aj     ak     al  funct  parameters");
-        lines += dihlines;
-        lines.append("");
-    }
+  if (not bondlines.isEmpty()) {
+    lines.append("[ bonds ]");
+    lines.append(";   ai     aj  funct  parameters");
+    lines += bondlines;
+    lines.append("");
+  }
 
-    if (not cmaplines.isEmpty())
-    {
-        lines.append("[ cmap ]");
-        lines.append(";   ai     aj     ak     al     am  funct");
-        lines += cmaplines;
-        lines.append("");
-    }
+  if (not scllines.isEmpty()) {
+    lines.append("[ pairs ]");
+    lines.append(";   ai     aj funct ");
+    lines += scllines;
+    lines.append("");
+  }
 
-    if (is_water)
-    {
-        lines.append("#else");
-        lines.append("");
-        lines += moltype.settlesLines();
-        lines.append("");
-        lines.append("#endif");
-    }
+  if (not anglines.isEmpty()) {
+    lines.append("[ angles ]");
+    lines.append(";   ai     aj     ak   funct   parameters");
+    lines += anglines;
+    lines.append("");
+  }
 
-    return lines;
+  if (not dihlines.isEmpty()) {
+    lines.append("[ dihedrals ]");
+    lines.append(";   ai     aj     ak     al  funct  parameters");
+    lines += dihlines;
+    lines.append("");
+  }
+
+  if (not cmaplines.isEmpty()) {
+    lines.append("[ cmap ]");
+    lines.append(";   ai     aj     ak     al     am  funct");
+    lines += cmaplines;
+    lines.append("");
+  }
+
+  if (is_water) {
+    lines.append("#else");
+    lines.append("");
+    lines += moltype.settlesLines();
+    lines.append("");
+    lines.append("#endif");
+  }
+
+  return lines;
 }
 
 /** Internal function used to convert an array of Gromacs Moltyps into
     lines of a Gromacs topology file */
-static QStringList writeMolTypes(const QMap<QPair<int, QString>, GroMolType> &moltyps,
-                                 const QMap<QPair<int, QString>, Molecule> &examples, bool uses_parallel,
-                                 bool isSorted = false)
-{
-    QHash<QString, QStringList> typs;
+static QStringList
+writeMolTypes(const QMap<QPair<int, QString>, GroMolType> &moltyps,
+              const QMap<QPair<int, QString>, Molecule> &examples,
+              bool uses_parallel, bool isSorted = false) {
+  QHash<QString, QStringList> typs;
 
-    if (uses_parallel)
-    {
-        const QVector<QPair<int, QString>> keys = moltyps.keys().toVector();
-        QMutex mutex;
+  if (uses_parallel) {
+    const QVector<QPair<int, QString>> keys = moltyps.keys().toVector();
+    QMutex mutex;
 
-        tbb::parallel_for(tbb::blocked_range<int>(0, keys.count(), 1), [&](const tbb::blocked_range<int> &r)
-                          {
-            for (int i = r.begin(); i < r.end(); ++i)
-            {
-                QStringList typlines =
-                    ::writeMolType(keys[i].second, moltyps[keys[i]], examples[keys[i]],
-                                   uses_parallel);
+    tbb::parallel_for(tbb::blocked_range<int>(0, keys.count(), 1),
+                      [&](const tbb::blocked_range<int> &r) {
+                        for (int i = r.begin(); i < r.end(); ++i) {
+                          QStringList typlines =
+                              ::writeMolType(keys[i].second, moltyps[keys[i]],
+                                             examples[keys[i]], uses_parallel);
 
-                QMutexLocker lkr(&mutex);
-                typs.insert(keys[i].second, typlines);
-            } });
+                          QMutexLocker lkr(&mutex);
+                          typs.insert(keys[i].second, typlines);
+                        }
+                      });
+  } else {
+    for (auto it = moltyps.constBegin(); it != moltyps.constEnd(); ++it) {
+      typs.insert(it.key().second,
+                  ::writeMolType(it.key().second, it.value(),
+                                 examples[it.key()], uses_parallel));
     }
-    else
-    {
-        for (auto it = moltyps.constBegin(); it != moltyps.constEnd(); ++it)
-        {
-            typs.insert(it.key().second,
-                        ::writeMolType(it.key().second, it.value(), examples[it.key()],
-                                       uses_parallel));
-        }
-    }
+  }
 
-    QStringList keys;
-    for (const auto &key : moltyps.keys())
-        keys.append(key.second);
+  QStringList keys;
+  for (const auto &key : moltyps.keys())
+    keys.append(key.second);
 
-    if (isSorted)
-        keys.sort();
+  if (isSorted)
+    keys.sort();
 
-    QStringList lines;
+  QStringList lines;
 
-    for (const auto &key : keys)
-    {
-        lines += typs[key];
-        lines += "";
-    }
+  for (const auto &key : keys) {
+    lines += typs[key];
+    lines += "";
+  }
 
-    return lines;
+  return lines;
 }
 
 /** Internal function used to write the system part of the gromacs file */
-static QStringList writeSystem(QString name, const QVector<QString> &mol_to_moltype)
-{
-    QStringList lines;
-    lines.append("[ system ]");
-    lines.append(name);
-    lines.append("");
-    lines.append("[ molecules ]");
-    lines.append(";molecule name    nr.");
+static QStringList writeSystem(QString name,
+                               const QVector<QString> &mol_to_moltype) {
+  QStringList lines;
+  lines.append("[ system ]");
+  lines.append(name);
+  lines.append("");
+  lines.append("[ molecules ]");
+  lines.append(";molecule name    nr.");
 
-    QString lastmol;
+  QString lastmol;
 
-    int count = 0;
+  int count = 0;
 
-    for (auto it = mol_to_moltype.constBegin(); it != mol_to_moltype.constEnd(); ++it)
-    {
-        if (*it != lastmol)
-        {
-            if (lastmol.isNull())
-            {
-                lastmol = *it;
-                count = 1;
-            }
-            else
-            {
-                lines.append(QString("%1 %2").arg(lastmol, 14).arg(count, 6));
-                lastmol = *it;
-                count = 1;
-            }
-        }
-        else
-            count += 1;
-    }
+  for (auto it = mol_to_moltype.constBegin(); it != mol_to_moltype.constEnd();
+       ++it) {
+    if (*it != lastmol) {
+      if (lastmol.isNull()) {
+        lastmol = *it;
+        count = 1;
+      } else {
+        lines.append(QString("%1 %2").arg(lastmol, 14).arg(count, 6));
+        lastmol = *it;
+        count = 1;
+      }
+    } else
+      count += 1;
+  }
 
-    lines.append(QString("%1 %2").arg(lastmol, 14).arg(count, 6));
+  lines.append(QString("%1 %2").arg(lastmol, 14).arg(count, 6));
 
-    lines.append("");
+  lines.append("");
 
-    return lines;
+  return lines;
 }
 
 /** Function called by the below constructor to sanitise all of the CMAP terms
@@ -5081,740 +4516,663 @@ static QStringList writeSystem(QString name, const QVector<QString> &mol_to_molt
  *  atoms that reference those CMAP terms use a consistent set of atom
  *  types.
  */
-static QHash<QString, CMAPParameter> sanitiseCMAPs(QHash<QString, GroMolType> &name_to_mtyp,
-                                                   QMap<QPair<int, QString>, GroMolType> &idx_name_to_mtyp)
-{
-    QHash<QString, CMAPParameter> cmap_potentials;
+static QHash<QString, CMAPParameter>
+sanitiseCMAPs(QHash<QString, GroMolType> &name_to_mtyp,
+              QMap<QPair<int, QString>, GroMolType> &idx_name_to_mtyp) {
+  QHash<QString, CMAPParameter> cmap_potentials;
 
-    // first, go through all of the molecules and extract out all of the
-    // unique CMAP terms - they are already written in a Gromacs string
-    // format
-    QHash<QString, CMAPParameter> unique_cmaps;
+  // first, go through all of the molecules and extract out all of the
+  // unique CMAP terms - they are already written in a Gromacs string
+  // format
+  QHash<QString, CMAPParameter> unique_cmaps;
 
-    // get a list of pointers to all of the molecule types
-    QVector<GroMolType *> moltypes;
+  // get a list of pointers to all of the molecule types
+  QVector<GroMolType *> moltypes;
 
-    moltypes.reserve(name_to_mtyp.count() + idx_name_to_mtyp.count());
+  moltypes.reserve(name_to_mtyp.count() + idx_name_to_mtyp.count());
 
-    for (auto it = name_to_mtyp.begin(); it != name_to_mtyp.end(); ++it)
-    {
-        moltypes.append(&it.value());
+  for (auto it = name_to_mtyp.begin(); it != name_to_mtyp.end(); ++it) {
+    moltypes.append(&it.value());
+  }
+
+  for (auto it = idx_name_to_mtyp.begin(); it != idx_name_to_mtyp.end(); ++it) {
+    moltypes.append(&it.value());
+  }
+
+  // first, create a set of all existing atom types
+  QSet<QString> existing_atom_types;
+
+  for (auto mol : moltypes) {
+    if (mol->isPerturbable()) {
+      for (const auto &atom : mol->atoms(false)) {
+        existing_atom_types.insert(atom.atomType());
+      }
+
+      for (const auto &atom : mol->atoms(true)) {
+        existing_atom_types.insert(atom.atomType());
+      }
+    } else {
+      for (const auto &atom : mol->atoms()) {
+        existing_atom_types.insert(atom.atomType());
+      }
+    }
+  }
+
+  auto get_atomtype_count = [&](const QString &atm_type, int count) -> QString {
+    // convert the count to a letter
+    // e.g. 0 -> A, 1 -> B, ..., 25 -> Z, 26 -> AA, 27 -> AB, ...
+    QString suffix = "";
+
+    while (count >= 0) {
+      suffix = QChar('A' + (count % 26)) + suffix;
+      count = count / 26 - 1;
     }
 
-    for (auto it = idx_name_to_mtyp.begin(); it != idx_name_to_mtyp.end(); ++it)
-    {
-        moltypes.append(&it.value());
+    return atm_type + suffix;
+  };
+
+  auto get_new_atomtype = [&](const QString &atm_type, int count) -> QString {
+    // make sure there is no "old" atom type that is the same as the new one
+    while (existing_atom_types.contains(get_atomtype_count(atm_type, count))) {
+      count += 1;
     }
 
-    // first, create a set of all existing atom types
-    QSet<QString> existing_atom_types;
+    return get_atomtype_count(atm_type, count);
+  };
 
-    for (auto mol : moltypes)
-    {
-        if (mol->isPerturbable())
-        {
-            for (const auto &atom : mol->atoms(false))
-            {
-                existing_atom_types.insert(atom.atomType());
+  for (auto mol : moltypes) {
+    if (mol->isPerturbable()) {
+      // do this both for lambda = 0 and lambda = 1
+      const auto cmaps0 = mol->cmaps();
+      const auto cmaps1 = mol->cmaps(true);
+
+      for (auto it = cmaps0.constBegin(); it != cmaps0.constEnd(); ++it) {
+        const auto &atoms = it.key();
+        const auto &param = it.value();
+        CMAPParameter cmap;
+
+        if (not unique_cmaps.contains(param)) {
+          cmap = string_to_cmap(param);
+          unique_cmaps.insert(param, cmap);
+        } else {
+          cmap = unique_cmaps[param];
+        }
+
+        // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
+        const auto atm0 = mol->atom(atoms.atom0().asA<AtomIdx>()).atomType();
+        const auto atm1 = mol->atom(atoms.atom1().asA<AtomIdx>()).atomType();
+        const auto atm2 = mol->atom(atoms.atom2().asA<AtomIdx>()).atomType();
+        const auto atm3 = mol->atom(atoms.atom3().asA<AtomIdx>()).atomType();
+        const auto atm4 = mol->atom(atoms.atom4().asA<AtomIdx>()).atomType();
+
+        // create the key for the combination of these atom types
+        // and a "1" function type
+        const auto key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, 1);
+
+        // have we seen this key before?
+        if (cmap_potentials.contains(key)) {
+          // check that we are consistent
+          if (cmap_potentials[key] != cmap) {
+            int count = 0;
+            auto new_atm_type = get_new_atomtype(atm2, count);
+            auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
+
+            while (cmap_potentials.contains(new_key) and
+                   cmap_potentials[new_key] != cmap) {
+              count += 1;
+              new_atm_type = get_new_atomtype(atm2, count);
+              new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
             }
 
-            for (const auto &atom : mol->atoms(true))
-            {
-                existing_atom_types.insert(atom.atomType());
+            // we have found a new atom type that can be used for this new CMAP
+            mol->setAtomType(atoms.atom2().asA<AtomIdx>(), new_atm_type);
+
+            if (not cmap_potentials.contains(new_key)) {
+              cmap_potentials.insert(new_key, cmap);
             }
+          }
+        } else {
+          // we have not seen this key before, so add it
+          cmap_potentials.insert(key, cmap);
         }
-        else
-        {
-            for (const auto &atom : mol->atoms())
-            {
-                existing_atom_types.insert(atom.atomType());
+      }
+
+      for (auto it = cmaps1.constBegin(); it != cmaps1.constEnd(); ++it) {
+        const auto &atoms = it.key();
+        const auto &param = it.value();
+        CMAPParameter cmap;
+
+        if (not unique_cmaps.contains(param)) {
+          cmap = string_to_cmap(param);
+          unique_cmaps.insert(param, cmap);
+        } else {
+          cmap = unique_cmaps[param];
+        }
+
+        // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
+        const auto atm0 =
+            mol->atom(atoms.atom0().asA<AtomIdx>(), true).atomType();
+        const auto atm1 =
+            mol->atom(atoms.atom1().asA<AtomIdx>(), true).atomType();
+        const auto atm2 =
+            mol->atom(atoms.atom2().asA<AtomIdx>(), true).atomType();
+        const auto atm3 =
+            mol->atom(atoms.atom3().asA<AtomIdx>(), true).atomType();
+        const auto atm4 =
+            mol->atom(atoms.atom4().asA<AtomIdx>(), true).atomType();
+
+        // create the key for the combination of these atom types
+        // and a "1" function type
+        const auto key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, 1);
+
+        // have we seen this key before?
+        if (cmap_potentials.contains(key)) {
+          // check that we are consistent
+          if (cmap_potentials[key] != cmap) {
+            int count = 0;
+            auto new_atm_type = get_new_atomtype(atm2, count);
+            auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
+
+            while (cmap_potentials.contains(new_key) and
+                   cmap_potentials[new_key] != cmap) {
+              count += 1;
+              new_atm_type = get_new_atomtype(atm2, count);
+              new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
             }
+
+            // we have found a new atom type that can be used for this new CMAP
+            mol->setAtomType(atoms.atom2().asA<AtomIdx>(), new_atm_type, true);
+
+            if (not cmap_potentials.contains(new_key)) {
+              cmap_potentials.insert(new_key, cmap);
+            }
+          }
+        } else {
+          // we have not seen this key before, so add it
+          cmap_potentials.insert(key, cmap);
         }
+      }
+
+      mol->sanitiseCMAPs();
+      mol->sanitiseCMAPs(true);
+    } else {
+      const auto cmaps = mol->cmaps();
+
+      for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it) {
+        const auto &atoms = it.key();
+        const auto &param = it.value();
+        CMAPParameter cmap;
+
+        if (not unique_cmaps.contains(param)) {
+          cmap = string_to_cmap(param);
+          unique_cmaps.insert(param, cmap);
+        } else {
+          cmap = unique_cmaps[param];
+        }
+
+        // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
+        const auto atm0 = mol->atom(atoms.atom0().asA<AtomIdx>()).atomType();
+        const auto atm1 = mol->atom(atoms.atom1().asA<AtomIdx>()).atomType();
+        const auto atm2 = mol->atom(atoms.atom2().asA<AtomIdx>()).atomType();
+        const auto atm3 = mol->atom(atoms.atom3().asA<AtomIdx>()).atomType();
+        const auto atm4 = mol->atom(atoms.atom4().asA<AtomIdx>()).atomType();
+
+        // create the key for the combination of these atom types
+        // and a "1" function type
+        const auto key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, 1);
+
+        // have we seen this key before?
+        if (cmap_potentials.contains(key)) {
+          // check that we are consistent
+          if (cmap_potentials[key] != cmap) {
+            int count = 0;
+            auto new_atm_type = get_new_atomtype(atm2, count);
+            auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
+
+            while (cmap_potentials.contains(new_key) and
+                   cmap_potentials[new_key] != cmap) {
+              count += 1;
+              new_atm_type = get_new_atomtype(atm2, count);
+              new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
+            }
+
+            // we have found a new atom type that can be used for this new CMAP
+            mol->setAtomType(atoms.atom2().asA<AtomIdx>(), new_atm_type);
+
+            if (not cmap_potentials.contains(new_key)) {
+              cmap_potentials.insert(new_key, cmap);
+            }
+          }
+        } else {
+          // we have not seen this key before, so add it
+          cmap_potentials.insert(key, cmap);
+        }
+      }
+
+      mol->sanitiseCMAPs();
     }
+  }
 
-    auto get_atomtype_count = [&](const QString &atm_type, int count) -> QString
-    {
-        // convert the count to a letter
-        // e.g. 0 -> A, 1 -> B, ..., 25 -> Z, 26 -> AA, 27 -> AB, ...
-        QString suffix = "";
-
-        while (count >= 0)
-        {
-            suffix = QChar('A' + (count % 26)) + suffix;
-            count = count / 26 - 1;
-        }
-
-        return atm_type + suffix;
-    };
-
-    auto get_new_atomtype = [&](const QString &atm_type, int count) -> QString
-    {
-        // make sure there is no "old" atom type that is the same as the new one
-        while (existing_atom_types.contains(get_atomtype_count(atm_type, count)))
-        {
-            count += 1;
-        }
-
-        return get_atomtype_count(atm_type, count);
-    };
-
-    for (auto mol : moltypes)
-    {
-        if (mol->isPerturbable())
-        {
-            // do this both for lambda = 0 and lambda = 1
-            const auto cmaps0 = mol->cmaps();
-            const auto cmaps1 = mol->cmaps(true);
-
-            for (auto it = cmaps0.constBegin(); it != cmaps0.constEnd(); ++it)
-            {
-                const auto &atoms = it.key();
-                const auto &param = it.value();
-                CMAPParameter cmap;
-
-                if (not unique_cmaps.contains(param))
-                {
-                    cmap = string_to_cmap(param);
-                    unique_cmaps.insert(param, cmap);
-                }
-                else
-                {
-                    cmap = unique_cmaps[param];
-                }
-
-                // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
-                const auto atm0 = mol->atom(atoms.atom0().asA<AtomIdx>()).atomType();
-                const auto atm1 = mol->atom(atoms.atom1().asA<AtomIdx>()).atomType();
-                const auto atm2 = mol->atom(atoms.atom2().asA<AtomIdx>()).atomType();
-                const auto atm3 = mol->atom(atoms.atom3().asA<AtomIdx>()).atomType();
-                const auto atm4 = mol->atom(atoms.atom4().asA<AtomIdx>()).atomType();
-
-                // create the key for the combination of these atom types
-                // and a "1" function type
-                const auto key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, 1);
-
-                // have we seen this key before?
-                if (cmap_potentials.contains(key))
-                {
-                    // check that we are consistent
-                    if (cmap_potentials[key] != cmap)
-                    {
-                        int count = 0;
-                        auto new_atm_type = get_new_atomtype(atm2, count);
-                        auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
-
-                        while (cmap_potentials.contains(new_key) and cmap_potentials[new_key] != cmap)
-                        {
-                            count += 1;
-                            new_atm_type = get_new_atomtype(atm2, count);
-                            new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
-                        }
-
-                        // we have found a new atom type that can be used for this new CMAP
-                        mol->setAtomType(atoms.atom2().asA<AtomIdx>(), new_atm_type);
-
-                        if (not cmap_potentials.contains(new_key))
-                        {
-                            cmap_potentials.insert(new_key, cmap);
-                        }
-                    }
-                }
-                else
-                {
-                    // we have not seen this key before, so add it
-                    cmap_potentials.insert(key, cmap);
-                }
-            }
-
-            for (auto it = cmaps1.constBegin(); it != cmaps1.constEnd(); ++it)
-            {
-                const auto &atoms = it.key();
-                const auto &param = it.value();
-                CMAPParameter cmap;
-
-                if (not unique_cmaps.contains(param))
-                {
-                    cmap = string_to_cmap(param);
-                    unique_cmaps.insert(param, cmap);
-                }
-                else
-                {
-                    cmap = unique_cmaps[param];
-                }
-
-                // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
-                const auto atm0 = mol->atom(atoms.atom0().asA<AtomIdx>(), true).atomType();
-                const auto atm1 = mol->atom(atoms.atom1().asA<AtomIdx>(), true).atomType();
-                const auto atm2 = mol->atom(atoms.atom2().asA<AtomIdx>(), true).atomType();
-                const auto atm3 = mol->atom(atoms.atom3().asA<AtomIdx>(), true).atomType();
-                const auto atm4 = mol->atom(atoms.atom4().asA<AtomIdx>(), true).atomType();
-
-                // create the key for the combination of these atom types
-                // and a "1" function type
-                const auto key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, 1);
-
-                // have we seen this key before?
-                if (cmap_potentials.contains(key))
-                {
-                    // check that we are consistent
-                    if (cmap_potentials[key] != cmap)
-                    {
-                        int count = 0;
-                        auto new_atm_type = get_new_atomtype(atm2, count);
-                        auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
-
-                        while (cmap_potentials.contains(new_key) and cmap_potentials[new_key] != cmap)
-                        {
-                            count += 1;
-                            new_atm_type = get_new_atomtype(atm2, count);
-                            new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
-                        }
-
-                        // we have found a new atom type that can be used for this new CMAP
-                        mol->setAtomType(atoms.atom2().asA<AtomIdx>(), new_atm_type, true);
-
-                        if (not cmap_potentials.contains(new_key))
-                        {
-                            cmap_potentials.insert(new_key, cmap);
-                        }
-                    }
-                }
-                else
-                {
-                    // we have not seen this key before, so add it
-                    cmap_potentials.insert(key, cmap);
-                }
-            }
-
-            mol->sanitiseCMAPs();
-            mol->sanitiseCMAPs(true);
-        }
-        else
-        {
-            const auto cmaps = mol->cmaps();
-
-            for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
-            {
-                const auto &atoms = it.key();
-                const auto &param = it.value();
-                CMAPParameter cmap;
-
-                if (not unique_cmaps.contains(param))
-                {
-                    cmap = string_to_cmap(param);
-                    unique_cmaps.insert(param, cmap);
-                }
-                else
-                {
-                    cmap = unique_cmaps[param];
-                }
-
-                // get the atom types for the atoms in this CMAP - AtomID is AtomIdx
-                const auto atm0 = mol->atom(atoms.atom0().asA<AtomIdx>()).atomType();
-                const auto atm1 = mol->atom(atoms.atom1().asA<AtomIdx>()).atomType();
-                const auto atm2 = mol->atom(atoms.atom2().asA<AtomIdx>()).atomType();
-                const auto atm3 = mol->atom(atoms.atom3().asA<AtomIdx>()).atomType();
-                const auto atm4 = mol->atom(atoms.atom4().asA<AtomIdx>()).atomType();
-
-                // create the key for the combination of these atom types
-                // and a "1" function type
-                const auto key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, 1);
-
-                // have we seen this key before?
-                if (cmap_potentials.contains(key))
-                {
-                    // check that we are consistent
-                    if (cmap_potentials[key] != cmap)
-                    {
-                        int count = 0;
-                        auto new_atm_type = get_new_atomtype(atm2, count);
-                        auto new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
-
-                        while (cmap_potentials.contains(new_key) and cmap_potentials[new_key] != cmap)
-                        {
-                            count += 1;
-                            new_atm_type = get_new_atomtype(atm2, count);
-                            new_key = get_cmap_id(atm0, atm1, new_atm_type, atm3, atm4, 1);
-                        }
-
-                        // we have found a new atom type that can be used for this new CMAP
-                        mol->setAtomType(atoms.atom2().asA<AtomIdx>(), new_atm_type);
-
-                        if (not cmap_potentials.contains(new_key))
-                        {
-                            cmap_potentials.insert(new_key, cmap);
-                        }
-                    }
-                }
-                else
-                {
-                    // we have not seen this key before, so add it
-                    cmap_potentials.insert(key, cmap);
-                }
-            }
-
-            mol->sanitiseCMAPs();
-        }
-    }
-
-    return cmap_potentials;
+  return cmap_potentials;
 }
 
 /** Construct this parser by extracting all necessary information from the
     passed SireSystem::System, looking for the properties that are specified
     in the passed property map */
 GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
-    : ConcreteProperty<GroTop, MoleculeParser>(map), nb_func_type(0), combining_rule(0), fudge_lj(0), fudge_qq(0),
-      generate_pairs(false)
-{
-    // get the MolNums of each molecule in the System - this returns the
-    // numbers in MolIdx order
-    const QVector<MolNum> molnums = system.getMoleculeNumbers().toVector();
+    : ConcreteProperty<GroTop, MoleculeParser>(map), nb_func_type(0),
+      combining_rule(0), fudge_lj(0), fudge_qq(0), generate_pairs(false) {
+  // get the MolNums of each molecule in the System - this returns the
+  // numbers in MolIdx order
+  const QVector<MolNum> molnums = system.getMoleculeNumbers().toVector();
 
-    if (molnums.isEmpty())
-    {
-        // no molecules in the system
-        this->operator=(GroTop());
-        return;
+  if (molnums.isEmpty()) {
+    // no molecules in the system
+    this->operator=(GroTop());
+    return;
+  }
+
+  bool isSorted = true;
+  if (map["sort"].hasValue()) {
+    isSorted = map["sort"].value().asA<BooleanProperty>().value();
+  }
+
+  // Search for waters and crystal waters. The user can speficy the residue name
+  // for crystal waters using the "crystal_water" property in the map. If the
+  // user wishes to preserve a custom water topology naming, then they can use
+  // "skip_water".
+  SelectResult waters;
+  SelectResult xtal_waters;
+  if (map.specified("crystal_water")) {
+    auto xtal_water_resname = map["crystal_water"].source();
+    xtal_waters = system.search(QString("resname %1").arg(xtal_water_resname));
+
+    if (not map.specified("skip_water")) {
+      waters = system.search(
+          QString("(not mols with property is_non_searchable_water) and (water "
+                  "and not resname %1")
+              .arg(xtal_water_resname));
     }
+  } else {
+    waters = system.search(
+        "(not mols with property is_non_searchable_water) and water");
+  }
 
-    bool isSorted = true;
-    if (map["sort"].hasValue())
-    {
-        isSorted = map["sort"].value().asA<BooleanProperty>().value();
-    }
+  // Extract the molecule numbers of the water molecules.
+  auto water_nums = waters.molNums();
 
-    // Search for waters and crystal waters. The user can speficy the residue name
-    // for crystal waters using the "crystal_water" property in the map. If the user
-    // wishes to preserve a custom water topology naming, then they can use "skip_water".
-    SelectResult waters;
-    SelectResult xtal_waters;
-    if (map.specified("crystal_water"))
-    {
-        auto xtal_water_resname = map["crystal_water"].source();
-        xtal_waters = system.search(QString("resname %1").arg(xtal_water_resname));
+  // Extract the molecule numbers of the crystal water molecules.
+  auto xtal_water_nums = xtal_waters.molNums();
 
-        if (not map.specified("skip_water"))
-        {
-            waters =
-                system.search(
-                    QString("(not mols with property is_non_searchable_water) and (water and not resname %1")
-                        .arg(xtal_water_resname));
-        }
-    }
-    else
-    {
-        waters = system.search("(not mols with property is_non_searchable_water) and water");
-    }
+  // Loop over the molecules to find the non-water molecules.
+  QList<MolNum> non_water_nums;
+  for (const auto &num : molnums) {
+    if (not water_nums.contains(num) and not xtal_water_nums.contains(num))
+      non_water_nums.append(num);
+  }
 
-    // Extract the molecule numbers of the water molecules.
-    auto water_nums = waters.molNums();
+  // Create a hash between MolNum and index in the system.
+  QHash<MolNum, int> molnum_to_idx;
 
-    // Extract the molecule numbers of the crystal water molecules.
-    auto xtal_water_nums = xtal_waters.molNums();
+  for (int i = 0; i < molnums.count(); ++i) {
+    molnum_to_idx.insert(molnums[i], i);
+  }
 
-    // Loop over the molecules to find the non-water molecules.
-    QList<MolNum> non_water_nums;
-    for (const auto &num : molnums)
-    {
-        if (not water_nums.contains(num) and not xtal_water_nums.contains(num))
-            non_water_nums.append(num);
-    }
+  // Initialise data structures to map molecules to their respective
+  // GroMolTypes.
+  QVector<QString> mol_to_moltype(molnums.count());
+  QMap<QPair<int, QString>, GroMolType> idx_name_to_mtyp;
+  QMap<QPair<int, QString>, Molecule> idx_name_to_example;
+  QHash<QString, GroMolType> name_to_mtyp;
 
-    // Create a hash between MolNum and index in the system.
-    QHash<MolNum, int> molnum_to_idx;
+  // First add the non-water molecules.
+  for (int i = 0; i < non_water_nums.count(); ++i) {
+    // Extract the molecule number of the molecule and work out
+    // the index in the system.
+    auto molnum = non_water_nums[i];
+    auto idx = molnum_to_idx[molnum];
 
-    for (int i = 0; i < molnums.count(); ++i)
-    {
-        molnum_to_idx.insert(molnums[i], i);
-    }
+    // Generate a GroMolType type for this molecule and get its name.
+    auto moltype = GroMolType(system[molnum].molecule(), map);
+    auto name = moltype.name();
 
-    // Initialise data structures to map molecules to their respective
-    // GroMolTypes.
-    QVector<QString> mol_to_moltype(molnums.count());
-    QMap<QPair<int, QString>, GroMolType> idx_name_to_mtyp;
-    QMap<QPair<int, QString>, Molecule> idx_name_to_example;
-    QHash<QString, GroMolType> name_to_mtyp;
+    // We have already recorded this name.
+    if (name_to_mtyp.contains(name)) {
+      if (moltype != name_to_mtyp[name]) {
+        // This has the same name but different details. Give this a new name.
+        int j = 0;
 
-    // First add the non-water molecules.
-    for (int i = 0; i < non_water_nums.count(); ++i)
-    {
-        // Extract the molecule number of the molecule and work out
-        // the index in the system.
-        auto molnum = non_water_nums[i];
-        auto idx = molnum_to_idx[molnum];
+        while (true) {
+          j++;
+          name = QString("%1_%2").arg(moltype.name()).arg(j);
 
-        // Generate a GroMolType type for this molecule and get its name.
-        auto moltype = GroMolType(system[molnum].molecule(), map);
-        auto name = moltype.name();
-
-        // We have already recorded this name.
-        if (name_to_mtyp.contains(name))
-        {
-            if (moltype != name_to_mtyp[name])
-            {
-                // This has the same name but different details. Give this a new name.
-                int j = 0;
-
-                while (true)
-                {
-                    j++;
-                    name = QString("%1_%2").arg(moltype.name()).arg(j);
-
-                    if (name_to_mtyp.contains(name))
-                    {
-                        if (moltype == name_to_mtyp[name])
-                            // Match :-)
-                            break;
-                    }
-                    else
-                    {
-                        // New moltype.
-                        idx_name_to_mtyp.insert(QPair<int, QString>(idx, name), moltype);
-                        name_to_mtyp.insert(name, moltype);
-
-                        // save an example of this molecule so that we can
-                        // extract any other details necessary
-                        idx_name_to_example.insert(QPair<int, QString>(idx, name), system[molnum].molecule());
-
-                        break;
-                    }
-
-                    // We have got here, meaning that we need to try a different name.
-                }
-            }
-        }
-        // Name not previously recorded.
-        else
-        {
+          if (name_to_mtyp.contains(name)) {
+            if (moltype == name_to_mtyp[name])
+              // Match :-)
+              break;
+          } else {
+            // New moltype.
+            idx_name_to_mtyp.insert(QPair<int, QString>(idx, name), moltype);
             name_to_mtyp.insert(name, moltype);
-            idx_name_to_mtyp.insert(QPair<int, QString>(idx, moltype.name()), moltype);
-            idx_name_to_example.insert(QPair<int, QString>(idx, name), system[molnum].molecule());
+
+            // save an example of this molecule so that we can
+            // extract any other details necessary
+            idx_name_to_example.insert(QPair<int, QString>(idx, name),
+                                       system[molnum].molecule());
+
+            break;
+          }
+
+          // We have got here, meaning that we need to try a different name.
         }
-
-        // Store the name of the molecule type.
-        mol_to_moltype[idx] = name;
+      }
+    }
+    // Name not previously recorded.
+    else {
+      name_to_mtyp.insert(name, moltype);
+      idx_name_to_mtyp.insert(QPair<int, QString>(idx, moltype.name()),
+                              moltype);
+      idx_name_to_example.insert(QPair<int, QString>(idx, name),
+                                 system[molnum].molecule());
     }
 
-    // Now deal with the water molecules.
-    if (waters.count() > 0)
-    {
-        // Extract the GroMolType of the first water molecule.
-        auto water_type = GroMolType(system[water_nums[0]].molecule(), map);
-        auto name = water_type.name();
-        auto molnum = water_nums[0];
-        auto idx = molnum_to_idx[molnum];
+    // Store the name of the molecule type.
+    mol_to_moltype[idx] = name;
+  }
 
-        // Populate the mappings.
-        name_to_mtyp.insert(name, water_type);
-        idx_name_to_mtyp.insert(QPair<int, QString>(idx, water_type.name()), water_type);
-        idx_name_to_example.insert(QPair<int, QString>(idx, name), system[molnum].molecule());
+  // Now deal with the water molecules.
+  if (waters.count() > 0) {
+    // Extract the GroMolType of the first water molecule.
+    auto water_type = GroMolType(system[water_nums[0]].molecule(), map);
+    auto name = water_type.name();
+    auto molnum = water_nums[0];
+    auto idx = molnum_to_idx[molnum];
 
-        for (int i = 0; i < water_nums.count(); ++i)
-        {
-            // Extract the molecule number of the molecule and work out
-            // the index in the system.
-            auto molnum = water_nums[i];
-            auto idx = molnum_to_idx[molnum];
+    // Populate the mappings.
+    name_to_mtyp.insert(name, water_type);
+    idx_name_to_mtyp.insert(QPair<int, QString>(idx, water_type.name()),
+                            water_type);
+    idx_name_to_example.insert(QPair<int, QString>(idx, name),
+                               system[molnum].molecule());
 
-            // Store the name of the molecule type.
-            mol_to_moltype[idx] = name;
-        }
+    for (int i = 0; i < water_nums.count(); ++i) {
+      // Extract the molecule number of the molecule and work out
+      // the index in the system.
+      auto molnum = water_nums[i];
+      auto idx = molnum_to_idx[molnum];
+
+      // Store the name of the molecule type.
+      mol_to_moltype[idx] = name;
     }
+  }
 
-    // Now add the crystal waters.
-    if (xtal_waters.count() > 0)
-    {
-        // Extract the GroMolType of the first water molecule.
-        auto water_type = GroMolType(system[xtal_water_nums[0]].molecule(), map);
-        auto name = water_type.name();
-        auto molnum = xtal_water_nums[0];
-        auto idx = molnum_to_idx[molnum];
+  // Now add the crystal waters.
+  if (xtal_waters.count() > 0) {
+    // Extract the GroMolType of the first water molecule.
+    auto water_type = GroMolType(system[xtal_water_nums[0]].molecule(), map);
+    auto name = water_type.name();
+    auto molnum = xtal_water_nums[0];
+    auto idx = molnum_to_idx[molnum];
 
-        // Populate the mappings.
-        name_to_mtyp.insert(name, water_type);
-        idx_name_to_mtyp.insert(QPair<int, QString>(idx, water_type.name()), water_type);
-        idx_name_to_example.insert(QPair<int, QString>(idx, name), system[molnum].molecule());
+    // Populate the mappings.
+    name_to_mtyp.insert(name, water_type);
+    idx_name_to_mtyp.insert(QPair<int, QString>(idx, water_type.name()),
+                            water_type);
+    idx_name_to_example.insert(QPair<int, QString>(idx, name),
+                               system[molnum].molecule());
 
-        for (int i = 0; i < xtal_water_nums.count(); ++i)
-        {
-            // Extract the molecule number of the molecule and work out
-            // the index in the system.
-            auto molnum = xtal_water_nums[i];
-            auto idx = molnum_to_idx[molnum];
+    for (int i = 0; i < xtal_water_nums.count(); ++i) {
+      // Extract the molecule number of the molecule and work out
+      // the index in the system.
+      auto molnum = xtal_water_nums[i];
+      auto idx = molnum_to_idx[molnum];
 
-            // Store the name of the molecule type.
-            mol_to_moltype[idx] = name;
-        }
+      // Store the name of the molecule type.
+      mol_to_moltype[idx] = name;
     }
+  }
 
-    QStringList errors;
+  QStringList errors;
 
-    // first, we need to extract the common forcefield from the molecules
-    MMDetail ffield = idx_name_to_mtyp.constBegin()->forcefield();
+  // first, we need to extract the common forcefield from the molecules
+  MMDetail ffield = idx_name_to_mtyp.constBegin()->forcefield();
 
-    for (auto it = idx_name_to_mtyp.constBegin(); it != idx_name_to_mtyp.constEnd(); ++it)
-    {
-        if (not ffield.isCompatibleWith(it.value().forcefield()))
-        {
-            errors.append(QObject::tr("The forcefield for molecule '%1' is not "
-                                      "compatible with that for other molecules.\n%1 versus\n%2")
-                              .arg(it.key().second)
-                              .arg(it.value().forcefield().toString())
-                              .arg(ffield.toString()));
-        }
+  for (auto it = idx_name_to_mtyp.constBegin();
+       it != idx_name_to_mtyp.constEnd(); ++it) {
+    if (not ffield.isCompatibleWith(it.value().forcefield())) {
+      errors.append(
+          QObject::tr(
+              "The forcefield for molecule '%1' is not "
+              "compatible with that for other molecules.\n%1 versus\n%2")
+              .arg(it.key().second)
+              .arg(it.value().forcefield().toString())
+              .arg(ffield.toString()));
     }
+  }
 
-    if (not errors.isEmpty())
-    {
-        throw SireError::incompatible_error(
-            QObject::tr("Cannot write this system to a Gromacs Top file as the forcefields of the "
-                        "molecules are incompatible with one another.\n%1")
-                .arg(errors.join("\n\n")),
-            CODELOC);
-    }
+  if (not errors.isEmpty()) {
+    throw SireError::incompatible_error(
+        QObject::tr("Cannot write this system to a Gromacs Top file as the "
+                    "forcefields of the "
+                    "molecules are incompatible with one another.\n%1")
+            .arg(errors.join("\n\n")),
+        CODELOC);
+  }
 
-    // first, we need to de-deduplicate and sanitise all of the CMAP terms
-    cmap_potentials = sanitiseCMAPs(name_to_mtyp, idx_name_to_mtyp);
+  // first, we need to de-deduplicate and sanitise all of the CMAP terms
+  cmap_potentials = sanitiseCMAPs(name_to_mtyp, idx_name_to_mtyp);
 
-    // next, we need to write the defaults section of the file
-    QStringList lines = ::writeDefaults(ffield);
+  // next, we need to write the defaults section of the file
+  QStringList lines = ::writeDefaults(ffield);
 
-    // next, we need to extract and write all of the atom types from all of
-    // the molecules
-    lines += ::writeAtomTypes(idx_name_to_mtyp, cmap_potentials, idx_name_to_example, ffield, map);
+  // next, we need to extract and write all of the atom types from all of
+  // the molecules
+  lines += ::writeAtomTypes(idx_name_to_mtyp, cmap_potentials,
+                            idx_name_to_example, ffield, map);
 
-    lines += ::writeCMAPTypes(cmap_potentials);
+  lines += ::writeCMAPTypes(cmap_potentials);
 
-    lines += ::writeMolTypes(idx_name_to_mtyp, idx_name_to_example, usesParallel(),
-                             isSorted);
+  lines += ::writeMolTypes(idx_name_to_mtyp, idx_name_to_example,
+                           usesParallel(), isSorted);
 
-    // now write the system part
-    lines += ::writeSystem(system.name(), mol_to_moltype);
+  // now write the system part
+  lines += ::writeSystem(system.name(), mol_to_moltype);
 
-    if (not errors.isEmpty())
-    {
-        throw SireIO::parse_error(
-            QObject::tr("Errors converting the system to a Gromacs Top format...\n%1").arg(lines.join("\n")), CODELOC);
-    }
+  if (not errors.isEmpty()) {
+    throw SireIO::parse_error(
+        QObject::tr(
+            "Errors converting the system to a Gromacs Top format...\n%1")
+            .arg(lines.join("\n")),
+        CODELOC);
+  }
 
-    // we don't need params any more, so free the memory
-    idx_name_to_mtyp.clear();
-    idx_name_to_example.clear();
-    mol_to_moltype.clear();
+  // we don't need params any more, so free the memory
+  idx_name_to_mtyp.clear();
+  idx_name_to_example.clear();
+  mol_to_moltype.clear();
 
-    // now we have the lines, reparse them to make sure that they are correct
-    // and we have a fully-constructed and sane GroTop object
-    GroTop parsed(lines, map);
+  // now we have the lines, reparse them to make sure that they are correct
+  // and we have a fully-constructed and sane GroTop object
+  GroTop parsed(lines, map);
 
-    this->operator=(parsed);
+  this->operator=(parsed);
 }
 
 /** Copy constructor */
 GroTop::GroTop(const GroTop &other)
-    : ConcreteProperty<GroTop, MoleculeParser>(other), include_path(other.include_path),
-      included_files(other.included_files), expanded_lines(other.expanded_lines), atom_types(other.atom_types),
-      bond_potentials(other.bond_potentials), ang_potentials(other.ang_potentials),
-      dih_potentials(other.dih_potentials), cmap_potentials(other.cmap_potentials),
-      moltypes(other.moltypes), grosys(other.grosys),
-      nb_func_type(other.nb_func_type), combining_rule(other.combining_rule), fudge_lj(other.fudge_lj),
-      fudge_qq(other.fudge_qq), parse_warnings(other.parse_warnings), generate_pairs(other.generate_pairs)
-{
-}
+    : ConcreteProperty<GroTop, MoleculeParser>(other),
+      include_path(other.include_path), included_files(other.included_files),
+      expanded_lines(other.expanded_lines), atom_types(other.atom_types),
+      bond_potentials(other.bond_potentials),
+      ang_potentials(other.ang_potentials),
+      dih_potentials(other.dih_potentials),
+      cmap_potentials(other.cmap_potentials), moltypes(other.moltypes),
+      grosys(other.grosys), nb_func_type(other.nb_func_type),
+      combining_rule(other.combining_rule), fudge_lj(other.fudge_lj),
+      fudge_qq(other.fudge_qq), parse_warnings(other.parse_warnings),
+      generate_pairs(other.generate_pairs) {}
 
 /** Destructor */
-GroTop::~GroTop()
-{
-}
+GroTop::~GroTop() {}
 
 /** Copy assignment operator */
-GroTop &GroTop::operator=(const GroTop &other)
-{
-    if (this != &other)
-    {
-        include_path = other.include_path;
-        included_files = other.included_files;
-        expanded_lines = other.expanded_lines;
-        atom_types = other.atom_types;
-        bond_potentials = other.bond_potentials;
-        ang_potentials = other.ang_potentials;
-        dih_potentials = other.dih_potentials;
-        cmap_potentials = other.cmap_potentials;
-        moltypes = other.moltypes;
-        grosys = other.grosys;
-        nb_func_type = other.nb_func_type;
-        combining_rule = other.combining_rule;
-        fudge_lj = other.fudge_lj;
-        fudge_qq = other.fudge_qq;
-        parse_warnings = other.parse_warnings;
-        generate_pairs = other.generate_pairs;
-        MoleculeParser::operator=(other);
-    }
+GroTop &GroTop::operator=(const GroTop &other) {
+  if (this != &other) {
+    include_path = other.include_path;
+    included_files = other.included_files;
+    expanded_lines = other.expanded_lines;
+    atom_types = other.atom_types;
+    bond_potentials = other.bond_potentials;
+    ang_potentials = other.ang_potentials;
+    dih_potentials = other.dih_potentials;
+    cmap_potentials = other.cmap_potentials;
+    moltypes = other.moltypes;
+    grosys = other.grosys;
+    nb_func_type = other.nb_func_type;
+    combining_rule = other.combining_rule;
+    fudge_lj = other.fudge_lj;
+    fudge_qq = other.fudge_qq;
+    parse_warnings = other.parse_warnings;
+    generate_pairs = other.generate_pairs;
+    MoleculeParser::operator=(other);
+  }
 
-    return *this;
+  return *this;
 }
 
 /** Comparison operator */
-bool GroTop::operator==(const GroTop &other) const
-{
-    return include_path == other.include_path and included_files == other.included_files and
-           expanded_lines == other.expanded_lines and MoleculeParser::operator==(other);
+bool GroTop::operator==(const GroTop &other) const {
+  return include_path == other.include_path and
+         included_files == other.included_files and
+         expanded_lines == other.expanded_lines and
+         MoleculeParser::operator==(other);
 }
 
 /** Comparison operator */
-bool GroTop::operator!=(const GroTop &other) const
-{
-    return not operator==(other);
+bool GroTop::operator!=(const GroTop &other) const {
+  return not operator==(other);
 }
 
 /** Return the C++ name for this class */
-const char *GroTop::typeName()
-{
-    return QMetaType::typeName(qMetaTypeId<GroTop>());
+const char *GroTop::typeName() {
+  return QMetaType::typeName(qMetaTypeId<GroTop>());
 }
 
 /** Return the C++ name for this class */
-const char *GroTop::what() const
-{
-    return GroTop::typeName();
-}
+const char *GroTop::what() const { return GroTop::typeName(); }
 
-bool GroTop::isTopology() const
-{
-    return true;
-}
+bool GroTop::isTopology() const { return true; }
 
 /** Return the list of names of directories in which to search for
     include files. The directories are either absolute, or relative
     to the current directory. If "absolute_paths" is true then
     the full absolute paths for directories that exist on this
     machine will be returned */
-QStringList GroTop::includePath(bool absolute_paths) const
-{
-    if (absolute_paths)
-    {
-        QStringList abspaths;
+QStringList GroTop::includePath(bool absolute_paths) const {
+  if (absolute_paths) {
+    QStringList abspaths;
 
-        for (const auto &path : include_path)
-        {
-            QFileInfo file(path);
+    for (const auto &path : include_path) {
+      QFileInfo file(path);
 
-            if (file.exists())
-                abspaths.append(file.absoluteFilePath());
-        }
-
-        return abspaths;
+      if (file.exists())
+        abspaths.append(file.absoluteFilePath());
     }
-    else
-        return include_path;
+
+    return abspaths;
+  } else
+    return include_path;
 }
 
 /** Return the list of names of files that were included when reading or
     writing this file. The files are relative. If "absolute_paths"
     is true then the full absolute paths for the files will be
     used */
-QStringList GroTop::includedFiles(bool absolute_paths) const
-{
-    // first, go through the list of included files
-    QStringList files;
+QStringList GroTop::includedFiles(bool absolute_paths) const {
+  // first, go through the list of included files
+  QStringList files;
 
-    for (auto it = included_files.constBegin(); it != included_files.constEnd(); ++it)
-    {
-        files += it.value();
-    }
+  for (auto it = included_files.constBegin(); it != included_files.constEnd();
+       ++it) {
+    files += it.value();
+  }
 
-    if (absolute_paths)
-    {
-        // these are already absolute filenames
-        return files;
-    }
-    else
-    {
-        // subtract any paths that relate to the current directory or GROMACS_PATH
-        QString curpath = QDir::current().absolutePath();
+  if (absolute_paths) {
+    // these are already absolute filenames
+    return files;
+  } else {
+    // subtract any paths that relate to the current directory or GROMACS_PATH
+    QString curpath = QDir::current().absolutePath();
 
-        for (auto it = files.begin(); it != files.end(); ++it)
-        {
-            if (it->startsWith(curpath))
-            {
-                *it = it->mid(curpath.length() + 1);
-            }
-            else
-            {
-                for (const auto &path : include_path)
-                {
-                    if (it->startsWith(path))
-                    {
-                        *it = it->mid(path.length() + 1);
-                    }
-                }
-            }
+    for (auto it = files.begin(); it != files.end(); ++it) {
+      if (it->startsWith(curpath)) {
+        *it = it->mid(curpath.length() + 1);
+      } else {
+        for (const auto &path : include_path) {
+          if (it->startsWith(path)) {
+            *it = it->mid(path.length() + 1);
+          }
         }
-
-        return files;
+      }
     }
+
+    return files;
+  }
 }
 
 /** Return the parser that has been constructed by reading in the passed
     file using the passed properties */
-MoleculeParserPtr GroTop::construct(const QString &filename, const PropertyMap &map) const
-{
-    return GroTop(filename, map);
+MoleculeParserPtr GroTop::construct(const QString &filename,
+                                    const PropertyMap &map) const {
+  return GroTop(filename, map);
 }
 
 /** Return the parser that has been constructed by reading in the passed
     text lines using the passed properties */
-MoleculeParserPtr GroTop::construct(const QStringList &lines, const PropertyMap &map) const
-{
-    return GroTop(lines, map);
+MoleculeParserPtr GroTop::construct(const QStringList &lines,
+                                    const PropertyMap &map) const {
+  return GroTop(lines, map);
 }
 
 /** Return the parser that has been constructed by extract all necessary
     data from the passed SireSystem::System using the specified properties */
-MoleculeParserPtr GroTop::construct(const SireSystem::System &system, const PropertyMap &map) const
-{
-    return GroTop(system, map);
+MoleculeParserPtr GroTop::construct(const SireSystem::System &system,
+                                    const PropertyMap &map) const {
+  return GroTop(system, map);
 }
 
 /** Return a string representation of this parser */
-QString GroTop::toString() const
-{
-    return QObject::tr("GroTop( includePath() = [%1], includedFiles() = [%2] )")
-        .arg(includePath().join(", "))
-        .arg(includedFiles().join(", "));
+QString GroTop::toString() const {
+  return QObject::tr("GroTop( includePath() = [%1], includedFiles() = [%2] )")
+      .arg(includePath().join(", "))
+      .arg(includedFiles().join(", "));
 }
 
-/** Return the format name that is used to identify this file format within Sire */
-QString GroTop::formatName() const
-{
-    return "GROTOP";
-}
+/** Return the format name that is used to identify this file format within Sire
+ */
+QString GroTop::formatName() const { return "GROTOP"; }
 
 /** Return a description of the file format */
-QString GroTop::formatDescription() const
-{
-    return QObject::tr("Gromacs Topology format files.");
+QString GroTop::formatDescription() const {
+  return QObject::tr("Gromacs Topology format files.");
 }
 
 /** Return the suffixes that these files are normally associated with */
-QStringList GroTop::formatSuffix() const
-{
-    static const QStringList suffixes = {"top", "grotop", "gtop"};
-    return suffixes;
+QStringList GroTop::formatSuffix() const {
+  static const QStringList suffixes = {"top", "grotop", "gtop"};
+  return suffixes;
 }
 
 /** Function that is called to assert that this object is sane. This
     should raise an exception if the parser is in an invalid state */
-void GroTop::assertSane() const
-{
-    // check state, raise SireError::program_bug if we are in an invalid state
+void GroTop::assertSane() const {
+  // check state, raise SireError::program_bug if we are in an invalid state
 }
 
 /** Return the atom type data for the passed atom type. This returns
     null data if it is not present */
-GromacsAtomType GroTop::atomType(const QString &atm) const
-{
-    return atom_types.value(atm, GromacsAtomType());
+GromacsAtomType GroTop::atomType(const QString &atm) const {
+  return atom_types.value(atm, GromacsAtomType());
 }
 
 /** Return the ID string for the bond atom types 'atm0' 'atm1'. This
@@ -5822,19 +5180,16 @@ GromacsAtomType GroTop::atomType(const QString &atm) const
     of the atoms is lower. The ';' character is used as a separator
     as it cannot be in the atom names, as it is used as a comment
     character in the Gromacs Top file */
-static QString get_bond_id(const QString &atm0, const QString &atm1, int func_type)
-{
-    if (func_type == 0) // default type
-        func_type = 1;
+static QString get_bond_id(const QString &atm0, const QString &atm1,
+                           int func_type) {
+  if (func_type == 0) // default type
+    func_type = 1;
 
-    if (atm0 < atm1)
-    {
-        return QString("%1;%2;%3").arg(atm0, atm1).arg(func_type);
-    }
-    else
-    {
-        return QString("%1;%2;%3").arg(atm1, atm0).arg(func_type);
-    }
+  if (atm0 < atm1) {
+    return QString("%1;%2;%3").arg(atm0, atm1).arg(func_type);
+  } else {
+    return QString("%1;%2;%3").arg(atm1, atm0).arg(func_type);
+  }
 }
 
 /** Return the ID string for the angle atom types 'atm0' 'atm1' 'atm2'. This
@@ -5842,3616 +5197,3317 @@ static QString get_bond_id(const QString &atm0, const QString &atm1, int func_ty
     of the atoms is lower. The ';' character is used as a separator
     as it cannot be in the atom names, as it is used as a comment
     character in the Gromacs Top file */
-static QString get_angle_id(const QString &atm0, const QString &atm1, const QString &atm2, int func_type)
-{
-    if (func_type == 0)
-        func_type = 1; // default type
+static QString get_angle_id(const QString &atm0, const QString &atm1,
+                            const QString &atm2, int func_type) {
+  if (func_type == 0)
+    func_type = 1; // default type
 
-    if (atm0 < atm2)
-    {
-        return QString("%1;%2;%3;%4").arg(atm0, atm1, atm2).arg(func_type);
-    }
-    else
-    {
-        return QString("%1;%2;%3;%4").arg(atm2, atm1, atm0).arg(func_type);
-    }
+  if (atm0 < atm2) {
+    return QString("%1;%2;%3;%4").arg(atm0, atm1, atm2).arg(func_type);
+  } else {
+    return QString("%1;%2;%3;%4").arg(atm2, atm1, atm0).arg(func_type);
+  }
 }
 
-/** Return the ID string for the dihedral atom types 'atm0' 'atm1' 'atm2' 'atm3'. This
-    creates the string 'atm0;atm1;atm2;atm3' or 'atm3;atm2;atm1;atm0' depending on which
-    of the atoms is lower. The ';' character is used as a separator
-    as it cannot be in the atom names, as it is used as a comment
-    character in the Gromacs Top file */
-static QString get_dihedral_id(const QString &atm0, const QString &atm1, const QString &atm2, const QString &atm3,
-                               int func_type)
-{
-    if ((atm0 < atm3) or (atm0 == atm3 and atm1 <= atm2))
-    {
-        return QString("%1;%2;%3;%4;%5").arg(atm0, atm1, atm2, atm3).arg(func_type);
-    }
-    else
-    {
-        return QString("%1;%2;%3;%4;%5").arg(atm3, atm2, atm1, atm0).arg(func_type);
-    }
+/** Return the ID string for the dihedral atom types 'atm0' 'atm1' 'atm2'
+   'atm3'. This creates the string 'atm0;atm1;atm2;atm3' or
+   'atm3;atm2;atm1;atm0' depending on which of the atoms is lower. The ';'
+   character is used as a separator as it cannot be in the atom names, as it is
+   used as a comment character in the Gromacs Top file */
+static QString get_dihedral_id(const QString &atm0, const QString &atm1,
+                               const QString &atm2, const QString &atm3,
+                               int func_type) {
+  if ((atm0 < atm3) or (atm0 == atm3 and atm1 <= atm2)) {
+    return QString("%1;%2;%3;%4;%5").arg(atm0, atm1, atm2, atm3).arg(func_type);
+  } else {
+    return QString("%1;%2;%3;%4;%5").arg(atm3, atm2, atm1, atm0).arg(func_type);
+  }
 }
 
 /** Return the Gromacs System that describes the list of molecules that should
     be contained */
-GroSystem GroTop::groSystem() const
-{
-    return grosys;
-}
+GroSystem GroTop::groSystem() const { return grosys; }
 
-/** Return the bond potential data for the passed pair of atoms. This only returns
-    the most recently inserted parameter for this pair. Use 'bonds' if you want
-    to allow for multiple return values */
-GromacsBond GroTop::bond(const QString &atm0, const QString &atm1, int func_type) const
-{
-    return bond_potentials.value(get_bond_id(atm0, atm1, func_type), GromacsBond());
+/** Return the bond potential data for the passed pair of atoms. This only
+   returns the most recently inserted parameter for this pair. Use 'bonds' if
+   you want to allow for multiple return values */
+GromacsBond GroTop::bond(const QString &atm0, const QString &atm1,
+                         int func_type) const {
+  return bond_potentials.value(get_bond_id(atm0, atm1, func_type),
+                               GromacsBond());
 }
 
 /** Return the bond potential data for the passed pair of atoms. This returns
     a list of all associated parameters */
-QList<GromacsBond> GroTop::bonds(const QString &atm0, const QString &atm1, int func_type) const
-{
-    return bond_potentials.values(get_bond_id(atm0, atm1, func_type));
+QList<GromacsBond> GroTop::bonds(const QString &atm0, const QString &atm1,
+                                 int func_type) const {
+  return bond_potentials.values(get_bond_id(atm0, atm1, func_type));
 }
 
-/** Return the angle potential data for the passed triple of atoms. This only returns
-    the most recently inserted parameter for these atoms. Use 'angles' if you want
-    to allow for multiple return values */
-GromacsAngle GroTop::angle(const QString &atm0, const QString &atm1, const QString &atm2, int func_type) const
-{
-    return ang_potentials.value(get_angle_id(atm0, atm1, atm2, func_type), GromacsAngle());
+/** Return the angle potential data for the passed triple of atoms. This only
+   returns the most recently inserted parameter for these atoms. Use 'angles' if
+   you want to allow for multiple return values */
+GromacsAngle GroTop::angle(const QString &atm0, const QString &atm1,
+                           const QString &atm2, int func_type) const {
+  return ang_potentials.value(get_angle_id(atm0, atm1, atm2, func_type),
+                              GromacsAngle());
 }
 
 /** Return the angle potential data for the passed triple of atoms. This returns
     a list of all associated parameters */
-QList<GromacsAngle> GroTop::angles(const QString &atm0, const QString &atm1, const QString &atm2, int func_type) const
-{
-    return ang_potentials.values(get_angle_id(atm0, atm1, atm2, func_type));
+QList<GromacsAngle> GroTop::angles(const QString &atm0, const QString &atm1,
+                                   const QString &atm2, int func_type) const {
+  return ang_potentials.values(get_angle_id(atm0, atm1, atm2, func_type));
 }
 
 /** Search for a dihedral type parameter that matches the atom types
-    atom0-atom1-atom2-atom3. This will try to find an exact match. If that fails,
-    it will then use one of the wildcard matches. Returns a null string if there
-    is no match. This will return the key into the dih_potentials dictionary */
-QString GroTop::searchForDihType(const QString &atm0, const QString &atm1, const QString &atm2, const QString &atm3,
-                                 int func_type) const
-{
-    QString key = get_dihedral_id(atm0, atm1, atm2, atm3, func_type);
+    atom0-atom1-atom2-atom3. This will try to find an exact match. If that
+   fails, it will then use one of the wildcard matches. Returns a null string if
+   there is no match. This will return the key into the dih_potentials
+   dictionary */
+QString GroTop::searchForDihType(const QString &atm0, const QString &atm1,
+                                 const QString &atm2, const QString &atm3,
+                                 int func_type) const {
+  QString key = get_dihedral_id(atm0, atm1, atm2, atm3, func_type);
 
-    // qDebug() << "SEARCHING FOR" << key;
+  // qDebug() << "SEARCHING FOR" << key;
 
-    if (dih_potentials.contains(key))
-    {
-        // qDebug() << "FOUND" << key;
-        return key;
-    }
+  if (dih_potentials.contains(key)) {
+    // qDebug() << "FOUND" << key;
+    return key;
+  }
 
-    static const QString wild = "X";
+  static const QString wild = "X";
 
-    // look for *-atm1-atm2-atm3
-    key = get_dihedral_id(wild, atm1, atm2, atm3, func_type);
+  // look for *-atm1-atm2-atm3
+  key = get_dihedral_id(wild, atm1, atm2, atm3, func_type);
 
-    if (dih_potentials.contains(key))
-    {
-        // qDebug() << "FOUND" << key;
-        return key;
-    }
+  if (dih_potentials.contains(key)) {
+    // qDebug() << "FOUND" << key;
+    return key;
+  }
 
-    // look for *-atm2-atm1-atm0
-    key = get_dihedral_id(wild, atm2, atm1, atm0, func_type);
+  // look for *-atm2-atm1-atm0
+  key = get_dihedral_id(wild, atm2, atm1, atm0, func_type);
 
-    if (dih_potentials.contains(key))
-    {
-        // qDebug() << "FOUND" << key;
-        return key;
-    }
+  if (dih_potentials.contains(key)) {
+    // qDebug() << "FOUND" << key;
+    return key;
+  }
 
-    // this failed. Look for *-atm1-atm2-* or *-atm2-atm1-*
-    key = get_dihedral_id(wild, atm1, atm2, wild, func_type);
+  // this failed. Look for *-atm1-atm2-* or *-atm2-atm1-*
+  key = get_dihedral_id(wild, atm1, atm2, wild, func_type);
 
-    if (dih_potentials.contains(key))
-    {
-        // qDebug() << "FOUND" << key;
-        return key;
-    }
+  if (dih_potentials.contains(key)) {
+    // qDebug() << "FOUND" << key;
+    return key;
+  }
 
-    key = get_dihedral_id(wild, atm2, atm1, wild, func_type);
+  key = get_dihedral_id(wild, atm2, atm1, wild, func_type);
 
-    if (dih_potentials.contains(key))
-    {
-        // qDebug() << "FOUND" << key;
-        return key;
-    }
+  if (dih_potentials.contains(key)) {
+    // qDebug() << "FOUND" << key;
+    return key;
+  }
 
-    // look for *-*-atm2-atm3
-    key = get_dihedral_id(wild, wild, atm2, atm3, func_type);
+  // look for *-*-atm2-atm3
+  key = get_dihedral_id(wild, wild, atm2, atm3, func_type);
 
-    if (dih_potentials.contains(key))
-    {
-        // qDebug() << "FOUND" << key;
-        return key;
-    }
+  if (dih_potentials.contains(key)) {
+    // qDebug() << "FOUND" << key;
+    return key;
+  }
 
-    // look for *-*-atm1-atm0
-    key = get_dihedral_id(wild, wild, atm1, atm0, func_type);
+  // look for *-*-atm1-atm0
+  key = get_dihedral_id(wild, wild, atm1, atm0, func_type);
 
-    if (dih_potentials.contains(key))
-    {
-        // qDebug() << "FOUND" << key;
-        return key;
-    }
+  if (dih_potentials.contains(key)) {
+    // qDebug() << "FOUND" << key;
+    return key;
+  }
 
-    // look for atm0-*-*-atm3 or atm3-*-*-atm0
-    key = get_dihedral_id(atm0, wild, wild, atm3, func_type);
+  // look for atm0-*-*-atm3 or atm3-*-*-atm0
+  key = get_dihedral_id(atm0, wild, wild, atm3, func_type);
 
-    if (dih_potentials.contains(key))
-    {
-        return key;
-    }
+  if (dih_potentials.contains(key)) {
+    return key;
+  }
 
-    // finally look for *-*-*-*
-    key = get_dihedral_id(wild, wild, wild, wild, func_type);
+  // finally look for *-*-*-*
+  key = get_dihedral_id(wild, wild, wild, wild, func_type);
 
-    if (dih_potentials.contains(key))
-    {
-        // qDebug() << "FOUND" << key;
-        return key;
-    }
+  if (dih_potentials.contains(key)) {
+    // qDebug() << "FOUND" << key;
+    return key;
+  }
 
-    return QString();
+  return QString();
 }
 
-/** Return the dihedral potential data for the passed quad of atoms. This only returns
-    the most recently inserted parameter for these atoms. Use 'dihedrals' if you want
-    to allow for multiple return values */
-GromacsDihedral GroTop::dihedral(const QString &atm0, const QString &atm1, const QString &atm2, const QString &atm3,
-                                 int func_type) const
-{
-    return dih_potentials.value(searchForDihType(atm0, atm1, atm2, atm3, func_type), GromacsDihedral());
+/** Return the dihedral potential data for the passed quad of atoms. This only
+   returns the most recently inserted parameter for these atoms. Use 'dihedrals'
+   if you want to allow for multiple return values */
+GromacsDihedral GroTop::dihedral(const QString &atm0, const QString &atm1,
+                                 const QString &atm2, const QString &atm3,
+                                 int func_type) const {
+  return dih_potentials.value(
+      searchForDihType(atm0, atm1, atm2, atm3, func_type), GromacsDihedral());
 }
 
-/** Return the dihedral potential data for the passed quad of atoms. This returns
-    a list of all associated parameters */
-QList<GromacsDihedral> GroTop::dihedrals(const QString &atm0, const QString &atm1, const QString &atm2,
-                                         const QString &atm3, int func_type) const
-{
-    return dih_potentials.values(searchForDihType(atm0, atm1, atm2, atm3, func_type));
+/** Return the dihedral potential data for the passed quad of atoms. This
+   returns a list of all associated parameters */
+QList<GromacsDihedral>
+GroTop::dihedrals(const QString &atm0, const QString &atm1, const QString &atm2,
+                  const QString &atm3, int func_type) const {
+  return dih_potentials.values(
+      searchForDihType(atm0, atm1, atm2, atm3, func_type));
 }
 
-/** Return all of the CMAP potentials for the passed quint of atom types, for the
- *  passed function type. This returns a list of all associated parameters
+/** Return all of the CMAP potentials for the passed quint of atom types, for
+ * the passed function type. This returns a list of all associated parameters
  *  (or an empty list if none exist) */
-QList<CMAPParameter> GroTop::cmaps(const QString &atm0, const QString &atm1, const QString &atm2,
-                                   const QString &atm3, const QString &atm4, int func_type) const
-{
-    // get the key for this cmap
-    QString key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, func_type);
+QList<CMAPParameter> GroTop::cmaps(const QString &atm0, const QString &atm1,
+                                   const QString &atm2, const QString &atm3,
+                                   const QString &atm4, int func_type) const {
+  // get the key for this cmap
+  QString key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, func_type);
 
-    auto it = cmap_potentials.find(key);
+  auto it = cmap_potentials.find(key);
 
-    if (it == cmap_potentials.end())
-    {
-        // no cmap found
-        return QList<CMAPParameter>();
-    }
-    else
-    {
-        // return the cmap
-        QList<CMAPParameter> cmaps;
-        cmaps.append(it.value());
-        return cmaps;
-    }
+  if (it == cmap_potentials.end()) {
+    // no cmap found
+    return QList<CMAPParameter>();
+  } else {
+    // return the cmap
+    QList<CMAPParameter> cmaps;
+    cmaps.append(it.value());
+    return cmaps;
+  }
 }
 
 /** Return the atom types loaded from this file */
-QHash<QString, GromacsAtomType> GroTop::atomTypes() const
-{
-    return atom_types;
-}
+QHash<QString, GromacsAtomType> GroTop::atomTypes() const { return atom_types; }
 
 /** Return the bond potentials loaded from this file */
-QMultiHash<QString, SireMM::GromacsBond> GroTop::bondPotentials() const
-{
-    return bond_potentials;
+QMultiHash<QString, SireMM::GromacsBond> GroTop::bondPotentials() const {
+  return bond_potentials;
 }
 
 /** Return the angle potentials loaded from this file */
-QMultiHash<QString, SireMM::GromacsAngle> GroTop::anglePotentials() const
-{
-    return ang_potentials;
+QMultiHash<QString, SireMM::GromacsAngle> GroTop::anglePotentials() const {
+  return ang_potentials;
 }
 
 /** Return the dihedral potentials loaded from this file */
-QMultiHash<QString, SireMM::GromacsDihedral> GroTop::dihedralPotentials() const
-{
-    return dih_potentials;
+QMultiHash<QString, SireMM::GromacsDihedral>
+GroTop::dihedralPotentials() const {
+  return dih_potentials;
 }
 
 /** Return the moleculetype with name 'name'. This returns an invalid (empty)
     GroMolType if one with this name does not exist */
-GroMolType GroTop::moleculeType(const QString &name) const
-{
-    for (const auto &moltype : moltypes)
-    {
-        if (moltype.name() == name)
-            return moltype;
-    }
+GroMolType GroTop::moleculeType(const QString &name) const {
+  for (const auto &moltype : moltypes) {
+    if (moltype.name() == name)
+      return moltype;
+  }
 
-    return GroMolType();
+  return GroMolType();
 }
 
 /** Return all of the moleculetypes that have been loaded from this file */
-QVector<GroMolType> GroTop::moleculeTypes() const
-{
-    return moltypes;
-}
+QVector<GroMolType> GroTop::moleculeTypes() const { return moltypes; }
 
 /** Return whether or not the gromacs preprocessor would change these lines */
-static bool gromacs_preprocess_would_change(const QVector<QString> &lines, bool use_parallel,
-                                            const QHash<QString, QString> &defines)
-{
-    // create the regexps that are needed to find all of the
-    // data that may be #define'd
-    QVector<QRegularExpression> regexps;
+static bool
+gromacs_preprocess_would_change(const QVector<QString> &lines,
+                                bool use_parallel,
+                                const QHash<QString, QString> &defines) {
+  // create the regexps that are needed to find all of the
+  // data that may be #define'd
+  QVector<QRegularExpression> regexps;
 
-    if (not defines.isEmpty())
-    {
-        regexps.reserve(defines.count());
+  if (not defines.isEmpty()) {
+    regexps.reserve(defines.count());
 
-        for (const auto &key : defines.keys())
-        {
-            regexps.append(QRegularExpression(QString("\\s+%1\\s*").arg(key)));
-        }
+    for (const auto &key : defines.keys()) {
+      regexps.append(QRegularExpression(QString("\\s+%1\\s*").arg(key)));
     }
+  }
 
-    // function that says whether or not an individual line would change
-    auto lineWillChange = [&](const QString &line)
-    {
-        if (line.indexOf(QLatin1String(";")) != -1 or line.indexOf(QLatin1String("#include")) != -1 or
-            line.indexOf(QLatin1String("#ifdef")) != -1 or line.indexOf(QLatin1String("#ifndef")) != -1 or
-            line.indexOf(QLatin1String("#else")) != -1 or line.indexOf(QLatin1String("#endif")) != -1 or
-            line.indexOf(QLatin1String("#define")) != -1 or line.indexOf(QLatin1String("#error")) != -1)
-        {
-            return true;
-        }
-        else
-        {
-            for (int i = 0; i < regexps.count(); ++i)
-            {
-                if (line.contains(regexps.constData()[i]))
-                    return true;
-            }
+  // function that says whether or not an individual line would change
+  auto lineWillChange = [&](const QString &line) {
+    if (line.indexOf(QLatin1String(";")) != -1 or
+        line.indexOf(QLatin1String("#include")) != -1 or
+        line.indexOf(QLatin1String("#ifdef")) != -1 or
+        line.indexOf(QLatin1String("#ifndef")) != -1 or
+        line.indexOf(QLatin1String("#else")) != -1 or
+        line.indexOf(QLatin1String("#endif")) != -1 or
+        line.indexOf(QLatin1String("#define")) != -1 or
+        line.indexOf(QLatin1String("#error")) != -1) {
+      return true;
+    } else {
+      for (int i = 0; i < regexps.count(); ++i) {
+        if (line.contains(regexps.constData()[i]))
+          return true;
+      }
 
-            if (line.trimmed().endsWith("\\"))
-            {
-                // this is a continuation line
-                return true;
-            }
+      if (line.trimmed().endsWith("\\")) {
+        // this is a continuation line
+        return true;
+      }
 
-            return false;
-        }
-    };
-
-    const auto lines_data = lines.constData();
-
-    if (use_parallel)
-    {
-        QMutex mutex;
-
-        bool must_change = false;
-
-        tbb::parallel_for(tbb::blocked_range<int>(0, lines.count()), [&](const tbb::blocked_range<int> &r)
-                          {
-            if (not must_change)
-            {
-                for (int i = r.begin(); i < r.end(); ++i)
-                {
-                    if (lineWillChange(lines_data[i]))
-                    {
-                        QMutexLocker lkr(&mutex);
-                        must_change = true;
-                        break;
-                    }
-                }
-            } });
-
-        return must_change;
+      return false;
     }
-    else
-    {
-        for (int i = 0; i < lines.count(); ++i)
-        {
-            if (lineWillChange(lines_data[i]))
-                return true;
-        }
-    }
+  };
 
-    return false;
+  const auto lines_data = lines.constData();
+
+  if (use_parallel) {
+    QMutex mutex;
+
+    bool must_change = false;
+
+    tbb::parallel_for(tbb::blocked_range<int>(0, lines.count()),
+                      [&](const tbb::blocked_range<int> &r) {
+                        if (not must_change) {
+                          for (int i = r.begin(); i < r.end(); ++i) {
+                            if (lineWillChange(lines_data[i])) {
+                              QMutexLocker lkr(&mutex);
+                              must_change = true;
+                              break;
+                            }
+                          }
+                        }
+                      });
+
+    return must_change;
+  } else {
+    for (int i = 0; i < lines.count(); ++i) {
+      if (lineWillChange(lines_data[i]))
+        return true;
+    }
+  }
+
+  return false;
 }
 
 /** Return the full path to the file 'filename' searching through the
     Gromacs file path. This throws an exception if the file is not found */
-QString GroTop::findIncludeFile(QString filename, QString current_dir)
-{
-    // new file, so first see if this filename is absolute
-    QFileInfo file(filename);
+QString GroTop::findIncludeFile(QString filename, QString current_dir) {
+  // new file, so first see if this filename is absolute
+  QFileInfo file(filename);
 
-    // is the filename absolute?
-    if (file.isAbsolute())
-    {
-        if (not(file.exists() and file.isReadable()))
-        {
-            throw SireError::io_error(QObject::tr("Cannot find the file '%1'. Please make sure that this file exists "
-                                                  "and is readable")
-                                          .arg(filename),
-                                      CODELOC);
-        }
-
-        return filename;
+  // is the filename absolute?
+  if (file.isAbsolute()) {
+    if (not(file.exists() and file.isReadable())) {
+      throw SireError::io_error(QObject::tr("Cannot find the file '%1'. Please "
+                                            "make sure that this file exists "
+                                            "and is readable")
+                                    .arg(filename),
+                                CODELOC);
     }
 
-    // does this exist from the current directory?
-    file = QFileInfo(QString("%1/%2").arg(current_dir).arg(filename));
+    return filename;
+  }
 
-    if (file.exists() and file.isReadable())
-        return file.absoluteFilePath();
+  // does this exist from the current directory?
+  file = QFileInfo(QString("%1/%2").arg(current_dir).arg(filename));
 
-    // otherwise search the GROMACS_PATH
-    for (const auto &path : include_path)
-    {
-        file = QFileInfo(QString("%1/%2").arg(path).arg(filename));
+  if (file.exists() and file.isReadable())
+    return file.absoluteFilePath();
 
-        if (file.exists() and file.isReadable())
-        {
-            return file.absoluteFilePath();
-        }
+  // otherwise search the GROMACS_PATH
+  for (const auto &path : include_path) {
+    file = QFileInfo(QString("%1/%2").arg(path).arg(filename));
+
+    if (file.exists() and file.isReadable()) {
+      return file.absoluteFilePath();
     }
+  }
 
-    // nothing was found!
-    throw SireError::io_error(
-        QObject::tr("Cannot find the file '%1' using GROMACS_PATH = [ %2 ], current directory '%3'. "
-                    "Please make "
-                    "sure the file exists and is readable within your GROMACS_PATH from the "
-                    "current directory '%3' (e.g. "
-                    "set the GROMACS_PATH environment variable to include the directory "
-                    "that contains '%1', or copy this file into one of the existing "
-                    "directories [ %2 ])")
-            .arg(filename)
-            .arg(include_path.join(", "))
-            .arg(current_dir),
-        CODELOC);
+  // nothing was found!
+  throw SireError::io_error(
+      QObject::tr(
+          "Cannot find the file '%1' using GROMACS_PATH = [ %2 ], current "
+          "directory '%3'. "
+          "Please make "
+          "sure the file exists and is readable within your GROMACS_PATH from "
+          "the "
+          "current directory '%3' (e.g. "
+          "set the GROMACS_PATH environment variable to include the directory "
+          "that contains '%1', or copy this file into one of the existing "
+          "directories [ %2 ])")
+          .arg(filename)
+          .arg(include_path.join(", "))
+          .arg(current_dir),
+      CODELOC);
 
-    return QString();
+  return QString();
 }
 
 /** This function will use the Gromacs search path to find and load the
     passed include file. This will load the file and return the
     un-preprocessed text. The file, together with its QFileInfo, will
     be saved in the 'included_files' hash */
-QVector<QString> GroTop::loadInclude(QString filename, QString current_dir)
-{
-    // try to find the file
-    QString absfile = findIncludeFile(filename, current_dir);
+QVector<QString> GroTop::loadInclude(QString filename, QString current_dir) {
+  // try to find the file
+  QString absfile = findIncludeFile(filename, current_dir);
 
-    // now load the file
-    return MoleculeParser::readTextFile(absfile);
+  // now load the file
+  return MoleculeParser::readTextFile(absfile);
 }
 
 /** This function scans through a set of gromacs file lines and expands all
     macros, removes all comments and includes all #included files */
-QVector<QString> GroTop::preprocess(const QVector<QString> &lines, QHash<QString, QString> &defines,
-                                    const QString &current_directory, const QString &parent_file)
-{
-    // first, scan through to see if anything needs changing
-    if (not gromacs_preprocess_would_change(lines, usesParallel(), defines))
-    {
-        // nothing to do
-        return lines;
+QVector<QString> GroTop::preprocess(const QVector<QString> &lines,
+                                    QHash<QString, QString> &defines,
+                                    const QString &current_directory,
+                                    const QString &parent_file) {
+  // first, scan through to see if anything needs changing
+  if (not gromacs_preprocess_would_change(lines, usesParallel(), defines)) {
+    // nothing to do
+    return lines;
+  }
+
+  // Ok, we have to change the lines...
+  QVector<QString> new_lines;
+  new_lines.reserve(lines.count());
+
+  // regexps used to parse the files...
+  QRegularExpression include_regexp(
+      "\\#include\\s*(<([^\"<>|\\b]+)>|\"([^\"<>|\\b]+)\")");
+
+  // loop through all of the lines...
+  QVectorIterator<QString> lines_it(lines);
+
+  QList<bool> ifparse;
+
+  while (lines_it.hasNext()) {
+    QString line = lines_it.next();
+
+    // remove any comments
+    if (line.indexOf(QLatin1String(";")) != -1) {
+      line = line.mid(0, line.indexOf(QLatin1String(";"))).simplified();
+
+      // this is just an empty line, so ignore it
+      if (line.isEmpty()) {
+        continue;
+      }
+    } else if (line.startsWith("*")) {
+      // the whole line is a comment
+      continue;
+    } else {
+      // simplify the line to remove weirdness
+      line = line.simplified();
     }
 
-    // Ok, we have to change the lines...
-    QVector<QString> new_lines;
-    new_lines.reserve(lines.count());
+    // now look to see if the line should be joined to the next line
+    while (line.endsWith("\\")) {
+      if (not lines_it.hasNext()) {
+        throw SireIO::parse_error(
+            QObject::tr(
+                "Continuation line on the last line of the Gromacs file! '%1'")
+                .arg(line),
+            CODELOC);
+      }
 
-    // regexps used to parse the files...
-    QRegularExpression include_regexp("\\#include\\s*(<([^\"<>|\\b]+)>|\"([^\"<>|\\b]+)\")");
+      // replace this last slash with a space
+      line = line.left(line.length() - 1) + " ";
 
-    // loop through all of the lines...
-    QVectorIterator<QString> lines_it(lines);
-
-    QList<bool> ifparse;
-
-    while (lines_it.hasNext())
-    {
-        QString line = lines_it.next();
-
-        // remove any comments
-        if (line.indexOf(QLatin1String(";")) != -1)
-        {
-            line = line.mid(0, line.indexOf(QLatin1String(";"))).simplified();
-
-            // this is just an empty line, so ignore it
-            if (line.isEmpty())
-            {
-                continue;
-            }
-        }
-        else if (line.startsWith("*"))
-        {
-            // the whole line is a comment
-            continue;
-        }
-        else
-        {
-            // simplify the line to remove weirdness
-            line = line.simplified();
-        }
-
-        // now look to see if the line should be joined to the next line
-        while (line.endsWith("\\"))
-        {
-            if (not lines_it.hasNext())
-            {
-                throw SireIO::parse_error(
-                    QObject::tr("Continuation line on the last line of the Gromacs file! '%1'").arg(line), CODELOC);
-            }
-
-            // replace this last slash with a space
-            line = line.left(line.length() - 1) + " ";
-
-            line += lines_it.next();
-            line = line.simplified();
-        }
-
-        // first, look to see if the line starts with #error, as this should
-        // terminate processing
-        if (line.startsWith("#error"))
-        {
-            // stop processing, and pass the error to the user
-            line = line.mid(6).simplified();
-            throw SireIO::parse_error(QObject::tr("Error in Gromacs file! '%1'").arg(line), CODELOC);
-        }
-
-        // now look to see if there is an #ifdef
-        if (line.startsWith("#ifdef"))
-        {
-            // we have an ifdef - has it been defined?
-            auto symbol = line.split(" ", Qt::SkipEmptyParts).last();
-
-            // push the current parse state (whether we parse if or else)
-            ifparse.append(defines.value(symbol, "0") != "0");
-            continue;
-        }
-
-        // now look to see if there is an #ifndef
-        if (line.startsWith("#ifndef"))
-        {
-            // we have an ifndef - has it been defined?
-            auto symbol = line.split(" ", Qt::SkipEmptyParts).last();
-
-            // push the current parse state (whether we parse if or else)
-            ifparse.append(defines.value(symbol, "0") == "0");
-            continue;
-        }
-
-        if (line == "#else")
-        {
-            // switch the last ifdef state
-            if (ifparse.isEmpty())
-                throw SireIO::parse_error(QObject::tr("Unmatched '#else' in the GROMACS file!"), CODELOC);
-
-            ifparse.last() = not ifparse.last();
-            continue;
-        }
-
-        if (line == "#endif")
-        {
-            // pop off the last 'ifdef' state
-            if (ifparse.isEmpty())
-                throw SireIO::parse_error(QObject::tr("Unmatched '#endif' in the GROMACS file!"), CODELOC);
-
-            ifparse.removeLast();
-            continue;
-        }
-
-        if (not ifparse.isEmpty())
-        {
-            // are we allowed to read this?
-            if (not ifparse.last())
-            {
-                // no, this is blocked out
-                continue;
-            }
-        }
-
-        // now look for any #define lines
-        if (line.startsWith("#define"))
-        {
-            auto words = line.split(" ", Qt::SkipEmptyParts);
-
-            if (words.count() == 1)
-                throw SireIO::parse_error(QObject::tr("Malformed #define line in Gromacs file? %1").arg(line), CODELOC);
-
-            if (words.count() == 2)
-            {
-                defines.insert(words[1], "1");
-            }
-            else
-            {
-                auto key = words[1];
-                words.takeFirst();
-                words.takeFirst();
-                defines.insert(key, words.join(" "));
-            }
-
-            continue;
-        }
-
-        // now try to substitute any 'defines' in the line with their defined values
-        for (auto it = defines.constBegin(); it != defines.constEnd(); ++it)
-        {
-            if (line.indexOf(it.key()) != -1)
-            {
-                auto words = line.split(" ", Qt::SkipEmptyParts);
-
-                for (int i = 0; i < words.count(); ++i)
-                {
-                    if (words[i] == it.key())
-                    {
-                        words[i] = it.value();
-                    }
-                }
-
-                line = words.join(" ");
-            }
-        }
-
-        // skip BioSimSpace position restraint includes
-        if (line.contains("#include \"posre"))
-        {
-            continue;
-        }
-
-        // now look for #include lines
-        if (line.startsWith("#include"))
-        {
-            // now insert the contents of any included files
-            auto m = include_regexp.match(line);
-
-            if (not m.hasMatch())
-            {
-                throw SireIO::parse_error(QObject::tr("Malformed #include line in Gromacs file? %1").arg(line),
-                                          CODELOC);
-            }
-
-            // we have to include a file
-            auto filename = m.captured(m.lastCapturedIndex());
-
-            // now find the absolute path to the file...
-            auto absfile = findIncludeFile(filename, current_directory);
-
-            // now load the file
-            auto included_lines = MoleculeParser::readTextFile(absfile);
-
-            // now get the absolute path to the included file
-            auto parts = absfile.split("/");
-            parts.removeLast();
-
-            // fully preprocess these lines using the current set of defines
-            included_lines = preprocess(included_lines, defines, parts.join("/"), absfile);
-
-            // add these included lines to the set
-            new_lines.reserve(new_lines.count() + included_lines.count());
-            new_lines += included_lines;
-
-            // finally, record that this file depends on the included file
-            included_files[parent_file].append(absfile);
-
-            continue;
-        }
-
-        // finally, make sure that we have not missed any '#' directives...
-        if (line.startsWith("#"))
-        {
-            throw SireIO::parse_error(QObject::tr("Unrecognised directive on Gromacs file line '%1'").arg(line),
-                                      CODELOC);
-        }
-
-        // skip empty lines
-        if (not line.isEmpty())
-        {
-            // otherwise this is a normal line, so append this to the set of new_lines
-            new_lines.append(line);
-        }
+      line += lines_it.next();
+      line = line.simplified();
     }
 
-    if (not ifparse.isEmpty())
-    {
-        throw SireIO::parse_error(QObject::tr("Unmatched #ifdef or #ifndef in Gromacs file!"), CODELOC);
+    // first, look to see if the line starts with #error, as this should
+    // terminate processing
+    if (line.startsWith("#error")) {
+      // stop processing, and pass the error to the user
+      line = line.mid(6).simplified();
+      throw SireIO::parse_error(
+          QObject::tr("Error in Gromacs file! '%1'").arg(line), CODELOC);
     }
 
-    return new_lines;
+    // now look to see if there is an #ifdef
+    if (line.startsWith("#ifdef")) {
+      // we have an ifdef - has it been defined?
+      auto symbol = line.split(" ", Qt::SkipEmptyParts).last();
+
+      // push the current parse state (whether we parse if or else)
+      ifparse.append(defines.value(symbol, "0") != "0");
+      continue;
+    }
+
+    // now look to see if there is an #ifndef
+    if (line.startsWith("#ifndef")) {
+      // we have an ifndef - has it been defined?
+      auto symbol = line.split(" ", Qt::SkipEmptyParts).last();
+
+      // push the current parse state (whether we parse if or else)
+      ifparse.append(defines.value(symbol, "0") == "0");
+      continue;
+    }
+
+    if (line == "#else") {
+      // switch the last ifdef state
+      if (ifparse.isEmpty())
+        throw SireIO::parse_error(
+            QObject::tr("Unmatched '#else' in the GROMACS file!"), CODELOC);
+
+      ifparse.last() = not ifparse.last();
+      continue;
+    }
+
+    if (line == "#endif") {
+      // pop off the last 'ifdef' state
+      if (ifparse.isEmpty())
+        throw SireIO::parse_error(
+            QObject::tr("Unmatched '#endif' in the GROMACS file!"), CODELOC);
+
+      ifparse.removeLast();
+      continue;
+    }
+
+    if (not ifparse.isEmpty()) {
+      // are we allowed to read this?
+      if (not ifparse.last()) {
+        // no, this is blocked out
+        continue;
+      }
+    }
+
+    // now look for any #define lines
+    if (line.startsWith("#define")) {
+      auto words = line.split(" ", Qt::SkipEmptyParts);
+
+      if (words.count() == 1)
+        throw SireIO::parse_error(
+            QObject::tr("Malformed #define line in Gromacs file? %1").arg(line),
+            CODELOC);
+
+      if (words.count() == 2) {
+        defines.insert(words[1], "1");
+      } else {
+        auto key = words[1];
+        words.takeFirst();
+        words.takeFirst();
+        defines.insert(key, words.join(" "));
+      }
+
+      continue;
+    }
+
+    // now try to substitute any 'defines' in the line with their defined values
+    for (auto it = defines.constBegin(); it != defines.constEnd(); ++it) {
+      if (line.indexOf(it.key()) != -1) {
+        auto words = line.split(" ", Qt::SkipEmptyParts);
+
+        for (int i = 0; i < words.count(); ++i) {
+          if (words[i] == it.key()) {
+            words[i] = it.value();
+          }
+        }
+
+        line = words.join(" ");
+      }
+    }
+
+    // skip BioSimSpace position restraint includes
+    if (line.contains("#include \"posre")) {
+      continue;
+    }
+
+    // now look for #include lines
+    if (line.startsWith("#include")) {
+      // now insert the contents of any included files
+      auto m = include_regexp.match(line);
+
+      if (not m.hasMatch()) {
+        throw SireIO::parse_error(
+            QObject::tr("Malformed #include line in Gromacs file? %1")
+                .arg(line),
+            CODELOC);
+      }
+
+      // we have to include a file
+      auto filename = m.captured(m.lastCapturedIndex());
+
+      // now find the absolute path to the file...
+      auto absfile = findIncludeFile(filename, current_directory);
+
+      // now load the file
+      auto included_lines = MoleculeParser::readTextFile(absfile);
+
+      // now get the absolute path to the included file
+      auto parts = absfile.split("/");
+      parts.removeLast();
+
+      // fully preprocess these lines using the current set of defines
+      included_lines =
+          preprocess(included_lines, defines, parts.join("/"), absfile);
+
+      // add these included lines to the set
+      new_lines.reserve(new_lines.count() + included_lines.count());
+      new_lines += included_lines;
+
+      // finally, record that this file depends on the included file
+      included_files[parent_file].append(absfile);
+
+      continue;
+    }
+
+    // finally, make sure that we have not missed any '#' directives...
+    if (line.startsWith("#")) {
+      throw SireIO::parse_error(
+          QObject::tr("Unrecognised directive on Gromacs file line '%1'")
+              .arg(line),
+          CODELOC);
+    }
+
+    // skip empty lines
+    if (not line.isEmpty()) {
+      // otherwise this is a normal line, so append this to the set of new_lines
+      new_lines.append(line);
+    }
+  }
+
+  if (not ifparse.isEmpty()) {
+    throw SireIO::parse_error(
+        QObject::tr("Unmatched #ifdef or #ifndef in Gromacs file!"), CODELOC);
+  }
+
+  return new_lines;
 }
 
 /** Return the non-bonded function type for the molecules in this file */
-int GroTop::nonBondedFunctionType() const
-{
-    return nb_func_type;
-}
+int GroTop::nonBondedFunctionType() const { return nb_func_type; }
 
 /** Return the combining rules to use for the molecules in this file */
-int GroTop::combiningRules() const
-{
-    return combining_rule;
-}
+int GroTop::combiningRules() const { return combining_rule; }
 
 /** Return the Lennard Jones fudge factor for the molecules in this file */
-double GroTop::fudgeLJ() const
-{
-    return fudge_lj;
-}
+double GroTop::fudgeLJ() const { return fudge_lj; }
 
 /** Return the electrostatic fudge factor for the molecules in this file */
-double GroTop::fudgeQQ() const
-{
-    return fudge_qq;
-}
+double GroTop::fudgeQQ() const { return fudge_qq; }
 
 /** Return whether or not the non-bonded pairs should be automatically generated
     for the molecules in this file */
-bool GroTop::generateNonBondedPairs() const
-{
-    return generate_pairs;
-}
+bool GroTop::generateNonBondedPairs() const { return generate_pairs; }
 
 /** Return the expanded set of lines (after preprocessing) */
-const QVector<QString> &GroTop::expandedLines() const
-{
-    return expanded_lines;
-}
+const QVector<QString> &GroTop::expandedLines() const { return expanded_lines; }
 
 /** Public function used to return the list of post-processed lines */
-QStringList GroTop::postprocessedLines() const
-{
-    return expanded_lines.toList();
+QStringList GroTop::postprocessedLines() const {
+  return expanded_lines.toList();
 }
 
 /** Internal function, called by ::interpret() that processes all of the data
     from all of the directives, returning a set of warnings */
-QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const QHash<QString, int> &ntags)
-{
-    // internal function that returns the lines associated with the
-    // specified directive
-    auto getLines = [&](const QString &directive, int n) -> QStringList
-    {
-        if (n >= ntags.value(directive, 0))
-        {
-            return QStringList();
-        }
+QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs,
+                                      const QHash<QString, int> &ntags) {
+  // internal function that returns the lines associated with the
+  // specified directive
+  auto getLines = [&](const QString &directive, int n) -> QStringList {
+    if (n >= ntags.value(directive, 0)) {
+      return QStringList();
+    }
 
-        bool found = false;
-        int start = 0;
-        int end = expandedLines().count();
+    bool found = false;
+    int start = 0;
+    int end = expandedLines().count();
 
-        // find the tag
-        for (auto it = taglocs.constBegin(); it != taglocs.constEnd(); ++it)
-        {
-            if (it.value() == directive)
-            {
-                if (n == 0)
-                {
-                    found = true;
-                    start = it.key() + 1;
+    // find the tag
+    for (auto it = taglocs.constBegin(); it != taglocs.constEnd(); ++it) {
+      if (it.value() == directive) {
+        if (n == 0) {
+          found = true;
+          start = it.key() + 1;
 
-                    ++it;
+          ++it;
 
-                    if (it != taglocs.constEnd())
-                    {
-                        end = it.key();
-                    }
-
-                    break;
-                }
-                else
-                    n -= 1;
-            }
-        }
-
-        if (not found)
-            throw SireError::program_bug(
-                QObject::tr("Cannot find tag '%1' at index '%2'. This should not happen!").arg(directive).arg(n),
-                CODELOC);
-
-        QStringList lines;
-
-        for (int i = start; i < end; ++i)
-        {
-            lines.append(expandedLines().constData()[i]);
-        }
-
-        return lines;
-    };
-
-    // return the lines associated with the directive at line 'linenum'
-    auto getDirectiveLines = [&](int linenum) -> QStringList
-    {
-        auto it = taglocs.constFind(linenum);
-
-        if (it == taglocs.constEnd())
-            throw SireError::program_bug(
-                QObject::tr("Cannot find a tag associated with line '%1'. This should not happen!").arg(linenum),
-                CODELOC);
-
-        int start = it.key() + 1;
-        int end = expandedLines().count();
-
-        ++it;
-
-        if (it != taglocs.constEnd())
+          if (it != taglocs.constEnd()) {
             end = it.key();
+          }
 
-        QStringList lines;
+          break;
+        } else
+          n -= 1;
+      }
+    }
 
-        for (int i = start; i < end; ++i)
-        {
-            lines.append(expandedLines().constData()[i]);
+    if (not found)
+      throw SireError::program_bug(
+          QObject::tr(
+              "Cannot find tag '%1' at index '%2'. This should not happen!")
+              .arg(directive)
+              .arg(n),
+          CODELOC);
+
+    QStringList lines;
+
+    for (int i = start; i < end; ++i) {
+      lines.append(expandedLines().constData()[i]);
+    }
+
+    return lines;
+  };
+
+  // return the lines associated with the directive at line 'linenum'
+  auto getDirectiveLines = [&](int linenum) -> QStringList {
+    auto it = taglocs.constFind(linenum);
+
+    if (it == taglocs.constEnd())
+      throw SireError::program_bug(
+          QObject::tr("Cannot find a tag associated with line '%1'. This "
+                      "should not happen!")
+              .arg(linenum),
+          CODELOC);
+
+    int start = it.key() + 1;
+    int end = expandedLines().count();
+
+    ++it;
+
+    if (it != taglocs.constEnd())
+      end = it.key();
+
+    QStringList lines;
+
+    for (int i = start; i < end; ++i) {
+      lines.append(expandedLines().constData()[i]);
+    }
+
+    return lines;
+  };
+
+  // return all of the lines associated with all copies of the passed directive
+  auto getAllLines = [&](const QString &directive) -> QStringList {
+    QStringList lines;
+
+    for (int i = 0; i < ntags.value(directive, 0); ++i) {
+      lines += getLines(directive, i);
+    }
+
+    return lines;
+  };
+
+  // interpret a bool from the passed string
+  auto gromacs_toBool = [&](const QString &word, bool *ok) {
+    QString w = word.toLower();
+
+    if (ok)
+      *ok = true;
+
+    if (w == "yes" or w == "y" or w == "true" or w == "1") {
+      return true;
+    } else if (w == "no" or w == "n" or w == "false" or w == "0") {
+      return false;
+    } else {
+      if (ok)
+        *ok = false;
+      return false;
+    }
+  };
+
+  // internal function to process the defaults lines
+  auto processDefaults = [&]() {
+    QStringList warnings;
+
+    // there should only be one defaults line
+    const auto lines = getLines("defaults", 0);
+
+    if (lines.isEmpty())
+      throw SireIO::parse_error(
+          QObject::tr(
+              "The required data for the '[defaults]' directive in Gromacs is "
+              "not supplied. This is not a valid Gromacs topology file!"),
+          CODELOC);
+
+    auto words = lines[0].split(" ", Qt::SkipEmptyParts);
+
+    // there should be five words; non-bonded function type, combinination rule,
+    //                             generate pairs, fudge LJ and fudge QQ
+    if (words.count() < 5) {
+      throw SireIO::parse_error(
+          QObject::tr("There is insufficient data for the '[defaults]' line "
+                      "'%1'. This is "
+                      "not a valid Gromacs topology file!")
+              .arg(lines[0]),
+          CODELOC);
+    }
+
+    bool ok;
+    int nbtyp = words[0].toInt(&ok);
+
+    if (not ok)
+      throw SireIO::parse_error(
+          QObject::tr("The first value for the '[defaults]' line '%1' is not "
+                      "an integer. "
+                      "This is not a valid Gromacs topology file!")
+              .arg(lines[0]),
+          CODELOC);
+
+    int combrule = words[1].toInt(&ok);
+
+    if (not ok)
+      throw SireIO::parse_error(
+          QObject::tr("The second value for the '[defaults]' line '%1' is not "
+                      "an integer. "
+                      "This is not a valid Gromacs topology file!")
+              .arg(lines[0]),
+          CODELOC);
+
+    bool gen_pairs = gromacs_toBool(words[2], &ok);
+
+    if (not ok)
+      throw SireIO::parse_error(
+          QObject::tr(
+              "The third value for the '[defaults]' line '%1' is not a yes/no. "
+              "This is not a valid Gromacs topology file!")
+              .arg(lines[0]),
+          CODELOC);
+
+    double lj = words[3].toDouble(&ok);
+
+    if (not ok)
+      throw SireIO::parse_error(
+          QObject::tr("The fourth value for the '[defaults]' line '%1' is not "
+                      "a double. "
+                      "This is not a valid Gromacs topology file!")
+              .arg(lines[0]),
+          CODELOC);
+
+    double qq = words[4].toDouble(&ok);
+
+    if (not ok)
+      throw SireIO::parse_error(
+          QObject::tr(
+              "The fifth value for the '[defaults]' line '%1' is not a double. "
+              "This is not a valid Gromacs topology file!")
+              .arg(lines[0]),
+          CODELOC);
+
+    // validate and then save these values
+    if (nbtyp <= 0 or nbtyp > 2) {
+      warnings.append(
+          QObject::tr("A non-supported non-bonded function type (%1) "
+                      "is requested.")
+              .arg(nbtyp));
+    }
+
+    if (combrule <= 0 or combrule > 3) {
+      warnings.append(
+          QObject::tr("A non-supported combinig rule (%1) is requested!")
+              .arg(combrule));
+    }
+
+    if (lj < 0 or lj > 1) {
+      warnings.append(
+          QObject::tr("An invalid value of fudge_lj (%1) is requested!")
+              .arg(lj));
+
+      if (lj < 0)
+        lj = 0;
+      else if (lj > 1)
+        lj = 1;
+    }
+
+    if (qq < 0 or qq > 1) {
+      warnings.append(
+          QObject::tr("An invalid value of fudge_qq (%1) is requested!")
+              .arg(qq));
+
+      if (qq < 0)
+        qq = 0;
+      else if (qq > 1)
+        qq = 1;
+    }
+
+    // Gromacs uses a non-exact value of the Amber fudge_qq (1.0/1.2). Correct
+    // this in case we convert to another file format
+    if (std::abs(qq - (1.0 / 1.2)) < 0.01) {
+      qq = 1.0 / 1.2;
+    }
+
+    nb_func_type = nbtyp;
+    combining_rule = combrule;
+    fudge_lj = lj;
+    fudge_qq = qq;
+    generate_pairs = gen_pairs;
+
+    return warnings;
+  };
+
+  // wildcard atomtype (this is 'X' in gromacs files)
+  static const QString wildcard_atomtype = "X";
+
+  // Whether the file uses a "bond_type" atom type.
+  bool is_bond_type = false;
+
+  // internal function to process the atomtypes lines
+  auto processAtomTypes = [&]() {
+    QStringList warnings;
+
+    // get all 'atomtypes' lines
+    const auto lines = getAllLines("atomtypes");
+
+    // the database of all atom types
+    QHash<QString, GromacsAtomType> typs;
+
+    // now parse each atom
+    for (const auto &line : lines) {
+      const auto words = line.split(" ", Qt::SkipEmptyParts);
+
+      // should either have 2 words (atom type, mass) or
+      // have 6 words; atom type, mass, charge, type, V, W or
+      // have 7 words; atom type, atom number, mass, charge, type, V, W
+      // have 8 words; atom type, bond type, atom number, mass, charge, type, V,
+      // W
+      if (words.count() < 2) {
+        warnings.append(QObject::tr("There is not enough data for the "
+                                    "atomtype data '%1'. Skipping this line.")
+                            .arg(line));
+        continue;
+      }
+
+      GromacsAtomType typ;
+
+      if (words.count() < 6) {
+        // only getting the atom type and mass
+        bool ok_mass;
+        double mass = words[1].toDouble(&ok_mass);
+
+        if (not ok_mass) {
+          warnings.append(QObject::tr("Could not interpret the atom type data "
+                                      "from line '%1'. Skipping this line.")
+                              .arg(line));
+          continue;
         }
 
-        return lines;
-    };
+        typ = GromacsAtomType(words[0], mass * g_per_mol);
+      } else if (words.count() < 7) {
+        bool ok_mass, ok_charge, ok_ptyp, ok_v, ok_w;
+        double mass = words[1].toDouble(&ok_mass);
+        double chg = words[2].toDouble(&ok_charge);
+        auto ptyp = GromacsAtomType::toParticleType(words[3], &ok_ptyp);
+        double v = words[4].toDouble(&ok_v);
+        double w = words[5].toDouble(&ok_w);
 
-    // return all of the lines associated with all copies of the passed directive
-    auto getAllLines = [&](const QString &directive) -> QStringList
-    {
-        QStringList lines;
-
-        for (int i = 0; i < ntags.value(directive, 0); ++i)
-        {
-            lines += getLines(directive, i);
+        if (not(ok_mass and ok_charge and ok_ptyp and ok_v and ok_w)) {
+          warnings.append(QObject::tr("Could not interpret the atom type data "
+                                      "from line '%1'. Skipping this line.")
+                              .arg(line));
+          continue;
         }
 
-        return lines;
-    };
+        typ = GromacsAtomType(words[0], mass * g_per_mol, chg * mod_electron,
+                              ptyp, ::toLJParameter(v, w, combining_rule));
+      } else if (words.count() < 8) {
+        bool ok_mass, ok_elem, ok_charge, ok_ptyp, ok_v, ok_w;
+        int nprotons = words[1].toInt(&ok_elem);
+        double mass = words[2].toDouble(&ok_mass);
+        double chg = words[3].toDouble(&ok_charge);
+        auto ptyp = GromacsAtomType::toParticleType(words[4], &ok_ptyp);
+        double v = words[5].toDouble(&ok_v);
+        double w = words[6].toDouble(&ok_w);
 
-    // interpret a bool from the passed string
-    auto gromacs_toBool = [&](const QString &word, bool *ok)
-    {
-        QString w = word.toLower();
+        if (not(ok_mass and ok_charge and ok_ptyp and ok_v and ok_w)) {
+          warnings.append(QObject::tr("Could not interpret the atom type data "
+                                      "from line '%1'. Skipping this line.")
+                              .arg(line));
+          continue;
+        }
+
+        if (ok_elem) {
+          typ = GromacsAtomType(words[0], mass * g_per_mol, chg * mod_electron,
+                                ptyp, ::toLJParameter(v, w, combining_rule),
+                                Element(nprotons));
+        } else {
+          // some gromacs files don't use 'nprotons', but instead give
+          // a "bond_type" ambertype
+          typ = GromacsAtomType(words[0], words[1], mass * g_per_mol,
+                                chg * mod_electron, ptyp,
+                                ::toLJParameter(v, w, combining_rule),
+                                Element::elementWithMass(mass * g_per_mol));
+
+          is_bond_type = true;
+        }
+      } else if (words.count() < 9) {
+        bool ok_mass, ok_elem, ok_charge, ok_ptyp, ok_v, ok_w;
+        int nprotons = words[2].toInt(&ok_elem);
+        double mass = words[3].toDouble(&ok_mass);
+        double chg = words[4].toDouble(&ok_charge);
+        auto ptyp = GromacsAtomType::toParticleType(words[5], &ok_ptyp);
+        double v = words[6].toDouble(&ok_v);
+        double w = words[7].toDouble(&ok_w);
+
+        if (not(ok_mass and ok_charge and ok_ptyp and ok_v and ok_w)) {
+          warnings.append(QObject::tr("Could not interpret the atom type data "
+                                      "from line '%1'. Skipping this line.")
+                              .arg(line));
+          continue;
+        }
+
+        typ = GromacsAtomType(
+            words[0], words[1], mass * g_per_mol, chg * mod_electron, ptyp,
+            ::toLJParameter(v, w, combining_rule), Element(nprotons));
+      } else {
+        warnings.append(QObject::tr("The atomtype line '%1' contains more data "
+                                    "than is expected!")
+                            .arg(line));
+      }
+
+      if (typs.contains(typ.atomType())) {
+        // only replace if the new type is fully specified
+        if (typ.hasMassOnly())
+          continue;
+
+        warnings.append(
+            QObject::tr(
+                "The data for atom type '%1' exists already! "
+                "This will now be replaced with new data from line '%2'")
+                .arg(typ.atomType())
+                .arg(line));
+      }
+
+      typs.insert(typ.atomType(), typ);
+    }
+
+    // save the database of types
+    atom_types = typs;
+
+    return warnings;
+  };
+
+  // internal function to process the bondtypes lines
+  auto processBondTypes = [&]() {
+    QStringList warnings;
+
+    // get all 'bondtypes' lines
+    const auto lines = getAllLines("bondtypes");
+
+    // save into a database of bonds
+    QMultiHash<QString, GromacsBond> bnds;
+
+    for (const auto &line : lines) {
+      // each line should contain the atom types of the two atoms, then
+      // the function type, then the parameters for the function
+      const auto words = line.split(" ", Qt::SkipEmptyParts);
+
+      if (words.count() < 3) {
+        warnings.append(
+            QObject::tr(
+                "There is not enough data on the "
+                "line '%1' to extract a Gromacs bond parameter. Skipping line.")
+                .arg(line));
+        continue;
+      }
+
+      const auto atm0 = words[0];
+      const auto atm1 = words[1];
+
+      bool ok;
+      int func_type = words[2].toInt(&ok);
+
+      if (not ok) {
+        warnings.append(QObject::tr("Unable to determine the function type "
+                                    "for the bond on line '%1'. Skipping line.")
+                            .arg(line));
+        continue;
+      }
+
+      // now read in all of the remaining values as numbers...
+      QList<double> params;
+
+      for (int i = 3; i < words.count(); ++i) {
+        double param = words[i].toDouble(&ok);
 
         if (ok)
-            *ok = true;
-
-        if (w == "yes" or w == "y" or w == "true" or w == "1")
-        {
-            return true;
-        }
-        else if (w == "no" or w == "n" or w == "false" or w == "0")
-        {
-            return false;
-        }
-        else
-        {
-            if (ok)
-                *ok = false;
-            return false;
-        }
-    };
-
-    // internal function to process the defaults lines
-    auto processDefaults = [&]()
-    {
-        QStringList warnings;
-
-        // there should only be one defaults line
-        const auto lines = getLines("defaults", 0);
-
-        if (lines.isEmpty())
-            throw SireIO::parse_error(QObject::tr("The required data for the '[defaults]' directive in Gromacs is "
-                                                  "not supplied. This is not a valid Gromacs topology file!"),
-                                      CODELOC);
-
-        auto words = lines[0].split(" ", Qt::SkipEmptyParts);
-
-        // there should be five words; non-bonded function type, combinination rule,
-        //                             generate pairs, fudge LJ and fudge QQ
-        if (words.count() < 5)
-        {
-            throw SireIO::parse_error(QObject::tr("There is insufficient data for the '[defaults]' line '%1'. This is "
-                                                  "not a valid Gromacs topology file!")
-                                          .arg(lines[0]),
-                                      CODELOC);
-        }
-
-        bool ok;
-        int nbtyp = words[0].toInt(&ok);
-
-        if (not ok)
-            throw SireIO::parse_error(QObject::tr("The first value for the '[defaults]' line '%1' is not an integer. "
-                                                  "This is not a valid Gromacs topology file!")
-                                          .arg(lines[0]),
-                                      CODELOC);
-
-        int combrule = words[1].toInt(&ok);
-
-        if (not ok)
-            throw SireIO::parse_error(QObject::tr("The second value for the '[defaults]' line '%1' is not an integer. "
-                                                  "This is not a valid Gromacs topology file!")
-                                          .arg(lines[0]),
-                                      CODELOC);
-
-        bool gen_pairs = gromacs_toBool(words[2], &ok);
-
-        if (not ok)
-            throw SireIO::parse_error(QObject::tr("The third value for the '[defaults]' line '%1' is not a yes/no. "
-                                                  "This is not a valid Gromacs topology file!")
-                                          .arg(lines[0]),
-                                      CODELOC);
-
-        double lj = words[3].toDouble(&ok);
-
-        if (not ok)
-            throw SireIO::parse_error(QObject::tr("The fourth value for the '[defaults]' line '%1' is not a double. "
-                                                  "This is not a valid Gromacs topology file!")
-                                          .arg(lines[0]),
-                                      CODELOC);
-
-        double qq = words[4].toDouble(&ok);
-
-        if (not ok)
-            throw SireIO::parse_error(QObject::tr("The fifth value for the '[defaults]' line '%1' is not a double. "
-                                                  "This is not a valid Gromacs topology file!")
-                                          .arg(lines[0]),
-                                      CODELOC);
-
-        // validate and then save these values
-        if (nbtyp <= 0 or nbtyp > 2)
-        {
-            warnings.append(QObject::tr("A non-supported non-bonded function type (%1) "
-                                        "is requested.")
-                                .arg(nbtyp));
-        }
-
-        if (combrule <= 0 or combrule > 3)
-        {
-            warnings.append(QObject::tr("A non-supported combinig rule (%1) is requested!").arg(combrule));
-        }
-
-        if (lj < 0 or lj > 1)
-        {
-            warnings.append(QObject::tr("An invalid value of fudge_lj (%1) is requested!").arg(lj));
-
-            if (lj < 0)
-                lj = 0;
-            else if (lj > 1)
-                lj = 1;
-        }
-
-        if (qq < 0 or qq > 1)
-        {
-            warnings.append(QObject::tr("An invalid value of fudge_qq (%1) is requested!").arg(qq));
-
-            if (qq < 0)
-                qq = 0;
-            else if (qq > 1)
-                qq = 1;
-        }
-
-        // Gromacs uses a non-exact value of the Amber fudge_qq (1.0/1.2). Correct this
-        // in case we convert to another file format
-        if (std::abs(qq - (1.0 / 1.2)) < 0.01)
-        {
-            qq = 1.0 / 1.2;
-        }
-
-        nb_func_type = nbtyp;
-        combining_rule = combrule;
-        fudge_lj = lj;
-        fudge_qq = qq;
-        generate_pairs = gen_pairs;
-
-        return warnings;
-    };
-
-    // wildcard atomtype (this is 'X' in gromacs files)
-    static const QString wildcard_atomtype = "X";
-
-    // Whether the file uses a "bond_type" atom type.
-    bool is_bond_type = false;
-
-    // internal function to process the atomtypes lines
-    auto processAtomTypes = [&]()
-    {
-        QStringList warnings;
-
-        // get all 'atomtypes' lines
-        const auto lines = getAllLines("atomtypes");
-
-        // the database of all atom types
-        QHash<QString, GromacsAtomType> typs;
-
-        // now parse each atom
-        for (const auto &line : lines)
-        {
-            const auto words = line.split(" ", Qt::SkipEmptyParts);
-
-            // should either have 2 words (atom type, mass) or
-            // have 6 words; atom type, mass, charge, type, V, W or
-            // have 7 words; atom type, atom number, mass, charge, type, V, W
-            // have 8 words; atom type, bond type, atom number, mass, charge, type, V, W
-            if (words.count() < 2)
-            {
-                warnings.append(QObject::tr("There is not enough data for the "
-                                            "atomtype data '%1'. Skipping this line.")
-                                    .arg(line));
-                continue;
-            }
-
-            GromacsAtomType typ;
-
-            if (words.count() < 6)
-            {
-                // only getting the atom type and mass
-                bool ok_mass;
-                double mass = words[1].toDouble(&ok_mass);
-
-                if (not ok_mass)
-                {
-                    warnings.append(QObject::tr("Could not interpret the atom type data "
-                                                "from line '%1'. Skipping this line.")
-                                        .arg(line));
-                    continue;
-                }
-
-                typ = GromacsAtomType(words[0], mass * g_per_mol);
-            }
-            else if (words.count() < 7)
-            {
-                bool ok_mass, ok_charge, ok_ptyp, ok_v, ok_w;
-                double mass = words[1].toDouble(&ok_mass);
-                double chg = words[2].toDouble(&ok_charge);
-                auto ptyp = GromacsAtomType::toParticleType(words[3], &ok_ptyp);
-                double v = words[4].toDouble(&ok_v);
-                double w = words[5].toDouble(&ok_w);
-
-                if (not(ok_mass and ok_charge and ok_ptyp and ok_v and ok_w))
-                {
-                    warnings.append(QObject::tr("Could not interpret the atom type data "
-                                                "from line '%1'. Skipping this line.")
-                                        .arg(line));
-                    continue;
-                }
-
-                typ = GromacsAtomType(words[0], mass * g_per_mol, chg * mod_electron, ptyp,
-                                      ::toLJParameter(v, w, combining_rule));
-            }
-            else if (words.count() < 8)
-            {
-                bool ok_mass, ok_elem, ok_charge, ok_ptyp, ok_v, ok_w;
-                int nprotons = words[1].toInt(&ok_elem);
-                double mass = words[2].toDouble(&ok_mass);
-                double chg = words[3].toDouble(&ok_charge);
-                auto ptyp = GromacsAtomType::toParticleType(words[4], &ok_ptyp);
-                double v = words[5].toDouble(&ok_v);
-                double w = words[6].toDouble(&ok_w);
-
-                if (not(ok_mass and ok_charge and ok_ptyp and ok_v and ok_w))
-                {
-                    warnings.append(QObject::tr("Could not interpret the atom type data "
-                                                "from line '%1'. Skipping this line.")
-                                        .arg(line));
-                    continue;
-                }
-
-                if (ok_elem)
-                {
-                    typ = GromacsAtomType(words[0], mass * g_per_mol, chg * mod_electron, ptyp,
-                                          ::toLJParameter(v, w, combining_rule), Element(nprotons));
-                }
-                else
-                {
-                    // some gromacs files don't use 'nprotons', but instead give
-                    // a "bond_type" ambertype
-                    typ = GromacsAtomType(words[0], words[1], mass * g_per_mol, chg * mod_electron, ptyp,
-                                          ::toLJParameter(v, w, combining_rule),
-                                          Element::elementWithMass(mass * g_per_mol));
-
-                    is_bond_type = true;
-                }
-            }
-            else if (words.count() < 9)
-            {
-                bool ok_mass, ok_elem, ok_charge, ok_ptyp, ok_v, ok_w;
-                int nprotons = words[2].toInt(&ok_elem);
-                double mass = words[3].toDouble(&ok_mass);
-                double chg = words[4].toDouble(&ok_charge);
-                auto ptyp = GromacsAtomType::toParticleType(words[5], &ok_ptyp);
-                double v = words[6].toDouble(&ok_v);
-                double w = words[7].toDouble(&ok_w);
-
-                if (not(ok_mass and ok_charge and ok_ptyp and ok_v and ok_w))
-                {
-                    warnings.append(QObject::tr("Could not interpret the atom type data "
-                                                "from line '%1'. Skipping this line.")
-                                        .arg(line));
-                    continue;
-                }
-
-                typ = GromacsAtomType(words[0], words[1], mass * g_per_mol, chg * mod_electron, ptyp,
-                                      ::toLJParameter(v, w, combining_rule), Element(nprotons));
-            }
-            else
-            {
-                warnings.append(QObject::tr("The atomtype line '%1' contains more data "
-                                            "than is expected!")
-                                    .arg(line));
-            }
-
-            if (typs.contains(typ.atomType()))
-            {
-                // only replace if the new type is fully specified
-                if (typ.hasMassOnly())
-                    continue;
-
-                warnings.append(QObject::tr("The data for atom type '%1' exists already! "
-                                            "This will now be replaced with new data from line '%2'")
-                                    .arg(typ.atomType())
-                                    .arg(line));
-            }
-
-            typs.insert(typ.atomType(), typ);
-        }
-
-        // save the database of types
-        atom_types = typs;
-
-        return warnings;
-    };
-
-    // internal function to process the bondtypes lines
-    auto processBondTypes = [&]()
-    {
-        QStringList warnings;
-
-        // get all 'bondtypes' lines
-        const auto lines = getAllLines("bondtypes");
-
-        // save into a database of bonds
-        QMultiHash<QString, GromacsBond> bnds;
-
-        for (const auto &line : lines)
-        {
-            // each line should contain the atom types of the two atoms, then
-            // the function type, then the parameters for the function
-            const auto words = line.split(" ", Qt::SkipEmptyParts);
-
-            if (words.count() < 3)
-            {
-                warnings.append(QObject::tr("There is not enough data on the "
-                                            "line '%1' to extract a Gromacs bond parameter. Skipping line.")
-                                    .arg(line));
-                continue;
-            }
-
-            const auto atm0 = words[0];
-            const auto atm1 = words[1];
-
-            bool ok;
-            int func_type = words[2].toInt(&ok);
-
-            if (not ok)
-            {
-                warnings.append(QObject::tr("Unable to determine the function type "
-                                            "for the bond on line '%1'. Skipping line.")
-                                    .arg(line));
-                continue;
-            }
-
-            // now read in all of the remaining values as numbers...
-            QList<double> params;
-
-            for (int i = 3; i < words.count(); ++i)
-            {
-                double param = words[i].toDouble(&ok);
-
-                if (ok)
-                    params.append(param);
-            }
-
-            GromacsBond bond;
-
-            try
-            {
-                bond = GromacsBond(func_type, params);
-            }
-            catch (const SireError::exception &e)
-            {
-                warnings.append(QObject::tr("Unable to extract the correct information "
-                                            "to form a bond from line '%1'. Error is '%2'")
-                                    .arg(line)
-                                    .arg(e.error()));
-                continue;
-            }
-
-            QString key = get_bond_id(atm0, atm1, bond.functionType());
-            bnds.insert(key, bond);
-        }
-
-        bond_potentials = bnds;
-
-        return warnings;
-    };
-
-    // internal function to process the pairtypes lines
-    auto processPairTypes = [&]()
-    {
-        QStringList warnings;
-
-        // get all 'bondtypes' lines
-        const auto lines = getAllLines("pairtypes");
-
-        if (not lines.isEmpty())
-        {
-            warnings.append(QString("Ignoring %1 pairtypes lines.").arg(lines.count()));
-            warnings.append(QString("e.g. the first ignored pairtypes line is"));
-            warnings.append(lines[0]);
-        }
-
-        return warnings;
-    };
-
-    // internal function to process the angletypes lines
-    auto processAngleTypes = [&]()
-    {
-        QStringList warnings;
-
-        // get all 'bondtypes' lines
-        const auto lines = getAllLines("angletypes");
-
-        // save into a database of angles
-        QMultiHash<QString, GromacsAngle> angs;
-
-        for (const auto &line : lines)
-        {
-            // each line should contain the atom types of the three atoms, then
-            // the function type, then the parameters for the function
-            const auto words = line.split(" ", Qt::SkipEmptyParts);
-
-            if (words.count() < 4)
-            {
-                warnings.append(QObject::tr("There is not enough data on the "
-                                            "line '%1' to extract a Gromacs angle parameter. Skipping line.")
-                                    .arg(line));
-                continue;
-            }
-
-            const auto atm0 = words[0];
-            const auto atm1 = words[1];
-            const auto atm2 = words[2];
-
-            bool ok;
-            int func_type = words[3].toInt(&ok);
-
-            if (not ok)
-            {
-                warnings.append(QObject::tr("Unable to determine the function type "
-                                            "for the angle on line '%1'. Skipping line.")
-                                    .arg(line));
-                continue;
-            }
-
-            // now read in all of the remaining values as numbers...
-            QList<double> params;
-
-            for (int i = 4; i < words.count(); ++i)
-            {
-                double param = words[i].toDouble(&ok);
-
-                if (ok)
-                    params.append(param);
-            }
-
-            GromacsAngle angle;
-
-            try
-            {
-                angle = GromacsAngle(func_type, params);
-            }
-            catch (const SireError::exception &e)
-            {
-                warnings.append(QObject::tr("Unable to extract the correct information "
-                                            "to form an angle from line '%1'. Error is '%2'")
-                                    .arg(line)
-                                    .arg(e.error()));
-                continue;
-            }
-
-            QString key = get_angle_id(atm0, atm1, atm2, angle.functionType());
-            angs.insert(key, angle);
-        }
-
-        ang_potentials = angs;
-
-        return warnings;
-    };
-
-    // internal function to process the dihedraltypes lines
-    auto processDihedralTypes = [&]()
-    {
-        QStringList warnings;
-
-        // get all 'bondtypes' lines
-        const auto lines = getAllLines("dihedraltypes");
-
-        // save into a database of dihedrals
-        QMultiHash<QString, GromacsDihedral> dihs;
-
-        for (const auto &line : lines)
-        {
-            // each line should contain the atom types of the four atoms, then
-            // the function type, then the parameters for the function.
-            //(however, some files have the atom types of just two atoms, which
-            //  I assume are the two middle atoms of the dihedral...)
-            const auto words = line.split(" ", Qt::SkipEmptyParts);
-
-            if (words.count() < 3)
-            {
-                warnings.append(QObject::tr("There is not enough data on the "
-                                            "line '%1' to extract a Gromacs dihedral parameter. Skipping line.")
-                                    .arg(line));
-                continue;
-            }
-
-            // first, let's try to parse this assuming that it is a 2-atom dihedral line...
-            //(most cases this should fail)
-            auto atm0 = wildcard_atomtype;
-            auto atm1 = words[0];
-            auto atm2 = words[1];
-            auto atm3 = wildcard_atomtype;
-
-            GromacsDihedral dihedral;
-
-            bool ok;
-            int func_type = words[2].toInt(&ok);
-
-            if (ok)
-            {
-                // this may be a two-atom dihedral - read in the rest of the parameters
-                QList<double> params;
-
-                for (int i = 3; i < words.count(); ++i)
-                {
-                    double param = words[i].toDouble(&ok);
-                    if (ok)
-                        params.append(param);
-                }
-
-                try
-                {
-                    dihedral = GromacsDihedral(func_type, params);
-                    ok = true;
-                }
-                catch (...)
-                {
-                    ok = false;
-                }
-            }
-
-            if (not ok)
-            {
-                // we couldn't parse as a two-atom dihedral, so parse as a four-atom dihedral
-
-                if (words.count() < 5)
-                {
-                    warnings.append(QObject::tr("There is not enough data on the "
-                                                "line '%1' to extract a Gromacs dihedral parameter. Skipping line.")
-                                        .arg(line));
-                    continue;
-                }
-
-                atm0 = words[0];
-                atm1 = words[1];
-                atm2 = words[2];
-                atm3 = words[3];
-
-                bool ok;
-                int func_type = words[4].toInt(&ok);
-
-                if (not ok)
-                {
-                    warnings.append(QObject::tr("Unable to determine the function type "
-                                                "for the dihedral on line '%1'. Skipping line.")
-                                        .arg(line));
-                    continue;
-                }
-
-                // now read in all of the remaining values as numbers...
-                QList<double> params;
-
-                for (int i = 5; i < words.count(); ++i)
-                {
-                    double param = words[i].toDouble(&ok);
-
-                    if (ok)
-                        params.append(param);
-                }
-
-                try
-                {
-                    dihedral = GromacsDihedral(func_type, params);
-                }
-                catch (const SireError::exception &e)
-                {
-                    warnings.append(QObject::tr("Unable to extract the correct information "
-                                                "to form a dihedral from line '%1'. Error is '%2'")
-                                        .arg(line)
-                                        .arg(e.error()));
-                    continue;
-                }
-            }
-
-            QString key = get_dihedral_id(atm0, atm1, atm2, atm3, dihedral.functionType());
-            dihs.insert(key, dihedral);
-        }
-
-        dih_potentials = dihs;
-
-        return warnings;
-    };
-
-    // internal function to process the constrainttypes lines
-    auto processConstraintTypes = [&]()
-    {
-        QStringList warnings;
-
-        // get all 'bondtypes' lines
-        const auto lines = getAllLines("constrainttypes");
-
-        if (not lines.isEmpty())
-        {
-            warnings.append(QString("Ignoring %1 'constrainttypes' lines").arg(lines.count()));
-            warnings.append(QString("e.g. the first ignored constrainttypes line is"));
-            warnings.append(lines[0]);
-        }
-
-        return warnings;
-    };
-
-    // internal function to process the nonbond_params lines
-    auto processNonBondParams = [&]()
-    {
-        QStringList warnings;
-
-        // get all 'bondtypes' lines
-        const auto lines = getAllLines("nonbond_params");
-
-        if (not lines.isEmpty())
-        {
-            warnings.append(QString("Ignoring %1 'nonbond_params' lines").arg(lines.count()));
-            warnings.append(QString("e.g. the first ignored nonbond_params line is"));
-            warnings.append(lines[0]);
-        }
-
-        return warnings;
-    };
-
-    // internal function to process the cmaptypes lines
-    auto processCMAPTypes = [&]()
-    {
-        QStringList warnings;
-
-        // get all 'cmaptypes' lines
-        const auto lines = getAllLines("cmaptypes");
-
-        // save into a database of cmap parameters - the index is the
-        // combination of the five atom types for the matching atoms
-        QHash<QString, CMAPParameter> cmaps;
-
-        for (const auto &line : lines)
-        {
-            // each line should contain the atom types of the five atoms,
-            // followed by the function type number (1), followed by the
-            // number of rows and columns, followed by num_rows*num_cols
-            // values for the cmap function
-            const auto words = line.split(" ", Qt::SkipEmptyParts);
-
-            if (words.count() < 8)
-            {
-                warnings.append(QObject::tr("There is not enough data on the "
-                                            "line '%1' to extract a Gromacs CMAP parameter. Skipping line.")
-                                    .arg(line));
-                continue;
-            }
-
-            // first, get the five atom types
-            const auto &atm0 = words[0];
-            const auto &atm1 = words[1];
-            const auto &atm2 = words[2];
-            const auto &atm3 = words[3];
-            const auto &atm4 = words[4];
-
-            // now, get the function type
-            bool ok;
-
-            int func_type = words[5].toInt(&ok);
-
-            if (not ok)
-            {
-                warnings.append(QObject::tr("Unable to determine the function type "
-                                            "for the cmap on line '%1'. Skipping line.")
-                                    .arg(line));
-                continue;
-            }
-
-            // gromacs currently only supports function type 1 - so do we!
-            if (func_type != 1)
-            {
-                warnings.append(QObject::tr("The function type for the cmap on line '%1' is not supported. "
-                                            "Only function type 1 is supported. Skipping line.")
-                                    .arg(line));
-                continue;
-            }
-
-            // now get the number of rows and columns
-            int nrows = words[6].toInt(&ok);
-
-            if (not ok)
-            {
-                warnings.append(QObject::tr("Unable to determine the number of rows "
-                                            "for the cmap on line '%1'. Skipping line.")
-                                    .arg(line));
-                continue;
-            }
-
-            int ncols = words[7].toInt(&ok);
-
-            if (not ok)
-            {
-                warnings.append(QObject::tr("Unable to determine the number of columns "
-                                            "for the cmap on line '%1'. Skipping line.")
-                                    .arg(line));
-                continue;
-            }
-
-            // there should be nrows*ncols values after this
-            if (words.count() != 8 + nrows * ncols)
-            {
-                warnings.append(QObject::tr("The number of values for the cmap on line '%1' is not correct. "
-                                            "There should be %2 values, but there are %3. Skipping line.")
-                                    .arg(line)
-                                    .arg(nrows * ncols)
-                                    .arg(words.count() - 8));
-                continue;
-            }
-
-            // just do some DOS protection, should now have more than 512 rows or columns
-            if (nrows > 512 or ncols > 512)
-            {
-                warnings.append(QObject::tr("The number of rows (%1) or columns (%2) for the cmap on line '%3' is too large. "
-                                            "Skipping line.")
-                                    .arg(nrows)
-                                    .arg(ncols)
-                                    .arg(line));
-                continue;
-            }
-
-            // check that the number of rows and columns is not negative or zero
-            if (nrows <= 0 or ncols <= 0)
-            {
-                warnings.append(QObject::tr("The number of rows (%1) or columns (%2) for the cmap on line '%3' is not positive. "
-                                            "Skipping line.")
-                                    .arg(nrows)
-                                    .arg(ncols)
-                                    .arg(line));
-                continue;
-            }
-
-            // we can now read in the cmap values
-            QVector<double> cmap_values(nrows * ncols);
-            auto *cmap_values_data = cmap_values.data();
-
-            ok = true;
-
-            for (int i = 0; i < nrows * ncols; ++i)
-            {
-                bool val_ok = true;
-                double value = words[8 + i].toDouble(&val_ok);
-
-                if (not val_ok)
-                {
-                    warnings.append(QObject::tr("Unable to read the value %1 for the cmap on line '%2'. Skipping line.")
-                                        .arg(i)
-                                        .arg(line));
-                    ok = false;
-                    break;
-                }
-
-                cmap_values_data[i] = value;
-            }
-
-            if (not ok)
-            {
-                continue;
-            }
-
-            CMAPParameter cmap(Array2D<double>::fromColumnMajorVector(cmap_values, nrows, ncols));
-
-            QString key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, func_type);
-
-            cmaps.insert(key, cmap);
-        }
-
-        cmap_potentials = cmaps;
-
-        return warnings;
-    };
-
-    // internal function to process moleculetype lines
-    auto processMoleculeTypes = [&]()
-    {
-        QStringList warnings;
-
-        // how many moleculetypes are there? Divide them up and get
-        // the child tags for each moleculetype
-        QList<QMultiHash<QString, int>> moltags;
-        {
-            // list of tags that are valid within a moleculetype -
-            // it is REALLY IMPORTANT that this list is kept up to date,
-            // as otherwise a new tag will cause the parser to move on to
-            // parsing a new moleculetype!
-            const QStringList valid_tags = {"atoms",
-                                            "bonds",
-                                            "pairs",
-                                            "pairs_nb",
-                                            "angles",
-                                            "dihedrals",
-                                            "cmap",
-                                            "exclusions",
-                                            "contraints",
-                                            "settles",
-                                            "virtual_sites2",
-                                            "virtual_sitesn",
-                                            "position_restraints",
-                                            "distance_restraints",
-                                            "orientation_restraints",
-                                            "angle_restraints",
-                                            "angle_restraints_z"};
-
-            auto it = taglocs.constBegin();
-
-            while (it != taglocs.constEnd())
-            {
-                if (it.value() == "moleculetype")
-                {
-                    // we have found another molecule - save the location
-                    // of all of its child tags
-                    QMultiHash<QString, int> tags;
-                    tags.insert(it.value(), it.key());
-                    ++it;
-
-                    while (it != taglocs.constEnd())
-                    {
-                        // save all child tags until we reach the end
-                        // of definition of this moleculetype
-                        if (valid_tags.contains(it.value()))
-                        {
-                            // this is a valid child tag - save its location
-                            //(note that a tag can exist multiple times!)
-                            tags.insert(it.value(), it.key());
-                            ++it;
-                        }
-                        else if (it.value() == "moleculetype")
-                        {
-                            // this is the next molecule
-                            break;
-                        }
-                        else
-                        {
-                            // this is the end of the 'moleculetype'
-                            ++it;
-                            break;
-                        }
-                    }
-
-                    moltags.append(tags);
-                }
-                else
-                {
-                    ++it;
-                }
-            }
-        }
-
-        // now we define a set of functions that are needed to parse the
-        // various child tags
-
-        // function that extract the metadata about the moleculetype
-        // and returns it as a 'GroMolType' object
-        auto getMolType = [&](int linenum)
-        {
-            GroMolType moltype;
-
-            // get the directives for this molecule - there should be
-            // one line that contains the name and number of excluded atoms
-            const auto lines = getDirectiveLines(linenum);
-
-            if (lines.count() != 1)
-            {
-                moltype.addWarning(QObject::tr("Expecting only one line that "
-                                               "provides the name and number of excluded atoms for this moleculetype. "
-                                               "Instead, the number of lines is %1 : [\n%2\n]")
-                                       .arg(lines.count())
-                                       .arg(lines.join("\n")));
-            }
-
-            if (lines.count() > 0)
-            {
-                // try to read the infromation from the first line only
-                const auto words = lines[0].split(" ");
-
-                if (words.count() != 2)
-                {
-                    moltype.addWarning(QObject::tr("Expecting two words for the "
-                                                   "moleculetype line, containing the name and number of excluded "
-                                                   "atoms. Instead we get '%1'")
-                                           .arg(lines[0]));
-                }
-
-                if (words.count() > 0)
-                {
-                    moltype.setName(words[0]);
-                }
-
-                if (words.count() > 1)
-                {
-                    bool ok;
-                    qint64 nexcl = words[1].toInt(&ok);
-
-                    if (not ok)
-                    {
-                        moltype.addWarning(QObject::tr("Expecting the second word in "
-                                                       "the moleculetype line '%1' to be the number of excluded "
-                                                       "atoms. It isn't!")
-                                               .arg(lines[0]));
-                    }
-                    else
-                    {
-                        moltype.setNExcludedAtoms(nexcl);
-                    }
-                }
-            }
-
-            return moltype;
-        };
-
-        // function that extracts all of the information from the 'atoms' lines
-        // and adds it to the passed GroMolType
-        auto addAtomsTo = [&](GroMolType &moltype, int linenum)
-        {
-            QStringList lines = getDirectiveLines(linenum);
-
-            for (const auto &line : lines)
-            {
-                // each line should contain index number, atom type,
-                // residue number, residue name, atom name, charge group number,
-                // charge (mod_electron) and mass (atomic mass)
-                const auto words = line.split(" ");
-
-                if (words.count() < 6)
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract atom information "
-                                                   "from the line '%1' as it should contain at least six words "
-                                                   "(pieces of information)")
-                                           .arg(line));
-
-                    continue;
-                }
-                else if (words.count() > 8)
-                {
-                    moltype.addWarning(QObject::tr("The line containing atom information "
-                                                   "'%1' contains more information than can be parsed. It should only "
-                                                   "contain six-eight words (pieces of information)")
-                                           .arg(line));
-                }
-
-                bool ok_idx, ok_resnum, ok_chggrp, ok_chg, ok_mass;
-
-                const qint64 atomnum = words[0].toInt(&ok_idx);
-                const auto atomtyp = words[1];
-                auto resnum = words[2].toInt(&ok_resnum);
-                QString chainname;
-
-                if (not ok_resnum)
-                {
-
-                    // could be residue_numberChain_name
-                    const QRegularExpression re("(\\-?\\d+)([\\w\\d]*)");
-
-                    auto m = re.match(words[2]);
-
-                    if (m.hasMatch())
-                    {
-                        resnum = m.captured(1).toInt(&ok_resnum);
-                        chainname = m.captured(2);
-                    }
-                }
-
-                const auto resnam = words[3];
-                const auto atmnam = words[4];
-                const qint64 chggrp = words[5].toInt(&ok_chggrp);
-
-                double chg = 0;
-                ok_chg = true;
-                if (words.count() > 6)
-                    chg = words[6].toDouble(&ok_chg);
-
-                double mass = 0;
-                ok_mass = true;
-                bool found_mass = false;
-                if (words.count() > 7)
-                {
-                    mass = words[7].toDouble(&ok_mass);
-                    found_mass = true;
-                }
-
-                if (not(ok_idx and ok_resnum and ok_chggrp and ok_chg and ok_mass))
-                {
-                    moltype.addWarning(QObject::tr("Could not interpret the necessary "
-                                                   "atom information from the line '%1' | %2 %3 %4 %5 %6")
-                                           .arg(line)
-                                           .arg(ok_idx)
-                                           .arg(ok_resnum)
-                                           .arg(ok_chggrp)
-                                           .arg(ok_chg)
-                                           .arg(ok_mass));
-                    continue;
-                }
-
-                GroAtom atom;
-                atom.setNumber(atomnum);
-                atom.setAtomType(atomtyp);
-                atom.setResidueNumber(resnum);
-                atom.setResidueName(resnam);
-                atom.setChainName(chainname);
-                atom.setName(atmnam);
-                atom.setChargeGroup(chggrp);
-                atom.setCharge(chg * mod_electron);
-                atom.setMass(mass * g_per_mol);
-
-                // we now need to look up the atom type of this atom to see if there
-                // is a separate bond_type
-                auto atom_type = atom_types.value(atomtyp);
-
-                if ((not atom_type.isNull()) and atom_type.bondType() != atomtyp)
-                {
-                    atom.setBondType(atom_type.bondType());
-                }
-
-                // now do the same to assign the mass if it has not been given explicitly
-                if ((not found_mass) and (not atom_type.isNull()))
-                {
-                    atom.setMass(atom_type.mass());
-                }
-
-                if (found_mass and is_bond_type)
-                {
-                    if (mass > 0 and atom_type.element() == Element("Xx"))
-                    {
-                        // Set the element of the atom type using the mass and
-                        // update the record in the dictionary.
-                        atom_type.setElement(Element::elementWithMass(mass * g_per_mol));
-                        this->atom_types[atomtyp] = atom_type;
-                    }
-                }
-
-                moltype.addAtom(atom);
-            }
-        };
-
-        // function that extracts all of the information from the 'bonds' lines
-        auto addBondsTo = [&](GroMolType &moltype, int linenum)
-        {
-            QStringList lines = getDirectiveLines(linenum);
-
-            QMultiHash<BondID, GromacsBond> bonds;
-            bonds.reserve(lines.count());
-
-            for (const auto &line : lines)
-            {
-                const auto words = line.split(" ");
-
-                if (words.count() < 2)
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract bond information "
-                                                   "from the line '%1' as it should contain at least two words "
-                                                   "(pieces of information)")
-                                           .arg(line));
-                    continue;
-                }
-
-                bool ok0, ok1;
-
-                int atm0 = words[0].toInt(&ok0);
-                int atm1 = words[1].toInt(&ok1);
-
-                if (not(ok0 and ok1))
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract bond information "
-                                                   "from the line '%1' as the first two words need to be integers. ")
-                                           .arg(line));
-                    continue;
-                }
-
-                // now see if any information about the bond is provided...
-                GromacsBond bond;
-
-                if (words.count() > 2)
-                {
-                    bool ok;
-                    int func_type = words[2].toInt(&ok);
-
-                    if (not ok)
-                    {
-                        moltype.addWarning(QObject::tr("Unable to extract the correct "
-                                                       "information to form a bond from line '%1' as the third word "
-                                                       "is not an integer.")
-                                               .arg(line));
-                        continue;
-                    }
-
-                    if (words.count() > 3)
-                    {
-                        // now read in all of the remaining values as numbers...
-                        QList<double> params;
-
-                        for (int i = 3; i < words.count(); ++i)
-                        {
-                            double param = words[i].toDouble(&ok);
-
-                            if (ok)
-                                params.append(param);
-                        }
-
-                        try
-                        {
-                            bond = GromacsBond(func_type, params);
-                        }
-                        catch (const SireError::exception &e)
-                        {
-                            moltype.addWarning(QObject::tr("Unable to extract the correct "
-                                                           "information to form a bond from line '%1'. Error is '%2'")
-                                                   .arg(line)
-                                                   .arg(e.error()));
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        bond = GromacsBond(func_type);
-                    }
-                }
-
-                bonds.insert(BondID(AtomNum(atm0), AtomNum(atm1)), bond);
-            }
-
-            // save the bonds in the molecule
-            moltype.addBonds(bonds);
-        };
-
-        // function that extracts all of the information from the 'angles' lines
-        auto addAnglesTo = [&](GroMolType &moltype, int linenum)
-        {
-            QStringList lines = getDirectiveLines(linenum);
-
-            QMultiHash<AngleID, GromacsAngle> angs;
-            angs.reserve(lines.count());
-
-            for (const auto &line : lines)
-            {
-                const auto words = line.split(" ");
-
-                if (words.count() < 3)
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract angle information "
-                                                   "from the line '%1' as it should contain at least three words "
-                                                   "(pieces of information)")
-                                           .arg(line));
-                    continue;
-                }
-
-                bool ok0, ok1, ok2;
-
-                int atm0 = words[0].toInt(&ok0);
-                int atm1 = words[1].toInt(&ok1);
-                int atm2 = words[2].toInt(&ok2);
-
-                if (not(ok0 and ok1 and ok2))
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract angle information "
-                                                   "from the line '%1' as the first three words need to be integers. ")
-                                           .arg(line));
-                    continue;
-                }
-
-                // now see if any information about the angle is provided...
-                GromacsAngle angle;
-
-                if (words.count() > 3)
-                {
-                    bool ok;
-                    int func_type = words[3].toInt(&ok);
-
-                    if (not ok)
-                    {
-                        moltype.addWarning(QObject::tr("Unable to extract the correct "
-                                                       "information to form an angle from line '%1' as the fourth word "
-                                                       "is not an integer.")
-                                               .arg(line));
-                        continue;
-                    }
-
-                    if (words.count() > 4)
-                    {
-                        // now read in all of the remaining values as numbers...
-                        QList<double> params;
-
-                        for (int i = 4; i < words.count(); ++i)
-                        {
-                            double param = words[i].toDouble(&ok);
-
-                            if (ok)
-                                params.append(param);
-                        }
-
-                        try
-                        {
-                            angle = GromacsAngle(func_type, params);
-                        }
-                        catch (const SireError::exception &e)
-                        {
-                            moltype.addWarning(QObject::tr("Unable to extract the correct "
-                                                           "information to form an angle from line '%1'. Error is '%2'")
-                                                   .arg(line)
-                                                   .arg(e.error()));
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        angle = GromacsAngle(func_type);
-                    }
-                }
-
-                angs.insert(AngleID(AtomNum(atm0), AtomNum(atm1), AtomNum(atm2)), angle);
-            }
-
-            // save the angles in the molecule
-            moltype.addAngles(angs);
-        };
-
-        // function that extracts all of the information from the 'dihedrals' lines
-        auto addDihedralsTo = [&](GroMolType &moltype, int linenum)
-        {
-            QStringList lines = getDirectiveLines(linenum);
-
-            QMultiHash<DihedralID, GromacsDihedral> dihs;
-            dihs.reserve(lines.count());
-
-            for (const auto &line : lines)
-            {
-                const auto words = line.split(" ");
-
-                if (words.count() < 4)
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract dihedral information "
-                                                   "from the line '%1' as it should contain at least four words "
-                                                   "(pieces of information)")
-                                           .arg(line));
-                    continue;
-                }
-
-                bool ok0, ok1, ok2, ok3;
-
-                int atm0 = words[0].toInt(&ok0);
-                int atm1 = words[1].toInt(&ok1);
-                int atm2 = words[2].toInt(&ok2);
-                int atm3 = words[3].toInt(&ok3);
-
-                if (not(ok0 and ok1 and ok2 and ok3))
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract dihedral information "
-                                                   "from the line '%1' as the first four words need to be integers. ")
-                                           .arg(line));
-                    continue;
-                }
-
-                // now see if any information about the dihedral is provided...
-                GromacsDihedral dihedral;
-
-                if (words.count() > 4)
-                {
-                    bool ok;
-                    int func_type = words[4].toInt(&ok);
-
-                    if (not ok)
-                    {
-                        moltype.addWarning(
-                            QObject::tr("Unable to extract the correct "
-                                        "information to form a dihedral from line '%1' as the fifth word "
-                                        "is not an integer.")
-                                .arg(line));
-                        continue;
-                    }
-
-                    if (words.count() > 5)
-                    {
-                        // now read in all of the remaining values as numbers...
-                        QList<double> params;
-
-                        for (int i = 5; i < words.count(); ++i)
-                        {
-                            double param = words[i].toDouble(&ok);
-
-                            if (ok)
-                                params.append(param);
-                        }
-
-                        try
-                        {
-                            dihedral = GromacsDihedral(func_type, params);
-                        }
-                        catch (const SireError::exception &e)
-                        {
-                            moltype.addWarning(
-                                QObject::tr("Unable to extract the correct "
-                                            "information to form a dihedral from line '%1'. Error is '%2'")
-                                    .arg(line)
-                                    .arg(e.error()));
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        dihedral = GromacsDihedral(func_type);
-                    }
-                }
-
-                dihs.insert(DihedralID(AtomNum(atm0), AtomNum(atm1), AtomNum(atm2), AtomNum(atm3)), dihedral);
-            }
-
-            // save the dihedrals in the molecule
-            moltype.addDihedrals(dihs);
-        };
-
-        // function that extracts all of the information from the 'cmap' lines
-        // function that extracts explicit 1-4 pair scale factors from the 'pairs' lines.
-        // funct=1 pairs are standard (use global fudge_qq/fudge_lj) and are handled
-        // automatically by gen-pairs, so we only need to store funct=2 explicit pairs.
-        // funct=2 format: ai aj 2 fudgeQQ qi qj sigma epsilon
-        // The LJ scale is 1.0 for funct=2 because sigma/epsilon are the full combined values.
-        auto addPairsTo = [&](GroMolType &moltype, int linenum)
-        {
-            QStringList lines = getDirectiveLines(linenum);
-
-            for (const auto &line : lines)
-            {
-                const auto words = line.split(" ");
-
-                if (words.count() < 3)
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract pair information "
-                                                   "from the line '%1' as it should contain at least three words.")
-                                           .arg(line));
-                    continue;
-                }
-
-                bool ok0, ok1, ok2;
-
-                int atm0 = words[0].toInt(&ok0);
-                int atm1 = words[1].toInt(&ok1);
-                int funct = words[2].toInt(&ok2);
-
-                if (not(ok0 and ok1 and ok2))
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract pair information "
-                                                   "from the line '%1' as the first three words need to be integers.")
-                                           .arg(line));
-                    continue;
-                }
-
-                if (funct == 1)
-                {
-                    // Standard pair: uses global fudge_qq/fudge_lj.
-                    // The gen-pairs mechanism already handles these, so no explicit storage needed.
-                    continue;
-                }
-                else if (funct == 2)
-                {
-                    // Explicit pair: ai aj 2 fudgeQQ qi qj sigma epsilon
-                    // The fudgeQQ is the coulomb scale factor; LJ params are used directly (lj_scl = 1.0).
-                    double cscl = fudge_qq; // default to global fudge_qq if not specified
-                    if (words.count() > 3)
-                    {
-                        bool ok;
-                        double val = words[3].toDouble(&ok);
-                        if (ok)
-                            cscl = val;
-                    }
-
-                    moltype.addExplicitPair(BondID(AtomNum(atm0), AtomNum(atm1)), cscl, 1.0);
-                }
-                else
-                {
-                    moltype.addWarning(QObject::tr("Unsupported pair function type %1 in line '%2'. "
-                                                   "Only funct=1 and funct=2 are supported.")
-                                           .arg(funct)
-                                           .arg(line));
-                }
-            }
-        };
-
-        auto addCMAPsTo = [&](GroMolType &moltype, int linenum)
-        {
-            QStringList lines = getDirectiveLines(linenum);
-
-            QHash<CMAPID, QString> cmaps;
-            cmaps.reserve(lines.count());
-
-            for (const auto &line : lines)
-            {
-                const auto words = line.split(" ");
-
-                if (words.count() < 6)
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract CMAP information "
-                                                   "from the line '%1' as it should contain at least six words "
-                                                   "(pieces of information)")
-                                           .arg(line));
-                    continue;
-                }
-
-                bool ok0, ok1, ok2, ok3, ok4, ok5;
-
-                int atm0 = words[0].toInt(&ok0);
-                int atm1 = words[1].toInt(&ok1);
-                int atm2 = words[2].toInt(&ok2);
-                int atm3 = words[3].toInt(&ok3);
-                int atm4 = words[4].toInt(&ok4);
-                int func = words[5].toInt(&ok5);
-
-                if (not(ok0 and ok1 and ok2 and ok3 and ok4 and ok5))
-                {
-                    moltype.addWarning(QObject::tr("Cannot extract CMAP information "
-                                                   "from the line '%1' as the first six words need to be integers. ")
-                                           .arg(line));
-                    continue;
-                }
-
-                cmaps.insert(CMAPID(AtomNum(atm0), AtomNum(atm1), AtomNum(atm2), AtomNum(atm3), AtomNum(atm4)),
-                             QString::number(func));
-            }
-
-            // save the CMAPs in the molecule
-            moltype.addCMAPs(cmaps);
-        };
-
-        // interpret the defaults so that the forcefield for each moltype can
-        // be determined
-        const QString elecstyle = "coulomb";
-        const QString vdwstyle = _getVDWStyle(nb_func_type);
-        const QString combrules = _getCombiningRules(combining_rule);
-
-        // ok, now we know the location of all child tags of each moleculetype
-        auto processMolType = [&](const QMultiHash<QString, int> &moltag)
-        {
-            auto moltype = getMolType(moltag.value("moleculetype", -1));
-
-            for (auto linenum : moltag.values("atoms"))
-            {
-                addAtomsTo(moltype, linenum);
-            }
-
-            for (auto linenum : moltag.values("bonds"))
-            {
-                addBondsTo(moltype, linenum);
-            }
-
-            for (auto linenum : moltag.values("angles"))
-            {
-                addAnglesTo(moltype, linenum);
-            }
-
-            for (auto linenum : moltag.values("dihedrals"))
-            {
-                addDihedralsTo(moltype, linenum);
-            }
-
-            for (auto linenum : moltag.values("cmap"))
-            {
-                addCMAPsTo(moltype, linenum);
-            }
-
-            for (auto linenum : moltag.values("pairs"))
-            {
-                addPairsTo(moltype, linenum);
-            }
-
-            // now print out warnings for any lines that are missed...
-            const QStringList missed_tags = {"pairs_nb",
-                                             "exclusions",
-                                             "contraints",
-                                             "settles",
-                                             "virtual_sites2",
-                                             "virtual_sitesn",
-                                             "position_restraints",
-                                             "distance_restraints",
-                                             "orientation_restraints",
-                                             "angle_restraints",
-                                             "angle_restraints_z"};
-
-            for (const auto &tag : missed_tags)
-            {
-                // not parsed this tag type
-                for (auto linenum : moltag.values(tag))
-                {
-                    const auto missed_lines = getDirectiveLines(linenum);
-
-                    if (not missed_lines.isEmpty())
-                    {
-                        moltype.addWarning(QObject::tr("Ignoring %1 '%2' lines").arg(missed_lines.count()).arg(tag));
-                        moltype.addWarning(QString("e.g. the first ignored %1 line is").arg(tag));
-                        moltype.addWarning(missed_lines[0]);
-                    }
-                }
-            }
-
-            // should be finished, run some checks that this looks sane
-            moltype.sanitise(elecstyle, vdwstyle, combrules, fudge_qq, fudge_lj);
-
-            return moltype;
-        };
-
-        // set the size of the array of moltypes
-        moltypes = QVector<GroMolType>(moltags.count());
-        auto moltypes_array = moltypes.data();
-
-        // load all of the molecule types (in parallel if possible)
-        if (usesParallel())
-        {
-            tbb::parallel_for(tbb::blocked_range<int>(0, moltags.count()), [&](const tbb::blocked_range<int> &r)
-                              {
-                for (int i = r.begin(); i < r.end(); ++i)
-                {
-                    auto moltype = processMolType(moltags.at(i));
-                    moltypes_array[i] = moltype;
-                } });
-        }
-        else
-        {
-            for (int i = 0; i < moltags.count(); ++i)
-            {
-                auto moltype = processMolType(moltags.at(i));
-                moltypes_array[i] = moltype;
-            }
-        }
-
-        return warnings;
-    };
-
-    // function used to parse the [system] part of the file
-    auto processSystem = [&]
-    {
-        QStringList warnings;
-
-        // look for the locations of the child tags of [system]
-        QList<QMultiHash<QString, int>> systags;
-        {
-            // list of tags that are valid within a [system]
-            const QStringList valid_tags = {"molecules"};
-
-            auto it = taglocs.constBegin();
-
-            while (it != taglocs.constEnd())
-            {
-                if (it.value() == "system")
-                {
-                    // we have found another 'system' - save the location
-                    // of all of its child tags
-                    QMultiHash<QString, int> tags;
-                    tags.insert(it.value(), it.key());
-                    ++it;
-
-                    while (it != taglocs.constEnd())
-                    {
-                        // save all child tags until we reach the end
-                        // of definition of this system
-                        if (valid_tags.contains(it.value()))
-                        {
-                            // this is a valid child tag - save its location
-                            //(note that a tag can exist multiple times!)
-                            tags.insert(it.value(), it.key());
-                            ++it;
-                        }
-                        else
-                        {
-                            // this is the end of the 'system'
-                            ++it;
-                            break;
-                        }
-                    }
-
-                    systags.append(tags);
-                }
-                else
-                {
-                    ++it;
-                }
-            }
-        }
-
-        // in theory, there should be one, and only one [system]
-        if (systags.count() != 1)
-        {
-            warnings.append(QObject::tr("There should be one, and only one "
-                                        "[system] section in a Gromacs topology file. The number of "
-                                        "[system] sections equals %1.")
-                                .arg(systags.count()));
-            return warnings;
-        }
-
-        // now parse the two parts of [system]
-        const auto tags = systags.at(0);
-
-        if (not(tags.contains("system") and tags.contains("molecules")))
-        {
-            warnings.append(QObject::tr("The [system] section should contain "
-                                        "both [system] and [molecules]. It contains '%1'")
-                                .arg(Sire::toString(tags)));
-            return warnings;
-        }
-
-        // process [system] first..
-        // each of these lines is part of the title of the system
-        GroSystem mysys(getDirectiveLines(tags.value("system")).join(" "));
-
-        // now process the [molecules]
-        for (auto linenum : tags.values("molecules"))
-        {
-            const auto lines = getDirectiveLines(linenum);
-
-            for (const auto &line : lines)
-            {
-                // each line should be the molecule type name, followed by the number
-                const auto words = line.split(" ");
-
-                if (words.count() < 2)
-                {
-                    warnings.append(QObject::tr("Cannot understand the [molecules] line "
-                                                "'%1' as it should have two words!")
-                                        .arg(line));
-                    continue;
-                }
-
-                if (words.count() > 2)
-                {
-                    warnings.append(QObject::tr("Ignoring the extraneous information at "
-                                                "the end of the [molecules] line '%1'")
-                                        .arg(line));
-                }
-
-                bool ok;
-                int nmols = words[1].toInt(&ok);
-
-                if (not ok)
-                {
-                    warnings.append(QObject::tr("Cannot interpret the number of molecules "
-                                                "from the [molecules] line '%1'. The second word should be an integer "
-                                                "that gives the number of molecules...")
-                                        .arg(line));
-                    continue;
-                }
-
-                mysys.add(words[0], nmols);
-            }
-        }
-
-        // save the system object to this GroTop
-        grosys = mysys;
-
-        return warnings;
-    };
-
-    // process the defaults data first, as this affects the rest of the parsing
-    auto warnings = processDefaults();
-
-    // next, read in the atom types as these have to be present before
-    // reading anything else...
-    warnings += processAtomTypes();
-
-    // now we can process the other tags
-    const QVector<std::function<QStringList()>> funcs = {
-        processBondTypes, processPairTypes, processAngleTypes, processDihedralTypes,
-        processConstraintTypes, processNonBondParams, processCMAPTypes,
-        processMoleculeTypes, processSystem};
-
-    if (usesParallel())
-    {
-        QMutex mutex;
-
-        tbb::parallel_for(tbb::blocked_range<int>(0, funcs.count()), [&](const tbb::blocked_range<int> &r)
-                          {
-            QStringList local_warnings;
-
-            for (int i = r.begin(); i < r.end(); ++i)
-            {
-                local_warnings += funcs[i]();
-            }
-
-            if (not local_warnings.isEmpty())
-            {
-                QMutexLocker lkr(&mutex);
-                warnings += local_warnings;
-            } });
+          params.append(param);
+      }
+
+      GromacsBond bond;
+
+      try {
+        bond = GromacsBond(func_type, params);
+      } catch (const SireError::exception &e) {
+        warnings.append(
+            QObject::tr("Unable to extract the correct information "
+                        "to form a bond from line '%1'. Error is '%2'")
+                .arg(line)
+                .arg(e.error()));
+        continue;
+      }
+
+      QString key = get_bond_id(atm0, atm1, bond.functionType());
+      bnds.insert(key, bond);
     }
-    else
-    {
-        for (int i = 0; i < funcs.count(); ++i)
-        {
-            warnings += funcs[i]();
-        }
+
+    bond_potentials = bnds;
+
+    return warnings;
+  };
+
+  // internal function to process the pairtypes lines
+  auto processPairTypes = [&]() {
+    QStringList warnings;
+
+    // get all 'bondtypes' lines
+    const auto lines = getAllLines("pairtypes");
+
+    if (not lines.isEmpty()) {
+      warnings.append(
+          QString("Ignoring %1 pairtypes lines.").arg(lines.count()));
+      warnings.append(QString("e.g. the first ignored pairtypes line is"));
+      warnings.append(lines[0]);
     }
 
     return warnings;
+  };
+
+  // internal function to process the angletypes lines
+  auto processAngleTypes = [&]() {
+    QStringList warnings;
+
+    // get all 'bondtypes' lines
+    const auto lines = getAllLines("angletypes");
+
+    // save into a database of angles
+    QMultiHash<QString, GromacsAngle> angs;
+
+    for (const auto &line : lines) {
+      // each line should contain the atom types of the three atoms, then
+      // the function type, then the parameters for the function
+      const auto words = line.split(" ", Qt::SkipEmptyParts);
+
+      if (words.count() < 4) {
+        warnings.append(QObject::tr("There is not enough data on the "
+                                    "line '%1' to extract a Gromacs angle "
+                                    "parameter. Skipping line.")
+                            .arg(line));
+        continue;
+      }
+
+      const auto atm0 = words[0];
+      const auto atm1 = words[1];
+      const auto atm2 = words[2];
+
+      bool ok;
+      int func_type = words[3].toInt(&ok);
+
+      if (not ok) {
+        warnings.append(
+            QObject::tr("Unable to determine the function type "
+                        "for the angle on line '%1'. Skipping line.")
+                .arg(line));
+        continue;
+      }
+
+      // now read in all of the remaining values as numbers...
+      QList<double> params;
+
+      for (int i = 4; i < words.count(); ++i) {
+        double param = words[i].toDouble(&ok);
+
+        if (ok)
+          params.append(param);
+      }
+
+      GromacsAngle angle;
+
+      try {
+        angle = GromacsAngle(func_type, params);
+      } catch (const SireError::exception &e) {
+        warnings.append(
+            QObject::tr("Unable to extract the correct information "
+                        "to form an angle from line '%1'. Error is '%2'")
+                .arg(line)
+                .arg(e.error()));
+        continue;
+      }
+
+      QString key = get_angle_id(atm0, atm1, atm2, angle.functionType());
+      angs.insert(key, angle);
+    }
+
+    ang_potentials = angs;
+
+    return warnings;
+  };
+
+  // internal function to process the dihedraltypes lines
+  auto processDihedralTypes = [&]() {
+    QStringList warnings;
+
+    // get all 'bondtypes' lines
+    const auto lines = getAllLines("dihedraltypes");
+
+    // save into a database of dihedrals
+    QMultiHash<QString, GromacsDihedral> dihs;
+
+    for (const auto &line : lines) {
+      // each line should contain the atom types of the four atoms, then
+      // the function type, then the parameters for the function.
+      //(however, some files have the atom types of just two atoms, which
+      //  I assume are the two middle atoms of the dihedral...)
+      const auto words = line.split(" ", Qt::SkipEmptyParts);
+
+      if (words.count() < 3) {
+        warnings.append(QObject::tr("There is not enough data on the "
+                                    "line '%1' to extract a Gromacs dihedral "
+                                    "parameter. Skipping line.")
+                            .arg(line));
+        continue;
+      }
+
+      // first, let's try to parse this assuming that it is a 2-atom dihedral
+      // line...
+      //(most cases this should fail)
+      auto atm0 = wildcard_atomtype;
+      auto atm1 = words[0];
+      auto atm2 = words[1];
+      auto atm3 = wildcard_atomtype;
+
+      GromacsDihedral dihedral;
+
+      bool ok;
+      int func_type = words[2].toInt(&ok);
+
+      if (ok) {
+        // this may be a two-atom dihedral - read in the rest of the parameters
+        QList<double> params;
+
+        for (int i = 3; i < words.count(); ++i) {
+          double param = words[i].toDouble(&ok);
+          if (ok)
+            params.append(param);
+        }
+
+        try {
+          dihedral = GromacsDihedral(func_type, params);
+          ok = true;
+        } catch (...) {
+          ok = false;
+        }
+      }
+
+      if (not ok) {
+        // we couldn't parse as a two-atom dihedral, so parse as a four-atom
+        // dihedral
+
+        if (words.count() < 5) {
+          warnings.append(QObject::tr("There is not enough data on the "
+                                      "line '%1' to extract a Gromacs dihedral "
+                                      "parameter. Skipping line.")
+                              .arg(line));
+          continue;
+        }
+
+        atm0 = words[0];
+        atm1 = words[1];
+        atm2 = words[2];
+        atm3 = words[3];
+
+        bool ok;
+        int func_type = words[4].toInt(&ok);
+
+        if (not ok) {
+          warnings.append(
+              QObject::tr("Unable to determine the function type "
+                          "for the dihedral on line '%1'. Skipping line.")
+                  .arg(line));
+          continue;
+        }
+
+        // now read in all of the remaining values as numbers...
+        QList<double> params;
+
+        for (int i = 5; i < words.count(); ++i) {
+          double param = words[i].toDouble(&ok);
+
+          if (ok)
+            params.append(param);
+        }
+
+        try {
+          dihedral = GromacsDihedral(func_type, params);
+        } catch (const SireError::exception &e) {
+          warnings.append(
+              QObject::tr("Unable to extract the correct information "
+                          "to form a dihedral from line '%1'. Error is '%2'")
+                  .arg(line)
+                  .arg(e.error()));
+          continue;
+        }
+      }
+
+      QString key =
+          get_dihedral_id(atm0, atm1, atm2, atm3, dihedral.functionType());
+      dihs.insert(key, dihedral);
+    }
+
+    dih_potentials = dihs;
+
+    return warnings;
+  };
+
+  // internal function to process the constrainttypes lines
+  auto processConstraintTypes = [&]() {
+    QStringList warnings;
+
+    // get all 'bondtypes' lines
+    const auto lines = getAllLines("constrainttypes");
+
+    if (not lines.isEmpty()) {
+      warnings.append(
+          QString("Ignoring %1 'constrainttypes' lines").arg(lines.count()));
+      warnings.append(
+          QString("e.g. the first ignored constrainttypes line is"));
+      warnings.append(lines[0]);
+    }
+
+    return warnings;
+  };
+
+  // internal function to process the nonbond_params lines
+  auto processNonBondParams = [&]() {
+    QStringList warnings;
+
+    // get all 'bondtypes' lines
+    const auto lines = getAllLines("nonbond_params");
+
+    if (not lines.isEmpty()) {
+      warnings.append(
+          QString("Ignoring %1 'nonbond_params' lines").arg(lines.count()));
+      warnings.append(QString("e.g. the first ignored nonbond_params line is"));
+      warnings.append(lines[0]);
+    }
+
+    return warnings;
+  };
+
+  // internal function to process the cmaptypes lines
+  auto processCMAPTypes = [&]() {
+    QStringList warnings;
+
+    // get all 'cmaptypes' lines
+    const auto lines = getAllLines("cmaptypes");
+
+    // save into a database of cmap parameters - the index is the
+    // combination of the five atom types for the matching atoms
+    QHash<QString, CMAPParameter> cmaps;
+
+    for (const auto &line : lines) {
+      // each line should contain the atom types of the five atoms,
+      // followed by the function type number (1), followed by the
+      // number of rows and columns, followed by num_rows*num_cols
+      // values for the cmap function
+      const auto words = line.split(" ", Qt::SkipEmptyParts);
+
+      if (words.count() < 8) {
+        warnings.append(
+            QObject::tr(
+                "There is not enough data on the "
+                "line '%1' to extract a Gromacs CMAP parameter. Skipping line.")
+                .arg(line));
+        continue;
+      }
+
+      // first, get the five atom types
+      const auto &atm0 = words[0];
+      const auto &atm1 = words[1];
+      const auto &atm2 = words[2];
+      const auto &atm3 = words[3];
+      const auto &atm4 = words[4];
+
+      // now, get the function type
+      bool ok;
+
+      int func_type = words[5].toInt(&ok);
+
+      if (not ok) {
+        warnings.append(QObject::tr("Unable to determine the function type "
+                                    "for the cmap on line '%1'. Skipping line.")
+                            .arg(line));
+        continue;
+      }
+
+      // gromacs currently only supports function type 1 - so do we!
+      if (func_type != 1) {
+        warnings.append(
+            QObject::tr(
+                "The function type for the cmap on line '%1' is not supported. "
+                "Only function type 1 is supported. Skipping line.")
+                .arg(line));
+        continue;
+      }
+
+      // now get the number of rows and columns
+      int nrows = words[6].toInt(&ok);
+
+      if (not ok) {
+        warnings.append(QObject::tr("Unable to determine the number of rows "
+                                    "for the cmap on line '%1'. Skipping line.")
+                            .arg(line));
+        continue;
+      }
+
+      int ncols = words[7].toInt(&ok);
+
+      if (not ok) {
+        warnings.append(QObject::tr("Unable to determine the number of columns "
+                                    "for the cmap on line '%1'. Skipping line.")
+                            .arg(line));
+        continue;
+      }
+
+      // there should be nrows*ncols values after this
+      if (words.count() != 8 + nrows * ncols) {
+        warnings.append(
+            QObject::tr(
+                "The number of values for the cmap on line '%1' is not "
+                "correct. "
+                "There should be %2 values, but there are %3. Skipping line.")
+                .arg(line)
+                .arg(nrows * ncols)
+                .arg(words.count() - 8));
+        continue;
+      }
+
+      // just do some DOS protection, should now have more than 512 rows or
+      // columns
+      if (nrows > 512 or ncols > 512) {
+        warnings.append(QObject::tr("The number of rows (%1) or columns (%2) "
+                                    "for the cmap on line '%3' is too large. "
+                                    "Skipping line.")
+                            .arg(nrows)
+                            .arg(ncols)
+                            .arg(line));
+        continue;
+      }
+
+      // check that the number of rows and columns is not negative or zero
+      if (nrows <= 0 or ncols <= 0) {
+        warnings.append(
+            QObject::tr("The number of rows (%1) or columns (%2) for the cmap "
+                        "on line '%3' is not positive. "
+                        "Skipping line.")
+                .arg(nrows)
+                .arg(ncols)
+                .arg(line));
+        continue;
+      }
+
+      // we can now read in the cmap values
+      QVector<double> cmap_values(nrows * ncols);
+      auto *cmap_values_data = cmap_values.data();
+
+      ok = true;
+
+      for (int i = 0; i < nrows * ncols; ++i) {
+        bool val_ok = true;
+        double value = words[8 + i].toDouble(&val_ok);
+
+        if (not val_ok) {
+          warnings.append(QObject::tr("Unable to read the value %1 for the "
+                                      "cmap on line '%2'. Skipping line.")
+                              .arg(i)
+                              .arg(line));
+          ok = false;
+          break;
+        }
+
+        cmap_values_data[i] = value;
+      }
+
+      if (not ok) {
+        continue;
+      }
+
+      CMAPParameter cmap(
+          Array2D<double>::fromColumnMajorVector(cmap_values, nrows, ncols));
+
+      QString key = get_cmap_id(atm0, atm1, atm2, atm3, atm4, func_type);
+
+      cmaps.insert(key, cmap);
+    }
+
+    cmap_potentials = cmaps;
+
+    return warnings;
+  };
+
+  // internal function to process moleculetype lines
+  auto processMoleculeTypes = [&]() {
+    QStringList warnings;
+
+    // how many moleculetypes are there? Divide them up and get
+    // the child tags for each moleculetype
+    QList<QMultiHash<QString, int>> moltags;
+    {
+      // list of tags that are valid within a moleculetype -
+      // it is REALLY IMPORTANT that this list is kept up to date,
+      // as otherwise a new tag will cause the parser to move on to
+      // parsing a new moleculetype!
+      const QStringList valid_tags = {"atoms",
+                                      "bonds",
+                                      "pairs",
+                                      "pairs_nb",
+                                      "angles",
+                                      "dihedrals",
+                                      "cmap",
+                                      "exclusions",
+                                      "contraints",
+                                      "settles",
+                                      "virtual_sites2",
+                                      "virtual_sitesn",
+                                      "position_restraints",
+                                      "distance_restraints",
+                                      "orientation_restraints",
+                                      "angle_restraints",
+                                      "angle_restraints_z"};
+
+      auto it = taglocs.constBegin();
+
+      while (it != taglocs.constEnd()) {
+        if (it.value() == "moleculetype") {
+          // we have found another molecule - save the location
+          // of all of its child tags
+          QMultiHash<QString, int> tags;
+          tags.insert(it.value(), it.key());
+          ++it;
+
+          while (it != taglocs.constEnd()) {
+            // save all child tags until we reach the end
+            // of definition of this moleculetype
+            if (valid_tags.contains(it.value())) {
+              // this is a valid child tag - save its location
+              //(note that a tag can exist multiple times!)
+              tags.insert(it.value(), it.key());
+              ++it;
+            } else if (it.value() == "moleculetype") {
+              // this is the next molecule
+              break;
+            } else {
+              // this is the end of the 'moleculetype'
+              ++it;
+              break;
+            }
+          }
+
+          moltags.append(tags);
+        } else {
+          ++it;
+        }
+      }
+    }
+
+    // now we define a set of functions that are needed to parse the
+    // various child tags
+
+    // function that extract the metadata about the moleculetype
+    // and returns it as a 'GroMolType' object
+    auto getMolType = [&](int linenum) {
+      GroMolType moltype;
+
+      // get the directives for this molecule - there should be
+      // one line that contains the name and number of excluded atoms
+      const auto lines = getDirectiveLines(linenum);
+
+      if (lines.count() != 1) {
+        moltype.addWarning(
+            QObject::tr("Expecting only one line that "
+                        "provides the name and number of excluded atoms for "
+                        "this moleculetype. "
+                        "Instead, the number of lines is %1 : [\n%2\n]")
+                .arg(lines.count())
+                .arg(lines.join("\n")));
+      }
+
+      if (lines.count() > 0) {
+        // try to read the infromation from the first line only
+        const auto words = lines[0].split(" ");
+
+        if (words.count() != 2) {
+          moltype.addWarning(QObject::tr("Expecting two words for the "
+                                         "moleculetype line, containing the "
+                                         "name and number of excluded "
+                                         "atoms. Instead we get '%1'")
+                                 .arg(lines[0]));
+        }
+
+        if (words.count() > 0) {
+          moltype.setName(words[0]);
+        }
+
+        if (words.count() > 1) {
+          bool ok;
+          qint64 nexcl = words[1].toInt(&ok);
+
+          if (not ok) {
+            moltype.addWarning(
+                QObject::tr(
+                    "Expecting the second word in "
+                    "the moleculetype line '%1' to be the number of excluded "
+                    "atoms. It isn't!")
+                    .arg(lines[0]));
+          } else {
+            moltype.setNExcludedAtoms(nexcl);
+          }
+        }
+      }
+
+      return moltype;
+    };
+
+    // function that extracts all of the information from the 'atoms' lines
+    // and adds it to the passed GroMolType
+    auto addAtomsTo = [&](GroMolType &moltype, int linenum) {
+      QStringList lines = getDirectiveLines(linenum);
+
+      for (const auto &line : lines) {
+        // each line should contain index number, atom type,
+        // residue number, residue name, atom name, charge group number,
+        // charge (mod_electron) and mass (atomic mass)
+        const auto words = line.split(" ");
+
+        if (words.count() < 6) {
+          moltype.addWarning(
+              QObject::tr(
+                  "Cannot extract atom information "
+                  "from the line '%1' as it should contain at least six words "
+                  "(pieces of information)")
+                  .arg(line));
+
+          continue;
+        } else if (words.count() > 8) {
+          moltype.addWarning(
+              QObject::tr("The line containing atom information "
+                          "'%1' contains more information than can be parsed. "
+                          "It should only "
+                          "contain six-eight words (pieces of information)")
+                  .arg(line));
+        }
+
+        bool ok_idx, ok_resnum, ok_chggrp, ok_chg, ok_mass;
+
+        const qint64 atomnum = words[0].toInt(&ok_idx);
+        const auto atomtyp = words[1];
+        auto resnum = words[2].toInt(&ok_resnum);
+        QString chainname;
+
+        if (not ok_resnum) {
+
+          // could be residue_numberChain_name
+          const QRegularExpression re("(\\-?\\d+)([\\w\\d]*)");
+
+          auto m = re.match(words[2]);
+
+          if (m.hasMatch()) {
+            resnum = m.captured(1).toInt(&ok_resnum);
+            chainname = m.captured(2);
+          }
+        }
+
+        const auto resnam = words[3];
+        const auto atmnam = words[4];
+        const qint64 chggrp = words[5].toInt(&ok_chggrp);
+
+        double chg = 0;
+        ok_chg = true;
+        if (words.count() > 6)
+          chg = words[6].toDouble(&ok_chg);
+
+        double mass = 0;
+        ok_mass = true;
+        bool found_mass = false;
+        if (words.count() > 7) {
+          mass = words[7].toDouble(&ok_mass);
+          found_mass = true;
+        }
+
+        if (not(ok_idx and ok_resnum and ok_chggrp and ok_chg and ok_mass)) {
+          moltype.addWarning(
+              QObject::tr(
+                  "Could not interpret the necessary "
+                  "atom information from the line '%1' | %2 %3 %4 %5 %6")
+                  .arg(line)
+                  .arg(ok_idx)
+                  .arg(ok_resnum)
+                  .arg(ok_chggrp)
+                  .arg(ok_chg)
+                  .arg(ok_mass));
+          continue;
+        }
+
+        GroAtom atom;
+        atom.setNumber(atomnum);
+        atom.setAtomType(atomtyp);
+        atom.setResidueNumber(resnum);
+        atom.setResidueName(resnam);
+        atom.setChainName(chainname);
+        atom.setName(atmnam);
+        atom.setChargeGroup(chggrp);
+        atom.setCharge(chg * mod_electron);
+        atom.setMass(mass * g_per_mol);
+
+        // we now need to look up the atom type of this atom to see if there
+        // is a separate bond_type
+        auto atom_type = atom_types.value(atomtyp);
+
+        if ((not atom_type.isNull()) and atom_type.bondType() != atomtyp) {
+          atom.setBondType(atom_type.bondType());
+        }
+
+        // now do the same to assign the mass if it has not been given
+        // explicitly
+        if ((not found_mass) and (not atom_type.isNull())) {
+          atom.setMass(atom_type.mass());
+        }
+
+        if (found_mass and is_bond_type) {
+          if (mass > 0 and atom_type.element() == Element("Xx")) {
+            // Set the element of the atom type using the mass and
+            // update the record in the dictionary.
+            atom_type.setElement(Element::elementWithMass(mass * g_per_mol));
+            this->atom_types[atomtyp] = atom_type;
+          }
+        }
+
+        moltype.addAtom(atom);
+      }
+    };
+
+    // function that extracts all of the information from the 'bonds' lines
+    auto addBondsTo = [&](GroMolType &moltype, int linenum) {
+      QStringList lines = getDirectiveLines(linenum);
+
+      QMultiHash<BondID, GromacsBond> bonds;
+      bonds.reserve(lines.count());
+
+      for (const auto &line : lines) {
+        const auto words = line.split(" ");
+
+        if (words.count() < 2) {
+          moltype.addWarning(
+              QObject::tr(
+                  "Cannot extract bond information "
+                  "from the line '%1' as it should contain at least two words "
+                  "(pieces of information)")
+                  .arg(line));
+          continue;
+        }
+
+        bool ok0, ok1;
+
+        int atm0 = words[0].toInt(&ok0);
+        int atm1 = words[1].toInt(&ok1);
+
+        if (not(ok0 and ok1)) {
+          moltype.addWarning(QObject::tr("Cannot extract bond information "
+                                         "from the line '%1' as the first two "
+                                         "words need to be integers. ")
+                                 .arg(line));
+          continue;
+        }
+
+        // now see if any information about the bond is provided...
+        GromacsBond bond;
+
+        if (words.count() > 2) {
+          bool ok;
+          int func_type = words[2].toInt(&ok);
+
+          if (not ok) {
+            moltype.addWarning(QObject::tr("Unable to extract the correct "
+                                           "information to form a bond from "
+                                           "line '%1' as the third word "
+                                           "is not an integer.")
+                                   .arg(line));
+            continue;
+          }
+
+          if (words.count() > 3) {
+            // now read in all of the remaining values as numbers...
+            QList<double> params;
+
+            for (int i = 3; i < words.count(); ++i) {
+              double param = words[i].toDouble(&ok);
+
+              if (ok)
+                params.append(param);
+            }
+
+            try {
+              bond = GromacsBond(func_type, params);
+            } catch (const SireError::exception &e) {
+              moltype.addWarning(QObject::tr("Unable to extract the correct "
+                                             "information to form a bond from "
+                                             "line '%1'. Error is '%2'")
+                                     .arg(line)
+                                     .arg(e.error()));
+              continue;
+            }
+          } else {
+            bond = GromacsBond(func_type);
+          }
+        }
+
+        bonds.insert(BondID(AtomNum(atm0), AtomNum(atm1)), bond);
+      }
+
+      // save the bonds in the molecule
+      moltype.addBonds(bonds);
+    };
+
+    // function that extracts all of the information from the 'angles' lines
+    auto addAnglesTo = [&](GroMolType &moltype, int linenum) {
+      QStringList lines = getDirectiveLines(linenum);
+
+      QMultiHash<AngleID, GromacsAngle> angs;
+      angs.reserve(lines.count());
+
+      for (const auto &line : lines) {
+        const auto words = line.split(" ");
+
+        if (words.count() < 3) {
+          moltype.addWarning(QObject::tr("Cannot extract angle information "
+                                         "from the line '%1' as it should "
+                                         "contain at least three words "
+                                         "(pieces of information)")
+                                 .arg(line));
+          continue;
+        }
+
+        bool ok0, ok1, ok2;
+
+        int atm0 = words[0].toInt(&ok0);
+        int atm1 = words[1].toInt(&ok1);
+        int atm2 = words[2].toInt(&ok2);
+
+        if (not(ok0 and ok1 and ok2)) {
+          moltype.addWarning(QObject::tr("Cannot extract angle information "
+                                         "from the line '%1' as the first "
+                                         "three words need to be integers. ")
+                                 .arg(line));
+          continue;
+        }
+
+        // now see if any information about the angle is provided...
+        GromacsAngle angle;
+
+        if (words.count() > 3) {
+          bool ok;
+          int func_type = words[3].toInt(&ok);
+
+          if (not ok) {
+            moltype.addWarning(QObject::tr("Unable to extract the correct "
+                                           "information to form an angle from "
+                                           "line '%1' as the fourth word "
+                                           "is not an integer.")
+                                   .arg(line));
+            continue;
+          }
+
+          if (words.count() > 4) {
+            // now read in all of the remaining values as numbers...
+            QList<double> params;
+
+            for (int i = 4; i < words.count(); ++i) {
+              double param = words[i].toDouble(&ok);
+
+              if (ok)
+                params.append(param);
+            }
+
+            try {
+              angle = GromacsAngle(func_type, params);
+            } catch (const SireError::exception &e) {
+              moltype.addWarning(QObject::tr("Unable to extract the correct "
+                                             "information to form an angle "
+                                             "from line '%1'. Error is '%2'")
+                                     .arg(line)
+                                     .arg(e.error()));
+              continue;
+            }
+          } else {
+            angle = GromacsAngle(func_type);
+          }
+        }
+
+        angs.insert(AngleID(AtomNum(atm0), AtomNum(atm1), AtomNum(atm2)),
+                    angle);
+      }
+
+      // save the angles in the molecule
+      moltype.addAngles(angs);
+    };
+
+    // function that extracts all of the information from the 'dihedrals' lines
+    auto addDihedralsTo = [&](GroMolType &moltype, int linenum) {
+      QStringList lines = getDirectiveLines(linenum);
+
+      QMultiHash<DihedralID, GromacsDihedral> dihs;
+      dihs.reserve(lines.count());
+
+      for (const auto &line : lines) {
+        const auto words = line.split(" ");
+
+        if (words.count() < 4) {
+          moltype.addWarning(
+              QObject::tr(
+                  "Cannot extract dihedral information "
+                  "from the line '%1' as it should contain at least four words "
+                  "(pieces of information)")
+                  .arg(line));
+          continue;
+        }
+
+        bool ok0, ok1, ok2, ok3;
+
+        int atm0 = words[0].toInt(&ok0);
+        int atm1 = words[1].toInt(&ok1);
+        int atm2 = words[2].toInt(&ok2);
+        int atm3 = words[3].toInt(&ok3);
+
+        if (not(ok0 and ok1 and ok2 and ok3)) {
+          moltype.addWarning(QObject::tr("Cannot extract dihedral information "
+                                         "from the line '%1' as the first four "
+                                         "words need to be integers. ")
+                                 .arg(line));
+          continue;
+        }
+
+        // now see if any information about the dihedral is provided...
+        GromacsDihedral dihedral;
+
+        if (words.count() > 4) {
+          bool ok;
+          int func_type = words[4].toInt(&ok);
+
+          if (not ok) {
+            moltype.addWarning(QObject::tr("Unable to extract the correct "
+                                           "information to form a dihedral "
+                                           "from line '%1' as the fifth word "
+                                           "is not an integer.")
+                                   .arg(line));
+            continue;
+          }
+
+          if (words.count() > 5) {
+            // now read in all of the remaining values as numbers...
+            QList<double> params;
+
+            for (int i = 5; i < words.count(); ++i) {
+              double param = words[i].toDouble(&ok);
+
+              if (ok)
+                params.append(param);
+            }
+
+            try {
+              dihedral = GromacsDihedral(func_type, params);
+            } catch (const SireError::exception &e) {
+              moltype.addWarning(QObject::tr("Unable to extract the correct "
+                                             "information to form a dihedral "
+                                             "from line '%1'. Error is '%2'")
+                                     .arg(line)
+                                     .arg(e.error()));
+              continue;
+            }
+          } else {
+            dihedral = GromacsDihedral(func_type);
+          }
+        }
+
+        dihs.insert(DihedralID(AtomNum(atm0), AtomNum(atm1), AtomNum(atm2),
+                               AtomNum(atm3)),
+                    dihedral);
+      }
+
+      // save the dihedrals in the molecule
+      moltype.addDihedrals(dihs);
+    };
+
+    // function that extracts all of the information from the 'cmap' lines
+    // function that extracts explicit 1-4 pair scale factors from the 'pairs'
+    // lines. funct=1 pairs are standard (use global fudge_qq/fudge_lj) and are
+    // handled automatically by gen-pairs, so we only need to store funct=2
+    // explicit pairs. funct=2 format: ai aj 2 fudgeQQ qi qj sigma epsilon The
+    // LJ scale is 1.0 for funct=2 because sigma/epsilon are the full combined
+    // values.
+    auto addPairsTo = [&](GroMolType &moltype, int linenum) {
+      QStringList lines = getDirectiveLines(linenum);
+
+      for (const auto &line : lines) {
+        const auto words = line.split(" ");
+
+        if (words.count() < 3) {
+          moltype.addWarning(QObject::tr("Cannot extract pair information "
+                                         "from the line '%1' as it should "
+                                         "contain at least three words.")
+                                 .arg(line));
+          continue;
+        }
+
+        bool ok0, ok1, ok2;
+
+        int atm0 = words[0].toInt(&ok0);
+        int atm1 = words[1].toInt(&ok1);
+        int funct = words[2].toInt(&ok2);
+
+        if (not(ok0 and ok1 and ok2)) {
+          moltype.addWarning(QObject::tr("Cannot extract pair information "
+                                         "from the line '%1' as the first "
+                                         "three words need to be integers.")
+                                 .arg(line));
+          continue;
+        }
+
+        if (funct == 1) {
+          // Standard pair: uses global fudge_qq/fudge_lj.
+          // The gen-pairs mechanism already handles these, so no explicit
+          // storage needed.
+          continue;
+        } else if (funct == 2) {
+          // Explicit pair: ai aj 2 fudgeQQ qi qj sigma epsilon
+          // The fudgeQQ is the coulomb scale factor; LJ params are used
+          // directly (lj_scl = 1.0).
+          double cscl = fudge_qq; // default to global fudge_qq if not specified
+          if (words.count() > 3) {
+            bool ok;
+            double val = words[3].toDouble(&ok);
+            if (ok)
+              cscl = val;
+          }
+
+          moltype.addExplicitPair(BondID(AtomNum(atm0), AtomNum(atm1)), cscl,
+                                  1.0);
+        } else {
+          moltype.addWarning(
+              QObject::tr("Unsupported pair function type %1 in line '%2'. "
+                          "Only funct=1 and funct=2 are supported.")
+                  .arg(funct)
+                  .arg(line));
+        }
+      }
+    };
+
+    auto addCMAPsTo = [&](GroMolType &moltype, int linenum) {
+      QStringList lines = getDirectiveLines(linenum);
+
+      QHash<CMAPID, QString> cmaps;
+      cmaps.reserve(lines.count());
+
+      for (const auto &line : lines) {
+        const auto words = line.split(" ");
+
+        if (words.count() < 6) {
+          moltype.addWarning(
+              QObject::tr(
+                  "Cannot extract CMAP information "
+                  "from the line '%1' as it should contain at least six words "
+                  "(pieces of information)")
+                  .arg(line));
+          continue;
+        }
+
+        bool ok0, ok1, ok2, ok3, ok4, ok5;
+
+        int atm0 = words[0].toInt(&ok0);
+        int atm1 = words[1].toInt(&ok1);
+        int atm2 = words[2].toInt(&ok2);
+        int atm3 = words[3].toInt(&ok3);
+        int atm4 = words[4].toInt(&ok4);
+        int func = words[5].toInt(&ok5);
+
+        if (not(ok0 and ok1 and ok2 and ok3 and ok4 and ok5)) {
+          moltype.addWarning(QObject::tr("Cannot extract CMAP information "
+                                         "from the line '%1' as the first six "
+                                         "words need to be integers. ")
+                                 .arg(line));
+          continue;
+        }
+
+        cmaps.insert(CMAPID(AtomNum(atm0), AtomNum(atm1), AtomNum(atm2),
+                            AtomNum(atm3), AtomNum(atm4)),
+                     QString::number(func));
+      }
+
+      // save the CMAPs in the molecule
+      moltype.addCMAPs(cmaps);
+    };
+
+    // interpret the defaults so that the forcefield for each moltype can
+    // be determined
+    const QString elecstyle = "coulomb";
+    const QString vdwstyle = _getVDWStyle(nb_func_type);
+    const QString combrules = _getCombiningRules(combining_rule);
+
+    // ok, now we know the location of all child tags of each moleculetype
+    auto processMolType = [&](const QMultiHash<QString, int> &moltag) {
+      auto moltype = getMolType(moltag.value("moleculetype", -1));
+
+      for (auto linenum : moltag.values("atoms")) {
+        addAtomsTo(moltype, linenum);
+      }
+
+      for (auto linenum : moltag.values("bonds")) {
+        addBondsTo(moltype, linenum);
+      }
+
+      for (auto linenum : moltag.values("angles")) {
+        addAnglesTo(moltype, linenum);
+      }
+
+      for (auto linenum : moltag.values("dihedrals")) {
+        addDihedralsTo(moltype, linenum);
+      }
+
+      for (auto linenum : moltag.values("cmap")) {
+        addCMAPsTo(moltype, linenum);
+      }
+
+      for (auto linenum : moltag.values("pairs")) {
+        addPairsTo(moltype, linenum);
+      }
+
+      // now print out warnings for any lines that are missed...
+      const QStringList missed_tags = {"pairs_nb",
+                                       "exclusions",
+                                       "contraints",
+                                       "settles",
+                                       "virtual_sites2",
+                                       "virtual_sitesn",
+                                       "position_restraints",
+                                       "distance_restraints",
+                                       "orientation_restraints",
+                                       "angle_restraints",
+                                       "angle_restraints_z"};
+
+      for (const auto &tag : missed_tags) {
+        // not parsed this tag type
+        for (auto linenum : moltag.values(tag)) {
+          const auto missed_lines = getDirectiveLines(linenum);
+
+          if (not missed_lines.isEmpty()) {
+            moltype.addWarning(QObject::tr("Ignoring %1 '%2' lines")
+                                   .arg(missed_lines.count())
+                                   .arg(tag));
+            moltype.addWarning(
+                QString("e.g. the first ignored %1 line is").arg(tag));
+            moltype.addWarning(missed_lines[0]);
+          }
+        }
+      }
+
+      // should be finished, run some checks that this looks sane
+      moltype.sanitise(elecstyle, vdwstyle, combrules, fudge_qq, fudge_lj);
+
+      return moltype;
+    };
+
+    // set the size of the array of moltypes
+    moltypes = QVector<GroMolType>(moltags.count());
+    auto moltypes_array = moltypes.data();
+
+    // load all of the molecule types (in parallel if possible)
+    if (usesParallel()) {
+      tbb::parallel_for(tbb::blocked_range<int>(0, moltags.count()),
+                        [&](const tbb::blocked_range<int> &r) {
+                          for (int i = r.begin(); i < r.end(); ++i) {
+                            auto moltype = processMolType(moltags.at(i));
+                            moltypes_array[i] = moltype;
+                          }
+                        });
+    } else {
+      for (int i = 0; i < moltags.count(); ++i) {
+        auto moltype = processMolType(moltags.at(i));
+        moltypes_array[i] = moltype;
+      }
+    }
+
+    return warnings;
+  };
+
+  // function used to parse the [system] part of the file
+  auto processSystem = [&] {
+    QStringList warnings;
+
+    // look for the locations of the child tags of [system]
+    QList<QMultiHash<QString, int>> systags;
+    {
+      // list of tags that are valid within a [system]
+      const QStringList valid_tags = {"molecules"};
+
+      auto it = taglocs.constBegin();
+
+      while (it != taglocs.constEnd()) {
+        if (it.value() == "system") {
+          // we have found another 'system' - save the location
+          // of all of its child tags
+          QMultiHash<QString, int> tags;
+          tags.insert(it.value(), it.key());
+          ++it;
+
+          while (it != taglocs.constEnd()) {
+            // save all child tags until we reach the end
+            // of definition of this system
+            if (valid_tags.contains(it.value())) {
+              // this is a valid child tag - save its location
+              //(note that a tag can exist multiple times!)
+              tags.insert(it.value(), it.key());
+              ++it;
+            } else {
+              // this is the end of the 'system'
+              ++it;
+              break;
+            }
+          }
+
+          systags.append(tags);
+        } else {
+          ++it;
+        }
+      }
+    }
+
+    // in theory, there should be one, and only one [system]
+    if (systags.count() != 1) {
+      warnings.append(
+          QObject::tr(
+              "There should be one, and only one "
+              "[system] section in a Gromacs topology file. The number of "
+              "[system] sections equals %1.")
+              .arg(systags.count()));
+      return warnings;
+    }
+
+    // now parse the two parts of [system]
+    const auto tags = systags.at(0);
+
+    if (not(tags.contains("system") and tags.contains("molecules"))) {
+      warnings.append(
+          QObject::tr("The [system] section should contain "
+                      "both [system] and [molecules]. It contains '%1'")
+              .arg(Sire::toString(tags)));
+      return warnings;
+    }
+
+    // process [system] first..
+    // each of these lines is part of the title of the system
+    GroSystem mysys(getDirectiveLines(tags.value("system")).join(" "));
+
+    // now process the [molecules]
+    for (auto linenum : tags.values("molecules")) {
+      const auto lines = getDirectiveLines(linenum);
+
+      for (const auto &line : lines) {
+        // each line should be the molecule type name, followed by the number
+        const auto words = line.split(" ");
+
+        if (words.count() < 2) {
+          warnings.append(QObject::tr("Cannot understand the [molecules] line "
+                                      "'%1' as it should have two words!")
+                              .arg(line));
+          continue;
+        }
+
+        if (words.count() > 2) {
+          warnings.append(QObject::tr("Ignoring the extraneous information at "
+                                      "the end of the [molecules] line '%1'")
+                              .arg(line));
+        }
+
+        bool ok;
+        int nmols = words[1].toInt(&ok);
+
+        if (not ok) {
+          warnings.append(
+              QObject::tr("Cannot interpret the number of molecules "
+                          "from the [molecules] line '%1'. The second word "
+                          "should be an integer "
+                          "that gives the number of molecules...")
+                  .arg(line));
+          continue;
+        }
+
+        mysys.add(words[0], nmols);
+      }
+    }
+
+    // save the system object to this GroTop
+    grosys = mysys;
+
+    return warnings;
+  };
+
+  // process the defaults data first, as this affects the rest of the parsing
+  auto warnings = processDefaults();
+
+  // next, read in the atom types as these have to be present before
+  // reading anything else...
+  warnings += processAtomTypes();
+
+  // now we can process the other tags
+  const QVector<std::function<QStringList()>> funcs = {
+      processBondTypes,     processPairTypes,       processAngleTypes,
+      processDihedralTypes, processConstraintTypes, processNonBondParams,
+      processCMAPTypes,     processMoleculeTypes,   processSystem};
+
+  if (usesParallel()) {
+    QMutex mutex;
+
+    tbb::parallel_for(tbb::blocked_range<int>(0, funcs.count()),
+                      [&](const tbb::blocked_range<int> &r) {
+                        QStringList local_warnings;
+
+                        for (int i = r.begin(); i < r.end(); ++i) {
+                          local_warnings += funcs[i]();
+                        }
+
+                        if (not local_warnings.isEmpty()) {
+                          QMutexLocker lkr(&mutex);
+                          warnings += local_warnings;
+                        }
+                      });
+  } else {
+    for (int i = 0; i < funcs.count(); ++i) {
+      warnings += funcs[i]();
+    }
+  }
+
+  return warnings;
 }
 
-/** Interpret the fully expanded set of lines to extract all of the necessary data */
-void GroTop::interpret()
-{
-    // first, go through and find the line numbers of all tags
-    const QRegularExpression re("\\[\\s*([\\w\\d]+)\\s*\\]");
+/** Interpret the fully expanded set of lines to extract all of the necessary
+ * data */
+void GroTop::interpret() {
+  // first, go through and find the line numbers of all tags
+  const QRegularExpression re("\\[\\s*([\\w\\d]+)\\s*\\]");
 
-    // map giving the type and line number of each directive tag
-    QMap<int, QString> taglocs;
+  // map giving the type and line number of each directive tag
+  QMap<int, QString> taglocs;
 
-    const int nlines = expandedLines().count();
-    const auto lines = expandedLines().constData();
+  const int nlines = expandedLines().count();
+  const auto lines = expandedLines().constData();
 
-    // run through this file to find all of the directives
-    if (usesParallel())
-    {
-        QMutex mutex;
+  // run through this file to find all of the directives
+  if (usesParallel()) {
+    QMutex mutex;
 
-        tbb::parallel_for(tbb::blocked_range<int>(0, nlines), [&](const tbb::blocked_range<int> &r)
-                          {
-            QMap<int, QString> mylocs;
+    tbb::parallel_for(tbb::blocked_range<int>(0, nlines),
+                      [&](const tbb::blocked_range<int> &r) {
+                        QMap<int, QString> mylocs;
 
-            for (int i = r.begin(); i < r.end(); ++i)
-            {
-                auto m = re.match(lines[i]);
+                        for (int i = r.begin(); i < r.end(); ++i) {
+                          auto m = re.match(lines[i]);
 
-                if (m.hasMatch())
-                {
-                    auto tag = m.captured(1);
-                    mylocs.insert(i, tag);
-                }
-            }
+                          if (m.hasMatch()) {
+                            auto tag = m.captured(1);
+                            mylocs.insert(i, tag);
+                          }
+                        }
 
-            if (not mylocs.isEmpty())
-            {
-                QMutexLocker lkr(&mutex);
+                        if (not mylocs.isEmpty()) {
+                          QMutexLocker lkr(&mutex);
 
-                for (auto it = mylocs.constBegin(); it != mylocs.constEnd(); ++it)
-                {
-                    taglocs.insert(it.key(), it.value());
-                }
-            } });
+                          for (auto it = mylocs.constBegin();
+                               it != mylocs.constEnd(); ++it) {
+                            taglocs.insert(it.key(), it.value());
+                          }
+                        }
+                      });
+  } else {
+    for (int i = 0; i < nlines; ++i) {
+      auto m = re.match(lines[i]);
+
+      if (m.hasMatch()) {
+        auto tag = m.captured(1);
+        taglocs.insert(i, tag);
+      }
     }
-    else
-    {
-        for (int i = 0; i < nlines; ++i)
-        {
-            auto m = re.match(lines[i]);
+  }
 
-            if (m.hasMatch())
-            {
-                auto tag = m.captured(1);
-                taglocs.insert(i, tag);
-            }
-        }
+  // now, validate that this looks like a gromacs top file. Rules are taken
+  // from page 138 of the Gromacs 5.1 PDF reference manual
+
+  // first, count up the number of each tag
+  QHash<QString, int> ntags;
+
+  for (auto it = taglocs.constBegin(); it != taglocs.constEnd(); ++it) {
+    if (not ntags.contains(it.value())) {
+      ntags.insert(it.value(), 1);
+    } else {
+      ntags[it.value()] += 1;
     }
+  }
 
-    // now, validate that this looks like a gromacs top file. Rules are taken
-    // from page 138 of the Gromacs 5.1 PDF reference manual
+  // there should be only one 'defaults' tag
+  if (ntags.value("defaults", 0) != 1) {
+    throw SireIO::parse_error(
+        QObject::tr("This is not a valid GROMACS topology file. Such files "
+                    "contain one, and one "
+                    "only 'defaults' directive. The number of such directives "
+                    "in this file is %1.")
+            .arg(ntags.value("defaults", 0)),
+        CODELOC);
+  }
 
-    // first, count up the number of each tag
-    QHash<QString, int> ntags;
+  // now process all of the directives
+  auto warnings = this->processDirectives(taglocs, ntags);
 
-    for (auto it = taglocs.constBegin(); it != taglocs.constEnd(); ++it)
-    {
-        if (not ntags.contains(it.value()))
-        {
-            ntags.insert(it.value(), 1);
-        }
-        else
-        {
-            ntags[it.value()] += 1;
-        }
-    }
+  if (not warnings.isEmpty()) {
+    parse_warnings = warnings;
+  }
 
-    // there should be only one 'defaults' tag
-    if (ntags.value("defaults", 0) != 1)
-    {
-        throw SireIO::parse_error(
-            QObject::tr("This is not a valid GROMACS topology file. Such files contain one, and one "
-                        "only 'defaults' directive. The number of such directives in this file is %1.")
-                .arg(ntags.value("defaults", 0)),
-            CODELOC);
-    }
-
-    // now process all of the directives
-    auto warnings = this->processDirectives(taglocs, ntags);
-
-    if (not warnings.isEmpty())
-    {
-        parse_warnings = warnings;
-    }
-
-    this->setScore(100);
+  this->setScore(100);
 }
 
 /** Return all of the warnings that were raised when parsing the file */
-QStringList GroTop::warnings() const
-{
-    QStringList w = parse_warnings;
+QStringList GroTop::warnings() const {
+  QStringList w = parse_warnings;
 
-    for (const auto &moltype : moltypes)
-    {
-        auto molwarns = moltype.warnings();
+  for (const auto &moltype : moltypes) {
+    auto molwarns = moltype.warnings();
 
-        if (not molwarns.isEmpty())
-        {
-            w.append(QObject::tr("\n** Warnings for molecule type %1 **\n").arg(moltype.toString()));
-            w += molwarns;
-        }
+    if (not molwarns.isEmpty()) {
+      w.append(QObject::tr("\n** Warnings for molecule type %1 **\n")
+                   .arg(moltype.toString()));
+      w += molwarns;
     }
+  }
 
-    return w;
+  return w;
 }
 
 /** Internal function that is used to actually parse the data contained
     in the lines of the file */
-void GroTop::parseLines(const QString &path, const PropertyMap &map)
-{
-    // first, see if there are any GROMACS defines in the passed map
-    // and then preprocess the lines to create the fully expanded file to parse
-    {
-        QHash<QString, QString> defines;
+void GroTop::parseLines(const QString &path, const PropertyMap &map) {
+  // first, see if there are any GROMACS defines in the passed map
+  // and then preprocess the lines to create the fully expanded file to parse
+  {
+    QHash<QString, QString> defines;
 
-        try
-        {
-            const auto p = map["GROMACS_DEFINE"];
+    try {
+      const auto p = map["GROMACS_DEFINE"];
 
-            QStringList d;
+      QStringList d;
 
-            if (p.hasValue())
-            {
-                d = p.value().asA<StringProperty>().toString().split(":", Qt::SkipEmptyParts);
-            }
-            else if (p.source() != "GROMACS_DEFINE")
-            {
-                d = p.source().split(":", Qt::SkipEmptyParts);
-            }
+      if (p.hasValue()) {
+        d = p.value().asA<StringProperty>().toString().split(
+            ":", Qt::SkipEmptyParts);
+      } else if (p.source() != "GROMACS_DEFINE") {
+        d = p.source().split(":", Qt::SkipEmptyParts);
+      }
 
-            for (const auto &define : d)
-            {
-                auto words = define.split("=");
+      for (const auto &define : d) {
+        auto words = define.split("=");
 
-                if (words.count() == 1)
-                {
-                    defines.insert(words[0].simplified(), "1");
-                }
-                else
-                {
-                    defines.insert(words[0].simplified(), words[1].simplified());
-                }
-            }
+        if (words.count() == 1) {
+          defines.insert(words[0].simplified(), "1");
+        } else {
+          defines.insert(words[0].simplified(), words[1].simplified());
         }
-        catch (...)
-        {
-        }
-
-        // now go through an expand any macros and include the contents of any
-        // included files
-        expanded_lines = preprocess(lines(), defines, path, ".");
+      }
+    } catch (...) {
     }
 
-    // now we know that there are no macros to expand, no other files to
-    // include, and everything should be ok... ;-)
-    this->interpret();
+    // now go through an expand any macros and include the contents of any
+    // included files
+    expanded_lines = preprocess(lines(), defines, path, ".");
+  }
+
+  // now we know that there are no macros to expand, no other files to
+  // include, and everything should be ok... ;-)
+  this->interpret();
 }
 
 /** This function is used to create a molecule. Any errors should be written
     to the 'errors' QStringList passed as an argument */
-Molecule GroTop::createMolecule(const GroMolType &moltype, QStringList &errors, const PropertyMap &) const
-{
-    try
-    {
-        MolStructureEditor mol;
+Molecule GroTop::createMolecule(const GroMolType &moltype, QStringList &errors,
+                                const PropertyMap &) const {
+  try {
+    MolStructureEditor mol;
 
-        // first go through and create the Molecule layout
-        //(the atoms are already sorted into Residues)
-        int cgidx = 1;
-        ResStructureEditor res;
-        ChainStructureEditor chain;
-        CGStructureEditor cgroup;
+    // first go through and create the Molecule layout
+    //(the atoms are already sorted into Residues)
+    int cgidx = 1;
+    ResStructureEditor res;
+    ChainStructureEditor chain;
+    CGStructureEditor cgroup;
 
-        auto different_chain = [&](const ChainName &name)
-        {
-            if (name.isNull() and chain.isEmpty())
-                return false;
-            else if (name.isNull() or chain.isEmpty())
-                return true;
-            else
-                return name != chain.name();
-        };
+    auto different_chain = [&](const ChainName &name) {
+      if (name.isNull() and chain.isEmpty())
+        return false;
+      else if (name.isNull() or chain.isEmpty())
+        return true;
+      else
+        return name != chain.name();
+    };
 
-        for (const auto &atom : moltype.atoms())
-        {
-            if (cgroup.nAtoms() == 0)
-            {
-                // this is the first atom in the molecule
-                cgroup = mol.add(CGName(QString::number(cgidx)));
-                cgidx += 1;
+    for (const auto &atom : moltype.atoms()) {
+      if (cgroup.nAtoms() == 0) {
+        // this is the first atom in the molecule
+        cgroup = mol.add(CGName(QString::number(cgidx)));
+        cgidx += 1;
 
-                if (not atom.chainName().isNull())
-                {
-                    chain = mol.add(ChainName(atom.chainName()));
-                    res = chain.add(ResNum(atom.residueNumber()));
-                }
-                else
-                {
-                    res = mol.add(ResNum(atom.residueNumber()));
-                }
-
-                res = res.rename(atom.residueName());
-            }
-            else if (different_chain(atom.chainName()))
-            {
-                // this atom is in a different residue in a different chain
-                cgroup = mol.add(CGName(QString::number(cgidx)));
-                cgidx += 1;
-
-                if (atom.chainName().isNull())
-                {
-                    // residue is not in a chain
-                    chain = ChainStructureEditor();
-                    res = mol.add(ResNum(atom.residueNumber()));
-                }
-                else
-                {
-                    // residue is in a chain
-                    chain = mol.add(ChainName(atom.chainName()));
-                    res = chain.add(ResNum(atom.residueNumber()));
-                }
-
-                res = res.rename(atom.residueName());
-            }
-            else if (atom.residueNumber() != res.number() or atom.residueName() != res.name())
-            {
-                // this atom is in a different residue
-                cgroup = mol.add(CGName(QString::number(cgidx)));
-                cgidx += 1;
-
-                res = mol.add(ResNum(atom.residueNumber()));
-                res = res.rename(atom.residueName());
-            }
-
-            // add the atom to the residue
-            auto a = res.add(AtomName(atom.name()));
-            a = a.renumber(atom.number());
-            a = a.reparent(cgroup.name());
+        if (not atom.chainName().isNull()) {
+          chain = mol.add(ChainName(atom.chainName()));
+          res = chain.add(ResNum(atom.residueNumber()));
+        } else {
+          res = mol.add(ResNum(atom.residueNumber()));
         }
 
-        return mol.commit();
-    }
-    catch (const SireError::exception &e)
-    {
-        errors.append(QObject::tr("Could not create the molecule %1. The error was %2: %3.")
-                          .arg(moltype.name())
-                          .arg(e.what())
-                          .arg(e.why()));
+        res = res.rename(atom.residueName());
+      } else if (different_chain(atom.chainName())) {
+        // this atom is in a different residue in a different chain
+        cgroup = mol.add(CGName(QString::number(cgidx)));
+        cgidx += 1;
 
-        if (not moltype.warnings().isEmpty())
-        {
-            errors.append(QObject::tr("This molecule type had the following parse warnings on read:"));
-            errors += moltype.warnings();
+        if (atom.chainName().isNull()) {
+          // residue is not in a chain
+          chain = ChainStructureEditor();
+          res = mol.add(ResNum(atom.residueNumber()));
+        } else {
+          // residue is in a chain
+          chain = mol.add(ChainName(atom.chainName()));
+          res = chain.add(ResNum(atom.residueNumber()));
         }
 
-        return Molecule();
+        res = res.rename(atom.residueName());
+      } else if (atom.residueNumber() != res.number() or
+                 atom.residueName() != res.name()) {
+        // this atom is in a different residue
+        cgroup = mol.add(CGName(QString::number(cgidx)));
+        cgidx += 1;
+
+        res = mol.add(ResNum(atom.residueNumber()));
+        res = res.rename(atom.residueName());
+      }
+
+      // add the atom to the residue
+      auto a = res.add(AtomName(atom.name()));
+      a = a.renumber(atom.number());
+      a = a.reparent(cgroup.name());
     }
+
+    return mol.commit();
+  } catch (const SireError::exception &e) {
+    errors.append(
+        QObject::tr("Could not create the molecule %1. The error was %2: %3.")
+            .arg(moltype.name())
+            .arg(e.what())
+            .arg(e.why()));
+
+    if (not moltype.warnings().isEmpty()) {
+      errors.append(QObject::tr(
+          "This molecule type had the following parse warnings on read:"));
+      errors += moltype.warnings();
+    }
+
+    return Molecule();
+  }
 }
 
 /** This function is used to return atom properties for the passed molecule */
-GroTop::PropsAndErrors GroTop::getAtomProperties(const MoleculeInfo &molinfo, const GroMolType &moltype) const
-{
-    try
-    {
-        // create space for all of the properties
-        AtomStringProperty atom_type(molinfo);
-        AtomStringProperty bond_type(molinfo);
-        AtomIntProperty charge_group(molinfo);
-        AtomCharges atom_chgs(molinfo);
-        AtomMasses atom_masses(molinfo);
+GroTop::PropsAndErrors
+GroTop::getAtomProperties(const MoleculeInfo &molinfo,
+                          const GroMolType &moltype) const {
+  try {
+    // create space for all of the properties
+    AtomStringProperty atom_type(molinfo);
+    AtomStringProperty bond_type(molinfo);
+    AtomIntProperty charge_group(molinfo);
+    AtomCharges atom_chgs(molinfo);
+    AtomMasses atom_masses(molinfo);
 
-        AtomLJs atom_ljs(molinfo);
-        AtomElements atom_elements(molinfo);
-        AtomStringProperty particle_type(molinfo);
+    AtomLJs atom_ljs(molinfo);
+    AtomElements atom_elements(molinfo);
+    AtomStringProperty particle_type(molinfo);
 
-        const auto atoms = moltype.atoms();
+    const auto atoms = moltype.atoms();
 
-        QStringList errors;
+    QStringList errors;
 
-        bool uses_bondtypes = false;
+    bool uses_bondtypes = false;
 
-        // loop over each atom and look up parameters
-        for (int i = 0; i < atoms.count(); ++i)
-        {
-            auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(i));
+    // loop over each atom and look up parameters
+    for (int i = 0; i < atoms.count(); ++i) {
+      auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(i));
 
-            // get the template for this atom (templates in same order as atoms)
-            const auto atom = atoms.constData()[i];
+      // get the template for this atom (templates in same order as atoms)
+      const auto atom = atoms.constData()[i];
 
-            // information from the template
-            atom_type.set(cgatomidx, atom.atomType());
-            bond_type.set(cgatomidx, atom.bondType());
+      // information from the template
+      atom_type.set(cgatomidx, atom.atomType());
+      bond_type.set(cgatomidx, atom.bondType());
 
-            if (atom.atomType() != atom.bondType())
-                uses_bondtypes = true;
+      if (atom.atomType() != atom.bondType())
+        uses_bondtypes = true;
 
-            charge_group.set(cgatomidx, atom.chargeGroup());
-            atom_chgs.set(cgatomidx, atom.charge());
-            atom_masses.set(cgatomidx, atom.mass());
+      charge_group.set(cgatomidx, atom.chargeGroup());
+      atom_chgs.set(cgatomidx, atom.charge());
+      atom_masses.set(cgatomidx, atom.mass());
 
-            // information from the atom type
-            const auto atmtyp = atom_types.value(atom.atomType());
+      // information from the atom type
+      const auto atmtyp = atom_types.value(atom.atomType());
 
-            if (atmtyp.isNull())
-            {
-                errors.append(QObject::tr("There are no parameters for the atom "
-                                          "type '%1', needed by atom '%2'")
-                                  .arg(atom.atomType())
-                                  .arg(atom.toString()));
-                continue;
-            }
-            else if (atmtyp.hasMassOnly())
-            {
-                errors.append(QObject::tr("The parameters for the atom type '%1' needed "
-                                          "by atom '%2' has mass parameters only! '%3'")
-                                  .arg(atom.atomType())
-                                  .arg(atom.toString())
-                                  .arg(atmtyp.toString()));
-                continue;
-            }
-
-            atom_ljs.set(cgatomidx, atmtyp.ljParameter());
-            atom_elements.set(cgatomidx, atmtyp.element());
-            particle_type.set(cgatomidx, atmtyp.particleTypeString());
-        }
-
-        Properties props;
-
-        props.setProperty("atomtype", atom_type);
-
-        if (uses_bondtypes)
-        {
-            // this forcefield uses a different ato
-            props.setProperty("bondtype", bond_type);
-        }
-
-        props.setProperty("charge_group", charge_group);
-        props.setProperty("charge", atom_chgs);
-        props.setProperty("mass", atom_masses);
-        props.setProperty("LJ", atom_ljs);
-        props.setProperty("element", atom_elements);
-        props.setProperty("particle_type", particle_type);
-
-        return std::make_tuple(props, errors);
-    }
-    catch (const SireError::exception &e)
-    {
-        QStringList errors;
+      if (atmtyp.isNull()) {
+        errors.append(QObject::tr("There are no parameters for the atom "
+                                  "type '%1', needed by atom '%2'")
+                          .arg(atom.atomType())
+                          .arg(atom.toString()));
+        continue;
+      } else if (atmtyp.hasMassOnly()) {
         errors.append(
-            QObject::tr("Error getting atom properties for %1. %2: %3").arg(moltype.name()).arg(e.what()).arg(e.why()));
+            QObject::tr("The parameters for the atom type '%1' needed "
+                        "by atom '%2' has mass parameters only! '%3'")
+                .arg(atom.atomType())
+                .arg(atom.toString())
+                .arg(atmtyp.toString()));
+        continue;
+      }
 
-        if (not moltype.warnings().isEmpty())
-        {
-            errors.append("There were warnings parsing this molecule template:");
-            errors += moltype.warnings();
-        }
-
-        return std::make_tuple(Properties(), errors);
+      atom_ljs.set(cgatomidx, atmtyp.ljParameter());
+      atom_elements.set(cgatomidx, atmtyp.element());
+      particle_type.set(cgatomidx, atmtyp.particleTypeString());
     }
+
+    Properties props;
+
+    props.setProperty("atomtype", atom_type);
+
+    if (uses_bondtypes) {
+      // this forcefield uses a different ato
+      props.setProperty("bondtype", bond_type);
+    }
+
+    props.setProperty("charge_group", charge_group);
+    props.setProperty("charge", atom_chgs);
+    props.setProperty("mass", atom_masses);
+    props.setProperty("LJ", atom_ljs);
+    props.setProperty("element", atom_elements);
+    props.setProperty("particle_type", particle_type);
+
+    return std::make_tuple(props, errors);
+  } catch (const SireError::exception &e) {
+    QStringList errors;
+    errors.append(QObject::tr("Error getting atom properties for %1. %2: %3")
+                      .arg(moltype.name())
+                      .arg(e.what())
+                      .arg(e.why()));
+
+    if (not moltype.warnings().isEmpty()) {
+      errors.append("There were warnings parsing this molecule template:");
+      errors += moltype.warnings();
+    }
+
+    return std::make_tuple(Properties(), errors);
+  }
 }
 
 /** This internal function is used to return all of the bond properties
     for the passed molecule */
-GroTop::PropsAndErrors GroTop::getBondProperties(const MoleculeInfo &molinfo, const GroMolType &moltype) const
-{
-    try
-    {
-        const auto R = InternalPotential::symbols().bond().r();
+GroTop::PropsAndErrors
+GroTop::getBondProperties(const MoleculeInfo &molinfo,
+                          const GroMolType &moltype) const {
+  try {
+    const auto R = InternalPotential::symbols().bond().r();
 
-        QStringList errors;
+    QStringList errors;
 
-        // add in all of the bond functions, together with the connectivity of the
-        // molecule
-        auto connectivity = Connectivity(molinfo).edit();
-        connectivity = connectivity.disconnectAll();
+    // add in all of the bond functions, together with the connectivity of the
+    // molecule
+    auto connectivity = Connectivity(molinfo).edit();
+    connectivity = connectivity.disconnectAll();
 
-        TwoAtomFunctions bondfuncs(molinfo);
+    TwoAtomFunctions bondfuncs(molinfo);
 
-        const auto bonds = moltype.bonds();
+    const auto bonds = moltype.bonds();
 
-        for (auto it = bonds.constBegin(); it != bonds.constEnd(); ++it)
-        {
-            const auto &bond = it.key();
-            auto potential = it.value();
+    for (auto it = bonds.constBegin(); it != bonds.constEnd(); ++it) {
+      const auto &bond = it.key();
+      auto potential = it.value();
 
-            AtomIdx idx0 = molinfo.atomIdx(bond.atom0());
-            AtomIdx idx1 = molinfo.atomIdx(bond.atom1());
+      AtomIdx idx0 = molinfo.atomIdx(bond.atom0());
+      AtomIdx idx1 = molinfo.atomIdx(bond.atom1());
 
-            if (idx1 < idx0)
-            {
-                qSwap(idx0, idx1);
-            }
+      if (idx1 < idx0) {
+        qSwap(idx0, idx1);
+      }
 
-            // do we need to resolve this bond parameter (look up the parameters)?
-            if (not potential.isResolved())
-            {
-                // look up the atoms in the molecule template
-                const auto atom0 = moltype.atom(idx0);
-                const auto atom1 = moltype.atom(idx1);
+      // do we need to resolve this bond parameter (look up the parameters)?
+      if (not potential.isResolved()) {
+        // look up the atoms in the molecule template
+        const auto atom0 = moltype.atom(idx0);
+        const auto atom1 = moltype.atom(idx1);
 
-                // get the bond parameter for these bond types
-                auto new_potential = this->bond(atom0.bondType(), atom1.bondType(), potential.functionType());
+        // get the bond parameter for these bond types
+        auto new_potential = this->bond(atom0.bondType(), atom1.bondType(),
+                                        potential.functionType());
 
-                if (not new_potential.isResolved())
-                {
-                    errors.append(QObject::tr("Cannot find the bond parameters for "
-                                              "the bond between atoms %1-%2 (atom types %3-%4, function type %5).")
-                                      .arg(atom0.toString())
-                                      .arg(atom1.toString())
-                                      .arg(atom0.bondType())
-                                      .arg(atom1.bondType())
-                                      .arg(potential.functionType()));
-                    continue;
-                }
-
-                potential = new_potential;
-            }
-
-            // add the connection
-            if (potential.atomsAreBonded())
-            {
-                connectivity.connect(idx0, idx1);
-            }
-
-            // now create the bond expression
-            auto exp = potential.toExpression(R);
-
-            if (not exp.isZero())
-            {
-                // add this expression onto any existing expression
-                auto oldfunc = bondfuncs.potential(idx0, idx1);
-
-                if (not oldfunc.isZero())
-                {
-                    bondfuncs.set(idx0, idx1, exp + oldfunc);
-                }
-                else
-                {
-                    bondfuncs.set(idx0, idx1, exp);
-                }
-            }
+        if (not new_potential.isResolved()) {
+          errors.append(QObject::tr("Cannot find the bond parameters for "
+                                    "the bond between atoms %1-%2 (atom types "
+                                    "%3-%4, function type %5).")
+                            .arg(atom0.toString())
+                            .arg(atom1.toString())
+                            .arg(atom0.bondType())
+                            .arg(atom1.bondType())
+                            .arg(potential.functionType()));
+          continue;
         }
 
-        auto conn = connectivity.commit();
+        potential = new_potential;
+      }
 
-        Properties props;
-        props.setProperty("connectivity", conn);
-        props.setProperty("bond", bondfuncs);
+      // add the connection
+      if (potential.atomsAreBonded()) {
+        connectivity.connect(idx0, idx1);
+      }
 
-        // if 'generate_pairs' is true, then we need to automatically generate
-        // the excluded atom pairs, using fudge_qq and fudge_lj for the 1-4 interactions
-        if (generate_pairs)
-        {
-            if (bonds.isEmpty())
-            {
-                // there are no bonds, so there cannot be any intramolecular nonbonded
-                // energy (don't know how atoms are connected). This likely means
-                // that this is a solvent molecule, so set the intrascales to 0
-                CLJNBPairs nbpairs(molinfo, CLJScaleFactor(0));
-                props.setProperty("intrascale", nbpairs);
-            }
-            else
-            {
-                CLJNBPairs nbpairs(conn, CLJScaleFactor(fudge_qq, fudge_lj));
+      // now create the bond expression
+      auto exp = potential.toExpression(R);
 
-                // Override with any explicitly specified [pairs] funct=2 entries.
-                // These carry their own fudgeQQ (coulomb scale) and use lj_scl=1.0
-                // (sigma/epsilon in funct=2 are the full combined values, not scaled by fudgeLJ).
-                const auto explicit_pairs = moltype.explicitPairs();
-                for (auto it = explicit_pairs.constBegin(); it != explicit_pairs.constEnd(); ++it)
-                {
-                    const auto &pair = it.key();
-                    const auto &scl = it.value();
-                    try
-                    {
-                        AtomIdx idx0 = molinfo.atomIdx(pair.atom0());
-                        AtomIdx idx1 = molinfo.atomIdx(pair.atom1());
-                        nbpairs.set(idx0, idx1, CLJScaleFactor(scl.first, scl.second));
-                    }
-                    catch (...)
-                    {
-                        // atom not found — skip silently (already warned during parsing)
-                    }
-                }
+      if (not exp.isZero()) {
+        // add this expression onto any existing expression
+        auto oldfunc = bondfuncs.potential(idx0, idx1);
 
-                props.setProperty("intrascale", nbpairs);
-            }
+        if (not oldfunc.isZero()) {
+          bondfuncs.set(idx0, idx1, exp + oldfunc);
+        } else {
+          bondfuncs.set(idx0, idx1, exp);
         }
-
-        return std::make_tuple(props, errors);
+      }
     }
-    catch (const SireError::exception &e)
-    {
-        QStringList errors;
-        errors.append(
-            QObject::tr("Error getting bond properties for %1. %2: %3").arg(moltype.name()).arg(e.what()).arg(e.why()));
 
-        if (not moltype.warnings().isEmpty())
-        {
-            errors.append("There were warnings parsing this molecule template:");
-            errors += moltype.warnings();
+    auto conn = connectivity.commit();
+
+    Properties props;
+    props.setProperty("connectivity", conn);
+    props.setProperty("bond", bondfuncs);
+
+    // if 'generate_pairs' is true, then we need to automatically generate
+    // the excluded atom pairs, using fudge_qq and fudge_lj for the 1-4
+    // interactions
+    if (generate_pairs) {
+      if (bonds.isEmpty()) {
+        // there are no bonds, so there cannot be any intramolecular nonbonded
+        // energy (don't know how atoms are connected). This likely means
+        // that this is a solvent molecule, so set the intrascales to 0
+        CLJNBPairs nbpairs(molinfo, CLJScaleFactor(0));
+        props.setProperty("intrascale", nbpairs);
+      } else {
+        CLJNBPairs nbpairs(conn, CLJScaleFactor(fudge_qq, fudge_lj));
+
+        // Override with any explicitly specified [pairs] funct=2 entries.
+        // These carry their own fudgeQQ (coulomb scale) and use lj_scl=1.0
+        // (sigma/epsilon in funct=2 are the full combined values, not scaled by
+        // fudgeLJ).
+        const auto explicit_pairs = moltype.explicitPairs();
+        for (auto it = explicit_pairs.constBegin();
+             it != explicit_pairs.constEnd(); ++it) {
+          const auto &pair = it.key();
+          const auto &scl = it.value();
+          try {
+            AtomIdx idx0 = molinfo.atomIdx(pair.atom0());
+            AtomIdx idx1 = molinfo.atomIdx(pair.atom1());
+            nbpairs.set(idx0, idx1, CLJScaleFactor(scl.first, scl.second));
+          } catch (...) {
+            // atom not found — skip silently (already warned during parsing)
+          }
         }
 
-        return std::make_tuple(Properties(), errors);
+        props.setProperty("intrascale", nbpairs);
+      }
     }
+
+    return std::make_tuple(props, errors);
+  } catch (const SireError::exception &e) {
+    QStringList errors;
+    errors.append(QObject::tr("Error getting bond properties for %1. %2: %3")
+                      .arg(moltype.name())
+                      .arg(e.what())
+                      .arg(e.why()));
+
+    if (not moltype.warnings().isEmpty()) {
+      errors.append("There were warnings parsing this molecule template:");
+      errors += moltype.warnings();
+    }
+
+    return std::make_tuple(Properties(), errors);
+  }
 }
 
 /** This internal function is used to return all of the angle properties
     for the passed molecule */
-GroTop::PropsAndErrors GroTop::getAngleProperties(const MoleculeInfo &molinfo, const GroMolType &moltype) const
-{
-    try
-    {
-        const auto R = InternalPotential::symbols().ureyBradley().r();
-        const auto THETA = InternalPotential::symbols().angle().theta();
+GroTop::PropsAndErrors
+GroTop::getAngleProperties(const MoleculeInfo &molinfo,
+                           const GroMolType &moltype) const {
+  try {
+    const auto R = InternalPotential::symbols().ureyBradley().r();
+    const auto THETA = InternalPotential::symbols().angle().theta();
 
-        QStringList errors;
+    QStringList errors;
 
-        // add in all of the angle functions
-        ThreeAtomFunctions angfuncs(molinfo);
+    // add in all of the angle functions
+    ThreeAtomFunctions angfuncs(molinfo);
 
-        // also any additional Urey-Bradley functions
-        TwoAtomFunctions ubfuncs(molinfo);
+    // also any additional Urey-Bradley functions
+    TwoAtomFunctions ubfuncs(molinfo);
 
-        const auto angles = moltype.angles();
+    const auto angles = moltype.angles();
 
-        bool has_ub = false;
+    bool has_ub = false;
 
-        for (auto it = angles.constBegin(); it != angles.constEnd(); ++it)
-        {
-            const auto &angle = it.key();
-            auto potential = it.value();
+    for (auto it = angles.constBegin(); it != angles.constEnd(); ++it) {
+      const auto &angle = it.key();
+      auto potential = it.value();
 
-            AtomIdx idx0 = molinfo.atomIdx(angle.atom0());
-            AtomIdx idx1 = molinfo.atomIdx(angle.atom1());
-            AtomIdx idx2 = molinfo.atomIdx(angle.atom2());
+      AtomIdx idx0 = molinfo.atomIdx(angle.atom0());
+      AtomIdx idx1 = molinfo.atomIdx(angle.atom1());
+      AtomIdx idx2 = molinfo.atomIdx(angle.atom2());
 
-            if (idx2 < idx0)
-            {
-                qSwap(idx0, idx2);
-            }
+      if (idx2 < idx0) {
+        qSwap(idx0, idx2);
+      }
 
-            // do we need to resolve this angle parameter (look up the parameters)?
-            if (not potential.isResolved())
-            {
-                // look up the atoms in the molecule template
-                const auto atom0 = moltype.atom(idx0);
-                const auto atom1 = moltype.atom(idx1);
-                const auto atom2 = moltype.atom(idx2);
+      // do we need to resolve this angle parameter (look up the parameters)?
+      if (not potential.isResolved()) {
+        // look up the atoms in the molecule template
+        const auto atom0 = moltype.atom(idx0);
+        const auto atom1 = moltype.atom(idx1);
+        const auto atom2 = moltype.atom(idx2);
 
-                // get the angle parameter for these atom types
-                auto new_potential =
-                    this->angle(atom0.bondType(), atom1.bondType(), atom2.bondType(), potential.functionType());
+        // get the angle parameter for these atom types
+        auto new_potential =
+            this->angle(atom0.bondType(), atom1.bondType(), atom2.bondType(),
+                        potential.functionType());
 
-                if (not new_potential.isResolved())
-                {
-                    errors.append(QObject::tr("Cannot find the angle parameters for "
-                                              "the angle between atoms %1-%2-%3 (atom types %4-%5-%6, "
-                                              "function type %7).")
-                                      .arg(atom0.toString())
-                                      .arg(atom1.toString())
-                                      .arg(atom2.toString())
-                                      .arg(atom0.bondType())
-                                      .arg(atom1.bondType())
-                                      .arg(atom2.bondType())
-                                      .arg(potential.functionType()));
-                    continue;
-                }
-
-                potential = new_potential;
-            }
-
-            if (potential.isBondAngleCrossTerm())
-            {
-                // extract and add the Urey Bradley term between the 0-2 atoms
-                auto bondpot = potential.toBondTerm();
-
-                auto exp = bondpot.toExpression(R);
-
-                if (not exp.isZero())
-                {
-                    has_ub = true;
-
-                    auto oldfunc = ubfuncs.potential(idx0, idx2);
-
-                    if (not oldfunc.isZero())
-                    {
-                        ubfuncs.set(idx0, idx2, exp + oldfunc);
-                    }
-                    else
-                    {
-                        ubfuncs.set(idx0, idx2, exp);
-                    }
-                }
-
-                // we will only add the angle part here - we will
-                // need to add the bond part somewhere else
-                potential = potential.toAngleTerm();
-            }
-
-            // now create the angle expression
-            auto exp = potential.toExpression(THETA);
-
-            if (not exp.isZero())
-            {
-                // add this expression onto any existing expression
-                auto oldfunc = angfuncs.potential(idx0, idx1, idx2);
-
-                if (not oldfunc.isZero())
-                {
-                    angfuncs.set(idx0, idx1, idx2, exp + oldfunc);
-                }
-                else
-                {
-                    angfuncs.set(idx0, idx1, idx2, exp);
-                }
-            }
+        if (not new_potential.isResolved()) {
+          errors.append(
+              QObject::tr(
+                  "Cannot find the angle parameters for "
+                  "the angle between atoms %1-%2-%3 (atom types %4-%5-%6, "
+                  "function type %7).")
+                  .arg(atom0.toString())
+                  .arg(atom1.toString())
+                  .arg(atom2.toString())
+                  .arg(atom0.bondType())
+                  .arg(atom1.bondType())
+                  .arg(atom2.bondType())
+                  .arg(potential.functionType()));
+          continue;
         }
 
-        Properties props;
-        props.setProperty("angle", angfuncs);
+        potential = new_potential;
+      }
 
-        if (has_ub)
-            props.setProperty("urey-bradley", ubfuncs);
+      if (potential.isBondAngleCrossTerm()) {
+        // extract and add the Urey Bradley term between the 0-2 atoms
+        auto bondpot = potential.toBondTerm();
 
-        return std::make_tuple(props, errors);
-    }
-    catch (const SireError::exception &e)
-    {
-        QStringList errors;
-        errors.append(QObject::tr("Error getting angle properties for %1. %2: %3")
-                          .arg(moltype.name())
-                          .arg(e.what())
-                          .arg(e.why()));
+        auto exp = bondpot.toExpression(R);
 
-        if (not moltype.warnings().isEmpty())
-        {
-            errors.append("There were warnings parsing this molecule template:");
-            errors += moltype.warnings();
+        if (not exp.isZero()) {
+          has_ub = true;
+
+          auto oldfunc = ubfuncs.potential(idx0, idx2);
+
+          if (not oldfunc.isZero()) {
+            ubfuncs.set(idx0, idx2, exp + oldfunc);
+          } else {
+            ubfuncs.set(idx0, idx2, exp);
+          }
         }
 
-        return std::make_tuple(Properties(), errors);
+        // we will only add the angle part here - we will
+        // need to add the bond part somewhere else
+        potential = potential.toAngleTerm();
+      }
+
+      // now create the angle expression
+      auto exp = potential.toExpression(THETA);
+
+      if (not exp.isZero()) {
+        // add this expression onto any existing expression
+        auto oldfunc = angfuncs.potential(idx0, idx1, idx2);
+
+        if (not oldfunc.isZero()) {
+          angfuncs.set(idx0, idx1, idx2, exp + oldfunc);
+        } else {
+          angfuncs.set(idx0, idx1, idx2, exp);
+        }
+      }
     }
+
+    Properties props;
+    props.setProperty("angle", angfuncs);
+
+    if (has_ub)
+      props.setProperty("urey-bradley", ubfuncs);
+
+    return std::make_tuple(props, errors);
+  } catch (const SireError::exception &e) {
+    QStringList errors;
+    errors.append(QObject::tr("Error getting angle properties for %1. %2: %3")
+                      .arg(moltype.name())
+                      .arg(e.what())
+                      .arg(e.why()));
+
+    if (not moltype.warnings().isEmpty()) {
+      errors.append("There were warnings parsing this molecule template:");
+      errors += moltype.warnings();
+    }
+
+    return std::make_tuple(Properties(), errors);
+  }
 }
 
 /** This internal function is used to return all of the dihedral properties
     for the passed molecule */
-GroTop::PropsAndErrors GroTop::getDihedralProperties(const MoleculeInfo &molinfo, const GroMolType &moltype) const
-{
-    try
-    {
-        const auto PHI = InternalPotential::symbols().dihedral().phi();
-        const auto THETA = InternalPotential::symbols().improper().theta();
+GroTop::PropsAndErrors
+GroTop::getDihedralProperties(const MoleculeInfo &molinfo,
+                              const GroMolType &moltype) const {
+  try {
+    const auto PHI = InternalPotential::symbols().dihedral().phi();
+    const auto THETA = InternalPotential::symbols().improper().theta();
 
-        QStringList errors;
+    QStringList errors;
 
-        // add in all of the dihedral and improper functions
-        FourAtomFunctions dihfuncs(molinfo);
-        FourAtomFunctions impfuncs(molinfo);
+    // add in all of the dihedral and improper functions
+    FourAtomFunctions dihfuncs(molinfo);
+    FourAtomFunctions impfuncs(molinfo);
 
-        const auto dihedrals = moltype.dihedrals();
+    const auto dihedrals = moltype.dihedrals();
 
-        bool has_any_impropers = false;
+    bool has_any_impropers = false;
 
-        for (auto it = dihedrals.constBegin(); it != dihedrals.constEnd(); ++it)
-        {
-            const auto &dihedral = it.key();
-            auto potential = it.value();
+    for (auto it = dihedrals.constBegin(); it != dihedrals.constEnd(); ++it) {
+      const auto &dihedral = it.key();
+      auto potential = it.value();
 
-            AtomIdx idx0 = molinfo.atomIdx(dihedral.atom0());
-            AtomIdx idx1 = molinfo.atomIdx(dihedral.atom1());
-            AtomIdx idx2 = molinfo.atomIdx(dihedral.atom2());
-            AtomIdx idx3 = molinfo.atomIdx(dihedral.atom3());
+      AtomIdx idx0 = molinfo.atomIdx(dihedral.atom0());
+      AtomIdx idx1 = molinfo.atomIdx(dihedral.atom1());
+      AtomIdx idx2 = molinfo.atomIdx(dihedral.atom2());
+      AtomIdx idx3 = molinfo.atomIdx(dihedral.atom3());
 
-            if (idx3 < idx0)
-            {
-                qSwap(idx0, idx3);
-                qSwap(idx2, idx1);
-            }
+      if (idx3 < idx0) {
+        qSwap(idx0, idx3);
+        qSwap(idx2, idx1);
+      }
 
-            Expression exp;
-            bool is_improper = false;
+      Expression exp;
+      bool is_improper = false;
 
-            // do we need to resolve this dihedral parameter (look up the parameters)?
-            if (not potential.isResolved())
-            {
-                // look up the atoms in the molecule template
-                const auto atom0 = moltype.atom(idx0);
-                const auto atom1 = moltype.atom(idx1);
-                const auto atom2 = moltype.atom(idx2);
-                const auto atom3 = moltype.atom(idx3);
+      // do we need to resolve this dihedral parameter (look up the parameters)?
+      if (not potential.isResolved()) {
+        // look up the atoms in the molecule template
+        const auto atom0 = moltype.atom(idx0);
+        const auto atom1 = moltype.atom(idx1);
+        const auto atom2 = moltype.atom(idx2);
+        const auto atom3 = moltype.atom(idx3);
 
-                // get the dihedral parameter for these atom types - could be
-                // many, as they will be added together
-                auto resolved = this->dihedrals(atom0.bondType(), atom1.bondType(), atom2.bondType(), atom3.bondType(),
-                                                potential.functionType());
+        // get the dihedral parameter for these atom types - could be
+        // many, as they will be added together
+        auto resolved = this->dihedrals(atom0.bondType(), atom1.bondType(),
+                                        atom2.bondType(), atom3.bondType(),
+                                        potential.functionType());
 
-                if (resolved.isEmpty())
-                {
-                    errors.append(QObject::tr("Cannot find the dihedral parameters for "
-                                              "the dihedral between atoms %1-%2-%3-%4 (atom types %5-%6-%7-%8, "
-                                              "function type %9).")
-                                      .arg(atom0.toString())
-                                      .arg(atom1.toString())
-                                      .arg(atom2.toString())
-                                      .arg(atom3.toString())
-                                      .arg(atom0.bondType())
-                                      .arg(atom1.bondType())
-                                      .arg(atom2.bondType())
-                                      .arg(atom3.bondType())
-                                      .arg(potential.functionType()));
-                    continue;
-                }
-
-                // sum all of the parts together
-                for (const auto &r : resolved)
-                {
-                    if (r.isResolved())
-                    {
-                        if (r.isImproperAngleTerm())
-                        {
-                            is_improper = true;
-                            exp += r.toImproperExpression(THETA);
-                        }
-                        else
-                        {
-                            exp += r.toExpression(PHI);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // we have a fully-resolved dihedral potential
-                if (potential.isImproperAngleTerm())
-                {
-                    exp = potential.toImproperExpression(THETA);
-                    is_improper = true;
-                }
-                else
-                {
-                    exp = potential.toExpression(PHI);
-                }
-            }
-
-            if (not exp.isZero())
-            {
-                if (is_improper)
-                {
-                    has_any_impropers = true;
-
-                    // add this expression onto any existing expression
-                    auto oldfunc = impfuncs.potential(idx0, idx1, idx2, idx3);
-
-                    if (not oldfunc.isZero())
-                    {
-                        impfuncs.set(idx0, idx1, idx2, idx3, exp + oldfunc);
-                    }
-                    else
-                    {
-                        impfuncs.set(idx0, idx1, idx2, idx3, exp);
-                    }
-                }
-                else
-                {
-                    // add this expression onto any existing expression
-                    auto oldfunc = dihfuncs.potential(idx0, idx1, idx2, idx3);
-
-                    if (not oldfunc.isZero())
-                    {
-                        dihfuncs.set(idx0, idx1, idx2, idx3, exp + oldfunc);
-                    }
-                    else
-                    {
-                        dihfuncs.set(idx0, idx1, idx2, idx3, exp);
-                    }
-                }
-            }
+        if (resolved.isEmpty()) {
+          errors.append(QObject::tr("Cannot find the dihedral parameters for "
+                                    "the dihedral between atoms %1-%2-%3-%4 "
+                                    "(atom types %5-%6-%7-%8, "
+                                    "function type %9).")
+                            .arg(atom0.toString())
+                            .arg(atom1.toString())
+                            .arg(atom2.toString())
+                            .arg(atom3.toString())
+                            .arg(atom0.bondType())
+                            .arg(atom1.bondType())
+                            .arg(atom2.bondType())
+                            .arg(atom3.bondType())
+                            .arg(potential.functionType()));
+          continue;
         }
 
-        Properties props;
-        props.setProperty("dihedral", dihfuncs);
-
-        if (has_any_impropers)
-            props.setProperty("improper", impfuncs);
-
-        return std::make_tuple(props, errors);
-    }
-    catch (const SireError::exception &e)
-    {
-        QStringList errors;
-        errors.append(QObject::tr("Error getting dihedral properties for %1. %2: %3")
-                          .arg(moltype.name())
-                          .arg(e.what())
-                          .arg(e.why()));
-
-        if (not moltype.warnings().isEmpty())
-        {
-            errors.append("There were warnings parsing this molecule template:");
-            errors += moltype.warnings();
+        // sum all of the parts together
+        for (const auto &r : resolved) {
+          if (r.isResolved()) {
+            if (r.isImproperAngleTerm()) {
+              is_improper = true;
+              exp += r.toImproperExpression(THETA);
+            } else {
+              exp += r.toExpression(PHI);
+            }
+          }
         }
+      } else {
+        // we have a fully-resolved dihedral potential
+        if (potential.isImproperAngleTerm()) {
+          exp = potential.toImproperExpression(THETA);
+          is_improper = true;
+        } else {
+          exp = potential.toExpression(PHI);
+        }
+      }
 
-        return std::make_tuple(Properties(), errors);
+      if (not exp.isZero()) {
+        if (is_improper) {
+          has_any_impropers = true;
+
+          // add this expression onto any existing expression
+          auto oldfunc = impfuncs.potential(idx0, idx1, idx2, idx3);
+
+          if (not oldfunc.isZero()) {
+            impfuncs.set(idx0, idx1, idx2, idx3, exp + oldfunc);
+          } else {
+            impfuncs.set(idx0, idx1, idx2, idx3, exp);
+          }
+        } else {
+          // add this expression onto any existing expression
+          auto oldfunc = dihfuncs.potential(idx0, idx1, idx2, idx3);
+
+          if (not oldfunc.isZero()) {
+            dihfuncs.set(idx0, idx1, idx2, idx3, exp + oldfunc);
+          } else {
+            dihfuncs.set(idx0, idx1, idx2, idx3, exp);
+          }
+        }
+      }
     }
+
+    Properties props;
+    props.setProperty("dihedral", dihfuncs);
+
+    if (has_any_impropers)
+      props.setProperty("improper", impfuncs);
+
+    return std::make_tuple(props, errors);
+  } catch (const SireError::exception &e) {
+    QStringList errors;
+    errors.append(
+        QObject::tr("Error getting dihedral properties for %1. %2: %3")
+            .arg(moltype.name())
+            .arg(e.what())
+            .arg(e.why()));
+
+    if (not moltype.warnings().isEmpty()) {
+      errors.append("There were warnings parsing this molecule template:");
+      errors += moltype.warnings();
+    }
+
+    return std::make_tuple(Properties(), errors);
+  }
 }
 
 /** This internal function is used to return all of the cmap properties
     for the passed molecule */
-GroTop::PropsAndErrors GroTop::getCMAPProperties(const MoleculeInfo &molinfo, const GroMolType &moltype) const
-{
-    try
-    {
-        QStringList errors;
+GroTop::PropsAndErrors
+GroTop::getCMAPProperties(const MoleculeInfo &molinfo,
+                          const GroMolType &moltype) const {
+  try {
+    QStringList errors;
 
-        // add in all of the cmap functions
-        CMAPFunctions cmapfuncs(molinfo);
+    // add in all of the cmap functions
+    CMAPFunctions cmapfuncs(molinfo);
 
-        const auto cmaps = moltype.cmaps();
+    const auto cmaps = moltype.cmaps();
 
-        for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it)
-        {
-            const auto &cmap = it.key();
-            auto potential = it.value();
+    for (auto it = cmaps.constBegin(); it != cmaps.constEnd(); ++it) {
+      const auto &cmap = it.key();
+      auto potential = it.value();
 
-            if (potential != "1")
-            {
-                errors.append(QObject::tr("The CMAP potential '%1' is not a valid "
-                                          "CMAP potential. It should be '1'.")
-                                  .arg(potential));
-                continue;
-            }
+      if (potential != "1") {
+        errors.append(QObject::tr("The CMAP potential '%1' is not a valid "
+                                  "CMAP potential. It should be '1'.")
+                          .arg(potential));
+        continue;
+      }
 
-            AtomIdx idx0 = molinfo.atomIdx(cmap.atom0());
-            AtomIdx idx1 = molinfo.atomIdx(cmap.atom1());
-            AtomIdx idx2 = molinfo.atomIdx(cmap.atom2());
-            AtomIdx idx3 = molinfo.atomIdx(cmap.atom3());
-            AtomIdx idx4 = molinfo.atomIdx(cmap.atom4());
+      AtomIdx idx0 = molinfo.atomIdx(cmap.atom0());
+      AtomIdx idx1 = molinfo.atomIdx(cmap.atom1());
+      AtomIdx idx2 = molinfo.atomIdx(cmap.atom2());
+      AtomIdx idx3 = molinfo.atomIdx(cmap.atom3());
+      AtomIdx idx4 = molinfo.atomIdx(cmap.atom4());
 
-            if (idx4 < idx0)
-            {
-                qSwap(idx0, idx4);
-                qSwap(idx3, idx1);
-            }
+      if (idx4 < idx0) {
+        qSwap(idx0, idx4);
+        qSwap(idx3, idx1);
+      }
 
-            // look up the atoms in the molecule template
-            const auto atom0 = moltype.atom(idx0);
-            const auto atom1 = moltype.atom(idx1);
-            const auto atom2 = moltype.atom(idx2);
-            const auto atom3 = moltype.atom(idx3);
-            const auto atom4 = moltype.atom(idx4);
+      // look up the atoms in the molecule template
+      const auto atom0 = moltype.atom(idx0);
+      const auto atom1 = moltype.atom(idx1);
+      const auto atom2 = moltype.atom(idx2);
+      const auto atom3 = moltype.atom(idx3);
+      const auto atom4 = moltype.atom(idx4);
 
-            // get the cmap parameter for these atom types - this returns
-            // an empty list if there are no matching parameters. We
-            // only support function type 1 for CMAP potentials
-            auto resolved = this->cmaps(atom0.atomType(), atom1.atomType(), atom2.atomType(),
-                                        atom3.atomType(), atom4.atomType(), 1);
+      // get the cmap parameter for these atom types - this returns
+      // an empty list if there are no matching parameters. We
+      // only support function type 1 for CMAP potentials
+      auto resolved =
+          this->cmaps(atom0.atomType(), atom1.atomType(), atom2.atomType(),
+                      atom3.atomType(), atom4.atomType(), 1);
 
-            if (resolved.isEmpty())
-            {
-                errors.append(QObject::tr("Cannot find the cmap parameters for "
-                                          "the cmap between atoms %1-%2-%3-%4-%5 (atom types %6-%7-%8-%9-%10, "
-                                          "function type 1).")
-                                  .arg(atom0.toString())
-                                  .arg(atom1.toString())
-                                  .arg(atom2.toString())
-                                  .arg(atom3.toString())
-                                  .arg(atom4.toString())
-                                  .arg(atom0.atomType())
-                                  .arg(atom1.atomType())
-                                  .arg(atom2.atomType())
-                                  .arg(atom3.atomType())
-                                  .arg(atom4.atomType()));
+      if (resolved.isEmpty()) {
+        errors.append(QObject::tr("Cannot find the cmap parameters for "
+                                  "the cmap between atoms %1-%2-%3-%4-%5 (atom "
+                                  "types %6-%7-%8-%9-%10, "
+                                  "function type 1).")
+                          .arg(atom0.toString())
+                          .arg(atom1.toString())
+                          .arg(atom2.toString())
+                          .arg(atom3.toString())
+                          .arg(atom4.toString())
+                          .arg(atom0.atomType())
+                          .arg(atom1.atomType())
+                          .arg(atom2.atomType())
+                          .arg(atom3.atomType())
+                          .arg(atom4.atomType()));
 
-                continue;
-            }
+        continue;
+      }
 
-            // we will just use the first CMAP function
-            cmapfuncs.set(idx0, idx1, idx2, idx3, idx4, resolved[0]);
-        }
-
-        Properties props;
-        props.setProperty("cmap", cmapfuncs);
-
-        return std::make_tuple(props, errors);
+      // we will just use the first CMAP function
+      cmapfuncs.set(idx0, idx1, idx2, idx3, idx4, resolved[0]);
     }
-    catch (const SireError::exception &e)
-    {
-        QStringList errors;
-        errors.append(QObject::tr("Error getting CMAP properties for %1. %2: %3")
-                          .arg(moltype.name())
-                          .arg(e.what())
-                          .arg(e.why()));
 
-        if (not moltype.warnings().isEmpty())
-        {
-            errors.append("There were warnings parsing this molecule template:");
-            errors += moltype.warnings();
-        }
+    Properties props;
+    props.setProperty("cmap", cmapfuncs);
 
-        return std::make_tuple(Properties(), errors);
+    return std::make_tuple(props, errors);
+  } catch (const SireError::exception &e) {
+    QStringList errors;
+    errors.append(QObject::tr("Error getting CMAP properties for %1. %2: %3")
+                      .arg(moltype.name())
+                      .arg(e.what())
+                      .arg(e.why()));
+
+    if (not moltype.warnings().isEmpty()) {
+      errors.append("There were warnings parsing this molecule template:");
+      errors += moltype.warnings();
     }
+
+    return std::make_tuple(Properties(), errors);
+  }
 }
 
 /** This function is used to create a molecule. Any errors should be written
     to the 'errors' QStringList passed as an argument */
-Molecule GroTop::createMolecule(QString moltype_name, QStringList &errors, const PropertyMap &map) const
-{
-    // find the molecular template for this molecule
-    int idx = -1;
+Molecule GroTop::createMolecule(QString moltype_name, QStringList &errors,
+                                const PropertyMap &map) const {
+  // find the molecular template for this molecule
+  int idx = -1;
 
-    for (int i = 0; i < moltypes.count(); ++i)
-    {
-        if (moltypes.constData()[i].name() == moltype_name)
-        {
-            idx = i;
-            break;
-        }
+  for (int i = 0; i < moltypes.count(); ++i) {
+    if (moltypes.constData()[i].name() == moltype_name) {
+      idx = i;
+      break;
+    }
+  }
+
+  if (idx == -1) {
+    QStringList typs;
+
+    for (const auto &moltype : moltypes) {
+      typs.append(moltype.name());
     }
 
-    if (idx == -1)
-    {
-        QStringList typs;
+    errors.append(
+        QObject::tr("There is no molecular template called '%1' "
+                    "in this Gromacs file. Available templates are [ %2 ]")
+            .arg(moltype_name)
+            .arg(Sire::toString(typs)));
+    return Molecule();
+  }
 
-        for (const auto &moltype : moltypes)
-        {
-            typs.append(moltype.name());
-        }
+  const auto moltype = moltypes.constData()[idx];
 
-        errors.append(QObject::tr("There is no molecular template called '%1' "
-                                  "in this Gromacs file. Available templates are [ %2 ]")
-                          .arg(moltype_name)
-                          .arg(Sire::toString(typs)));
-        return Molecule();
+  // create the underlying molecule
+  auto mol = this->createMolecule(moltype, errors, map).edit();
+
+  if (mol.nAtoms() == 0) {
+    // something went wrong on read
+    errors.append(
+        QObject::tr(
+            "Something went wrong creating a molecule from the template %1.")
+            .arg(moltype_name));
+    return Molecule();
+  }
+
+  mol.rename(moltype_name);
+  const auto molinfo = mol.info();
+
+  // now get all of the molecule properties
+  const QVector<std::function<PropsAndErrors()>> funcs = {
+      [&]() { return getAtomProperties(molinfo, moltype); },
+      [&]() { return getBondProperties(molinfo, moltype); },
+      [&]() { return getAngleProperties(molinfo, moltype); },
+      [&]() { return getDihedralProperties(molinfo, moltype); },
+      [&]() { return getCMAPProperties(molinfo, moltype); }};
+
+  QVector<PropsAndErrors> props(funcs.count());
+  auto props_data = props.data();
+
+  if (usesParallel()) {
+    tbb::parallel_for(tbb::blocked_range<int>(0, funcs.count()),
+                      [&](const tbb::blocked_range<int> &r) {
+                        for (int i = r.begin(); i < r.end(); ++i) {
+                          props_data[i] = funcs.at(i)();
+                        }
+                      });
+  } else {
+    for (int i = 0; i < funcs.count(); ++i) {
+      props_data[i] = funcs.at(i)();
+    }
+  }
+
+  // assemble all of the properties together
+  for (int i = 0; i < props.count(); ++i) {
+    const auto &p = std::get<0>(props.at(i));
+    const auto &pe = std::get<1>(props.at(i));
+
+    if (not pe.isEmpty()) {
+      errors += pe;
     }
 
-    const auto moltype = moltypes.constData()[idx];
+    for (const auto &key : p.propertyKeys()) {
+      const auto mapped = map[key];
 
-    // create the underlying molecule
-    auto mol = this->createMolecule(moltype, errors, map).edit();
-
-    if (mol.nAtoms() == 0)
-    {
-        // something went wrong on read
-        errors.append(QObject::tr("Something went wrong creating a molecule from the template %1.").arg(moltype_name));
-        return Molecule();
+      if (mapped.hasValue()) {
+        mol.setProperty(key, mapped.value());
+      } else {
+        mol.setProperty(mapped, p.property(key));
+      }
     }
+  }
 
-    mol.rename(moltype_name);
-    const auto molinfo = mol.info();
+  // finally set the forcefield property
+  const auto mapped = map["forcefield"];
 
-    // now get all of the molecule properties
-    const QVector<std::function<PropsAndErrors()>> funcs = {[&]()
-                                                            { return getAtomProperties(molinfo, moltype); },
-                                                            [&]()
-                                                            { return getBondProperties(molinfo, moltype); },
-                                                            [&]()
-                                                            { return getAngleProperties(molinfo, moltype); },
-                                                            [&]()
-                                                            { return getDihedralProperties(molinfo, moltype); },
-                                                            [&]()
-                                                            { return getCMAPProperties(molinfo, moltype); }};
+  if (mapped.hasValue()) {
+    mol.setProperty("forcefield", mapped.value());
+  } else {
+    mol.setProperty(mapped, moltype.forcefield());
+  }
 
-    QVector<PropsAndErrors> props(funcs.count());
-    auto props_data = props.data();
-
-    if (usesParallel())
-    {
-        tbb::parallel_for(tbb::blocked_range<int>(0, funcs.count()), [&](const tbb::blocked_range<int> &r)
-                          {
-            for (int i = r.begin(); i < r.end(); ++i)
-            {
-                props_data[i] = funcs.at(i)();
-            } });
-    }
-    else
-    {
-        for (int i = 0; i < funcs.count(); ++i)
-        {
-            props_data[i] = funcs.at(i)();
-        }
-    }
-
-    // assemble all of the properties together
-    for (int i = 0; i < props.count(); ++i)
-    {
-        const auto &p = std::get<0>(props.at(i));
-        const auto &pe = std::get<1>(props.at(i));
-
-        if (not pe.isEmpty())
-        {
-            errors += pe;
-        }
-
-        for (const auto &key : p.propertyKeys())
-        {
-            const auto mapped = map[key];
-
-            if (mapped.hasValue())
-            {
-                mol.setProperty(key, mapped.value());
-            }
-            else
-            {
-                mol.setProperty(mapped, p.property(key));
-            }
-        }
-    }
-
-    // finally set the forcefield property
-    const auto mapped = map["forcefield"];
-
-    if (mapped.hasValue())
-    {
-        mol.setProperty("forcefield", mapped.value());
-    }
-    else
-    {
-        mol.setProperty(mapped, moltype.forcefield());
-    }
-
-    return mol.commit();
+  return mol.commit();
 }
 
-int GroTop::nAtoms() const
-{
-    return this->startSystem(PropertyMap()).nAtoms();
-}
+int GroTop::nAtoms() const { return this->startSystem(PropertyMap()).nAtoms(); }
 
 /** Use the data contained in this parser to create a new System of molecules,
     assigning properties based on the mapping in 'map' */
-System GroTop::startSystem(const PropertyMap &map) const
-{
-    if (grosys.isEmpty())
-    {
-        // there are no molecules to process
-        return System();
+System GroTop::startSystem(const PropertyMap &map) const {
+  if (grosys.isEmpty()) {
+    // there are no molecules to process
+    return System();
+  }
+
+  // first, create template molecules for each of the unique molecule types
+  const auto unique_typs = grosys.uniqueTypes();
+
+  QHash<QString, Molecule> mol_templates;
+  QHash<QString, QStringList> template_errors;
+  mol_templates.reserve(unique_typs.count());
+
+  // loop over each unique type, creating the associated molecule and storing
+  // in mol_templates. If there are any errors, then store them in
+  // template_errors
+  if (usesParallel()) {
+    QMutex mutex;
+
+    tbb::parallel_for(tbb::blocked_range<int>(0, unique_typs.count()),
+                      [&](const tbb::blocked_range<int> &r) {
+                        for (int i = r.begin(); i < r.end(); ++i) {
+                          auto typ = unique_typs[i];
+
+                          QStringList errors;
+                          Molecule mol = this->createMolecule(typ, errors, map);
+
+                          QMutexLocker lkr(&mutex);
+
+                          if (not errors.isEmpty()) {
+                            template_errors.insert(typ, errors);
+                          }
+
+                          mol_templates.insert(typ, mol);
+                        }
+                      });
+  } else {
+    for (auto typ : unique_typs) {
+      QStringList errors;
+      Molecule mol = this->createMolecule(typ, errors, map);
+
+      if (not errors.isEmpty()) {
+        template_errors.insert(typ, errors);
+      }
+
+      mol_templates.insert(typ, mol);
+    }
+  }
+
+  // next, we see if there were any errors. If there are, then raise an
+  // exception
+  if (not template_errors.isEmpty()) {
+    QStringList errors;
+
+    for (auto it = template_errors.constBegin();
+         it != template_errors.constEnd(); ++it) {
+      errors.append(
+          QObject::tr("Error constructing the molecule associated with "
+                      "template '%1' : %2")
+              .arg(it.key())
+              .arg(it.value().join("\n")));
     }
 
-    // first, create template molecules for each of the unique molecule types
-    const auto unique_typs = grosys.uniqueTypes();
+    throw SireIO::parse_error(
+        QObject::tr(
+            "Could not construct a molecule system from the information stored "
+            "in this Gromacs topology file. Errors include:\n%1")
+            .arg(errors.join("\n \n")),
+        CODELOC);
+  }
 
-    QHash<QString, Molecule> mol_templates;
-    QHash<QString, QStringList> template_errors;
-    mol_templates.reserve(unique_typs.count());
+  // next, make sure that none of the molecules are empty...
+  {
+    QStringList errors;
 
-    // loop over each unique type, creating the associated molecule and storing
-    // in mol_templates. If there are any errors, then store them in template_errors
-    if (usesParallel())
-    {
-        QMutex mutex;
-
-        tbb::parallel_for(tbb::blocked_range<int>(0, unique_typs.count()), [&](const tbb::blocked_range<int> &r)
-                          {
-            for (int i = r.begin(); i < r.end(); ++i)
-            {
-                auto typ = unique_typs[i];
-
-                QStringList errors;
-                Molecule mol = this->createMolecule(typ, errors, map);
-
-                QMutexLocker lkr(&mutex);
-
-                if (not errors.isEmpty())
-                {
-                    template_errors.insert(typ, errors);
-                }
-
-                mol_templates.insert(typ, mol);
-            } });
-    }
-    else
-    {
-        for (auto typ : unique_typs)
-        {
-            QStringList errors;
-            Molecule mol = this->createMolecule(typ, errors, map);
-
-            if (not errors.isEmpty())
-            {
-                template_errors.insert(typ, errors);
-            }
-
-            mol_templates.insert(typ, mol);
-        }
+    for (auto it = mol_templates.constBegin(); it != mol_templates.constEnd();
+         ++it) {
+      if (it.value().isNull()) {
+        errors.append(
+            QObject::tr("Error constructing the molecule associated with "
+                        "template '%1' : The molecule is empty!")
+                .arg(it.key()));
+      }
     }
 
-    // next, we see if there were any errors. If there are, then raise an exception
-    if (not template_errors.isEmpty())
-    {
-        QStringList errors;
+    if (not errors.isEmpty())
+      throw SireIO::parse_error(
+          QObject::tr("Could not construct a molecule system from the "
+                      "information stored "
+                      "in this Gromacs topology file. Errors include:\n%1")
+              .arg(errors.join("\n \n")),
+          CODELOC);
+  }
 
-        for (auto it = template_errors.constBegin(); it != template_errors.constEnd(); ++it)
-        {
-            errors.append(QObject::tr("Error constructing the molecule associated with "
-                                      "template '%1' : %2")
-                              .arg(it.key())
-                              .arg(it.value().join("\n")));
-        }
+  // now that we have the molecules, we just need to duplicate them
+  // the correct number of times to create the full system
+  MoleculeGroup molgroup("all");
 
-        throw SireIO::parse_error(QObject::tr("Could not construct a molecule system from the information stored "
-                                              "in this Gromacs topology file. Errors include:\n%1")
-                                      .arg(errors.join("\n \n")),
-                                  CODELOC);
-    }
+  for (int i = 0; i < grosys.nMolecules(); ++i) {
+    molgroup.add(mol_templates.value(grosys[i]).edit().renumber());
+  }
 
-    // next, make sure that none of the molecules are empty...
-    {
-        QStringList errors;
+  System system(grosys.name());
+  system.add(molgroup);
+  system.setProperty(map["fileformat"].source(),
+                     StringProperty(this->formatName()));
 
-        for (auto it = mol_templates.constBegin(); it != mol_templates.constEnd(); ++it)
-        {
-            if (it.value().isNull())
-            {
-                errors.append(QObject::tr("Error constructing the molecule associated with "
-                                          "template '%1' : The molecule is empty!")
-                                  .arg(it.key()));
-            }
-        }
-
-        if (not errors.isEmpty())
-            throw SireIO::parse_error(QObject::tr("Could not construct a molecule system from the information stored "
-                                                  "in this Gromacs topology file. Errors include:\n%1")
-                                          .arg(errors.join("\n \n")),
-                                      CODELOC);
-    }
-
-    // now that we have the molecules, we just need to duplicate them
-    // the correct number of times to create the full system
-    MoleculeGroup molgroup("all");
-
-    for (int i = 0; i < grosys.nMolecules(); ++i)
-    {
-        molgroup.add(mol_templates.value(grosys[i]).edit().renumber());
-    }
-
-    System system(grosys.name());
-    system.add(molgroup);
-    system.setProperty(map["fileformat"].source(), StringProperty(this->formatName()));
-
-    return system;
+  return system;
 }
