@@ -7639,6 +7639,32 @@ Molecule GroTop::createMolecule(const GroMolType &moltype, QStringList &errors,
     ChainStructureEditor chain;
     CGStructureEditor cgroup;
 
+    // Track used residue numbers to handle topologies where numbering restarts
+    // (e.g. glycan residues numbered from 1 after a protein chain also starting
+    // from 1). Duplicate ResNums within a molecule cause duplicate_residue errors.
+    // next_unique is always > every number assigned so far, so conflict
+    // resolution is O(1) rather than a linear scan.
+    QSet<int> used_resnums;
+    int next_unique = 0;
+    auto unique_resnum = [&](int resnum) -> ResNum {
+      if (!used_resnums.contains(resnum))
+      {
+        used_resnums.insert(resnum);
+        if (resnum >= next_unique)
+          next_unique = resnum + 1;
+        return ResNum(resnum);
+      }
+      // conflict: assign next number beyond all previously seen
+      used_resnums.insert(next_unique);
+      return ResNum(next_unique++);
+    };
+
+    // Track the original (topology) residue number of the current residue
+    // separately, because unique_resnum may assign a different number. The
+    // "is this a new residue?" check must use the original topology number.
+    int current_orig_resnum = -1;
+    ResName current_resname;
+
     auto different_chain = [&](const ChainName &name) {
       if (name.isNull() and chain.isEmpty())
         return false;
@@ -7656,12 +7682,14 @@ Molecule GroTop::createMolecule(const GroMolType &moltype, QStringList &errors,
 
         if (not atom.chainName().isNull()) {
           chain = mol.add(ChainName(atom.chainName()));
-          res = chain.add(ResNum(atom.residueNumber()));
+          res = chain.add(unique_resnum(atom.residueNumber()));
         } else {
-          res = mol.add(ResNum(atom.residueNumber()));
+          res = mol.add(unique_resnum(atom.residueNumber()));
         }
 
         res = res.rename(atom.residueName());
+        current_orig_resnum = atom.residueNumber();
+        current_resname = atom.residueName();
       } else if (different_chain(atom.chainName())) {
         // this atom is in a different residue in a different chain
         cgroup = mol.add(CGName(QString::number(cgidx)));
@@ -7670,22 +7698,26 @@ Molecule GroTop::createMolecule(const GroMolType &moltype, QStringList &errors,
         if (atom.chainName().isNull()) {
           // residue is not in a chain
           chain = ChainStructureEditor();
-          res = mol.add(ResNum(atom.residueNumber()));
+          res = mol.add(unique_resnum(atom.residueNumber()));
         } else {
           // residue is in a chain
           chain = mol.add(ChainName(atom.chainName()));
-          res = chain.add(ResNum(atom.residueNumber()));
+          res = chain.add(unique_resnum(atom.residueNumber()));
         }
 
         res = res.rename(atom.residueName());
-      } else if (atom.residueNumber() != res.number() or
-                 atom.residueName() != res.name()) {
+        current_orig_resnum = atom.residueNumber();
+        current_resname = atom.residueName();
+      } else if (atom.residueNumber() != current_orig_resnum or
+                 atom.residueName() != current_resname) {
         // this atom is in a different residue
         cgroup = mol.add(CGName(QString::number(cgidx)));
         cgidx += 1;
 
-        res = mol.add(ResNum(atom.residueNumber()));
+        res = mol.add(unique_resnum(atom.residueNumber()));
         res = res.rename(atom.residueName());
+        current_orig_resnum = atom.residueNumber();
+        current_resname = atom.residueName();
       }
 
       // add the atom to the residue
