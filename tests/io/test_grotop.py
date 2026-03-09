@@ -377,6 +377,7 @@ def test_grotop_water(tmpdir, water_model):
                 is_vsite = True
 
 
+@pytest.mark.slow
 def test_glycam(tmpdir):
     """Test that a topology using the GLYCAM force field (SCEE=1.0, SCNB=1.0)
     is read and written correctly.
