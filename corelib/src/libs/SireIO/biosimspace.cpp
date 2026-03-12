@@ -32,6 +32,8 @@
 
 #include "SireError/errors.h"
 
+#include "SireMM/cljnbpairs.h"
+
 #include "SireMol/atomelements.h"
 #include "SireMol/atommasses.h"
 #include "SireMol/connectivity.h"
@@ -39,6 +41,7 @@
 #include "SireMol/mgname.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/molidx.h"
+#include "SireMol/moleculeinfodata.h"
 
 #include "SireVol/periodicbox.h"
 #include "SireVol/triclinicbox.h"
@@ -49,6 +52,7 @@
 
 using namespace SireBase;
 using namespace SireMaths;
+using namespace SireMM;
 using namespace SireMol;
 using namespace SireUnits;
 using namespace SireVol;
@@ -1752,6 +1756,77 @@ namespace SireIO
         double nz = v0.x() * v1.y() - v0.y() * v1.x();
 
         return Vector(nx, ny, nz);
+    }
+
+    SireBase::PropertyList mergeIntrascale(const CLJNBPairs &nb0,
+                                           const CLJNBPairs &nb1,
+                                           const MoleculeInfoData &merged_info,
+                                           const QHash<AtomIdx, AtomIdx> &mol0_merged_mapping,
+                                           const QHash<AtomIdx, AtomIdx> &mol1_merged_mapping)
+    {
+        // Helper lambda: copy the non-default scaling factors from 'nb' to
+        // 'nb_merged' according to the provided mapping. Takes nb_merged by
+        // reference to avoid copies.
+        auto copyIntrascale = [&](const CLJNBPairs &nb, CLJNBPairs &nb_merged,
+                                  const QHash<AtomIdx, AtomIdx> &mapping)
+        {
+            const int n = nb.nAtoms();
+
+            for (int i = 0; i < n; ++i)
+            {
+                const AtomIdx ai(i);
+
+                // Get the index of this atom in the merged system.
+                const AtomIdx merged_ai = mapping.value(ai, AtomIdx(-1));
+
+                // If this atom hasn't been mapped to the merged system, then we
+                // can skip it, as any scaling factors involving this atom will
+                // just use the default.
+                if (merged_ai == AtomIdx(-1))
+                    continue;
+
+                for (int j = i; j < n; ++j)
+                {
+                    const AtomIdx aj(j);
+
+                    // Get the scaling factor for this pair of atoms.
+                    const CLJScaleFactor sf = nb.get(ai, aj);
+
+                    // This is a non-default scaling factor, so we need to copy
+                    // it across to the merged intrascale object according to
+                    // the mapping.
+                    if (sf.coulomb() != 1.0 or sf.lj() != 1.0)
+                    {
+                        // Get the index of the second atom in the merged system.
+                        const AtomIdx merged_aj = mapping.value(aj, AtomIdx(-1));
+
+                        // Only set the scaling factor if both atoms have been
+                        // mapped to the merged system. If one of the atoms
+                        // hasn't been mapped, then we can just use the default.
+                        if (merged_aj != AtomIdx(-1))
+                            nb_merged.set(merged_ai, merged_aj, sf);
+                    }
+                }
+            }
+        };
+
+        // Create the intrascale objects for the merged end-states.
+        CLJNBPairs intra0(merged_info);
+        CLJNBPairs intra1(merged_info);
+
+        // Copy the non-default scaling factors from the original intrascale
+        // objects to the merged intrascale objects according to the provided
+        // mappings.
+        copyIntrascale(nb1, intra0, mol1_merged_mapping);
+        copyIntrascale(nb0, intra0, mol0_merged_mapping);
+        copyIntrascale(nb0, intra1, mol0_merged_mapping);
+        copyIntrascale(nb1, intra1, mol1_merged_mapping);
+
+        // Assemble the intrascale objects into a property list to return.
+        SireBase::PropertyList ret;
+        ret.append(intra0);
+        ret.append(intra1);
+        return ret;
     }
 
 } // namespace SireIO
