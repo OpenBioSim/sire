@@ -82,56 +82,62 @@ using namespace SireStream;
 
 static const RegisterMetaType<GroAtom> r_groatom(NO_ROOT);
 
-QDataStream &operator<<(QDataStream &ds, const GroAtom &atom) {
-  writeHeader(ds, r_groatom, 3);
+QDataStream &operator<<(QDataStream &ds, const GroAtom &atom)
+{
+    writeHeader(ds, r_groatom, 3);
 
-  SharedDataStream sds(ds);
+    SharedDataStream sds(ds);
 
-  sds << atom.atmname << atom.resname << atom.chainname << atom.atmtyp
-      << atom.bndtyp << atom.atmnum << atom.resnum << atom.chggrp
-      << atom.chg.to(mod_electron) << atom.mss.to(g_per_mol);
+    sds << atom.atmname << atom.resname << atom.chainname << atom.atmtyp << atom.bndtyp << atom.atmnum << atom.resnum
+        << atom.chggrp << atom.chg.to(mod_electron) << atom.mss.to(g_per_mol);
 
-  return ds;
+    return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, GroAtom &atom) {
-  VersionID v = readHeader(ds, r_groatom);
+QDataStream &operator>>(QDataStream &ds, GroAtom &atom)
+{
+    VersionID v = readHeader(ds, r_groatom);
 
-  if (v == 3) {
-    SharedDataStream sds(ds);
+    if (v == 3)
+    {
+        SharedDataStream sds(ds);
 
-    double chg, mass;
+        double chg, mass;
 
-    sds >> atom.atmname >> atom.resname >> atom.chainname >> atom.atmtyp >>
-        atom.bndtyp >> atom.atmnum >> atom.resnum >> atom.chggrp >> chg >> mass;
+        sds >> atom.atmname >> atom.resname >> atom.chainname >> atom.atmtyp >> atom.bndtyp >> atom.atmnum >>
+            atom.resnum >> atom.chggrp >> chg >> mass;
 
-    atom.chg = chg * mod_electron;
-    atom.mss = mass * g_per_mol;
-  } else if (v == 2) {
-    SharedDataStream sds(ds);
+        atom.chg = chg * mod_electron;
+        atom.mss = mass * g_per_mol;
+    }
+    else if (v == 2)
+    {
+        SharedDataStream sds(ds);
 
-    double chg, mass;
+        double chg, mass;
 
-    sds >> atom.atmname >> atom.resname >> atom.atmtyp >> atom.bndtyp >>
-        atom.atmnum >> atom.resnum >> atom.chggrp >> chg >> mass;
+        sds >> atom.atmname >> atom.resname >> atom.atmtyp >> atom.bndtyp >> atom.atmnum >> atom.resnum >>
+            atom.chggrp >> chg >> mass;
 
-    atom.chg = chg * mod_electron;
-    atom.mss = mass * g_per_mol;
-  } else if (v == 1) {
-    SharedDataStream sds(ds);
+        atom.chg = chg * mod_electron;
+        atom.mss = mass * g_per_mol;
+    }
+    else if (v == 1)
+    {
+        SharedDataStream sds(ds);
 
-    double chg, mass;
+        double chg, mass;
 
-    sds >> atom.atmname >> atom.resname >> atom.atmtyp >> atom.atmnum >>
-        atom.resnum >> atom.chggrp >> chg >> mass;
+        sds >> atom.atmname >> atom.resname >> atom.atmtyp >> atom.atmnum >> atom.resnum >> atom.chggrp >> chg >> mass;
 
-    atom.bndtyp = atom.atmtyp;
-    atom.chg = chg * mod_electron;
-    atom.mss = mass * g_per_mol;
-  } else
-    throw version_error(v, "1,2", r_groatom, CODELOC);
+        atom.bndtyp = atom.atmtyp;
+        atom.chg = chg * mod_electron;
+        atom.mss = mass * g_per_mol;
+    }
+    else
+        throw version_error(v, "1,2,3", r_groatom, CODELOC);
 
-  return ds;
+    return ds;
 }
 
 /** Constructor */
@@ -279,52 +285,71 @@ void GroAtom::setMass(SireUnits::Dimension::MolarMass mass) {
 
 static const RegisterMetaType<GroMolType> r_gromoltyp(NO_ROOT);
 
-QDataStream &operator<<(QDataStream &ds, const GroMolType &moltyp) {
-  writeHeader(ds, r_gromoltyp, 3);
+QDataStream &operator<<(QDataStream &ds, const GroMolType &moltyp)
+{
+    writeHeader(ds, r_gromoltyp, 4);
 
-  SharedDataStream sds(ds);
-
-  sds << moltyp.nme << moltyp.warns << moltyp.atms0 << moltyp.atms1
-      << moltyp.bnds0 << moltyp.bnds1 << moltyp.angs0 << moltyp.angs1
-      << moltyp.dihs0 << moltyp.dihs1 << moltyp.cmaps0 << moltyp.cmaps1
-      << moltyp.first_atoms0 << moltyp.first_atoms1 << moltyp.ffield0
-      << moltyp.ffield1 << moltyp.nexcl0 << moltyp.nexcl1
-      << moltyp.is_perturbable;
-
-  return ds;
-}
-
-QDataStream &operator>>(QDataStream &ds, GroMolType &moltyp) {
-  VersionID v = readHeader(ds, r_gromoltyp);
-
-  if (v == 1 or v == 2 or v == 3) {
     SharedDataStream sds(ds);
 
-    sds >> moltyp.nme >> moltyp.warns >> moltyp.atms0 >> moltyp.atms1 >>
-        moltyp.bnds0 >> moltyp.bnds1 >> moltyp.angs0 >> moltyp.angs1 >>
-        moltyp.dihs0 >> moltyp.dihs1;
+    sds << moltyp.nme << moltyp.warns << moltyp.atms0 << moltyp.atms1 << moltyp.bnds0 << moltyp.bnds1 << moltyp.angs0
+        << moltyp.angs1 << moltyp.dihs0 << moltyp.dihs1
+        << moltyp.cmaps0 << moltyp.cmaps1 << moltyp.first_atoms0 << moltyp.first_atoms1 << moltyp.ffield0
+        << moltyp.ffield1 << moltyp.nexcl0 << moltyp.nexcl1 << moltyp.is_perturbable;
 
-    if (v == 3) {
-      sds >> moltyp.cmaps0 >> moltyp.cmaps1;
-    } else {
-      moltyp.cmaps0 = QHash<SireMol::CMAPID, QString>();
-      moltyp.cmaps1 = QHash<SireMol::CMAPID, QString>();
+    return ds;
+}
+
+QDataStream &operator>>(QDataStream &ds, GroMolType &moltyp)
+{
+    VersionID v = readHeader(ds, r_gromoltyp);
+
+    if (v == 4)
+    {
+        // v4: all fields in correct order, fixing the v3 write/read misalignment
+        // where ffield was written but not read back.
+        SharedDataStream sds(ds);
+
+        sds >> moltyp.nme >> moltyp.warns >> moltyp.atms0 >> moltyp.atms1 >> moltyp.bnds0 >> moltyp.bnds1 >>
+            moltyp.angs0 >> moltyp.angs1 >> moltyp.dihs0 >> moltyp.dihs1 >>
+            moltyp.cmaps0 >> moltyp.cmaps1 >> moltyp.first_atoms0 >> moltyp.first_atoms1 >>
+            moltyp.ffield0 >> moltyp.ffield1 >> moltyp.nexcl0 >> moltyp.nexcl1 >> moltyp.is_perturbable;
     }
+    else if (v == 1 or v == 2 or v == 3)
+    {
+        // v1/v2/v3: preserved as-is for backward compatibility.
+        // Note: v3 streams have a write/read misalignment (ffield was written
+        // but not read back); existing v3 caches will be corrupt. v4 fixes this.
+        SharedDataStream sds(ds);
 
-    sds >> moltyp.first_atoms0 >> moltyp.first_atoms1;
+        sds >> moltyp.nme >> moltyp.warns >> moltyp.atms0 >> moltyp.atms1 >> moltyp.bnds0 >> moltyp.bnds1 >>
+            moltyp.angs0 >> moltyp.angs1 >> moltyp.dihs0 >> moltyp.dihs1;
 
-    if (v == 2)
-      sds >> moltyp.ffield0 >> moltyp.ffield1;
-    else {
-      moltyp.ffield0 = MMDetail();
-      moltyp.ffield1 = MMDetail();
+        if (v == 3)
+        {
+            sds >> moltyp.cmaps0 >> moltyp.cmaps1;
+        }
+        else
+        {
+            moltyp.cmaps0 = QHash<SireMol::CMAPID, QString>();
+            moltyp.cmaps1 = QHash<SireMol::CMAPID, QString>();
+        }
+
+        sds >> moltyp.first_atoms0 >> moltyp.first_atoms1;
+
+        if (v == 2)
+            sds >> moltyp.ffield0 >> moltyp.ffield1;
+        else
+        {
+            moltyp.ffield0 = MMDetail();
+            moltyp.ffield1 = MMDetail();
+        }
+
+        sds >> moltyp.nexcl0 >> moltyp.nexcl1 >> moltyp.is_perturbable;
     }
+    else
+        throw version_error(v, "1,2,3,4", r_gromoltyp, CODELOC);
 
-    sds >> moltyp.nexcl0 >> moltyp.nexcl1 >> moltyp.is_perturbable;
-  } else
-    throw version_error(v, "1,2,3", r_gromoltyp, CODELOC);
-
-  return ds;
+    return ds;
 }
 
 /** Constructor */
