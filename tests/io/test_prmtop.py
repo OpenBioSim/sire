@@ -258,6 +258,20 @@ def test_reorder_prmtop(reordered_protein):
         for i in range(3):
             assert z[i].value() == pytest.approx(coord[i].value(), 1e-3)
 
+    # check that the zinc atoms are bonded to the proteins
+    bonds = mols.bonds("element Zn")
+
+    assert len(bonds) == 16
+
+    zn = sr.mol.Element("Zn")
+
+    for bond in bonds:
+        assert bond[0].element() == zn or bond[1].element() == zn
+        assert bond[0].molecule() == bond[1].molecule()
+
+    assert mols[0]["element Zn"].num_atoms() == 2
+    assert mols[1]["element Zn"].num_atoms() == 2
+
 
 @pytest.mark.slow
 def test_glycam(tmpdir):
@@ -331,17 +345,3 @@ def test_glycam(tmpdir):
     # interactions and a different energy.
     mols2 = sr.load(f)
     assert mols2.energy().value() == pytest.approx(mols.energy().value(), rel=1e-3)
-
-    # check that the zinc atoms are bonded to the proteins
-    bonds = mols.bonds("element Zn")
-
-    assert len(bonds) == 16
-
-    zn = sr.mol.Element("Zn")
-
-    for bond in bonds:
-        assert bond[0].element() == zn or bond[1].element() == zn
-        assert bond[0].molecule() == bond[1].molecule()
-
-    assert mols[0]["element Zn"].num_atoms() == 2
-    assert mols[1]["element Zn"].num_atoms() == 2
