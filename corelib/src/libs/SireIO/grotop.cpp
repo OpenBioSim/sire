@@ -1420,7 +1420,7 @@ GroMolType &GroMolType::operator=(const GroMolType &other) {
     ffield0 = other.ffield0;
     ffield1 = other.ffield1;
     nexcl0 = other.nexcl0;
-    nexcl0 = other.nexcl1;
+    nexcl1 = other.nexcl1;
     is_perturbable = other.is_perturbable;
   }
 
