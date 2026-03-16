@@ -1897,7 +1897,8 @@ System Gro87::startSystem(const PropertyMap &map) const
         // resolution is O(1) rather than a linear scan.
         QSet<int> used_resnums;
         int next_unique = 0;
-        auto unique_resnum = [&](int resnum) -> ResNum {
+        auto unique_resnum = [&](int resnum) -> ResNum
+        {
             if (!used_resnums.contains(resnum))
             {
                 used_resnums.insert(resnum);

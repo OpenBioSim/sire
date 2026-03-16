@@ -39,9 +39,9 @@
 #include "SireMol/connectivity.h"
 #include "SireMol/core.h"
 #include "SireMol/mgname.h"
+#include "SireMol/moleculeinfodata.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/molidx.h"
-#include "SireMol/moleculeinfodata.h"
 
 #include "SireVol/periodicbox.h"
 #include "SireVol/triclinicbox.h"
@@ -1631,7 +1631,7 @@ namespace SireIO
 
     Molecule createSodiumIon(const Vector &coords, const QString model, const PropertyMap &map)
     {
-		// Strip all whitespace from the model name and convert to upper case.
+        // Strip all whitespace from the model name and convert to upper case.
         auto _model = model.simplified().replace(" ", "").toUpper();
 
         // Create a hash between the allowed model names and their templace files.
@@ -1662,7 +1662,7 @@ namespace SireIO
 
     Molecule createChlorineIon(const Vector &coords, const QString model, const PropertyMap &map)
     {
-		// Strip all whitespace from the model name and convert to upper case.
+        // Strip all whitespace from the model name and convert to upper case.
         auto _model = model.simplified().replace(" ", "").toUpper();
 
         // Create a hash between the allowed model names and their templace files.
@@ -1734,9 +1734,9 @@ namespace SireIO
 
                 // Set the new coordinates.
                 molecule = molecule.edit()
-                                   .atom(AtomIdx(j))
-                                   .setProperty(coord_prop, coord)
-                                   .molecule();
+                               .atom(AtomIdx(j))
+                               .setProperty(coord_prop, coord)
+                               .molecule();
             }
 
             // Update the molecule in the system.

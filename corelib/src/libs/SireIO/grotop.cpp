@@ -46,11 +46,11 @@
 
 #include "SireMM/atomljs.h"
 #include "SireMM/cljnbpairs.h"
+#include "SireMM/cmapfunctions.h"
 #include "SireMM/fouratomfunctions.h"
 #include "SireMM/internalff.h"
 #include "SireMM/threeatomfunctions.h"
 #include "SireMM/twoatomfunctions.h"
-#include "SireMM/cmapfunctions.h"
 
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
@@ -2643,7 +2643,8 @@ QStringList GroMolType::settlesLines(bool is_lambda1) const
     // lambda function to check whether a four point water model
     // is OPC water, which is determined by the virtual site charge
     // value being < -1.1
-    auto is_opc = [this, is_lambda1]() -> bool {
+    auto is_opc = [this, is_lambda1]() -> bool
+    {
         if (is_lambda1)
         {
             for (const auto &atm : atms1)
