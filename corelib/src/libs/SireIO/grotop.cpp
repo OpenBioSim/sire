@@ -4093,6 +4093,34 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype,
     // Store the molinfo object;
     const auto molinfo = mol.info();
 
+    // Precompute the set of genuine 1-4 bonded atom pairs once. This lets
+    // us distinguish GLYCAM-style 1-4 pairs (CLJScaleFactor(1,1)) from
+    // 1-5+ pairs that return the same default value but must not appear in
+    // [pairs]. Empty if connectivity is unavailable (fallback: write all).
+    QSet<QPair<AtomIdx, AtomIdx>> pairs_14;
+
+    try {
+      const auto conn = mol.property("connectivity").asA<Connectivity>();
+      const int natoms = molinfo.nAtoms();
+      for (int a = 0; a < natoms; ++a) {
+        const AtomIdx aidx(a);
+        for (const auto &b : conn.connectionsTo(aidx)) {
+          for (const auto &c : conn.connectionsTo(b)) {
+            if (c == aidx)
+              continue;
+            for (const auto &d : conn.connectionsTo(c)) {
+              if (d == b or d == aidx)
+                continue;
+              // aidx-b-c-d is a dihedral: aidx and d are 1-4 bonded.
+              pairs_14.insert(QPair<AtomIdx, AtomIdx>(aidx, d));
+              pairs_14.insert(QPair<AtomIdx, AtomIdx>(d, aidx));
+            }
+          }
+        }
+      }
+    } catch (...) {
+    }
+
     if (is_perturbable) {
       CLJNBPairs scl0;
       CLJNBPairs scl1;
@@ -4130,9 +4158,6 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype,
       } catch (...) {
       }
 
-      // A set of recorded 1-4 pairs.
-      QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
-
       bool fix_null_perturbable_14s = false;
 
       if (mol.hasProperty("fix_null_perturbable_14s"))
@@ -4140,122 +4165,88 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype,
                                        .asA<BooleanProperty>()
                                        .value();
 
-      // Must record every pair that has a non-default scaling factor.
-      // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
-      for (int i = 0; i < scl0.nGroups(); ++i) {
-        for (int j = 0; j < scl0.nGroups(); ++j) {
-          const auto s0 = scl0.get(CGIdx(i), CGIdx(j));
-          const auto s1 = scl1.get(CGIdx(i), CGIdx(j));
-
-          if (not s0.isEmpty() and not s1.isEmpty()) {
-            const auto idxs0 = molinfo.getAtomsIn(CGIdx(i));
-            const auto idxs1 = molinfo.getAtomsIn(CGIdx(j));
-
-            for (const auto &idx0 : idxs0) {
-              for (const auto &idx1 : idxs1) {
-                QPair<AtomIdx, AtomIdx> pair =
-                    QPair<AtomIdx, AtomIdx>(idx0, idx1);
-
-                // Make sure this is a new atom pair.
-                if (not recorded_pairs.contains(pair)) {
-                  // Insert the pair and its inverse.
-                  recorded_pairs.insert(pair);
-                  pair = QPair<AtomIdx, AtomIdx>(idx1, idx0);
-                  recorded_pairs.insert(pair);
-
-                  const auto s0 = scl0.get(idx0, idx1);
-                  const auto s1 = scl1.get(idx0, idx1);
-
-                  if (s0.coulomb() == 1 and s0.lj() == 1 and
-                      s1.coulomb() == 1 and s1.lj() == 1) {
-                    // Both endstates have full 1-4 interaction (e.g. GLYCAM
-                    // SCNB=1.0/SCEE=1.0). Write as funct=2 with explicit LJ
-                    // parameters from state 0 (identical in both states).
-                    if (has_ljs and has_charges) {
-                      const auto cgidx0 = molinfo.cgAtomIdx(idx0);
-                      const auto cgidx1 = molinfo.cgAtomIdx(idx1);
-
-                      const auto &lj0 = ljs0.at(cgidx0);
-                      const auto &lj1 = ljs0.at(cgidx1);
-
-                      LJParameter lj_ij;
-                      if (combining_rules == 2)
-                        lj_ij = lj0.combineArithmetic(lj1);
-                      else
-                        lj_ij = lj0.combineGeometric(lj1);
-
-                      const double qi = charges0.at(cgidx0).to(mod_electron);
-                      const double qj = charges0.at(cgidx1).to(mod_electron);
-
-                      scllines.append(
-                          QString("%1 %2     2  1.0  %3  %4  %5  %6")
-                              .arg(idx0 + 1, 6)
-                              .arg(idx1 + 1, 6)
-                              .arg(qi, 11, 'f', 6)
-                              .arg(qj, 11, 'f', 6)
-                              .arg(lj_ij.sigma().to(nanometer), 18, 'e', 11)
-                              .arg(lj_ij.epsilon().to(kJ_per_mol), 18, 'e',
-                                   11));
-                    } else {
-                      scllines.append(QString("%1 %2     1")
-                                          .arg(idx0 + 1, 6)
-                                          .arg(idx1 + 1, 6));
-                    }
-                  } else if (not(s0.coulomb() == 0 and s0.lj() == 0 and
-                                 s1.coulomb() == 0 and s1.lj() == 0)) {
-                    // This is a non-default, non-full pair (e.g. standard AMBER
-                    // partial scaling, or a mixed perturbation).
-                    if (fix_null_perturbable_14s) {
-                      // get the initial and perturbed charge and LJ parameters
-                      const auto &lj0_0 = ljs0.get(idx0);
-                      const auto &lj0_1 = ljs1.get(idx0);
-                      const auto &lj1_0 = ljs0.get(idx1);
-                      const auto &lj1_1 = ljs1.get(idx1);
-
-                      if (lj0_0.epsilon().value() == 0 or
-                          lj0_1.epsilon().value() == 0 or
-                          lj1_0.epsilon().value() == 0 or
-                          lj1_1.epsilon().value() == 0) {
-                        // we need to avoid having a null 1-4 LJ parameter, so
-                        // use the non-dummy state
-                        LJParameter lj0, lj1;
-
-                        if (lj0_0.epsilon().value() == 0)
-                          lj0 = lj0_1;
-                        else
-                          lj0 = lj0_0;
-
-                        if (lj1_0.epsilon().value() == 0)
-                          lj1 = lj1_1;
-                        else
-                          lj1 = lj1_0;
-
-                        auto lj = (combining_rules == 2) ? lj0.combineArithmetic(lj1)
-                                                          : lj0.combineGeometric(lj1);
-
-                        double scl = s0.lj();
-
-                        if (scl == 0)
-                          scl = s1.lj();
-
-                        scllines.append(
-                            QString("%1 %2     1  %3  %4  %3  %4")
+      // When connectivity is available, iterate over genuine 1-4 bonded pairs
+      // — O(N_dihedrals). Otherwise use nonDefaultElements() on each CG pair
+      // — O(N_bonded). Both avoid the O(N^2) atom-pair loop.
+      const auto write_pair14 = [&](AtomIdx idx0, AtomIdx idx1) {
+        const auto s0 = scl0.get(idx0, idx1);
+        const auto s1 = scl1.get(idx0, idx1);
+        if (s0.coulomb() == 1 and s0.lj() == 1 and
+            s1.coulomb() == 1 and s1.lj() == 1) {
+          // Both end states have full 1-4 interaction (GLYCAM). Write as
+          // funct=2 with explicit LJ from state 0.
+          if (has_ljs and has_charges) {
+            const auto cgidx0 = molinfo.cgAtomIdx(idx0);
+            const auto cgidx1 = molinfo.cgAtomIdx(idx1);
+            const auto &lj0 = ljs0.at(cgidx0);
+            const auto &lj1 = ljs0.at(cgidx1);
+            LJParameter lj_ij;
+            if (combining_rules == 2)
+              lj_ij = lj0.combineArithmetic(lj1);
+            else
+              lj_ij = lj0.combineGeometric(lj1);
+            const double qi = charges0.at(cgidx0).to(mod_electron);
+            const double qj = charges0.at(cgidx1).to(mod_electron);
+            scllines.append(
+                QString("%1 %2     2  1.0  %3  %4  %5  %6")
+                    .arg(idx0 + 1, 6)
+                    .arg(idx1 + 1, 6)
+                    .arg(qi, 11, 'f', 6)
+                    .arg(qj, 11, 'f', 6)
+                    .arg(lj_ij.sigma().to(nanometer), 18, 'e', 11)
+                    .arg(lj_ij.epsilon().to(kJ_per_mol), 18, 'e', 11));
+          } else {
+            scllines.append(QString("%1 %2     1")
                                 .arg(idx0 + 1, 6)
-                                .arg(idx1 + 1, 6)
-                                .arg(lj.sigma().to(nanometer), 11, 'f', 5)
-                                .arg(scl * lj.epsilon().to(kJ_per_mol), 11, 'f',
-                                     5));
+                                .arg(idx1 + 1, 6));
+          }
+        } else if (not(s0.coulomb() == 0 and s0.lj() == 0 and
+                       s1.coulomb() == 0 and s1.lj() == 0)) {
+          // Standard partial 1-4 scaling, or a mixed perturbation.
+          if (fix_null_perturbable_14s) {
+            const auto &lj0_0 = ljs0.get(idx0);
+            const auto &lj0_1 = ljs1.get(idx0);
+            const auto &lj1_0 = ljs0.get(idx1);
+            const auto &lj1_1 = ljs1.get(idx1);
+            if (lj0_0.epsilon().value() == 0 or lj0_1.epsilon().value() == 0 or
+                lj1_0.epsilon().value() == 0 or lj1_1.epsilon().value() == 0) {
+              LJParameter lj0, lj1;
+              lj0 = (lj0_0.epsilon().value() == 0) ? lj0_1 : lj0_0;
+              lj1 = (lj1_0.epsilon().value() == 0) ? lj1_1 : lj1_0;
+              auto lj = (combining_rules == 2) ? lj0.combineArithmetic(lj1)
+                                               : lj0.combineGeometric(lj1);
+              double scl = (s0.lj() != 0) ? s0.lj() : s1.lj();
+              scllines.append(
+                  QString("%1 %2     1  %3  %4  %3  %4")
+                      .arg(idx0 + 1, 6)
+                      .arg(idx1 + 1, 6)
+                      .arg(lj.sigma().to(nanometer), 11, 'f', 5)
+                      .arg(scl * lj.epsilon().to(kJ_per_mol), 11, 'f', 5));
+              return;
+            }
+          }
+          scllines.append(QString("%1 %2     1")
+                              .arg(idx0 + 1, 6)
+                              .arg(idx1 + 1, 6));
+        }
+      };
 
-                        continue;
-                      }
-                    }
-
-                    scllines.append(QString("%1 %2     1")
-                                        .arg(idx0 + 1, 6)
-                                        .arg(idx1 + 1, 6));
-                  }
-                }
-              }
+      if (not pairs_14.isEmpty()) {
+        for (const auto &pair14 : pairs_14) {
+          if (pair14.first >= pair14.second)
+            continue;
+          write_pair14(pair14.first, pair14.second);
+        }
+      } else {
+        // No connectivity: iterate over non-default CG atom pair entries.
+        // GLYCAM-style (1,1) pairs cannot be identified here and are omitted.
+        for (int i = 0; i < scl0.nGroups(); ++i) {
+          for (int j = 0; j < scl0.nGroups(); ++j) {
+            for (const auto &[row, col, s0] :
+                 scl0.get(CGIdx(i), CGIdx(j)).nonDefaultElements()) {
+              if (row >= col)
+                continue;
+              write_pair14(AtomIdx(row), AtomIdx(col));
             }
           }
         }
@@ -4275,7 +4266,6 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype,
       bool has_ljs = false;
       bool has_charges = false;
 
-
       try {
         ljs = mol.property("LJ").asA<AtomLJs>();
         has_ljs = true;
@@ -4288,82 +4278,66 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype,
       } catch (...) {
       }
 
-      // A set of recorded 1-4 pairs.
-      QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
-
-      // Must record every pair that has a non-default scaling factor.
-      // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
-      for (int i = 0; i < scl.nGroups(); ++i) {
-        for (int j = 0; j < scl.nGroups(); ++j) {
-          const auto s = scl.get(CGIdx(i), CGIdx(j));
-
-          if (not s.isEmpty()) {
-            const auto idxs0 = molinfo.getAtomsIn(CGIdx(i));
-            const auto idxs1 = molinfo.getAtomsIn(CGIdx(j));
-
-            for (const auto &idx0 : idxs0) {
-              for (const auto &idx1 : idxs1) {
-                QPair<AtomIdx, AtomIdx> pair =
-                    QPair<AtomIdx, AtomIdx>(idx0, idx1);
-
-                // Make sure this is a new atom pair.
-                if (not recorded_pairs.contains(pair)) {
-                  // Insert the pair and its inverse.
-                  recorded_pairs.insert(pair);
-                  pair = QPair<AtomIdx, AtomIdx>(idx1, idx0);
-                  recorded_pairs.insert(pair);
-
-                  const auto s = scl.get(idx0, idx1);
-
-                  if (s.coulomb() == 0 and s.lj() == 0) {
-                    // Fully excluded: don't write.
-                  } else if (s.coulomb() == 1 and s.lj() == 1) {
-                    // Full 1-4 interaction (e.g. GLYCAM with SCNB=1.0,
-                    // SCEE=1.0). Must write as funct=2 with explicit LJ
-                    // parameters because funct=1 with gen-pairs would apply
-                    // fudgeLJ and reduce the interaction, and not listing the
-                    // pair would give zero interaction.
-                    if (has_ljs and has_charges) {
-                      const auto cgidx0 = molinfo.cgAtomIdx(idx0);
-                      const auto cgidx1 = molinfo.cgAtomIdx(idx1);
-
-                      const auto &lj0 = ljs.at(cgidx0);
-                      const auto &lj1 = ljs.at(cgidx1);
-
-                      LJParameter lj_ij;
-                      if (combining_rules == 2)
-                        lj_ij = lj0.combineArithmetic(lj1);
-                      else
-                        lj_ij = lj0.combineGeometric(lj1);
-
-                      const double qi = charges.at(cgidx0).to(mod_electron);
-                      const double qj = charges.at(cgidx1).to(mod_electron);
-
-                      scllines.append(
-                          QString("%1 %2     2  1.0  %3  %4  %5  %6")
+      // When connectivity is available, iterate over genuine 1-4 bonded pairs
+      // — O(N_dihedrals). Otherwise use nonDefaultElements() on each CG pair
+      // — O(N_bonded). Both avoid the O(N^2) atom-pair loop.
+      const auto write_pair14 = [&](AtomIdx idx0, AtomIdx idx1) {
+        const auto s = scl.get(idx0, idx1);
+        if (s.coulomb() == 0 and s.lj() == 0) {
+          // excluded — skip
+        } else if (s.coulomb() == 1 and s.lj() == 1) {
+          // Full 1-4 interaction (GLYCAM). Write as funct=2 with explicit LJ
+          // parameters because funct=1 would apply fudgeLJ scaling.
+          if (has_ljs and has_charges) {
+            const auto cgidx0 = molinfo.cgAtomIdx(idx0);
+            const auto cgidx1 = molinfo.cgAtomIdx(idx1);
+            const auto &lj0 = ljs.at(cgidx0);
+            const auto &lj1 = ljs.at(cgidx1);
+            LJParameter lj_ij;
+            if (combining_rules == 2)
+              lj_ij = lj0.combineArithmetic(lj1);
+            else
+              lj_ij = lj0.combineGeometric(lj1);
+            const double qi = charges.at(cgidx0).to(mod_electron);
+            const double qj = charges.at(cgidx1).to(mod_electron);
+            scllines.append(
+                QString("%1 %2     2  1.0  %3  %4  %5  %6")
+                    .arg(idx0 + 1, 6)
+                    .arg(idx1 + 1, 6)
+                    .arg(qi, 11, 'f', 6)
+                    .arg(qj, 11, 'f', 6)
+                    .arg(lj_ij.sigma().to(nanometer), 18, 'e', 11)
+                    .arg(lj_ij.epsilon().to(kJ_per_mol), 18, 'e', 11));
+          } else {
+            // Fall back to funct=1; energy will be wrong if fudgeLJ != 1.0.
+            scllines.append(QString("%1 %2     1")
+                                .arg(idx0 + 1, 6)
+                                .arg(idx1 + 1, 6));
+          }
+        } else {
+          // Standard partial 1-4 scaling (e.g. AMBER). Write as funct=1.
+          scllines.append(QString("%1 %2     1")
                               .arg(idx0 + 1, 6)
-                              .arg(idx1 + 1, 6)
-                              .arg(qi, 11, 'f', 6)
-                              .arg(qj, 11, 'f', 6)
-                              .arg(lj_ij.sigma().to(nanometer), 18, 'e', 11)
-                              .arg(lj_ij.epsilon().to(kJ_per_mol), 18, 'e',
-                                   11));
-                    } else {
-                      // Fall back to funct=1; the energy will be wrong if
-                      // fudgeLJ != 1.0, but we have no LJ parameters to use.
-                      scllines.append(QString("%1 %2     1")
-                                          .arg(idx0 + 1, 6)
-                                          .arg(idx1 + 1, 6));
-                    }
-                  } else {
-                    // Standard partial 1-4 (e.g. fudgeQQ/fudgeLJ): write as
-                    // funct=1.
-                    scllines.append(QString("%1 %2     1")
-                                        .arg(idx0 + 1, 6)
-                                        .arg(idx1 + 1, 6));
-                  }
-                }
-              }
+                              .arg(idx1 + 1, 6));
+        }
+      };
+
+      if (not pairs_14.isEmpty()) {
+        for (const auto &pair14 : pairs_14) {
+          if (pair14.first >= pair14.second)
+            continue;
+          write_pair14(pair14.first, pair14.second);
+        }
+      } else {
+        // No connectivity: iterate over non-default CG atom pair entries.
+        // GLYCAM-style (1,1) pairs cannot be identified here and are omitted.
+        for (int i = 0; i < scl.nGroups(); ++i) {
+          for (int j = 0; j < scl.nGroups(); ++j) {
+            for (const auto &[row, col, s] :
+                 scl.get(CGIdx(i), CGIdx(j)).nonDefaultElements()) {
+              if (row >= col)
+                continue;
+              write_pair14(AtomIdx(row), AtomIdx(col));
             }
           }
         }
