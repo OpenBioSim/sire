@@ -43,6 +43,7 @@
 #include "SireMM/cmapparameter.h"
 
 #include <QMultiHash>
+#include <QPair>
 
 SIRE_BEGIN_HEADER
 
@@ -247,6 +248,9 @@ namespace SireIO
         QMultiHash<SireMol::DihedralID, GromacsDihedral> dihedrals(bool is_lambda1 = false) const;
         QHash<SireMol::CMAPID, QString> cmaps(bool is_lambda1 = false) const;
 
+        void addExplicitPair(const SireMol::BondID &pair, double cscl, double ljscl);
+        QHash<SireMol::BondID, QPair<double, double>> explicitPairs() const;
+
         bool isWater(bool is_lambda1 = false) const;
         QStringList settlesLines(bool is_lambda1 = false) const;
 
@@ -295,6 +299,12 @@ namespace SireIO
         /** The details about the forcefield used for this molecule */
         SireMM::MMDetail ffield0;
         SireMM::MMDetail ffield1;
+
+        /** Explicit 1-4 pair scale factors from [pairs] funct=2 lines.
+         *  Key: the atom pair. Value: (coulomb_scl, lj_scl) where
+         *  coulomb_scl comes from the fudgeQQ column and lj_scl = 1.0
+         *  (since funct=2 LJ parameters are used directly, not further scaled). */
+        QHash<SireMol::BondID, QPair<double, double>> explicit_pairs;
 
         /** The number of excluded atoms */
         qint64 nexcl0;
