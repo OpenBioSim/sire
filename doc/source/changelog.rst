@@ -17,6 +17,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
+* Fixed a bug in the AMBER prmtop writer where CMAP atom indices were calculated
+  incorrectly for systems containing more than one molecule with CMAP terms (e.g.
+  multi-chain glycoproteins).
+
+* Add convenience function to ``sire.mol.dynamics`` to get current energy trajectory records.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
