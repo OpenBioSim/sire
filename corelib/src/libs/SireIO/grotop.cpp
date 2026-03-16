@@ -1391,8 +1391,9 @@ GroMolType::GroMolType(const GroMolType &other)
       first_atoms1(other.first_atoms1), bnds0(other.bnds0), bnds1(other.bnds1),
       angs0(other.angs0), angs1(other.angs1), dihs0(other.dihs0),
       dihs1(other.dihs1), cmaps0(other.cmaps0), cmaps1(other.cmaps1),
-      explicit_pairs(other.explicit_pairs), ffield0(other.ffield0),
-      ffield1(other.ffield1), nexcl0(other.nexcl0), nexcl1(other.nexcl1),
+      ffield0(other.ffield0), ffield1(other.ffield1),
+      explicit_pairs(other.explicit_pairs), nexcl0(other.nexcl0),
+      nexcl1(other.nexcl1),
       is_perturbable(other.is_perturbable) {}
 
 /** Destructor */
