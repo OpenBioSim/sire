@@ -7,6 +7,13 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/propertylist.h"
+
+#include "SireMM/cljnbpairs.h"
+
+#include "SireMol/atomidxmapping.h"
+#include "SireMol/moleculeinfodata.h"
+
 #include "SireBase/getinstalldir.h"
 
 #include "SireBase/parallel.h"
@@ -871,16 +878,45 @@ void register_free_functions(){
     }
 
     { //::SireIO::updateCoordinatesAndVelocities
-    
+
         typedef ::boost::tuples::tuple< SireSystem::System, QHash< SireMol::MolIdx, SireMol::MolIdx >, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( *updateCoordinatesAndVelocities_function_type )( ::SireSystem::System const &,::SireSystem::System const &,::SireSystem::System const &,::QHash< SireMol::MolIdx, SireMol::MolIdx > const &,bool const,::SireBase::PropertyMap const &,::SireBase::PropertyMap const & );
         updateCoordinatesAndVelocities_function_type updateCoordinatesAndVelocities_function_value( &::SireIO::updateCoordinatesAndVelocities );
-        
-        bp::def( 
+
+        bp::def(
             "updateCoordinatesAndVelocities"
             , updateCoordinatesAndVelocities_function_value
             , ( bp::arg("original_system"), bp::arg("renumbered_system"), bp::arg("updated_system"), bp::arg("molecule_mapping"), bp::arg("is_lambda1")=(bool const)(false), bp::arg("map0")=SireBase::PropertyMap(), bp::arg("map1")=SireBase::PropertyMap() )
             , "Update the coordinates and velocities of original_system with those from\nupdated_system.\n\nPar:am system_original\nThe original system.\n\nPar:am system_renumbered\nThe original system, atoms and residues have been renumbered to be\nunique and in ascending order.\n\nPar:am system_updated\nThe updated system, where molecules may not be in the same order.\n\nPar:am map0\nA dictionary of user-defined molecular property names for system0.\n\nPar:am map1\nA dictionary of user-defined molecular property names for system1.\n\nRetval: system, mapping\nThe system with updated coordinates and velocities and a mapping\nbetween the molecule indices in both systems.\n" );
-    
+
+    }
+
+    { //::SireIO::mergeIntrascale
+
+        typedef ::SireBase::PropertyList ( *mergeIntrascale_function_type )(
+            ::SireMM::CLJNBPairs const &,
+            ::SireMM::CLJNBPairs const &,
+            ::SireMol::MoleculeInfoData const &,
+            ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > const &,
+            ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > const & );
+        mergeIntrascale_function_type mergeIntrascale_function_value( &::SireIO::mergeIntrascale );
+
+        bp::def(
+            "mergeIntrascale"
+            , mergeIntrascale_function_value
+            , ( bp::arg("nb0"), bp::arg("nb1"), bp::arg("merged_info"),
+                bp::arg("mol0_merged_mapping"), bp::arg("mol1_merged_mapping") )
+            , "Merge the CLJNBPairs (intrascale) of two molecules into the end-state\n"
+              "intrascales of a perturbable merged molecule.\n"
+              "\n"
+              "Uses a two-pass approach to correctly preserve actual per-pair scale factors\n"
+              "(including GLYCAM funct=2 overrides of 1.0/1.0) without relying on global\n"
+              "forcefield scale factors. For intrascale0, nb1 is copied first (so ghost\n"
+              "atoms from mol1 get correct exclusions), then nb0 overwrites (so mapped and\n"
+              "mol0-unique atoms get correct state-0 values). intrascale1 is built with the\n"
+              "same logic in reverse.\n"
+              "\n"
+              "Returns a PropertyList [intrascale0, intrascale1].\n" );
+
     }
 
 }
