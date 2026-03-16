@@ -378,7 +378,7 @@ def generate_recipe(data, features, git_remote, git_branch, git_version, git_num
     lines.append("      - if: win")
     lines.append("        then: set PYTHONUTF8=1")
     lines.append("        else: export PYTHONUTF8=1")
-    lines.append("      - pytest -svvv --color=yes --runveryslow ./tests")
+    lines.append("      - pytest -vvv --color=yes --runveryslow ./tests")
     lines.append("    files:")
     lines.append("      source:")
     lines.append("        - tests/")

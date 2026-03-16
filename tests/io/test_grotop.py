@@ -478,8 +478,7 @@ def test_glycam(tmpdir):
         glycan_lj[1].epsilon().value(), rel=1e-3
     )
 
-    e_orig = mols.energy().value()
-    e_rt = mols2.energy().value()
-    print(f"\ntest_glycam (grotop): original energy = {e_orig}, roundtrip energy = {e_rt}")
+    # The CLJ energy calculation returns NaN for large solvated systems on Windows
+    # (a separate Windows-specific bug). Skip the energy check on that platform.
     if sys.platform != "win32":
-        assert e_rt == pytest.approx(e_orig, rel=1e-3)
+        assert mols2.energy().value() == pytest.approx(mols.energy().value(), rel=1e-3)
