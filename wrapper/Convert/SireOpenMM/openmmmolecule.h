@@ -280,9 +280,9 @@ namespace SireOpenMM
         QVector<double> getTorsionPhases0() const;
         QVector<double> getTorsionPhases1() const;
 
-        QVector<double> getCMAPGrids0() const;
-        QVector<double> getCMAPGrids1() const;
-        QVector<int> getCMAPGridSizes() const;
+        const QVector<double> &getCMAPGrids0() const;
+        const QVector<double> &getCMAPGrids1() const;
+        const QVector<int> &getCMAPGridSizes() const;
 
         /** Return the 5-atom indices (molecule-local) for each CMAP torsion,
          *  in the same order as getCMAPGridSizes(). Used for REST2 scaling. */

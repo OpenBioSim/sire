@@ -2966,19 +2966,19 @@ PerturbableOpenMMMolecule::getCMAPAtoms() const
 }
 
 /** Return flat concatenated CMAP grid values for state 0 (column-major, kJ/mol) */
-QVector<double> PerturbableOpenMMMolecule::getCMAPGrids0() const
+const QVector<double> &PerturbableOpenMMMolecule::getCMAPGrids0() const
 {
     return cmap_grid0;
 }
 
 /** Return flat concatenated CMAP grid values for state 1 (column-major, kJ/mol) */
-QVector<double> PerturbableOpenMMMolecule::getCMAPGrids1() const
+const QVector<double> &PerturbableOpenMMMolecule::getCMAPGrids1() const
 {
     return cmap_grid1;
 }
 
 /** Return the grid dimension N for each CMAP torsion (grid is N x N) */
-QVector<int> PerturbableOpenMMMolecule::getCMAPGridSizes() const
+const QVector<int> &PerturbableOpenMMMolecule::getCMAPGridSizes() const
 {
     return cmap_grid_sizes;
 }
