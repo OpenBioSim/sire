@@ -77,11 +77,16 @@ def _get_gromacs_dir():
 
     if not os.path.exists(gromacs_tbz2):
         try:
+            import socket
             import urllib.request
 
-            urllib.request.urlretrieve(f"{tutorial_url}/gromacs.tar.bz2", gromacs_tbz2)
-        except Exception:
-            # we cannot download - just give up
+            with urllib.request.urlopen(
+                f"{tutorial_url}/gromacs.tar.bz2", timeout=5
+            ) as response:
+                with open(gromacs_tbz2, "wb") as f:
+                    f.write(response.read())
+        except (Exception, socket.timeout):
+            # we cannot download - continue without GROMACS
             return None
 
     if not os.path.exists(gromacs_tbz2):
@@ -443,7 +448,7 @@ def load(
         gromacs_path = _get_gromacs_dir()
 
     m = {
-        "GROMACS_PATH": _get_gromacs_dir(),
+        "GROMACS_PATH": gromacs_path,
         "show_warnings": show_warnings,
         "parallel": parallel,
         "ignore_topology_frame": ignore_topology_frame,

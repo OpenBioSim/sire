@@ -27,6 +27,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add support for CMAP terms in the OpenMM conversion layer.
 
+* Fix hang in ``sire.load`` function when shared GROMACS topology path is missing.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
