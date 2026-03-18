@@ -81,7 +81,6 @@ def test_openmm_cmap_energy(tmpdir, multichain_cmap, openmm_platform):
     assert sire_energy == pytest.approx(direct_energy, abs=1.0)
 
 
-@pytest.mark.slow
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
@@ -89,29 +88,20 @@ def test_openmm_cmap_energy(tmpdir, multichain_cmap, openmm_platform):
 def test_openmm_cmap_perturbable(multichain_cmap, openmm_platform):
     """
     Verify that CMAPTorsionForce grids are correctly handled for a perturbable
-    molecule. In practice, CMAP backbone terms are not perturbed in protein FEP,
-    so both end states carry identical CMAP. The test checks that the perturbable
-    code path correctly applies the same grids at all lambda values and that
+    molecule. The pre-merged stream file merged_molecule_cmap.s3 contains a
+    perturbable molecule whose two end states are identical (an identity
+    perturbation of a CHARMM protein chain), so both end states carry the same
+    CMAP backbone correction terms. The test checks that the perturbable code
+    path correctly applies the same grids at all lambda values and that
     set_lambda does not corrupt the force parameters.
-
-    A region-of-interest merge is used to avoid the O(n²) intrascale merge cost
-    for a large protein.
     """
     import openmm
-    import BioSimSpace as BSS
 
     platform_name = openmm_platform or "CPU"
 
     mol0 = multichain_cmap[0]
 
-    # Both end states are identical: same molecule, same CMAP everywhere.
-    mol0_bss = BSS._SireWrappers.Molecule(mol0)
-    mol1_bss = BSS._SireWrappers.Molecule(mol0.clone())
-    mapping = {i: i for i in range(mol0.num_atoms())}
-    pert_mol = BSS.Align.merge(mol0_bss, mol1_bss, mapping=mapping, roi=[1, 2, 3])
-
-    mols_pert = sr.system.System()
-    mols_pert.add(pert_mol._sire_object)
+    mols_pert = sr.load_test_files("merged_molecule_cmap.s3")
     mols_pert = sr.morph.link_to_reference(mols_pert)
 
     omm_map = {
