@@ -23,6 +23,7 @@ def test_openmm_cmap_energy(tmpdir, multichain_cmap, openmm_platform):
     mols = sr.system.System()
     mols.add(multichain_cmap[0])
     mols.add(multichain_cmap[1])
+    mols.add(multichain_cmap[2])
 
     # Sanity-check: at least two molecules must carry CMAP so that the
     # multi-chain code path is exercised.
