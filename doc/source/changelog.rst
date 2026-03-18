@@ -25,6 +25,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed parsing of AMBER and GROMACS GLYCAM force field topologies.
 
+* Add support for CMAP terms in the OpenMM conversion layer.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
