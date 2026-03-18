@@ -139,11 +139,13 @@ def test_openmm_cmap_perturbable(multichain_cmap, openmm_platform):
         return []
 
     def unique_grids(torsion_grids, decimals=3):
-        """Return the sorted set of unique (size, rounded-grid) tuples.
+        """
+        Return the sorted set of unique (size, rounded-grid) tuples.
 
         Torsion ordering can differ between the perturbable and non-perturbable
         code paths, so we compare the sets of unique grid shapes rather than
-        comparing torsion-by-torsion."""
+        comparing torsion-by-torsion.
+        """
         seen = set()
         result = []
         for size, grid in torsion_grids:
