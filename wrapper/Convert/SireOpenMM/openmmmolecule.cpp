@@ -1166,6 +1166,65 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
     }
 
+    // now the CMAP terms
+    cmap_params.clear();
+
+    const auto cmap_funcs = params.cmapFunctions();
+
+    if (not cmap_funcs.isEmpty())
+    {
+        for (const auto &func : cmap_funcs.parameters())
+        {
+            const int atom0 = molinfo.atomIdx(func.atom0()).value();
+            const int atom1 = molinfo.atomIdx(func.atom1()).value();
+            const int atom2 = molinfo.atomIdx(func.atom2()).value();
+            const int atom3 = molinfo.atomIdx(func.atom3()).value();
+            const int atom4 = molinfo.atomIdx(func.atom4()).value();
+
+            cmap_params.append(boost::make_tuple(atom0, atom1, atom2, atom3, atom4,
+                                                 func.parameter()));
+        }
+    }
+
+    if (is_perturbable)
+    {
+        // Add any CMAP terms that exist only in the other state,
+        // using the same atoms but a zero grid for this (missing) state.
+        const auto cmap_funcs1 = params1.cmapFunctions();
+
+        for (const auto &func1 : cmap_funcs1.parameters())
+        {
+            const int atom0 = molinfo.atomIdx(func1.atom0()).value();
+            const int atom1 = molinfo.atomIdx(func1.atom1()).value();
+            const int atom2 = molinfo.atomIdx(func1.atom2()).value();
+            const int atom3 = molinfo.atomIdx(func1.atom3()).value();
+            const int atom4 = molinfo.atomIdx(func1.atom4()).value();
+
+            bool found = false;
+
+            for (const auto &existing : cmap_params)
+            {
+                if (boost::get<0>(existing) == atom0 and
+                    boost::get<1>(existing) == atom1 and
+                    boost::get<2>(existing) == atom2 and
+                    boost::get<3>(existing) == atom3 and
+                    boost::get<4>(existing) == atom4)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (not found)
+            {
+                const int N = func1.parameter().nRows();
+                const SireBase::Array2D<double> null_grid(N, N, 0.0);
+                cmap_params.append(boost::make_tuple(atom0, atom1, atom2, atom3, atom4,
+                                                     SireMM::CMAPParameter(null_grid)));
+            }
+        }
+    }
+
     this->buildExceptions(mol, constrained_pairs, map);
 }
 
@@ -1553,6 +1612,89 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                                          .arg(perturbed->exception_params.count()),
                                      CODELOC);
     }
+
+    // align the CMAP parameters between the two end states
+    QVector<boost::tuple<int, int, int, int, int, SireMM::CMAPParameter>> cmap_params_1;
+    cmap_params_1.reserve(cmap_params.count());
+
+    found_index_0 = QVector<bool>(cmap_params.count(), false);
+    found_index_1 = QVector<bool>(perturbed->cmap_params.count(), false);
+
+    for (int i = 0; i < cmap_params.count(); ++i)
+    {
+        const auto &cmap0 = cmap_params.at(i);
+
+        const int atom0 = boost::get<0>(cmap0);
+        const int atom1 = boost::get<1>(cmap0);
+        const int atom2 = boost::get<2>(cmap0);
+        const int atom3 = boost::get<3>(cmap0);
+        const int atom4 = boost::get<4>(cmap0);
+
+        bool found = false;
+
+        for (int j = 0; j < perturbed->cmap_params.count(); ++j)
+        {
+            if (not found_index_1[j])
+            {
+                const auto &cmap1 = perturbed->cmap_params.at(j);
+
+                if (boost::get<0>(cmap1) == atom0 and
+                    boost::get<1>(cmap1) == atom1 and
+                    boost::get<2>(cmap1) == atom2 and
+                    boost::get<3>(cmap1) == atom3 and
+                    boost::get<4>(cmap1) == atom4)
+                {
+                    cmap_params_1.append(cmap1);
+                    found_index_0[i] = true;
+                    found_index_1[j] = true;
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (not found)
+        {
+            // add a null CMAP (zero grid) for the missing perturbed state
+            found_index_0[i] = true;
+            const int N = boost::get<5>(cmap0).nRows();
+            const SireBase::Array2D<double> null_grid(N, N, 0.0);
+            cmap_params_1.append(boost::make_tuple(atom0, atom1, atom2, atom3, atom4,
+                                                   SireMM::CMAPParameter(null_grid)));
+        }
+    }
+
+    for (int j = 0; j < perturbed->cmap_params.count(); ++j)
+    {
+        if (not found_index_1[j])
+        {
+            // add a CMAP term missing in the reference state
+            const auto &cmap1 = perturbed->cmap_params.at(j);
+
+            const int atom0 = boost::get<0>(cmap1);
+            const int atom1 = boost::get<1>(cmap1);
+            const int atom2 = boost::get<2>(cmap1);
+            const int atom3 = boost::get<3>(cmap1);
+            const int atom4 = boost::get<4>(cmap1);
+
+            // add a null CMAP to the reference state
+            const int N = boost::get<5>(cmap1).nRows();
+            const SireBase::Array2D<double> null_grid(N, N, 0.0);
+            cmap_params.append(boost::make_tuple(atom0, atom1, atom2, atom3, atom4,
+                                                 SireMM::CMAPParameter(null_grid)));
+            cmap_params_1.append(cmap1);
+            found_index_1[j] = true;
+        }
+    }
+
+    if (found_index_0.indexOf(false) != -1 or found_index_1.indexOf(false) != -1)
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "Failed to align the CMAP parameters!"),
+                                     CODELOC);
+    }
+
+    perturbed->cmap_params = cmap_params_1;
 }
 
 /** Internal function that builds all of the exceptions for all of the
@@ -2050,6 +2192,52 @@ QVector<double> OpenMMMolecule::getTorsionKs() const
     return dih_ks;
 }
 
+/** Return all CMAP grid values (column-major order, kJ/mol) for all CMAP terms
+ *  concatenated. Grid k has getCMAPGridSizes()[k]^2 entries.
+ */
+QVector<double> OpenMMMolecule::getCMAPGrids() const
+{
+    const double cmap_k_to_openmm = (SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
+
+    QVector<double> grids;
+
+    for (const auto &cmap : this->cmap_params)
+    {
+        const auto &param = boost::get<5>(cmap);
+        // Apply the same AMBER→OpenMM grid transformation used by OpenMM's
+        // amber_file_parser.py: cyclic N/2 shift in both axes with phi↔psi swap.
+        // idx = ngrid*((j+ngrid//2)%ngrid)+((i+ngrid//2)%ngrid)
+        // where i=phi (outer/slow) and j=psi (inner/fast) in the output.
+        const auto flat_in = param.grid().toColumnMajorVector();
+        const int N = param.nRows();
+
+        for (int phi = 0; phi < N; ++phi)
+        {
+            for (int psi = 0; psi < N; ++psi)
+            {
+                const int src = ((psi + N / 2) % N) * N + ((phi + N / 2) % N);
+                grids.append(flat_in[src] * cmap_k_to_openmm);
+            }
+        }
+    }
+
+    return grids;
+}
+
+/** Return the grid dimension N for each CMAP torsion (grid is N x N) */
+QVector<int> OpenMMMolecule::getCMAPGridSizes() const
+{
+    QVector<int> sizes;
+    sizes.reserve(this->cmap_params.count());
+
+    for (const auto &cmap : this->cmap_params)
+    {
+        sizes.append(boost::get<5>(cmap).nRows());
+    }
+
+    return sizes;
+}
+
 /** Return the atom indexes of the atoms in the exceptions, in
  *  exception order for this molecule
  */
@@ -2236,6 +2424,18 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
 
     is_improper = mol.is_improper;
     is_rest2 = mol.is_rest2;
+
+    // populate the CMAP grid data and atom indices for both end states
+    cmap_grid0 = mol.getCMAPGrids();
+    cmap_grid1 = mol.perturbed->getCMAPGrids();
+    cmap_grid_sizes = mol.getCMAPGridSizes();
+
+    for (const auto &cmap : mol.cmap_params)
+    {
+        cmap_atoms.append(boost::make_tuple(boost::get<0>(cmap), boost::get<1>(cmap),
+                                            boost::get<2>(cmap), boost::get<3>(cmap),
+                                            boost::get<4>(cmap)));
+    }
 
     bool fix_perturbable_zero_sigmas = false;
 
@@ -2754,6 +2954,33 @@ QList<Dihedral> PerturbableOpenMMMolecule::torsions() const
 QVector<bool> PerturbableOpenMMMolecule::getIsImproper() const
 {
     return is_improper;
+}
+
+/** Return the 5-atom indices (molecule-local) for each CMAP torsion,
+ *  in the same order as getCMAPGridSizes(). Used for REST2 scaling.
+ */
+QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32>>
+PerturbableOpenMMMolecule::getCMAPAtoms() const
+{
+    return cmap_atoms;
+}
+
+/** Return flat concatenated CMAP grid values for state 0 (column-major, kJ/mol) */
+QVector<double> PerturbableOpenMMMolecule::getCMAPGrids0() const
+{
+    return cmap_grid0;
+}
+
+/** Return flat concatenated CMAP grid values for state 1 (column-major, kJ/mol) */
+QVector<double> PerturbableOpenMMMolecule::getCMAPGrids1() const
+{
+    return cmap_grid1;
+}
+
+/** Return the grid dimension N for each CMAP torsion (grid is N x N) */
+QVector<int> PerturbableOpenMMMolecule::getCMAPGridSizes() const
+{
+    return cmap_grid_sizes;
 }
 
 /** Return the index of the first atom in the Sire system */

@@ -585,8 +585,63 @@ void register_PerturbableOpenMMMolecule_class(){
                 , "Return the torsion phase parameters of the perturbed state" );
         
         }
+        { //::SireOpenMM::PerturbableOpenMMMolecule::getCMAPGrids0
+
+            typedef ::QVector< double > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getCMAPGrids0_function_type)(  ) const;
+            getCMAPGrids0_function_type getCMAPGrids0_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::getCMAPGrids0 );
+
+            PerturbableOpenMMMolecule_exposer.def(
+                "getCMAPGrids0"
+                , getCMAPGrids0_function_value
+                , bp::release_gil_policy()
+                , "Return the flat concatenated CMAP grid values (column-major, kJ/mol) "
+                  "for the reference state. Grid k has getCMAPGridSizes()[k]^2 entries." );
+
+        }
+        { //::SireOpenMM::PerturbableOpenMMMolecule::getCMAPGrids1
+
+            typedef ::QVector< double > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getCMAPGrids1_function_type)(  ) const;
+            getCMAPGrids1_function_type getCMAPGrids1_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::getCMAPGrids1 );
+
+            PerturbableOpenMMMolecule_exposer.def(
+                "getCMAPGrids1"
+                , getCMAPGrids1_function_value
+                , bp::release_gil_policy()
+                , "Return the flat concatenated CMAP grid values (column-major, kJ/mol) "
+                  "for the perturbed state. Grid k has getCMAPGridSizes()[k]^2 entries." );
+
+        }
+        { //::SireOpenMM::PerturbableOpenMMMolecule::getCMAPGridSizes
+
+            typedef ::QVector< int > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getCMAPGridSizes_function_type)(  ) const;
+            getCMAPGridSizes_function_type getCMAPGridSizes_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::getCMAPGridSizes );
+
+            PerturbableOpenMMMolecule_exposer.def(
+                "getCMAPGridSizes"
+                , getCMAPGridSizes_function_value
+                , bp::release_gil_policy()
+                , "Return the grid dimension N for each CMAP torsion (grid is N x N). "
+                  "Entries correspond to the grids in getCMAPGrids0/1." );
+
+        }
+        { //::SireOpenMM::PerturbableOpenMMMolecule::getCMAPAtoms
+
+            typedef ::QVector< boost::tuples::tuple< int, int, int, int, int,
+                boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type,
+                boost::tuples::null_type, boost::tuples::null_type > >
+                ( ::SireOpenMM::PerturbableOpenMMMolecule::*getCMAPAtoms_function_type)(  ) const;
+            getCMAPAtoms_function_type getCMAPAtoms_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::getCMAPAtoms );
+
+            PerturbableOpenMMMolecule_exposer.def(
+                "getCMAPAtoms"
+                , getCMAPAtoms_function_value
+                , bp::release_gil_policy()
+                , "Return the molecule-local 5-atom indices for each CMAP torsion, "
+                  "in the same order as getCMAPGridSizes(). Used for REST2 scaling." );
+
+        }
         { //::SireOpenMM::PerturbableOpenMMMolecule::isGhostAtom
-        
+
             typedef bool ( ::SireOpenMM::PerturbableOpenMMMolecule::*isGhostAtom_function_type)( int ) const;
             isGhostAtom_function_type isGhostAtom_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::isGhostAtom );
             

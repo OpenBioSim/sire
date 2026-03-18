@@ -1107,6 +1107,27 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             idx += 1;
         }
 
+        const auto morphed_cmap_grid = cache.morph(
+            schedule,
+            "cmap", "cmap_grid",
+            mol.getCMAPGrids0(),
+            mol.getCMAPGrids1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_cmap_grid.count(); ++i)
+            {
+                column_names.append(QString("cmap-cmap_grid-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_cmap_grid)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
         is_first = false;
     }
 
@@ -1156,6 +1177,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
     auto angff = this->getForce<OpenMM::HarmonicAngleForce>("angle", system);
     auto dihff = this->getForce<OpenMM::PeriodicTorsionForce>("torsion", system);
+    auto cmapff = this->getForce<OpenMM::CMAPTorsionForce>("cmap", system);
 
     // we know if we have peturbable ghost atoms if we have the ghost forcefields
     const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
@@ -1780,6 +1802,59 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                                             morphed_torsion_phase[j],
                                             morphed_torsion_k[j] * scale);
             }
+        }
+
+        // update CMAP parameters for this perturbable molecule
+        start_index = start_idxs.value("cmap", -1);
+
+        if (start_index != -1 and cmapff != 0)
+        {
+            const auto &grid0 = perturbable_mol.getCMAPGrids0();
+            const auto &grid1 = perturbable_mol.getCMAPGrids1();
+            const auto &sizes = perturbable_mol.getCMAPGridSizes();
+            const auto &atoms = perturbable_mol.getCMAPAtoms();
+
+            // morph all grid values together using the lambda schedule
+            const auto morphed_grids = cache.morph(
+                schedule,
+                "cmap", "cmap_grid",
+                grid0,
+                grid1);
+
+            int offset = 0;
+
+            for (int j = 0; j < sizes.count(); ++j)
+            {
+                const int N = sizes[j];
+                const int map_size = N * N;
+
+                // CMAP is always a proper backbone dihedral pair, never improper.
+                // Apply REST2 scaling if all 5 atoms are within the REST2 region.
+                double scale = 1.0;
+
+                const auto &cmap_atms = atoms[j];
+
+                if (perturbable_mol.isRest2(boost::get<0>(cmap_atms)) and
+                    perturbable_mol.isRest2(boost::get<1>(cmap_atms)) and
+                    perturbable_mol.isRest2(boost::get<2>(cmap_atms)) and
+                    perturbable_mol.isRest2(boost::get<3>(cmap_atms)) and
+                    perturbable_mol.isRest2(boost::get<4>(cmap_atms)))
+                {
+                    scale = rest2_scale;
+                }
+
+                std::vector<double> energy(map_size);
+
+                for (int k = 0; k < map_size; ++k)
+                {
+                    energy[k] = morphed_grids[offset + k] * scale;
+                }
+
+                cmapff->setMapParameters(start_index + j, N, energy);
+                offset += map_size;
+            }
+
+            cmapff->updateParametersInContext(context);
         }
     }
 

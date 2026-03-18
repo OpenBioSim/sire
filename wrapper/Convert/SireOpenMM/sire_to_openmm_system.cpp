@@ -21,6 +21,7 @@
 #include "SireMol/moleditor.h"
 
 #include "SireMM/amberparams.h"
+#include "SireMM/cmapparameter.h"
 #include "SireMM/anglerestraints.h"
 #include "SireMM/atomljs.h"
 #include "SireMM/bondrestraints.h"
@@ -1158,10 +1159,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // the infomation in ffinfo
     _set_clj_cutoff(*cljff, ffinfo);
 
-    // now create the base bond, angle and torsion forcefields
+    // now create the base bond, angle, torsion and CMAP forcefields
     OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
     OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
     OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
+    OpenMM::CMAPTorsionForce *cmapff = new OpenMM::CMAPTorsionForce();
 
     // now create the engine for computing QM forces on atoms
     QMForce *qmff = 0;
@@ -1241,6 +1243,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     lambda_lever.setForceIndex("torsion", system.addForce(dihff));
     lambda_lever.addLever("torsion_phase");
     lambda_lever.addLever("torsion_k");
+
+    lambda_lever.setForceIndex("cmap", system.addForce(cmapff));
+    lambda_lever.addLever("cmap_grid");
 
     ///
     /// Stage 4 - define the forces for ghost atoms
@@ -1584,6 +1589,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     from_ghost_idxs.reserve(n_ghost_atoms);
     to_ghost_idxs.reserve(n_ghost_atoms);
 
+    // map from CMAPParameter to OpenMM map index for non-perturbable molecules
+    // (enables sharing identical grids across molecules)
+    QHash<SireMM::CMAPParameter, int> shared_cmap_map_indices;
+
+    const double cmap_k_to_openmm = (SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
+
     // loop over every molecule and add them one by one
     for (int i = 0; i < nmols; ++i)
     {
@@ -1632,6 +1643,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             start_indicies.insert("bond", bondff->getNumBonds());
             start_indicies.insert("angle", angff->getNumAngles());
             start_indicies.insert("torsion", dihff->getNumTorsions());
+            start_indicies.insert("cmap", cmapff->getNumMaps());
 
             // we can now record this as a perturbable molecule
             // in the lambda lever. The returned index is the
@@ -1814,6 +1826,96 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                               boost::get<2>(dih) + start_index,
                               boost::get<3>(dih) + start_index,
                               boost::get<4>(dih), boost::get<5>(dih), boost::get<6>(dih));
+        }
+
+        // now add all of the CMAP torsions
+        // CMAP defines two consecutive dihedrals sharing atoms 1-3:
+        //   phi: atom0-atom1-atom2-atom3
+        //   psi: atom1-atom2-atom3-atom4
+        if (any_perturbable and mol.isPerturbable())
+        {
+            // perturbable molecules get a dedicated map per CMAP torsion
+            // (so the map values can be updated at each lambda step)
+            for (const auto &cmap : mol.cmap_params)
+            {
+                const auto &param = boost::get<5>(cmap);
+                // Apply the same AMBER→OpenMM grid transformation used by OpenMM's
+                // amber_file_parser.py: cyclic N/2 shift in both axes with phi↔psi swap.
+                // idx = ngrid*((j+ngrid//2)%ngrid)+((i+ngrid//2)%ngrid)
+                // where i=phi (outer/slow) and j=psi (inner/fast) in the output.
+                const auto flat_in = param.grid().toColumnMajorVector();
+                const int N = param.nRows();
+
+                std::vector<double> energy(N * N);
+
+                for (int phi = 0; phi < N; ++phi)
+                {
+                    for (int psi = 0; psi < N; ++psi)
+                    {
+                        const int src = ((psi + N / 2) % N) * N + ((phi + N / 2) % N);
+                        energy[phi * N + psi] = flat_in[src] * cmap_k_to_openmm;
+                    }
+                }
+
+                const int map_index = cmapff->addMap(N, energy);
+
+                cmapff->addTorsion(map_index,
+                                   boost::get<0>(cmap) + start_index,
+                                   boost::get<1>(cmap) + start_index,
+                                   boost::get<2>(cmap) + start_index,
+                                   boost::get<3>(cmap) + start_index,
+                                   boost::get<1>(cmap) + start_index,
+                                   boost::get<2>(cmap) + start_index,
+                                   boost::get<3>(cmap) + start_index,
+                                   boost::get<4>(cmap) + start_index);
+            }
+        }
+        else
+        {
+            // non-perturbable molecules share maps (deduplicated by CMAPParameter)
+            for (const auto &cmap : mol.cmap_params)
+            {
+                const auto &param = boost::get<5>(cmap);
+                int map_index;
+
+                if (shared_cmap_map_indices.contains(param))
+                {
+                    map_index = shared_cmap_map_indices[param];
+                }
+                else
+                {
+                    // Apply the same AMBER→OpenMM grid transformation used by OpenMM's
+                    // amber_file_parser.py: cyclic N/2 shift in both axes with phi↔psi swap.
+                    // idx = ngrid*((j+ngrid//2)%ngrid)+((i+ngrid//2)%ngrid)
+                    // where i=phi (outer/slow) and j=psi (inner/fast) in the output.
+                    const auto flat_in = param.grid().toColumnMajorVector();
+                    const int N = param.nRows();
+
+                    std::vector<double> energy(N * N);
+
+                    for (int phi = 0; phi < N; ++phi)
+                    {
+                        for (int psi = 0; psi < N; ++psi)
+                        {
+                            const int src = ((psi + N / 2) % N) * N + ((phi + N / 2) % N);
+                            energy[phi * N + psi] = flat_in[src] * cmap_k_to_openmm;
+                        }
+                    }
+
+                    map_index = cmapff->addMap(N, energy);
+                    shared_cmap_map_indices.insert(param, map_index);
+                }
+
+                cmapff->addTorsion(map_index,
+                                   boost::get<0>(cmap) + start_index,
+                                   boost::get<1>(cmap) + start_index,
+                                   boost::get<2>(cmap) + start_index,
+                                   boost::get<3>(cmap) + start_index,
+                                   boost::get<1>(cmap) + start_index,
+                                   boost::get<2>(cmap) + start_index,
+                                   boost::get<3>(cmap) + start_index,
+                                   boost::get<4>(cmap) + start_index);
+            }
         }
 
         for (const auto &constraint : mol.constraints)

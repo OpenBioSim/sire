@@ -73,6 +73,9 @@ namespace SireOpenMM
         QVector<double> getTorsionPhases() const;
         QVector<double> getTorsionKs() const;
 
+        QVector<double> getCMAPGrids() const;
+        QVector<int> getCMAPGridSizes() const;
+
         QVector<boost::tuple<qint32, qint32>> getExceptionAtoms() const;
 
         QVector<double> getChargeScales() const;
@@ -135,6 +138,9 @@ namespace SireOpenMM
 
         /** All the dihedral and improper parameters */
         QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32, double, double>> dih_params;
+
+        /** All the CMAP parameters (atom0..4 indices, CMAPParameter) */
+        QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32, SireMM::CMAPParameter>> cmap_params;
 
         /** All the constraints */
         QVector<boost::tuple<qint32, qint32, double>> constraints;
@@ -274,6 +280,14 @@ namespace SireOpenMM
         QVector<double> getTorsionPhases0() const;
         QVector<double> getTorsionPhases1() const;
 
+        QVector<double> getCMAPGrids0() const;
+        QVector<double> getCMAPGrids1() const;
+        QVector<int> getCMAPGridSizes() const;
+
+        /** Return the 5-atom indices (molecule-local) for each CMAP torsion,
+         *  in the same order as getCMAPGridSizes(). Used for REST2 scaling. */
+        QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32>> getCMAPAtoms() const;
+
         QVector<double> getChargeScales0() const;
         QVector<double> getChargeScales1() const;
         QVector<double> getLJScales0() const;
@@ -347,6 +361,16 @@ namespace SireOpenMM
         QVector<double> tors_phase0, tors_phase1;
         QVector<double> charge_scl0, charge_scl1;
         QVector<double> lj_scl0, lj_scl1;
+
+        /** Flat concatenation of all CMAP grid values (column-major, kJ/mol) for
+         *  state 0 and state 1. Grid k occupies cmap_grid_sizes[k]^2 entries. */
+        QVector<double> cmap_grid0, cmap_grid1;
+
+        /** The grid dimension N for each CMAP torsion (grid is N x N) */
+        QVector<int> cmap_grid_sizes;
+
+        /** Molecule-local 5-atom indices for each CMAP torsion (for REST2 checks) */
+        QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32>> cmap_atoms;
 
         /** The indexes of atoms that become ghosts in the
          *  perturbed state
