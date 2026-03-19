@@ -86,21 +86,23 @@ def test_openmm_cmap_energy(tmpdir, multichain_cmap, openmm_platform):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_cmap_perturbable(multichain_cmap, openmm_platform):
+def test_openmm_cmap_perturbable(openmm_platform):
     """
-    Verify that CMAPTorsionForce grids are correctly handled for a perturbable
-    molecule. The pre-merged stream file merged_molecule_cmap.s3 contains a
-    perturbable molecule whose two end states are identical (an identity
-    perturbation of a CHARMM protein chain), so both end states carry the same
-    CMAP backbone correction terms. The test checks that the perturbable code
-    path correctly applies the same grids at all lambda values and that
-    set_lambda does not corrupt the force parameters.
+    Verify that CMAPTorsionForce grids are correctly updated by the lambda lever
+    for a perturbable molecule with a genuine single-residue mutation.
+
+    The pre-merged stream file merged_molecule_cmap.s3 contains a perturbable
+    ubiquitin chain with a T9A mutation. cmap0 and cmap1 differ for exactly
+    one torsion (the one centred on the mutated residue). The test checks that:
+
+    - CMAP torsions are present at both end states.
+    - At least one torsion grid differs between lambda=0 and lambda=1.
+    - Most torsion grids are unchanged (only the mutated residue is affected).
     """
     import openmm
+    import openmm.unit
 
     platform_name = openmm_platform or "CPU"
-
-    mol0 = multichain_cmap[0]
 
     mols_pert = sr.load_test_files("merged_molecule_cmap.s3")
     mols_pert = sr.morph.link_to_reference(mols_pert)
@@ -113,14 +115,8 @@ def test_openmm_cmap_perturbable(multichain_cmap, openmm_platform):
     }
 
     def get_cmap_torsion_grids(context):
-        """
-        Return list of (size, grid) for each CMAP torsion, dereferencing the
-        map index.  Grid values are returned as plain floats (kJ/mol) so that
-        pytest.approx can compare them.  This is map-count-agnostic: the
-        non-perturbable path deduplicates maps while the perturbable path
-        allocates one map per torsion, but the per-torsion grid values must
-        agree.
-        """
+        """Return list of (size, grid) for each CMAP torsion, dereferencing
+        the map index. Grid values are plain floats (kJ/mol)."""
         system = context.getSystem()
         for force in system.getForces():
             if isinstance(force, openmm.CMAPTorsionForce):
@@ -138,50 +134,37 @@ def test_openmm_cmap_perturbable(multichain_cmap, openmm_platform):
                 return result
         return []
 
-    def unique_grids(torsion_grids, decimals=3):
-        """
-        Return the sorted set of unique (size, rounded-grid) tuples.
-
-        Torsion ordering can differ between the perturbable and non-perturbable
-        code paths, so we compare the sets of unique grid shapes rather than
-        comparing torsion-by-torsion.
-        """
-        seen = set()
-        result = []
-        for size, grid in torsion_grids:
-            key = (size, tuple(round(v, decimals) for v in grid))
-            if key not in seen:
-                seen.add(key)
-                result.append(key)
-        return sorted(result)
-
-    # Reference: non-perturbable molecule.
-    mols_ref = sr.system.System()
-    mols_ref.add(mol0)
-    omm_ref = sr.convert.to(mols_ref, "openmm", map=omm_map)
-    ref_torsion_grids = get_cmap_torsion_grids(omm_ref)
-
-    assert len(ref_torsion_grids) > 0, "Reference context has no CMAP torsions"
-    ref_unique = unique_grids(ref_torsion_grids)
-
-    # Perturbable context — one context, lambda changed in place.
     omm_pert = sr.convert.to(mols_pert, "openmm", map=omm_map)
 
-    # At both lambda=0 and lambda=1 the set of unique CMAP grids must match the
-    # non-perturbable reference (cmap0 == cmap1 for an identity perturbation).
-    # We compare sets of unique grids because the perturbable and non-perturbable
-    # code paths may order torsions differently.
-    for lam in (0.0, 1.0):
-        omm_pert.set_lambda(lam)
-        pert_torsion_grids = get_cmap_torsion_grids(omm_pert)
+    omm_pert.set_lambda(0.0)
+    grids_lam0 = get_cmap_torsion_grids(omm_pert)
 
-        assert len(pert_torsion_grids) == len(ref_torsion_grids), (
-            f"Wrong number of CMAP torsions at lambda={lam}: "
-            f"{len(pert_torsion_grids)} != {len(ref_torsion_grids)}"
-        )
+    omm_pert.set_lambda(1.0)
+    grids_lam1 = get_cmap_torsion_grids(omm_pert)
 
-        pert_unique = unique_grids(pert_torsion_grids)
-        assert pert_unique == ref_unique, (
-            f"Set of unique CMAP grids differs from reference at lambda={lam}: "
-            f"{len(pert_unique)} unique grids vs {len(ref_unique)} in reference"
-        )
+    assert len(grids_lam0) > 0, "No CMAP torsions at lambda=0"
+    assert len(grids_lam1) == len(
+        grids_lam0
+    ), f"Torsion count differs between end states: {len(grids_lam0)} vs {len(grids_lam1)}"
+
+    differing = sum(
+        1
+        for (s0, g0), (s1, g1) in zip(grids_lam0, grids_lam1)
+        if s0 != s1 or any(round(a, 3) != round(b, 3) for a, b in zip(g0, g1))
+    )
+
+    assert differing > 0, (
+        "Expected at least one torsion grid to differ between lambda=0 and lambda=1 "
+        "for a genuine single-residue mutation"
+    )
+    assert differing < len(
+        grids_lam0
+    ), "Expected most torsion grids to be unchanged for a single-residue mutation"
+
+    # Verify that changed_cmaps() correctly identifies the same set of
+    # differing torsions as the direct grid comparison above.
+    p_omm = mols_pert.molecule(0).perturbation().to_openmm(map=omm_map)
+    changed = p_omm.changed_cmaps()
+    assert (
+        len(changed) == differing
+    ), f"changed_cmaps() returned {len(changed)} torsions but expected {differing}"
