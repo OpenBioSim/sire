@@ -1,21 +1,21 @@
 
 #include "openmmmolecule.h"
 
-#include "SireMol/core.h"
-#include "SireMol/moleditor.h"
-#include "SireMol/atomelements.h"
 #include "SireMol/atomcharges.h"
 #include "SireMol/atomcoords.h"
+#include "SireMol/atomelements.h"
 #include "SireMol/atommasses.h"
 #include "SireMol/atomproperty.hpp"
-#include "SireMol/connectivity.h"
+#include "SireMol/atomvelocities.h"
 #include "SireMol/bondid.h"
 #include "SireMol/bondorder.h"
-#include "SireMol/atomvelocities.h"
+#include "SireMol/connectivity.h"
+#include "SireMol/core.h"
+#include "SireMol/moleditor.h"
 
+#include "SireMM/amberparams.h"
 #include "SireMM/atomljs.h"
 #include "SireMM/selectorbond.h"
-#include "SireMM/amberparams.h"
 #include "SireMM/twoatomfunctions.h"
 
 #include "SireMaths/vector.h"
@@ -257,7 +257,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
             // its current coordinates (which should represent the
             // current lambda state)
             QStringList props = {"LJ", "ambertype", "angle", "atomtype",
-                                 "bond", "charge",
+                                 "bond", "charge", "cmap",
                                  "dihedral", "element", "forcefield",
                                  "gb_radii", "gb_screening", "improper",
                                  "intrascale", "mass", "name",
