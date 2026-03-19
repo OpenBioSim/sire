@@ -2505,7 +2505,11 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMole
       constraint_idxs(other.constraint_idxs),
       start_atom_idx(other.start_atom_idx),
       is_improper(other.is_improper),
-      is_rest2(other.is_rest2)
+      is_rest2(other.is_rest2),
+      cmap_grid0(other.cmap_grid0),
+      cmap_grid1(other.cmap_grid1),
+      cmap_grid_sizes(other.cmap_grid_sizes),
+      cmap_atoms(other.cmap_atoms)
 {
 }
 
@@ -2533,7 +2537,9 @@ bool PerturbableOpenMMMolecule::operator==(const PerturbableOpenMMMolecule &othe
            lj_scl0 == other.lj_scl0 and lj_scl1 == other.lj_scl1 and
            to_ghost_idxs == other.to_ghost_idxs and from_ghost_idxs == other.from_ghost_idxs and
            exception_atoms == other.exception_atoms and exception_idxs == other.exception_idxs and
-           perturbable_constraints == other.perturbable_constraints and constraint_idxs == other.constraint_idxs;
+           perturbable_constraints == other.perturbable_constraints and constraint_idxs == other.constraint_idxs and
+           cmap_grid0 == other.cmap_grid0 and cmap_grid1 == other.cmap_grid1 and
+           cmap_grid_sizes == other.cmap_grid_sizes and cmap_atoms == other.cmap_atoms;
 }
 
 /** Comparison operator */
@@ -2601,6 +2607,11 @@ PerturbableOpenMMMolecule &PerturbableOpenMMMolecule::operator=(const Perturbabl
 
         perturbable_constraints = other.perturbable_constraints;
         constraint_idxs = other.constraint_idxs;
+
+        cmap_grid0 = other.cmap_grid0;
+        cmap_grid1 = other.cmap_grid1;
+        cmap_grid_sizes = other.cmap_grid_sizes;
+        cmap_atoms = other.cmap_atoms;
 
         Property::operator=(other);
     }
