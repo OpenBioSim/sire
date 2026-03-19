@@ -105,6 +105,10 @@ def _pythonize(C, delete_old: bool = True) -> None:
         # change "RDKit" to "Rdkit"
         new_attr = new_attr.replace("RDKit", "Rdkit")
 
+        # change "CMAP" into "Cmap" (it will then be converted to _cmap by
+        # the code below)
+        new_attr = new_attr.replace("CMAP", "Cmap")
+
         # change "MCS" into "Mcs" (it will then be converted to _mcs by
         # the code below)
         new_attr = new_attr.replace("MCS", "Mcs")
