@@ -1643,7 +1643,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             start_indicies.insert("bond", bondff->getNumBonds());
             start_indicies.insert("angle", angff->getNumAngles());
             start_indicies.insert("torsion", dihff->getNumTorsions());
-            start_indicies.insert("cmap", cmapff->getNumMaps());
+
+            // Only record a CMAP start index if this molecule actually has
+            // CMAP torsions.  If we always insert here, start_index is never
+            // -1 in the lambda lever, and updateParametersInContext is called
+            // on an uninitialised GPU force for molecules with no CMAP terms.
+            if (not mol.cmap_params.isEmpty())
+                start_indicies.insert("cmap", cmapff->getNumMaps());
 
             // we can now record this as a perturbable molecule
             // in the lambda lever. The returned index is the
