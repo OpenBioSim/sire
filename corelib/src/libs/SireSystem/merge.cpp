@@ -131,6 +131,7 @@ namespace SireSystem
                 "atomtype",
                 "bond",
                 "charge",
+                "cmap",
                 "connectivity",
                 "coordinates",
                 "dihedral",

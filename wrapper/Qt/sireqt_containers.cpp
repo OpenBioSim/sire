@@ -92,10 +92,12 @@ void register_SireQt_containers()
 
   register_tuple<boost::tuple<qint32, qint32>>();
   register_tuple<boost::tuple<qint32, qint32, double, double>>();
+  register_tuple<boost::tuple<qint32, qint32, qint32, qint32, qint32>>();
   register_tuple<boost::tuple<QVector<qint32>, QVector<double>, QVector<double>>>();
 
   register_list<QVector<boost::tuple<qint32, qint32>>>();
   register_list<QVector<boost::tuple<qint32, qint32, double, double>>>();
+  register_list<QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32>>>();
 
   register_dict<QHash<QString, QVector<double>>>();
 
