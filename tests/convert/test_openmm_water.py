@@ -1,3 +1,5 @@
+import math
+
 import pytest
 import sire as sr
 
@@ -81,7 +83,7 @@ def test_tip3p_no_virtual_sites(tip3p_mols, openmm_platform):
     assert bad_constraints == 0
 
     e = _potential_energy(omm)
-    assert e == e, "Potential energy is NaN"
+    assert not math.isnan(e), "Potential energy is NaN"
 
 
 @_skip_no_openmm
@@ -118,7 +120,7 @@ def test_tip4p_virtual_sites(tip4p_mols, openmm_platform):
             ), f"Particle {i}: expected ThreeParticleAverageSite, got {type(vs).__name__}"
 
     e = _potential_energy(omm)
-    assert e == e, "Potential energy is NaN"
+    assert not math.isnan(e), "Potential energy is NaN"
 
 
 @_skip_no_openmm
@@ -154,7 +156,7 @@ def test_opc_virtual_sites(opc_mols, openmm_platform):
             ), f"Particle {i}: expected ThreeParticleAverageSite, got {type(vs).__name__}"
 
     e = _potential_energy(omm)
-    assert e == e, "Potential energy is NaN"
+    assert not math.isnan(e), "Potential energy is NaN"
 
 
 @_skip_no_openmm
@@ -192,4 +194,4 @@ def test_tip5p_virtual_sites(tip5p_mols, openmm_platform):
             ), f"Particle {i}: expected OutOfPlaneSite, got {type(vs).__name__}"
 
     e = _potential_energy(omm)
-    assert e == e, "Potential energy is NaN"
+    assert not math.isnan(e), "Potential energy is NaN"
