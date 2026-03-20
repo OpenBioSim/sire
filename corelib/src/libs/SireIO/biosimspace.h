@@ -36,6 +36,12 @@
 
 #include "SireMaths/vector.h"
 
+#include "SireBase/propertylist.h"
+
+#include "SireMM/cljnbpairs.h"
+
+#include "SireMol/atomidxmapping.h"
+#include "SireMol/moleculeinfodata.h"
 #include "SireMol/select.h"
 
 SIRE_BEGIN_HEADER
@@ -372,6 +378,43 @@ namespace SireIO
         const bool is_lambda1 = false, const PropertyMap &map = PropertyMap());
 
     Vector cross(const Vector &v0, const Vector &v1);
+
+    //! Merge the CLJNBPairs (intrascale) of two molecules into a perturbable
+    /*! merged molecule's end-state intrascales.
+
+        Expands nb0 from molecule0's atom index space into the merged
+        molecule's space (preserving actual per-pair scale factors, including
+        force-field-specific overrides such as GLYCAM funct=2 pairs), then
+        calls CLJNBPairs::merge to produce intrascale0 and intrascale1.
+
+        \param nb0
+            The CLJNBPairs for molecule0 in its original atom index space.
+
+        \param nb1
+            The CLJNBPairs for molecule1 in its original atom index space.
+
+        \param merged_info
+            The MoleculeInfoData for the merged molecule.
+
+        \param mol0_merged_mapping
+            A hash mapping each AtomIdx in molecule0's original space to
+            the corresponding AtomIdx in the merged molecule's space.
+
+        \param atom_mapping
+            The AtomIdxMapping describing how merged-molecule atom indices
+            correspond to molecule1 atom indices (used by CLJNBPairs::merge).
+
+        \retval [intrascale0, intrascale1]
+            A PropertyList containing the CLJNBPairs for the lambda=0 and
+            lambda=1 end states of the merged molecule.
+     */
+    SIREIO_EXPORT SireBase::PropertyList mergeIntrascale(
+        const SireMM::CLJNBPairs &nb0,
+        const SireMM::CLJNBPairs &nb1,
+        const SireMol::MoleculeInfoData &merged_info,
+        const QHash<SireMol::AtomIdx, SireMol::AtomIdx> &mol0_merged_mapping,
+        const QHash<SireMol::AtomIdx, SireMol::AtomIdx> &mol1_merged_mapping);
+
 } // namespace SireIO
 
 SIRE_EXPOSE_FUNCTION(SireIO::isAmberWater)
@@ -387,6 +430,7 @@ SIRE_EXPOSE_FUNCTION(SireIO::updateCoordinatesAndVelocities)
 SIRE_EXPOSE_FUNCTION(SireIO::createSodiumIon)
 SIRE_EXPOSE_FUNCTION(SireIO::createChlorineIon)
 SIRE_EXPOSE_FUNCTION(SireIO::setCoordinates)
+SIRE_EXPOSE_FUNCTION(SireIO::mergeIntrascale)
 
 SIRE_END_HEADER
 

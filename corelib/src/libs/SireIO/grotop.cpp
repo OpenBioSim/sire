@@ -46,11 +46,11 @@
 
 #include "SireMM/atomljs.h"
 #include "SireMM/cljnbpairs.h"
+#include "SireMM/cmapfunctions.h"
 #include "SireMM/fouratomfunctions.h"
 #include "SireMM/internalff.h"
 #include "SireMM/threeatomfunctions.h"
 #include "SireMM/twoatomfunctions.h"
-#include "SireMM/cmapfunctions.h"
 
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
@@ -135,7 +135,7 @@ QDataStream &operator>>(QDataStream &ds, GroAtom &atom)
         atom.mss = mass * g_per_mol;
     }
     else
-        throw version_error(v, "1,2", r_groatom, CODELOC);
+        throw version_error(v, "1,2,3", r_groatom, CODELOC);
 
     return ds;
 }
@@ -351,7 +351,7 @@ static const RegisterMetaType<GroMolType> r_gromoltyp(NO_ROOT);
 
 QDataStream &operator<<(QDataStream &ds, const GroMolType &moltyp)
 {
-    writeHeader(ds, r_gromoltyp, 3);
+    writeHeader(ds, r_gromoltyp, 4);
 
     SharedDataStream sds(ds);
 
@@ -367,8 +367,22 @@ QDataStream &operator>>(QDataStream &ds, GroMolType &moltyp)
 {
     VersionID v = readHeader(ds, r_gromoltyp);
 
-    if (v == 1 or v == 2 or v == 3)
+    if (v == 4)
     {
+        // v4: all fields in correct order, fixing the v3 write/read misalignment
+        // where ffield was written but not read back.
+        SharedDataStream sds(ds);
+
+        sds >> moltyp.nme >> moltyp.warns >> moltyp.atms0 >> moltyp.atms1 >> moltyp.bnds0 >> moltyp.bnds1 >>
+            moltyp.angs0 >> moltyp.angs1 >> moltyp.dihs0 >> moltyp.dihs1 >>
+            moltyp.cmaps0 >> moltyp.cmaps1 >> moltyp.first_atoms0 >> moltyp.first_atoms1 >>
+            moltyp.ffield0 >> moltyp.ffield1 >> moltyp.nexcl0 >> moltyp.nexcl1 >> moltyp.is_perturbable;
+    }
+    else if (v == 1 or v == 2 or v == 3)
+    {
+        // v1/v2/v3: preserved as-is for backward compatibility.
+        // Note: v3 streams have a write/read misalignment (ffield was written
+        // but not read back); existing v3 caches will be corrupt. v4 fixes this.
         SharedDataStream sds(ds);
 
         sds >> moltyp.nme >> moltyp.warns >> moltyp.atms0 >> moltyp.atms1 >> moltyp.bnds0 >> moltyp.bnds1 >>
@@ -397,7 +411,7 @@ QDataStream &operator>>(QDataStream &ds, GroMolType &moltyp)
         sds >> moltyp.nexcl0 >> moltyp.nexcl1 >> moltyp.is_perturbable;
     }
     else
-        throw version_error(v, "1,2,3", r_gromoltyp, CODELOC);
+        throw version_error(v, "1,2,3,4", r_gromoltyp, CODELOC);
 
     return ds;
 }
@@ -1617,7 +1631,8 @@ GroMolType::GroMolType(const GroMolType &other)
     : nme(other.nme), warns(other.warns), atms0(other.atms0), atms1(other.atms1), first_atoms0(other.first_atoms0),
       first_atoms1(other.first_atoms1), bnds0(other.bnds0), bnds1(other.bnds1), angs0(other.angs0), angs1(other.angs1),
       dihs0(other.dihs0), dihs1(other.dihs1), cmaps0(other.cmaps0), cmaps1(other.cmaps1),
-      ffield0(other.ffield0), ffield1(other.ffield1), nexcl0(other.nexcl0),
+      ffield0(other.ffield0), ffield1(other.ffield1),
+      explicit_pairs(other.explicit_pairs), nexcl0(other.nexcl0),
       nexcl1(other.nexcl1), is_perturbable(other.is_perturbable)
 {
 }
@@ -1646,10 +1661,11 @@ GroMolType &GroMolType::operator=(const GroMolType &other)
         dihs1 = other.dihs1;
         cmaps0 = other.cmaps0;
         cmaps1 = other.cmaps1;
+        explicit_pairs = other.explicit_pairs;
         ffield0 = other.ffield0;
         ffield1 = other.ffield1;
         nexcl0 = other.nexcl0;
-        nexcl0 = other.nexcl1;
+        nexcl1 = other.nexcl1;
         is_perturbable = other.is_perturbable;
     }
 
@@ -1663,6 +1679,7 @@ bool GroMolType::operator==(const GroMolType &other) const
            first_atoms0 == other.first_atoms0 and first_atoms1 == other.first_atoms1 and bnds0 == other.bnds0 and
            bnds1 == other.bnds1 and angs0 == other.angs0 and angs1 == other.angs1 and dihs0 == other.dihs0 and
            dihs1 == other.dihs1 and cmaps0 == other.cmaps0 and cmaps1 == other.cmaps1 and
+           explicit_pairs == other.explicit_pairs and
            nexcl0 == other.nexcl0 and nexcl1 == other.nexcl1 and
            is_perturbable == other.is_perturbable;
 }
@@ -2483,6 +2500,19 @@ QHash<CMAPID, QString> GroMolType::cmaps(bool is_lambda1) const
         return cmaps0;
 }
 
+/** Add an explicit 1-4 pair (from a [pairs] funct=2 line) with given
+ *  coulomb and LJ scale factors */
+void GroMolType::addExplicitPair(const BondID &pair, double cscl, double ljscl)
+{
+    explicit_pairs.insert(pair, qMakePair(cscl, ljscl));
+}
+
+/** Return the explicit 1-4 pair scale factors (from [pairs] funct=2) */
+QHash<BondID, QPair<double, double>> GroMolType::explicitPairs() const
+{
+    return explicit_pairs;
+}
+
 /** Sanitise all of the CMAP terms - this sets the string equal to "1",
  *  as the information contained previously has already been read
  */
@@ -2613,7 +2643,8 @@ QStringList GroMolType::settlesLines(bool is_lambda1) const
     // lambda function to check whether a four point water model
     // is OPC water, which is determined by the virtual site charge
     // value being < -1.1
-    auto is_opc = [this, is_lambda1]() -> bool {
+    auto is_opc = [this, is_lambda1]() -> bool
+    {
         if (is_lambda1)
         {
             for (const auto &atm : atms1)
@@ -3699,7 +3730,7 @@ static QStringList writeCMAPTypes(const QHash<QString, CMAPParameter> &cmap_para
 
 /** Internal function used to convert a Gromacs Moltyp to a set of lines */
 static QStringList writeMolType(const QString &name, const GroMolType &moltype, const Molecule &mol,
-                                bool uses_parallel)
+                                bool uses_parallel, int combining_rules = 2)
 {
     QStringList lines;
 
@@ -4605,6 +4636,41 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
         // Store the molinfo object;
         const auto molinfo = mol.info();
 
+        // Precompute the set of genuine 1-4 bonded atom pairs once. This lets
+        // us distinguish GLYCAM-style 1-4 pairs (CLJScaleFactor(1,1)) from
+        // 1-5+ pairs that return the same default value but must not appear in
+        // [pairs]. Empty if connectivity is unavailable (fallback: write all).
+        QSet<QPair<AtomIdx, AtomIdx>> pairs_14;
+
+        try
+        {
+            const auto conn = mol.property("connectivity").asA<Connectivity>();
+            const int natoms = molinfo.nAtoms();
+            for (int a = 0; a < natoms; ++a)
+            {
+                const AtomIdx aidx(a);
+                for (const auto &b : conn.connectionsTo(aidx))
+                {
+                    for (const auto &c : conn.connectionsTo(b))
+                    {
+                        if (c == aidx)
+                            continue;
+                        for (const auto &d : conn.connectionsTo(c))
+                        {
+                            if (d == b or d == aidx)
+                                continue;
+                            // aidx-b-c-d is a dihedral: aidx and d are 1-4 bonded.
+                            pairs_14.insert(QPair<AtomIdx, AtomIdx>(aidx, d));
+                            pairs_14.insert(QPair<AtomIdx, AtomIdx>(d, aidx));
+                        }
+                    }
+                }
+            }
+        }
+        catch (...)
+        {
+        }
+
         if (is_perturbable)
         {
             CLJNBPairs scl0;
@@ -4630,10 +4696,16 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
 
             AtomLJs ljs0;
             AtomLJs ljs1;
+            AtomCharges charges0;
+            AtomCharges charges1;
+            bool has_ljs = false;
+            bool has_charges = false;
 
             try
             {
                 ljs0 = mol.property("LJ0").asA<AtomLJs>();
+                ljs1 = mol.property("LJ1").asA<AtomLJs>();
+                has_ljs = true;
             }
             catch (...)
             {
@@ -4641,102 +4713,117 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
 
             try
             {
-                ljs1 = mol.property("LJ1").asA<AtomLJs>();
+                charges0 = mol.property("charge0").asA<AtomCharges>();
+                charges1 = mol.property("charge1").asA<AtomCharges>();
+                has_charges = true;
             }
             catch (...)
             {
             }
-
-            // A set of recorded 1-4 pairs.
-            QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
 
             bool fix_null_perturbable_14s = false;
 
             if (mol.hasProperty("fix_null_perturbable_14s"))
                 fix_null_perturbable_14s = mol.property("fix_null_perturbable_14s").asA<BooleanProperty>().value();
 
-            // Must record every pair that has a non-default scaling factor.
-            // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
-            for (int i = 0; i < scl0.nGroups(); ++i)
+            // When connectivity is available, iterate over genuine 1-4 bonded pairs
+            // — O(N_dihedrals). Otherwise use nonDefaultElements() on each CG pair
+            // — O(N_bonded). Both avoid the O(N^2) atom-pair loop.
+            auto write_pair14 = [&](AtomIdx idx0, AtomIdx idx1)
             {
-                for (int j = 0; j < scl0.nGroups(); ++j)
+                const auto s0 = scl0.get(idx0, idx1);
+                const auto s1 = scl1.get(idx0, idx1);
+                if (s0.coulomb() == 1 and s0.lj() == 1 and
+                    s1.coulomb() == 1 and s1.lj() == 1)
                 {
-                    const auto s0 = scl0.get(CGIdx(i), CGIdx(j));
-                    const auto s1 = scl1.get(CGIdx(i), CGIdx(j));
-
-                    if (not s0.isEmpty() and not s1.isEmpty())
+                    // Both end states have full 1-4 interaction (GLYCAM). Write as
+                    // funct=2 with explicit LJ from state 0.
+                    if (has_ljs and has_charges)
                     {
-                        const auto idxs0 = molinfo.getAtomsIn(CGIdx(i));
-                        const auto idxs1 = molinfo.getAtomsIn(CGIdx(j));
-
-                        for (const auto &idx0 : idxs0)
+                        const auto cgidx0 = molinfo.cgAtomIdx(idx0);
+                        const auto cgidx1 = molinfo.cgAtomIdx(idx1);
+                        const auto &lj0 = ljs0.at(cgidx0);
+                        const auto &lj1 = ljs0.at(cgidx1);
+                        LJParameter lj_ij;
+                        if (combining_rules == 2)
+                            lj_ij = lj0.combineArithmetic(lj1);
+                        else
+                            lj_ij = lj0.combineGeometric(lj1);
+                        const double qi = charges0.at(cgidx0).to(mod_electron);
+                        const double qj = charges0.at(cgidx1).to(mod_electron);
+                        scllines.append(
+                            QString("%1 %2     2  1.0  %3  %4  %5  %6")
+                                .arg(idx0 + 1, 6)
+                                .arg(idx1 + 1, 6)
+                                .arg(qi, 11, 'f', 6)
+                                .arg(qj, 11, 'f', 6)
+                                .arg(lj_ij.sigma().to(nanometer), 18, 'e', 11)
+                                .arg(lj_ij.epsilon().to(kJ_per_mol), 18, 'e', 11));
+                    }
+                    else
+                    {
+                        scllines.append(QString("%1 %2     1")
+                                            .arg(idx0 + 1, 6)
+                                            .arg(idx1 + 1, 6));
+                    }
+                }
+                else if (not(s0.coulomb() == 0 and s0.lj() == 0 and
+                             s1.coulomb() == 0 and s1.lj() == 0))
+                {
+                    // Standard partial 1-4 scaling, or a mixed perturbation.
+                    if (fix_null_perturbable_14s)
+                    {
+                        const auto &lj0_0 = ljs0.get(idx0);
+                        const auto &lj0_1 = ljs1.get(idx0);
+                        const auto &lj1_0 = ljs0.get(idx1);
+                        const auto &lj1_1 = ljs1.get(idx1);
+                        if (lj0_0.epsilon().value() == 0 or lj0_1.epsilon().value() == 0 or
+                            lj1_0.epsilon().value() == 0 or lj1_1.epsilon().value() == 0)
                         {
-                            for (const auto &idx1 : idxs1)
-                            {
-                                QPair<AtomIdx, AtomIdx> pair = QPair<AtomIdx, AtomIdx>(idx0, idx1);
+                            LJParameter lj0, lj1;
+                            lj0 = (lj0_0.epsilon().value() == 0) ? lj0_1 : lj0_0;
+                            lj1 = (lj1_0.epsilon().value() == 0) ? lj1_1 : lj1_0;
+                            auto lj = (combining_rules == 2) ? lj0.combineArithmetic(lj1)
+                                                             : lj0.combineGeometric(lj1);
+                            double scl = (s0.lj() != 0) ? s0.lj() : s1.lj();
+                            scllines.append(
+                                QString("%1 %2     1  %3  %4  %3  %4")
+                                    .arg(idx0 + 1, 6)
+                                    .arg(idx1 + 1, 6)
+                                    .arg(lj.sigma().to(nanometer), 11, 'f', 5)
+                                    .arg(scl * lj.epsilon().to(kJ_per_mol), 11, 'f', 5));
+                            return;
+                        }
+                    }
+                    scllines.append(QString("%1 %2     1")
+                                        .arg(idx0 + 1, 6)
+                                        .arg(idx1 + 1, 6));
+                }
+            };
 
-                                // Make sure this is a new atom pair.
-                                if (not recorded_pairs.contains(pair))
-                                {
-                                    // Insert the pair and its inverse.
-                                    recorded_pairs.insert(pair);
-                                    pair = QPair<AtomIdx, AtomIdx>(idx1, idx0);
-                                    recorded_pairs.insert(pair);
-
-                                    const auto s0 = scl0.get(idx0, idx1);
-                                    const auto s1 = scl1.get(idx0, idx1);
-
-                                    if (not((s0.coulomb() == 0 and s0.lj() == 0 and s1.coulomb() == 0 and
-                                             s1.lj() == 0) or
-                                            (s0.coulomb() == 1 and s0.lj() == 1 and s1.coulomb() == 1 and
-                                             s1.lj() == 1)))
-                                    {
-                                        // This is a non-default pair.
-                                        if (fix_null_perturbable_14s)
-                                        {
-                                            // get the initial and perturbed charge and LJ parameters
-                                            const auto &lj0_0 = ljs0.get(idx0);
-                                            const auto &lj0_1 = ljs1.get(idx0);
-                                            const auto &lj1_0 = ljs0.get(idx1);
-                                            const auto &lj1_1 = ljs1.get(idx1);
-
-                                            if (lj0_0.epsilon().value() == 0 or lj0_1.epsilon().value() == 0 or
-                                                lj1_0.epsilon().value() == 0 or lj1_1.epsilon().value() == 0)
-                                            {
-                                                // we need to avoid having a null 1-4 LJ parameter, so use the non-dummy state
-                                                LJParameter lj0, lj1;
-
-                                                if (lj0_0.epsilon().value() == 0)
-                                                    lj0 = lj0_1;
-                                                else
-                                                    lj0 = lj0_0;
-
-                                                if (lj1_0.epsilon().value() == 0)
-                                                    lj1 = lj1_1;
-                                                else
-                                                    lj1 = lj1_0;
-
-                                                auto lj = lj0.combineArithmetic(lj1);
-
-                                                double scl = s0.lj();
-
-                                                if (scl == 0)
-                                                    scl = s1.lj();
-
-                                                scllines.append(QString("%1 %2     1  %3  %4  %3  %4")
-                                                                    .arg(idx0 + 1, 6)
-                                                                    .arg(idx1 + 1, 6)
-                                                                    .arg(lj.sigma().to(nanometer), 11, 'f', 5)
-                                                                    .arg(scl * lj.epsilon().to(kJ_per_mol), 11, 'f', 5));
-
-                                                continue;
-                                            }
-                                        }
-
-                                        scllines.append(QString("%1 %2     1").arg(idx0 + 1, 6).arg(idx1 + 1, 6));
-                                    }
-                                }
-                            }
+            if (not pairs_14.isEmpty())
+            {
+                for (const auto &pair14 : pairs_14)
+                {
+                    if (pair14.first >= pair14.second)
+                        continue;
+                    write_pair14(pair14.first, pair14.second);
+                }
+            }
+            else
+            {
+                // No connectivity: iterate over non-default CG atom pair entries.
+                // GLYCAM-style (1,1) pairs cannot be identified here and are omitted.
+                for (int i = 0; i < scl0.nGroups(); ++i)
+                {
+                    for (int j = 0; j < scl0.nGroups(); ++j)
+                    {
+                        for (const auto &[row, col, s0] :
+                             scl0.get(CGIdx(i), CGIdx(j)).nonDefaultElements())
+                        {
+                            if (row >= col)
+                                continue;
+                            write_pair14(AtomIdx(row), AtomIdx(col));
                         }
                     }
                 }
@@ -4755,45 +4842,106 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
                 return;
             }
 
-            // A set of recorded 1-4 pairs.
-            QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
+            // Get LJ and charge properties for writing funct=2 explicit pairs.
+            AtomLJs ljs;
+            AtomCharges charges;
+            bool has_ljs = false;
+            bool has_charges = false;
 
-            // Must record every pair that has a non-default scaling factor.
-            // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
-            for (int i = 0; i < scl.nGroups(); ++i)
+            try
             {
-                for (int j = 0; j < scl.nGroups(); ++j)
+                ljs = mol.property("LJ").asA<AtomLJs>();
+                has_ljs = true;
+            }
+            catch (...)
+            {
+            }
+
+            try
+            {
+                charges = mol.property("charge").asA<AtomCharges>();
+                has_charges = true;
+            }
+            catch (...)
+            {
+            }
+
+            // When connectivity is available, iterate over genuine 1-4 bonded pairs
+            // — O(N_dihedrals). Otherwise use nonDefaultElements() on each CG pair
+            // — O(N_bonded). Both avoid the O(N^2) atom-pair loop.
+            auto write_pair14 = [&](AtomIdx idx0, AtomIdx idx1)
+            {
+                const auto s = scl.get(idx0, idx1);
+                if (s.coulomb() == 0 and s.lj() == 0)
                 {
-                    const auto s = scl.get(CGIdx(i), CGIdx(j));
-
-                    if (not s.isEmpty())
+                    // excluded — skip
+                }
+                else if (s.coulomb() == 1 and s.lj() == 1)
+                {
+                    // Full 1-4 interaction (GLYCAM). Write as funct=2 with explicit LJ
+                    // parameters because funct=1 would apply fudgeLJ scaling.
+                    if (has_ljs and has_charges)
                     {
-                        const auto idxs0 = molinfo.getAtomsIn(CGIdx(i));
-                        const auto idxs1 = molinfo.getAtomsIn(CGIdx(j));
+                        const auto cgidx0 = molinfo.cgAtomIdx(idx0);
+                        const auto cgidx1 = molinfo.cgAtomIdx(idx1);
+                        const auto &lj0 = ljs.at(cgidx0);
+                        const auto &lj1 = ljs.at(cgidx1);
+                        LJParameter lj_ij;
+                        if (combining_rules == 2)
+                            lj_ij = lj0.combineArithmetic(lj1);
+                        else
+                            lj_ij = lj0.combineGeometric(lj1);
+                        const double qi = charges.at(cgidx0).to(mod_electron);
+                        const double qj = charges.at(cgidx1).to(mod_electron);
+                        scllines.append(
+                            QString("%1 %2     2  1.0  %3  %4  %5  %6")
+                                .arg(idx0 + 1, 6)
+                                .arg(idx1 + 1, 6)
+                                .arg(qi, 11, 'f', 6)
+                                .arg(qj, 11, 'f', 6)
+                                .arg(lj_ij.sigma().to(nanometer), 18, 'e', 11)
+                                .arg(lj_ij.epsilon().to(kJ_per_mol), 18, 'e', 11));
+                    }
+                    else
+                    {
+                        // Fall back to funct=1; energy will be wrong if fudgeLJ != 1.0.
+                        scllines.append(QString("%1 %2     1")
+                                            .arg(idx0 + 1, 6)
+                                            .arg(idx1 + 1, 6));
+                    }
+                }
+                else
+                {
+                    // Standard partial 1-4 scaling (e.g. AMBER). Write as funct=1.
+                    scllines.append(QString("%1 %2     1")
+                                        .arg(idx0 + 1, 6)
+                                        .arg(idx1 + 1, 6));
+                }
+            };
 
-                        for (const auto &idx0 : idxs0)
+            if (not pairs_14.isEmpty())
+            {
+                for (const auto &pair14 : pairs_14)
+                {
+                    if (pair14.first >= pair14.second)
+                        continue;
+                    write_pair14(pair14.first, pair14.second);
+                }
+            }
+            else
+            {
+                // No connectivity: iterate over non-default CG atom pair entries.
+                // GLYCAM-style (1,1) pairs cannot be identified here and are omitted.
+                for (int i = 0; i < scl.nGroups(); ++i)
+                {
+                    for (int j = 0; j < scl.nGroups(); ++j)
+                    {
+                        for (const auto &[row, col, s] :
+                             scl.get(CGIdx(i), CGIdx(j)).nonDefaultElements())
                         {
-                            for (const auto &idx1 : idxs1)
-                            {
-                                QPair<AtomIdx, AtomIdx> pair = QPair<AtomIdx, AtomIdx>(idx0, idx1);
-
-                                // Make sure this is a new atom pair.
-                                if (not recorded_pairs.contains(pair))
-                                {
-                                    // Insert the pair and its inverse.
-                                    recorded_pairs.insert(pair);
-                                    pair = QPair<AtomIdx, AtomIdx>(idx1, idx0);
-                                    recorded_pairs.insert(pair);
-
-                                    const auto s = scl.get(idx0, idx1);
-
-                                    if (not((s.coulomb() == 0 and s.lj() == 0) or (s.coulomb() == 1 and s.lj() == 1)))
-                                    {
-                                        // This is a non-default pair.
-                                        scllines.append(QString("%1 %2     1").arg(idx0 + 1, 6).arg(idx1 + 1, 6));
-                                    }
-                                }
-                            }
+                            if (row >= col)
+                                continue;
+                            write_pair14(AtomIdx(row), AtomIdx(col));
                         }
                     }
                 }
@@ -7836,6 +7984,72 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
         };
 
         // function that extracts all of the information from the 'cmap' lines
+        // function that extracts explicit 1-4 pair scale factors from the 'pairs' lines.
+        // funct=1 pairs are standard (use global fudge_qq/fudge_lj) and are handled
+        // automatically by gen-pairs, so we only need to store funct=2 explicit pairs.
+        // funct=2 format: ai aj 2 fudgeQQ qi qj sigma epsilon
+        // The LJ scale is 1.0 for funct=2 because sigma/epsilon are the full combined values.
+        auto addPairsTo = [&](GroMolType &moltype, int linenum)
+        {
+            QStringList lines = getDirectiveLines(linenum);
+
+            for (const auto &line : lines)
+            {
+                const auto words = line.split(" ");
+
+                if (words.count() < 3)
+                {
+                    moltype.addWarning(QObject::tr("Cannot extract pair information "
+                                                   "from the line '%1' as it should contain at least three words.")
+                                           .arg(line));
+                    continue;
+                }
+
+                bool ok0, ok1, ok2;
+
+                int atm0 = words[0].toInt(&ok0);
+                int atm1 = words[1].toInt(&ok1);
+                int funct = words[2].toInt(&ok2);
+
+                if (not(ok0 and ok1 and ok2))
+                {
+                    moltype.addWarning(QObject::tr("Cannot extract pair information "
+                                                   "from the line '%1' as the first three words need to be integers.")
+                                           .arg(line));
+                    continue;
+                }
+
+                if (funct == 1)
+                {
+                    // Standard pair: uses global fudge_qq/fudge_lj.
+                    // The gen-pairs mechanism already handles these, so no explicit storage needed.
+                    continue;
+                }
+                else if (funct == 2)
+                {
+                    // Explicit pair: ai aj 2 fudgeQQ qi qj sigma epsilon
+                    // The fudgeQQ is the coulomb scale factor; LJ params are used directly (lj_scl = 1.0).
+                    double cscl = fudge_qq; // default to global fudge_qq if not specified
+                    if (words.count() > 3)
+                    {
+                        bool ok;
+                        double val = words[3].toDouble(&ok);
+                        if (ok)
+                            cscl = val;
+                    }
+
+                    moltype.addExplicitPair(BondID(AtomNum(atm0), AtomNum(atm1)), cscl, 1.0);
+                }
+                else
+                {
+                    moltype.addWarning(QObject::tr("Unsupported pair function type %1 in line '%2'. "
+                                                   "Only funct=1 and funct=2 are supported.")
+                                           .arg(funct)
+                                           .arg(line));
+                }
+            }
+        };
+
         auto addCMAPsTo = [&](GroMolType &moltype, int linenum)
         {
             QStringList lines = getDirectiveLines(linenum);
@@ -7917,9 +8131,13 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
                 addCMAPsTo(moltype, linenum);
             }
 
+            for (auto linenum : moltag.values("pairs"))
+            {
+                addPairsTo(moltype, linenum);
+            }
+
             // now print out warnings for any lines that are missed...
-            const QStringList missed_tags = {"pairs",
-                                             "pairs_nb",
+            const QStringList missed_tags = {"pairs_nb",
                                              "exclusions",
                                              "contraints",
                                              "settles",
@@ -8327,6 +8545,33 @@ Molecule GroTop::createMolecule(const GroMolType &moltype, QStringList &errors, 
         ChainStructureEditor chain;
         CGStructureEditor cgroup;
 
+        // Track used residue numbers to handle topologies where numbering restarts
+        // (e.g. glycan residues numbered from 1 after a protein chain also starting
+        // from 1). Duplicate ResNums within a molecule cause duplicate_residue errors.
+        // next_unique is always > every number assigned so far, so conflict
+        // resolution is O(1) rather than a linear scan.
+        QSet<int> used_resnums;
+        int next_unique = 0;
+        auto unique_resnum = [&](int resnum) -> ResNum
+        {
+            if (!used_resnums.contains(resnum))
+            {
+                used_resnums.insert(resnum);
+                if (resnum >= next_unique)
+                    next_unique = resnum + 1;
+                return ResNum(resnum);
+            }
+            // conflict: assign next number beyond all previously seen
+            used_resnums.insert(next_unique);
+            return ResNum(next_unique++);
+        };
+
+        // Track the original (topology) residue number of the current residue
+        // separately, because unique_resnum may assign a different number. The
+        // "is this a new residue?" check must use the original topology number.
+        int current_orig_resnum = -1;
+        ResName current_resname;
+
         auto different_chain = [&](const ChainName &name)
         {
             if (name.isNull() and chain.isEmpty())
@@ -8348,14 +8593,16 @@ Molecule GroTop::createMolecule(const GroMolType &moltype, QStringList &errors, 
                 if (not atom.chainName().isNull())
                 {
                     chain = mol.add(ChainName(atom.chainName()));
-                    res = chain.add(ResNum(atom.residueNumber()));
+                    res = chain.add(unique_resnum(atom.residueNumber()));
                 }
                 else
                 {
-                    res = mol.add(ResNum(atom.residueNumber()));
+                    res = mol.add(unique_resnum(atom.residueNumber()));
                 }
 
                 res = res.rename(atom.residueName());
+                current_orig_resnum = atom.residueNumber();
+                current_resname = atom.residueName();
             }
             else if (different_chain(atom.chainName()))
             {
@@ -8367,25 +8614,30 @@ Molecule GroTop::createMolecule(const GroMolType &moltype, QStringList &errors, 
                 {
                     // residue is not in a chain
                     chain = ChainStructureEditor();
-                    res = mol.add(ResNum(atom.residueNumber()));
+                    res = mol.add(unique_resnum(atom.residueNumber()));
                 }
                 else
                 {
                     // residue is in a chain
                     chain = mol.add(ChainName(atom.chainName()));
-                    res = chain.add(ResNum(atom.residueNumber()));
+                    res = chain.add(unique_resnum(atom.residueNumber()));
                 }
 
                 res = res.rename(atom.residueName());
+                current_orig_resnum = atom.residueNumber();
+                current_resname = atom.residueName();
             }
-            else if (atom.residueNumber() != res.number() or atom.residueName() != res.name())
+            else if (atom.residueNumber() != current_orig_resnum or
+                     atom.residueName() != current_resname)
             {
                 // this atom is in a different residue
                 cgroup = mol.add(CGName(QString::number(cgidx)));
                 cgidx += 1;
 
-                res = mol.add(ResNum(atom.residueNumber()));
+                res = mol.add(unique_resnum(atom.residueNumber()));
                 res = res.rename(atom.residueName());
+                current_orig_resnum = atom.residueNumber();
+                current_resname = atom.residueName();
             }
 
             // add the atom to the residue
@@ -8618,6 +8870,27 @@ GroTop::PropsAndErrors GroTop::getBondProperties(const MoleculeInfo &molinfo, co
             else
             {
                 CLJNBPairs nbpairs(conn, CLJScaleFactor(fudge_qq, fudge_lj));
+
+                // Override with any explicitly specified [pairs] funct=2 entries.
+                // These carry their own fudgeQQ (coulomb scale) and use lj_scl=1.0
+                // (sigma/epsilon in funct=2 are the full combined values, not scaled by fudgeLJ).
+                const auto explicit_pairs = moltype.explicitPairs();
+                for (auto it = explicit_pairs.constBegin(); it != explicit_pairs.constEnd(); ++it)
+                {
+                    const auto &pair = it.key();
+                    const auto &scl = it.value();
+                    try
+                    {
+                        AtomIdx idx0 = molinfo.atomIdx(pair.atom0());
+                        AtomIdx idx1 = molinfo.atomIdx(pair.atom1());
+                        nbpairs.set(idx0, idx1, CLJScaleFactor(scl.first, scl.second));
+                    }
+                    catch (...)
+                    {
+                        // atom not found — skip silently (already warned during parsing)
+                    }
+                }
+
                 props.setProperty("intrascale", nbpairs);
             }
         }

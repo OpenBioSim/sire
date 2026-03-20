@@ -125,6 +125,8 @@ namespace SireMM
 
         const T &defaultValue() const;
 
+        QList<std::tuple<quint32, quint32, T>> nonDefaultElements() const;
+
     private:
         /** The matrix of objects associated with each pair of atoms */
         SireBase::SparseMatrix<T> data;
@@ -350,6 +352,13 @@ namespace SireMM
     SIRE_INLINE_TEMPLATE const T &CGAtomPairs<T>::defaultValue() const
     {
         return data.defaultValue();
+    }
+
+    /** Return all non-default (i, j, value) elements of this atom pairs matrix */
+    template <class T>
+    SIRE_INLINE_TEMPLATE QList<std::tuple<quint32, quint32, T>> CGAtomPairs<T>::nonDefaultElements() const
+    {
+        return data.nonDefaultElements();
     }
 
     /** Make sure that this container can hold dim_x by dim_y atom pairs */

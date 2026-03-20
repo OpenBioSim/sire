@@ -605,6 +605,11 @@ namespace SireMM
         /** The property map used (if any) to identify the properties that
             hold the amber parameters */
         SireBase::PropertyMap propmap;
+
+        /** Whether this molecule is perturbable (has an is_perturbable property).
+            Used in validateAndFix to handle ring-closure 1-3 pairs that may
+            carry incorrect (1,1) CLJScaleFactors from old-style merges. */
+        bool is_perturbable = false;
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS

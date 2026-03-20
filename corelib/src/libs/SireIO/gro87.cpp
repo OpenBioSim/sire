@@ -1889,43 +1889,59 @@ System Gro87::startSystem(const PropertyMap &map) const
 
         int ncg = 0;
 
-        QSet<ResNum> completed_residues;
+        // Track used residue numbers to handle topologies where numbering
+        // restarts (e.g. glycan residues numbered from 1 after a protein
+        // chain also starting from 1). Duplicate ResNums cause errors when
+        // looking up residues by number.
+        // next_unique is always > every number assigned so far, so conflict
+        // resolution is O(1) rather than a linear scan.
+        QSet<int> used_resnums;
+        int next_unique = 0;
+        auto unique_resnum = [&](int resnum) -> ResNum
+        {
+            if (!used_resnums.contains(resnum))
+            {
+                used_resnums.insert(resnum);
+                if (resnum >= next_unique)
+                    next_unique = resnum + 1;
+                return ResNum(resnum);
+            }
+            // conflict: assign next number beyond all previously seen
+            used_resnums.insert(next_unique);
+            return ResNum(next_unique++);
+        };
+
+        // Track the original residue number/name to detect residue boundaries.
+        // We compare against the original topology values (not remapped numbers).
+        // Store editors for the current residue and CutGroup so reparenting uses
+        // O(1) index lookups rather than O(n) name scans.
+        int current_orig_resnum = -1;
+        QString current_resname;
+        ResStructureEditor current_res;
+        CGStructureEditor current_cg;
 
         for (int i = 0; i < atmnams.count(); ++i)
         {
             auto atom = moleditor.add(AtomNum(atmnums[i]));
             atom = atom.rename(AtomName(atmnams[i]));
 
-            const ResNum resnum(resnums[i]);
+            const int orig_resnum = resnums[i];
+            const QString &resnam = resnams[i];
 
-            if (completed_residues.contains(resnum))
+            if (orig_resnum != current_orig_resnum || resnam != current_resname)
             {
-                auto res = moleditor.residue(resnum);
-
-                if (res.name().value() != resnams[i])
-                {
-                    // different residue
-                    res = moleditor.add(resnum);
-                    res = res.rename(ResName(resnams[i]));
-                    ncg += 1;
-                    moleditor.add(CGName(QString::number(ncg)));
-                }
-
-                atom = atom.reparent(res.index());
-                atom = atom.reparent(CGName(QString::number(ncg)));
-            }
-            else
-            {
-                auto res = moleditor.add(resnum);
-                res = res.rename(ResName(resnams[i]));
-                atom = atom.reparent(res.index());
+                // new residue
+                current_res = moleditor.add(unique_resnum(orig_resnum));
+                current_res = current_res.rename(ResName(resnam));
+                current_orig_resnum = orig_resnum;
+                current_resname = resnam;
 
                 ncg += 1;
-                auto cg = moleditor.add(CGName(QString::number(ncg)));
-                atom = atom.reparent(cg.index());
-
-                completed_residues.insert(resnum);
+                current_cg = moleditor.add(CGName(QString::number(ncg)));
             }
+
+            atom = atom.reparent(current_res.index());
+            atom = atom.reparent(current_cg.index());
         }
 
         // we have created the molecule - now add in the coordinates/velocities as needed
