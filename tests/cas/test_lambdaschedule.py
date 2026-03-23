@@ -154,3 +154,105 @@ def test_lambdaschedule():
 def test_has_force_specific_equation(force, lever, contained):
     l = sr.cas.LambdaSchedule.standard_decouple()
     assert l.has_force_specific_equation("decouple", force, lever) == contained
+
+
+def test_coupled_lever_default():
+    """cmap::cmap_grid should follow torsion::torsion_k by default."""
+    l = sr.cas.LambdaSchedule.standard_morph()
+    morph_equation = (1 - l.lam()) * l.initial() + l.lam() * l.final()
+
+    # With no custom equations, both should return the stage default.
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="morph", force="torsion", lever="torsion_k"),
+        morph_equation,
+    )
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="morph", force="cmap", lever="cmap_grid"),
+        morph_equation,
+    )
+
+
+def test_coupled_lever_follows_torsion_k():
+    """Setting a custom torsion_k equation should automatically apply to cmap_grid."""
+    l = sr.cas.LambdaSchedule.standard_morph()
+    custom_eq = l.lam() ** 2 * l.final() + (1 - l.lam() ** 2) * l.initial()
+
+    l.set_equation(
+        stage="morph", force="torsion", lever="torsion_k", equation=custom_eq
+    )
+
+    # cmap_grid should now follow the custom torsion_k equation via coupling.
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="morph", force="cmap", lever="cmap_grid"),
+        custom_eq,
+    )
+
+
+def test_coupled_lever_explicit_override():
+    """An explicit cmap_grid equation should take precedence over the coupling."""
+    l = sr.cas.LambdaSchedule.standard_morph()
+    torsion_eq = l.lam() ** 2 * l.final() + (1 - l.lam() ** 2) * l.initial()
+    cmap_eq = l.initial()  # freeze CMAP at λ=0
+
+    l.set_equation(
+        stage="morph", force="torsion", lever="torsion_k", equation=torsion_eq
+    )
+    l.set_equation(stage="morph", force="cmap", lever="cmap_grid", equation=cmap_eq)
+
+    # cmap_grid should use its own explicit equation, not torsion_k's.
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="morph", force="cmap", lever="cmap_grid"),
+        cmap_eq,
+    )
+    # torsion_k should be unaffected.
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="morph", force="torsion", lever="torsion_k"),
+        torsion_eq,
+    )
+
+
+def test_remove_coupled_lever():
+    """Removing the coupling makes cmap_grid fall back to the stage default."""
+    l = sr.cas.LambdaSchedule.standard_morph()
+    morph_equation = (1 - l.lam()) * l.initial() + l.lam() * l.final()
+    custom_eq = l.lam() ** 2 * l.final() + (1 - l.lam() ** 2) * l.initial()
+
+    l.set_equation(
+        stage="morph", force="torsion", lever="torsion_k", equation=custom_eq
+    )
+    l.remove_coupled_lever(force="cmap", lever="cmap_grid")
+
+    # cmap_grid should now use the stage default, not follow torsion_k.
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="morph", force="cmap", lever="cmap_grid"),
+        morph_equation,
+    )
+
+
+def test_couple_lever_custom():
+    """coupleLever can set an arbitrary coupling between levers."""
+    l = sr.cas.LambdaSchedule.standard_morph()
+    custom_eq = l.lam() ** 2 * l.final() + (1 - l.lam() ** 2) * l.initial()
+
+    # Couple bond_k to torsion_k (unusual, but should work).
+    l.couple_lever(
+        force="bond",
+        lever="bond_k",
+        fallback_force="torsion",
+        fallback_lever="torsion_k",
+    )
+    l.set_equation(
+        stage="morph", force="torsion", lever="torsion_k", equation=custom_eq
+    )
+
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="morph", force="bond", lever="bond_k"),
+        custom_eq,
+    )

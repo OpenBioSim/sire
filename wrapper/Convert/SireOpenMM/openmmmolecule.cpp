@@ -1399,6 +1399,18 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 }
             }
         }
+
+        if (virtual_sites.size() != vsite_idxs.count())
+        {
+            throw SireError::incompatible_error(
+                QObject::tr("Molecule %1: detected %2 virtual site atom(s) but only "
+                            "registered %3. Check atom geometry (degenerate coordinates?) "
+                            "or atom naming conventions.")
+                    .arg(number.toString())
+                    .arg(vsite_idxs.count())
+                    .arg(virtual_sites.size()),
+                CODELOC);
+        }
     }
 
     this->buildExceptions(mol, constrained_pairs, map);

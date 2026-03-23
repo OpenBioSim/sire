@@ -65,7 +65,7 @@ static RegisterMetaType<LambdaSchedule> r_schedule;
 
 QDataStream &operator<<(QDataStream &ds, const LambdaSchedule &schedule)
 {
-    writeHeader(ds, r_schedule, 3);
+    writeHeader(ds, r_schedule, 4);
 
     SharedDataStream sds(ds);
 
@@ -75,6 +75,7 @@ QDataStream &operator<<(QDataStream &ds, const LambdaSchedule &schedule)
         << schedule.default_equations
         << schedule.stage_equations
         << schedule.mol_schedules
+        << schedule.coupled_levers
         << static_cast<const Property &>(schedule);
 
     return ds;
@@ -91,20 +92,29 @@ QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
 {
     VersionID v = readHeader(ds, r_schedule);
 
-    if (v == 1 or v == 2 or v == 3)
+    if (v == 1 or v == 2 or v == 3 or v == 4)
     {
         SharedDataStream sds(ds);
 
         sds >> schedule.constant_values;
 
-        if (v == 3)
+        if (v >= 3)
             sds >> schedule.force_names;
 
         sds >> schedule.lever_names >> schedule.stage_names >>
             schedule.default_equations >> schedule.stage_equations;
 
-        if (v == 2 or v == 3)
+        if (v >= 2)
             sds >> schedule.mol_schedules;
+
+        if (v >= 4)
+            sds >> schedule.coupled_levers;
+        else
+        {
+            // Populate the default coupling for streams written before v4
+            schedule.coupled_levers[_get_lever_name("cmap", "cmap_grid")] =
+                _get_lever_name("torsion", "torsion_k");
+        }
 
         if (v < 3)
         {
@@ -146,13 +156,17 @@ QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
         }
     }
     else
-        throw version_error(v, "1, 2, 3", r_schedule, CODELOC);
+        throw version_error(v, "1, 2, 3, 4", r_schedule, CODELOC);
 
     return ds;
 }
 
 LambdaSchedule::LambdaSchedule() : ConcreteProperty<LambdaSchedule, Property>()
 {
+    // By default, cmap_grid falls back to torsion_k so that customising
+    // torsion scaling automatically keeps the CMAP correction in sync.
+    coupled_levers[_get_lever_name("cmap", "cmap_grid")] =
+        _get_lever_name("torsion", "torsion_k");
 }
 
 LambdaSchedule::LambdaSchedule(const LambdaSchedule &other)
@@ -162,7 +176,8 @@ LambdaSchedule::LambdaSchedule(const LambdaSchedule &other)
       force_names(other.force_names),
       lever_names(other.lever_names), stage_names(other.stage_names),
       default_equations(other.default_equations),
-      stage_equations(other.stage_equations)
+      stage_equations(other.stage_equations),
+      coupled_levers(other.coupled_levers)
 {
 }
 
@@ -1006,6 +1021,32 @@ void LambdaSchedule::removeEquation(const QString &stage,
     this->stage_equations[idx].remove(_get_lever_name(force, lever));
 }
 
+/** Couple the lever 'force::lever' to 'fallback_force::fallback_lever'.
+ *  If no custom equation has been set for 'force::lever' at any stage,
+ *  the equation for 'fallback_force::fallback_lever' will be used instead
+ *  of the stage default. This is a single level of indirection — the
+ *  fallback lever is not itself followed further.
+ *
+ *  By default, 'cmap::cmap_grid' is coupled to 'torsion::torsion_k' so
+ *  that custom torsion schedules automatically keep the CMAP correction
+ *  in sync.
+ */
+void LambdaSchedule::coupleLever(const QString &force, const QString &lever,
+                                  const QString &fallback_force,
+                                  const QString &fallback_lever)
+{
+    coupled_levers[_get_lever_name(force, lever)] =
+        _get_lever_name(fallback_force, fallback_lever);
+}
+
+/** Remove any coupling for the lever 'force::lever', reverting it to
+ *  use the stage default equation when no custom equation is set.
+ */
+void LambdaSchedule::removeCoupledLever(const QString &force, const QString &lever)
+{
+    coupled_levers.remove(_get_lever_name(force, lever));
+}
+
 /** Return whether or not the specified 'lever' in the specified 'force'
  *  at the specified 'stage' has a custom equation set for it
  */
@@ -1075,6 +1116,32 @@ SireCAS::Expression LambdaSchedule::_getEquation(int stage,
     if (it != equations.end())
     {
         return it.value();
+    }
+
+    // Check coupled levers: if this lever is coupled to another, try to
+    // find a custom equation for the coupled lever before falling back to
+    // the stage default. This is a single level of indirection (no recursion)
+    // to prevent loops.
+    auto coupled_it = this->coupled_levers.find(lever_name);
+
+    if (coupled_it != this->coupled_levers.end())
+    {
+        const auto &coupled_name = coupled_it.value();
+        const int sep = coupled_name.indexOf("::");
+        const QString coupled_force = sep >= 0 ? coupled_name.left(sep) : "*";
+        const QString coupled_lever_part = sep >= 0 ? coupled_name.mid(sep + 2) : coupled_name;
+
+        it = equations.find(coupled_name);
+        if (it != equations.end())
+            return it.value();
+
+        it = equations.find(_get_lever_name(coupled_force, "*"));
+        if (it != equations.end())
+            return it.value();
+
+        it = equations.find(_get_lever_name("*", coupled_lever_part));
+        if (it != equations.end())
+            return it.value();
     }
 
     // we don't have any match, so return the default equation for this stage

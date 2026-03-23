@@ -159,6 +159,31 @@ In this case, as we have a perturbable system, the Force objects used are;
   It uses parameters that are controlled by the ``charge``, ``sigma``, ``epsilon``,
   ``alpha``, ``kappa``, ``charge_scale`` and ``lj_scale`` levers.
 
+For systems that use a force field with CMAP backbone torsion corrections (such
+as AMBER ff19SB), an additional Force object is present:
+
+* ``cmap``: `OpenMM::CMAPTorsionForce <http://docs.openmm.org/latest/api-c++/generated/CMAPTorsionForce.html>`__.
+  This models the cross-term energy correction (CMAP) for backbone φ/ψ dihedral
+  pairs. It uses a parameter controlled by the ``cmap_grid`` lever, which
+  interpolates the two-dimensional energy grid from its λ=0 value to its λ=1 value.
+
+.. note::
+
+   By default, ``cmap::cmap_grid`` is coupled to ``torsion::torsion_k``:
+   if you set a custom equation for ``torsion_k``, the same equation will
+   automatically be used for ``cmap_grid``, keeping the CMAP correction
+   in sync with the torsion perturbation. You can override this by
+   setting an explicit equation for ``cmap::cmap_grid``::
+
+      # freeze CMAP at its λ=0 grid while still perturbing torsions
+      s.set_equation(stage="morph", force="cmap", lever="cmap_grid",
+                     equation=s.initial())
+
+   To remove the coupling entirely (so that ``cmap_grid`` falls back to
+   the stage default independently of ``torsion_k``)::
+
+      s.remove_coupled_lever(force="cmap", lever="cmap_grid")
+
 Some levers, like ``bond_length``, are used only by a single Force object.
 However, others, like ``charge``, are used by multiple Force objects.
 
