@@ -337,7 +337,7 @@ def generate_recipe(data, features, git_remote, git_branch, git_version, git_num
     lines.extend(deps_to_yaml_lines(run_deps, indent=4))
 
     # Run constraints
-    lines.append("  run_constrained:")
+    lines.append("  run_constraints:")
     lines.append("    - ${{ pin_compatible('gemmi', upper_bound='x.x.x') }}")
     lines.append("    - ${{ pin_compatible('openmm', upper_bound='x.x') }}")
     lines.append("    - ${{ pin_compatible('rdkit', upper_bound='x.x.x') }}")
