@@ -29,6 +29,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fix hang in ``sire.load`` function when shared GROMACS topology path is missing.
 
+* Add support for 4- and 5-point water models in the OpenMM conversion layer.
+
+* Add functionality for coupling one lambda lever to another.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 

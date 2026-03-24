@@ -1807,6 +1807,30 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             }
         }
 
+        // Register virtual sites (OPC, TIP4P, TIP5P, …).
+        // setVirtualSite() must be called after all particles have been added
+        // to the System but before the Context is created.
+        for (const auto &vs : mol.virtual_sites)
+        {
+            const int vsite_atom = vs.vsite_idx + start_index;
+            const int p1         = vs.p1_idx    + start_index;
+            const int p2         = vs.p2_idx    + start_index;
+            const int p3         = vs.p3_idx    + start_index;
+
+            if (vs.type == VirtualSiteInfo::ThreeParticleAverage)
+            {
+                system.setVirtualSite(vsite_atom,
+                                      new OpenMM::ThreeParticleAverageSite(
+                                          p1, p2, p3, vs.w1, vs.w2, vs.w3));
+            }
+            else
+            {
+                system.setVirtualSite(vsite_atom,
+                                      new OpenMM::OutOfPlaneSite(
+                                          p1, p2, p3, vs.w12, vs.w13, vs.wCross));
+            }
+        }
+
         // now add all of the bond parameters
         for (const auto &bond : mol.bond_params)
         {

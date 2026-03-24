@@ -646,8 +646,34 @@ void register_LambdaSchedule_class(){
                 , "Remove the custom equation for the specified `lever` in the\n  specified force at the specified `stage`.\n  The lever will now use the equation specified for this\n  lever for this stage, or the default lever for the stage\n  if this isnt set\n" );
         
         }
+        { //::SireCAS::LambdaSchedule::coupleLever
+
+            typedef void ( ::SireCAS::LambdaSchedule::*coupleLever_function_type)( ::QString const &,::QString const &,::QString const &,::QString const & ) ;
+            coupleLever_function_type coupleLever_function_value( &::SireCAS::LambdaSchedule::coupleLever );
+
+            LambdaSchedule_exposer.def(
+                "coupleLever"
+                , coupleLever_function_value
+                , ( bp::arg("force"), bp::arg("lever"), bp::arg("fallback_force"), bp::arg("fallback_lever") )
+                , bp::release_gil_policy()
+                , "Couple force::lever to fallback_force::fallback_lever. When no\n  custom equation is set for force::lever, the equation for\n  fallback_force::fallback_lever will be used instead of the stage\n  default. By default cmap::cmap_grid is coupled to torsion::torsion_k.\n" );
+
+        }
+        { //::SireCAS::LambdaSchedule::removeCoupledLever
+
+            typedef void ( ::SireCAS::LambdaSchedule::*removeCoupledLever_function_type)( ::QString const &,::QString const & ) ;
+            removeCoupledLever_function_type removeCoupledLever_function_value( &::SireCAS::LambdaSchedule::removeCoupledLever );
+
+            LambdaSchedule_exposer.def(
+                "removeCoupledLever"
+                , removeCoupledLever_function_value
+                , ( bp::arg("force"), bp::arg("lever") )
+                , bp::release_gil_policy()
+                , "Remove any coupling for force::lever, reverting it to use the\n  stage default equation when no custom equation is set.\n" );
+
+        }
         { //::SireCAS::LambdaSchedule::removeForce
-        
+
             typedef void ( ::SireCAS::LambdaSchedule::*removeForce_function_type)( ::QString const & ) ;
             removeForce_function_type removeForce_function_value( &::SireCAS::LambdaSchedule::removeForce );
             
