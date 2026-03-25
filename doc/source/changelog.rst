@@ -17,6 +17,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
+* Fixed duplicate converter registrations in the Python wrappers for OpenMM-related classes,
+  which caused ``RuntimeWarning: to-Python converter already registered`` warnings at import
+  time. Also fixed the autogeneration script (``scanheaders.py``) to deduplicate metatypes
+  so the issue does not recur when wrappers are regenerated.
+
 * Fixed a bug in the AMBER prmtop writer where CMAP atom indices were calculated
   incorrectly for systems containing more than one molecule with CMAP terms (e.g.
   multi-chain glycoproteins).
