@@ -262,7 +262,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
 
 void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraints,
                                 OpenMM::System &system, LambdaLever &lambda_lever,
-                                int natoms)
+                                int natoms, QVector<int> &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -303,8 +303,8 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
 
     for (const auto &restraint : atom_restraints)
     {
-        int atom0_index = restraint.atom0();
-        int atom1_index = restraint.atom1();
+        int atom0_index = real_atoms[restraint.atom0()];
+        int atom1_index = real_atoms[restraint.atom1()];
 
         if (atom0_index < 0 or atom0_index >= natoms)
         throw SireError::invalid_index(QObject::tr(
@@ -333,7 +333,7 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
  */
 void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &restraints,
         OpenMM::System &system, LambdaLever &lambda_lever,
-        int natoms)
+        int natoms, QVector<int> &real_atoms)
 {
     if (restraints.isEmpty())
     return;
@@ -379,8 +379,8 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
 
     for (const auto &restraint : atom_restraints)
     {
-        int atom0_index = restraint.atom0();
-        int atom1_index = restraint.atom1();
+        int atom0_index = real_atoms[restraint.atom0()];
+        int atom1_index = real_atoms[restraint.atom1()];
 
         if (atom0_index < 0 or atom0_index >= natoms)
         throw SireError::invalid_index(QObject::tr(
@@ -548,7 +548,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
 
 void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
                               OpenMM::System &system, LambdaLever &lambda_lever,
-                              int natoms)
+                              int natoms, QVector<int> &real_atoms)
 {
     if (restraints.isEmpty())
         return;
@@ -607,7 +607,7 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
 
         for (int i = 0; i < n_particles; ++i)
         {
-            particles[i] = restraint.atoms()[i];
+            particles[i] = real_atoms[restraint.atoms()[i]];
         }
 
         // Extract reference positions and convert to correct units
@@ -2376,12 +2376,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             else if (prop.read().isA<SireMM::MorsePotentialRestraints>())
             {
                 _add_morse_potential_restraints(prop.read().asA<SireMM::MorsePotentialRestraints>(),
-                                     system, lambda_lever, start_index);
+                                     system, lambda_lever, start_index, real_atoms);
             }
             else if (prop.read().isA<SireMM::RMSDRestraints>())
             {
                 _add_rmsd_restraints(prop.read().asA<SireMM::RMSDRestraints>(),
-                                           system, lambda_lever, start_index);
+                                           system, lambda_lever, start_index, real_atoms);
             }
             else if (prop.read().isA<SireMM::BondRestraints>())
             {
@@ -2391,7 +2391,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             else if (prop.read().isA<SireMM::InverseBondRestraints>())
             {
                 _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
-                                     system, lambda_lever, start_index);
+                                     system, lambda_lever, start_index, real_atoms);
             }
             else if (prop.read().isA<SireMM::BoreschRestraints>())
             {
@@ -2421,7 +2421,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             if (prop.read().isA<SireMM::InverseBondRestraints>())
             {
                 _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
-                                         system, lambda_lever, start_index);
+                                         system, lambda_lever, start_index, real_atoms);
             }
         }
     }
