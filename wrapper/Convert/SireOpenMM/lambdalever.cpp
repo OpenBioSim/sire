@@ -1455,7 +1455,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     else
                     {
                         cljff->setParticleParameters(
-                            start_index + j, sqrt_scale* morphed_charges[j],
+                            start_index + j, sqrt_scale * morphed_charges[j],
                             morphed_sigmas[j], scale * morphed_epsilons[j]);
                     }
                 }
@@ -1475,7 +1475,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     }
 
                     cljff->setParticleParameters(start_index + j, sqrt_scale * morphed_charges[j],
-                            morphed_sigmas[j], scale * morphed_epsilons[j]);
+                                                 morphed_sigmas[j], scale * morphed_epsilons[j]);
                 }
             }
 
@@ -1538,8 +1538,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
                             if (nbidx < 0)
                                 throw SireError::program_bug(QObject::tr(
-                                                                "Unset NB14 index for a ghost atom?"),
-                                                            CODELOC);
+                                                                 "Unset NB14 index for a ghost atom?"),
+                                                             CODELOC);
 
                             coul_14_scale = morphed_ghost14_charge_scale[j];
                             lj_14_scale = morphed_ghost14_lj_scale[j];
@@ -1558,8 +1558,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                                 boost::get<3>(p),
                                 4.0 * boost::get<4>(p) * scale,
                                 boost::get<5>(p),
-                                boost::get<6>(p)
-                            };
+                                boost::get<6>(p)};
 
                             if (start_change_14 == -1)
                             {
@@ -1670,11 +1669,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double length, k;
 
                 bondff->getBondParameters(index, particle1, particle2,
-                                        length, k);
+                                          length, k);
 
                 bondff->setBondParameters(index, particle1, particle2,
-                                        morphed_bond_length[j],
-                                        morphed_bond_k[j]);
+                                          morphed_bond_length[j],
+                                          morphed_bond_k[j]);
             }
         }
 
@@ -1719,13 +1718,13 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double size, k;
 
                 angff->getAngleParameters(index,
-                                        particle1, particle2, particle3,
-                                        size, k);
+                                          particle1, particle2, particle3,
+                                          size, k);
 
                 angff->setAngleParameters(index,
-                                        particle1, particle2, particle3,
-                                        morphed_angle_size[j],
-                                        morphed_angle_k[j]);
+                                          particle1, particle2, particle3,
+                                          morphed_angle_size[j],
+                                          morphed_angle_k[j]);
             }
         }
 
@@ -1868,54 +1867,26 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     if (num_changed_atoms > 0)
     {
         if (cljff)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-            cljff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
-#else
             cljff->updateParametersInContext(context);
-#endif
 
         if (ghost_ghostff)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-            ghost_ghostff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
-#else
             ghost_ghostff->updateParametersInContext(context);
-#endif
 
         if (ghost_nonghostff)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-            ghost_nonghostff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
-#else
             ghost_nonghostff->updateParametersInContext(context);
-#endif
     }
 
     if (ghost_14ff and num_changed_14 > 0)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-        ghost_14ff->updateSomeParametersInContext(start_change_14, num_changed_14, context);
-#else
         ghost_14ff->updateParametersInContext(context);
-#endif
 
     if (bondff and num_changed_bonds > 0)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-        bondff->updateSomeParametersInContext(start_change_bond, num_changed_bonds, context);
-#else
         bondff->updateParametersInContext(context);
-#endif
 
     if (angff and num_changed_angles > 0)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-        angff->updateSomeParametersInContext(start_change_angle, num_changed_angles, context);
-#else
         angff->updateParametersInContext(context);
-#endif
 
     if (dihff and num_changed_torsions > 0)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-        dihff->updateSomeParametersInContext(start_change_torsion, num_changed_torsions, context);
-#else
         dihff->updateParametersInContext(context);
-#endif
 
     // now update any restraints that are scaled
     for (const auto &restraint : this->name_to_restraintidx.keys())
