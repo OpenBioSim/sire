@@ -36,6 +36,15 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add support for 4- and 5-point water models in the OpenMM conversion layer.
 
+* Add per-force-group energy caching to the OpenMM integration layer. Named
+  forces (``clj``, ``bond``, ``angle``, ``torsion``, ``cmap``, ghost forces,
+  restraints, etc.) are each assigned a unique OpenMM force group when the
+  system is built. :meth:`~sire.mol.Dynamics.get_potential_energy` now
+  re-evaluates only the groups whose parameters changed since the last lambda
+  update, using cached values for all others. Call
+  :meth:`~sire.mol.Dynamics.clear_energy_cache` to force a full re-evaluation
+  (e.g. after a replica-exchange position swap).
+
 * Add functionality for coupling one lambda lever to another.
 
 * Added support for Direct Morse Replacement (DMR) feature in ``sire.restraints.morse_potential``

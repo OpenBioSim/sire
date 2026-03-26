@@ -217,17 +217,68 @@ void register_LambdaLever_class(){
         
         }
         { //::SireOpenMM::LambdaLever::setForceIndex
-        
+
             typedef void ( ::SireOpenMM::LambdaLever::*setForceIndex_function_type)( ::QString const &,int ) ;
             setForceIndex_function_type setForceIndex_function_value( &::SireOpenMM::LambdaLever::setForceIndex );
-            
-            LambdaLever_exposer.def( 
+
+            LambdaLever_exposer.def(
                 "setForceIndex"
                 , setForceIndex_function_value
                 , ( bp::arg("force"), bp::arg("index") )
                 , bp::release_gil_policy()
                 , "Set the index of the force called force in the OpenMM System.\n  There can only be one force with this name. Attempts to add\n  a duplicate will cause an error to be raised.\n" );
-        
+
+        }
+        { //::SireOpenMM::LambdaLever::setForceGroup
+
+            typedef void ( ::SireOpenMM::LambdaLever::*setForceGroup_function_type)( ::QString const &,int ) ;
+            setForceGroup_function_type setForceGroup_function_value( &::SireOpenMM::LambdaLever::setForceGroup );
+
+            LambdaLever_exposer.def(
+                "setForceGroup"
+                , setForceGroup_function_value
+                , ( bp::arg("name"), bp::arg("group_idx") )
+                , bp::release_gil_policy()
+                , "Set the force group index for the named force." );
+
+        }
+        { //::SireOpenMM::LambdaLever::getForceGroup
+
+            typedef int ( ::SireOpenMM::LambdaLever::*getForceGroup_function_type)( ::QString const & ) const;
+            getForceGroup_function_type getForceGroup_function_value( &::SireOpenMM::LambdaLever::getForceGroup );
+
+            LambdaLever_exposer.def(
+                "getForceGroup"
+                , getForceGroup_function_value
+                , ( bp::arg("name") )
+                , bp::release_gil_policy()
+                , "Get the force group index for the named force. Returns -1 if not found." );
+
+        }
+        { //::SireOpenMM::LambdaLever::getForceNames
+
+            typedef ::QStringList ( ::SireOpenMM::LambdaLever::*getForceNames_function_type)(  ) const;
+            getForceNames_function_type getForceNames_function_value( &::SireOpenMM::LambdaLever::getForceNames );
+
+            LambdaLever_exposer.def(
+                "getForceNames"
+                , getForceNames_function_value
+                , bp::release_gil_policy()
+                , "Return the names of all forces and restraints that have been assigned a force group index." );
+
+        }
+        { //::SireOpenMM::LambdaLever::wasForceChanged
+
+            typedef bool ( ::SireOpenMM::LambdaLever::*wasForceChanged_function_type)( ::QString const & ) const;
+            wasForceChanged_function_type wasForceChanged_function_value( &::SireOpenMM::LambdaLever::wasForceChanged );
+
+            LambdaLever_exposer.def(
+                "wasForceChanged"
+                , wasForceChanged_function_value
+                , ( bp::arg("name") )
+                , bp::release_gil_policy()
+                , "Return whether the named force had parameters changed in the last setLambda call." );
+
         }
         { //::SireOpenMM::LambdaLever::setLambda
         

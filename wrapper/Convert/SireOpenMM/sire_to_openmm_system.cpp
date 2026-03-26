@@ -72,7 +72,7 @@ using namespace SireOpenMM;
  */
 void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
                              OpenMM::System &system, LambdaLever &lambda_lever,
-                             int natoms)
+                             int natoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
         return;
@@ -137,8 +137,10 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
 
     restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
+    restraintff->setForceGroup(force_group_counter);
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
+    lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
 
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
     const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / SireUnits::nanometer2);
@@ -197,7 +199,7 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
  */
 void _add_bond_restraints(const SireMM::BondRestraints &restraints,
                           OpenMM::System &system, LambdaLever &lambda_lever,
-                          int natoms)
+                          int natoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
         return;
@@ -224,8 +226,10 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
 
     restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
+    restraintff->setForceGroup(force_group_counter);
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
+    lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
 
     const auto atom_restraints = restraints.atomRestraints();
 
@@ -263,7 +267,7 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
 
 void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraints,
                                 OpenMM::System &system, LambdaLever &lambda_lever,
-                                int natoms)
+                                int natoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
         return;
@@ -290,8 +294,10 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
 
     restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
+    restraintff->setForceGroup(force_group_counter);
     lambda_lever.addRestraintIndex(restraints.name(),
     system.addForce(restraintff));
+    lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
 
     const auto atom_restraints = restraints.atomRestraints();
 
@@ -334,7 +340,7 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
  */
 void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &restraints,
         OpenMM::System &system, LambdaLever &lambda_lever,
-        int natoms)
+        int natoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
     return;
@@ -368,8 +374,10 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
 
     restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
+    restraintff->setForceGroup(force_group_counter);
     lambda_lever.addRestraintIndex(restraints.name(),
                 system.addForce(restraintff));
+    lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
 
     const auto atom_restraints = restraints.atomRestraints();
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
@@ -415,7 +423,7 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
 void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
                                 OpenMM::System &system, LambdaLever &lambda_lever,
                                 std::vector<OpenMM::Vec3> &anchor_coords,
-                                int natoms)
+                                int natoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
         return;
@@ -442,8 +450,10 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
 
     restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
+    restraintff->setForceGroup(force_group_counter);
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
+    lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
 
     const auto atom_restraints = restraints.atomRestraints();
 
@@ -549,7 +559,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
 
 void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
                               OpenMM::System &system, LambdaLever &lambda_lever,
-                              int natoms)
+                              int natoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
         return;
@@ -631,8 +641,17 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
         auto *rmsdCV = new OpenMM::RMSDForce(referencePositions, particles);
         restraintff->addCollectiveVariable(rmsd_unique, rmsdCV);
 
+        // All sub-restraints with the same name share a single force group so
+        // that one getState(groups=...) call sums their energies correctly.
+        int grp = lambda_lever.getForceGroup(restraints.name());
+        if (grp < 0)
+        {
+            grp = force_group_counter++;
+        }
+        restraintff->setForceGroup(grp);
         lambda_lever.addRestraintIndex(restraints.name(),
                                     system.addForce(restraintff));
+        lambda_lever.setRestraintForceGroup(restraints.name(), grp);
 
         // Update the counter for number of CustomCVForces
         n_CVForces++;
@@ -645,7 +664,7 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
  */
 void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
                            OpenMM::System &system, LambdaLever &lambda_lever,
-                           int natoms)
+                           int natoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
         return;
@@ -672,8 +691,10 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
 
     restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
+    restraintff->setForceGroup(force_group_counter);
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
+    lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
 
     const double internal_to_ktheta = (1 * SireUnits::kcal_per_mol / (SireUnits::radian2)).to(SireUnits::kJ_per_mol / SireUnits::radian2);
 
@@ -703,7 +724,7 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
 
 void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
                               OpenMM::System &system, LambdaLever &lambda_lever,
-                              int natoms)
+                              int natoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
         return;
@@ -735,8 +756,10 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
 
     restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
 
+    restraintff->setForceGroup(force_group_counter);
     lambda_lever.addRestraintIndex(restraints.name(),
                                    system.addForce(restraintff));
+    lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
 
     const double internal_to_ktheta = (1 * SireUnits::kcal_per_mol / (SireUnits::radian2)).to(SireUnits::kJ_per_mol / SireUnits::radian2);
 
@@ -1209,17 +1232,26 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             LambdaSchedule::standard_morph());
     }
 
+    // Each named force is placed into its own force group so that energies
+    // can be queried and cached per-group. The counter starts at 0 and
+    // increments for each named force added to the system.
+    int force_group_counter = 0;
+
     // Add any QM force first so that we can guarantee that it is index zero.
     if (qmff != 0)
     {
+        qmff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("qmff", system.addForce(qmff));
+        lambda_lever.setForceGroup("qmff", force_group_counter++);
         lambda_lever.addLever("qm_scale");
     }
 
     // We can now add the standard forces to the OpenMM::System.
     // We do this here, so that we can capture the index of the
     // force and associate it with a name in the lever.
+    cljff->setForceGroup(force_group_counter);
     lambda_lever.setForceIndex("clj", system.addForce(cljff));
+    lambda_lever.setForceGroup("clj", force_group_counter++);
 
     // We also want to name the levers available for this force,
     // e.g. we can change the charge, sigma and epsilon parameters
@@ -1232,19 +1264,27 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     lambda_lever.addLever("lj_scale");
 
     // Do the same for the bond, angle and torsion forces
+    bondff->setForceGroup(force_group_counter);
     lambda_lever.setForceIndex("bond", system.addForce(bondff));
+    lambda_lever.setForceGroup("bond", force_group_counter++);
     lambda_lever.addLever("bond_length");
     lambda_lever.addLever("bond_k");
 
+    angff->setForceGroup(force_group_counter);
     lambda_lever.setForceIndex("angle", system.addForce(angff));
+    lambda_lever.setForceGroup("angle", force_group_counter++);
     lambda_lever.addLever("angle_size");
     lambda_lever.addLever("angle_k");
 
+    dihff->setForceGroup(force_group_counter);
     lambda_lever.setForceIndex("torsion", system.addForce(dihff));
+    lambda_lever.setForceGroup("torsion", force_group_counter++);
     lambda_lever.addLever("torsion_phase");
     lambda_lever.addLever("torsion_k");
 
+    cmapff->setForceGroup(force_group_counter);
     lambda_lever.setForceIndex("cmap", system.addForce(cmapff));
+    lambda_lever.setForceGroup("cmap", force_group_counter++);
     lambda_lever.addLever("cmap_grid");
 
     ///
@@ -1521,9 +1561,17 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             ghost_nonghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::NoCutoff);
         }
 
+        ghost_ghostff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost/ghost", system.addForce(ghost_ghostff));
+        lambda_lever.setForceGroup("ghost/ghost", force_group_counter++);
+
+        ghost_nonghostff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost/non-ghost", system.addForce(ghost_nonghostff));
+        lambda_lever.setForceGroup("ghost/non-ghost", force_group_counter++);
+
+        ghost_14ff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost-14", system.addForce(ghost_14ff));
+        lambda_lever.setForceGroup("ghost-14", force_group_counter++);
     }
 
     // Stage 4 is complete. We now have all(*) of the forces we need to run
@@ -2231,42 +2279,43 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             if (prop.read().isA<SireMM::DihedralRestraints>())
             {
                 _add_dihedral_restraints(prop.read().asA<SireMM::DihedralRestraints>(),
-                                         system, lambda_lever, start_index);
+                                         system, lambda_lever, start_index, force_group_counter);
             }
             else if (prop.read().isA<SireMM::AngleRestraints>())
             {
                 _add_angle_restraints(prop.read().asA<SireMM::AngleRestraints>(),
-                                      system, lambda_lever, start_index);
+                                      system, lambda_lever, start_index, force_group_counter);
             }
             else if (prop.read().isA<SireMM::PositionalRestraints>())
             {
                 _add_positional_restraints(prop.read().asA<SireMM::PositionalRestraints>(),
-                                           system, lambda_lever, anchor_coords, start_index);
+                                           system, lambda_lever, anchor_coords, start_index,
+                                           force_group_counter);
             }
             else if (prop.read().isA<SireMM::MorsePotentialRestraints>())
             {
                 _add_morse_potential_restraints(prop.read().asA<SireMM::MorsePotentialRestraints>(),
-                                     system, lambda_lever, start_index);
+                                     system, lambda_lever, start_index, force_group_counter);
             }
             else if (prop.read().isA<SireMM::RMSDRestraints>())
             {
                 _add_rmsd_restraints(prop.read().asA<SireMM::RMSDRestraints>(),
-                                           system, lambda_lever, start_index);
+                                           system, lambda_lever, start_index, force_group_counter);
             }
             else if (prop.read().isA<SireMM::BondRestraints>())
             {
                 _add_bond_restraints(prop.read().asA<SireMM::BondRestraints>(),
-                                     system, lambda_lever, start_index);
+                                     system, lambda_lever, start_index, force_group_counter);
             }
             else if (prop.read().isA<SireMM::InverseBondRestraints>())
             {
                 _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
-                                     system, lambda_lever, start_index);
+                                     system, lambda_lever, start_index, force_group_counter);
             }
             else if (prop.read().isA<SireMM::BoreschRestraints>())
             {
                 _add_boresch_restraints(prop.read().asA<SireMM::BoreschRestraints>(),
-                                        system, lambda_lever, start_index);
+                                        system, lambda_lever, start_index, force_group_counter);
             }
         }
     }
@@ -2291,7 +2340,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             if (prop.read().isA<SireMM::InverseBondRestraints>())
             {
                 _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
-                                         system, lambda_lever, start_index);
+                                         system, lambda_lever, start_index, force_group_counter);
             }
         }
     }
