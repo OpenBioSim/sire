@@ -360,7 +360,7 @@ Morse Potential Restraints
 ---------------------------
 
 The :func:`sire.restraints.morse_potential` function is used to create Morse potential restraints,
-which can be used to carry harmonic bond annihilations or creations in alchemical relative binding free energy calculations.
+which can be used to carry out harmonic bond annihilations or creations in alchemical relative binding free energy calculations.
 
 To create a Morse potential restraint, you need to specify the two atoms to be restrained. Like the distance restraints,
 the atoms can be specified using a search string, passing lists of atom indexes, or
@@ -370,7 +370,7 @@ If not supplied, automatic parametrisation feature can be used, which will detec
 annihilated or created and set the parameters accordingly (dissociation energy value still needs to be provided). For example,
 
 >>> mols = sr.load_test_files("cyclopentane_cyclohexane.bss")
->>> morse_restraints = sr.restraints.morse_potential(
+>>> morse_restraints, mols = sr.restraints.morse_potential(
 ...     mols,
 ...     atoms0=mols["molecule property is_perturbable and atomidx 0"],
 ...     atoms1=mols["molecule property is_perturbable and atomidx 4"],
@@ -385,13 +385,21 @@ MorsePotentialRestraint( 0 <=> 4, k=100 kcal mol-1 Å-2 : r0=1.5 Å : de=50 kcal
 creates a Morse potential restraint between atoms 0 and 4 using the specified parameters.
 Alternatively, if the molecule contains a bond that is being alchemically annihilated, e.g.
 
->>> morse_restraints = sr.restraints.morse_potential(mols, auto_parametrise=True, de="50 kcal mol-1")
+>>> morse_restraints, mols = sr.restraints.morse_potential(mols, auto_parametrise=True, de="50 kcal mol-1")
 >>> morse_restraint = morse_restraints[0]
 >>> print(morse_restraint)
-MorsePotentialRestraint( 0 <=> 4, k=228.89 kcal mol-1 Å-2 : r0=1.5354 Å : de=50 kcal mol-1 )
+MorsePotentialRestraint( 0 <=> 4, k=457.78 kcal mol-1 Å-2 : r0=1.5354 Å : de=50 kcal mol-1 )
 
 creates a Morse potential restraint between atoms 0 and 4 by attempting to match the
 bond parameters of the bond being alchemically annihilated.
+
+.. note::
+
+   Automatic bond parametrisation is enabled by default and will strip away the bond being
+   alchemically annihilated or created from the system, and use the parameters of that bond
+   to set the parameters of the Morse potential restraint. If you want to keep the original bond
+   in the system, then you can disable automatic parametrisation by setting ``auto_parametrise=False``
+   and explicitly providing the parameters for the Morse potential restraint.
 
 Boresch Restraints
 ---------------------------
