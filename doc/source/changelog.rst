@@ -38,6 +38,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add functionality for coupling one lambda lever to another.
 
+* Added support for Direct Morse Replacement (DMR) feature in ``sire.restraints.morse_potential``
+  which is enabled by default.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
