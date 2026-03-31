@@ -88,6 +88,7 @@ def test_multiple_morse_potential_restraints(cyclopentane_cyclohexane):
     restraints.add(restraint1)
     assert restraints.num_restraints() == 2
 
+
 def test_morse_potential_direct_morse_replacement(cyclopentane_cyclohexane):
     """Tests that morse_potential restraints by default will remove the annihilated harmonic bond."""
     mols = cyclopentane_cyclohexane.clone()
@@ -101,7 +102,7 @@ def test_morse_potential_direct_morse_replacement(cyclopentane_cyclohexane):
         de="25 kcal mol-1",
         auto_parametrise=True,
     )
-   
+
     bonds0_mod_mol = mols[0].property("bond0")
     bonds1_mod_mol = mols[0].property("bond1")
     num_bonds0_mod_mol = len(bonds0_mod_mol.potentials())
@@ -115,7 +116,10 @@ def test_morse_potential_direct_morse_replacement(cyclopentane_cyclohexane):
     assert num_bonds1_mod_mol == num_bonds1_org_mol
     assert num_bonds0_org_mol == num_bonds1_org_mol + 1
 
-def test_morse_potential_direct_morse_replacement_retain_harmonic(cyclopentane_cyclohexane):
+
+def test_morse_potential_direct_morse_replacement_retain_harmonic(
+    cyclopentane_cyclohexane,
+):
     """Tests that morse_potential restraints can retain the annihilated harmonic bond, if specified."""
     mols = cyclopentane_cyclohexane.clone()
     bonds0_org_mol = mols[0].property("bond0")
