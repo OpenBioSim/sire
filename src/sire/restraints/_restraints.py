@@ -938,8 +938,8 @@ def morse_potential(
                                 f"No match found in the string: {bond_potential_string}"
                             )
 
-                        # If we retaining the harmonic bond, then set the harmonic bond force constant
-                        # to zero. Otherwise, the harmonic bond entirely removed from the force list.
+                        # If retaining the harmonic bond, then set the harmonic bond force constant
+                        # to zero. Otherwise, remove the harmonic bond from the force list.
                         if retain_harmonic_bond:
                             r = float(match.group(1))
                             amber_bond = _MM.AmberBond(0, r)
@@ -996,7 +996,7 @@ def morse_potential(
         except:
             raise ValueError(f"Unable to parse 'de' as a Sire GeneralUnit: {de}")
 
-    mols_atms = mols.atoms()
+    atoms = mols.atoms()
 
     if name is None:
         restraints = MorsePotentialRestraints()
@@ -1004,8 +1004,8 @@ def morse_potential(
         restraints = MorsePotentialRestraints(name=name)
 
     for i, (atom0, atom1) in enumerate(zip(atoms0, atoms1)):
-        idxs0 = mols_atms.find(atom0)
-        idxs1 = mols_atms.find(atom1)
+        idxs0 = atoms.find(atom0)
+        idxs1 = atoms.find(atom1)
 
         if type(idxs0) is int:
             idxs0 = [idxs0]
