@@ -360,7 +360,7 @@ Morse Potential Restraints
 ---------------------------
 
 The :func:`sire.restraints.morse_potential` function is used to create Morse potential restraints,
-which can be used to carry out harmonic bond annihilations or creations in alchemical relative binding free energy calculations.
+which can be used to carry out bond annihilations or creations in alchemical relative binding free energy calculations.
 
 To create a Morse potential restraint, you need to specify the two atoms to be restrained. Like the distance restraints,
 the atoms can be specified using a search string, passing lists of atom indexes, or
