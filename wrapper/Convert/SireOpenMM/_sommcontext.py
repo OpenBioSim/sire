@@ -354,10 +354,10 @@ class SOMMContext(_Context):
         """
         Calculate and return the potential energy of the system.
 
-        Uses per-force-group caching where possible: only force groups whose
-        parameters have changed since the last call are re-evaluated; unchanged
-        groups use their cached energy values. Call clear_energy_cache() to
-        force a full re-evaluation of all groups (e.g. after positions change).
+        Uses energy caching: if no force groups have been marked dirty since
+        the last call (i.e. neither lambda nor positions changed), the cached
+        total is returned without any GPU call.  Otherwise a single full
+        getState() evaluation is performed and the result cached.
 
         Falls back to a full getState() evaluation when no force group map is
         available (null context or no perturbable forces).
@@ -377,15 +377,18 @@ class SOMMContext(_Context):
             else:
                 return nrg
 
-        # Re-evaluate only the dirty force groups.
-        for grp in self._dirty_groups:
-            s = self.getState(getEnergy=True, groups=(1 << grp))
-            self._energy_cache[grp] = s.getPotentialEnergy().value_in_unit(
+        if self._dirty_groups:
+            # One or more groups have changed — re-evaluate with a single
+            # full getState call rather than N per-group calls.  Multiple
+            # small masked calls carry per-call GPU synchronisation overhead
+            # that outweighs any saving from skipping clean groups.
+            total_kj = self.getState(getEnergy=True).getPotentialEnergy().value_in_unit(
                 openmm.unit.kilojoule_per_mole
             )
-        self._dirty_groups.clear()
-
-        total_kj = sum(self._energy_cache.values())
+            self._energy_cache = {"_total": total_kj}
+            self._dirty_groups.clear()
+        else:
+            total_kj = self._energy_cache["_total"]
 
         if to_sire_units:
             from ...units import kcal_per_mol
@@ -421,9 +424,9 @@ class SOMMContext(_Context):
 
     def clear_energy_cache(self):
         """
-        Invalidate the per-force-group energy cache. Call this whenever
-        positions change (e.g. after dynamics steps) so that the next
-        get_potential_energy() call fully re-evaluates all groups.
+        Invalidate the energy cache. Call this whenever positions change
+        (e.g. after dynamics steps) so that the next get_potential_energy()
+        call fully re-evaluates the system.
         """
         self._energy_cache.clear()
         self._dirty_groups = set(self._force_group_map.values())
