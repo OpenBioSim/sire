@@ -190,6 +190,7 @@ MorsePotentialRestraint &MorsePotentialRestraint::operator=(const MorsePotential
 {
     if (this != &other)
     {
+        Property::operator=(other);
         atms0 = other.atms0;
         atms1 = other.atms1;
         _k = other._k;
