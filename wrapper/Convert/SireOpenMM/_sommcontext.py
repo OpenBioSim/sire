@@ -394,6 +394,31 @@ class SOMMContext(_Context):
         else:
             return total_kj * openmm.unit.kilojoule_per_mole
 
+    def setPositions(self, positions, *args, **kwargs):
+        """
+        Set the positions of all particles. Overridden to automatically
+        invalidate the per-force-group energy cache.
+        """
+        super().setPositions(positions, *args, **kwargs)
+        self.clear_energy_cache()
+
+    def setState(self, state, *args, **kwargs):
+        """
+        Set the complete state of the context (positions, velocities, box
+        vectors). Overridden to automatically invalidate the per-force-group
+        energy cache.
+        """
+        super().setState(state, *args, **kwargs)
+        self.clear_energy_cache()
+
+    def setPeriodicBoxVectors(self, a, b, c, *args, **kwargs):
+        """
+        Set the periodic box vectors. Overridden to automatically invalidate
+        the per-force-group energy cache, since a box change affects PME energy.
+        """
+        super().setPeriodicBoxVectors(a, b, c, *args, **kwargs)
+        self.clear_energy_cache()
+
     def clear_energy_cache(self):
         """
         Invalidate the per-force-group energy cache. Call this whenever

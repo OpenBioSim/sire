@@ -189,6 +189,85 @@ def test_clear_cache_marks_all_dirty(perturbable_omm):
     assert cached_kj == pytest.approx(full_kj, abs=1e-3)
 
 
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_set_positions_invalidates_cache(perturbable_omm):
+    """
+    Calling setPositions() must invalidate the energy cache so that the next
+    get_potential_energy() call re-evaluates all force groups.
+    """
+    omm = perturbable_omm
+    omm.set_lambda(0.0)
+
+    # Populate the cache.
+    _ = omm.get_potential_energy(to_sire_units=False)
+    assert len(omm._dirty_groups) == 0, "Cache should be clean after evaluation"
+
+    # Retrieve current positions and set them back — content unchanged but
+    # the override must still invalidate the cache.
+    import openmm
+
+    positions = omm.getState(getPositions=True).getPositions()
+    omm.setPositions(positions)
+
+    assert omm._dirty_groups == set(omm._force_group_map.values()), (
+        "All groups should be dirty after setPositions()"
+    )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_set_state_invalidates_cache(perturbable_omm):
+    """
+    Calling setState() must invalidate the energy cache so that the next
+    get_potential_energy() call re-evaluates all force groups.
+    """
+    omm = perturbable_omm
+    omm.set_lambda(0.0)
+
+    # Populate the cache.
+    _ = omm.get_potential_energy(to_sire_units=False)
+    assert len(omm._dirty_groups) == 0, "Cache should be clean after evaluation"
+
+    # Round-trip through setState using the current state.
+    state = omm.getState(getPositions=True)
+    omm.setState(state)
+
+    assert omm._dirty_groups == set(omm._force_group_map.values()), (
+        "All groups should be dirty after setState()"
+    )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_set_periodic_box_vectors_invalidates_cache(perturbable_omm):
+    """
+    Calling setPeriodicBoxVectors() must invalidate the energy cache since
+    a box change affects the PME energy.
+    """
+    omm = perturbable_omm
+    omm.set_lambda(0.0)
+
+    # Populate the cache.
+    _ = omm.get_potential_energy(to_sire_units=False)
+    assert len(omm._dirty_groups) == 0, "Cache should be clean after evaluation"
+
+    # Set the same box vectors back — content unchanged but the override must
+    # still invalidate the cache.
+    box = omm.getState(getPositions=True).getPeriodicBoxVectors()
+    omm.setPeriodicBoxVectors(*box)
+
+    assert omm._dirty_groups == set(omm._force_group_map.values()), (
+        "All groups should be dirty after setPeriodicBoxVectors()"
+    )
+
+
 # ---------------------------------------------------------------------------
 # Levers that belong to each named OpenMM force.  When ALL levers for a force
 # are pinned to l.initial(), that force's parameters cannot change between
