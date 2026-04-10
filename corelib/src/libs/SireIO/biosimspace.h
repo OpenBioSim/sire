@@ -374,7 +374,7 @@ namespace SireIO
             The system with updated coordinates.
      */
     SIREIO_EXPORT SireSystem::System setCoordinates(
-        SireSystem::System &system, const QVector<QVector<float>> &coordinates,
+        SireSystem::System system, const QVector<QVector<float>> &coordinates,
         const bool is_lambda1 = false, const PropertyMap &map = PropertyMap());
 
     Vector cross(const Vector &v0, const Vector &v1);
