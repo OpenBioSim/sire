@@ -1691,7 +1691,7 @@ namespace SireIO
         return ion;
     }
 
-    System setCoordinates(System &system, const QVector<QVector<float>> &coordinates, const bool is_lambda1, const PropertyMap &map)
+    System setCoordinates(System system, const QVector<QVector<float>> &coordinates, const bool is_lambda1, const PropertyMap &map)
     {
         // Make sure that the number of coordinates matches the number of atoms.
         if (system.nAtoms() != coordinates.size())

@@ -814,7 +814,7 @@ void register_free_functions(){
 
     { //::SireIO::setCoordinates
     
-        typedef ::SireSystem::System ( *setCoordinates_function_type )( ::SireSystem::System &,::QVector<QVector<float>> const &,bool const,::SireBase::PropertyMap const & );
+        typedef ::SireSystem::System ( *setCoordinates_function_type )( ::SireSystem::System,::QVector<QVector<float>> const &,bool const,::SireBase::PropertyMap const & );
         setCoordinates_function_type setCoordinates_function_value( &::SireIO::setCoordinates );
         
         bp::def( 
