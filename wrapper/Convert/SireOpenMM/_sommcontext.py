@@ -378,12 +378,14 @@ class SOMMContext(_Context):
                 return nrg
 
         if self._dirty_groups:
-            # One or more groups have changed — re-evaluate with a single
-            # full getState call rather than N per-group calls.  Multiple
+            # One or more groups have changed so re-evaluate with a single
+            # full getState call rather than N per-group calls. Multiple
             # small masked calls carry per-call GPU synchronisation overhead
             # that outweighs any saving from skipping clean groups.
-            total_kj = self.getState(getEnergy=True).getPotentialEnergy().value_in_unit(
-                openmm.unit.kilojoule_per_mole
+            total_kj = (
+                self.getState(getEnergy=True)
+                .getPotentialEnergy()
+                .value_in_unit(openmm.unit.kilojoule_per_mole)
             )
             self._energy_cache = {"_total": total_kj}
             self._dirty_groups.clear()
