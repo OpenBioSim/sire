@@ -1330,9 +1330,10 @@ class DynamicsData:
         from datetime import datetime
         from math import isnan
 
-        # Capture a pre-run state snapshot for crash recovery if one
-        # hasn't already been set by an external tool, e.g. SOMD2.
-        if self._pre_run_state is None:
+        # Capture a pre-run state snapshot for crash recovery if one hasn't
+        # already been set externally. Only needed when auto_fix_minimise is
+        # enabled, since the snapshot is only consumed by _rebuild_and_minimise.
+        if auto_fix_minimise and self._pre_run_state is None:
             self._pre_run_state = self._omm_mols.getState(
                 getPositions=True, getVelocities=True
             )
@@ -1524,8 +1525,9 @@ class DynamicsData:
                     nsteps_completed=nsteps_before_run + completed,
                 )
 
-            # Discard the pre-run snapshot so it is not reused.
-            self._pre_run_state = None
+            # Discard the pre-run snapshot so it is not reused stale.
+            if auto_fix_minimise:
+                self._pre_run_state = None
 
         except NeedsMinimiseError:
             from openmm.unit import picosecond
