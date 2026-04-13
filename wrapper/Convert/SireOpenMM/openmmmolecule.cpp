@@ -783,6 +783,28 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         this->unbonded_atoms.insert(i);
     }
 
+    // Detect virtual site (extra point) atoms by name.
+    // Only 4- and 5-atom molecules can have EP atoms (TIP4P, OPC, TIP5P).
+    // Supported names: AMBER EPW / EP1 / EP2, GROMACS MW / LP1 / LP2.
+    // We remove them from unbonded_atoms so that buildExceptions does
+    // not try to add an erroneous constraint for them.
+    static const QSet<QString> vsite_names = {"EPW", "EP1", "EP2", "MW", "LP1", "LP2"};
+
+    QSet<int> vsite_idxs;
+
+    if (nats == 4 or nats == 5)
+    {
+        for (int i = 0; i < nats; ++i)
+        {
+            if (masses_data[i] < 0.05 and
+                vsite_names.contains(mol.atom(SireMol::AtomIdx(i)).name().value()))
+            {
+                vsite_idxs.insert(i);
+                unbonded_atoms.remove(i);
+            }
+        }
+    }
+
     // now the bonds
     const double bond_k_to_openmm = 2.0 * (SireUnits::kcal_per_mol / (SireUnits::angstrom * SireUnits::angstrom)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer * SireUnits::nanometer));
     const double bond_r0_to_openmm = SireUnits::angstrom.to(SireUnits::nanometer);
@@ -865,6 +887,11 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         if (atom0 > atom1)
             std::swap(atom0, atom1);
+
+        // Skip bonds involving virtual site atoms: their positions are
+        // determined by OpenMM's VirtualSite machinery, not a HarmonicBondForce.
+        if (vsite_idxs.contains(atom0) or vsite_idxs.contains(atom1))
+            continue;
 
         const double k = bondparam.k() * bond_k_to_openmm;
         const double r0 = bondparam.r0() * bond_r0_to_openmm;
@@ -1012,6 +1039,10 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         if (atom0 > atom2)
             std::swap(atom0, atom2);
+
+        // Skip angles involving virtual site atoms.
+        if (vsite_idxs.contains(atom0) or vsite_idxs.contains(atom1) or vsite_idxs.contains(atom2))
+            continue;
 
         const double k = angparam.k() * angle_k_to_openmm;
         const double theta0 = angparam.theta0(); // already in radians
@@ -1263,6 +1294,163 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 cmap_params.append(boost::make_tuple(atom0, atom1, atom2, atom3, atom4,
                                                      SireMM::CMAPParameter(null_grid)));
             }
+        }
+    }
+
+    // Build virtual site definitions for any extra-point atoms detected above.
+    // Weights are derived from the actual atomic coordinates so that any 4- or
+    // 5-point water model (OPC, TIP4P, TIP5P, …) is handled automatically.
+    virtual_sites.clear();
+
+    if (not vsite_idxs.isEmpty())
+    {
+        // Map atom name → molecule-local index (first match wins).
+        QHash<QString, int> name_to_idx;
+
+        for (int i = 0; i < nats; ++i)
+        {
+            const QString name = mol.atom(SireMol::AtomIdx(i)).name().value();
+
+            if (not name_to_idx.contains(name))
+                name_to_idx.insert(name, i);
+        }
+
+        auto find_idx = [&](std::initializer_list<const char *> candidates) -> int
+        {
+            for (const char *n : candidates)
+            {
+                auto it = name_to_idx.find(QString(n));
+
+                if (it != name_to_idx.end())
+                    return it.value();
+            }
+
+            return -1;
+        };
+
+        const int o_idx = find_idx({"O", "OW"});
+        const int h1_idx = find_idx({"H1", "HW1"});
+        const int h2_idx = find_idx({"H2", "HW2"});
+
+        if (o_idx < 0 or h1_idx < 0 or h2_idx < 0)
+        {
+            throw SireError::incompatible_error(
+                QObject::tr("Molecule %1 contains virtual site atoms (%2) but the expected "
+                            "parent atoms (O/OW, H1/HW1, H2/HW2) could not be found. "
+                            "Cannot register virtual sites for this molecule.")
+                    .arg(number.toString())
+                    .arg(vsite_idxs.count()),
+                CODELOC);
+        }
+        else
+        {
+            const auto &O = coords[o_idx];
+            const auto &H1 = coords[h1_idx];
+            const auto &H2 = coords[h2_idx];
+
+            // Bisector vector in the molecular plane: (H1-O) + (H2-O)
+            const double bx = (H1[0] - O[0]) + (H2[0] - O[0]);
+            const double by = (H1[1] - O[1]) + (H2[1] - O[1]);
+            const double bz = (H1[2] - O[2]) + (H2[2] - O[2]);
+            const double bisect_sq = bx * bx + by * by + bz * bz;
+
+            // Cross product (H1-O) x (H2-O) — needed for out-of-plane sites (TIP5P)
+            const double d1x = H1[0] - O[0], d1y = H1[1] - O[1], d1z = H1[2] - O[2];
+            const double d2x = H2[0] - O[0], d2y = H2[1] - O[1], d2z = H2[2] - O[2];
+            const double cx = d1y * d2z - d1z * d2y;
+            const double cy = d1z * d2x - d1x * d2z;
+            const double cz = d1x * d2y - d1y * d2x;
+            const double cross_sq = cx * cx + cy * cy + cz * cz;
+
+            // ── 4-point water (OPC, TIP4P): single EP on the bisector ──────
+            const int ep_idx = find_idx({"EPW", "MW"});
+
+            if (ep_idx >= 0 and vsite_idxs.contains(ep_idx) and bisect_sq > 1e-20)
+            {
+                const auto &EP = coords[ep_idx];
+                const double ex = EP[0] - O[0];
+                const double ey = EP[1] - O[1];
+                const double ez = EP[2] - O[2];
+                const double a = (ex * bx + ey * by + ez * bz) / bisect_sq;
+
+                VirtualSiteInfo vs;
+                vs.type = VirtualSiteInfo::ThreeParticleAverage;
+                vs.vsite_idx = ep_idx;
+                vs.p1_idx = o_idx;
+                vs.p2_idx = h1_idx;
+                vs.p3_idx = h2_idx;
+                vs.w1 = 1.0 - 2.0 * a;
+                vs.w2 = a;
+                vs.w3 = a;
+                vs.w12 = vs.w13 = vs.wCross = 0.0;
+                virtual_sites.append(vs);
+            }
+
+            // ── 5-point water (TIP5P): two out-of-plane EPs ─────────────────
+            const int ep1_idx = find_idx({"EP1", "LP1"});
+            const int ep2_idx = find_idx({"EP2", "LP2"});
+
+            if (ep1_idx >= 0 and ep2_idx >= 0 and
+                vsite_idxs.contains(ep1_idx) and vsite_idxs.contains(ep2_idx) and
+                bisect_sq > 1e-20 and cross_sq > 1e-20)
+            {
+                const auto &EP1 = coords[ep1_idx];
+                const auto &EP2 = coords[ep2_idx];
+
+                // a = dot((EP1+EP2)/2 - O, bisect) / bisect_sq
+                const double mx = 0.5 * (EP1[0] + EP2[0]) - O[0];
+                const double my = 0.5 * (EP1[1] + EP2[1]) - O[1];
+                const double mz = 0.5 * (EP1[2] + EP2[2]) - O[2];
+                const double a = (mx * bx + my * by + mz * bz) / bisect_sq;
+
+                // b = dot(EP1-EP2, cross) / (2 * cross_sq)
+                const double dx = EP1[0] - EP2[0];
+                const double dy = EP1[1] - EP2[1];
+                const double dz = EP1[2] - EP2[2];
+                const double b = (dx * cx + dy * cy + dz * cz) / (2.0 * cross_sq);
+
+                // EP1: wCross = +b
+                {
+                    VirtualSiteInfo vs;
+                    vs.type = VirtualSiteInfo::OutOfPlane;
+                    vs.vsite_idx = ep1_idx;
+                    vs.p1_idx = o_idx;
+                    vs.p2_idx = h1_idx;
+                    vs.p3_idx = h2_idx;
+                    vs.w1 = vs.w2 = vs.w3 = 0.0;
+                    vs.w12 = a;
+                    vs.w13 = a;
+                    vs.wCross = b;
+                    virtual_sites.append(vs);
+                }
+
+                // EP2: wCross = -b
+                {
+                    VirtualSiteInfo vs;
+                    vs.type = VirtualSiteInfo::OutOfPlane;
+                    vs.vsite_idx = ep2_idx;
+                    vs.p1_idx = o_idx;
+                    vs.p2_idx = h1_idx;
+                    vs.p3_idx = h2_idx;
+                    vs.w1 = vs.w2 = vs.w3 = 0.0;
+                    vs.w12 = a;
+                    vs.w13 = a;
+                    vs.wCross = -b;
+                    virtual_sites.append(vs);
+                }
+            }
+        }
+
+        if (virtual_sites.size() != vsite_idxs.count())
+        {
+            throw SireError::incompatible_error(
+                QObject::tr("Molecule %1: detected %2 virtual site atom(s) but only "
+                            "registered %3. Check atom geometry (degenerate coordinates?) "
+                            "or atom naming conventions.")
+                    .arg(number.toString())
+                    .arg(vsite_idxs.count())
+                    .arg(virtual_sites.size()),
+                CODELOC);
         }
     }
 

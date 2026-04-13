@@ -22,6 +22,28 @@ SIRE_BEGIN_HEADER
 namespace SireOpenMM
 {
 
+    /** Describes a virtual site (extra point) in an OpenMM molecule.
+     *  Used for 4- and 5-point water models such as OPC, TIP4P, and TIP5P.
+     */
+    struct VirtualSiteInfo
+    {
+        enum Type
+        {
+            ThreeParticleAverage, // used for 4-point water (OPC, TIP4P)
+            OutOfPlane            // used for 5-point water (TIP5P)
+        };
+
+        Type type;
+        int vsite_idx;            // molecule-local index of the virtual site atom
+        int p1_idx, p2_idx, p3_idx; // molecule-local parent indices (O, H1, H2)
+
+        // Weights for ThreeParticleAverageSite: pos = w1*p1 + w2*p2 + w3*p3
+        double w1, w2, w3;
+
+        // Weights for OutOfPlaneSite: pos = p1 + w12*(p2-p1) + w13*(p3-p1) + wCross*(p2-p1)x(p3-p1)
+        double w12, w13, wCross;
+    };
+
     /** Internal class used to hold all of the extracted information
      *  of an OpenMM Molecule. You should not use this outside
      *  of the sire_to_openmm_system function. It holds lots of scratch
@@ -141,6 +163,9 @@ namespace SireOpenMM
 
         /** All the CMAP parameters (atom0..4 indices, CMAPParameter) */
         QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32, SireMM::CMAPParameter>> cmap_params;
+
+        /** Virtual site definitions for extra-point water models (OPC, TIP4P, TIP5P) */
+        QVector<VirtualSiteInfo> virtual_sites;
 
         /** All the constraints */
         QVector<boost::tuple<qint32, qint32, double>> constraints;

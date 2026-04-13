@@ -124,7 +124,8 @@ class HeaderInfo:
         if classname in skip_metatypes:
             return
 
-        self._metatypes.append(classname)
+        if classname not in self._metatypes:
+            self._metatypes.append(classname)
 
     def addAlias(self, classname, alias):
         self._aliases[classname] = alias

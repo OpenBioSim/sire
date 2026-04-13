@@ -67,7 +67,6 @@ void register_SireMove_objects()
     ObjectRegistry::registerConverterFor< SireMove::SimPacket >();
     ObjectRegistry::registerConverterFor< SireMove::WeightedMoves >();
     ObjectRegistry::registerConverterFor< SireMove::OpenMMMDIntegrator >();
-    ObjectRegistry::registerConverterFor< SireMove::OpenMMMDIntegrator >();
     ObjectRegistry::registerConverterFor< SireMove::ZMatMove >();
     ObjectRegistry::registerConverterFor< SireMove::Replicas >();
     ObjectRegistry::registerConverterFor< SireMove::MTSMC >();
@@ -78,7 +77,6 @@ void register_SireMove_objects()
     ObjectRegistry::registerConverterFor< SireMove::SameSupraSubMoves >();
     ObjectRegistry::registerConverterFor< SireMove::PrefSampler >();
     ObjectRegistry::registerConverterFor< SireMove::VelocityVerlet >();
-    ObjectRegistry::registerConverterFor< SireMove::OpenMMPMEFEP >();
     ObjectRegistry::registerConverterFor< SireMove::OpenMMPMEFEP >();
     ObjectRegistry::registerConverterFor< SireMove::SupraSystem >();
     ObjectRegistry::registerConverterFor< SireMove::RBWorkspace >();
@@ -97,7 +95,6 @@ void register_SireMove_objects()
     ObjectRegistry::registerConverterFor< SireMove::NullInserter >();
     ObjectRegistry::registerConverterFor< SireMove::UniformInserter >();
     ObjectRegistry::registerConverterFor< SireMove::DLMRigidBody >();
-    ObjectRegistry::registerConverterFor< SireMove::OpenMMFrEnergyST >();
     ObjectRegistry::registerConverterFor< SireMove::OpenMMFrEnergyST >();
     ObjectRegistry::registerConverterFor< SireMove::NullIntegratorWorkspace >();
     ObjectRegistry::registerConverterFor< SireMove::AtomicVelocityWorkspace >();
@@ -122,7 +119,6 @@ void register_SireMove_objects()
     ObjectRegistry::registerConverterFor< SireMove::RigidBodyMC >();
     ObjectRegistry::registerConverterFor< SireMove::Ensemble >();
     ObjectRegistry::registerConverterFor< SireMove::TitrationMove >();
-    ObjectRegistry::registerConverterFor< SireMove::OpenMMFrEnergyDT >();
     ObjectRegistry::registerConverterFor< SireMove::OpenMMFrEnergyDT >();
     ObjectRegistry::registerConverterFor< SireMove::NullSupraSubMove >();
     ObjectRegistry::registerConverterFor< SireMove::SameMoves >();
