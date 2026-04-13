@@ -186,6 +186,9 @@ class DynamicsData:
             # if the dynamics object is coupled to a sampler.
             self._gcmc_sampler = None
 
+            # Pre-run OpenMM state snapshot used for crash recovery.
+            self._pre_run_state = None
+
             # Check for a REST2 scaling factor.
             if map.specified("rest2_scale"):
                 try:
@@ -1005,12 +1008,20 @@ class DynamicsData:
         else:
             Console.warning(msg)
 
-        # rebuild the molecules
-        from ..convert import to
+        # Reset the context to the pre-run state snapshot. This was captured
+        # immediately before dynamics.run() was called so it contains consistent
+        # positions, velocities, and box vectors. If no snapshot is available
+        # (e.g. very first run call), fall back to rebuilding the context from
+        # _sire_mols.
+        if self._pre_run_state is not None:
+            self._omm_mols.setState(self._pre_run_state)
+            self._pre_run_state = None
+        else:
+            from ..convert import to
 
-        self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
+            self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
-        # reset the water state
+        # Reset the GCMC water state.
         if self._gcmc_sampler is not None:
             self._gcmc_sampler.push()
             self._gcmc_sampler._set_water_state(self._omm_mols)
@@ -1056,6 +1067,11 @@ class DynamicsData:
             np.savetxt(f"positions_{crash_id}.txt", positions)
 
         self.run_minimisation()
+
+        # Randomise velocities after minimisation. The restored velocities may
+        # be inconsistent with the minimised geometry, which could cause a
+        # secondary instability at the start of the retry dynamics.
+        self.randomise_velocities()
 
     def run(
         self,
@@ -1314,6 +1330,13 @@ class DynamicsData:
         from datetime import datetime
         from math import isnan
 
+        # Capture a pre-run state snapshot for crash recovery if one
+        # hasn't already been set by an external tool, e.g. SOMD2.
+        if self._pre_run_state is None:
+            self._pre_run_state = self._omm_mols.getState(
+                getPositions=True, getVelocities=True
+            )
+
         try:
             with ProgressBar(total=steps_to_run, text="dynamics") as progress:
                 progress.set_speed_unit("steps / s")
@@ -1500,6 +1523,9 @@ class DynamicsData:
                     state_has_cv=state_has_cv,
                     nsteps_completed=nsteps_before_run + completed,
                 )
+
+            # Discard the pre-run snapshot so it is not reused.
+            self._pre_run_state = None
 
         except NeedsMinimiseError:
             from openmm.unit import picosecond
