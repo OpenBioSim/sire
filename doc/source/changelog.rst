@@ -43,6 +43,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Don't mutate input system in the ``sire.legacy.IO.setCoordinates`` function.
 
+* Store OpenMM state at start of a dynamics run to use for crash recovery.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
