@@ -1282,11 +1282,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     lambda_lever.addLever("torsion_phase");
     lambda_lever.addLever("torsion_k");
 
-    cmapff->setForceGroup(force_group_counter);
-    lambda_lever.setForceIndex("cmap", system.addForce(cmapff));
-    lambda_lever.setForceGroup("cmap", force_group_counter++);
-    lambda_lever.addLever("cmap_grid");
-
     ///
     /// Stage 4 - define the forces for ghost atoms
     ///
@@ -2047,6 +2042,22 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     /// Stage 5 is complete. We have added all of the parameter data
     /// for the molecules to the OpenMM forces
+
+    // Only register the CMAP force if terms were actually added during the
+    // molecule loop. An empty CMAPTorsionForce wastes a force-group slot and
+    // launches a zero-work kernel on every step.
+    if (cmapff->getNumMaps() > 0)
+    {
+        cmapff->setForceGroup(force_group_counter);
+        lambda_lever.setForceIndex("cmap", system.addForce(cmapff));
+        lambda_lever.setForceGroup("cmap", force_group_counter++);
+        lambda_lever.addLever("cmap_grid");
+    }
+    else
+    {
+        delete cmapff;
+        cmapff = nullptr;
+    }
 
     ///
     /// Stage 6 - Set up the exceptions and perturbable constraints
