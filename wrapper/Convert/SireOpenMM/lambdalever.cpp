@@ -93,6 +93,7 @@ bool MolLambdaCache::hasChanged(const QString &force, const QString &key,
         return true;
 
     QString cache_key = key;
+
     if (not subkey.isEmpty())
         cache_key += ("::" + subkey);
 
@@ -262,7 +263,8 @@ void LeverCache::clear()
 
 LambdaLever::LambdaLever()
     : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>(),
-      last_rest2_scale(-1.0)
+      last_rest2_scale(-1.0),
+      last_qmff_lam(-1.0)
 {
 }
 
@@ -276,7 +278,8 @@ LambdaLever::LambdaLever(const LambdaLever &other)
       start_indices(other.start_indices),
       perturbable_maps(other.perturbable_maps),
       lambda_cache(other.lambda_cache),
-      last_rest2_scale(-1.0)
+      last_rest2_scale(-1.0),
+      last_qmff_lam(-1.0)
 {
 }
 
@@ -1309,7 +1312,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     if (qmff != 0)
     {
         double lam = this->lambda_schedule.morph("qmff", "*", 0.0, 1.0, lambda_value);
+        last_changed_forces["qmff"] = (lam != last_qmff_lam);
         qmff->setLambda(lam);
+        last_qmff_lam = lam;
     }
 
     // track whether parameters actually changed for each force, so we only
@@ -1990,7 +1995,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     last_changed_forces["angle"] = has_changed_angff;
     last_changed_forces["torsion"] = has_changed_dihff;
     last_changed_forces["cmap"] = has_changed_cmap;
-    last_changed_forces["qmff"] = false;
+    if (qmff == 0)
+        last_changed_forces["qmff"] = false;
 
     return lambda_value;
 }

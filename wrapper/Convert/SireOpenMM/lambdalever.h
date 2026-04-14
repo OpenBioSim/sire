@@ -196,18 +196,24 @@ namespace SireOpenMM
         /** Cache of the parameters for different lambda values */
         LeverCache lambda_cache;
 
-        /** Records which forces had parameters changed in the last setLambda
-         *  call. Mutable so it can be updated from the const setLambda method. */
-        mutable QHash<QString, bool> last_changed_forces;
-
         /** Records the rho value used for each restraint in the last setLambda
-         *  call, so we can detect when restraint parameters actually change. */
+         *  call, so we can avoid redundant updateRestraintInContext calls. */
         mutable QHash<QString, double> last_restraint_rho;
 
         /** Records the REST2 scale factor used in the last setLambda call,
          *  so we can detect when it changes (REST2 scaling is applied on top
-         *  of the morphed parameters, so a change requires re-setting params). */
+         *  of the morphed parameters, so a change requires re-uploading
+         *  parameters even if morphed values are unchanged). */
         mutable double last_rest2_scale;
+
+        /** Records which forces had parameters changed in the last setLambda
+         *  call. Mutable so it can be updated from the const setLambda method. */
+        mutable QHash<QString, bool> last_changed_forces;
+
+        /** Records the morphed qmff lambda value from the last setLambda call,
+         *  so we can detect when it actually changes. Initialised to -1 as a
+         *  sentinel meaning "never been set". */
+        mutable double last_qmff_lam;
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTION

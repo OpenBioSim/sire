@@ -2252,9 +2252,9 @@ class Dynamics:
 
     def clear_energy_cache(self):
         """
-        Invalidate the per-force-group energy cache. Call this whenever
-        positions have been changed externally (e.g. after a replica-exchange
-        swap) so that the next energy evaluation fully re-computes all groups.
+        Invalidate the energy cache. Call this whenever positions have been
+        changed externally (e.g. after a replica-exchange swap) so that the
+        next energy evaluation fully re-computes the potential energy.
         """
         self._d.clear_energy_cache()
 
