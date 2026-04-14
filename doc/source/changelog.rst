@@ -54,6 +54,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Store OpenMM state at start of a dynamics run to use for crash recovery.
 
+* Print warning when ``sire.legacy.IO.AmberPrm`` parser re-orders residues due to covalent bonds between molecules.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
