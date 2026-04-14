@@ -96,11 +96,28 @@ class SOMMContext(_Context):
             )
 
             self._map = map
+
+            # Build the force group map from the lambda lever and initialise
+            # the per-group energy cache.
+            self._force_group_map = {}  # force name → group index
+            for name in self._lambda_lever.get_force_names():
+                grp = self._lambda_lever.get_force_group(name)
+                if grp >= 0:
+                    self._force_group_map[name] = grp
+
+            self._energy_cache = {}  # group index → energy in kJ/mol
+            # All groups are dirty on first call.
+            self._dirty_groups = set(self._force_group_map.values())
+            self._prev_rest2_scale = self._rest2_scale
         else:
             self._atom_index = None
             self._lambda_lever = None
             self._lambda_value = 0.0
             self._map = None
+            self._force_group_map = {}
+            self._energy_cache = {}
+            self._dirty_groups = set()
+            self._prev_rest2_scale = 1.0
 
         self._is_non_pert_rest2 = False
 
@@ -278,10 +295,28 @@ class SOMMContext(_Context):
                 update_constraints=update_constraints,
             )
 
+            # Mark force groups whose parameters changed.
+            for name, grp in self._force_group_map.items():
+                if self._lambda_lever.was_force_changed(name):
+                    self._dirty_groups.add(grp)
+
+            # A REST2 scale change also affects CLJ and torsion even if the
+            # perturbable lambda parameters didn't change.
+            if rest2_scale != self._prev_rest2_scale:
+                for name in ("clj", "torsion", "ghost/ghost", "ghost/non-ghost"):
+                    if name in self._force_group_map:
+                        self._dirty_groups.add(self._force_group_map[name])
+                self._prev_rest2_scale = rest2_scale
+
         # Update any additional parameters in the REST2 region.
         if self._is_non_pert_rest2 and rest2_scale != self._rest2_scale:
             self._update_rest2(lambda_value, rest2_scale)
             self._rest2_scale = rest2_scale
+            # _update_rest2 modifies nonbonded and torsion forces directly;
+            # mark those groups as dirty.
+            for name in ("clj", "torsion"):
+                if name in self._force_group_map:
+                    self._dirty_groups.add(self._force_group_map[name])
 
     def get_rest2_scale(self):
         """
@@ -317,18 +352,86 @@ class SOMMContext(_Context):
 
     def get_potential_energy(self, to_sire_units: bool = True):
         """
-        Calculate and return the potential energy of the system
+        Calculate and return the potential energy of the system.
+
+        Uses energy caching: if no force groups have been marked dirty since
+        the last call (i.e. neither lambda nor positions changed), the cached
+        total is returned without any GPU call.  Otherwise a single full
+        getState() evaluation is performed and the result cached.
+
+        Falls back to a full getState() evaluation when no force group map is
+        available (null context or no perturbable forces).
         """
-        s = self.getState(getEnergy=True)
-        nrg = s.getPotentialEnergy()
+        import openmm
+
+        if not self._force_group_map:
+            # No force group information available; fall back to full evaluation.
+            s = self.getState(getEnergy=True)
+            nrg = s.getPotentialEnergy()
+            if to_sire_units:
+                from ...units import kcal_per_mol
+
+                return (
+                    nrg.value_in_unit(openmm.unit.kilocalorie_per_mole) * kcal_per_mol
+                )
+            else:
+                return nrg
+
+        if self._dirty_groups:
+            # One or more groups have changed so re-evaluate with a single
+            # full getState call rather than N per-group calls. Multiple
+            # small masked calls carry per-call GPU synchronisation overhead
+            # that outweighs any saving from skipping clean groups.
+            total_kj = (
+                self.getState(getEnergy=True)
+                .getPotentialEnergy()
+                .value_in_unit(openmm.unit.kilojoule_per_mole)
+            )
+            self._energy_cache = {"_total": total_kj}
+            self._dirty_groups.clear()
+        else:
+            total_kj = self._energy_cache["_total"]
 
         if to_sire_units:
-            import openmm
             from ...units import kcal_per_mol
 
-            return nrg.value_in_unit(openmm.unit.kilocalorie_per_mole) * kcal_per_mol
+            return (total_kj / 4.184) * kcal_per_mol
         else:
-            return nrg
+            return total_kj * openmm.unit.kilojoule_per_mole
+
+    def setPositions(self, positions, *args, **kwargs):
+        """
+        Set the positions of all particles. Overridden to automatically
+        invalidate the per-force-group energy cache.
+        """
+        super().setPositions(positions, *args, **kwargs)
+        self.clear_energy_cache()
+
+    def setState(self, state, *args, **kwargs):
+        """
+        Set the complete state of the context (positions, velocities, box
+        vectors). Overridden to automatically invalidate the per-force-group
+        energy cache.
+        """
+        super().setState(state, *args, **kwargs)
+        self.clear_energy_cache()
+
+    def setPeriodicBoxVectors(self, a, b, c, *args, **kwargs):
+        """
+        Set the periodic box vectors. Overridden to automatically invalidate
+        the per-force-group energy cache, since a box change affects PME energy.
+        """
+        super().setPeriodicBoxVectors(a, b, c, *args, **kwargs)
+        self.clear_energy_cache()
+
+    def clear_energy_cache(self):
+        """
+        Invalidate the energy cache. Call this whenever positions change
+        (e.g. after dynamics steps) so that the next get_potential_energy()
+        call fully re-evaluates the system.
+        """
+        self._energy_cache.clear()
+        self._dirty_groups = set(self._force_group_map.values())
 
     def get_energy(self, to_sire_units: bool = True):
         """
