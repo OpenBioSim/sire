@@ -207,14 +207,12 @@ def test_set_positions_invalidates_cache(perturbable_omm):
 
     # Retrieve current positions and set them back — content unchanged but
     # the override must still invalidate the cache.
-    import openmm
-
     positions = omm.getState(getPositions=True).getPositions()
     omm.setPositions(positions)
 
-    assert omm._dirty_groups == set(omm._force_group_map.values()), (
-        "All groups should be dirty after setPositions()"
-    )
+    assert omm._dirty_groups == set(
+        omm._force_group_map.values()
+    ), "All groups should be dirty after setPositions()"
 
 
 @pytest.mark.skipif(
@@ -237,9 +235,9 @@ def test_set_state_invalidates_cache(perturbable_omm):
     state = omm.getState(getPositions=True)
     omm.setState(state)
 
-    assert omm._dirty_groups == set(omm._force_group_map.values()), (
-        "All groups should be dirty after setState()"
-    )
+    assert omm._dirty_groups == set(
+        omm._force_group_map.values()
+    ), "All groups should be dirty after setState()"
 
 
 @pytest.mark.skipif(
@@ -263,9 +261,9 @@ def test_set_periodic_box_vectors_invalidates_cache(perturbable_omm):
     box = omm.getState(getPositions=True).getPeriodicBoxVectors()
     omm.setPeriodicBoxVectors(*box)
 
-    assert omm._dirty_groups == set(omm._force_group_map.values()), (
-        "All groups should be dirty after setPeriodicBoxVectors()"
-    )
+    assert omm._dirty_groups == set(
+        omm._force_group_map.values()
+    ), "All groups should be dirty after setPeriodicBoxVectors()"
 
 
 # ---------------------------------------------------------------------------
