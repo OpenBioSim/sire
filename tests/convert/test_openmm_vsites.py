@@ -35,7 +35,7 @@ def test_vsite_params(ethane_12dichloroethane, openmm_platform):
     mol = cursor.commit()
 
     # Create openmm system
-    omm = sr.convert.to(mol, "openmm")
+    omm = sr.convert.to(mol, "openmm", platform=openmm_platform)
 
     omm_system = omm.getSystem()
 
@@ -108,7 +108,7 @@ def test_vsite_pertubation(ethane_12dichloroethane, openmm_platform):
     from openmm import unit
 
     for lam in [0.0, 0.5, 1.0]:
-        d = mol.dynamics(lambda_value=lam)
+        d = mol.dynamics(lambda_value=lam, platform=openmm_platform)
         system = d.context().getSystem()
         nb_force = next(force for force in system.getForces() if force.getName() == 'NonbondedForce')
         for vs_index in range(n_virtual_sites):
