@@ -1,0 +1,41 @@
+repos:
+  # General file quality checks (Python source files only)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        files: ^(src|tests|wrapper)/
+        types: [python]
+      - id: end-of-file-fixer
+        files: ^(src|tests|wrapper)/
+        types: [python]
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-merge-conflict
+
+  # Python formatting and linting (src/, tests/, and wrapper/ Python files)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.4
+    hooks:
+      # Run the formatter
+      - id: ruff-format
+        files: ^(src|tests|wrapper)/
+      # Run the linter (auto-fix but don't block commits)
+      - id: ruff
+        files: ^(src|tests|wrapper)/
+        args: [--fix, --exit-zero]
+
+  # C++ formatting (corelib/ and wrapper/ only)
+  # Runs clang-format only on files staged for commit, so the codebase
+  # drifts gradually toward the .clang-format standard rather than
+  # requiring a blanket one-time reformatting pass.
+  # NOTE: do NOT run 'pre-commit run --all-files' for C++ — use per-file
+  # formatting instead to preserve the drift-based approach.
+  - repo: local
+    hooks:
+      - id: clang-format
+        name: clang-format
+        entry: clang-format
+        language: system
+        args: [-i]
+        files: ^(corelib|wrapper)/.*\.(cpp|h|hpp)$

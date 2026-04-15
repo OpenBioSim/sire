@@ -307,7 +307,7 @@ class SOMMContext(_Context):
         """
         Set the temperature scale factor for the REST2 region.
         """
-        self._set_lambda(self._lambda_value, rest2_scale=rest2_scale)
+        self.set_lambda(self._lambda_value, rest2_scale=rest2_scale)
 
     def set_temperature(self, temperature, rescale_velocities=True):
         """
