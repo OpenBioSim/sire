@@ -34,8 +34,10 @@ def test_vsite_params(ethane_12dichloroethane, openmm_platform):
     cursor.set("parents", parents_dict)
     mol = cursor.commit()
 
+    map = {"platform": openmm_platform}
+
     # Create openmm system
-    omm = sr.convert.to(mol, "openmm", platform=openmm_platform)
+    omm = sr.convert.to(mol, "openmm", map=map)
 
     omm_system = omm.getSystem()
 
