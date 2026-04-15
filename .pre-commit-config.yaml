@@ -31,11 +31,8 @@ repos:
   # requiring a blanket one-time reformatting pass.
   # NOTE: do NOT run 'pre-commit run --all-files' for C++ — use per-file
   # formatting instead to preserve the drift-based approach.
-  - repo: local
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v22.1.3
     hooks:
       - id: clang-format
-        name: clang-format
-        entry: clang-format
-        language: system
-        args: [-i]
         files: ^(corelib|wrapper)/.*\.(cpp|h|hpp)$

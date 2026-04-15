@@ -181,7 +181,6 @@ gemmi = ">=0.6.4,<0.7.0"
 # Lint feature (local development only, not included in recipes)
 # =============================================================================
 [feature.lint.dependencies]
-clang-format = "==22.1.3"
 pre-commit = "*"
 rattler-build = "*"
 ruff = "*"
