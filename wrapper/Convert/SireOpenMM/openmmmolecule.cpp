@@ -1495,7 +1495,6 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
     this->perturbed->alphas = this->alphas;
     this->perturbed->kappas = this->kappas;
 
-    //for (int i = 0; i < cljs.count(); ++i)
     for (int i = 0; i < this->nAtoms(); ++i)
     {
         const auto &clj0 = cljs.at(i);
