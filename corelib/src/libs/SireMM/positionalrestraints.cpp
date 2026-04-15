@@ -146,6 +146,7 @@ PositionalRestraint &PositionalRestraint::operator=(const PositionalRestraint &o
 {
     if (this != &other)
     {
+        Property::operator=(other);
         atms = other.atms;
         pos = other.pos;
         _k = other._k;

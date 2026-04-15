@@ -5396,6 +5396,63 @@ System AmberPrm::startSystem(const PropertyMap &map) const
         bar.success();
     }
 
+    if (not in_expected_order)
+    {
+        // Collect all residues in loaded (mol-index) order and check for
+        // residue-number inversions. These arise when covalent bonds cross
+        // AMBER's molecule boundaries (e.g. a metal ion bonded to a small
+        // molecule), forcing Sire to group the bonded atoms into the same
+        // molecule and thereby placing some residues out of their original
+        // residue-number sequence.
+        struct ResEntry
+        {
+            int resnum;
+            QString resname;
+        };
+
+        QVector<ResEntry> all_res;
+
+        for (const auto &mol : mols)
+        {
+            const auto &molinfo = mol.info();
+            const int nres = molinfo.nResidues();
+
+            for (int j = 0; j < nres; ++j)
+            {
+                all_res.append({molinfo.number(ResIdx(j)).value(),
+                                molinfo.name(ResIdx(j)).value()});
+            }
+        }
+
+        QStringList out_of_order;
+        int prev_resnum = 0;
+
+        for (const auto &res : all_res)
+        {
+            if (res.resnum < prev_resnum)
+            {
+                out_of_order.append(
+                    QString("%1(%2)").arg(res.resname).arg(res.resnum));
+            }
+
+            prev_resnum = res.resnum;
+        }
+
+        if (not out_of_order.isEmpty())
+        {
+            qWarning().noquote() << QObject::tr(
+                "WARNING: One or more residues have been reordered relative to the "
+                "original topology when loading this file. This happens when covalent "
+                "bonds cross AMBER's molecule boundaries (e.g. a metal ion bonded to a "
+                "small molecule ligand), which forces Sire to group the bonded atoms "
+                "into the same molecule. The following residues appear out of "
+                "residue-number order in the loaded system: %1. "
+                "To avoid ordering issues, access residues by name rather than by "
+                "position (e.g. mols.residues()[\"resname ML1\"] instead of mols.residues()[1]).")
+                .arg(out_of_order.join(", "));
+        }
+    }
+
     MoleculeGroup molgroup("all");
 
     for (auto mol : mols)

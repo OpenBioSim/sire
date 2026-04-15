@@ -96,11 +96,24 @@ class SOMMContext(_Context):
             )
 
             self._map = map
+
+            # Build a name → force-group-index map from the lambda lever.
+            # Used externally (e.g. by SOMD2) to evaluate per-component energies
+            # via getState(groups=(1 << grp)).
+            self._force_group_map = {
+                name: self._lambda_lever.get_force_group(name)
+                for name in self._lambda_lever.get_force_names()
+                if self._lambda_lever.get_force_group(name) >= 0
+            }
+
+            self._energy_cache = {}
         else:
             self._atom_index = None
             self._lambda_lever = None
             self._lambda_value = 0.0
             self._map = None
+            self._force_group_map = {}
+            self._energy_cache = {}
 
         self._is_non_pert_rest2 = False
 
@@ -277,6 +290,7 @@ class SOMMContext(_Context):
                 rest2_scale=rest2_scale,
                 update_constraints=update_constraints,
             )
+            self.clear_energy_cache()
 
         # Update any additional parameters in the REST2 region.
         if self._is_non_pert_rest2 and rest2_scale != self._rest2_scale:
@@ -317,18 +331,62 @@ class SOMMContext(_Context):
 
     def get_potential_energy(self, to_sire_units: bool = True):
         """
-        Calculate and return the potential energy of the system
+        Calculate and return the potential energy of the system.
+
+        Uses energy caching: if neither lambda nor positions have changed since
+        the last call, the cached total is returned without any GPU call.
+        Otherwise a single full getState() evaluation is performed and cached.
         """
-        s = self.getState(getEnergy=True)
-        nrg = s.getPotentialEnergy()
+        import openmm
+
+        if "_total" not in self._energy_cache:
+            total_kj = (
+                self.getState(getEnergy=True)
+                .getPotentialEnergy()
+                .value_in_unit(openmm.unit.kilojoule_per_mole)
+            )
+            self._energy_cache["_total"] = total_kj
+
+        total_kj = self._energy_cache["_total"]
 
         if to_sire_units:
-            import openmm
             from ...units import kcal_per_mol
 
-            return nrg.value_in_unit(openmm.unit.kilocalorie_per_mole) * kcal_per_mol
+            return (total_kj / 4.184) * kcal_per_mol
         else:
-            return nrg
+            return total_kj * openmm.unit.kilojoule_per_mole
+
+    def setPositions(self, positions, *args, **kwargs):
+        """
+        Set the positions of all particles. Overridden to automatically
+        invalidate the per-force-group energy cache.
+        """
+        super().setPositions(positions, *args, **kwargs)
+        self.clear_energy_cache()
+
+    def setState(self, state, *args, **kwargs):
+        """
+        Set the complete state of the context (positions, velocities, box
+        vectors). Overridden to automatically invalidate the per-force-group
+        energy cache.
+        """
+        super().setState(state, *args, **kwargs)
+        self.clear_energy_cache()
+
+    def setPeriodicBoxVectors(self, a, b, c, *args, **kwargs):
+        """
+        Set the periodic box vectors. Overridden to automatically invalidate
+        the per-force-group energy cache, since a box change affects PME energy.
+        """
+        super().setPeriodicBoxVectors(a, b, c, *args, **kwargs)
+        self.clear_energy_cache()
+
+    def clear_energy_cache(self):
+        """
+        Invalidate the energy cache. Call this whenever positions or lambda
+        change so that the next get_potential_energy() call re-evaluates.
+        """
+        self._energy_cache.clear()
 
     def get_energy(self, to_sire_units: bool = True):
         """
