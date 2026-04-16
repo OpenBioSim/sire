@@ -185,6 +185,31 @@ def test_rdkit_force_infer():
     "rdkit" not in sr.convert.supported_formats(),
     reason="rdkit support is not available",
 )
+def test_rdkit_bond_order_inference():
+    """
+    Formal charges inferred from AMBER topology (no bond orders) should
+    match those obtained from an SDF file (explicit bond orders).
+    """
+
+    mol_prm = sr.load_test_files("bond_order_issue.prm7", "bond_order_issue.rst7")[0]
+    mol_sdf = sr.load_test_files("bond_order_issue.sdf")[0]
+
+    rdmol_prm = sr.convert.to_rdkit(mol_prm)
+    rdmol_sdf = sr.convert.to_rdkit(mol_sdf)
+
+    charges_prm = [atom.GetFormalCharge() for atom in rdmol_prm.GetAtoms()]
+    charges_sdf = [atom.GetFormalCharge() for atom in rdmol_sdf.GetAtoms()]
+
+    assert charges_prm == charges_sdf
+
+    # SMILES should also agree between the two loading paths
+    assert mol_prm.smiles() == mol_sdf.smiles()
+
+
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
 def test_rdkit_sdf_tags(tagged_sdf):
 
     # store the sdf data property
