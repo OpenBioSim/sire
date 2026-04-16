@@ -20,13 +20,13 @@
 #include "SireMol/moleditor.h"
 
 #include "SireMM/amberparams.h"
-#include "SireMM/cmapparameter.h"
 #include "SireMM/anglerestraints.h"
 #include "SireMM/atomljs.h"
 #include "SireMM/bondrestraints.h"
-#include "SireMM/inversebondrestraints.h"
 #include "SireMM/boreschrestraints.h"
+#include "SireMM/cmapparameter.h"
 #include "SireMM/dihedralrestraints.h"
+#include "SireMM/inversebondrestraints.h"
 #include "SireMM/morsepotentialrestraints.h"
 #include "SireMM/positionalrestraints.h"
 #include "SireMM/rmsdrestraints.h"
@@ -265,8 +265,8 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
 }
 
 void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraints,
-                                OpenMM::System &system, LambdaLever &lambda_lever,
-                                int natoms, QVector<int> &real_atoms, int &force_group_counter)
+                                  OpenMM::System &system, LambdaLever &lambda_lever,
+                                  int natoms, QVector<int> &real_atoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
         return;
@@ -279,10 +279,10 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
     }
 
     const auto energy_expression = QString(
-        "rho*k*delta*delta*step;"
-        "delta=(r-r0);"
-        "step=max(0,min(1,(r0 - r)))")
-        .toStdString();
+                                       "rho*k*delta*delta*step;"
+                                       "delta=(r-r0);"
+                                       "step=max(0,min(1,(r0 - r)))")
+                                       .toStdString();
 
     auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
     restraintff->setName("InverseBondRestraintForce");
@@ -295,7 +295,7 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
 
     restraintff->setForceGroup(force_group_counter);
     lambda_lever.addRestraintIndex(restraints.name(),
-    system.addForce(restraintff));
+                                   system.addForce(restraintff));
     lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
 
     const auto atom_restraints = restraints.atomRestraints();
@@ -313,18 +313,18 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
         int atom1_index = real_atoms[restraint.atom1()];
 
         if (atom0_index < 0 or atom0_index >= natoms)
-        throw SireError::invalid_index(QObject::tr(
-                        "Invalid particle index! %1 from %2")
-                        .arg(atom0_index)
-                        .arg(natoms),
-                    CODELOC);
+            throw SireError::invalid_index(QObject::tr(
+                                               "Invalid particle index! %1 from %2")
+                                               .arg(atom0_index)
+                                               .arg(natoms),
+                                           CODELOC);
 
         if (atom1_index < 0 or atom1_index >= natoms)
-        throw SireError::invalid_index(QObject::tr(
-                        "Invalid particle index! %1 from %2")
-                        .arg(atom1_index)
-                        .arg(natoms),
-                    CODELOC);
+            throw SireError::invalid_index(QObject::tr(
+                                               "Invalid particle index! %1 from %2")
+                                               .arg(atom1_index)
+                                               .arg(natoms),
+                                           CODELOC);
 
         custom_params[0] = 1.0;                                     // rho - always equal to 1 (scaled by lever)
         custom_params[1] = restraint.k().value() * internal_to_k;   // k
@@ -338,17 +338,17 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
  *  system, which is acted on by the passed LambdaLever.
  */
 void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &restraints,
-        OpenMM::System &system, LambdaLever &lambda_lever,
-        int natoms, QVector<int> &real_atoms, int &force_group_counter)
+                                     OpenMM::System &system, LambdaLever &lambda_lever,
+                                     int natoms, QVector<int> &real_atoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
-    return;
+        return;
 
     if (restraints.hasCentroidRestraints())
     {
         throw SireError::unsupported(QObject::tr(
-                        "Centroid bond restraints aren't yet supported..."),
-                    CODELOC);
+                                         "Centroid bond restraints aren't yet supported..."),
+                                     CODELOC);
     }
 
     // energy expression of a harmonic bond potential, scaled by rho
@@ -357,11 +357,10 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
     // dr = (r - r0)
 
     const auto energy_expression = QString(
-                                    "rho*e_restraint;"
-                                    "e_restraint=de*(1-exp(-sqrt(k/(2*de))*delta))^2;"
-                                    "delta=(r-r0)")
-                                    .toStdString();
-
+                                       "rho*e_restraint;"
+                                       "e_restraint=de*(1-exp(-sqrt(k/(2*de))*delta))^2;"
+                                       "delta=(r-r0)")
+                                       .toStdString();
 
     auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
     restraintff->setName("MorsePotentialRestraintForce");
@@ -375,7 +374,7 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
 
     restraintff->setForceGroup(force_group_counter);
     lambda_lever.addRestraintIndex(restraints.name(),
-                system.addForce(restraintff));
+                                   system.addForce(restraintff));
     lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
 
     const auto atom_restraints = restraints.atomRestraints();
@@ -391,18 +390,18 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
         int atom1_index = real_atoms[restraint.atom1()];
 
         if (atom0_index < 0 or atom0_index >= natoms)
-        throw SireError::invalid_index(QObject::tr(
-                                "Invalid particle index! %1 from %2")
-                                .arg(atom0_index)
-                                .arg(natoms),
-                            CODELOC);
+            throw SireError::invalid_index(QObject::tr(
+                                               "Invalid particle index! %1 from %2")
+                                               .arg(atom0_index)
+                                               .arg(natoms),
+                                           CODELOC);
 
         if (atom1_index < 0 or atom1_index >= natoms)
-        throw SireError::invalid_index(QObject::tr(
-                                "Invalid particle index! %1 from %2")
-                                .arg(atom1_index)
-                                .arg(natoms),
-                            CODELOC);
+            throw SireError::invalid_index(QObject::tr(
+                                               "Invalid particle index! %1 from %2")
+                                               .arg(atom1_index)
+                                               .arg(natoms),
+                                           CODELOC);
 
         custom_params[0] = 1.0;                                     // rho - always equal to 1 (scaled by lever)
         custom_params[1] = restraint.k().value() * internal_to_k;   // k
@@ -557,8 +556,8 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
 }
 
 void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
-                              OpenMM::System &system, LambdaLever &lambda_lever,
-                              int natoms, QVector<int> &real_atoms, int &force_group_counter)
+                          OpenMM::System &system, LambdaLever &lambda_lever,
+                          int natoms, QVector<int> &real_atoms, int &force_group_counter)
 {
     if (restraints.isEmpty())
         return;
@@ -578,16 +577,19 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
     };
 
     // Count the number of existing RMSD forces in the system
-    std::vector<OpenMM::Force*> forces;
+    std::vector<OpenMM::Force *> forces;
 
-    for (int i = 0; i < system.getNumForces(); ++i) {
+    for (int i = 0; i < system.getNumForces(); ++i)
+    {
         forces.push_back(&system.getForce(i));
     }
 
     int n_CVForces = 0;
 
-    for (auto* force : forces) {
-        if (dynamic_cast<OpenMM::CustomCVForce*>(force)) {
+    for (auto *force : forces)
+    {
+        if (dynamic_cast<OpenMM::CustomCVForce *>(force))
+        {
             n_CVForces++;
         }
     }
@@ -605,7 +607,7 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
 
         // energy expression of a flat-bottom well potential, scaled by rho
         const auto energy_expression = rho_unique + "*" + k_unique + "*step(delta)*delta*delta;" +
-            "delta=(" + rmsd_unique + "-" + rmsd_b_unique + ")";
+                                       "delta=(" + rmsd_unique + "-" + rmsd_b_unique + ")";
 
         double k = restraint.k().value() * internal_to_k;
         double r0 = restraint.r0().value() * internal_to_nm;
@@ -649,7 +651,7 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
         }
         restraintff->setForceGroup(grp);
         lambda_lever.addRestraintIndex(restraints.name(),
-                                    system.addForce(restraintff));
+                                       system.addForce(restraintff));
         lambda_lever.setRestraintForceGroup(restraints.name(), grp);
 
         // Update the counter for number of CustomCVForces
@@ -1099,7 +1101,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     start_atom_index[0] = 0;
     for (int i = 1; i < nmols; ++i)
     {
-        start_atom_index[i] = start_atom_index[i-1] + mols[i-1].nAtoms();
+        start_atom_index[i] = start_atom_index[i - 1] + mols[i - 1].nAtoms();
     }
 
     if (SireBase::should_run_in_parallel(nmols, map))
@@ -1292,7 +1294,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     OpenMM::CustomBondForce *ghost_14ff = 0;
     OpenMM::CustomNonbondedForce *ghost_ghostff = 0;
-    OpenMM::CustomNonbondedForce *ghost_nonghostff = 0; 
+    OpenMM::CustomNonbondedForce *ghost_nonghostff = 0;
 
     if (any_perturbable)
     {
@@ -1708,7 +1710,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // index of this perturbable molecule in the list
             // of perturbable molecules (e.g. the first perturbable
             // molecule we find has index 0)
-            // VS - do we need to pass virtual site parameters here, or 
+            // VS - do we need to pass virtual site parameters here, or
             // is what is already in the molecule properties ok
             auto pert_idx = lambda_lever.addPerturbableMolecule(mol,
                                                                 start_indicies,
@@ -1926,9 +1928,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     // two_sqrt_epsilon
                     custom_params[2] = 0.0;
                     // alpha
-                    custom_params[3] = alphas_data[mol.molinfo.nAtoms()+k];
+                    custom_params[3] = alphas_data[mol.molinfo.nAtoms() + k];
                     // kappa
-                    custom_params[4] = kappas_data[mol.molinfo.nAtoms()+k];
+                    custom_params[4] = kappas_data[mol.molinfo.nAtoms() + k];
 
                     ghost_ghostff->addParticle(custom_params);
                     ghost_nonghostff->addParticle(custom_params);
@@ -1948,7 +1950,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         ghost_atoms.append(atom_index);
                         from_ghost_idxs.append(atom_index);
                     }
-
                 }
                 else if (any_perturbable)
                 {
@@ -1958,7 +1959,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     ghost_nonghostff->addParticle(custom_params);
                     non_ghost_atoms.append(atom_index);
                 }
-        }
+            }
         }
 
         // Register virtual sites (OPC, TIP4P, TIP5P, …).
@@ -1967,9 +1968,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         for (const auto &vs : mol.virtual_sites)
         {
             const int vsite_atom = vs.vsite_idx + start_index;
-            const int p1         = vs.p1_idx    + start_index;
-            const int p2         = vs.p2_idx    + start_index;
-            const int p3         = vs.p3_idx    + start_index;
+            const int p1 = vs.p1_idx + start_index;
+            const int p2 = vs.p2_idx + start_index;
+            const int p3 = vs.p3_idx + start_index;
 
             if (vs.type == VirtualSiteInfo::ThreeParticleAverage)
             {
@@ -2189,7 +2190,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     /// (we need to remember which ghost-ghost interactions we have
     ///  excluded, so that we don't double-exclude them later)
     QSet<IndexPair> excluded_ghost_pairs;
-    excluded_ghost_pairs.reserve((n_ghost_atoms * n_ghost_atoms) / 2); 
+    excluded_ghost_pairs.reserve((n_ghost_atoms * n_ghost_atoms) / 2);
 
     for (int i = 0; i < nmols; ++i)
     {
@@ -2329,7 +2330,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             auto pert_idx = idx_to_pert_idx.value(i, openmm_mols.count() + 1);
             lambda_lever.setExceptionIndicies(pert_idx,
-                                             "clj", exception_idxs);
+                                              "clj", exception_idxs);
             lambda_lever.setConstraintIndicies(pert_idx,
                                                constraint_idxs);
         }
@@ -2346,17 +2347,16 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 for (int v0 = 0; v0 < atom_vs.size(); ++v0)
                 {
                     int vs0_index = vs_start + atom_vs.at(v0).asAnInteger();
-                    cljff->addException(vs0_index, start_index+a,
-                        0.0, 1,
-                        0, false);
+                    cljff->addException(vs0_index, start_index + a,
+                                        0.0, 1,
+                                        0, false);
                     if (ghost_ghostff != 0)
                     {
-                        ghost_ghostff->addExclusion(vs0_index, start_index+a);
-                        ghost_nonghostff->addExclusion(vs0_index, start_index+a);
+                        ghost_ghostff->addExclusion(vs0_index, start_index + a);
+                        ghost_nonghostff->addExclusion(vs0_index, start_index + a);
                     }
 
-
-                    for (int v1 = v0+1; v1 < atom_vs.size(); ++v1)
+                    for (int v1 = v0 + 1; v1 < atom_vs.size(); ++v1)
                     {
                         int vs1_index = vs_start + atom_vs.at(v1).asAnInteger();
                         cljff->addException(vs0_index, vs1_index,
@@ -2365,8 +2365,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         if (ghost_ghostff != 0)
                         {
                             ghost_ghostff->addExclusion(vs0_index, vs1_index);
-                            ghost_nonghostff->addExclusion(vs0_index, vs1_index);     
-                        }                      
+                            ghost_nonghostff->addExclusion(vs0_index, vs1_index);
+                        }
                     }
                 }
             }
@@ -2460,12 +2460,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             else if (prop.read().isA<SireMM::MorsePotentialRestraints>())
             {
                 _add_morse_potential_restraints(prop.read().asA<SireMM::MorsePotentialRestraints>(),
-                                     system, lambda_lever, start_index, real_atoms, force_group_counter);
+                                                system, lambda_lever, start_index, real_atoms, force_group_counter);
             }
             else if (prop.read().isA<SireMM::RMSDRestraints>())
             {
                 _add_rmsd_restraints(prop.read().asA<SireMM::RMSDRestraints>(),
-                                           system, lambda_lever, start_index, real_atoms, force_group_counter);
+                                     system, lambda_lever, start_index, real_atoms, force_group_counter);
             }
             else if (prop.read().isA<SireMM::BondRestraints>())
             {
@@ -2475,7 +2475,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             else if (prop.read().isA<SireMM::InverseBondRestraints>())
             {
                 _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
-                                     system, lambda_lever, start_index, real_atoms, force_group_counter);
+                                             system, lambda_lever, start_index, real_atoms, force_group_counter);
             }
             else if (prop.read().isA<SireMM::BoreschRestraints>())
             {
@@ -2505,7 +2505,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             if (prop.read().isA<SireMM::InverseBondRestraints>())
             {
                 _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
-                                         system, lambda_lever, start_index, real_atoms, force_group_counter);
+                                             system, lambda_lever, start_index, real_atoms, force_group_counter);
             }
         }
     }
@@ -2566,10 +2566,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                           vels_data + start_index);
             if (mol.has_vs)
             {
-            for (int vs = 0; vs < mol.n_vs; ++vs)
+                for (int vs = 0; vs < mol.n_vs; ++vs)
                 {
-                    coords_data[start_index+mol.nAtoms()+vs] = OpenMM::Vec3(0,0,0);
-                    vels_data[start_index+mol.nAtoms()+vs] = OpenMM::Vec3(0,0,0);
+                    coords_data[start_index + mol.nAtoms() + vs] = OpenMM::Vec3(0, 0, 0);
+                    vels_data[start_index + mol.nAtoms() + vs] = OpenMM::Vec3(0, 0, 0);
                 }
             }
         }

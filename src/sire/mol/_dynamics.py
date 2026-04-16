@@ -982,7 +982,8 @@ class DynamicsData:
             raise ValueError("Unable to parse 'timeout' as a time")
 
         self._clear_state()
-        # Need to calculate virtual site positions first
+
+        # Need to calculate virtual site positions first.
         self._omm_mols.computeVirtualSites()
 
         self._minimisation_log = minimise_openmm_context(
