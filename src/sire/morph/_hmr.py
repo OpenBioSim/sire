@@ -82,15 +82,19 @@ def repartition_hydrogen_masses(
         if include_end_states:
             mass0 = f"{map['mass'].source()}0"
             mass1 = f"{map['mass'].source()}1"
+            element0 = f"{map['element'].source()}0"
+            element1 = f"{map['element'].source()}1"
 
             if mol.has_property(mass0):
                 map0 = map.clone()
                 map0.set("mass", mass0)
+                map0.set("element", element0)
                 mol = _repartition_hydrogen_mass(mol, mass_factor, water, map0)
 
             if mol.has_property(mass1):
                 map1 = map.clone()
                 map1.set("mass", mass1)
+                map1.set("element", element1)
                 mol = _repartition_hydrogen_mass(mol, mass_factor, water, map1)
 
         mols.update(mol)
