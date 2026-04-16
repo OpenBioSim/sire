@@ -65,6 +65,8 @@ else()
                                   HINTS ${RDKIT_LIBRARY_DIR})
       find_library(SUBSTRUCTMATCH_LIB NAMES SubstructMatch RDKitSubstructMatch
                                   HINTS ${RDKIT_LIBRARY_DIR})
+      find_library(DETERMINEBONDS_LIB NAMES DetermineBonds RDKitDetermineBonds
+                                  HINTS ${RDKIT_LIBRARY_DIR})
 
       set (RDKIT_LIBRARIES ${GRAPHMOL_LIB}            # RDKit::ROMol et al
                            ${RDGENERAL_LIB}           # Base RDKit objects
@@ -74,6 +76,7 @@ else()
                            ${FORCEFIELD_LIB}          # Add forcefields to molecules
                            ${FORCEFIELD_HELPERS_LIB}  # Add forcefields to molecules
                            ${SUBSTRUCTMATCH_LIB}      # Substructure matching
+                           ${DETERMINEBONDS_LIB}      # Bond order inference
            )
     endif()
     if(RDKIT_LIBRARIES)
