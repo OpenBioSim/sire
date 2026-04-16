@@ -36,6 +36,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Store OpenMM state at start of a dynamics run to use for crash recovery.
 
+* Use ``RDKit::determineBondOrders()`` in Sire-to-RDKit conversion to infer bond orders.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 

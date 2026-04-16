@@ -1,35 +1,36 @@
 
 #include "sire_rdkit.h"
 
+#include <GraphMol/DetermineBonds/DetermineBonds.h>
+#include <GraphMol/DistGeomHelpers/Embedder.h>
+#include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/MolOps.h>
+#include <GraphMol/MonomerInfo.h>
 #include <GraphMol/PeriodicTable.h>
+#include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
-#include <GraphMol/SmilesParse/SmartsWrite.h>
-#include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
-#include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
-#include <GraphMol/MonomerInfo.h>
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
-#include "SireMol/core.h"
-#include "SireMol/moleditor.h"
-#include "SireMol/atomelements.h"
 #include "SireMol/atomcharges.h"
 #include "SireMol/atomcoords.h"
+#include "SireMol/atomelements.h"
 #include "SireMol/atommasses.h"
 #include "SireMol/atommatch.h"
 #include "SireMol/atomproperty.hpp"
-#include "SireMol/connectivity.h"
 #include "SireMol/bondid.h"
 #include "SireMol/bondorder.h"
-#include "SireMol/stereochemistry.h"
 #include "SireMol/chirality.h"
+#include "SireMol/connectivity.h"
+#include "SireMol/core.h"
 #include "SireMol/hybridization.h"
 #include "SireMol/iswater.h"
+#include "SireMol/moleditor.h"
 #include "SireMol/mover_metaid.h"
+#include "SireMol/stereochemistry.h"
 
 #include "SireMM/selectorbond.h"
 
@@ -43,6 +44,7 @@
 
 #include "tostring.h"
 
+#include <cmath>
 #include <map>
 
 #include <QDebug>
@@ -848,8 +850,110 @@ namespace SireRDKit
 
         if (atoms.count() > 1 and (not has_bond_info or force_stereo_inference))
         {
-            // we need to infer the bond information
-            infer_bond_info(molecule);
+            // we need to infer the bond information.
+            //
+            // Determine total molecular charge before any resets.
+            // For the force_stereo_inference case the formal charges were set from
+            // the source file (e.g. M CHG records in SDF) so we sum them directly
+            // from the RDKit atoms. For the no-bond-info case we derive the charge
+            // from the Sire partial charges (AMBER partial charges sum to the
+            // integer formal charge of the molecule).
+            int total_charge = 0;
+
+            if (has_bond_info and force_stereo_inference)
+            {
+                for (auto a : molecule.atoms())
+                {
+                    total_charge += a->getFormalCharge();
+                }
+            }
+            else
+            {
+                try
+                {
+                    double charge_sum = 0.0;
+                    for (int i = 0; i < atoms.count(); ++i)
+                    {
+                        charge_sum += atoms(i).property<SireUnits::Dimension::Charge>(map["charge"]).to(SireUnits::mod_electron);
+                    }
+                    total_charge = static_cast<int>(std::round(charge_sum));
+                }
+                catch (...)
+                {
+                    total_charge = 0;
+                }
+            }
+
+            // When bond info is present but force_stereo_inference is requested,
+            // reset all bonds to SINGLE and clear formal charges so that the
+            // inference algorithm starts from a clean connectivity graph.
+            if (has_bond_info and force_stereo_inference)
+            {
+                for (auto b : molecule.bonds())
+                {
+                    if (b->getBondType() != RDKit::Bond::ZERO)
+                    {
+                        b->setBondType(RDKit::Bond::SINGLE);
+                    }
+                }
+                for (auto a : molecule.atoms())
+                {
+                    a->setFormalCharge(0);
+                }
+                molecule.updatePropertyCache(false);
+            }
+
+            // Prefer RDKit's determineBondOrders, which is based on the xyz2mol
+            // linear-programming algorithm and is significantly more robust than the
+            // MDAnalysis heuristic implemented in infer_bond_info().
+            //
+            // determineBondOrders() needs all heavy atoms to have noImplicit set so
+            // that it does not try to add implicit hydrogens (all H are explicit when
+            // loaded from formats such as AMBER that carry all hydrogen atoms).
+            for (auto a : molecule.atoms())
+            {
+                if (a->getAtomicNum() > 1)
+                {
+                    a->setNoImplicit(true);
+                }
+            }
+
+            // Check for dummy atoms (atomic_num == 0): determineBondOrders may not
+            // handle them correctly, so fall back to the heuristic in that case.
+            bool has_dummy_atoms = false;
+            for (auto a : molecule.atoms())
+            {
+                if (a->getAtomicNum() == 0)
+                {
+                    has_dummy_atoms = true;
+                    break;
+                }
+            }
+
+            bool inferred = false;
+
+            if (not has_dummy_atoms)
+            {
+                try
+                {
+                    // embedChiral=false: we call sanitizeMol ourselves below,
+                    // and assignStereochemistryFrom3D is called afterwards.
+                    RDKit::determineBondOrders(molecule, total_charge,
+                                               /*allowChargedFragments=*/true,
+                                               /*embedChiral=*/false,
+                                               /*useAtomMap=*/false);
+                    inferred = true;
+                }
+                catch (...)
+                {
+                }
+            }
+
+            if (not inferred)
+            {
+                // Fall back to the MDAnalysis-based heuristic.
+                infer_bond_info(molecule);
+            }
         }
 
         // sanitze the molecule.
