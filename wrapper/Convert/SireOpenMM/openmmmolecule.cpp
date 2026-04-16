@@ -1,4 +1,3 @@
-
 #include "openmmmolecule.h"
 
 #include "SireMol/atomcharges.h"
@@ -67,6 +66,9 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         return;
     }
 
+
+    // Set up virtual site properties
+
     bool is_perturbable = false;
     bool swap_end_states = false;
 
@@ -87,6 +89,26 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
     else
     {
         ffinfo = mol.property(map["forcefield"]).asA<MMDetail>();
+    }
+
+    if (mol.hasProperty("n_virtual_sites") and mol.property("n_virtual_sites").asAnInteger() > 0)
+    {
+        this->has_vs = true; 
+        this->vs_parents = mol.property("parents").asA<SireBase::Properties>();
+        this->vs_properties = mol.property("virtual_sites").asA<SireBase::Properties>();
+        this->n_vs = mol.property("n_virtual_sites").asAnInteger();
+        if (is_perturbable)
+        {
+            this->vs_charges = mol.property("vs_charges0").asAnArray();
+        }
+        else
+        {
+            this->vs_charges = mol.property("vs_charges").asAnArray();
+        }
+    }
+    else 
+    {
+        this->has_vs = false;
     }
 
     if (map.specified("constraint"))
@@ -261,7 +283,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
                                  "dihedral", "element", "forcefield",
                                  "gb_radii", "gb_screening", "improper",
                                  "intrascale", "mass", "name",
-                                 "parameters", "treechain"};
+                                 "parameters", "treechain", "vs_charges"};
 
             // we can't specialise these globally in case other molecules
             // are not of amber type
@@ -701,7 +723,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     const auto params_charges = params.charges();
     const auto params_ljs = params.ljs();
 
-    this->cljs = QVector<boost::tuple<double, double, double>>(nats, boost::make_tuple(0.0, 0.0, 0.0));
+    int n_params = nats;
+    if (this->has_vs)
+    {
+        n_params += this->n_vs;
+    }
+    this->cljs = QVector<boost::tuple<double, double, double>>(n_params, boost::make_tuple(0.0, 0.0, 0.0));
+
     auto cljs_data = cljs.data();
 
     for (int i = 0; i < nats; ++i)
@@ -728,6 +756,19 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
 
         cljs_data[i] = boost::make_tuple(chg, sig, eps);
+    }
+
+    if (this->has_vs)
+    {
+        auto vs_charges = mol.property(map["vs_charges"]).asAnArray();
+        for (int vs = 0; vs < this->n_vs; ++vs)
+        {
+            double chg = vs_charges.at(vs).asADouble();
+            double sig = 1e-9;
+            double eps = 0.0;
+
+            cljs_data[nats + vs] = boost::make_tuple(chg, sig, eps);
+        }
     }
 
     this->bond_params.clear();
@@ -1454,7 +1495,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
     this->perturbed->alphas = this->alphas;
     this->perturbed->kappas = this->kappas;
 
-    for (int i = 0; i < cljs.count(); ++i)
+    for (int i = 0; i < this->nAtoms(); ++i)
     {
         const auto &clj0 = cljs.at(i);
         const auto &clj1 = perturbed->cljs.at(i);
@@ -1478,6 +1519,19 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                     // kappa is 1 for both end states for ghost atoms
                     this->kappas[i] = 1.0;
                     this->perturbed->kappas[i] = 1.0;
+
+                    if (this->has_vs)
+                    {
+                        auto atom_vs = this->vs_parents.property(std::to_string(i).c_str()).asAnArray();
+                        for (int vs = 0; vs < atom_vs.size(); ++vs)
+                        {
+                            int vs_index = this->nAtoms() + atom_vs.at(vs).asAnInteger();
+                            from_ghost_idxs.insert(vs_index);
+                            this->alphas[vs_index] = 1.0;
+                            this->kappas[vs_index] = 1.0;
+                            this->perturbed->kappas[vs_index] = 1.0;
+                        }
+                    }
                 }
             }
             else if (is_ghost(clj1))
@@ -1491,6 +1545,19 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                 // kappa is 1 for both end states for ghost atoms
                 this->kappas[i] = 1.0;
                 this->perturbed->kappas[i] = 1.0;
+
+                if (this->has_vs)
+                {
+                    auto atom_vs = this->vs_parents.property(std::to_string(i).c_str()).asAnArray();
+                    for (int vs = 0; vs < atom_vs.size(); ++vs)
+                    {
+                        int vs_index = this->nAtoms() + atom_vs.at(vs).asAnInteger();
+                        to_ghost_idxs.insert(vs_index);
+                        this->perturbed->alphas[vs_index] = 1.0;
+                        this->kappas[vs_index] = 1.0;
+                        this->perturbed->kappas[vs_index] = 1.0;
+                    }
+                }
             }
         }
     }
@@ -1901,7 +1968,7 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
     if (unbonded_atoms.isEmpty())
         unbonded_atoms = QSet<qint32>();
 
-    const int nats = this->cljs.count();
+    const int nats = this->atoms.count();
 
     const auto &nbpairs = mol.property(map["intrascale"]).asA<CLJNBPairs>();
 
@@ -2135,6 +2202,47 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
             }
         }
     }
+
+    // Add virtual site exceptions
+    if (this->has_vs)
+    {
+        int n_exceptions = exception_params.count();
+        for (int exc = 0; exc < n_exceptions; ++exc)
+        {
+            const auto &param = exception_params[exc];
+            const auto atom0 = boost::get<0>(param);
+            const auto atom1 = boost::get<1>(param);
+            const auto coul_14_scale = boost::get<2>(param);
+            const auto lj_14_scale = boost::get<3>(param);
+
+            int n_atoms = this->coords.count();
+
+            auto vs_on_0 = vs_parents.property(std::to_string(atom0).c_str()).asAnArray();
+            auto vs_on_1 = vs_parents.property(std::to_string(atom1).c_str()).asAnArray();
+
+            // Not add_exception because we don't want to add constraints between virtual sites
+            // Scaling factors are inherited from the parent atom exception
+            for (int vs0 = 0; vs0 < vs_on_0.size(); ++vs0)
+            {
+                int vs0_index = vs_on_0.at(vs0).asAnInteger() + n_atoms;
+                exception_params.append(boost::make_tuple(vs0_index, atom1, coul_14_scale, lj_14_scale));
+                for (int vs1 = 0; vs1 < vs_on_1.size(); ++vs1)
+                {
+                    int vs1_index = vs_on_1.at(vs1).asAnInteger() + n_atoms;
+                    exception_params.append(boost::make_tuple(vs0_index, vs1_index, coul_14_scale, lj_14_scale));
+                }
+            }
+
+            // We need an additional loop for the case where atom 0 has no virtual sites
+            for (int vs1 = 0; vs1 < vs_on_1.size(); ++vs1)
+            {
+                int vs1_index = vs_on_1.at(vs1).asAnInteger() + n_atoms;
+                exception_params.append(boost::make_tuple(atom0, vs1_index, coul_14_scale, lj_14_scale));
+            }
+        }
+    }
+
+
 }
 
 void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v) const
