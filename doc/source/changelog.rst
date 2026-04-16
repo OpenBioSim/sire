@@ -38,6 +38,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Use ``RDKit::determineBondOrders()`` in Sire-to-RDKit conversion to infer bond orders.
 
+* Map the end-state ``element`` property when performing hydrogen mass repartitioning on perturbable molecules.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
