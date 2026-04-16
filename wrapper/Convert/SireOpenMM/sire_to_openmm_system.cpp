@@ -1710,8 +1710,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // index of this perturbable molecule in the list
             // of perturbable molecules (e.g. the first perturbable
             // molecule we find has index 0)
-            // VS - do we need to pass virtual site parameters here, or
-            // is what is already in the molecule properties ok
             auto pert_idx = lambda_lever.addPerturbableMolecule(mol,
                                                                 start_indicies,
                                                                 map);
