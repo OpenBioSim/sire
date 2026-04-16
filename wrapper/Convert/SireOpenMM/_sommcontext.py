@@ -69,6 +69,9 @@ class SOMMContext(_Context):
             # place the coordinates and velocities into the context
             set_openmm_coordinates_and_velocities(self, metadata)
 
+            # set the positions of any virtual sites
+            self.computeVirtualSites()
+
             # Check for a REST2 scaling factor.
             if map.specified("rest2_scale"):
                 try:

@@ -983,9 +983,6 @@ class DynamicsData:
 
         self._clear_state()
 
-        # Need to calculate virtual site positions first.
-        self._omm_mols.computeVirtualSites()
-
         self._minimisation_log = minimise_openmm_context(
             self._omm_mols,
             tolerance=tolerance,
