@@ -402,7 +402,7 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
         custom_params[2] = restraint.r0().value() * internal_to_nm; // r0
         custom_params[3] = restraint.de().value() * internal_to_de; // de
         custom_params[4] = 41.84;                                   // e_rep (kJ/mol)
-        custom_params[5] = 0.05;                                    // r_sigma (nm)
+        custom_params[5] = 0.025;                                   // r_sigma (nm)
         custom_params[6] = 12;                                      // r_pow
 
         restraintff->addBond(atom0_index, atom1_index, custom_params);
