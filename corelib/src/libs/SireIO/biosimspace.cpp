@@ -1764,11 +1764,16 @@ namespace SireIO
                                            const QHash<AtomIdx, AtomIdx> &mol0_merged_mapping,
                                            const QHash<AtomIdx, AtomIdx> &mol1_merged_mapping)
     {
-        // Helper lambda: copy the non-default scaling factors from 'nb' to
-        // 'nb_merged' according to the provided mapping. Takes nb_merged by
-        // reference to avoid copies.
+        // Helper lambda: copy scaling factors from 'nb' to 'nb_merged' according
+        // to the provided mapping. Takes nb_merged by reference to avoid copies.
+        // When copy_all is true, ALL pairs between mapped atoms are written
+        // (including the default (1,1)), so that the correct end-state values
+        // always overwrite any values set by a prior ghost-topology pass.
+        // When copy_all is false, only non-(1,1) pairs are written (sufficient
+        // for the first/ghost pass, where unset pairs default to (1,1) anyway).
         auto copyIntrascale = [&](const CLJNBPairs &nb, CLJNBPairs &nb_merged,
-                                  const QHash<AtomIdx, AtomIdx> &mapping)
+                                  const QHash<AtomIdx, AtomIdx> &mapping,
+                                  bool copy_all = false)
         {
             const int n = nb.nAtoms();
 
@@ -1792,10 +1797,10 @@ namespace SireIO
                     // Get the scaling factor for this pair of atoms.
                     const CLJScaleFactor sf = nb.get(ai, aj);
 
-                    // This is a non-default scaling factor, so we need to copy
-                    // it across to the merged intrascale object according to
-                    // the mapping.
-                    if (sf.coulomb() != 1.0 or sf.lj() != 1.0)
+                    // Copy if this is a non-default scaling factor, or if
+                    // copy_all is set (second pass: must overwrite ghost-topology
+                    // values even when the correct end-state value is (1,1)).
+                    if (copy_all or sf.coulomb() != 1.0 or sf.lj() != 1.0)
                     {
                         // Get the index of the second atom in the merged system.
                         const AtomIdx merged_aj = mapping.value(aj, AtomIdx(-1));
@@ -1814,13 +1819,17 @@ namespace SireIO
         CLJNBPairs intra0(merged_info);
         CLJNBPairs intra1(merged_info);
 
-        // Copy the non-default scaling factors from the original intrascale
-        // objects to the merged intrascale objects according to the provided
-        // mappings.
+        // Copy scaling factors from the original intrascale objects to the
+        // merged intrascale objects. For each end state, the ghost molecule's
+        // topology is written first (non-default pairs only), then the correct
+        // end-state topology overwrites with copy_all=true so that (1,1) pairs
+        // are also written. This handles ring-breaking perturbations where a
+        // pair that is excluded/1-4 in one state becomes fully interacting (1,1)
+        // in the other state and must not be left at the ghost state's value.
         copyIntrascale(nb1, intra0, mol1_merged_mapping);
-        copyIntrascale(nb0, intra0, mol0_merged_mapping);
+        copyIntrascale(nb0, intra0, mol0_merged_mapping, true);
         copyIntrascale(nb0, intra1, mol0_merged_mapping);
-        copyIntrascale(nb1, intra1, mol1_merged_mapping);
+        copyIntrascale(nb1, intra1, mol1_merged_mapping, true);
 
         // Assemble the intrascale objects into a property list to return.
         SireBase::PropertyList ret;
