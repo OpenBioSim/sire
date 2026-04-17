@@ -9,20 +9,54 @@ throughout, we ask that you please follow the below coding styles
 (and that you aren't offended if we modify your submission so
 that it meets these styles).
 
-Python
-======
+Pre-commit hooks
+================
 
-Python code should be written to be `PEP8-compliant <https://pep8.org>`__,
-ideally autoformatted using a tool such as
-`black <https://black.readthedocs.io/en/stable/>`__.
+The repository uses `pre-commit <https://pre-commit.com>`__ to automate code
+formatting. To install the hooks, run:
+
+.. code-block:: bash
+
+    pre-commit install
+
+Once installed, the hooks run automatically on each commit. To run them
+manually against staged files:
+
+.. code-block:: bash
+
+    pre-commit run
+
+Python formatting is applied to ``src/``, ``tests/``, and Python files in
+``wrapper/`` using `ruff <https://docs.astral.sh/ruff/>`__. C++ formatting
+is applied to ``corelib/`` and ``wrapper/`` using
+`clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__. The
+C++ hook only runs on files staged for commit, so the codebase drifts
+gradually toward the standard rather than requiring a blanket one-time
+reformatting pass.
 
 .. note::
 
-   The developers use `black <https://black.readthedocs.io/en/stable/>`__
-   and will autoformat all python code with this tool to maintain
-   a consistent style. Please use `black <https://black.readthedocs.io/en/stable/>`__
-   if you can, as this will make diffs, pull requests and other changes
-   smaller and easier for everyone to review. Thanks :-)
+   Please do **not** run ``pre-commit run --all-files`` for C++ — this
+   would format the entire codebase at once, which is intentionally
+   avoided. Format only the files you are actively editing.
+
+Python
+======
+
+Python code should be written to be `PEP8-compliant <https://pep8.org>`__
+and is automatically formatted using `ruff <https://docs.astral.sh/ruff/>`__.
+
+.. note::
+
+   The developers use `ruff <https://docs.astral.sh/ruff/>`__ via
+   the pre-commit hooks above. The formatter is run automatically on
+   ``src/``, ``tests/``, and Python files in ``wrapper/`` on each commit,
+   keeping a consistent style. If you prefer to format manually before
+   committing, run:
+
+   .. code-block:: bash
+
+       ruff format src/ tests/ wrapper/
 
 C++
 ===
@@ -201,13 +235,14 @@ an existing rule or propose a new rule then please
 
 .. note::
 
-   The developers use the C++ autoformatting tool built into the C++
-   extension of VSCode (e.g. as `described here <https://dev.to/thiagoow/format-ccpp-files-automatically-on-vs-code-ad7>`__).
-   This is based on (and formats identically to `clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__
-   using the ``Visual Studio`` theme - roughly equivalent to
-   ``clang-format -style="{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false })"``,
-   and so can be installed on any IDE (or run from the command line).
-   Please use the VSCode autoformatter, or
-   `clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ if you
-   can, as this will make diffs, pull requests and other changes
-   smaller and easier for everyone to review. Thanks :-)
+   The pre-commit hooks (see above) automatically run
+   `clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ on
+   any C++ files you stage for commit, using the ``.clang-format`` file at
+   the root of the repository. This is equivalent to the style:
+
+   ``clang-format -style="{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }"``
+
+   IDE integration is also available — the VSCode C++ extension supports
+   ``clang-format`` natively (see
+   `this guide <https://dev.to/thiagoow/format-ccpp-files-automatically-on-vs-code-ad7>`__)
+   and will pick up the ``.clang-format`` file automatically.

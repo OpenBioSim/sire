@@ -186,6 +186,9 @@ class DynamicsData:
             # if the dynamics object is coupled to a sampler.
             self._gcmc_sampler = None
 
+            # Pre-run OpenMM state snapshot used for crash recovery.
+            self._pre_run_state = None
+
             # Check for a REST2 scaling factor.
             if map.specified("rest2_scale"):
                 try:
@@ -480,6 +483,10 @@ class DynamicsData:
                 nrg_sim_lambda_value = nrg
 
                 if lambda_windows is not None:
+                    # Positions have just changed (dynamics completed), so
+                    # invalidate all cached per-group energies before the scan.
+                    self._omm_mols.clear_energy_cache()
+
                     # get the index of the simulation lambda value in the
                     # lambda windows list
                     try:
@@ -538,6 +545,10 @@ class DynamicsData:
             # Store the current energies.
             self._nrgs = nrgs
             self._nrgs_array = nrgs_array
+
+            # Repex synchronisation point: a peer replica may push new
+            # positions into this context, so the cache must be invalidated.
+            self._omm_mols.clear_energy_cache()
 
             # update the interpolation lambda value
             if self._is_interpolate:
@@ -850,14 +861,11 @@ class DynamicsData:
         if self.is_null():
             return 0
         else:
-            from openmm.unit import kilocalorie_per_mole as _omm_kcal_mol
-            from ..units import kcal_per_mol as _sire_kcal_mol
+            return self._omm_mols.get_potential_energy(to_sire_units=True)
 
-            state = self._get_current_state()
-
-            nrg = state.getPotentialEnergy()
-
-            return nrg.value_in_unit(_omm_kcal_mol) * _sire_kcal_mol
+    def clear_energy_cache(self):
+        if not self.is_null():
+            self._omm_mols.clear_energy_cache()
 
     def current_kinetic_energy(self):
         if self.is_null():
@@ -986,6 +994,9 @@ class DynamicsData:
             timeout=timeout.to(second),
         )
 
+        # Positions changed during minimisation; invalidate the energy cache.
+        self._omm_mols.clear_energy_cache()
+
     def _rebuild_and_minimise(self):
         if self.is_null():
             return
@@ -1005,12 +1016,20 @@ class DynamicsData:
         else:
             Console.warning(msg)
 
-        # rebuild the molecules
-        from ..convert import to
+        # Reset the context to the pre-run state snapshot. This was captured
+        # immediately before dynamics.run() was called so it contains consistent
+        # positions, velocities, and box vectors. If no snapshot is available
+        # (e.g. very first run call), fall back to rebuilding the context from
+        # _sire_mols.
+        if self._pre_run_state is not None:
+            self._omm_mols.setState(self._pre_run_state)
+            self._pre_run_state = None
+        else:
+            from ..convert import to
 
-        self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
+            self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
-        # reset the water state
+        # Reset the GCMC water state.
         if self._gcmc_sampler is not None:
             self._gcmc_sampler.push()
             self._gcmc_sampler._set_water_state(self._omm_mols)
@@ -1019,43 +1038,38 @@ class DynamicsData:
         if self._save_crash_report:
             import openmm
             import numpy as np
-            from copy import deepcopy
             from uuid import uuid4
 
             # Create a unique identifier for this crash report.
             crash_id = str(uuid4())[:8]
 
-            # Get the current context and system.
             context = self._omm_mols
-            system = deepcopy(context.getSystem())
 
-            # Add each force to a unique group.
-            for i, f in enumerate(system.getForces()):
-                f.setForceGroup(i)
-
-            # Create a new context.
-            new_context = openmm.Context(system, deepcopy(context.getIntegrator()))
-            new_context.setPositions(context.getState(getPositions=True).getPositions())
-
-            # Write the  energies for each force group.
+            # Write per-force-group energies using the groups already assigned
+            # by sire_to_openmm_system.
             with open(f"crash_{crash_id}.log", "w") as f:
                 f.write(f"Current lambda: {str(self.get_lambda())}\n")
-                for i, force in enumerate(system.getForces()):
-                    state = new_context.getState(getEnergy=True, groups={i})
-                    f.write(f"{force.getName()}, {state.getPotentialEnergy()}\n")
+                for name, grp in context._force_group_map.items():
+                    state = context.getState(getEnergy=True, groups=(1 << grp))
+                    f.write(f"{name}, {state.getPotentialEnergy()}\n")
 
             # Save the serialised system.
             with open(f"system_{crash_id}.xml", "w") as f:
-                f.write(openmm.XmlSerializer.serialize(system))
+                f.write(openmm.XmlSerializer.serialize(context.getSystem()))
 
             # Save the positions.
             positions = (
-                new_context.getState(getPositions=True).getPositions(asNumpy=True)
+                context.getState(getPositions=True).getPositions(asNumpy=True)
                 / openmm.unit.nanometer
             )
             np.savetxt(f"positions_{crash_id}.txt", positions)
 
         self.run_minimisation()
+
+        # Randomise velocities after minimisation. The restored velocities may
+        # be inconsistent with the minimised geometry, which could cause a
+        # secondary instability at the start of the retry dynamics.
+        self.randomise_velocities()
 
     def run(
         self,
@@ -1314,6 +1328,14 @@ class DynamicsData:
         from datetime import datetime
         from math import isnan
 
+        # Capture a pre-run state snapshot for crash recovery if one hasn't
+        # already been set externally. Only needed when auto_fix_minimise is
+        # enabled, since the snapshot is only consumed by _rebuild_and_minimise.
+        if auto_fix_minimise and self._pre_run_state is None:
+            self._pre_run_state = self._omm_mols.getState(
+                getPositions=True, getVelocities=True
+            )
+
         try:
             with ProgressBar(total=steps_to_run, text="dynamics") as progress:
                 progress.set_speed_unit("steps / s")
@@ -1500,6 +1522,10 @@ class DynamicsData:
                     state_has_cv=state_has_cv,
                     nsteps_completed=nsteps_before_run + completed,
                 )
+
+            # Discard the pre-run snapshot so it is not reused stale.
+            if auto_fix_minimise:
+                self._pre_run_state = None
 
         except NeedsMinimiseError:
             from openmm.unit import picosecond
@@ -2223,6 +2249,14 @@ class Dynamics:
         as the energy trajectory columns.
         """
         return self._d._current_energy_array()
+
+    def clear_energy_cache(self):
+        """
+        Invalidate the energy cache. Call this whenever positions have been
+        changed externally (e.g. after a replica-exchange swap) so that the
+        next energy evaluation fully re-computes the potential energy.
+        """
+        self._d.clear_energy_cache()
 
     def to_xml(self, f=None):
         """

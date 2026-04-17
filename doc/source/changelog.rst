@@ -36,10 +36,27 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add support for 4- and 5-point water models in the OpenMM conversion layer.
 
+* Named forces (``clj``, ``bond``, ``angle``, ``torsion``, ``cmap``, ghost
+  forces, restraints, etc.) are each assigned a unique OpenMM force group when
+  the system is built, enabling energy decomposition by force type via
+  ``getState(groups=...)``.
+
 * Add functionality for coupling one lambda lever to another.
 
 * Added support for Direct Morse Replacement (DMR) feature in ``sire.restraints.morse_potential``
   which is enabled by default.
+
+* Don't mutate input system in the ``sire.legacy.IO.setCoordinates`` function.
+
+* Store OpenMM state at start of a dynamics run to use for crash recovery.
+
+* Print warning when ``sire.legacy.IO.AmberPrm`` parser re-orders residues due to covalent bonds between molecules.
+
+* Added internal implementation of virtual sites in the Sire-to-OpenMM conversion layer 
+
+* Use ``RDKit::determineBondOrders()`` in Sire-to-RDKit conversion to infer bond orders.
+
+* Map the end-state ``element`` property when performing hydrogen mass repartitioning on perturbable molecules.
 
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
