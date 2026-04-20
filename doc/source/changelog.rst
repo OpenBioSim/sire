@@ -40,6 +40,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Map the end-state ``element`` property when performing hydrogen mass repartitioning on perturbable molecules.
 
+* Fixed out-of-bounds ``molidx`` searches silently returning the last molecule instead of
+  raising a ``KeyError``. Out-of-bounds positive and negative single-index values now
+  behave consistently with ``residx`` and ``atomidx``.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
