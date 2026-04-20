@@ -1758,48 +1758,36 @@ namespace SireIO
         return Vector(nx, ny, nz);
     }
 
-    SireBase::PropertyList mergeIntrascale(const CLJNBPairs &nb0,
+    SireBase::PropertyList patchIntrascale(const CLJNBPairs &nb0,
                                            const CLJNBPairs &nb1,
-                                           const Connectivity &conn0,
-                                           const Connectivity &conn1,
-                                           const CLJScaleFactor &sf14,
+                                           CLJNBPairs intra0,
+                                           CLJNBPairs intra1,
                                            const QHash<AtomIdx, AtomIdx> &mol0_merged_mapping,
                                            const QHash<AtomIdx, AtomIdx> &mol1_merged_mapping)
     {
-        // Build base CLJNBPairs from the per-state merged connectivity. This
-        // correctly captures bonded distances (1-2, 1-3, 1-4) in the merged
-        // atom space, including paths that only exist in one end state (e.g.
-        // the ring-closure bond for ring-breaking perturbations).
-        CLJNBPairs intra0(conn0, sf14);
-        CLJNBPairs intra1(conn1, sf14);
-
-        // Override with per-pair values from the individual molecule intrascales.
-        // For standard AMBER molecules these are identical to the connectivity-
-        // derived values and the override is a no-op. For force fields with
-        // non-default per-pair scale factors (e.g. GLYCAM funct=2 with (1,1)
-        // instead of global sf14 for certain 1-4 pairs) the override replaces
-        // the global-sf14 value set by the base construction with the correct
-        // per-pair value.
-        auto overrideIntrascale = [&](const CLJNBPairs &nb, CLJNBPairs &nb_merged,
-                                      const QHash<AtomIdx, AtomIdx> &mapping)
+        // Apply per-pair scale factors from nb to nb_merged wherever they differ
+        // from the connectivity-derived base values. For standard AMBER molecules
+        // this is a no-op. For force fields with non-default per-pair values
+        // (e.g. GLYCAM funct=2 (1,1) instead of global sf14 for 1-4 pairs)
+        // it replaces the base value with the correct per-pair value.
+        auto patch = [&](const CLJNBPairs &nb, CLJNBPairs &nb_merged,
+                         const QHash<AtomIdx, AtomIdx> &mapping)
         {
-            const int n = nb.nAtoms();
+            // Iterate only over the mapped atoms rather than all atoms in nb.
+            // This is O(k²) in the number of mapped atoms k, which is always
+            // ≤ nb.nAtoms() and can be much smaller.
+            const QList<AtomIdx> keys = mapping.keys();
+            const int k = keys.size();
 
-            for (int i = 0; i < n; ++i)
+            for (int i = 0; i < k; ++i)
             {
-                const AtomIdx ai(i);
-                const AtomIdx merged_ai = mapping.value(ai, AtomIdx(-1));
+                const AtomIdx ai = keys.at(i);
+                const AtomIdx merged_ai = mapping.value(ai);
 
-                if (merged_ai == AtomIdx(-1))
-                    continue;
-
-                for (int j = i; j < n; ++j)
+                for (int j = i; j < k; ++j)
                 {
-                    const AtomIdx aj(j);
-                    const AtomIdx merged_aj = mapping.value(aj, AtomIdx(-1));
-
-                    if (merged_aj == AtomIdx(-1))
-                        continue;
+                    const AtomIdx aj = keys.at(j);
+                    const AtomIdx merged_aj = mapping.value(aj);
 
                     const CLJScaleFactor nb_sf = nb.get(ai, aj);
                     const CLJScaleFactor base_sf = nb_merged.get(merged_ai, merged_aj);
@@ -1810,10 +1798,9 @@ namespace SireIO
             }
         };
 
-        overrideIntrascale(nb0, intra0, mol0_merged_mapping);
-        overrideIntrascale(nb1, intra1, mol1_merged_mapping);
+        patch(nb0, intra0, mol0_merged_mapping);
+        patch(nb1, intra1, mol1_merged_mapping);
 
-        // Assemble the intrascale objects into a property list to return.
         SireBase::PropertyList ret;
         ret.append(intra0);
         ret.append(intra1);

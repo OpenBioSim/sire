@@ -811,29 +811,29 @@ void register_free_functions()
             "updateCoordinatesAndVelocities", updateCoordinatesAndVelocities_function_value, (bp::arg("original_system"), bp::arg("renumbered_system"), bp::arg("updated_system"), bp::arg("molecule_mapping"), bp::arg("is_lambda1") = (bool const)(false), bp::arg("map0") = SireBase::PropertyMap(), bp::arg("map1") = SireBase::PropertyMap()), "Update the coordinates and velocities of original_system with those from\nupdated_system.\n\nPar:am system_original\nThe original system.\n\nPar:am system_renumbered\nThe original system, atoms and residues have been renumbered to be\nunique and in ascending order.\n\nPar:am system_updated\nThe updated system, where molecules may not be in the same order.\n\nPar:am map0\nA dictionary of user-defined molecular property names for system0.\n\nPar:am map1\nA dictionary of user-defined molecular property names for system1.\n\nRetval: system, mapping\nThe system with updated coordinates and velocities and a mapping\nbetween the molecule indices in both systems.\n");
     }
 
-    { //::SireIO::mergeIntrascale
+    { //::SireIO::patchIntrascale
 
-        typedef ::SireBase::PropertyList (*mergeIntrascale_function_type)(
+        typedef ::SireBase::PropertyList (*patchIntrascale_function_type)(
             ::SireMM::CLJNBPairs const &,
             ::SireMM::CLJNBPairs const &,
-            ::SireMol::Connectivity const &,
-            ::SireMol::Connectivity const &,
-            ::SireMM::CLJScaleFactor const &,
+            ::SireMM::CLJNBPairs,
+            ::SireMM::CLJNBPairs,
             ::QHash<SireMol::AtomIdx, SireMol::AtomIdx> const &,
             ::QHash<SireMol::AtomIdx, SireMol::AtomIdx> const &);
-        mergeIntrascale_function_type mergeIntrascale_function_value(&::SireIO::mergeIntrascale);
+        patchIntrascale_function_type patchIntrascale_function_value(&::SireIO::patchIntrascale);
 
         bp::def(
-            "mergeIntrascale", mergeIntrascale_function_value, (bp::arg("nb0"), bp::arg("nb1"), bp::arg("conn0"), bp::arg("conn1"), bp::arg("sf14"), bp::arg("mol0_merged_mapping"), bp::arg("mol1_merged_mapping")), "Merge the CLJNBPairs (intrascale) of two molecules into the end-state\n"
-                                                                                                                                                                                                                      "intrascales of a perturbable merged molecule.\n"
-                                                                                                                                                                                                                      "\n"
-                                                                                                                                                                                                                      "Builds each merged intrascale from the per-state merged connectivity\n"
-                                                                                                                                                                                                                      "(conn0/conn1) so that bonded distances — including paths created by\n"
-                                                                                                                                                                                                                      "ring-closure bonds — are correctly captured in the merged atom space.\n"
-                                                                                                                                                                                                                      "Per-pair scale factors from nb0/nb1 are then applied as overrides, so\n"
-                                                                                                                                                                                                                      "that non-default values (e.g. GLYCAM funct=2 (1,1) instead of global\n"
-                                                                                                                                                                                                                      "sf14) are preserved.\n"
-                                                                                                                                                                                                                      "\n"
-                                                                                                                                                                                                                      "Returns a PropertyList [intrascale0, intrascale1].\n");
+            "patchIntrascale", patchIntrascale_function_value,
+            (bp::arg("nb0"), bp::arg("nb1"), bp::arg("intra0"), bp::arg("intra1"),
+             bp::arg("mol0_merged_mapping"), bp::arg("mol1_merged_mapping")),
+            "Patch connectivity-derived end-state intrascale matrices with non-default\n"
+            "per-pair scale factors from the individual molecule intrascales.\n"
+            "\n"
+            "For standard AMBER molecules this is a no-op. For force fields with\n"
+            "non-default per-pair values (e.g. GLYCAM funct=2 (1,1) instead of the\n"
+            "global 1-4 scale factor) it replaces the connectivity-derived value with\n"
+            "the correct per-pair value wherever they differ.\n"
+            "\n"
+            "Returns a PropertyList [intrascale0, intrascale1].\n");
     }
 }
