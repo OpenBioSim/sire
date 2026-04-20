@@ -36,8 +36,6 @@
 
 #include "SireMaths/vector.h"
 
-#include "SireBase/propertylist.h"
-
 #include "SireMM/cljnbpairs.h"
 
 #include "SireMol/atomidxmapping.h"
@@ -410,11 +408,11 @@ namespace SireIO
             A hash mapping each AtomIdx in molecule1's original space to
             the corresponding AtomIdx in the merged molecule's space.
 
-        \retval [intrascale0, intrascale1]
-            A PropertyList containing the updated CLJNBPairs for the lambda=0
-            and lambda=1 end states of the merged molecule.
+        \retval (intrascale0, intrascale1)
+            A tuple of the updated CLJNBPairs for the lambda=0 and lambda=1
+            end states of the merged molecule.
      */
-    SIREIO_EXPORT SireBase::PropertyList patchIntrascale(
+    SIREIO_EXPORT boost::tuple<SireMM::CLJNBPairs, SireMM::CLJNBPairs> patchIntrascale(
         const SireMM::CLJNBPairs &nb0,
         const SireMM::CLJNBPairs &nb1,
         SireMM::CLJNBPairs intra0,

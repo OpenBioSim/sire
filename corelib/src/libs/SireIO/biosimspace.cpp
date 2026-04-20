@@ -28,6 +28,8 @@
 #include "biosimspace.h"
 #include "moleculeparser.h"
 
+#include <boost/tuple/tuple.hpp>
+
 #include "SireBase/getinstalldir.h"
 
 #include "SireError/errors.h"
@@ -1758,12 +1760,12 @@ namespace SireIO
         return Vector(nx, ny, nz);
     }
 
-    SireBase::PropertyList patchIntrascale(const CLJNBPairs &nb0,
-                                           const CLJNBPairs &nb1,
-                                           CLJNBPairs intra0,
-                                           CLJNBPairs intra1,
-                                           const QHash<AtomIdx, AtomIdx> &mol0_merged_mapping,
-                                           const QHash<AtomIdx, AtomIdx> &mol1_merged_mapping)
+    boost::tuple<CLJNBPairs, CLJNBPairs> patchIntrascale(const CLJNBPairs &nb0,
+                                                         const CLJNBPairs &nb1,
+                                                         CLJNBPairs intra0,
+                                                         CLJNBPairs intra1,
+                                                         const QHash<AtomIdx, AtomIdx> &mol0_merged_mapping,
+                                                         const QHash<AtomIdx, AtomIdx> &mol1_merged_mapping)
     {
         // Apply per-pair scale factors from nb to nb_merged wherever they differ
         // from the connectivity-derived base values. For standard AMBER molecules
@@ -1801,10 +1803,7 @@ namespace SireIO
         patch(nb0, intra0, mol0_merged_mapping);
         patch(nb1, intra1, mol1_merged_mapping);
 
-        SireBase::PropertyList ret;
-        ret.append(intra0);
-        ret.append(intra1);
-        return ret;
+        return boost::make_tuple(intra0, intra1);
     }
 
 } // namespace SireIO

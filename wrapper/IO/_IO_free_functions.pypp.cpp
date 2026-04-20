@@ -813,7 +813,7 @@ void register_free_functions()
 
     { //::SireIO::patchIntrascale
 
-        typedef ::SireBase::PropertyList (*patchIntrascale_function_type)(
+        typedef ::boost::tuple<::SireMM::CLJNBPairs, ::SireMM::CLJNBPairs> (*patchIntrascale_function_type)(
             ::SireMM::CLJNBPairs const &,
             ::SireMM::CLJNBPairs const &,
             ::SireMM::CLJNBPairs,
