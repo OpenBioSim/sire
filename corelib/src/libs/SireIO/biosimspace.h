@@ -41,6 +41,7 @@
 #include "SireMM/cljnbpairs.h"
 
 #include "SireMol/atomidxmapping.h"
+#include "SireMol/connectivity.h"
 #include "SireMol/moleculeinfodata.h"
 #include "SireMol/select.h"
 
@@ -411,7 +412,9 @@ namespace SireIO
     SIREIO_EXPORT SireBase::PropertyList mergeIntrascale(
         const SireMM::CLJNBPairs &nb0,
         const SireMM::CLJNBPairs &nb1,
-        const SireMol::MoleculeInfoData &merged_info,
+        const SireMol::Connectivity &conn0,
+        const SireMol::Connectivity &conn1,
+        const SireMM::CLJScaleFactor &sf14,
         const QHash<SireMol::AtomIdx, SireMol::AtomIdx> &mol0_merged_mapping,
         const QHash<SireMol::AtomIdx, SireMol::AtomIdx> &mol1_merged_mapping);
 
