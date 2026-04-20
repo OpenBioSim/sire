@@ -266,6 +266,8 @@ QList<MolNum> MolIdx::map(const Molecules &molecules) const
             molnums.append(it.key());
             break;
         }
+
+        --i;
     }
 
     BOOST_ASSERT(not molnums.isEmpty());
