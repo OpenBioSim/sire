@@ -62,6 +62,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   raising a ``KeyError``. Out-of-bounds positive and negative single-index values now
   behave consistently with ``residx`` and ``atomidx``.
 
+* Reassign end-state mass and element properties in the ``sire.morph.create_from_pertfile``
+  to undo ``SOMD`` modifications.
+
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
