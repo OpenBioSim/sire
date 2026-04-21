@@ -67,6 +67,7 @@ def create_from_pertfile(mol, pertfile, map=None):
     lj_prop = map["LJ"].source()
     typ_prop = map["ambertype"].source()
     elem_prop = map["element"].source()
+    mass_prop = map["mass"].source()
 
     c["charge0"] = c[chg_prop]
     c["charge1"] = c[chg_prop]
@@ -80,6 +81,9 @@ def create_from_pertfile(mol, pertfile, map=None):
     c["element0"] = c[elem_prop]
     c["element1"] = c[elem_prop]
 
+    c["mass0"] = c[mass_prop]
+    c["mass1"] = c[mass_prop]
+
     for atom in c.atoms():
         atomname = atom.name
 
@@ -90,7 +94,7 @@ def create_from_pertfile(mol, pertfile, map=None):
             lj1 = template.get_final_lj(atomname)
             typ0 = template.get_init_type(atomname)
             typ1 = template.get_final_type(atomname)
-        except Exception as e:
+        except Exception:
             continue
 
         atom["charge0"] = q0
@@ -102,7 +106,17 @@ def create_from_pertfile(mol, pertfile, map=None):
         atom["ambertype0"] = typ0
         atom["ambertype1"] = typ1
 
+        # IMPORTANT: The pert file will already include modifications to the element
+        # and mass properties of the end states, i.e. when perturbing, elements are
+        # set to the mass/eelement of the heaviest end state. As such, we need to
+        # infer the element from the ambertype, then reset the mass. This also
+        # removes any existing hydrogen mass repartitioning.
+
+        atom["element0"] = Element.biological_element(typ0)
         atom["element1"] = Element.biological_element(typ1)
+
+        atom["mass0"] = atom["element0"].mass()
+        atom["mass1"] = atom["element1"].mass()
 
     # now update all of the internals
     bond_prop = map["bond"].source()
@@ -259,7 +273,7 @@ def create_from_pertfile(mol, pertfile, map=None):
     c["improper1"] = impropers1
 
     # duplicate unperturbed properties
-    for prop in ["coordinates", "mass", "forcefield", "intrascale"]:
+    for prop in ["coordinates", "forcefield", "intrascale"]:
         orig_prop = map[prop].source()
         c[prop + "0"] = c[orig_prop]
         c[prop + "1"] = c[orig_prop]
