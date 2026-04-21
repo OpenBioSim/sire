@@ -31,8 +31,8 @@
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
 
-#include "SireMol/atomelements.h"
 #include "SireMol/atomcoords.h"
+#include "SireMol/atomelements.h"
 #include "SireMol/core.h"
 #include "SireMol/iswater.h"
 
@@ -1155,8 +1155,62 @@ SelectResult IDIndexEngine::searchMolIdx(const SelectResult &mols, const SelectR
 {
     QList<Molecule> matches;
 
-    int idx = 0;
     int count = context.listCount();
+
+    if (_is_single_value(this->vals))
+    {
+        // For a single index value, apply Python-style negative-index mapping
+        // and do a strict bounds check. Out-of-bounds returns no match,
+        // consistent with residx/atomidx behaviour.
+        // We read the raw start value from RangeValue directly, bypassing the
+        // _to_single_value helper which maps against INT_MAX and corrupts
+        // negative indices.
+        auto rv = boost::get<RangeValue>(this->vals[0]);
+
+        if (not rv.start)
+            return SelectResult(matches);
+
+        int v = *rv.start;
+
+        if (v < 0)
+            v = count + v;
+
+        if (v < 0 or v >= count)
+            return SelectResult(matches);
+
+        int idx = 0;
+
+        for (const auto &mol : context)
+        {
+            if (idx == v)
+            {
+                if (&mols == &context)
+                {
+                    matches.append(mol->molecule());
+                }
+                else
+                {
+                    const auto molnum = mol->data().number();
+
+                    for (const auto &m : mols)
+                    {
+                        if (m->data().number() == molnum)
+                        {
+                            matches.append(m->molecule());
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
+
+            idx += 1;
+        }
+
+        return SelectResult(matches);
+    }
+
+    int idx = 0;
 
     for (const auto &mol : context)
     {

@@ -2,8 +2,8 @@
 
 // (C) Christopher Woods, GPL >= 3 License
 
-#include "boost/python.hpp"
 #include "_IO_free_functions.pypp.hpp"
+#include "boost/python.hpp"
 
 namespace bp = boost::python;
 
@@ -628,295 +628,212 @@ namespace bp = boost::python;
 
 #include "biosimspace.h"
 
-void register_free_functions(){
+void register_free_functions()
+{
 
     { //::SireIO::createChlorineIon
-    
-        typedef ::SireMol::Molecule ( *createChlorineIon_function_type )( ::SireMaths::Vector const &,::QString const,::SireBase::PropertyMap const & );
-        createChlorineIon_function_type createChlorineIon_function_value( &::SireIO::createChlorineIon );
-        
-        bp::def( 
-            "createChlorineIon"
-            , createChlorineIon_function_value
-            , ( bp::arg("coords"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap() )
-            , "Create a chlorine ion at the specified position.\nPar:am position\nThe position of the chlorine ion.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: chlorine\nThe chlorine ion.\n" );
-    
+
+        typedef ::SireMol::Molecule (*createChlorineIon_function_type)(::SireMaths::Vector const &, ::QString const, ::SireBase::PropertyMap const &);
+        createChlorineIon_function_type createChlorineIon_function_value(&::SireIO::createChlorineIon);
+
+        bp::def(
+            "createChlorineIon", createChlorineIon_function_value, (bp::arg("coords"), bp::arg("model"), bp::arg("map") = SireBase::PropertyMap()), "Create a chlorine ion at the specified position.\nPar:am position\nThe position of the chlorine ion.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: chlorine\nThe chlorine ion.\n");
     }
 
     { //::SireIO::createSodiumIon
-    
-        typedef ::SireMol::Molecule ( *createSodiumIon_function_type )( ::SireMaths::Vector const &,::QString const,::SireBase::PropertyMap const & );
-        createSodiumIon_function_type createSodiumIon_function_value( &::SireIO::createSodiumIon );
-        
-        bp::def( 
-            "createSodiumIon"
-            , createSodiumIon_function_value
-            , ( bp::arg("coords"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap() )
-            , "Create a sodium ion at the specified position.\nPar:am position\nThe position of the sodium ion.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: sodium\nThe sodium ion.\n" );
-    
+
+        typedef ::SireMol::Molecule (*createSodiumIon_function_type)(::SireMaths::Vector const &, ::QString const, ::SireBase::PropertyMap const &);
+        createSodiumIon_function_type createSodiumIon_function_value(&::SireIO::createSodiumIon);
+
+        bp::def(
+            "createSodiumIon", createSodiumIon_function_value, (bp::arg("coords"), bp::arg("model"), bp::arg("map") = SireBase::PropertyMap()), "Create a sodium ion at the specified position.\nPar:am position\nThe position of the sodium ion.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: sodium\nThe sodium ion.\n");
     }
 
     { //::SireIO::getCoordsArray
-    
-        typedef ::QVector< float > ( *getCoordsArray_function_type )( ::SireMol::MoleculeView const &,::SireUnits::Dimension::Length const &,::SireBase::PropertyMap const & );
-        getCoordsArray_function_type getCoordsArray_function_value( &::SireIO::getCoordsArray );
-        
-        bp::def( 
-            "getCoordsArray"
-            , getCoordsArray_function_value
-            , ( bp::arg("mol"), bp::arg("to_unit"), bp::arg("map") )
-            , "" );
-    
+
+        typedef ::QVector<float> (*getCoordsArray_function_type)(::SireMol::MoleculeView const &, ::SireUnits::Dimension::Length const &, ::SireBase::PropertyMap const &);
+        getCoordsArray_function_type getCoordsArray_function_value(&::SireIO::getCoordsArray);
+
+        bp::def(
+            "getCoordsArray", getCoordsArray_function_value, (bp::arg("mol"), bp::arg("to_unit"), bp::arg("map")), "");
     }
 
     { //::SireIO::getCoordsArray
-    
-        typedef ::QVector< float > ( *getCoordsArray_function_type )( ::SireMol::MoleculeGroup const &,::SireUnits::Dimension::Length const &,::SireBase::PropertyMap const & );
-        getCoordsArray_function_type getCoordsArray_function_value( &::SireIO::getCoordsArray );
-        
-        bp::def( 
-            "getCoordsArray"
-            , getCoordsArray_function_value
-            , ( bp::arg("mols"), bp::arg("to_unit"), bp::arg("map") )
-            , "" );
-    
+
+        typedef ::QVector<float> (*getCoordsArray_function_type)(::SireMol::MoleculeGroup const &, ::SireUnits::Dimension::Length const &, ::SireBase::PropertyMap const &);
+        getCoordsArray_function_type getCoordsArray_function_value(&::SireIO::getCoordsArray);
+
+        bp::def(
+            "getCoordsArray", getCoordsArray_function_value, (bp::arg("mols"), bp::arg("to_unit"), bp::arg("map")), "");
     }
 
     { //::SireIO::getCoordsArray
-    
-        typedef ::QVector< float > ( *getCoordsArray_function_type )( ::SireSystem::System const &,::SireUnits::Dimension::Length const &,::SireBase::PropertyMap const & );
-        getCoordsArray_function_type getCoordsArray_function_value( &::SireIO::getCoordsArray );
-        
-        bp::def( 
-            "getCoordsArray"
-            , getCoordsArray_function_value
-            , ( bp::arg("system"), bp::arg("to_unit"), bp::arg("map") )
-            , "" );
-    
+
+        typedef ::QVector<float> (*getCoordsArray_function_type)(::SireSystem::System const &, ::SireUnits::Dimension::Length const &, ::SireBase::PropertyMap const &);
+        getCoordsArray_function_type getCoordsArray_function_value(&::SireIO::getCoordsArray);
+
+        bp::def(
+            "getCoordsArray", getCoordsArray_function_value, (bp::arg("system"), bp::arg("to_unit"), bp::arg("map")), "");
     }
 
     { //::SireIO::isAmberWater
-    
-        typedef bool ( *isAmberWater_function_type )( ::SireMol::Molecule const &,::SireBase::PropertyMap const & );
-        isAmberWater_function_type isAmberWater_function_value( &::SireIO::isAmberWater );
-        
-        bp::def( 
-            "isAmberWater"
-            , isAmberWater_function_value
-            , ( bp::arg("molecule"), bp::arg("map")=SireBase::PropertyMap() )
-            , "Test whether the passed water molecule matches standard AMBER\nformat water topologies.\n\nPar:am molecule\nThe molecule to test.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: is_water\nWhether the molecule is an AMBER format water.\n" );
-    
+
+        typedef bool (*isAmberWater_function_type)(::SireMol::Molecule const &, ::SireBase::PropertyMap const &);
+        isAmberWater_function_type isAmberWater_function_value(&::SireIO::isAmberWater);
+
+        bp::def(
+            "isAmberWater", isAmberWater_function_value, (bp::arg("molecule"), bp::arg("map") = SireBase::PropertyMap()), "Test whether the passed water molecule matches standard AMBER\nformat water topologies.\n\nPar:am molecule\nThe molecule to test.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: is_water\nWhether the molecule is an AMBER format water.\n");
     }
 
     { //::SireIO::isGromacsWater
-    
-        typedef bool ( *isGromacsWater_function_type )( ::SireMol::Molecule const &,::SireBase::PropertyMap const & );
-        isGromacsWater_function_type isGromacsWater_function_value( &::SireIO::isGromacsWater );
-        
-        bp::def( 
-            "isGromacsWater"
-            , isGromacsWater_function_value
-            , ( bp::arg("molecule"), bp::arg("map")=SireBase::PropertyMap() )
-            , "Test whether the passed water molecule matches standard GROMACS\nformat water topologies.\n\nPar:am molecule\nThe molecule to test.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: is_water\nWhether the molecule is a GROMACS format water.\n" );
-    
+
+        typedef bool (*isGromacsWater_function_type)(::SireMol::Molecule const &, ::SireBase::PropertyMap const &);
+        isGromacsWater_function_type isGromacsWater_function_value(&::SireIO::isGromacsWater);
+
+        bp::def(
+            "isGromacsWater", isGromacsWater_function_value, (bp::arg("molecule"), bp::arg("map") = SireBase::PropertyMap()), "Test whether the passed water molecule matches standard GROMACS\nformat water topologies.\n\nPar:am molecule\nThe molecule to test.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: is_water\nWhether the molecule is a GROMACS format water.\n");
     }
 
     { //::SireIO::isWater
-    
-        typedef bool ( *isWater_function_type )( ::SireMol::Molecule const &,::SireBase::PropertyMap const & );
-        isWater_function_type isWater_function_value( &::SireIO::isWater );
-        
-        bp::def( 
-            "isWater"
-            , isWater_function_value
-            , ( bp::arg("molecule"), bp::arg("map")=SireBase::PropertyMap() )
-            , "Test whether the passed water molecule matches standard water\ntopologies.\n\nPar:am molecule\nThe molecule to test.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: is_water\nWhether the molecule is a water.\n" );
-    
+
+        typedef bool (*isWater_function_type)(::SireMol::Molecule const &, ::SireBase::PropertyMap const &);
+        isWater_function_type isWater_function_value(&::SireIO::isWater);
+
+        bp::def(
+            "isWater", isWater_function_value, (bp::arg("molecule"), bp::arg("map") = SireBase::PropertyMap()), "Test whether the passed water molecule matches standard water\ntopologies.\n\nPar:am molecule\nThe molecule to test.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: is_water\nWhether the molecule is a water.\n");
     }
 
     { //::SireIO::removeProperty
-    
-        typedef ::SireSystem::System ( *removeProperty_function_type )( ::SireSystem::System &,::QString const & );
-        removeProperty_function_type removeProperty_function_value( &::SireIO::removeProperty );
-        
-        bp::def( 
-            "removeProperty"
-            , removeProperty_function_value
-            , ( bp::arg("system"), bp::arg("property") )
-            , "Remove a named property from all molecules in a system.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am property\nThe name of the property to be removed.\n\nRetval: system\nThe system with renumbered constituents.\n" );
-    
+
+        typedef ::SireSystem::System (*removeProperty_function_type)(::SireSystem::System &, ::QString const &);
+        removeProperty_function_type removeProperty_function_value(&::SireIO::removeProperty);
+
+        bp::def(
+            "removeProperty", removeProperty_function_value, (bp::arg("system"), bp::arg("property")), "Remove a named property from all molecules in a system.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am property\nThe name of the property to be removed.\n\nRetval: system\nThe system with renumbered constituents.\n");
     }
 
     { //::SireIO::renumberConstituents
-    
-        typedef ::SireSystem::System ( *renumberConstituents_function_type )( ::SireSystem::System const &,unsigned int );
-        renumberConstituents_function_type renumberConstituents_function_value( &::SireIO::renumberConstituents );
-        
-        bp::def( 
-            "renumberConstituents"
-            , renumberConstituents_function_value
-            , ( bp::arg("system"), bp::arg("mol_offset")=(unsigned int)(0) )
-            , "Renumber the constituents of a system (residues and atoms) so that\nthey are unique and are in ascending order.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am mol_offset\nThe index of the molecule at which to begin renumbering.\n\nRetval: system\nThe system with renumbered constituents.\n" );
-    
+
+        typedef ::SireSystem::System (*renumberConstituents_function_type)(::SireSystem::System const &, unsigned int);
+        renumberConstituents_function_type renumberConstituents_function_value(&::SireIO::renumberConstituents);
+
+        bp::def(
+            "renumberConstituents", renumberConstituents_function_value, (bp::arg("system"), bp::arg("mol_offset") = (unsigned int)(0)), "Renumber the constituents of a system (residues and atoms) so that\nthey are unique and are in ascending order.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am mol_offset\nThe index of the molecule at which to begin renumbering.\n\nRetval: system\nThe system with renumbered constituents.\n");
     }
 
     { //::SireIO::repartitionHydrogenMass
-    
-        typedef ::SireSystem::System ( *repartitionHydrogenMass_function_type )( ::SireSystem::System const &,double const,unsigned int const,::SireBase::PropertyMap const & );
-        repartitionHydrogenMass_function_type repartitionHydrogenMass_function_value( &::SireIO::repartitionHydrogenMass );
-        
-        bp::def( 
-            "repartitionHydrogenMass"
-            , repartitionHydrogenMass_function_value
-            , ( bp::arg("system"), bp::arg("factor")=4, bp::arg("water")=(unsigned int const)(0), bp::arg("map")=SireBase::PropertyMap() )
-            , "Redistribute mass of heavy atoms connected to bonded hydrogens into\nthe hydrogen atoms. This allows use of larger simulation integration\ntime steps without encountering instabilities related to high-frequency\nhydrogen motion.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am factor\nThe repartitioning scale factor. Hydrogen masses are scaled by\nthis amount.\n\nPar:am water\nWhether to repartiotion masses for water molecules:\n0 = yes, 1 = no, 2 = only water molecules.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with repartitioned hydrogen mass.\n" );
-    
+
+        typedef ::SireSystem::System (*repartitionHydrogenMass_function_type)(::SireSystem::System const &, double const, unsigned int const, ::SireBase::PropertyMap const &);
+        repartitionHydrogenMass_function_type repartitionHydrogenMass_function_value(&::SireIO::repartitionHydrogenMass);
+
+        bp::def(
+            "repartitionHydrogenMass", repartitionHydrogenMass_function_value, (bp::arg("system"), bp::arg("factor") = 4, bp::arg("water") = (unsigned int const)(0), bp::arg("map") = SireBase::PropertyMap()), "Redistribute mass of heavy atoms connected to bonded hydrogens into\nthe hydrogen atoms. This allows use of larger simulation integration\ntime steps without encountering instabilities related to high-frequency\nhydrogen motion.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am factor\nThe repartitioning scale factor. Hydrogen masses are scaled by\nthis amount.\n\nPar:am water\nWhether to repartiotion masses for water molecules:\n0 = yes, 1 = no, 2 = only water molecules.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with repartitioned hydrogen mass.\n");
     }
 
     { //::SireIO::repartitionHydrogenMass
-    
-        typedef ::SireMol::Molecule ( *repartitionHydrogenMass_function_type )( ::SireMol::Molecule &,double const,unsigned int const,::SireBase::PropertyMap const & );
-        repartitionHydrogenMass_function_type repartitionHydrogenMass_function_value( &::SireIO::repartitionHydrogenMass );
-        
-        bp::def( 
-            "repartitionHydrogenMass"
-            , repartitionHydrogenMass_function_value
-            , ( bp::arg("molecule"), bp::arg("factor")=4, bp::arg("water")=(unsigned int const)(0), bp::arg("map")=SireBase::PropertyMap() )
-            , "Redistribute mass of heavy atoms connected to bonded hydrogens into\nthe hydrogen atoms. This allows use of larger simulation integration\ntime steps without encountering instabilities related to high-frequency\nhydrogen motion.\n\nPar:am molecule\nThe molecule of interest.\n\nPar:am factor\nThe repartitioning scale factor. Hydrogen masses are scaled by\nthis amount.\n\nPar:am water\nWhether to repartiotion masses for water molecules:\n0 = yes, 1 = no, 2 = only water molecules.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with repartitioned hydrogen mass.\n" );
-    
+
+        typedef ::SireMol::Molecule (*repartitionHydrogenMass_function_type)(::SireMol::Molecule &, double const, unsigned int const, ::SireBase::PropertyMap const &);
+        repartitionHydrogenMass_function_type repartitionHydrogenMass_function_value(&::SireIO::repartitionHydrogenMass);
+
+        bp::def(
+            "repartitionHydrogenMass", repartitionHydrogenMass_function_value, (bp::arg("molecule"), bp::arg("factor") = 4, bp::arg("water") = (unsigned int const)(0), bp::arg("map") = SireBase::PropertyMap()), "Redistribute mass of heavy atoms connected to bonded hydrogens into\nthe hydrogen atoms. This allows use of larger simulation integration\ntime steps without encountering instabilities related to high-frequency\nhydrogen motion.\n\nPar:am molecule\nThe molecule of interest.\n\nPar:am factor\nThe repartitioning scale factor. Hydrogen masses are scaled by\nthis amount.\n\nPar:am water\nWhether to repartiotion masses for water molecules:\n0 = yes, 1 = no, 2 = only water molecules.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with repartitioned hydrogen mass.\n");
     }
 
     { //::SireIO::setAmberWater
-    
-        typedef ::SireSystem::System ( *setAmberWater_function_type )( ::SireSystem::System const &,::QString const &,::SireBase::PropertyMap const & );
-        setAmberWater_function_type setAmberWater_function_value( &::SireIO::setAmberWater );
-        
-        bp::def( 
-            "setAmberWater"
-            , setAmberWater_function_value
-            , ( bp::arg("system"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap() )
-            , "Set all water molecules in the passed system to the appropriate AMBER\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated water topology.\n" );
-    
+
+        typedef ::SireSystem::System (*setAmberWater_function_type)(::SireSystem::System const &, ::QString const &, ::SireBase::PropertyMap const &);
+        setAmberWater_function_type setAmberWater_function_value(&::SireIO::setAmberWater);
+
+        bp::def(
+            "setAmberWater", setAmberWater_function_value, (bp::arg("system"), bp::arg("model"), bp::arg("map") = SireBase::PropertyMap()), "Set all water molecules in the passed system to the appropriate AMBER\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated water topology.\n");
     }
 
     { //::SireIO::setAmberWater
-    
-        typedef ::SireMol::SelectResult ( *setAmberWater_function_type )( ::SireMol::SelectResult const &,::QString const &,::SireBase::PropertyMap const & );
-        setAmberWater_function_type setAmberWater_function_value( &::SireIO::setAmberWater );
-        
-        bp::def( 
-            "setAmberWater"
-            , setAmberWater_function_value
-            , ( bp::arg("molecules"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap() )
-            , "Set all water molecules in the passed system to the appropriate AMBER\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated water topology.\n" );
-    
+
+        typedef ::SireMol::SelectResult (*setAmberWater_function_type)(::SireMol::SelectResult const &, ::QString const &, ::SireBase::PropertyMap const &);
+        setAmberWater_function_type setAmberWater_function_value(&::SireIO::setAmberWater);
+
+        bp::def(
+            "setAmberWater", setAmberWater_function_value, (bp::arg("molecules"), bp::arg("model"), bp::arg("map") = SireBase::PropertyMap()), "Set all water molecules in the passed system to the appropriate AMBER\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated water topology.\n");
     }
 
     { //::SireIO::setCoordinates
-    
-        typedef ::SireSystem::System ( *setCoordinates_function_type )( ::SireSystem::System,::QVector<QVector<float>> const &,bool const,::SireBase::PropertyMap const & );
-        setCoordinates_function_type setCoordinates_function_value( &::SireIO::setCoordinates );
-        
-        bp::def( 
-            "setCoordinates"
-            , setCoordinates_function_value
-            , ( bp::arg("system"), bp::arg("coordinates"), bp::arg("is_lambda1")=(bool const)(false), bp::arg("map")=SireBase::PropertyMap() )
-            , "Set the coordinates of the entire system.\nPar:am system\nThe molecular system of interest.\n\nPar:am coordinates\nThe new coordinates for the system.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated coordinates.\n" );
-    
+
+        typedef ::SireSystem::System (*setCoordinates_function_type)(::SireSystem::System, ::QVector<QVector<float>> const &, bool const, ::SireBase::PropertyMap const &);
+        setCoordinates_function_type setCoordinates_function_value(&::SireIO::setCoordinates);
+
+        bp::def(
+            "setCoordinates", setCoordinates_function_value, (bp::arg("system"), bp::arg("coordinates"), bp::arg("is_lambda1") = (bool const)(false), bp::arg("map") = SireBase::PropertyMap()), "Set the coordinates of the entire system.\nPar:am system\nThe molecular system of interest.\n\nPar:am coordinates\nThe new coordinates for the system.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated coordinates.\n");
     }
 
     { //::SireIO::setGromacsWater
-    
-        typedef ::SireSystem::System ( *setGromacsWater_function_type )( ::SireSystem::System const &,::QString const &,::SireBase::PropertyMap const &,bool );
-        setGromacsWater_function_type setGromacsWater_function_value( &::SireIO::setGromacsWater );
-        
-        bp::def( 
-            "setGromacsWater"
-            , setGromacsWater_function_value
-            , ( bp::arg("system"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("is_crystal")=(bool)(false) )
-            , "Set all water molecules in the passed system to the appropriate GROMACS\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nPar:am is_crystal\nWhether this is a crystal water molecule. If true, then the molecule\nand residue name will be set to XTL rather than SOL.\n\nRetval: system\nThe system with updated water topology.\n" );
-    
+
+        typedef ::SireSystem::System (*setGromacsWater_function_type)(::SireSystem::System const &, ::QString const &, ::SireBase::PropertyMap const &, bool);
+        setGromacsWater_function_type setGromacsWater_function_value(&::SireIO::setGromacsWater);
+
+        bp::def(
+            "setGromacsWater", setGromacsWater_function_value, (bp::arg("system"), bp::arg("model"), bp::arg("map") = SireBase::PropertyMap(), bp::arg("is_crystal") = (bool)(false)), "Set all water molecules in the passed system to the appropriate GROMACS\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nPar:am is_crystal\nWhether this is a crystal water molecule. If true, then the molecule\nand residue name will be set to XTL rather than SOL.\n\nRetval: system\nThe system with updated water topology.\n");
     }
 
     { //::SireIO::setGromacsWater
-    
-        typedef ::SireMol::SelectResult ( *setGromacsWater_function_type )( ::SireMol::SelectResult const &,::QString const &,::SireBase::PropertyMap const & );
-        setGromacsWater_function_type setGromacsWater_function_value( &::SireIO::setGromacsWater );
-        
-        bp::def( 
-            "setGromacsWater"
-            , setGromacsWater_function_value
-            , ( bp::arg("molecules"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap() )
-            , "Set all water molecules in the passed system to the appropriate GROMACS\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated water topology.\n\n" );
-    
+
+        typedef ::SireMol::SelectResult (*setGromacsWater_function_type)(::SireMol::SelectResult const &, ::QString const &, ::SireBase::PropertyMap const &);
+        setGromacsWater_function_type setGromacsWater_function_value(&::SireIO::setGromacsWater);
+
+        bp::def(
+            "setGromacsWater", setGromacsWater_function_value, (bp::arg("molecules"), bp::arg("model"), bp::arg("map") = SireBase::PropertyMap()), "Set all water molecules in the passed system to the appropriate GROMACS\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated water topology.\n\n");
     }
 
     { //::SireIO::updateAndPreserveOrder
-    
-        typedef ::SireSystem::System ( *updateAndPreserveOrder_function_type )( ::SireSystem::System const &,::SireMol::Molecule const &,unsigned int );
-        updateAndPreserveOrder_function_type updateAndPreserveOrder_function_value( &::SireIO::updateAndPreserveOrder );
-        
-        bp::def( 
-            "updateAndPreserveOrder"
-            , updateAndPreserveOrder_function_value
-            , ( bp::arg("system"), bp::arg("molecule"), bp::arg("index") )
-            , "Update a molecule in the system with a different UUID while\npreserving the molecular ordering. Normally we would need to\ndelete and re-add the molecule, which would place it at the\nend, even if the MolNum was unchanged.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am molecule\nThe updated molecule.\n\nPar:am index\nThe index of the molecule in the system.\n\nRetval: system\nThe system with renumbered constituents.\n" );
-    
-    }
 
-    { //::SireIO::updateCoordinatesAndVelocities
-    
-        typedef ::boost::tuples::tuple< SireSystem::System, QHash< SireMol::MolIdx, SireMol::MolIdx >, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( *updateCoordinatesAndVelocities_function_type )( ::SireSystem::System const &,::SireSystem::System const &,::QHash< SireMol::MolIdx, SireMol::MolIdx > const &,bool const,::SireBase::PropertyMap const &,::SireBase::PropertyMap const & );
-        updateCoordinatesAndVelocities_function_type updateCoordinatesAndVelocities_function_value( &::SireIO::updateCoordinatesAndVelocities );
-        
-        bp::def( 
-            "updateCoordinatesAndVelocities"
-            , updateCoordinatesAndVelocities_function_value
-            , ( bp::arg("system0"), bp::arg("system1"), bp::arg("molecule_mapping"), bp::arg("is_lambda1")=(bool const)(false), bp::arg("map0")=SireBase::PropertyMap(), bp::arg("map1")=SireBase::PropertyMap() )
-            , "Update the coordinates and velocities of system0 with those from\nsystem1.\nPar:am system0\nThe reference system.\nPar:am system1\nThe updated system, where molecules may not be in the same order.\nPar:am map0\nA dictionary of user-defined molecular property names for system0.\nPar:am map1\nA dictionary of user-defined molecular property names for system1.\nRetval: system, mapping\nThe system with updated coordinates and velocities and a mapping\nbetween the molecule indices in both systems.\n" );
-    
+        typedef ::SireSystem::System (*updateAndPreserveOrder_function_type)(::SireSystem::System const &, ::SireMol::Molecule const &, unsigned int);
+        updateAndPreserveOrder_function_type updateAndPreserveOrder_function_value(&::SireIO::updateAndPreserveOrder);
+
+        bp::def(
+            "updateAndPreserveOrder", updateAndPreserveOrder_function_value, (bp::arg("system"), bp::arg("molecule"), bp::arg("index")), "Update a molecule in the system with a different UUID while\npreserving the molecular ordering. Normally we would need to\ndelete and re-add the molecule, which would place it at the\nend, even if the MolNum was unchanged.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am molecule\nThe updated molecule.\n\nPar:am index\nThe index of the molecule in the system.\n\nRetval: system\nThe system with renumbered constituents.\n");
     }
 
     { //::SireIO::updateCoordinatesAndVelocities
 
-        typedef ::boost::tuples::tuple< SireSystem::System, QHash< SireMol::MolIdx, SireMol::MolIdx >, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( *updateCoordinatesAndVelocities_function_type )( ::SireSystem::System const &,::SireSystem::System const &,::SireSystem::System const &,::QHash< SireMol::MolIdx, SireMol::MolIdx > const &,bool const,::SireBase::PropertyMap const &,::SireBase::PropertyMap const & );
-        updateCoordinatesAndVelocities_function_type updateCoordinatesAndVelocities_function_value( &::SireIO::updateCoordinatesAndVelocities );
+        typedef ::boost::tuples::tuple<SireSystem::System, QHash<SireMol::MolIdx, SireMol::MolIdx>, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type> (*updateCoordinatesAndVelocities_function_type)(::SireSystem::System const &, ::SireSystem::System const &, ::QHash<SireMol::MolIdx, SireMol::MolIdx> const &, bool const, ::SireBase::PropertyMap const &, ::SireBase::PropertyMap const &);
+        updateCoordinatesAndVelocities_function_type updateCoordinatesAndVelocities_function_value(&::SireIO::updateCoordinatesAndVelocities);
 
         bp::def(
-            "updateCoordinatesAndVelocities"
-            , updateCoordinatesAndVelocities_function_value
-            , ( bp::arg("original_system"), bp::arg("renumbered_system"), bp::arg("updated_system"), bp::arg("molecule_mapping"), bp::arg("is_lambda1")=(bool const)(false), bp::arg("map0")=SireBase::PropertyMap(), bp::arg("map1")=SireBase::PropertyMap() )
-            , "Update the coordinates and velocities of original_system with those from\nupdated_system.\n\nPar:am system_original\nThe original system.\n\nPar:am system_renumbered\nThe original system, atoms and residues have been renumbered to be\nunique and in ascending order.\n\nPar:am system_updated\nThe updated system, where molecules may not be in the same order.\n\nPar:am map0\nA dictionary of user-defined molecular property names for system0.\n\nPar:am map1\nA dictionary of user-defined molecular property names for system1.\n\nRetval: system, mapping\nThe system with updated coordinates and velocities and a mapping\nbetween the molecule indices in both systems.\n" );
-
+            "updateCoordinatesAndVelocities", updateCoordinatesAndVelocities_function_value, (bp::arg("system0"), bp::arg("system1"), bp::arg("molecule_mapping"), bp::arg("is_lambda1") = (bool const)(false), bp::arg("map0") = SireBase::PropertyMap(), bp::arg("map1") = SireBase::PropertyMap()), "Update the coordinates and velocities of system0 with those from\nsystem1.\nPar:am system0\nThe reference system.\nPar:am system1\nThe updated system, where molecules may not be in the same order.\nPar:am map0\nA dictionary of user-defined molecular property names for system0.\nPar:am map1\nA dictionary of user-defined molecular property names for system1.\nRetval: system, mapping\nThe system with updated coordinates and velocities and a mapping\nbetween the molecule indices in both systems.\n");
     }
 
-    { //::SireIO::mergeIntrascale
+    { //::SireIO::updateCoordinatesAndVelocities
 
-        typedef ::SireBase::PropertyList ( *mergeIntrascale_function_type )(
-            ::SireMM::CLJNBPairs const &,
-            ::SireMM::CLJNBPairs const &,
-            ::SireMol::MoleculeInfoData const &,
-            ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > const &,
-            ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > const & );
-        mergeIntrascale_function_type mergeIntrascale_function_value( &::SireIO::mergeIntrascale );
+        typedef ::boost::tuples::tuple<SireSystem::System, QHash<SireMol::MolIdx, SireMol::MolIdx>, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type> (*updateCoordinatesAndVelocities_function_type)(::SireSystem::System const &, ::SireSystem::System const &, ::SireSystem::System const &, ::QHash<SireMol::MolIdx, SireMol::MolIdx> const &, bool const, ::SireBase::PropertyMap const &, ::SireBase::PropertyMap const &);
+        updateCoordinatesAndVelocities_function_type updateCoordinatesAndVelocities_function_value(&::SireIO::updateCoordinatesAndVelocities);
 
         bp::def(
-            "mergeIntrascale"
-            , mergeIntrascale_function_value
-            , ( bp::arg("nb0"), bp::arg("nb1"), bp::arg("merged_info"),
-                bp::arg("mol0_merged_mapping"), bp::arg("mol1_merged_mapping") )
-            , "Merge the CLJNBPairs (intrascale) of two molecules into the end-state\n"
-              "intrascales of a perturbable merged molecule.\n"
-              "\n"
-              "Uses a two-pass approach to correctly preserve actual per-pair scale factors\n"
-              "(including GLYCAM funct=2 overrides of 1.0/1.0) without relying on global\n"
-              "forcefield scale factors. For intrascale0, nb1 is copied first (so ghost\n"
-              "atoms from mol1 get correct exclusions), then nb0 overwrites (so mapped and\n"
-              "mol0-unique atoms get correct state-0 values). intrascale1 is built with the\n"
-              "same logic in reverse.\n"
-              "\n"
-              "Returns a PropertyList [intrascale0, intrascale1].\n" );
-
+            "updateCoordinatesAndVelocities", updateCoordinatesAndVelocities_function_value, (bp::arg("original_system"), bp::arg("renumbered_system"), bp::arg("updated_system"), bp::arg("molecule_mapping"), bp::arg("is_lambda1") = (bool const)(false), bp::arg("map0") = SireBase::PropertyMap(), bp::arg("map1") = SireBase::PropertyMap()), "Update the coordinates and velocities of original_system with those from\nupdated_system.\n\nPar:am system_original\nThe original system.\n\nPar:am system_renumbered\nThe original system, atoms and residues have been renumbered to be\nunique and in ascending order.\n\nPar:am system_updated\nThe updated system, where molecules may not be in the same order.\n\nPar:am map0\nA dictionary of user-defined molecular property names for system0.\n\nPar:am map1\nA dictionary of user-defined molecular property names for system1.\n\nRetval: system, mapping\nThe system with updated coordinates and velocities and a mapping\nbetween the molecule indices in both systems.\n");
     }
 
+    { //::SireIO::patchIntrascale
+
+        typedef ::boost::tuple<::SireMM::CLJNBPairs, ::SireMM::CLJNBPairs> (*patchIntrascale_function_type)(
+            ::SireMM::CLJNBPairs const &,
+            ::SireMM::CLJNBPairs const &,
+            ::SireMM::CLJNBPairs,
+            ::SireMM::CLJNBPairs,
+            ::QHash<SireMol::AtomIdx, SireMol::AtomIdx> const &,
+            ::QHash<SireMol::AtomIdx, SireMol::AtomIdx> const &);
+        patchIntrascale_function_type patchIntrascale_function_value(&::SireIO::patchIntrascale);
+
+        bp::def(
+            "patchIntrascale", patchIntrascale_function_value,
+            (bp::arg("nb0"), bp::arg("nb1"), bp::arg("intra0"), bp::arg("intra1"),
+             bp::arg("mol0_merged_mapping"), bp::arg("mol1_merged_mapping")),
+            "Patch connectivity-derived end-state intrascale matrices with non-default\n"
+            "per-pair scale factors from the individual molecule intrascales.\n"
+            "\n"
+            "For standard AMBER molecules this is a no-op. For force fields with\n"
+            "non-default per-pair values (e.g. GLYCAM funct=2 (1,1) instead of the\n"
+            "global 1-4 scale factor) it replaces the connectivity-derived value with\n"
+            "the correct per-pair value wherever they differ.\n"
+            "\n"
+            "Returns a PropertyList [intrascale0, intrascale1].\n");
+    }
 }

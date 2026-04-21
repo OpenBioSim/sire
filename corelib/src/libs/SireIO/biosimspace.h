@@ -36,8 +36,6 @@
 
 #include "SireMaths/vector.h"
 
-#include "SireBase/propertylist.h"
-
 #include "SireMM/cljnbpairs.h"
 
 #include "SireMol/atomidxmapping.h"
@@ -393,25 +391,32 @@ namespace SireIO
         \param nb1
             The CLJNBPairs for molecule1 in its original atom index space.
 
-        \param merged_info
-            The MoleculeInfoData for the merged molecule.
+        \param intra0
+            The connectivity-derived CLJNBPairs for the lambda=0 end state,
+            built in merged-molecule atom index space. Per-pair non-default
+            values from nb0 will be applied on top.
+
+        \param intra1
+            The connectivity-derived CLJNBPairs for the lambda=1 end state.
+            Per-pair non-default values from nb1 will be applied on top.
 
         \param mol0_merged_mapping
             A hash mapping each AtomIdx in molecule0's original space to
             the corresponding AtomIdx in the merged molecule's space.
 
-        \param atom_mapping
-            The AtomIdxMapping describing how merged-molecule atom indices
-            correspond to molecule1 atom indices (used by CLJNBPairs::merge).
+        \param mol1_merged_mapping
+            A hash mapping each AtomIdx in molecule1's original space to
+            the corresponding AtomIdx in the merged molecule's space.
 
-        \retval [intrascale0, intrascale1]
-            A PropertyList containing the CLJNBPairs for the lambda=0 and
-            lambda=1 end states of the merged molecule.
+        \retval (intrascale0, intrascale1)
+            A tuple of the updated CLJNBPairs for the lambda=0 and lambda=1
+            end states of the merged molecule.
      */
-    SIREIO_EXPORT SireBase::PropertyList mergeIntrascale(
+    SIREIO_EXPORT boost::tuple<SireMM::CLJNBPairs, SireMM::CLJNBPairs> patchIntrascale(
         const SireMM::CLJNBPairs &nb0,
         const SireMM::CLJNBPairs &nb1,
-        const SireMol::MoleculeInfoData &merged_info,
+        SireMM::CLJNBPairs intra0,
+        SireMM::CLJNBPairs intra1,
         const QHash<SireMol::AtomIdx, SireMol::AtomIdx> &mol0_merged_mapping,
         const QHash<SireMol::AtomIdx, SireMol::AtomIdx> &mol1_merged_mapping);
 
@@ -430,7 +435,7 @@ SIRE_EXPOSE_FUNCTION(SireIO::updateCoordinatesAndVelocities)
 SIRE_EXPOSE_FUNCTION(SireIO::createSodiumIon)
 SIRE_EXPOSE_FUNCTION(SireIO::createChlorineIon)
 SIRE_EXPOSE_FUNCTION(SireIO::setCoordinates)
-SIRE_EXPOSE_FUNCTION(SireIO::mergeIntrascale)
+SIRE_EXPOSE_FUNCTION(SireIO::patchIntrascale)
 
 SIRE_END_HEADER
 

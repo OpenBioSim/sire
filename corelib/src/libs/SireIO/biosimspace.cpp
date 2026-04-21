@@ -28,6 +28,8 @@
 #include "biosimspace.h"
 #include "moleculeparser.h"
 
+#include <boost/tuple/tuple.hpp>
+
 #include "SireBase/getinstalldir.h"
 
 #include "SireError/errors.h"
@@ -1758,84 +1760,50 @@ namespace SireIO
         return Vector(nx, ny, nz);
     }
 
-    SireBase::PropertyList mergeIntrascale(const CLJNBPairs &nb0,
-                                           const CLJNBPairs &nb1,
-                                           const MoleculeInfoData &merged_info,
-                                           const QHash<AtomIdx, AtomIdx> &mol0_merged_mapping,
-                                           const QHash<AtomIdx, AtomIdx> &mol1_merged_mapping)
+    boost::tuple<CLJNBPairs, CLJNBPairs> patchIntrascale(const CLJNBPairs &nb0,
+                                                         const CLJNBPairs &nb1,
+                                                         CLJNBPairs intra0,
+                                                         CLJNBPairs intra1,
+                                                         const QHash<AtomIdx, AtomIdx> &mol0_merged_mapping,
+                                                         const QHash<AtomIdx, AtomIdx> &mol1_merged_mapping)
     {
-        // Helper lambda: copy scaling factors from 'nb' to 'nb_merged' according
-        // to the provided mapping. Takes nb_merged by reference to avoid copies.
-        // When copy_all is true, ALL pairs between mapped atoms are written
-        // (including the default (1,1)), so that the correct end-state values
-        // always overwrite any values set by a prior ghost-topology pass.
-        // When copy_all is false, only non-(1,1) pairs are written (sufficient
-        // for the first/ghost pass, where unset pairs default to (1,1) anyway).
-        auto copyIntrascale = [&](const CLJNBPairs &nb, CLJNBPairs &nb_merged,
-                                  const QHash<AtomIdx, AtomIdx> &mapping,
-                                  bool copy_all = false)
+        // Apply per-pair scale factors from nb to nb_merged wherever they differ
+        // from the connectivity-derived base values. For standard AMBER molecules
+        // this is a no-op. For force fields with non-default per-pair values
+        // (e.g. GLYCAM funct=2 (1,1) instead of global sf14 for 1-4 pairs)
+        // it replaces the base value with the correct per-pair value.
+        auto patch = [&](const CLJNBPairs &nb, CLJNBPairs &nb_merged,
+                         const QHash<AtomIdx, AtomIdx> &mapping)
         {
-            const int n = nb.nAtoms();
+            // Iterate only over the mapped atoms rather than all atoms in nb.
+            // This is O(k²) in the number of mapped atoms k, which is always
+            // ≤ nb.nAtoms() and can be much smaller.
+            const QList<AtomIdx> keys = mapping.keys();
+            const int k = keys.size();
 
-            for (int i = 0; i < n; ++i)
+            for (int i = 0; i < k; ++i)
             {
-                const AtomIdx ai(i);
+                const AtomIdx ai = keys.at(i);
+                const AtomIdx merged_ai = mapping.value(ai);
 
-                // Get the index of this atom in the merged system.
-                const AtomIdx merged_ai = mapping.value(ai, AtomIdx(-1));
-
-                // If this atom hasn't been mapped to the merged system, then we
-                // can skip it, as any scaling factors involving this atom will
-                // just use the default.
-                if (merged_ai == AtomIdx(-1))
-                    continue;
-
-                for (int j = i; j < n; ++j)
+                for (int j = i; j < k; ++j)
                 {
-                    const AtomIdx aj(j);
+                    const AtomIdx aj = keys.at(j);
+                    const AtomIdx merged_aj = mapping.value(aj);
 
-                    // Get the scaling factor for this pair of atoms.
-                    const CLJScaleFactor sf = nb.get(ai, aj);
+                    const CLJScaleFactor nb_sf = nb.get(ai, aj);
+                    const CLJScaleFactor base_sf = nb_merged.get(merged_ai, merged_aj);
 
-                    // Copy if this is a non-default scaling factor, or if
-                    // copy_all is set (second pass: must overwrite ghost-topology
-                    // values even when the correct end-state value is (1,1)).
-                    if (copy_all or sf.coulomb() != 1.0 or sf.lj() != 1.0)
-                    {
-                        // Get the index of the second atom in the merged system.
-                        const AtomIdx merged_aj = mapping.value(aj, AtomIdx(-1));
-
-                        // Only set the scaling factor if both atoms have been
-                        // mapped to the merged system. If one of the atoms
-                        // hasn't been mapped, then we can just use the default.
-                        if (merged_aj != AtomIdx(-1))
-                            nb_merged.set(merged_ai, merged_aj, sf);
-                    }
+                    if (nb_sf.coulomb() != base_sf.coulomb() or nb_sf.lj() != base_sf.lj())
+                        nb_merged.set(merged_ai, merged_aj, nb_sf);
                 }
             }
         };
 
-        // Create the intrascale objects for the merged end-states.
-        CLJNBPairs intra0(merged_info);
-        CLJNBPairs intra1(merged_info);
+        patch(nb0, intra0, mol0_merged_mapping);
+        patch(nb1, intra1, mol1_merged_mapping);
 
-        // Copy scaling factors from the original intrascale objects to the
-        // merged intrascale objects. For each end state, the ghost molecule's
-        // topology is written first (non-default pairs only), then the correct
-        // end-state topology overwrites with copy_all=true so that (1,1) pairs
-        // are also written. This handles ring-breaking perturbations where a
-        // pair that is excluded/1-4 in one state becomes fully interacting (1,1)
-        // in the other state and must not be left at the ghost state's value.
-        copyIntrascale(nb1, intra0, mol1_merged_mapping);
-        copyIntrascale(nb0, intra0, mol0_merged_mapping, true);
-        copyIntrascale(nb0, intra1, mol0_merged_mapping);
-        copyIntrascale(nb1, intra1, mol1_merged_mapping, true);
-
-        // Assemble the intrascale objects into a property list to return.
-        SireBase::PropertyList ret;
-        ret.append(intra0);
-        ret.append(intra1);
-        return ret;
+        return boost::make_tuple(intra0, intra1);
     }
 
 } // namespace SireIO
