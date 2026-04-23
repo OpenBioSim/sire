@@ -423,11 +423,6 @@ There are two parameters that control the softening potential:
   point number that defaults to ``1.0``, which should be good for
   most perturbations.
 
-* ``coulomb_power`` - set the ``coulomb_power`` parameter which is used
-  to control the electrostatic softening potential that smooths the
-  creation and deletion of ghost atoms. This is an integer that defaults
-  to ``0``, which should be good for most perturbations.
-
 Low level interface
 -------------------
 

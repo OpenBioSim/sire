@@ -122,10 +122,6 @@ Available keys and allowable values are listed below.
 |                              | ``bonds-h-angles-not-perturbed`` and                     |
 |                              | ``bonds-h-angles-not-heavy-perturbed                     |
 +------------------------------+----------------------------------------------------------+
-| coulomb_power                | The coulomb power parameter used by the softening        |
-|                              | potential used to soften electrostatic interactions      |
-|                              | involving ghost atoms. This defaults to 0.               |
-+------------------------------+----------------------------------------------------------+
 | cutoff                       | Size of the non-bonded cutoff, e.g.                      |
 |                              | ``7.5*sr.units.angstrom``                                |
 +------------------------------+----------------------------------------------------------+
@@ -226,14 +222,26 @@ Available keys and allowable values are listed below.
 | use_dispersion_correction    | Whether or not to use the dispersion correction to       |
 |                              | deal with cutoff issues. This is very expensive.         |
 +------------------------------+----------------------------------------------------------+
-| use_taylor_softening         | Whether or not to use the taylor algorithm to soften     |
+| beutler_alpha                | The dimensionless scale factor for the r\ :sup:`6`\      |
+|                              | shift in the Beutler softcore form, equivalent to        |
+|                              | GROMACS ``sc-alpha``. Only used when                     |
+|                              | ``use_beutler_softening`` is ``True``.                   |
+|                              | This defaults to 0.5.                                    |
++------------------------------+----------------------------------------------------------+
+| use_beutler_softening        | Whether or not to use the Beutler softcore form for      |
+|                              | ghost atom interactions. This shifts in r\ :sup:`6`\     |
+|                              | space (native to LJ) and applies an explicit             |
+|                              | ``(1 - alpha)`` prefactor, guaranteeing V → 0 at full    |
+|                              | ghosting for any separation. This defaults to False.     |
++------------------------------+----------------------------------------------------------+
+| use_taylor_softening         | Whether or not to use the Taylor algorithm to soften     |
 |                              | interactions involving ghost atoms. This defaults to     |
 |                              | False.                                                   |
 +------------------------------+----------------------------------------------------------+
-| use_zacharias_softening      | Whether or not to use the zacharias algorithm to soften  |
+| use_zacharias_softening      | Whether or not to use the Zacharias algorithm to soften  |
 |                              | interactions involving ghost atoms. This defaults to     |
-|                              | True. Note that one of zacharias or taylor softening     |
-|                              | must be True, with zacharias taking precedence.          |
+|                              | True. Note that ``use_beutler_softening`` takes          |
+|                              | precedence over both Taylor and Zacharias if set.        |
 +------------------------------+----------------------------------------------------------+
 
 Higher level API

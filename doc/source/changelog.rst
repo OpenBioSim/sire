@@ -67,6 +67,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added per-stage weights to :class:`~sire.cas.LambdaSchedule`, allowing stages to occupy unequal fractions of lambda space (e.g. ``add_morph_stage("morph", weight=2.0)``).
 
+* Added Buetler soft-core potential for alchemical transformations.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 

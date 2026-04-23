@@ -352,14 +352,13 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
     }
 
     const auto energy_expression = QString(
-        "e_total;"
-        "e_total = rho * e_morse + e_repulsion;"
-        "e_morse = de * (1 - exp(-alpha * delta))^2;"
-        "e_repulsion = e_rep * (r_sigma / r)^r_pow;"
-        "alpha = sqrt(k / (2 * de));"
-        "delta = (r - r0)")
-        .toStdString();
-
+                                       "e_total;"
+                                       "e_total = rho * e_morse + e_repulsion;"
+                                       "e_morse = de * (1 - exp(-alpha * delta))^2;"
+                                       "e_repulsion = e_rep * (r_sigma / r)^r_pow;"
+                                       "alpha = sqrt(k / (2 * de));"
+                                       "delta = (r - r0)")
+                                       .toStdString();
 
     auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
     restraintff->setName("MorsePotentialRestraintForce");
@@ -1361,29 +1360,25 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             use_taylor_softening = not map["use_zacharias_softening"].value().asABoolean();
         }
 
-        int coulomb_power = 0;
+        // use_beutler_softening overrides taylor/zacharias if set
+        bool use_beutler_softening = false;
 
-        if (map.specified("coulomb_power"))
+        if (map.specified("use_beutler_softening"))
         {
-            coulomb_power = map["coulomb_power"].value().asAnInteger();
+            use_beutler_softening = map["use_beutler_softening"].value().asABoolean();
         }
 
-        if (coulomb_power < 0)
-            coulomb_power = 0;
-        else if (coulomb_power > 4)
-            coulomb_power = 4;
+        // Beutler sc-alpha: dimensionless scale factor for the r^6 shift,
+        // equivalent to GROMACS sc-alpha (default 0.5)
+        double beutler_alpha = 0.5;
 
-        auto coulomb_power_expression = [](const QString &alpha, int power)
+        if (map.specified("beutler_alpha"))
         {
-            if (power == 0)
-                return QString("1");
-            else if (power == 1)
-                return QString("(1-%1)").arg(alpha);
-            else if (power == 2)
-                return QString("(1-%1)*(1-%1)").arg(alpha);
-            else
-                return QString("(1-%1)^%2").arg(alpha).arg(power);
-        };
+            beutler_alpha = map["beutler_alpha"].value().asADouble();
+        }
+
+        if (beutler_alpha < 0.0)
+            beutler_alpha = 0.0;
 
         auto taylor_power_expression = [](const QString &alpha, int power)
         {
@@ -1400,15 +1395,38 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // see below for the description of this energy expression
         std::string nb14_expression, clj_expression;
 
-        if (use_taylor_softening)
+        if (use_beutler_softening)
+        {
+            // Beutler et al., Chem. Phys. Lett., 1994
+            // Shifts in r^6 space (native to LJ), with an explicit (1-alpha)
+            // prefactor that guarantees V -> 0 at alpha=1 for any separation.
+            //
+            //   V_{LJ}(r) = (1-alpha) * 4 epsilon [
+            //                 sigma^12 / (beutler_alpha*sigma^6*alpha + r^6)^2
+            //               - sigma^6  / (beutler_alpha*sigma^6*alpha + r^6) ]
+            //
+            //   V_{coul}(r) = q_i q_j / 4 pi eps_0 (delta + r^2)^(1/2)
+            //
+            //   delta = shift_coulomb^2 * alpha
+            //
+            nb14_expression = QString(
+                                  "coul_nrg+lj_nrg;"
+                                  "coul_nrg=138.9354558466661*q*((1/sqrt((%1*alpha)+r_safe^2))-(kappa/r_safe));"
+                                  "lj_nrg=(1-alpha)*four_epsilon*sig6*(sig6-1);"
+                                  "sig6=(sigma^6)/(%2*sigma^6*alpha + r_safe^6);"
+                                  "r_safe=max(r, 0.001);")
+                                  .arg(shift_coulomb)
+                                  .arg(beutler_alpha)
+                                  .toStdString();
+        }
+        else if (use_taylor_softening)
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r_safe^2))-(kappa/r_safe));"
+                                  "coul_nrg=138.9354558466661*q*((1/sqrt((%1*alpha)+r_safe^2))-(kappa/r_safe));"
                                   "lj_nrg=four_epsilon*sig6*(sig6-1);"
-                                  "sig6=(sigma^6)/(%3*sigma^6 + r_safe^6);"
+                                  "sig6=(sigma^6)/(%2*sigma^6 + r_safe^6);"
                                   "r_safe=max(r, 0.001);")
-                                  .arg(coulomb_power_expression("alpha", coulomb_power))
                                   .arg(shift_coulomb)
                                   .arg(taylor_power_expression("alpha", taylor_power))
                                   .toStdString();
@@ -1417,12 +1435,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r_safe^2))-(kappa/r_safe));"
+                                  "coul_nrg=138.9354558466661*q*((1/sqrt((%1*alpha)+r_safe^2))-(kappa/r_safe));"
                                   "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                   "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
                                   "r_safe=max(r, 0.001);"
-                                  "delta=%3*alpha;")
-                                  .arg(coulomb_power_expression("alpha", coulomb_power))
+                                  "delta=%2*alpha;")
                                   .arg(shift_coulomb)
                                   .arg(shift_delta.to(SireUnits::nanometer))
                                   .toStdString();
@@ -1441,77 +1458,90 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // periodic boundaries or cutoffs
         ghost_14ff->setUsesPeriodicBoundaryConditions(false);
 
-        if (use_taylor_softening)
+        if (use_beutler_softening)
         {
-            // this uses the following potentials
-            //            Zacharias and McCammon, J. Chem. Phys., 1994, and also,
-            //            Michel et al., JCTC, 2007
-            //            LJ is Rich Taylor's softcore LJ
+            // Beutler et al., Chem. Phys. Lett., 1994
+            // Shifts in r^6 space (native to LJ), with an explicit (1-alpha)
+            // prefactor that guarantees V -> 0 at alpha=1 for any separation.
+            // alpha = max(alpha1, alpha2) for the pair.
             //
-            //   V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
-            //                           (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
+            //   V_{LJ}(r) = (1-alpha) * 4 epsilon [
+            //                 sigma^12 / (beutler_alpha*sigma^6*alpha + r^6)^2
+            //               - sigma^6  / (beutler_alpha*sigma^6*alpha + r^6) ]
             //
-            //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (delta+r^2)^(1/2)
+            //   V_{coul}(r) = q_i q_j / 4 pi eps_0 (delta + r^2)^(1/2)
             //
             //   delta = shift_coulomb^2 * alpha
-            //
-            // Note that we supply half_sigma and two_sqrt_epsilon to save some
-            // cycles
-            //
-            // Note also that we subtract the normal coulomb energy as this
-            // is calculated during the standard NonbondedForce
             //
             // 138.9354558466661 is the constant needed to get energies in
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
-                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
-                                     "sig6=(sigma^6)/(%3*sigma^6 + r_safe^6);"
+                                     "coul_nrg=138.9354558466661*q1*q2*((1/sqrt((%1*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
+                                     "lj_nrg=(1-max_alpha)*two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
+                                     "sig6=(sigma^6)/(%2*sigma^6*max_alpha + r_safe^6);"
                                      "r_safe=max(r, 0.001);"
                                      "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
-                                 .arg(coulomb_power_expression("max_alpha", coulomb_power))
+                                 .arg(shift_coulomb)
+                                 .arg(beutler_alpha)
+                                 .toStdString();
+        }
+        else if (use_taylor_softening)
+        {
+            // Zacharias and McCammon, J. Chem. Phys., 1994
+            // Michel et al., JCTC, 2007
+            // LJ is Rich Taylor's softcore LJ
+            //
+            //   V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
+            //                           (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
+            //
+            //   V_{coul}(r) = q_i q_j / 4 pi eps_0 (delta+r^2)^(1/2)
+            //
+            //   delta = shift_coulomb^2 * alpha
+            //
+            // 138.9354558466661 is the constant needed to get energies in
+            // kJ mol-1 given the units of charge (|e|) and distance (nm)
+            //
+            clj_expression = QString("coul_nrg+lj_nrg;"
+                                     "coul_nrg=138.9354558466661*q1*q2*((1/sqrt((%1*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
+                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
+                                     "sig6=(sigma^6)/(%2*sigma^6 + r_safe^6);"
+                                     "r_safe=max(r, 0.001);"
+                                     "max_kappa=max(kappa1, kappa2);"
+                                     "max_alpha=max(alpha1, alpha2);"
+                                     "sigma=half_sigma1+half_sigma2;")
                                  .arg(shift_coulomb)
                                  .arg(taylor_power_expression("max_alpha", taylor_power))
                                  .toStdString();
         }
         else
         {
-            // this uses the following potentials
-            //            Zacharias and McCammon, J. Chem. Phys., 1994, and also,
-            //            Michel et al., JCTC, 2007
+            // Zacharias and McCammon, J. Chem. Phys., 1994
+            // Michel et al., JCTC, 2007
             //
             //   V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) -
             //                           ( sigma^6  / (delta*sigma + r^2)^3 ) ]
             //
             //   delta = shift_delta * alpha
             //
-            //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (delta+r^2)^(1/2)
+            //   V_{coul}(r) = q_i q_j / 4 pi eps_0 (delta+r^2)^(1/2)
             //
             //   delta = shift_coulomb^2 * alpha
-            //
-            // Note that we pre-calculate delta as a forcefield parameter,
-            // and also supply half_sigma and two_sqrt_epsilon to save some
-            // cycles
-            //
-            // Note also that we subtract the normal coulomb energy as this
-            // is calculated during the standard NonbondedForce
             //
             // 138.9354558466661 is the constant needed to get energies in
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
+                                     "coul_nrg=138.9354558466661*q1*q2*((1/sqrt((%1*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
                                      "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
-                                     "delta=%3*max_alpha;"
+                                     "delta=%2*max_alpha;"
                                      "r_safe=max(r, 0.001);"
                                      "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
-                                 .arg(coulomb_power_expression("max_alpha", coulomb_power))
                                  .arg(shift_coulomb)
                                  .arg(shift_delta.to(SireUnits::nanometer))
                                  .toStdString();

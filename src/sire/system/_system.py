@@ -440,10 +440,6 @@ class System:
             creation and deletion of ghost atoms during a potential.
             This defaults to 2.0 A.
 
-        coulomb_power: int
-            The coulomb power parmeter that controls the electrostatic
-            softening potential that smooths the creation and deletion
-            of ghost atoms during a potential. This defaults to 0.
 
         vacuum: bool
             Whether or not to run the simulation in vacuum. If this is
@@ -626,10 +622,6 @@ class System:
             creation and deletion of ghost atoms during a potential.
             This defaults to 2.0 A.
 
-        coulomb_power: int
-            The coulomb power parmeter that controls the electrostatic
-            softening potential that smooths the creation and deletion
-            of ghost atoms during a potential. This defaults to 0.
 
         restraints: sire.mm.Restraints or list[sire.mm.Restraints]
             A single set of restraints, or a list of sets of
@@ -948,7 +940,7 @@ class System:
 
         if trajectory.what() != "SireMaths::EnergyTrajectory":
             raise TypeError(
-                f"You cannot set a {type(trajectory)} as an " "energy trajectory!"
+                f"You cannot set a {type(trajectory)} as an energy trajectory!"
             )
 
         self._system.set_property(traj_propname.source(), trajectory)

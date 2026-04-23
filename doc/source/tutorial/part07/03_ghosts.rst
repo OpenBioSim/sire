@@ -103,10 +103,6 @@ The soft-core parameters are:
   state, and 1 in the perturbed state. These values can be perturbed
   via the ``alpha`` lever in the λ-schedule.
 
-* ``n`` is the "coulomb power", and is set to 0 by default. It can be
-  any integer between 0 and 4. It is set via ``coulomb_power`` map
-  parameter.
-
 * ``shift_coulomb`` and ``shift_LJ`` are the so-called "shift delta"
   parameters, which are specified individually for the coulomb and LJ\
   potentials. They are set via the ``shift_coulomb`` and ``shift_delta``
@@ -169,10 +165,6 @@ The soft-core parameters are:
   any integer between 0 and 4. It is set via ``taylor_power`` map
   parameter.
 
-* ``n`` is the "coulomb power", and is set to 0 by default. It can be
-  any integer between 0 and 4. It is set via ``coulomb_power`` map
-  parameter.
-
 * ``shift_coulomb`` is the so-called "shift delta"
   parameters, which are specified only for the coulomb
   potential. This is set via the ``shift_coulomb``
@@ -186,6 +178,74 @@ The soft-core parameters are:
   ``kappa`` lever in the λ-schedule, e.g. if you want to decouple the
   intramolecular electrostatic interactions, when the "hard" interaction
   would not be calculated in the NonbondedForce.
+
+Beutler softening
+-----------------
+
+This is the recommended soft-core potential for absolute binding free energy
+(ABFE) calculations. You can use it by setting the map option
+``use_beutler_softening`` to True.
+
+It is based on the Beutler et al. (Chem. Phys. Lett., 1994) form, and uses
+the following electrostatic and Lennard-Jones potentials:
+
+.. math::
+
+   V_{\text{elec}}(r) = q_i q_j \left[ \frac{1}{\sqrt{r^2 + \delta^2}} - \frac{\kappa}{r} \right]
+
+   V_{\text{LJ}}(r) = (1 - \alpha) \cdot 4\epsilon \left[ \frac{\sigma^{12}}{(\alpha_\text{sc}\,\sigma^6\,\alpha + r^6)^2} - \frac{\sigma^6}{\alpha_\text{sc}\,\sigma^6\,\alpha + r^6} \right]
+
+where
+
+.. math::
+
+    \delta = \alpha \times \text{shift\_coulomb}
+
+and
+
+.. math::
+
+   \alpha = \max(\alpha_i, \alpha_j)
+
+   \kappa = \max(\kappa_i, \kappa_j)
+
+The parameters ``r``, ``q_i``, ``q_j``, ``\epsilon``, and ``\sigma``
+are the standard parameters for the electrostatic and Lennard-Jones
+potentials.
+
+The key properties of this form are:
+
+* The shift ``\alpha_\text{sc}\,\sigma^6\,\alpha`` is in r\ :sup:`6` space,
+  which is native to the LJ potential. This means that at full ghosting
+  (α = 1, r = 0), the effective r\ :sup:`6` is ``α_sc σ^6`` and the LJ
+  energy approaches zero cleanly.
+
+* The explicit ``(1 - α)`` prefactor guarantees V → 0 at α = 1 for **any**
+  atom separation, independently of the shift term. This eliminates the
+  variance spike in the final lambda windows that occurs with Zacharias
+  softening in ABFE simulations.
+
+The soft-core parameters are:
+
+* ``α_i`` and ``α_j`` control the amount of "softening". A value of 0 means
+  no softening (fully hard), while a value of 1 means fully soft. For a
+  disappearing molecule in ABFE, α = max(α_i, α_j) ramps from 0 to 1 through
+  the LJ stage of the lambda schedule.
+
+* ``α_sc`` (``beutler_alpha``) is a dimensionless scale factor for the
+  r\ :sup:`6` shift, equivalent to GROMACS ``sc-alpha``. It defaults to 0.5,
+  matching the GROMACS default. Larger values give stronger endpoint protection
+  at the cost of higher variance early in the LJ stage.
+
+* ``shift_coulomb`` controls the electrostatic softening. It is set via the
+  ``shift_coulomb`` map parameter and defaults to 1 Å.
+
+* ``κ_i`` and ``κ_j`` are the "hard" electrostatic parameters,
+  which control whether or not to calculate the "hard" electrostatic
+  interaction to subtract from the total energy and force (thus cancelling
+  out the double-counting of this interaction from the NonbondedForce).
+  By default, these are always equal to 1. You can perturb these via the
+  ``kappa`` lever in the λ-schedule.
 
 Good practice
 -------------

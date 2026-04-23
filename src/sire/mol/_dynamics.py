@@ -1613,7 +1613,6 @@ class Dynamics:
         ignore_perturbations=None,
         shift_delta=None,
         shift_coulomb=None,
-        coulomb_power=None,
         restraints=None,
         fixed=None,
         qm_engine=None,
@@ -1643,7 +1642,6 @@ class Dynamics:
         if shift_coulomb is not None:
             _add_extra(extras, "shift_coulomb", u(shift_coulomb))
 
-        _add_extra(extras, "coulomb_power", coulomb_power)
         _add_extra(extras, "restraints", restraints)
         _add_extra(extras, "fixed", fixed)
         _add_extra(extras, "qm_engine", qm_engine)
