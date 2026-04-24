@@ -66,7 +66,6 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         return;
     }
 
-
     // Set up virtual site properties
 
     bool is_perturbable = false;
@@ -93,7 +92,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
     if (mol.hasProperty("n_virtual_sites") and mol.property("n_virtual_sites").asAnInteger() > 0)
     {
-        this->has_vs = true; 
+        this->has_vs = true;
         this->vs_parents = mol.property("parents").asA<SireBase::Properties>();
         this->vs_properties = mol.property("virtual_sites").asA<SireBase::Properties>();
         this->n_vs = mol.property("n_virtual_sites").asAnInteger();
@@ -106,7 +105,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
             this->vs_charges = mol.property("vs_charges").asAnArray();
         }
     }
-    else 
+    else
     {
         this->has_vs = false;
     }
@@ -2241,8 +2240,6 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
             }
         }
     }
-
-
 }
 
 void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v) const
@@ -2764,7 +2761,7 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
                 sig0[i] = sig1_data[i];
                 sig0_data = sig0.constData();
             }
-            else if (std::abs(sig1_data[i] <= 1e-9))
+            else if (std::abs(sig1_data[i]) <= 1e-9)
             {
                 sig1[i] = sig0_data[i];
                 sig1_data = sig1.constData();
