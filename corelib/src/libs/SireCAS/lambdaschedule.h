@@ -120,22 +120,26 @@ namespace SireCAS
         double getLambdaInStage(double lambda_value) const;
 
         void addStage(const QString &stage,
-                      const SireCAS::Expression &equation);
+                      const SireCAS::Expression &equation,
+                      double weight = 1.0);
 
         void prependStage(const QString &stage,
-                          const SireCAS::Expression &equation);
+                          const SireCAS::Expression &equation,
+                          double weight = 1.0);
 
         void appendStage(const QString &stage,
-                         const SireCAS::Expression &equation);
+                         const SireCAS::Expression &equation,
+                         double weight = 1.0);
 
         void insertStage(int i,
                          const QString &stage,
-                         const SireCAS::Expression &equation);
+                         const SireCAS::Expression &equation,
+                         double weight = 1.0);
 
         void removeStage(const QString &stage);
 
         void addMorphStage();
-        void addMorphStage(const QString &name);
+        void addMorphStage(const QString &name, double weight = 1.0);
 
         void addChargeScaleStages(double scale = 0.2);
         void addChargeScaleStages(const QString &decharge_name,
@@ -143,10 +147,16 @@ namespace SireCAS
                                   double scale = 0.2);
 
         void addDecoupleStage(bool perturbed_is_decoupled = true);
-        void addDecoupleStage(const QString &name, bool perturbed_is_decoupled = true);
+        void addDecoupleStage(const QString &name, bool perturbed_is_decoupled = true,
+                              double weight = 1.0);
 
         void addAnnihilateStage(bool perturbed_is_annihilated = true);
-        void addAnnihilateStage(const QString &name, bool perturbed_is_annihilated = true);
+        void addAnnihilateStage(const QString &name, bool perturbed_is_annihilated = true,
+                                double weight = 1.0);
+
+        void setStageWeight(const QString &stage, double weight);
+        double getStageWeight(const QString &stage) const;
+        QVector<double> getStageWeights() const;
 
         void setDefaultStageEquation(const QString &stage,
                                      const SireCAS::Expression &equation);
@@ -253,6 +263,11 @@ namespace SireCAS
         /** Any over-ridden equations for a particular lever in a
             particular stage */
         QVector<QHash<QString, SireCAS::Expression>> stage_equations;
+
+        /** The relative weight of each stage in lambda space (default 1.0).
+            A stage with weight 2 occupies twice the lambda range of one
+            with weight 1. */
+        QVector<double> stage_weights;
 
         /** Coupled lever fallbacks: if a lever (force::lever) has no custom
             equation set, use the equation for the paired lever instead of
