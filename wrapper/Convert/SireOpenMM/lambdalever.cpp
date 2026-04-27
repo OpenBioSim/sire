@@ -1925,14 +1925,17 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // update the parameters in the context for forces whose parameters changed
     if (has_changed_cljff)
     {
+        if (ghost_ghostff or ghost_nonghostff)
+            context.setParameter("lambda", std::round(lambda_value * 1e5) / 1e5);
+
         if (cljff)
-            cljff->updateParametersInContext(context);
+            cljff->updateParametersInContext(context, true);
 
         if (ghost_ghostff)
-            ghost_ghostff->updateParametersInContext(context);
+            ghost_ghostff->updateParametersInContext(context, true);
 
         if (ghost_nonghostff)
-            ghost_nonghostff->updateParametersInContext(context);
+            ghost_nonghostff->updateParametersInContext(context, true);
     }
 
     if (ghost_14ff and has_changed_ghost14ff)

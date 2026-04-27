@@ -352,14 +352,13 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
     }
 
     const auto energy_expression = QString(
-        "e_total;"
-        "e_total = rho * e_morse + e_repulsion;"
-        "e_morse = de * (1 - exp(-alpha * delta))^2;"
-        "e_repulsion = e_rep * (r_sigma / r)^r_pow;"
-        "alpha = sqrt(k / (2 * de));"
-        "delta = (r - r0)")
-        .toStdString();
-
+                                       "e_total;"
+                                       "e_total = rho * e_morse + e_repulsion;"
+                                       "e_morse = de * (1 - exp(-alpha * delta))^2;"
+                                       "e_repulsion = e_rep * (r_sigma / r)^r_pow;"
+                                       "alpha = sqrt(k / (2 * de));"
+                                       "delta = (r - r0)")
+                                       .toStdString();
 
     auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
     restraintff->setName("MorsePotentialRestraintForce");
@@ -1527,15 +1526,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_ghostff->addPerParticleParameter("two_sqrt_epsilon");
         ghost_ghostff->addPerParticleParameter("alpha");
         ghost_ghostff->addPerParticleParameter("kappa");
+        ghost_ghostff->addGlobalParameter("lambda", 0.00000);
 
         ghost_nonghostff->addPerParticleParameter("q");
         ghost_nonghostff->addPerParticleParameter("half_sigma");
         ghost_nonghostff->addPerParticleParameter("two_sqrt_epsilon");
         ghost_nonghostff->addPerParticleParameter("alpha");
         ghost_nonghostff->addPerParticleParameter("kappa");
+        ghost_nonghostff->addGlobalParameter("lambda", 0.00000);
 
-        // this will be slow if switched on, as it needs recalculating
-        // for every change in parameters
         ghost_ghostff->setUseLongRangeCorrection(use_dispersion_correction);
         ghost_nonghostff->setUseLongRangeCorrection(use_dispersion_correction);
 
