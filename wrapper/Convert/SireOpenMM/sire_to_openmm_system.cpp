@@ -1555,9 +1555,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // (proportional to int r^2 * 1/r^3 dr = int 1/r dr) log-divergent.
         ghost_ghost_coulombff->setUseLongRangeCorrection(false);
         ghost_nonghost_coulombff->setUseLongRangeCorrection(false);
-        // LJ soft-core decays as 1/r^6, so LRC is well-defined.
-        ghost_ghost_ljff->setUseLongRangeCorrection(use_dispersion_correction);
-        ghost_nonghost_ljff->setUseLongRangeCorrection(use_dispersion_correction);
+        // LJ soft-core LRC is handled analytically via a CustomVolumeForce
+        // rather than OpenMM's numerical integrator, because the standard
+        // LJ tail (r > rc, soft-core shift negligible) has a closed-form
+        // expression and this allows the result to be cached per lambda state.
+        ghost_ghost_ljff->setUseLongRangeCorrection(false);
+        ghost_nonghost_ljff->setUseLongRangeCorrection(false);
 
         if (ffinfo.hasCutoff())
         {
@@ -1600,6 +1603,17 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_nonghost_ljff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost/non-ghost-lj", system.addForce(ghost_nonghost_ljff));
         lambda_lever.setForceGroup("ghost/non-ghost-lj", force_group_counter++);
+
+        // Analytic LJ LRC: E = lrc_coeff / V, updated each lambda step via
+        // a cached closed-form sum over interaction-group pairs.
+        if (use_dispersion_correction && ffinfo.hasCutoff() && ffinfo.space().isPeriodic())
+        {
+            auto ghost_lrc_ff = new OpenMM::CustomVolumeForce("lrc_coeff/v");
+            ghost_lrc_ff->addGlobalParameter("lrc_coeff", 0.0);
+            ghost_lrc_ff->setForceGroup(force_group_counter);
+            lambda_lever.setForceIndex("ghost-lrc", system.addForce(ghost_lrc_ff));
+            lambda_lever.setForceGroup("ghost-lrc", force_group_counter++);
+        }
 
         ghost_14ff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost-14", system.addForce(ghost_14ff));

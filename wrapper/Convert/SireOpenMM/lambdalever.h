@@ -214,6 +214,11 @@ namespace SireOpenMM
          *  so we can detect when it actually changes. Initialised to -1 as a
          *  sentinel meaning "never been set". */
         mutable double last_qmff_lam;
+
+        /** Cache of pre-computed ghost LJ dispersion coefficients keyed by
+         *  rounded lambda (qRound64(lambda * 1e5)).  Populated on first visit
+         *  to each lambda state and reused on warm passes. */
+        mutable QHash<qint64, double> lrc_coeff_cache;
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTION
@@ -240,6 +245,12 @@ namespace SireOpenMM
     inline QString _get_typename<OpenMM::CustomCVForce>()
     {
         return "OpenMM::CustomCVForce";
+    }
+
+    template <>
+    inline QString _get_typename<OpenMM::CustomVolumeForce>()
+    {
+        return "OpenMM::CustomVolumeForce";
     }
 
     template <>
