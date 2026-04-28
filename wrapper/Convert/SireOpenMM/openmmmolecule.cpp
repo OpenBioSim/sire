@@ -1490,7 +1490,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                                             CODELOC);
 
     this->alphas = QVector<double>(cljs.count(), 0.0);
-    this->kappas = QVector<double>(cljs.count(), 1.0);
+    this->kappas = QVector<double>(cljs.count(), 0.0);
     this->perturbed->alphas = this->alphas;
     this->perturbed->kappas = this->kappas;
 
