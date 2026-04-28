@@ -1934,7 +1934,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     // update the parameters in the context for forces whose parameters changed
     if (has_changed_cljff and cljff)
-        cljff->updateParametersInContext(context, true);
+        cljff->updateParametersInContext(context);
 
     if (has_changed_coulombff or has_changed_ljff)
     {
