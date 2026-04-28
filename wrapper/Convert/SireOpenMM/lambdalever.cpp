@@ -1291,8 +1291,10 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // get copies of the forcefields in which the parameters will be changed
     auto qmff = this->getForce<QMForce>("qmff", system);
     auto cljff = this->getForce<OpenMM::NonbondedForce>("clj", system);
-    auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
-    auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
+    auto ghost_ghost_coulombff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost-coulomb", system);
+    auto ghost_ghost_ljff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost-lj", system);
+    auto ghost_nonghost_coulombff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost-coulomb", system);
+    auto ghost_nonghost_ljff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost-lj", system);
     auto ghost_14ff = this->getForce<OpenMM::CustomBondForce>("ghost-14", system);
     auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
     auto angff = this->getForce<OpenMM::HarmonicAngleForce>("angle", system);
@@ -1300,7 +1302,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     auto cmapff = this->getForce<OpenMM::CMAPTorsionForce>("cmap", system);
 
     // we know if we have peturbable ghost atoms if we have the ghost forcefields
-    const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
+    const bool have_ghost_atoms = (ghost_ghost_ljff != 0 or ghost_nonghost_ljff != 0);
 
     // whether the constraints have changed
     bool have_constraints_changed = false;
@@ -1320,6 +1322,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // track whether parameters actually changed for each force, so we only
     // call updateParametersInContext when necessary
     bool has_changed_cljff = false;
+    bool has_changed_coulombff = false;
+    bool has_changed_ljff = false;
     bool has_changed_ghost14ff = false;
     bool has_changed_bondff = false;
     bool has_changed_angff = false;
@@ -1491,7 +1495,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             const int nparams = morphed_charges.count();
 
             // Detect whether any CLJ or ghost-14 parameters changed
-            has_changed_cljff |= rest2_changed || cache.hasChanged("clj", "charge") || cache.hasChanged("clj", "sigma") || cache.hasChanged("clj", "epsilon") || cache.hasChanged("clj", "alpha") || cache.hasChanged("clj", "kappa") || cache.hasChanged("clj", "charge_scale") || cache.hasChanged("clj", "lj_scale") || cache.hasChanged("ghost/ghost", "charge") || cache.hasChanged("ghost/ghost", "sigma") || cache.hasChanged("ghost/ghost", "epsilon") || cache.hasChanged("ghost/ghost", "alpha") || cache.hasChanged("ghost/ghost", "kappa") || cache.hasChanged("ghost/non-ghost", "charge") || cache.hasChanged("ghost/non-ghost", "sigma") || cache.hasChanged("ghost/non-ghost", "epsilon") || cache.hasChanged("ghost/non-ghost", "alpha") || cache.hasChanged("ghost/non-ghost", "kappa");
+            has_changed_cljff |= rest2_changed || cache.hasChanged("clj", "charge") || cache.hasChanged("clj", "sigma") || cache.hasChanged("clj", "epsilon") || cache.hasChanged("clj", "alpha") || cache.hasChanged("clj", "kappa") || cache.hasChanged("clj", "charge_scale") || cache.hasChanged("clj", "lj_scale");
+
+            has_changed_coulombff |= rest2_changed || cache.hasChanged("ghost/ghost", "charge") || cache.hasChanged("ghost/ghost", "alpha") || cache.hasChanged("ghost/ghost", "kappa") || cache.hasChanged("ghost/non-ghost", "charge") || cache.hasChanged("ghost/non-ghost", "alpha") || cache.hasChanged("ghost/non-ghost", "kappa");
+
+            has_changed_ljff |= rest2_changed || cache.hasChanged("ghost/ghost", "sigma") || cache.hasChanged("ghost/ghost", "epsilon") || cache.hasChanged("ghost/ghost", "alpha") || cache.hasChanged("ghost/non-ghost", "sigma") || cache.hasChanged("ghost/non-ghost", "epsilon") || cache.hasChanged("ghost/non-ghost", "alpha");
 
             has_changed_ghost14ff |= rest2_changed || cache.hasChanged("ghost-14", "charge") || cache.hasChanged("ghost-14", "sigma") || cache.hasChanged("ghost-14", "epsilon") || cache.hasChanged("ghost-14", "alpha") || cache.hasChanged("ghost-14", "kappa") || cache.hasChanged("ghost-14", "charge_scale") || cache.hasChanged("ghost-14", "lj_scale");
 
@@ -1535,7 +1543,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     else if (custom_params[4] > 1)
                         custom_params[4] = 1;
 
-                    ghost_ghostff->setParticleParameters(start_index + j, custom_params);
+                    ghost_ghost_coulombff->setParticleParameters(start_index + j, custom_params);
+                    ghost_ghost_ljff->setParticleParameters(start_index + j, custom_params);
 
                     // reduced charge
                     custom_params[0] = sqrt_scale * morphed_nonghost_charges[j];
@@ -1560,7 +1569,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     else if (custom_params[4] > 1)
                         custom_params[4] = 1;
 
-                    ghost_nonghostff->setParticleParameters(start_index + j, custom_params);
+                    ghost_nonghost_coulombff->setParticleParameters(start_index + j, custom_params);
+                    ghost_nonghost_ljff->setParticleParameters(start_index + j, custom_params);
 
                     if (is_from_ghost or is_to_ghost)
                     {
@@ -1923,19 +1933,30 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     }
 
     // update the parameters in the context for forces whose parameters changed
-    if (has_changed_cljff)
+    if (has_changed_cljff and cljff)
+        cljff->updateParametersInContext(context, true);
+
+    if (has_changed_coulombff or has_changed_ljff)
     {
-        if (ghost_ghostff or ghost_nonghostff)
+        // Update the lambda cache key before any ghost force updateParametersInContext.
+        if (ghost_ghost_ljff or ghost_nonghost_ljff)
             context.setParameter("lambda", std::round(lambda_value * 1e5) / 1e5);
 
-        if (cljff)
-            cljff->updateParametersInContext(context, true);
+        if (has_changed_coulombff)
+        {
+            if (ghost_ghost_coulombff)
+                ghost_ghost_coulombff->updateParametersInContext(context, true);
+            if (ghost_nonghost_coulombff)
+                ghost_nonghost_coulombff->updateParametersInContext(context, true);
+        }
 
-        if (ghost_ghostff)
-            ghost_ghostff->updateParametersInContext(context, true);
-
-        if (ghost_nonghostff)
-            ghost_nonghostff->updateParametersInContext(context, true);
+        if (has_changed_ljff)
+        {
+            if (ghost_ghost_ljff)
+                ghost_ghost_ljff->updateParametersInContext(context, true);
+            if (ghost_nonghost_ljff)
+                ghost_nonghost_ljff->updateParametersInContext(context, true);
+        }
     }
 
     if (ghost_14ff and has_changed_ghost14ff)
@@ -1991,8 +2012,10 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     // record which named forces had parameters changed in this call
     last_changed_forces["clj"] = has_changed_cljff;
-    last_changed_forces["ghost/ghost"] = has_changed_cljff;
-    last_changed_forces["ghost/non-ghost"] = has_changed_cljff;
+    last_changed_forces["ghost/ghost-coulomb"] = has_changed_coulombff;
+    last_changed_forces["ghost/ghost-lj"] = has_changed_ljff;
+    last_changed_forces["ghost/non-ghost-coulomb"] = has_changed_coulombff;
+    last_changed_forces["ghost/non-ghost-lj"] = has_changed_ljff;
     last_changed_forces["ghost-14"] = has_changed_ghost14ff;
     last_changed_forces["bond"] = has_changed_bondff;
     last_changed_forces["angle"] = has_changed_angff;
