@@ -1945,17 +1945,17 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         if (has_changed_coulombff)
         {
             if (ghost_ghost_coulombff)
-                ghost_ghost_coulombff->updateParametersInContext(context, true);
+                ghost_ghost_coulombff->updateParametersInContext(context);
             if (ghost_nonghost_coulombff)
-                ghost_nonghost_coulombff->updateParametersInContext(context, true);
+                ghost_nonghost_coulombff->updateParametersInContext(context);
         }
 
         if (has_changed_ljff)
         {
             if (ghost_ghost_ljff)
-                ghost_ghost_ljff->updateParametersInContext(context, true);
+                ghost_ghost_ljff->updateParametersInContext(context);
             if (ghost_nonghost_ljff)
-                ghost_nonghost_ljff->updateParametersInContext(context, true);
+                ghost_nonghost_ljff->updateParametersInContext(context);
         }
     }
 
