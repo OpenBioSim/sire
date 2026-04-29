@@ -20,7 +20,8 @@ def evaluate_xml_force(mols, xml, force):
 
     force : str
         The name of the custom force to evaluate. Options are:
-        "ghost-ghost", "ghost-nonghost", "ghost-14".
+        "ghost-ghost-lj", "ghost-ghost-coulomb",
+        "ghost-nonghost-lj", "ghost-nonghost-coulomb", "ghost-14".
 
     Returns
     -------
@@ -34,8 +35,6 @@ def evaluate_xml_force(mols, xml, force):
     nrg_lj : [sr.units.GeneralUnit]
         The Lennard-Jones energies for each atom pair.
     """
-
-    from math import sqrt
 
     import xml.etree.ElementTree as ET
     import sys
@@ -78,21 +77,28 @@ def evaluate_xml_force(mols, xml, force):
     )
 
     # Validate the force name.
-    if not force in ["ghostghost", "ghostnonghost", "ghost14"]:
+    valid = [
+        "ghostghostlj",
+        "ghostghostcoulomb",
+        "ghostnonghostlj",
+        "ghostnonghostcoulomb",
+        "ghost14",
+    ]
+    if force not in valid:
         raise ValueError(
-            "'force' must be one of 'ghost-ghost', 'ghost-nonghost', or 'ghost-14'."
+            "'force' must be one of 'ghost-ghost-lj', 'ghost-ghost-coulomb', "
+            "'ghost-nonghost-lj', 'ghost-nonghost-coulomb', or 'ghost-14'."
         )
 
-    # Create the name and index based on the force type.
-    if force == "ghostghost":
-        name = "GhostGhostNonbondedForce"
-    elif force == "ghostnonghost":
-        name = "GhostNonGhostNonbondedForce"
-    elif force == "ghost14":
-        name = "Ghost14BondForce"
-
-    # Get the root of the XML tree.
-    root = tree.getroot()
+    # Map sanitised name to the OpenMM force name in the XML.
+    _force_name_map = {
+        "ghostghostlj": "GhostGhostLJForce",
+        "ghostghostcoulomb": "GhostGhostCoulombForce",
+        "ghostnonghostlj": "GhostNonGhostLJForce",
+        "ghostnonghostcoulomb": "GhostNonGhostCoulombForce",
+        "ghost14": "Ghost14BondForce",
+    }
+    name = _force_name_map[force]
 
     # Loop over the forces until we find the named CustomNonbondedForce.
     is_found = False
@@ -163,11 +169,8 @@ def evaluate_xml_force(mols, xml, force):
             atom_i = atoms[i]
 
             # Set the parameters for this particle.
-            setattr(module, parameters[0] + "1", float(particle_i.get("param1")))
-            setattr(module, parameters[1] + "1", float(particle_i.get("param2")))
-            setattr(module, parameters[2] + "1", float(particle_i.get("param3")))
-            setattr(module, parameters[3] + "1", float(particle_i.get("param4")))
-            setattr(module, parameters[4] + "1", float(particle_i.get("param5")))
+            for k, param in enumerate(parameters):
+                setattr(module, param + "1", float(particle_i.get(f"param{k + 1}")))
 
             # Loop over particles in set2.
             for y in range(len(set2)):
@@ -190,11 +193,8 @@ def evaluate_xml_force(mols, xml, force):
                 atom_j = atoms[j]
 
                 # Set the parameters for this particle.
-                setattr(module, parameters[0] + "2", float(particle_j.get("param1")))
-                setattr(module, parameters[1] + "2", float(particle_j.get("param2")))
-                setattr(module, parameters[2] + "2", float(particle_j.get("param3")))
-                setattr(module, parameters[3] + "2", float(particle_j.get("param4")))
-                setattr(module, parameters[4] + "2", float(particle_j.get("param5")))
+                for k, param in enumerate(parameters):
+                    setattr(module, param + "2", float(particle_j.get(f"param{k + 1}")))
 
                 # Get the distance between the particles.
                 r = measure(atom_i, atom_j).to(nanometer)
@@ -239,11 +239,8 @@ def evaluate_xml_force(mols, xml, force):
             atom_j = atoms[int(bond.get("p2"))]
 
             # Set the parameters for this bond.
-            setattr(module, parameters[0], float(bond.get("param1")))
-            setattr(module, parameters[1], float(bond.get("param2")))
-            setattr(module, parameters[2], float(bond.get("param3")))
-            setattr(module, parameters[3], float(bond.get("param4")))
-            setattr(module, parameters[4], float(bond.get("param5")))
+            for k, param in enumerate(parameters):
+                setattr(module, param, float(bond.get(f"param{k + 1}")))
 
             # Get the distance between the particles.
             r = measure(atom_i, atom_j).to(nanometer)
