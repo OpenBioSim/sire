@@ -1312,9 +1312,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // whether the constraints have changed
     bool have_constraints_changed = false;
 
-    // whether any CMAP map parameters were set (tracked to defer updateParametersInContext)
-
-    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0, 0.0};
+    std::vector<double> custom_params_coul = {0.0, 0.0, 0.0};
+    std::vector<double> custom_params_lj = {0.0, 0.0, 0.0};
 
     if (qmff != 0)
     {
@@ -1526,56 +1525,68 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     }
 
                     // reduced charge
-                    custom_params[0] = sqrt_scale * morphed_ghost_charges[j];
-                    // half_sigma
-                    custom_params[1] = 0.5 * morphed_ghost_sigmas[j];
-                    // two_sqrt_epsilon
-                    custom_params[2] = 2.0 * sqrt_scale * std::sqrt(morphed_ghost_epsilons[j]);
+                    custom_params_coul[0] = sqrt_scale * morphed_ghost_charges[j];
                     // alpha
-                    custom_params[3] = morphed_ghost_alphas[j];
+                    custom_params_coul[1] = morphed_ghost_alphas[j];
                     // kappa
-                    custom_params[4] = morphed_ghost_kappas[j];
+                    custom_params_coul[2] = morphed_ghost_kappas[j];
+
+                    // half_sigma
+                    custom_params_lj[0] = 0.5 * morphed_ghost_sigmas[j];
+                    // two_sqrt_epsilon
+                    custom_params_lj[1] = 2.0 * sqrt_scale * std::sqrt(morphed_ghost_epsilons[j]);
+                    // alpha
+                    custom_params_lj[2] = morphed_ghost_alphas[j];
 
                     // clamp alpha between 0 and 1
-                    if (custom_params[3] < 0)
-                        custom_params[3] = 0;
-                    else if (custom_params[3] > 1)
-                        custom_params[3] = 1;
+                    if (custom_params_coul[1] < 0)
+                    {
+                        custom_params_coul[1] = 0;
+                        custom_params_lj[2] = 0;
+                    }
+                    else if (custom_params_coul[1] > 1)
+                    {
+                        custom_params_coul[1] = 1;
+                        custom_params_lj[2] = 1;
+                    }
 
                     // clamp kappa between 0 and 1
-                    if (custom_params[4] < 0)
-                        custom_params[4] = 0;
-                    else if (custom_params[4] > 1)
-                        custom_params[4] = 1;
+                    if (custom_params_coul[2] < 0)
+                        custom_params_coul[2] = 0;
+                    else if (custom_params_coul[2] > 1)
+                        custom_params_coul[2] = 1;
 
-                    ghost_ghost_coulombff->setParticleParameters(start_index + j, custom_params);
-                    ghost_ghost_ljff->setParticleParameters(start_index + j, custom_params);
+                    ghost_ghost_coulombff->setParticleParameters(start_index + j, custom_params_coul);
+                    ghost_ghost_ljff->setParticleParameters(start_index + j, custom_params_lj);
 
                     // reduced charge
-                    custom_params[0] = sqrt_scale * morphed_nonghost_charges[j];
-                    // half_sigma
-                    custom_params[1] = 0.5 * morphed_nonghost_sigmas[j];
-                    // two_sqrt_epsilon
-                    custom_params[2] = 2.0 * sqrt_scale * std::sqrt(morphed_nonghost_epsilons[j]);
+                    custom_params_coul[0] = sqrt_scale * morphed_nonghost_charges[j];
                     // alpha
-                    custom_params[3] = morphed_nonghost_alphas[j];
+                    custom_params_coul[1] = morphed_nonghost_alphas[j];
                     // kappa
-                    custom_params[4] = morphed_nonghost_kappas[j];
+                    custom_params_coul[2] = morphed_nonghost_kappas[j];
+
+                    // half_sigma
+                    custom_params_lj[0] = 0.5 * morphed_nonghost_sigmas[j];
+                    // two_sqrt_epsilon
+                    custom_params_lj[1] = 2.0 * sqrt_scale * std::sqrt(morphed_nonghost_epsilons[j]);
+                    // alpha
+                    custom_params_lj[2] = morphed_nonghost_alphas[j];
 
                     // clamp alpha between 0 and 1
-                    if (custom_params[3] < 0)
-                        custom_params[3] = 0;
-                    else if (custom_params[3] > 1)
-                        custom_params[3] = 1;
+                    if (custom_params_coul[1] < 0)
+                    {
+                        custom_params_coul[1] = 0;
+                        custom_params_lj[2] = 0;
+                    }
+                    else if (custom_params_coul[1] > 1)
+                    {
+                        custom_params_coul[1] = 1;
+                        custom_params_lj[2] = 1;
+                    }
 
-                    // clamp kappa between 0 and 1
-                    if (custom_params[4] < 0)
-                        custom_params[4] = 0;
-                    else if (custom_params[4] > 1)
-                        custom_params[4] = 1;
-
-                    ghost_nonghost_coulombff->setParticleParameters(start_index + j, custom_params);
-                    ghost_nonghost_ljff->setParticleParameters(start_index + j, custom_params);
+                    ghost_nonghost_coulombff->setParticleParameters(start_index + j, custom_params_coul);
+                    ghost_nonghost_ljff->setParticleParameters(start_index + j, custom_params_lj);
 
                     if (is_from_ghost or is_to_ghost)
                     {
@@ -1995,7 +2006,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             {
                 std::vector<double> p;
                 ghost_ghost_ljff->getParticleParameters(i, p);
-                ghost_params[i] = {p[1], p[2]}; // half_sigma, two_sqrt_epsilon
+                ghost_params[i] = {p[0], p[1]}; // half_sigma, two_sqrt_epsilon
             }
 
             // Cache non-ghost params.
@@ -2004,7 +2015,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             {
                 std::vector<double> p;
                 ghost_nonghost_ljff->getParticleParameters(j, p);
-                nonghost_params[j] = {p[1], p[2]};
+                nonghost_params[j] = {p[0], p[1]};
             }
 
             // ghost-ghost unique pairs (i < j).

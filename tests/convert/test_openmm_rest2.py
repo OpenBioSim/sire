@@ -91,32 +91,34 @@ def test_rest2(mols, rest2_selection, excluded_atoms, request):
     if is_perturbable:
         # Find the ghost/ghost nonbonded interaction.
         for force in omm_system.getForces():
-            if force.getName() == "GhostGhostNonbondedForce":
-                break
+            if force.getName() == "GhostGhostCoulombForce":
+                ghost_ghost_coulomb_force = force
+            elif force.getName() == "GhostGhostLJForce":
+                ghost_ghost_lj_force = force
 
         # Store the initial parameters.
         ghost_ghost_params_initial = []
         excluded_ghost_ghost_indices = []
-        for i in range(force.getNumParticles()):
-            charge, half_sigma, two_sqrt_epsilon, alpha, kappa = (
-                force.getParticleParameters(i)
-            )
+        for i in range(ghost_ghost_coulomb_force.getNumParticles()):
+            charge, _, _ = ghost_ghost_coulomb_force.getParticleParameters(i)
+            _, two_sqrt_epsilon, _ = ghost_ghost_lj_force.getParticleParameters(i)
             ghost_ghost_params_initial.append((charge, two_sqrt_epsilon))
             if i in excluded_atoms:
                 excluded_ghost_ghost_indices.append(i)
 
         # Find the ghost/non-ghost nonbonded interaction.
         for force in omm_system.getForces():
-            if force.getName() == "GhostNonGhostNonbondedForce":
-                break
+            if force.getName() == "GhostNonGhostCoulombForce":
+                ghost_non_ghost_coulomb_force = force
+            elif force.getName() == "GhostNonGhostLJForce":
+                ghost_non_ghost_lj_force = force
 
         # Store the initial parameters.
         ghost_non_ghost_params_initial = []
         excluded_ghost_non_ghost_indices = []
-        for i in range(force.getNumParticles()):
-            charge, half_sigma, two_sqrt_epsilon, alpha, kappa = (
-                force.getParticleParameters(i)
-            )
+        for i in range(ghost_non_ghost_coulomb_force.getNumParticles()):
+            charge, _, _ = ghost_non_ghost_coulomb_force.getParticleParameters(i)
+            _, two_sqrt_epsilon, _ = ghost_non_ghost_lj_force.getParticleParameters(i)
             ghost_non_ghost_params_initial.append((charge, two_sqrt_epsilon))
             if i in excluded_atoms:
                 excluded_ghost_non_ghost_indices.append(i)
@@ -151,32 +153,34 @@ def test_rest2(mols, rest2_selection, excluded_atoms, request):
     for i in range(force.getNumExceptions()):
         exception_params_modified.append(force.getExceptionParameters(i)[-3::2])
 
-    # Find the ghost/ghost nonbonded interaction.
+    # Find the ghost/ghost nonbonded forces.
     for force in omm_system.getForces():
-        if force.getName() == "GhostGhostNonbondedForce":
-            break
+        if force.getName() == "GhostGhostCoulombForce":
+            ghost_ghost_coulomb_force = force
+        elif force.getName() == "GhostGhostLJForce":
+            ghost_ghost_lj_force = force
 
     # Handle custom forces for pertubable molecules.
     if is_perturbable:
         # Store the modified parameters.
         ghost_ghost_params_modified = []
-        for i in range(force.getNumParticles()):
-            charge, half_sigma, two_sqrt_epsilon, alpha, kappa = (
-                force.getParticleParameters(i)
-            )
+        for i in range(ghost_ghost_coulomb_force.getNumParticles()):
+            charge, _, _ = ghost_ghost_coulomb_force.getParticleParameters(i)
+            _, two_sqrt_epsilon, _ = ghost_ghost_lj_force.getParticleParameters(i)
             ghost_ghost_params_modified.append((charge, two_sqrt_epsilon))
 
         # Find the ghost/non-ghost nonbonded interaction.
         for force in omm_system.getForces():
-            if force.getName() == "GhostNonGhostNonbondedForce":
-                break
+            if force.getName() == "GhostNonGhostCoulombForce":
+                ghost_non_ghost_coulomb_force = force
+            elif force.getName() == "GhostNonGhostLJForce":
+                ghost_non_ghost_lj_force = force
 
         # Store the modified parameters.
         ghost_non_ghost_params_modified = []
-        for i in range(force.getNumParticles()):
-            charge, half_sigma, two_sqrt_epsilon, alpha, kappa = (
-                force.getParticleParameters(i)
-            )
+        for i in range(ghost_non_ghost_coulomb_force.getNumParticles()):
+            charge, _, _ = ghost_non_ghost_coulomb_force.getParticleParameters(i)
+            _, two_sqrt_epsilon, _ = ghost_non_ghost_lj_force.getParticleParameters(i)
             ghost_non_ghost_params_modified.append((charge, two_sqrt_epsilon))
 
     # Store the scaling factor.

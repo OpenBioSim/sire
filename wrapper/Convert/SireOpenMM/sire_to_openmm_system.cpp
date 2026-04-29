@@ -482,7 +482,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
 
     std::vector<double> custom_params = {1.0, 0.0, 0.0};
     // Define null parameters used to add these particles to the ghost forces (5 total)
-    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0, 0.0, 0.0};
+    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0};
 
     // we need to add all of the positions as anchor particles
     for (const auto &restraint : atom_restraints)
@@ -1551,14 +1551,19 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_nonghost_ljff = new OpenMM::CustomNonbondedForce(lj_expression);
         ghost_nonghost_ljff->setName("GhostNonGhostLJForce");
 
-        for (auto ff : {ghost_ghost_coulombff, ghost_ghost_ljff,
-                        ghost_nonghost_coulombff, ghost_nonghost_ljff})
+        for (auto ff : {ghost_ghost_coulombff, ghost_nonghost_coulombff})
         {
             ff->addPerParticleParameter("q");
+            ff->addPerParticleParameter("alpha");
+            ff->addPerParticleParameter("kappa");
+            ff->addGlobalParameter("lambda", 0.00000);
+        }
+
+        for (auto ff : {ghost_ghost_ljff, ghost_nonghost_ljff})
+        {
             ff->addPerParticleParameter("half_sigma");
             ff->addPerParticleParameter("two_sqrt_epsilon");
             ff->addPerParticleParameter("alpha");
-            ff->addPerParticleParameter("kappa");
             ff->addGlobalParameter("lambda", 0.00000);
         }
 
@@ -1689,9 +1694,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     QHash<int, int> idx_to_pert_idx;
     QHash<int, int> idx_to_qm_idx;
 
-    // just a holder for all of the custom parameters for the
-    // ghost forces (prevents us having to continually re-allocate it)
-    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0, 0.0};
+    // holders for all of custom parameters for the ghost forces (prevents us
+    // having to continually re-allocate it)
+    std::vector<double> custom_params_coul = {0.0, 0.0, 0.0};
+    std::vector<double> custom_params_lj = {0.0, 0.0, 0.0};
 
     // the sets of particle indexes for the ghost atoms and non-ghost atoms
     QVector<int> ghost_atoms;
@@ -1857,21 +1863,24 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 }
 
                 // reduced_q
-                custom_params[0] = charge;
-                // half_sigma
-                custom_params[1] = 0.5 * boost::get<1>(clj);
-                // two_sqrt_epsilon
-                custom_params[2] = 2.0 * std::sqrt(boost::get<2>(clj));
+                custom_params_coul[0] = charge;
                 // alpha
-                custom_params[3] = alphas_data[j];
+                custom_params_coul[1] = alphas_data[j];
                 // kappa
-                custom_params[4] = kappas_data[j];
+                custom_params_coul[2] = kappas_data[j];
+
+                // half_sigma
+                custom_params_lj[0] = 0.5 * boost::get<1>(clj);
+                // two_sqrt_epsilon
+                custom_params_lj[1] = 2.0 * std::sqrt(boost::get<2>(clj));
+                // alpha
+                custom_params_lj[2] = alphas_data[j];
 
                 // Add the particle to the ghost and nonghost forcefields
-                ghost_ghost_coulombff->addParticle(custom_params);
-                ghost_ghost_ljff->addParticle(custom_params);
-                ghost_nonghost_coulombff->addParticle(custom_params);
-                ghost_nonghost_ljff->addParticle(custom_params);
+                ghost_ghost_coulombff->addParticle(custom_params_coul);
+                ghost_ghost_ljff->addParticle(custom_params_lj);
+                ghost_nonghost_coulombff->addParticle(custom_params_coul);
+                ghost_nonghost_ljff->addParticle(custom_params_lj);
 
                 real_atoms.append(atom_index);
 
@@ -1940,20 +1949,24 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // forcefields if there are any perturbable molecules
                 if (any_perturbable)
                 {
-                    // reduced charge
-                    custom_params[0] = boost::get<0>(clj);
-                    // half_sigma
-                    custom_params[1] = 0.5 * boost::get<1>(clj);
-                    // two_sqrt_epsilon
-                    custom_params[2] = 2.0 * std::sqrt(boost::get<2>(clj));
+                    // reduced_q
+                    custom_params_coul[0] = boost::get<0>(clj);
                     // alpha - is zero for non-ghost atoms
-                    custom_params[3] = 0.0;
+                    custom_params_coul[1] = 0.0;
                     // kappa - is 0 for non-ghost atoms
-                    custom_params[4] = 0.0;
-                    ghost_ghost_coulombff->addParticle(custom_params);
-                    ghost_ghost_ljff->addParticle(custom_params);
-                    ghost_nonghost_coulombff->addParticle(custom_params);
-                    ghost_nonghost_ljff->addParticle(custom_params);
+                    custom_params_coul[2] = 0.0;
+
+                    // half_sigma
+                    custom_params_lj[0] = 0.5 * boost::get<1>(clj);
+                    // two_sqrt_epsilon
+                    custom_params_lj[1] = 2.0 * std::sqrt(boost::get<2>(clj));
+                    // alpha - is zero for non-ghost atoms
+                    custom_params_lj[2] = 0.0;
+
+                    ghost_ghost_coulombff->addParticle(custom_params_coul);
+                    ghost_ghost_ljff->addParticle(custom_params_lj);
+                    ghost_nonghost_coulombff->addParticle(custom_params_coul);
+                    ghost_nonghost_ljff->addParticle(custom_params_lj);
                     non_ghost_atoms.append(atom_index);
                 }
             }
@@ -2007,27 +2020,31 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 system.setVirtualSite(atom_index, new_vs);
 
                 // Add to forcefield, depending on whether the system is perturbable
-                // Note that VS with LJ parameters are currently not supported, so epsilon and sigma are hard-coded to 0 in all cases
+                // Note that VS with LJ parameters are currently not supported,
+                // so epsilon and sigma are hard-coded to 0 in all cases
                 double vs_charge = mol.vs_charges.at(k).asADouble();
                 cljff->addParticle(vs_charge, 1.0, 0.0);
 
                 if (any_perturbable and mol.isPerturbable())
                 {
                     // reduced_q
-                    custom_params[0] = vs_charge;
-                    // half_sigma
-                    custom_params[1] = 1.0;
-                    // two_sqrt_epsilon
-                    custom_params[2] = 0.0;
+                    custom_params_coul[0] = vs_charge;
                     // alpha
-                    custom_params[3] = alphas_data[mol.molinfo.nAtoms() + k];
+                    custom_params_coul[1] = alphas_data[mol.molinfo.nAtoms() + k];
                     // kappa
-                    custom_params[4] = kappas_data[mol.molinfo.nAtoms() + k];
+                    custom_params_coul[2] = kappas_data[mol.molinfo.nAtoms() + k];
 
-                    ghost_ghost_coulombff->addParticle(custom_params);
-                    ghost_ghost_ljff->addParticle(custom_params);
-                    ghost_nonghost_coulombff->addParticle(custom_params);
-                    ghost_nonghost_ljff->addParticle(custom_params);
+                    // half_sigma
+                    custom_params_lj[0] = 1.0;
+                    // two_sqrt_epsilon
+                    custom_params_lj[1] = 0.0;
+                    // alpha
+                    custom_params_lj[2] = alphas_data[mol.molinfo.nAtoms() + k];
+
+                    ghost_ghost_coulombff->addParticle(custom_params_coul);
+                    ghost_ghost_ljff->addParticle(custom_params_lj);
+                    ghost_nonghost_coulombff->addParticle(custom_params_coul);
+                    ghost_nonghost_ljff->addParticle(custom_params_lj);
 
                     const bool vs_to_ghost = mol.to_ghost_idxs.contains(parent_idx);
                     const bool vs_from_ghost = mol.from_ghost_idxs.contains(parent_idx);
@@ -2048,11 +2065,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 else if (any_perturbable)
                 {
                     // Add to ghost FFs if necessary
-                    custom_params = {vs_charge, 1.0, 0.0, 0.0, 0.0};
-                    ghost_ghost_coulombff->addParticle(custom_params);
-                    ghost_ghost_ljff->addParticle(custom_params);
-                    ghost_nonghost_coulombff->addParticle(custom_params);
-                    ghost_nonghost_ljff->addParticle(custom_params);
+                    custom_params_coul = {vs_charge, 0.0, 0.0};
+                    custom_params_lj = {1.0, 0.0, 0.0};
+                    ghost_ghost_coulombff->addParticle(custom_params_coul);
+                    ghost_ghost_ljff->addParticle(custom_params_lj);
+                    ghost_nonghost_coulombff->addParticle(custom_params_coul);
+                    ghost_nonghost_ljff->addParticle(custom_params_lj);
                     non_ghost_atoms.append(atom_index);
                 }
             }
