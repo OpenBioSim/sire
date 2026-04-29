@@ -55,6 +55,19 @@ Ghost atoms are then added to three custom OpenMM Forces:
    interaction and subtracts this from the total (to remove the real-space
    contribution that was calculated in the standard OpenMM NonBondedForce).
 
+When ``use_dispersion_correction=True`` and the system uses a periodic
+cutoff, two additional ``CustomVolumeForce`` objects are added:
+
+* A **background LRC** force (``lrc_background/v``) that evaluates the
+  LJ long-range correction for all non-ghost atoms analytically. This
+  replaces the built-in dispersion correction of the ``NonbondedForce``,
+  which would otherwise be recomputed on every λ change. The coefficient
+  is cached per λ state by the lambda lever.
+
+* A **ghost LRC** force (``lrc_coeff/v``) that evaluates the LJ
+  long-range correction for all ghost–ghost and ghost–non-ghost
+  interactions analytically. Its coefficient is also cached per λ state.
+
 There are two different soft-core potentials available. The default is
 the Zacharias potential, while the second is the Taylor potential.
 
