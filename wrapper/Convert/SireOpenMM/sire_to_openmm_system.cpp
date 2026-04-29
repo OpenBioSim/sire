@@ -1184,9 +1184,21 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         use_dispersion_correction = map["use_dispersion_correction"].value().asABoolean();
     }
 
-    // note that this will be very slow for perturbable systems, as
-    // it needs recalculating for every change of lambda
-    cljff->setUseDispersionCorrection(use_dispersion_correction);
+    bool is_gcmc = false;
+    int num_gcmc_waters = 0;
+
+    if (map.specified("use_gcmc_lrc"))
+    {
+        is_gcmc = map["use_gcmc_lrc"].value().asABoolean();
+    }
+    if (is_gcmc && map.specified("num_gcmc_waters"))
+    {
+        num_gcmc_waters = map["num_gcmc_waters"].value().asAnInteger();
+    }
+
+    // LRC for the NonbondedForce is handled analytically via a CustomVolumeForce
+    // (background-lrc) updated each lambda step, so we always disable it here.
+    cljff->setUseDispersionCorrection(false);
 
     // set the non-bonded cutoff type and length based on
     // the infomation in ffinfo
@@ -1618,6 +1630,32 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_14ff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost-14", system.addForce(ghost_14ff));
         lambda_lever.setForceGroup("ghost-14", force_group_counter++);
+    }
+
+    // Analytic LRC for the NonbondedForce (all non-ghost atoms): E = lrc_background / V,
+    // updated each lambda step via a cached closed-form class-pair sum.
+    if (use_dispersion_correction && ffinfo.hasCutoff() && ffinfo.space().isPeriodic())
+    {
+        auto background_lrc_ff = new OpenMM::CustomVolumeForce("lrc_background/v");
+        background_lrc_ff->addGlobalParameter("lrc_background", 0.0);
+        background_lrc_ff->setForceGroup(force_group_counter);
+        lambda_lever.setForceIndex("background-lrc", system.addForce(background_lrc_ff));
+        lambda_lever.setForceGroup("background-lrc", force_group_counter++);
+    }
+
+    // GCMC water LRC: E = (n_w * lrc_w_solute + n_w*(n_w-1) * lrc_ww_half) / V.
+    // lrc_w_solute and lrc_ww_half are pre-computed at setup; n_w is updated by
+    // the GCMC sampler at each insertion/deletion move.
+    if (is_gcmc && use_dispersion_correction && ffinfo.hasCutoff() && ffinfo.space().isPeriodic())
+    {
+        auto gcmc_lrc_ff = new OpenMM::CustomVolumeForce(
+            "(n_w * lrc_w_solute + n_w * (n_w - 1) * lrc_ww_half) / v");
+        gcmc_lrc_ff->addGlobalParameter("n_w", 0.0);
+        gcmc_lrc_ff->addGlobalParameter("lrc_w_solute", 0.0);
+        gcmc_lrc_ff->addGlobalParameter("lrc_ww_half", 0.0);
+        gcmc_lrc_ff->setForceGroup(force_group_counter);
+        lambda_lever.setForceIndex("gcmc-lrc", system.addForce(gcmc_lrc_ff));
+        lambda_lever.setForceGroup("gcmc-lrc", force_group_counter++);
     }
 
     // Stage 4 is complete. We now have all(*) of the forces we need to run
@@ -2200,6 +2238,128 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             ff->addInteractionGroup(ghost_atoms_set, ghost_atoms_set);
         for (auto ff : {ghost_nonghost_coulombff, ghost_nonghost_ljff})
             ff->addInteractionGroup(ghost_atoms_set, non_ghost_atoms_set);
+    }
+
+    // Register GCMC water atom indices with the lambda lever and pre-compute the
+    // fixed LRC coefficients (lrc_w_solute and lrc_ww_half) for the gcmc-lrc force.
+    if (is_gcmc && use_dispersion_correction && ffinfo.hasCutoff() && ffinfo.space().isPeriodic())
+    {
+        auto gcmc_lrc_ff = lambda_lever.getForce<OpenMM::CustomVolumeForce>("gcmc-lrc", system);
+        if (gcmc_lrc_ff != nullptr)
+        {
+            const double cutoff = cljff->getCutoffDistance();
+            const double rc3 = cutoff * cutoff * cutoff;
+            const double rc9 = rc3 * rc3 * rc3;
+            const double four_pi = 4.0 * M_PI;
+
+            // All GCMC waters (real + virtual buffer) are excluded from the background
+            // LRC and tracked by n_w instead. Any water can be swapped in or out.
+            const auto water_result = mols.search("water");
+            QSet<MolNum> water_mol_nums;
+            for (const auto &view : water_result.views())
+                water_mol_nums.insert(view.data().number());
+
+            // Collect OpenMM atom indices for all water molecules.
+            QVector<int> water_atom_indices;
+            for (int i = 0; i < nmols; ++i)
+            {
+                if (!water_mol_nums.contains(mols[i].number()))
+                    continue;
+                const int mol_start = start_indexes[i];
+                const int mol_natoms = openmm_mols_data[i].masses.count();
+                for (int j = mol_start; j < mol_start + mol_natoms; ++j)
+                    water_atom_indices.append(j);
+            }
+
+            lambda_lever.setGCMCWaterAtoms(water_atom_indices);
+
+            // Pre-compute lrc_w_solute (per active water molecule, interaction with
+            // all non-water atoms: protein, ligand, ions) and lrc_ww_half (per active
+            // water-molecule pair, halved). FEP ghost atoms have epsilon=0 and
+            // contribute zero automatically.
+            // n_w starts at n_all_waters - num_gcmc_waters (initially active count).
+            QSet<int> water_set(water_atom_indices.begin(), water_atom_indices.end());
+
+            // Collect (sigma, epsilon) for water atom types and non-water solute atoms.
+            // Real waters are also in the GCMC pool so solute = protein + ligand + ions.
+            std::map<std::pair<double, double>, int> water_class_counts;
+            std::map<std::pair<double, double>, int> solute_class_counts;
+            for (int i = 0; i < cljff->getNumParticles(); ++i)
+            {
+                double charge, sigma, epsilon;
+                cljff->getParticleParameters(i, charge, sigma, epsilon);
+                if (epsilon == 0.0)
+                    continue;
+                if (water_set.contains(i))
+                    water_class_counts[{sigma, epsilon}]++;
+                else
+                    solute_class_counts[{sigma, epsilon}]++;
+            }
+
+            // lrc_ww_half: half the LRC coefficient for one water-molecule pair.
+            // Sum over all water-atom-type pairs within a molecule pair.
+            // Each molecule pair contributes once (factor 1/2 already in the name).
+            const int n_water_mols = water_mol_nums.size();
+            double lrc_ww = 0.0;
+            // diagonal water-water class pairs (same type within a water molecule pair)
+            for (const auto &[key, n] : water_class_counts)
+            {
+                // n atoms of this type spread across n_water_mols molecules:
+                // per-mol count = n / n_water_mols
+                const double per_mol = static_cast<double>(n) / n_water_mols;
+                const double n_pairs = per_mol * per_mol;
+                const double sig2 = key.first * key.first;
+                const double sig6 = sig2 * sig2 * sig2;
+                const double eps_pair = 4.0 * key.second;
+                lrc_ww += n_pairs * four_pi * eps_pair * sig6 * (sig6 / (9.0 * rc9) - 1.0 / (3.0 * rc3));
+            }
+            // off-diagonal water-water class pairs
+            for (auto it1 = water_class_counts.cbegin(); it1 != water_class_counts.cend(); ++it1)
+            {
+                auto it2 = it1;
+                for (++it2; it2 != water_class_counts.cend(); ++it2)
+                {
+                    const double per_mol_1 = static_cast<double>(it1->second) / n_water_mols;
+                    const double per_mol_2 = static_cast<double>(it2->second) / n_water_mols;
+                    const double sigma_ij = 0.5 * (it1->first.first + it2->first.first);
+                    const double eps_pair = 4.0 * std::sqrt(it1->first.second * it2->first.second);
+                    const double sig2 = sigma_ij * sigma_ij;
+                    const double sig6 = sig2 * sig2 * sig2;
+                    lrc_ww += 2.0 * per_mol_1 * per_mol_2 * four_pi * eps_pair * sig6 * (sig6 / (9.0 * rc9) - 1.0 / (3.0 * rc3));
+                }
+            }
+            const double lrc_ww_half = 0.5 * lrc_ww;
+
+            // lrc_w_solute: LRC coefficient for one water molecule with all solute atoms.
+            double lrc_w_solute = 0.0;
+            for (const auto &[wkey, wn] : water_class_counts)
+            {
+                const double per_mol_w = static_cast<double>(wn) / n_water_mols;
+                for (const auto &[skey, sn] : solute_class_counts)
+                {
+                    const double sigma_ij = 0.5 * (wkey.first + skey.first);
+                    const double eps_pair = 4.0 * std::sqrt(wkey.second * skey.second);
+                    const double sig2 = sigma_ij * sigma_ij;
+                    const double sig6 = sig2 * sig2 * sig2;
+                    lrc_w_solute += per_mol_w * sn * four_pi * eps_pair * sig6 * (sig6 / (9.0 * rc9) - 1.0 / (3.0 * rc3));
+                }
+            }
+
+            // Update the CustomVolumeForce default parameter values so they are
+            // correct when the OpenMM Context is created.
+            // n_w starts at the number of initially active waters (total - buffer).
+            const double n_w_initial = static_cast<double>(n_water_mols - num_gcmc_waters);
+            for (int p = 0; p < gcmc_lrc_ff->getNumGlobalParameters(); ++p)
+            {
+                const auto &name = gcmc_lrc_ff->getGlobalParameterName(p);
+                if (name == "n_w")
+                    gcmc_lrc_ff->setGlobalParameterDefaultValue(p, n_w_initial);
+                else if (name == "lrc_w_solute")
+                    gcmc_lrc_ff->setGlobalParameterDefaultValue(p, lrc_w_solute);
+                else if (name == "lrc_ww_half")
+                    gcmc_lrc_ff->setGlobalParameterDefaultValue(p, lrc_ww_half);
+            }
+        }
     }
 
     // see if we want to remove COM motion

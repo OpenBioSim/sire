@@ -438,6 +438,11 @@ bool LambdaLever::wasForceChanged(const QString &name) const
     return it.value();
 }
 
+void LambdaLever::setGCMCWaterAtoms(const QVector<int> &atoms)
+{
+    gcmc_water_atoms = QSet<int>(atoms.begin(), atoms.end());
+}
+
 boost::tuple<int, int, double, double, double, double, double>
 get_exception(int atom0, int atom1, int start_index,
               double coul_14_scl, double lj_14_scl,
@@ -2039,6 +2044,72 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         context.setParameter("lrc_coeff", lrc_coeff);
     }
 
+    // Update the NonbondedForce (background) LRC via its own CustomVolumeForce.
+    // Ghost atoms have epsilon=0 in cljff so they contribute nothing naturally.
+    auto background_lrc_ff = this->getForce<OpenMM::CustomVolumeForce>("background-lrc", system);
+    if (background_lrc_ff != nullptr && cljff != nullptr)
+    {
+        const qint64 lam_key = qRound64(lambda_value * 1e5);
+        double lrc_coeff = 0.0;
+
+        if (this->background_lrc_coeff_cache.contains(lam_key))
+        {
+            lrc_coeff = this->background_lrc_coeff_cache[lam_key];
+        }
+        else
+        {
+            const double cutoff = cljff->getCutoffDistance();
+            const double rc3 = cutoff * cutoff * cutoff;
+            const double rc9 = rc3 * rc3 * rc3;
+            const double four_pi = 4.0 * M_PI;
+
+            // Classify particles by (sigma, epsilon); ghost atoms (epsilon=0),
+            // virtual sites, and GCMC water atoms are skipped.
+            std::map<std::pair<double, double>, int> class_counts;
+            for (int i = 0; i < cljff->getNumParticles(); ++i)
+            {
+                double charge, sigma, epsilon;
+                cljff->getParticleParameters(i, charge, sigma, epsilon);
+                if (epsilon == 0.0)
+                    continue;
+                if (!gcmc_water_atoms.isEmpty() && gcmc_water_atoms.contains(i))
+                    continue;
+                class_counts[{sigma, epsilon}]++;
+            }
+
+            // Diagonal pairs (same class, unique i<j).
+            for (const auto &[key, n] : class_counts)
+            {
+                const double n_pairs = static_cast<double>(n) * (n - 1) * 0.5;
+                if (n_pairs == 0.0)
+                    continue;
+                const double sig2 = key.first * key.first;
+                const double sig6 = sig2 * sig2 * sig2;
+                const double eps_pair = 4.0 * key.second;
+                lrc_coeff += n_pairs * four_pi * eps_pair * sig6 * (sig6 / (9.0 * rc9) - 1.0 / (3.0 * rc3));
+            }
+
+            // Off-diagonal pairs (class i != class j).
+            for (auto it1 = class_counts.cbegin(); it1 != class_counts.cend(); ++it1)
+            {
+                auto it2 = it1;
+                for (++it2; it2 != class_counts.cend(); ++it2)
+                {
+                    const double sigma_ij = 0.5 * (it1->first.first + it2->first.first);
+                    const double eps_pair = 4.0 * std::sqrt(it1->first.second * it2->first.second);
+                    const double n_pairs = static_cast<double>(it1->second) * it2->second;
+                    const double sig2 = sigma_ij * sigma_ij;
+                    const double sig6 = sig2 * sig2 * sig2;
+                    lrc_coeff += n_pairs * four_pi * eps_pair * sig6 * (sig6 / (9.0 * rc9) - 1.0 / (3.0 * rc3));
+                }
+            }
+
+            this->background_lrc_coeff_cache[lam_key] = lrc_coeff;
+        }
+
+        context.setParameter("lrc_background", lrc_coeff);
+    }
+
     if (ghost_14ff and has_changed_ghost14ff)
         ghost_14ff->updateParametersInContext(context);
 
@@ -2097,6 +2168,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     last_changed_forces["ghost/non-ghost-coulomb"] = has_changed_coulombff;
     last_changed_forces["ghost/non-ghost-lj"] = has_changed_ljff;
     last_changed_forces["ghost-lrc"] = has_changed_ljff;
+    last_changed_forces["background-lrc"] = has_changed_cljff;
+    last_changed_forces["gcmc-lrc"] = false;
     last_changed_forces["ghost-14"] = has_changed_ghost14ff;
     last_changed_forces["bond"] = has_changed_bondff;
     last_changed_forces["angle"] = has_changed_angff;
