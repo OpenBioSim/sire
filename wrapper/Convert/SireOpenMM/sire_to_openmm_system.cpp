@@ -1668,6 +1668,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             auto ghost_lrc_ff = new OpenMM::CustomVolumeForce("lrc_coeff/v");
             ghost_lrc_ff->addGlobalParameter("lrc_coeff", 0.0);
+            ghost_lrc_ff->setName("GhostLRCForce");
             ghost_lrc_ff->setForceGroup(force_group_counter);
             lambda_lever.setForceIndex("ghost-lrc", system.addForce(ghost_lrc_ff));
             lambda_lever.setForceGroup("ghost-lrc", force_group_counter++);
@@ -1684,6 +1685,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     {
         auto background_lrc_ff = new OpenMM::CustomVolumeForce("lrc_background/v");
         background_lrc_ff->addGlobalParameter("lrc_background", 0.0);
+        background_lrc_ff->setName("BackgroundLRCForce");
         background_lrc_ff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("background-lrc", system.addForce(background_lrc_ff));
         lambda_lever.setForceGroup("background-lrc", force_group_counter++);
@@ -1699,6 +1701,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         gcmc_lrc_ff->addGlobalParameter("n_w", 0.0);
         gcmc_lrc_ff->addGlobalParameter("lrc_w_solute", 0.0);
         gcmc_lrc_ff->addGlobalParameter("lrc_ww_half", 0.0);
+        gcmc_lrc_ff->setName("GCMCLRCForce");
         gcmc_lrc_ff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("gcmc-lrc", system.addForce(gcmc_lrc_ff));
         lambda_lever.setForceGroup("gcmc-lrc", force_group_counter++);
