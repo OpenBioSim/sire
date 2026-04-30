@@ -122,9 +122,9 @@ Available keys and allowable values are listed below.
 |                              | ``bonds-h-angles-not-perturbed`` and                     |
 |                              | ``bonds-h-angles-not-heavy-perturbed                     |
 +------------------------------+----------------------------------------------------------+
-| coulomb_power                | The coulomb power parameter used by the softening        |
-|                              | potential used to soften electrostatic interactions      |
-|                              | involving ghost atoms. This defaults to 0.               |
+| beutler_alpha                | The alpha parameter for the Beutler softcore LJ          |
+|                              | potential. Controls the width of the softening in        |
+|                              | r^6-space. This defaults to 0.5.                         |
 +------------------------------+----------------------------------------------------------+
 | cutoff                       | Size of the non-bonded cutoff, e.g.                      |
 |                              | ``7.5*sr.units.angstrom``                                |
@@ -226,14 +226,18 @@ Available keys and allowable values are listed below.
 | use_dispersion_correction    | Whether or not to use the dispersion correction to       |
 |                              | deal with cutoff issues. This is very expensive.         |
 +------------------------------+----------------------------------------------------------+
+| use_beutler_softening        | Whether or not to use the Beutler softcore potential to  |
+|                              | soften interactions involving ghost atoms. Currently     |
+|                              | designed for ABFE calculations only. This defaults to    |
+|                              | False. If True, overrides taylor and zacharias softening.|
++------------------------------+----------------------------------------------------------+
 | use_taylor_softening         | Whether or not to use the taylor algorithm to soften     |
 |                              | interactions involving ghost atoms. This defaults to     |
 |                              | False.                                                   |
 +------------------------------+----------------------------------------------------------+
 | use_zacharias_softening      | Whether or not to use the zacharias algorithm to soften  |
 |                              | interactions involving ghost atoms. This defaults to     |
-|                              | True. Note that one of zacharias or taylor softening     |
-|                              | must be True, with zacharias taking precedence.          |
+|                              | True.                                                    |
 +------------------------------+----------------------------------------------------------+
 
 Higher level API

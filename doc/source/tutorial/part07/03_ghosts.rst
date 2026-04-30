@@ -68,8 +68,9 @@ cutoff, two additional ``CustomVolumeForce`` objects are added:
   long-range correction for all ghost–ghost and ghost–non-ghost
   interactions analytically. Its coefficient is also cached per λ state.
 
-There are two different soft-core potentials available. The default is
-the Zacharias potential, while the second is the Taylor potential.
+There are three different soft-core potentials available. The default is
+the Zacharias potential, while the second is the Taylor potential, and
+the third is the Beutler potential.
 
 Zacharias softening
 -------------------
@@ -81,7 +82,7 @@ It is based on the following electrostatic and Lennard-Jones potentials:
 
 .. math::
 
-   V_{\text{elec}}(r) = q_i q_j \left[ \frac{(1 - \alpha)^n}{\sqrt{r^2 + \delta_\text{coulomb}}} - \frac{\kappa}{r} \right]
+   V_{\text{elec}}(r) = q_i q_j \left[ \frac{1}{\sqrt{r^2 + \delta_\text{coulomb}}} - \frac{\kappa}{r} \right]
 
    V_{\text{LJ}}(r) = 4\epsilon \left[ \frac{\sigma^{12}}{(\delta_\text{LJ} \sigma + r^2)^6} - \frac{\sigma^6}{(\delta_\text{LJ} \sigma + r^2)^3} \right]
 
@@ -116,10 +117,6 @@ The soft-core parameters are:
   state, and 1 in the perturbed state. These values can be perturbed
   via the ``alpha`` lever in the λ-schedule.
 
-* ``n`` is the "coulomb power", and is set to 0 by default. It can be
-  any integer between 0 and 4. It is set via ``coulomb_power`` map
-  parameter.
-
 * ``shift_coulomb`` and ``shift_LJ`` are the so-called "shift delta"
   parameters, which are specified individually for the coulomb and LJ\
   potentials. They are set via the ``shift_coulomb`` and ``shift_delta``
@@ -145,7 +142,7 @@ It is based on the following electrostatic and Lennard-Jones potentials:
 
 .. math::
 
-   V_{\text{elec}}(r) = q_i q_j \left[ \frac{(1 - \alpha)^n}{\sqrt{r^2 + \delta^2}} - \frac{\kappa}{r} \right]
+   V_{\text{elec}}(r) = q_i q_j \left[ \frac{1}{\sqrt{r^2 + \delta^2}} - \frac{\kappa}{r} \right]
 
    V_{\text{LJ}}(r) = 4\epsilon \left[ \frac{\sigma^{12}}{(\alpha^m \sigma^6 + r^6)^2} - \frac{\sigma^6}{\alpha^m \sigma^6 + r^6} \right]
 
@@ -182,10 +179,6 @@ The soft-core parameters are:
   any integer between 0 and 4. It is set via ``taylor_power`` map
   parameter.
 
-* ``n`` is the "coulomb power", and is set to 0 by default. It can be
-  any integer between 0 and 4. It is set via ``coulomb_power`` map
-  parameter.
-
 * ``shift_coulomb`` is the so-called "shift delta"
   parameters, which are specified only for the coulomb
   potential. This is set via the ``shift_coulomb``
@@ -199,6 +192,74 @@ The soft-core parameters are:
   ``kappa`` lever in the λ-schedule, e.g. if you want to decouple the
   intramolecular electrostatic interactions, when the "hard" interaction
   would not be calculated in the NonbondedForce.
+
+Beutler softening
+-----------------
+
+This is the third soft-core potential, based on Beutler et al.,
+*Chem. Phys. Lett.*, 1994. You can use it by setting the map option
+``use_beutler_softening`` to True.
+
+.. note::
+
+   The Beutler potential is currently designed for absolute binding free
+   energy (ABFE) calculations only. It is not recommended for relative
+   free energy (RBFE) calculations.
+
+It is based on the following electrostatic and Lennard-Jones potentials:
+
+.. math::
+
+   V_{\text{elec}}(r) = q_i q_j \left[ \frac{1}{\sqrt{r^2 + \delta^2}} - \frac{\kappa}{r} \right]
+
+   V_{\text{LJ}}(r) = (1 - \alpha) \cdot 4\epsilon \left[ \frac{\sigma^{12}}{(\beta \sigma^6 \alpha + r^6)^2} - \frac{\sigma^6}{\beta \sigma^6 \alpha + r^6} \right]
+
+where
+
+.. math::
+
+    \delta = \alpha \times \text{shift_coulomb}
+
+and
+
+.. math::
+
+   \alpha = \max(\alpha_i, \alpha_j)
+
+   \kappa = \max(\kappa_i, \kappa_j)
+
+The parameters ``r``, ``q_i``, ``q_j``, ``\epsilon``, and ``\sigma``
+are the standard parameters for the electrostatic and Lennard-Jones
+potentials.
+
+The soft-core parameters are:
+
+* ``α_i`` and ``α_j`` control the amount of "softening" of the
+  electrostatic and LJ interactions. A value of 0 means no softening
+  (fully hard), while a value of 1 means fully soft. Ghost atoms which
+  disappear as a function of λ have a value of α of 1 in the
+  reference state, and 0 in the perturbed state. Ghost atoms which appear
+  as a function of λ have a value of α of 0 in the reference
+  state, and 1 in the perturbed state. These values can be perturbed
+  via the ``alpha`` lever in the λ-schedule.
+
+* ``β`` is the Beutler alpha parameter that controls the softening of the
+  LJ interaction. It is set via the ``beutler_alpha`` map parameter and
+  defaults to 0.5.
+
+* ``shift_coulomb`` is the "shift delta" parameter for the electrostatic
+  potential. It is set via the ``shift_coulomb`` map parameter and
+  defaults to 1 Å.
+
+* ``κ_i`` and ``κ_j`` are the "hard" electrostatic parameters,
+  which control whether or not to calculate the "hard" electrostatic
+  interaction to subtract from the total energy and force (thus cancelling
+  out the double-counting of this interaction from the NonbondedForce).
+  By default, these are always equal to 1. You can perturb these via the
+  ``kappa`` lever in the λ-schedule, e.g. if you want to decouple the
+  intramolecular electrostatic interactions, when the "hard" interaction
+  would not be calculated in the NonbondedForce.
+
 
 Good practice
 -------------

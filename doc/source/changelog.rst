@@ -67,6 +67,16 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added per-stage weights to :class:`~sire.cas.LambdaSchedule`, allowing stages to occupy unequal fractions of lambda space (e.g. ``add_morph_stage("morph", weight=2.0)``).
 
+* Added support for the Beutler et al. softcore potential (``use_beutler_softening``,
+  ``beutler_alpha`` map options), currently intended for ABFE calculations. Removed the
+  ``coulomb_power`` parameter, which was invalid for any non-zero value.
+
+* Added analytic LJ long-range correction (LRC) for periodic simulations
+  (``use_dispersion_correction`` map option). A background LRC is computed for all
+  non-ghost atoms. When ghost atoms are present, a separate ghost LRC covers ghost–ghost
+  and ghost–non-ghost interactions. Both are updated efficiently via the lambda lever
+  without recomputing the full dispersion correction on every λ change.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
