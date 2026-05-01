@@ -2053,6 +2053,14 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         }
 
         context.setParameter("lrc_coeff", lrc_coeff);
+
+        // lrc_scale defaults to 1.0 (no effect). Schedules that fix epsilon
+        // (e.g. Beutler softcore) should set a force-specific equation for
+        // lever "lrc_scale" on force "ghost-lrc" to scale it to zero as the
+        // ghost is annihilated/decoupled.
+        double lrc_scale = this->lambda_schedule.morph(
+            "ghost-lrc", "lrc_scale", 1.0, 1.0, lambda_value);
+        context.setParameter("lrc_scale", lrc_scale);
     }
 
     // Update the NonbondedForce (background) LRC via its own CustomVolumeForce.

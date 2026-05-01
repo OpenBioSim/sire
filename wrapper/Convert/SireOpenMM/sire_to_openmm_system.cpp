@@ -1666,8 +1666,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // a cached closed-form sum over interaction-group pairs.
         if (use_dispersion_correction && ffinfo.hasCutoff() && ffinfo.space().isPeriodic())
         {
-            auto ghost_lrc_ff = new OpenMM::CustomVolumeForce("lrc_coeff/v");
+            auto ghost_lrc_ff = new OpenMM::CustomVolumeForce("lrc_coeff*lrc_scale/v");
             ghost_lrc_ff->addGlobalParameter("lrc_coeff", 0.0);
+            ghost_lrc_ff->addGlobalParameter("lrc_scale", 1.0);
             ghost_lrc_ff->setName("GhostLRCForce");
             ghost_lrc_ff->setForceGroup(force_group_counter);
             lambda_lever.setForceIndex("ghost-lrc", system.addForce(ghost_lrc_ff));
