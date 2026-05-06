@@ -5,6 +5,10 @@ standard NonbondedForce dispersion correction.
 
 Tests use merged_ethane_methanol (merged_molecule.s3) with the 5 nearest waters
 so they run quickly while still exercising a periodic cutoff system.
+
+A separate test exercises the GCMC water LRC (GCMCLRCForce) using the ala_mols
+system (alanine-dipeptide in water). GCMC is faked by decrementing n_w by hand
+and verifying the energy change against the analytical formula.
 """
 
 import pytest
@@ -100,3 +104,72 @@ def test_lrc_lambda1_matches_perturbed_end_state(
     nrg_pert_end = omm_pert_end.get_energy().value()
 
     assert nrg_pert == pytest.approx(nrg_pert_end, rel=1e-3)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_gcmc_lrc(ala_mols, openmm_platform):
+    """
+    Test the GCMCLRCForce by faking a GCMC move: decrement n_w by 1 and verify
+    the energy change matches the analytical formula.
+
+    E(n_w) = (n_w * lrc_w_solute + n_w * (n_w - 1) * lrc_ww_half) / V
+
+    dE = E(n_w - 1) - E(n_w) = -(lrc_w_solute + 2 * (n_w - 1) * lrc_ww_half) / V
+    """
+    # Build with GCMC LRC enabled, reserving 1 buffer water so n_w starts at
+    # n_waters - 1.
+    d = ala_mols.dynamics(
+        platform=openmm_platform,
+        map={
+            "use_dispersion_correction": True,
+            "use_gcmc_lrc": True,
+            "num_gcmc_waters": 1,
+        },
+    )
+    d.set_lambda(0.0)
+
+    context = d.context()
+    omm_system = context.getSystem()
+
+    # Locate the GCMCLRCForce and its force group.
+    gcmc_force = None
+    for force in omm_system.getForces():
+        if force.getName() == "GCMCLRCForce":
+            gcmc_force = force
+            break
+    assert gcmc_force is not None, "GCMCLRCForce not found in system"
+    fg = gcmc_force.getForceGroup()
+
+    # Read the pre-computed LRC coefficients and initial n_w from the context.
+    state = context.getState(getParameters=True, getPositions=True)
+    params = state.getParameters()
+    n_w = params["n_w"]
+    lrc_w_solute = params["lrc_w_solute"]
+    lrc_ww_half = params["lrc_ww_half"]
+
+    # The LJ tail is attractive so both coefficients must be negative.
+    assert lrc_w_solute < 0
+    assert lrc_ww_half < 0
+    assert n_w > 0
+
+    # Get the GCMC LRC energy at the initial n_w.
+    nrg1 = (
+        context.getState(getEnergy=True, groups=(1 << fg)).getPotentialEnergy()._value
+    )
+
+    # "Turn off" one water by decrementing n_w.
+    context.setParameter("n_w", n_w - 1)
+    nrg2 = (
+        context.getState(getEnergy=True, groups=(1 << fg)).getPotentialEnergy()._value
+    )
+
+    # Compute the expected energy change analytically.
+    # Box vectors are in nm; volume in nm^3 matches the lrc_coeff units (kJ/mol·nm^3).
+    box = state.getPeriodicBoxVectors()
+    V = box[0][0]._value * box[1][1]._value * box[2][2]._value
+
+    expected_delta = -(lrc_w_solute + 2 * (n_w - 1) * lrc_ww_half) / V
+    assert nrg2 - nrg1 == pytest.approx(expected_delta, rel=1e-5)
