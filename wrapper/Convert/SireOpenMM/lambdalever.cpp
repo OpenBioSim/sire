@@ -1495,11 +1495,37 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             const int nparams = morphed_charges.count();
 
             // Detect whether any CLJ or ghost-14 parameters changed
-            has_changed_cljff |= rest2_changed || cache.hasChanged("clj", "charge") || cache.hasChanged("clj", "sigma") || cache.hasChanged("clj", "epsilon") || cache.hasChanged("clj", "alpha") || cache.hasChanged("clj", "kappa") || cache.hasChanged("clj", "charge_scale") || cache.hasChanged("clj", "lj_scale");
+            // clang-format off
+            has_changed_cljff |= rest2_changed
+                || cache.hasChanged("clj", "charge")
+                || cache.hasChanged("clj", "sigma")
+                || cache.hasChanged("clj", "epsilon")
+                || cache.hasChanged("clj", "alpha")
+                || cache.hasChanged("clj", "kappa")
+                || cache.hasChanged("clj", "charge_scale")
+                || cache.hasChanged("clj", "lj_scale");
 
-            has_changed_ghostff |= rest2_changed || cache.hasChanged("ghost/ghost", "charge") || cache.hasChanged("ghost/ghost", "sigma") || cache.hasChanged("ghost/ghost", "epsilon") || cache.hasChanged("ghost/ghost", "alpha") || cache.hasChanged("ghost/ghost", "kappa") || cache.hasChanged("ghost/non-ghost", "charge") || cache.hasChanged("ghost/non-ghost", "sigma") || cache.hasChanged("ghost/non-ghost", "epsilon") || cache.hasChanged("ghost/non-ghost", "alpha") || cache.hasChanged("ghost/non-ghost", "kappa");
+            has_changed_ghostff |= rest2_changed
+                || cache.hasChanged("ghost/ghost", "charge")
+                || cache.hasChanged("ghost/ghost", "sigma")
+                || cache.hasChanged("ghost/ghost", "epsilon")
+                || cache.hasChanged("ghost/ghost", "alpha")
+                || cache.hasChanged("ghost/ghost", "kappa")
+                || cache.hasChanged("ghost/non-ghost", "charge")
+                || cache.hasChanged("ghost/non-ghost", "sigma")
+                || cache.hasChanged("ghost/non-ghost", "epsilon")
+                || cache.hasChanged("ghost/non-ghost", "alpha")
+                || cache.hasChanged("ghost/non-ghost", "kappa");
 
-            has_changed_ghost14ff |= rest2_changed || cache.hasChanged("ghost-14", "charge") || cache.hasChanged("ghost-14", "sigma") || cache.hasChanged("ghost-14", "epsilon") || cache.hasChanged("ghost-14", "alpha") || cache.hasChanged("ghost-14", "kappa") || cache.hasChanged("ghost-14", "charge_scale") || cache.hasChanged("ghost-14", "lj_scale");
+            has_changed_ghost14ff |= rest2_changed
+                || cache.hasChanged("ghost-14", "charge")
+                || cache.hasChanged("ghost-14", "sigma")
+                || cache.hasChanged("ghost-14", "epsilon")
+                || cache.hasChanged("ghost-14", "alpha")
+                || cache.hasChanged("ghost-14", "kappa")
+                || cache.hasChanged("ghost-14", "charge_scale")
+                || cache.hasChanged("ghost-14", "lj_scale");
+            // clang-format on
 
             if (have_ghost_atoms)
             {
