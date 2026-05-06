@@ -20,8 +20,7 @@ def evaluate_xml_force(mols, xml, force):
 
     force : str
         The name of the custom force to evaluate. Options are:
-        "ghost-ghost-lj", "ghost-ghost-coulomb",
-        "ghost-nonghost-lj", "ghost-nonghost-coulomb", "ghost-14".
+        "ghost-ghost", "ghost-nonghost", "ghost-14".
 
     Returns
     -------
@@ -78,24 +77,19 @@ def evaluate_xml_force(mols, xml, force):
 
     # Validate the force name.
     valid = [
-        "ghostghostlj",
-        "ghostghostcoulomb",
-        "ghostnonghostlj",
-        "ghostnonghostcoulomb",
+        "ghostghost",
+        "ghostnonghost",
         "ghost14",
     ]
     if force not in valid:
         raise ValueError(
-            "'force' must be one of 'ghost-ghost-lj', 'ghost-ghost-coulomb', "
-            "'ghost-nonghost-lj', 'ghost-nonghost-coulomb', or 'ghost-14'."
+            "'force' must be one of 'ghost-ghost', 'ghost-nonghost', or 'ghost-14'."
         )
 
     # Map sanitised name to the OpenMM force name in the XML.
     _force_name_map = {
-        "ghostghostlj": "GhostGhostLJForce",
-        "ghostghostcoulomb": "GhostGhostCoulombForce",
-        "ghostnonghostlj": "GhostNonGhostLJForce",
-        "ghostnonghostcoulomb": "GhostNonGhostCoulombForce",
+        "ghostghost": "GhostGhostNonbondedForce",
+        "ghostnonghost": "GhostNonGhostNonbondedForce",
         "ghost14": "Ghost14BondForce",
     }
     name = _force_name_map[force]

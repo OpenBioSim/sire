@@ -475,14 +475,12 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
 
     auto cljff = lambda_lever.getForce<OpenMM::NonbondedForce>("clj", system);
-    auto ghost_ghost_coulombff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/ghost-coulomb", system);
-    auto ghost_ghost_ljff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/ghost-lj", system);
-    auto ghost_nonghost_coulombff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost-coulomb", system);
-    auto ghost_nonghost_ljff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost-lj", system);
+    auto ghost_ghostff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
+    auto ghost_nonghostff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
 
     std::vector<double> custom_params = {1.0, 0.0, 0.0};
-    // Define null parameters used to add these particles to the ghost forces (5 total)
-    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0};
+    // Null parameters for anchor particles added to the ghost forces {q, half_sigma, two_sqrt_epsilon, alpha, kappa}
+    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     // we need to add all of the positions as anchor particles
     for (const auto &restraint : atom_restraints)
@@ -517,16 +515,14 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
                 cljff->addParticle(0, 0, 0);
             }
 
-            if (ghost_ghost_coulombff != 0)
+            if (ghost_ghostff != 0)
             {
-                ghost_ghost_coulombff->addParticle(custom_clj_params);
-                ghost_ghost_ljff->addParticle(custom_clj_params);
+                ghost_ghostff->addParticle(custom_clj_params);
             }
 
-            if (ghost_nonghost_coulombff != 0)
+            if (ghost_nonghostff != 0)
             {
-                ghost_nonghost_coulombff->addParticle(custom_clj_params);
-                ghost_nonghost_ljff->addParticle(custom_clj_params);
+                ghost_nonghostff->addParticle(custom_clj_params);
             }
         }
 
@@ -542,22 +538,20 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
             cljff->addException(anchor_index, atom_index, 0, 0, 0, true);
         }
 
-        if (ghost_ghost_coulombff != 0)
+        if (ghost_ghostff != 0)
         {
             // make sure to exclude interactions between
             // the atom being positionally restrained and
             // the anchor
-            ghost_ghost_coulombff->addExclusion(anchor_index, atom_index);
-            ghost_ghost_ljff->addExclusion(anchor_index, atom_index);
+            ghost_ghostff->addExclusion(anchor_index, atom_index);
         }
 
-        if (ghost_nonghost_coulombff != 0)
+        if (ghost_nonghostff != 0)
         {
             // make sure to exclude interactions between
             // the atom being positionally restrained and
             // the anchor
-            ghost_nonghost_coulombff->addExclusion(anchor_index, atom_index);
-            ghost_nonghost_ljff->addExclusion(anchor_index, atom_index);
+            ghost_nonghostff->addExclusion(anchor_index, atom_index);
         }
 
         restraintff->addBond(anchor_index, atom_index, custom_params);
@@ -1314,10 +1308,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     ///
 
     OpenMM::CustomBondForce *ghost_14ff = 0;
-    OpenMM::CustomNonbondedForce *ghost_ghost_coulombff = 0;
-    OpenMM::CustomNonbondedForce *ghost_ghost_ljff = 0;
-    OpenMM::CustomNonbondedForce *ghost_nonghost_coulombff = 0;
-    OpenMM::CustomNonbondedForce *ghost_nonghost_ljff = 0;
+    OpenMM::CustomNonbondedForce *ghost_ghostff = 0;
+    OpenMM::CustomNonbondedForce *ghost_nonghostff = 0;
 
     if (any_perturbable)
     {
@@ -1411,7 +1403,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         };
 
         // see below for the description of this energy expression
-        std::string nb14_expression, coul_expression, lj_expression;
+        std::string nb14_expression, clj_expression;
 
         if (use_beutler_softening)
         {
@@ -1470,25 +1462,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // periodic boundaries or cutoffs
         ghost_14ff->setUsesPeriodicBoundaryConditions(false);
 
-        // Coulomb soft-core expression is identical for all three soft-core forms
-        // (Beutler, Taylor, and Zacharias/Michel). The energy is:
-        //
-        //   V_{coul}(r) = q_i q_j / 4 pi eps_0 * sqrt(delta + r^2)
-        //
-        //   delta = shift_coulomb^2 * max(alpha_i, alpha_j)
-        //
-        // We use max(alpha) so that the interaction is soft whenever either
-        // particle is a ghost. We subtract the regular Coulomb (kappa/r) term
-        // because the standard NonbondedForce already contributes it.
-        // 138.9354558466661 converts from |e|^2/nm to kJ mol-1.
-        //
-        coul_expression = QString("138.9354558466661*q1*q2*((1/sqrt((%1*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
-                                  "r_safe=max(r, 0.001);"
-                                  "max_kappa=max(kappa1, kappa2);"
-                                  "max_alpha=max(alpha1, alpha2);")
-                              .arg(shift_coulomb)
-                              .toStdString();
-
         if (use_beutler_softening)
         {
             // Beutler et al., Chem. Phys. Lett., 1994
@@ -1499,133 +1472,143 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             //
             // half_sigma and two_sqrt_epsilon are supplied to save cycles.
             //
-            lj_expression = QString("(1-max_alpha)*two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
-                                    "sig6=(sigma^6)/(%1*sigma^6*max_alpha + r_safe^6);"
-                                    "r_safe=max(r, 0.001);"
-                                    "max_alpha=max(alpha1, alpha2);"
-                                    "sigma=half_sigma1+half_sigma2;")
-                                .arg(beutler_alpha)
-                                .toStdString();
+            clj_expression = QString("coul_nrg+lj_nrg;"
+                                     "coul_nrg=138.9354558466661*q1*q2*((1/sqrt((%1*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
+                                     "lj_nrg=(1-max_alpha)*two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
+                                     "sig6=(sigma^6)/(%2*sigma^6*max_alpha + r_safe^6);"
+                                     "r_safe=max(r, 0.001);"
+                                     "max_kappa=max(kappa1, kappa2);"
+                                     "max_alpha=max(alpha1, alpha2);"
+                                     "sigma=half_sigma1+half_sigma2;")
+                                 .arg(shift_coulomb)
+                                 .arg(beutler_alpha)
+                                 .toStdString();
         }
         else if (use_taylor_softening)
         {
-            // Zacharias and McCammon, J. Chem. Phys., 1994, and also,
-            // Michel et al., JCTC, 2007; LJ is Rich Taylor's softcore LJ
+            // this uses the following potentials
+            //            Zacharias and McCammon, J. Chem. Phys., 1994, and also,
+            //            Michel et al., JCTC, 2007
+            //            LJ is Rich Taylor's softcore LJ
             //
             //   V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
             //                           (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
             //
-            // half_sigma and two_sqrt_epsilon are supplied to save cycles.
+            //   V_{coul}(r) = q_i q_j / 4 pi eps_0 (delta+r^2)^(1/2)
             //
-            lj_expression = QString("two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
-                                    "sig6=(sigma^6)/(%1*sigma^6 + r_safe^6);"
-                                    "r_safe=max(r, 0.001);"
-                                    "max_alpha=max(alpha1, alpha2);"
-                                    "sigma=half_sigma1+half_sigma2;")
-                                .arg(taylor_power_expression("max_alpha", taylor_power))
-                                .toStdString();
+            //   delta = shift_coulomb^2 * alpha
+            //
+            // Note that we supply half_sigma and two_sqrt_epsilon to save some
+            // cycles
+            //
+            // Note also that we subtract the normal coulomb energy as this
+            // is calculated during the standard NonbondedForce
+            //
+            // 138.9354558466661 is the constant needed to get energies in
+            // kJ mol-1 given the units of charge (|e|) and distance (nm)
+            //
+            clj_expression = QString("coul_nrg+lj_nrg;"
+                                     "coul_nrg=138.9354558466661*q1*q2*((1/sqrt((%1*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
+                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
+                                     "sig6=(sigma^6)/(%2*sigma^6 + r_safe^6);"
+                                     "r_safe=max(r, 0.001);"
+                                     "max_kappa=max(kappa1, kappa2);"
+                                     "max_alpha=max(alpha1, alpha2);"
+                                     "sigma=half_sigma1+half_sigma2;")
+                                 .arg(shift_coulomb)
+                                 .arg(taylor_power_expression("max_alpha", taylor_power))
+                                 .toStdString();
         }
         else
         {
-            // Zacharias and McCammon, J. Chem. Phys., 1994, and also,
-            // Michel et al., JCTC, 2007
+            // this uses the following potentials
+            //            Zacharias and McCammon, J. Chem. Phys., 1994, and also,
+            //            Michel et al., JCTC, 2007
             //
             //   V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) -
             //                           ( sigma^6  / (delta*sigma + r^2)^3 ) ]
             //
             //   delta = shift_delta * alpha
             //
-            // half_sigma and two_sqrt_epsilon are supplied to save cycles.
+            //   V_{coul}(r) = q_i q_j / 4 pi eps_0 (delta+r^2)^(1/2)
             //
-            lj_expression = QString("two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
-                                    "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
-                                    "delta=%1*max_alpha;"
-                                    "r_safe=max(r, 0.001);"
-                                    "max_alpha=max(alpha1, alpha2);"
-                                    "sigma=half_sigma1+half_sigma2;")
-                                .arg(shift_delta.to(SireUnits::nanometer))
-                                .toStdString();
+            //   delta = shift_coulomb^2 * alpha
+            //
+            // Note that we pre-calculate delta as a forcefield parameter,
+            // and also supply half_sigma and two_sqrt_epsilon to save some
+            // cycles
+            //
+            // Note also that we subtract the normal coulomb energy as this
+            // is calculated during the standard NonbondedForce
+            //
+            // 138.9354558466661 is the constant needed to get energies in
+            // kJ mol-1 given the units of charge (|e|) and distance (nm)
+            //
+            clj_expression = QString("coul_nrg+lj_nrg;"
+                                     "coul_nrg=138.9354558466661*q1*q2*((1/sqrt((%1*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
+                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
+                                     "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
+                                     "delta=%2*max_alpha;"
+                                     "r_safe=max(r, 0.001);"
+                                     "max_kappa=max(kappa1, kappa2);"
+                                     "max_alpha=max(alpha1, alpha2);"
+                                     "sigma=half_sigma1+half_sigma2;")
+                                 .arg(shift_coulomb)
+                                 .arg(shift_delta.to(SireUnits::nanometer))
+                                 .toStdString();
         }
 
-        ghost_ghost_coulombff = new OpenMM::CustomNonbondedForce(coul_expression);
-        ghost_ghost_coulombff->setName("GhostGhostCoulombForce");
-        ghost_ghost_ljff = new OpenMM::CustomNonbondedForce(lj_expression);
-        ghost_ghost_ljff->setName("GhostGhostLJForce");
-        ghost_nonghost_coulombff = new OpenMM::CustomNonbondedForce(coul_expression);
-        ghost_nonghost_coulombff->setName("GhostNonGhostCoulombForce");
-        ghost_nonghost_ljff = new OpenMM::CustomNonbondedForce(lj_expression);
-        ghost_nonghost_ljff->setName("GhostNonGhostLJForce");
+        ghost_ghostff = new OpenMM::CustomNonbondedForce(clj_expression);
+        ghost_ghostff->setName("GhostGhostNonbondedForce");
+        ghost_nonghostff = new OpenMM::CustomNonbondedForce(clj_expression);
+        ghost_nonghostff->setName("GhostNonGhostNonbondedForce");
 
-        for (auto ff : {ghost_ghost_coulombff, ghost_nonghost_coulombff})
-        {
-            ff->addPerParticleParameter("q");
-            ff->addPerParticleParameter("alpha");
-            ff->addPerParticleParameter("kappa");
-            ff->addGlobalParameter("lambda", 0.00000);
-        }
+        ghost_ghostff->addPerParticleParameter("q");
+        ghost_ghostff->addPerParticleParameter("half_sigma");
+        ghost_ghostff->addPerParticleParameter("two_sqrt_epsilon");
+        ghost_ghostff->addPerParticleParameter("alpha");
+        ghost_ghostff->addPerParticleParameter("kappa");
 
-        for (auto ff : {ghost_ghost_ljff, ghost_nonghost_ljff})
-        {
-            ff->addPerParticleParameter("half_sigma");
-            ff->addPerParticleParameter("two_sqrt_epsilon");
-            ff->addPerParticleParameter("alpha");
-            ff->addGlobalParameter("lambda", 0.00000);
-        }
+        ghost_nonghostff->addPerParticleParameter("q");
+        ghost_nonghostff->addPerParticleParameter("half_sigma");
+        ghost_nonghostff->addPerParticleParameter("two_sqrt_epsilon");
+        ghost_nonghostff->addPerParticleParameter("alpha");
+        ghost_nonghostff->addPerParticleParameter("kappa");
 
-        // Coulomb forces must not use LRC: the soft-core 1/sqrt(alpha+r^2)-1/r
-        // expression decays as 1/r^3 when alpha>0, making the LRC integral
-        // (proportional to int r^2 * 1/r^3 dr = int 1/r dr) log-divergent.
-        ghost_ghost_coulombff->setUseLongRangeCorrection(false);
-        ghost_nonghost_coulombff->setUseLongRangeCorrection(false);
-
-        // LJ soft-core LRC is handled analytically via a CustomVolumeForce
-        // rather than OpenMM's numerical integrator, because the standard
-        // LJ tail (r > rc, soft-core shift negligible) has a closed-form
-        // expression and this allows the result to be cached per lambda state.
-        ghost_ghost_ljff->setUseLongRangeCorrection(false);
-        ghost_nonghost_ljff->setUseLongRangeCorrection(false);
+        // LRC for the ghost soft-core is handled analytically via a CustomVolumeForce
+        // (Coulomb has no well-defined LRC; LJ tail is handled by the ghost-lrc force).
+        ghost_ghostff->setUseLongRangeCorrection(false);
+        ghost_nonghostff->setUseLongRangeCorrection(false);
 
         if (ffinfo.hasCutoff())
         {
             if (ffinfo.space().isPeriodic())
             {
-                for (auto ff : {ghost_ghost_coulombff, ghost_ghost_ljff,
-                                ghost_nonghost_coulombff, ghost_nonghost_ljff})
-                    ff->setNonbondedMethod(OpenMM::CustomNonbondedForce::CutoffPeriodic);
+                ghost_ghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::CutoffPeriodic);
+                ghost_nonghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::CutoffPeriodic);
             }
             else
             {
-                for (auto ff : {ghost_ghost_coulombff, ghost_ghost_ljff,
-                                ghost_nonghost_coulombff, ghost_nonghost_ljff})
-                    ff->setNonbondedMethod(OpenMM::CustomNonbondedForce::CutoffNonPeriodic);
+                ghost_ghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::CutoffNonPeriodic);
+                ghost_nonghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::CutoffNonPeriodic);
             }
 
-            for (auto ff : {ghost_ghost_coulombff, ghost_ghost_ljff,
-                            ghost_nonghost_coulombff, ghost_nonghost_ljff})
-                ff->setCutoffDistance(ffinfo.cutoff().to(SireUnits::nanometers));
+            ghost_ghostff->setCutoffDistance(ffinfo.cutoff().to(SireUnits::nanometers));
+            ghost_nonghostff->setCutoffDistance(ffinfo.cutoff().to(SireUnits::nanometers));
         }
         else
         {
-            for (auto ff : {ghost_ghost_coulombff, ghost_ghost_ljff,
-                            ghost_nonghost_coulombff, ghost_nonghost_ljff})
-                ff->setNonbondedMethod(OpenMM::CustomNonbondedForce::NoCutoff);
+            ghost_ghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::NoCutoff);
+            ghost_nonghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::NoCutoff);
         }
 
-        ghost_ghost_coulombff->setForceGroup(force_group_counter);
-        lambda_lever.setForceIndex("ghost/ghost-coulomb", system.addForce(ghost_ghost_coulombff));
-        lambda_lever.setForceGroup("ghost/ghost-coulomb", force_group_counter++);
+        ghost_ghostff->setForceGroup(force_group_counter);
+        lambda_lever.setForceIndex("ghost/ghost", system.addForce(ghost_ghostff));
+        lambda_lever.setForceGroup("ghost/ghost", force_group_counter++);
 
-        ghost_ghost_ljff->setForceGroup(force_group_counter);
-        lambda_lever.setForceIndex("ghost/ghost-lj", system.addForce(ghost_ghost_ljff));
-        lambda_lever.setForceGroup("ghost/ghost-lj", force_group_counter++);
-
-        ghost_nonghost_coulombff->setForceGroup(force_group_counter);
-        lambda_lever.setForceIndex("ghost/non-ghost-coulomb", system.addForce(ghost_nonghost_coulombff));
-        lambda_lever.setForceGroup("ghost/non-ghost-coulomb", force_group_counter++);
-
-        ghost_nonghost_ljff->setForceGroup(force_group_counter);
-        lambda_lever.setForceIndex("ghost/non-ghost-lj", system.addForce(ghost_nonghost_ljff));
-        lambda_lever.setForceGroup("ghost/non-ghost-lj", force_group_counter++);
+        ghost_nonghostff->setForceGroup(force_group_counter);
+        lambda_lever.setForceIndex("ghost/non-ghost", system.addForce(ghost_nonghostff));
+        lambda_lever.setForceGroup("ghost/non-ghost", force_group_counter++);
 
         // Analytic LJ LRC: E = lrc_coeff / V, updated each lambda step via
         // a cached closed-form sum over interaction-group pairs.
@@ -1704,10 +1687,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     QHash<int, int> idx_to_pert_idx;
     QHash<int, int> idx_to_qm_idx;
 
-    // holders for all of custom parameters for the ghost forces (prevents us
-    // having to continually re-allocate it)
-    std::vector<double> custom_params_coul = {0.0, 0.0, 0.0};
-    std::vector<double> custom_params_lj = {0.0, 0.0, 0.0};
+    // just a holder for all of the custom parameters for the
+    // ghost forces (prevents us having to continually re-allocate it)
+    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     // the sets of particle indexes for the ghost atoms and non-ghost atoms
     QVector<int> ghost_atoms;
@@ -1788,13 +1770,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
             // add a perturbable molecule, recording the start index
             // for each of the forcefields
-            start_indicies.reserve(9);
+            start_indicies.reserve(7);
 
             start_indicies.insert("clj", start_index);
-            start_indicies.insert("ghost/ghost-coulomb", start_index);
-            start_indicies.insert("ghost/ghost-lj", start_index);
-            start_indicies.insert("ghost/non-ghost-coulomb", start_index);
-            start_indicies.insert("ghost/non-ghost-lj", start_index);
+            start_indicies.insert("ghost/ghost", start_index);
+            start_indicies.insert("ghost/non-ghost", start_index);
 
             // the start index for this molecules first bond, angle or
             // torsion parameters will be however many of these
@@ -1873,24 +1853,19 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 }
 
                 // reduced_q
-                custom_params_coul[0] = charge;
-                // alpha
-                custom_params_coul[1] = alphas_data[j];
-                // kappa
-                custom_params_coul[2] = kappas_data[j];
-
+                custom_params[0] = charge;
                 // half_sigma
-                custom_params_lj[0] = 0.5 * boost::get<1>(clj);
+                custom_params[1] = 0.5 * boost::get<1>(clj);
                 // two_sqrt_epsilon
-                custom_params_lj[1] = 2.0 * std::sqrt(boost::get<2>(clj));
+                custom_params[2] = 2.0 * std::sqrt(boost::get<2>(clj));
                 // alpha
-                custom_params_lj[2] = alphas_data[j];
+                custom_params[3] = alphas_data[j];
+                // kappa
+                custom_params[4] = kappas_data[j];
 
                 // Add the particle to the ghost and nonghost forcefields
-                ghost_ghost_coulombff->addParticle(custom_params_coul);
-                ghost_ghost_ljff->addParticle(custom_params_lj);
-                ghost_nonghost_coulombff->addParticle(custom_params_coul);
-                ghost_nonghost_ljff->addParticle(custom_params_lj);
+                ghost_ghostff->addParticle(custom_params);
+                ghost_nonghostff->addParticle(custom_params);
 
                 real_atoms.append(atom_index);
 
@@ -1959,24 +1934,18 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // forcefields if there are any perturbable molecules
                 if (any_perturbable)
                 {
-                    // reduced_q
-                    custom_params_coul[0] = boost::get<0>(clj);
-                    // alpha - is zero for non-ghost atoms
-                    custom_params_coul[1] = 0.0;
-                    // kappa - is 0 for non-ghost atoms
-                    custom_params_coul[2] = 0.0;
-
+                    // reduced charge
+                    custom_params[0] = boost::get<0>(clj);
                     // half_sigma
-                    custom_params_lj[0] = 0.5 * boost::get<1>(clj);
+                    custom_params[1] = 0.5 * boost::get<1>(clj);
                     // two_sqrt_epsilon
-                    custom_params_lj[1] = 2.0 * std::sqrt(boost::get<2>(clj));
+                    custom_params[2] = 2.0 * std::sqrt(boost::get<2>(clj));
                     // alpha - is zero for non-ghost atoms
-                    custom_params_lj[2] = 0.0;
-
-                    ghost_ghost_coulombff->addParticle(custom_params_coul);
-                    ghost_ghost_ljff->addParticle(custom_params_lj);
-                    ghost_nonghost_coulombff->addParticle(custom_params_coul);
-                    ghost_nonghost_ljff->addParticle(custom_params_lj);
+                    custom_params[3] = 0.0;
+                    // kappa - is 0 for non-ghost atoms
+                    custom_params[4] = 0.0;
+                    ghost_ghostff->addParticle(custom_params);
+                    ghost_nonghostff->addParticle(custom_params);
                     non_ghost_atoms.append(atom_index);
                 }
             }
@@ -2038,23 +2007,18 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 if (any_perturbable and mol.isPerturbable())
                 {
                     // reduced_q
-                    custom_params_coul[0] = vs_charge;
-                    // alpha
-                    custom_params_coul[1] = alphas_data[mol.molinfo.nAtoms() + k];
-                    // kappa
-                    custom_params_coul[2] = kappas_data[mol.molinfo.nAtoms() + k];
-
+                    custom_params[0] = vs_charge;
                     // half_sigma
-                    custom_params_lj[0] = 1.0;
+                    custom_params[1] = 1.0;
                     // two_sqrt_epsilon
-                    custom_params_lj[1] = 0.0;
+                    custom_params[2] = 0.0;
                     // alpha
-                    custom_params_lj[2] = alphas_data[mol.molinfo.nAtoms() + k];
+                    custom_params[3] = alphas_data[mol.molinfo.nAtoms() + k];
+                    // kappa
+                    custom_params[4] = kappas_data[mol.molinfo.nAtoms() + k];
 
-                    ghost_ghost_coulombff->addParticle(custom_params_coul);
-                    ghost_ghost_ljff->addParticle(custom_params_lj);
-                    ghost_nonghost_coulombff->addParticle(custom_params_coul);
-                    ghost_nonghost_ljff->addParticle(custom_params_lj);
+                    ghost_ghostff->addParticle(custom_params);
+                    ghost_nonghostff->addParticle(custom_params);
 
                     const bool vs_to_ghost = mol.to_ghost_idxs.contains(parent_idx);
                     const bool vs_from_ghost = mol.from_ghost_idxs.contains(parent_idx);
@@ -2075,12 +2039,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 else if (any_perturbable)
                 {
                     // Add to ghost FFs if necessary
-                    custom_params_coul = {vs_charge, 0.0, 0.0};
-                    custom_params_lj = {1.0, 0.0, 0.0};
-                    ghost_ghost_coulombff->addParticle(custom_params_coul);
-                    ghost_ghost_ljff->addParticle(custom_params_lj);
-                    ghost_nonghost_coulombff->addParticle(custom_params_coul);
-                    ghost_nonghost_ljff->addParticle(custom_params_lj);
+                    custom_params = {vs_charge, 1.0, 0.0, 0.0, 0.0};
+                    ghost_ghostff->addParticle(custom_params);
+                    ghost_nonghostff->addParticle(custom_params);
                     non_ghost_atoms.append(atom_index);
                 }
             }
@@ -2256,16 +2217,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     /// Finally tell the ghost forcefields about the ghost and non-ghost
     /// interaction groups, so that they can correctly calculate the
     /// ghost/ghost and ghost/non-ghost energies
-    if (ghost_ghost_ljff != 0 and ghost_nonghost_ljff != 0)
+    if (ghost_ghostff != 0 and ghost_nonghostff != 0)
     {
         // set up the interaction groups - ghost / non-ghost
         //                                 ghost / ghost
         std::set<int> ghost_atoms_set(ghost_atoms.begin(), ghost_atoms.end());
         std::set<int> non_ghost_atoms_set(non_ghost_atoms.begin(), non_ghost_atoms.end());
-        for (auto ff : {ghost_ghost_coulombff, ghost_ghost_ljff})
-            ff->addInteractionGroup(ghost_atoms_set, ghost_atoms_set);
-        for (auto ff : {ghost_nonghost_coulombff, ghost_nonghost_ljff})
-            ff->addInteractionGroup(ghost_atoms_set, non_ghost_atoms_set);
+        ghost_ghostff->addInteractionGroup(ghost_atoms_set, ghost_atoms_set);
+        ghost_nonghostff->addInteractionGroup(ghost_atoms_set, non_ghost_atoms_set);
     }
 
     // Register GCMC water atom indices with the lambda lever and pre-compute the
@@ -2299,7 +2258,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     water_atom_indices.append(j);
             }
 
-            lambda_lever.setWaterAtoms(water_atom_indices);
+            lambda_lever.setGCMCWaterAtoms(water_atom_indices);
 
             // Pre-compute lrc_w_solute (per active water molecule, interaction with
             // all non-water atoms: protein, ligand, ions) and lrc_ww_half (per active
@@ -2567,11 +2526,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
             // we need to make sure that the list of exclusions in
             // the NonbondedForce match those in the CustomNonbondedForces
-            if (ghost_ghost_ljff != 0)
+            if (ghost_ghostff != 0)
             {
-                for (auto ff : {ghost_ghost_coulombff, ghost_ghost_ljff,
-                                ghost_nonghost_coulombff, ghost_nonghost_ljff})
-                    ff->addExclusion(boost::get<0>(p), boost::get<1>(p));
+                ghost_ghostff->addExclusion(boost::get<0>(p), boost::get<1>(p));
+                ghost_nonghostff->addExclusion(boost::get<0>(p), boost::get<1>(p));
             }
         }
 
@@ -2599,11 +2557,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     cljff->addException(vs0_index, start_index + a,
                                         0.0, 1,
                                         0, false);
-                    if (ghost_ghost_ljff != 0)
+                    if (ghost_ghostff != 0)
                     {
-                        for (auto ff : {ghost_ghost_coulombff, ghost_ghost_ljff,
-                                        ghost_nonghost_coulombff, ghost_nonghost_ljff})
-                            ff->addExclusion(vs0_index, start_index + a);
+                        ghost_ghostff->addExclusion(vs0_index, start_index + a);
+                        ghost_nonghostff->addExclusion(vs0_index, start_index + a);
                     }
 
                     for (int v1 = v0 + 1; v1 < atom_vs.size(); ++v1)
@@ -2612,11 +2569,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         cljff->addException(vs0_index, vs1_index,
                                             0.0, 1,
                                             0, false);
-                        if (ghost_ghost_ljff != 0)
+                        if (ghost_ghostff != 0)
                         {
-                            for (auto ff : {ghost_ghost_coulombff, ghost_ghost_ljff,
-                                            ghost_nonghost_coulombff, ghost_nonghost_ljff})
-                                ff->addExclusion(vs0_index, vs1_index);
+                            ghost_ghostff->addExclusion(vs0_index, vs1_index);
+                            ghost_nonghostff->addExclusion(vs0_index, vs1_index);
                         }
                     }
                 }
@@ -2646,9 +2602,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // and if the two atoms are in the same molecule
                 if (mol_from == mol_to)
                 {
-                    for (auto ff : {ghost_ghost_coulombff, ghost_ghost_ljff,
-                                    ghost_nonghost_coulombff, ghost_nonghost_ljff})
-                        ff->addExclusion(from_ghost_idx, to_ghost_idx);
+                    ghost_ghostff->addExclusion(from_ghost_idx, to_ghost_idx);
+                    ghost_nonghostff->addExclusion(from_ghost_idx, to_ghost_idx);
                     cljff->addException(from_ghost_idx, to_ghost_idx,
                                         0.0, 1e-9, 1e-9, false);
                 }

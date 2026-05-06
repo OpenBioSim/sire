@@ -165,7 +165,7 @@ namespace SireOpenMM
         QStringList getForceNames() const;
         bool wasForceChanged(const QString &name) const;
 
-        void setWaterAtoms(const QVector<int> &atoms);
+        void setGCMCWaterAtoms(const QVector<int> &atoms);
 
     protected:
         void updateRestraintInContext(OpenMM::Force &ff, double rho,
@@ -218,16 +218,16 @@ namespace SireOpenMM
         mutable double last_qmff_lam;
 
         /** Cache of pre-computed ghost LJ dispersion coefficients keyed by
-         *  rounded lambda (qRound64(lambda * 1e5)).  Populated on first visit
+         *  rounded lambda (qRound64(lambda * 1e5)). Populated on first visit
          *  to each lambda state and reused on warm passes. */
         mutable QHash<qint64, double> lrc_coeff_cache;
 
         /** Cache of pre-computed background (NonbondedForce) LJ dispersion
-         *  coefficients keyed by rounded lambda.  Mirrors lrc_coeff_cache but
+         *  coefficients keyed by rounded lambda. Mirrors lrc_coeff_cache but
          *  covers all non-ghost atoms in the clj force. */
         mutable QHash<qint64, double> background_lrc_coeff_cache;
 
-        /** OpenMM atom indices that belong to GCMC water molecules.  When
+        /** OpenMM atom indices that belong to GCMC water molecules. When
          *  non-empty these atoms are excluded from background-lrc (their LRC
          *  is handled by the gcmc-lrc CustomVolumeForce instead). */
         QSet<int> gcmc_water_atoms;
