@@ -165,7 +165,7 @@ namespace SireOpenMM
         QStringList getForceNames() const;
         bool wasForceChanged(const QString &name) const;
 
-        void setGCMCWaterAtoms(const QVector<int> &atoms);
+        void setWaterAtoms(const QVector<int> &atoms);
 
     protected:
         void updateRestraintInContext(OpenMM::Force &ff, double rho,

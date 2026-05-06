@@ -438,7 +438,7 @@ bool LambdaLever::wasForceChanged(const QString &name) const
     return it.value();
 }
 
-void LambdaLever::setGCMCWaterAtoms(const QVector<int> &atoms)
+void LambdaLever::setWaterAtoms(const QVector<int> &atoms)
 {
     gcmc_water_atoms = QSet<int>(atoms.begin(), atoms.end());
 }
@@ -1977,7 +1977,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     // Update the ghost LJ dispersion correction via the CustomVolumeForce.
     // At r > rc the soft-core shift is negligible, so the standard closed-form
-    // LJ tail integral applies.  Results are cached per lambda state.
+    // LJ tail integral applies. Results are cached per lambda state.
     auto ghost_lrc_ff = this->getForce<OpenMM::CustomVolumeForce>("ghost-lrc", system);
     if (ghost_lrc_ff != nullptr && ghost_ghost_ljff != nullptr && ghost_nonghost_ljff != nullptr)
     {

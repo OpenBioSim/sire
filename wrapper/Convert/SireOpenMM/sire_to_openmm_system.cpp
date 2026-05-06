@@ -2299,7 +2299,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     water_atom_indices.append(j);
             }
 
-            lambda_lever.setGCMCWaterAtoms(water_atom_indices);
+            lambda_lever.setWaterAtoms(water_atom_indices);
 
             // Pre-compute lrc_w_solute (per active water molecule, interaction with
             // all non-water atoms: protein, ligand, ions) and lrc_ww_half (per active
