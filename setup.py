@@ -271,6 +271,31 @@ def add_default_cmake_defs(cmake_defs, ncores):
         cmake_defs.append(["SIRE_DISABLE_AVX512F=ON"])
 
 
+def _detect_vs_generator():
+    # Map the installed VS major version to the CMake generator name.
+    # VS 2019=16, VS 2022=17, VS 2026=18 (and beyond).
+    _VS_GENERATORS = {
+        18: "Visual Studio 18 2026",
+        17: "Visual Studio 17 2022",
+        16: "Visual Studio 16 2019",
+        15: "Visual Studio 15 2017",
+    }
+    try:
+        result = subprocess.run(
+            ["vswhere.exe", "-nologo", "-latest", "-property", "installationVersion"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            major = int(result.stdout.strip().split(".")[0])
+            for version in sorted(_VS_GENERATORS, reverse=True):
+                if major >= version:
+                    return _VS_GENERATORS[version]
+    except Exception:
+        pass
+    return "Visual Studio 17 2022"
+
+
 def make_cmd(ncores, install=False):
     if is_windows:
         action = "INSTALL" if install else "ALL_BUILD"
@@ -661,7 +686,7 @@ if __name__ == "__main__":
     action = args.action[0]
 
     if is_windows and (args.generator is None or len(args.generator) == 0):
-        args.generator = [["Visual Studio 17 2022"]]
+        args.generator = [[_detect_vs_generator()]]
         args.architecture = [["x64"]]
     elif is_macos:
         # fix compile bug when INSTALL_NAME_TOOL is not set

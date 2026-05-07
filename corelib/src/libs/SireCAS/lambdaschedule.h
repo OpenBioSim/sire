@@ -233,6 +233,8 @@ namespace SireCAS
 
         double clamp(double lambda_value) const;
 
+        LambdaSchedule reverse() const;
+
     protected:
         int find_stage(const QString &stage) const;
 

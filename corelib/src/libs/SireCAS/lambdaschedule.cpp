@@ -28,6 +28,8 @@
 
 #include "lambdaschedule.h"
 
+#include "SireCAS/identities.h"
+#include "SireCAS/symbolexpression.h"
 #include "SireCAS/values.h"
 
 #include "SireBase/console.h"
@@ -1669,4 +1671,55 @@ QVector<int> LambdaSchedule::morph(const QString &force,
     }
 
     return morphed;
+}
+
+/** Return a new LambdaSchedule that is the reverse of this schedule.
+ *  The stages are reversed in order, and within each stage's equations
+ *  the lambda symbol is replaced by (1 - lambda) and the initial and
+ *  final symbols are swapped simultaneously. This flips the schedule
+ *  about its midpoint so that the end state becomes the start state
+ *  and vice versa.
+ *
+ *  The invariant is:
+ *    reversed.morph(force, lever, initial, final, λ)
+ *      == original.morph(force, lever, final, initial, 1-λ)
+ */
+LambdaSchedule LambdaSchedule::reverse() const
+{
+    if (this->isNull())
+        return *this;
+
+    // Simultaneous substitution: λ → (1-λ), initial ↔ final
+    const Identities ids(
+        SymbolExpression(lambda_symbol, 1.0 - Expression(lambda_symbol)),
+        SymbolExpression(initial_symbol, Expression(final_symbol)),
+        SymbolExpression(final_symbol, Expression(initial_symbol)));
+
+    auto transform = [&](const Expression &e) -> Expression
+    {
+        auto r = e.substitute(ids);
+        if (r == default_morph_equation)
+            r = default_morph_equation;
+        return r;
+    };
+
+    LambdaSchedule result(*this);
+
+    std::reverse(result.stage_names.begin(), result.stage_names.end());
+    std::reverse(result.default_equations.begin(), result.default_equations.end());
+    std::reverse(result.stage_equations.begin(), result.stage_equations.end());
+    std::reverse(result.stage_weights.begin(), result.stage_weights.end());
+
+    for (int i = 0; i < result.nStages(); ++i)
+    {
+        result.default_equations[i] = transform(result.default_equations[i]);
+
+        for (auto &eq : result.stage_equations[i])
+            eq = transform(eq);
+    }
+
+    for (auto &mol_sched : result.mol_schedules)
+        mol_sched = mol_sched.reverse();
+
+    return result;
 }
