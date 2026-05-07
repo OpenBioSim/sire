@@ -520,6 +520,14 @@ void register_LambdaSchedule_class()
             LambdaSchedule_exposer.def(
                 "removeStage", removeStage_function_value, (bp::arg("stage")), bp::release_gil_policy(), "Remove the stage stage");
         }
+        { //::SireCAS::LambdaSchedule::reverse
+
+            typedef ::SireCAS::LambdaSchedule (::SireCAS::LambdaSchedule::*reverse_function_type)() const;
+            reverse_function_type reverse_function_value(&::SireCAS::LambdaSchedule::reverse);
+
+            LambdaSchedule_exposer.def(
+                "reverse", reverse_function_value, bp::release_gil_policy(), "Return a new LambdaSchedule that is the reverse of this schedule.\n  The stages are reversed in order and in each stages equations\n  the lambda symbol is replaced by (1 - lambda) and the initial and\n  final symbols are swapped simultaneously. The invariant is:\n  reversed.morph(force, lever, initial, final, lam) ==\n  original.morph(force, lever, final, initial, 1-lam)\n");
+        }
         { //::SireCAS::LambdaSchedule::setConstant
 
             typedef ::SireCAS::Symbol (::SireCAS::LambdaSchedule::*setConstant_function_type)(::QString const &, double);

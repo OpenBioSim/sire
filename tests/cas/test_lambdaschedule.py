@@ -547,3 +547,83 @@ def test_stage_weight_get_stage_boundaries():
 
     # Midpoint of stage "b": lambda=0.25 + 1.5/4 = 0.625 → local lam=0.5
     assert l.get_lambda_in_stage(0.625) == pytest.approx(0.5)
+
+
+def test_reverse_stage_order():
+    """Reversing reverses the order of stage names."""
+    l = sr.cas.LambdaSchedule()
+    l.add_stage("a", l.lam())
+    l.add_stage("b", l.lam())
+    l.add_stage("c", l.lam())
+
+    r = l.reverse()
+    assert r.get_stages() == ["c", "b", "a"]
+
+
+def test_reverse_stage_weights():
+    """Reversing preserves stage weights in reversed order."""
+    l = sr.cas.LambdaSchedule()
+    l.add_stage("a", l.lam(), weight=1.0)
+    l.add_stage("b", l.lam(), weight=2.0)
+    l.add_stage("c", l.lam(), weight=3.0)
+
+    r = l.reverse()
+    assert r.get_stage_weights() == pytest.approx([3.0, 2.0, 1.0])
+
+
+def test_reverse_invariant():
+    """reversed.morph(init, fin, λ) == original.morph(fin, init, 1-λ)."""
+    import random
+
+    random.seed(42)
+
+    for schedule in [
+        sr.cas.LambdaSchedule.standard_morph(),
+        sr.cas.LambdaSchedule.charge_scaled_morph(),
+        sr.cas.LambdaSchedule.standard_decouple(),
+    ]:
+        r = schedule.reverse()
+        for _ in range(50):
+            lam_val = random.uniform(0.0, 1.0)
+            assert r.morph(
+                initial=0.0, final=1.0, lambda_value=lam_val
+            ) == pytest.approx(
+                schedule.morph(initial=1.0, final=0.0, lambda_value=1.0 - lam_val),
+                abs=1e-10,
+            )
+
+
+def test_reverse_standard_morph_is_identity():
+    """Reversing a standard morph schedule gives the same behaviour (it is symmetric)."""
+    import random
+
+    random.seed(42)
+    l = sr.cas.LambdaSchedule.standard_morph()
+    r = l.reverse()
+
+    for _ in range(50):
+        lam_val = random.uniform(0.0, 1.0)
+        assert l.morph(initial=0.0, final=1.0, lambda_value=lam_val) == pytest.approx(
+            r.morph(initial=0.0, final=1.0, lambda_value=lam_val), abs=1e-10
+        )
+
+
+def test_reverse_twice_is_identity():
+    """Reversing a schedule twice recovers the original behaviour."""
+    import random
+
+    random.seed(42)
+
+    for schedule in [
+        sr.cas.LambdaSchedule.standard_morph(),
+        sr.cas.LambdaSchedule.charge_scaled_morph(),
+        sr.cas.LambdaSchedule.standard_decouple(),
+    ]:
+        rr = schedule.reverse().reverse()
+        for _ in range(50):
+            lam_val = random.uniform(0.0, 1.0)
+            assert schedule.morph(
+                initial=0.0, final=1.0, lambda_value=lam_val
+            ) == pytest.approx(
+                rr.morph(initial=0.0, final=1.0, lambda_value=lam_val), abs=1e-10
+            )

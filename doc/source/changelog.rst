@@ -77,6 +77,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   and ghost–non-ghost interactions. Both are updated efficiently via the lambda lever
   without recomputing the full dispersion correction on every λ change.
 
+* Added a ``reverse()`` method to :class:`~sire.cas.LambdaSchedule` that returns a new
+  schedule flipped about its midpoint. Stages are reversed in order and each equation is
+  transformed by substituting ``λ → (1-λ)`` and swapping ``initial`` ↔ ``final``
+  simultaneously. The invariant is that
+  ``reversed.morph(force, lever, initial, final, λ)`` equals
+  ``original.morph(force, lever, final, initial, 1-λ)``.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
