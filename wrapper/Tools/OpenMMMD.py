@@ -152,7 +152,7 @@ buffered_coords_freq = Parameter(
 minimal_coordinate_saving = Parameter(
     "minimal coordinate saving",
     False,
-    "Reduce the number of coordiantes writing for stateswith lambda in ]0,1[",
+    "Reduce the number of coordiantes writing for states with lambda in ]0,1[",
 )
 
 time_to_skip = Parameter(
