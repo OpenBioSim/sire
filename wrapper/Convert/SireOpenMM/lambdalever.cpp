@@ -1753,8 +1753,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         }
 
         // Update CLJ exceptions for ring-breaking pairs: scale charge product by
-        // rb_kappa (0 at bonded end, 1 at nonbonded end). LJ stays at 1e-9
-        // so the ring-break CustomBondForce provides the full LJ correction.
+        // rb_kappa (0 at bonded end, 1 at nonbonded end) and by rest2_scale when
+        // both atoms are REST2 solute atoms. LJ stays at 1e-9 so the ring-break
+        // CustomBondForce provides the full LJ correction.
+        // Note: getBondParameters always returns the original unscaled q (bp[0])
+        // because setBondParameters is never called on ring_breaking_ff here.
         if (cljff != nullptr and ring_breaking_ff != nullptr)
         {
             const auto rb_exc = perturbable_mol.getExceptionIndicies("ring-break");
@@ -1767,8 +1770,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 int a0, a1;
                 std::vector<double> bp;
                 ring_breaking_ff->getBondParameters(bond_idx, a0, a1, bp);
+                double q_scale = rb_kappa;
+                if (perturbable_mol.isRest2(a0 - start_index) and
+                    perturbable_mol.isRest2(a1 - start_index))
+                    q_scale *= rest2_scale;
                 cljff->setExceptionParameters(clj_idx, a0, a1,
-                                              rb_kappa * bp[0], 1e-9, 1e-9);
+                                              q_scale * bp[0], 1e-9, 1e-9);
                 has_changed_cljff = true;
             }
         }
@@ -1785,8 +1792,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 int a0, a1;
                 std::vector<double> bp;
                 ring_making_ff->getBondParameters(bond_idx, a0, a1, bp);
+                double q_scale = rm_kappa;
+                if (perturbable_mol.isRest2(a0 - start_index) and
+                    perturbable_mol.isRest2(a1 - start_index))
+                    q_scale *= rest2_scale;
                 cljff->setExceptionParameters(clj_idx, a0, a1,
-                                              rm_kappa * bp[0], 1e-9, 1e-9);
+                                              q_scale * bp[0], 1e-9, 1e-9);
                 has_changed_cljff = true;
             }
         }
