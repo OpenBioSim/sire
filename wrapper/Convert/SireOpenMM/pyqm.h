@@ -124,6 +124,8 @@ namespace SireOpenMM
                     - The energy in kJ/mol.
                     - A vector of forces for the QM atoms in kJ/mol/nm.
                     - A vector of forces for the MM atoms in kJ/mol/nm.
+                    - (Optional) The gradient of the energy w.r.t. the effective MM
+                      charges in kJ/mol/e, used for the chain-rule switching correction.
          */
         boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
             QVector<int> numbers_qm,
@@ -652,6 +654,8 @@ namespace SireOpenMM
                     - The energy in kJ/mol.
                     - A vector of forces for the QM atoms in kJ/mol/nm.
                     - A vector of forces for the MM atoms in kJ/mol/nm.
+                    - (Optional) The gradient of the energy w.r.t. the effective MM
+                      charges in kJ/mol/e, used for the chain-rule switching correction.
          */
         boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
             QVector<int> numbers_qm,
