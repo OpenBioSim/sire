@@ -133,6 +133,9 @@ loguru = "*"
 pygit2 = "*"
 pyyaml = "*"
 
+[feature.emle.system-requirements]
+cuda = "12"
+
 [feature.emle.target.linux-64.dependencies]
 ambertools = ">=22"
 deepmd-kit = "*"
