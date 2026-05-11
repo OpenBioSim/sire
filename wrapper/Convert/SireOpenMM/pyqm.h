@@ -96,7 +96,7 @@ namespace SireOpenMM
                     - A list of forces for the MM atoms in kJ/mol/nm.
                 If empty, then the object is assumed to be a callable.
          */
-        PyQMCallback(bp::object, QString name="");
+        PyQMCallback(bp::object, QString name = "");
 
         //! Call the callback function.
         /*! \param numbers_qm
@@ -126,13 +126,27 @@ namespace SireOpenMM
                     - A vector of forces for the MM atoms in kJ/mol/nm.
          */
         boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
-                QVector<int> numbers_qm,
-                QVector<double> charges_mm,
-                QVector<QVector<double>> xyz_qm,
-                QVector<QVector<double>> xyz_mm,
-                QVector<QVector<double>> cell,
-                QVector<int> idx_mm
-        ) const;
+            QVector<int> numbers_qm,
+            QVector<double> charges_mm,
+            QVector<QVector<double>> xyz_qm,
+            QVector<QVector<double>> xyz_mm,
+            QVector<QVector<double>> cell,
+            QVector<int> idx_mm) const;
+
+        //! Call the callback and return an optional dE/dcharges_mm fourth element.
+        /*! Same arguments as call(). The 4th element of the returned tuple is the
+            gradient of the energy w.r.t. the effective MM charges (dE/dq_eff).
+            If the callback returns only 3 elements the 4th is an empty vector,
+            providing backward compatibility with existing callbacks.
+         */
+        boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>, QVector<double>>
+        call4(
+            QVector<int> numbers_qm,
+            QVector<double> charges_mm,
+            QVector<QVector<double>> xyz_qm,
+            QVector<QVector<double>> xyz_mm,
+            QVector<QVector<double>> cell,
+            QVector<int> idx_mm) const;
 
         //! Return the C++ name for this class.
         static const char *typeName();
@@ -212,8 +226,9 @@ namespace SireOpenMM
             QMap<int, double> bond_scale_factors,
             QVector<int> mm2_atoms,
             QVector<int> numbers,
-            QVector<double> charges
-        );
+            QVector<double> charges,
+            double switch_width = 0.2,
+            bool use_switch = true);
 
         //! Copy constructor.
         PyQMForce(const PyQMForce &other);
@@ -309,6 +324,18 @@ namespace SireOpenMM
          */
         QVector<double> getCharges() const;
 
+        //! Get the switch width.
+        /*! \returns
+                The switch width as a fraction of the cutoff.
+         */
+        double getSwitchWidth() const;
+
+        //! Get whether a switching function is used.
+        /*! \returns
+                Whether a switching function is used.
+         */
+        bool getUseSwitch() const;
+
         //! Return the C++ name for this class.
         static const char *typeName();
 
@@ -316,40 +343,24 @@ namespace SireOpenMM
         const char *what() const;
 
         //! Call the callback function.
-        /*! \param numbers_qm
-                A vector of atomic numbers for the atoms in the ML region.
-
-            \param charges_mm
-                A vector of the charges on the MM atoms in mod electron charge.
-
-            \param xyz_qm
-                A vector of positions for the atoms in the ML region in Angstrom.
-
-            \param xyz_mm
-                A vector of positions for the atoms in the MM region in Angstrom.
-
-            \param cell
-                A vector of the 3 cell vectors in Angstrom.
-
-            \param idx_mm
-                A vector of MM atom indices. Note that len(idx_mm) <= len(charges_mm)
-                since it only contains the indices of true MM atoms, not link atoms
-                or virtual charges.
-
-            \returns
-                A tuple containing:
-                    - The energy in kJ/mol.
-                    - A vector of forces for the QM atoms in kJ/mol/nm.
-                    - A vector of forces for the MM atoms in kJ/mol/nm.
-         */
+        /*! \returns A tuple: (energy, forces_qm, forces_mm). */
         boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
-                QVector<int> numbers_qm,
-                QVector<double> charges_mm,
-                QVector<QVector<double>> xyz_qm,
-                QVector<QVector<double>> xyz_mm,
-                QVector<QVector<double>> cell,
-                QVector<int> idx_mm
-        ) const;
+            QVector<int> numbers_qm,
+            QVector<double> charges_mm,
+            QVector<QVector<double>> xyz_qm,
+            QVector<QVector<double>> xyz_mm,
+            QVector<QVector<double>> cell,
+            QVector<int> idx_mm) const;
+
+        //! Call the callback, returning optional dE/dcharges_mm as fourth element.
+        boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>, QVector<double>>
+        call4(
+            QVector<int> numbers_qm,
+            QVector<double> charges_mm,
+            QVector<QVector<double>> xyz_qm,
+            QVector<QVector<double>> xyz_mm,
+            QVector<QVector<double>> cell,
+            QVector<int> idx_mm) const;
 
     protected:
         OpenMM::ForceImpl *createImpl() const;
@@ -360,6 +371,8 @@ namespace SireOpenMM
         int neighbour_list_frequency;
         bool is_mechanical;
         double lambda;
+        double switch_width;
+        bool use_switch;
         QVector<int> atoms;
         QMap<int, int> mm1_to_qm;
         QMap<int, QVector<int>> mm1_to_mm2;
@@ -385,8 +398,10 @@ namespace SireOpenMM
 
     private:
         const PyQMForce &owner;
-        unsigned long long step_count=0;
+        unsigned long long step_count = 0;
         double cutoff;
+        double r_switch;
+        bool use_switch;
         bool is_neighbour_list;
         int neighbour_list_frequency;
         double neighbour_list_cutoff;
@@ -424,12 +439,13 @@ namespace SireOpenMM
          */
         PyQMEngine(
             bp::object,
-            QString method="",
-            SireUnits::Dimension::Length cutoff=7.5*SireUnits::angstrom,
-            int neighbour_list_frequency=0,
-            bool is_mechanical=false,
-            double lambda=1.0
-        );
+            QString method = "",
+            SireUnits::Dimension::Length cutoff = 7.5 * SireUnits::angstrom,
+            int neighbour_list_frequency = 0,
+            bool is_mechanical = false,
+            double lambda = 1.0,
+            double switch_width = 0.2,
+            bool use_switch = true);
 
         //! Copy constructor.
         PyQMEngine(const PyQMEngine &other);
@@ -580,6 +596,30 @@ namespace SireOpenMM
          */
         void setCharges(QVector<double> charges);
 
+        //! Get the switch width.
+        /*! \returns
+                The switch width as a fraction of the cutoff.
+         */
+        double getSwitchWidth() const;
+
+        //! Set the switch width.
+        /*! \param switch_width
+                The switch width as a fraction of the cutoff (0 to 1).
+         */
+        void setSwitchWidth(double switch_width);
+
+        //! Get whether a switching function is used.
+        /*! \returns
+                Whether a switching function is used.
+         */
+        bool getUseSwitch() const;
+
+        //! Set whether a switching function is used.
+        /*! \param use_switch
+                Whether to use a switching function.
+         */
+        void setUseSwitch(bool use_switch);
+
         //! Return the C++ name for this class.
         static const char *typeName();
 
@@ -614,16 +654,15 @@ namespace SireOpenMM
                     - A vector of forces for the MM atoms in kJ/mol/nm.
          */
         boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
-                QVector<int> numbers_qm,
-                QVector<double> charges_mm,
-                QVector<QVector<double>> xyz_qm,
-                QVector<QVector<double>> xyz_mm,
-                QVector<QVector<double>> cell,
-                QVector<int> idx_mm
-        ) const;
+            QVector<int> numbers_qm,
+            QVector<double> charges_mm,
+            QVector<QVector<double>> xyz_qm,
+            QVector<QVector<double>> xyz_mm,
+            QVector<QVector<double>> cell,
+            QVector<int> idx_mm) const;
 
         //! Create an EMLE force object.
-        QMForce* createForce() const;
+        QMForce *createForce() const;
 
     private:
         PyQMCallback callback;
@@ -631,6 +670,8 @@ namespace SireOpenMM
         int neighbour_list_frequency;
         bool is_mechanical;
         double lambda;
+        double switch_width;
+        bool use_switch;
         QVector<int> atoms;
         QMap<int, int> mm1_to_qm;
         QMap<int, QVector<int>> mm1_to_mm2;

@@ -19,6 +19,7 @@ def create_engine(
     neighbour_list_frequency=0,
     mechanical_embedding=False,
     redistribute_charge=True,
+    switch_width=0.2,
     map=None,
 ):
     """
@@ -73,6 +74,13 @@ def create_engine(
         charge is an integer. Alternatively, when the QM region is part of a
         molecule, the excess charge is redistributed over the MM atoms within
         the residues of the QM region.
+
+    switch_width : float, optional, default=0.2
+        The width of the switching region as a fraction of the cutoff (0 to 1).
+        A quintic switching function is applied to the MM charges over the last
+        ``switch_width * cutoff`` angstroms before the cutoff, smoothly scaling
+        them to zero. Set to 0 or None to disable switching (not recommended
+        for production MD with charged ML regions).
 
     Returns
     -------
@@ -133,6 +141,15 @@ def create_engine(
     if not isinstance(redistribute_charge, bool):
         raise TypeError("'redistribute_charge' must be of type 'bool'")
 
+    if switch_width is None:
+        switch_width = 0.0
+    if not isinstance(switch_width, (int, float)):
+        raise TypeError("'switch_width' must be of type 'int' or 'float'")
+    switch_width = float(switch_width)
+    if switch_width < 0.0 or switch_width > 1.0:
+        raise ValueError("'switch_width' must be between 0 and 1")
+    use_switch = switch_width > 0.0
+
     if map is not None:
         if not isinstance(map, dict):
             raise TypeError("'map' must be of type 'dict'")
@@ -146,6 +163,10 @@ def create_engine(
         neighbour_list_frequency,
         mechanical_embedding,
     )
+
+    # Configure the switching function.
+    engine.set_switch_width(switch_width)
+    engine.set_use_switch(use_switch)
 
     from ._utils import (
         _check_charge,
