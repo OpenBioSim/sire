@@ -37,6 +37,7 @@ an engine to perform the calculation:
 ...     cutoff="7.5A",
 ...     neighbour_list_frequency=20,
 ...     mechanical_embedding=False,
+...     switch_width=0.2,
 ... )
 
 Here the first argument is the molecules that we are simulating, the second
@@ -65,7 +66,7 @@ signature:
         xyz_mm: List[List[float]],
         cell: Optional[List[List[float]]] = None,
         idx_mm: Optional[List[int]] = None,
-    ) -> Tuple[float, List[List[float]], List[List[float]]]:
+    ) -> Tuple[float, List[List[float]], List[List[float]], Optional[List[float]]]:
 
 The function takes the atomic numbers of the QM atoms, the charges of the MM
 atoms in mod electron charge, the coordinates of the QM atoms in Angstrom, and
@@ -75,10 +76,18 @@ QM/MM region. This is useful for obtaining any additional atomic properties
 that may be required by the callback. (Note that link atoms and virtual charges
 are always placed last in the list of MM charges and positions.) The function
 should return the calculated energy in kJ/mol, the forces on the QM atoms in
-kJ/mol/nm, and the forces on the MM atoms in kJ/mol/nm. The remaining arguments
-are optional and specify the QM cutoff distance, the neighbour list update
-frequency, and whether the electrostatics should be treated with mechanical
-embedding. When mechanical embedding is used, the electrostatics are treated
+kJ/mol/nm, and the forces on the MM atoms in kJ/mol/nm. Optionally, it may also
+return a fourth element: the gradient of the energy with respect to the effective
+MM charges (dE/dq) in kJ/mol/e. When present, this is used to apply a chain-rule
+force correction that accounts for the positional dependence of the charge switching
+function (see below), which is important for systems with a charged ML region. The
+remaining arguments are optional and specify the QM cutoff distance, the neighbour
+list update frequency, whether the electrostatics should be treated with mechanical
+embedding, and the width of the switching region as a fraction of the cutoff
+(``switch_width``, default 0.2). The switching function smoothly scales the MM
+charges to zero between ``(1 - switch_width) * cutoff`` and ``cutoff``, which
+avoids force discontinuities as MM atoms enter or leave the cutoff sphere. Setting
+``switch_width=0`` disables switching (not recommended for charged ML regions). When mechanical embedding is used, the electrostatics are treated
 at the MM level by ``OpenMM``. Note that this doesn't change the signature of
 the callback function, i.e. it will be passed empty lists for the MM specific
 arguments and should return an empty list for the MM forces. Atomic positions

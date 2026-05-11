@@ -84,6 +84,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   ``reversed.morph(force, lever, initial, final, λ)`` equals
   ``original.morph(force, lever, final, initial, 1-λ)``.
 
+* Add support for using a switching function for QM/MM simulations.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 

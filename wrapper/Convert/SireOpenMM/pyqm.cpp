@@ -26,6 +26,7 @@
   *
 \*********************************************/
 
+#include <limits>
 #include <mutex>
 
 #include <QHash>
@@ -54,8 +55,9 @@ static const double VIRTUAL_PC_DELTA = 0.01;
 class GILLock
 {
 public:
-    GILLock()  { state_ = PyGILState_Ensure(); }
-    ~GILLock() { PyGILState_Release(state_);   }
+    GILLock() { state_ = PyGILState_Ensure(); }
+    ~GILLock() { PyGILState_Release(state_); }
+
 private:
     PyGILState_STATE state_;
 };
@@ -85,8 +87,9 @@ bp::object getPythonObject(QString uuid)
     if (not py_object_registry.contains(uuid))
     {
         throw SireError::invalid_key(QObject::tr(
-            "Unable to find UUID %1 in the PyQMForce callback registry.").arg(uuid),
-            CODELOC);
+                                         "Unable to find UUID %1 in the PyQMForce callback registry.")
+                                         .arg(uuid),
+                                     CODELOC);
     }
 
     return py_object_registry[uuid];
@@ -137,8 +140,7 @@ PyQMCallback::PyQMCallback()
 {
 }
 
-PyQMCallback::PyQMCallback(bp::object py_object, QString name) :
-    py_object(py_object), name(name)
+PyQMCallback::PyQMCallback(bp::object py_object, QString name) : py_object(py_object), name(name)
 {
     // Is this a method or free function.
     if (name.isEmpty())
@@ -172,15 +174,14 @@ PyQMCallback::call(
                 xyz_qm,
                 xyz_mm,
                 cell,
-                idx_mm
-            );
+                idx_mm);
         }
         catch (const bp::error_already_set &)
         {
             PyErr_Print();
             throw SireError::process_error(QObject::tr(
-                "An error occurred when calling the QM Python callback method"),
-                CODELOC);
+                                               "An error occurred when calling the QM Python callback method"),
+                                           CODELOC);
         }
     }
     else
@@ -194,17 +195,74 @@ PyQMCallback::call(
                 xyz_qm,
                 xyz_mm,
                 cell,
-                idx_mm
-            );
+                idx_mm);
         }
         catch (const bp::error_already_set &)
         {
             PyErr_Print();
             throw SireError::process_error(QObject::tr(
-                "An error occurred when calling the QM Python callback method"),
-                CODELOC);
+                                               "An error occurred when calling the QM Python callback method"),
+                                           CODELOC);
         }
     }
+}
+
+boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>, QVector<double>>
+PyQMCallback::call4(
+    QVector<int> numbers_qm,
+    QVector<double> charges_mm,
+    QVector<QVector<double>> xyz_qm,
+    QVector<QVector<double>> xyz_mm,
+    QVector<QVector<double>> cell,
+    QVector<int> idx_mm) const
+{
+    // Acquire GIL before calling Python code.
+    GILLock lock;
+
+    bp::object result;
+    try
+    {
+        if (this->is_method)
+        {
+            result = bp::call_method<bp::object>(
+                this->py_object.ptr(),
+                this->name.toStdString().c_str(),
+                numbers_qm, charges_mm, xyz_qm, xyz_mm, cell, idx_mm);
+        }
+        else
+        {
+            result = bp::call<bp::object>(
+                this->py_object.ptr(),
+                numbers_qm, charges_mm, xyz_qm, xyz_mm, cell, idx_mm);
+        }
+    }
+    catch (const bp::error_already_set &)
+    {
+        PyErr_Print();
+        throw SireError::process_error(QObject::tr(
+                                           "An error occurred when calling the QM Python callback method"),
+                                       CODELOC);
+    }
+
+    // Extract mandatory first three elements while GIL is held.
+    const auto energy = bp::extract<double>(result[0])();
+    const auto forces_qm = bp::extract<QVector<QVector<double>>>(result[1])();
+    const auto forces_mm = bp::extract<QVector<QVector<double>>>(result[2])();
+
+    // Extract optional fourth element: dE/dcharges_mm (empty if not returned).
+    QVector<double> dE_dcharges_mm;
+    if (bp::len(result) > 3)
+    {
+        try
+        {
+            dE_dcharges_mm = bp::extract<QVector<double>>(result[3])();
+        }
+        catch (...)
+        {
+        }
+    }
+
+    return boost::make_tuple(energy, forces_qm, forces_mm, dE_dcharges_mm);
 }
 
 const char *PyQMCallback::typeName()
@@ -225,14 +283,15 @@ static const RegisterMetaType<PyQMForce> r_pyqmforce(NO_ROOT);
 
 QDataStream &operator<<(QDataStream &ds, const PyQMForce &pyqmforce)
 {
-    writeHeader(ds, r_pyqmforce, 1);
+    writeHeader(ds, r_pyqmforce, 2);
 
     SharedDataStream sds(ds);
 
     sds << pyqmforce.callback << pyqmforce.cutoff << pyqmforce.neighbour_list_frequency
-        << pyqmforce.is_mechanical <<  pyqmforce.lambda << pyqmforce.atoms
+        << pyqmforce.is_mechanical << pyqmforce.lambda << pyqmforce.atoms
         << pyqmforce.mm1_to_qm << pyqmforce.mm1_to_mm2 << pyqmforce.bond_scale_factors
-        << pyqmforce.mm2_atoms << pyqmforce.numbers << pyqmforce.charges;
+        << pyqmforce.mm2_atoms << pyqmforce.numbers << pyqmforce.charges
+        << pyqmforce.switch_width << pyqmforce.use_switch;
 
     return ds;
 }
@@ -241,17 +300,23 @@ QDataStream &operator>>(QDataStream &ds, PyQMForce &pyqmforce)
 {
     VersionID v = readHeader(ds, r_pyqmforce);
 
-    if (v == 1)
+    if (v == 2)
     {
         SharedDataStream sds(ds);
 
-        sds >> pyqmforce.callback >> pyqmforce.cutoff >> pyqmforce.neighbour_list_frequency
-            >> pyqmforce.is_mechanical >> pyqmforce.lambda >> pyqmforce.atoms
-            >> pyqmforce.mm1_to_qm >> pyqmforce.mm1_to_mm2 >> pyqmforce.bond_scale_factors
-            >> pyqmforce.mm2_atoms >> pyqmforce.numbers >> pyqmforce.charges;
+        sds >> pyqmforce.callback >> pyqmforce.cutoff >> pyqmforce.neighbour_list_frequency >> pyqmforce.is_mechanical >> pyqmforce.lambda >> pyqmforce.atoms >> pyqmforce.mm1_to_qm >> pyqmforce.mm1_to_mm2 >> pyqmforce.bond_scale_factors >> pyqmforce.mm2_atoms >> pyqmforce.numbers >> pyqmforce.charges >> pyqmforce.switch_width >> pyqmforce.use_switch;
+    }
+    else if (v == 1)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> pyqmforce.callback >> pyqmforce.cutoff >> pyqmforce.neighbour_list_frequency >> pyqmforce.is_mechanical >> pyqmforce.lambda >> pyqmforce.atoms >> pyqmforce.mm1_to_qm >> pyqmforce.mm1_to_mm2 >> pyqmforce.bond_scale_factors >> pyqmforce.mm2_atoms >> pyqmforce.numbers >> pyqmforce.charges;
+
+        pyqmforce.switch_width = 0.2;
+        pyqmforce.use_switch = true;
     }
     else
-        throw version_error(v, "1", r_pyqmforce, CODELOC);
+        throw version_error(v, "2", r_pyqmforce, CODELOC);
 
     return ds;
 }
@@ -272,35 +337,39 @@ PyQMForce::PyQMForce(
     QMap<int, double> bond_scale_factors,
     QVector<int> mm2_atoms,
     QVector<int> numbers,
-    QVector<double> charges) :
-    callback(callback),
-    cutoff(cutoff),
-    neighbour_list_frequency(neighbour_list_frequency),
-    is_mechanical(is_mechanical),
-    lambda(lambda),
-    atoms(atoms),
-    mm1_to_qm(mm1_to_qm),
-    mm1_to_mm2(mm1_to_mm2),
-    bond_scale_factors(bond_scale_factors),
-    mm2_atoms(mm2_atoms),
-    numbers(numbers),
-    charges(charges)
+    QVector<double> charges,
+    double switch_width,
+    bool use_switch) : callback(callback),
+                       cutoff(cutoff),
+                       neighbour_list_frequency(neighbour_list_frequency),
+                       is_mechanical(is_mechanical),
+                       lambda(lambda),
+                       atoms(atoms),
+                       mm1_to_qm(mm1_to_qm),
+                       mm1_to_mm2(mm1_to_mm2),
+                       bond_scale_factors(bond_scale_factors),
+                       mm2_atoms(mm2_atoms),
+                       numbers(numbers),
+                       charges(charges),
+                       switch_width(switch_width),
+                       use_switch(use_switch)
 {
 }
 
-PyQMForce::PyQMForce(const PyQMForce &other) :
-    callback(other.callback),
-    cutoff(other.cutoff),
-    neighbour_list_frequency(other.neighbour_list_frequency),
-    is_mechanical(other.is_mechanical),
-    lambda(other.lambda),
-    atoms(other.atoms),
-    mm1_to_qm(other.mm1_to_qm),
-    mm1_to_mm2(other.mm1_to_mm2),
-    mm2_atoms(other.mm2_atoms),
-    bond_scale_factors(other.bond_scale_factors),
-    numbers(other.numbers),
-    charges(other.charges)
+PyQMForce::PyQMForce(const PyQMForce &other) : callback(other.callback),
+                                               cutoff(other.cutoff),
+                                               neighbour_list_frequency(other.neighbour_list_frequency),
+                                               is_mechanical(other.is_mechanical),
+                                               lambda(other.lambda),
+                                               atoms(other.atoms),
+                                               mm1_to_qm(other.mm1_to_qm),
+                                               mm1_to_mm2(other.mm1_to_mm2),
+                                               mm2_atoms(other.mm2_atoms),
+                                               bond_scale_factors(other.bond_scale_factors),
+                                               numbers(other.numbers),
+                                               charges(other.charges),
+                                               switch_width(other.switch_width),
+                                               use_switch(other.use_switch)
 {
 }
 
@@ -318,6 +387,8 @@ PyQMForce &PyQMForce::operator=(const PyQMForce &other)
     this->bond_scale_factors = other.bond_scale_factors;
     this->numbers = other.numbers;
     this->charges = other.charges;
+    this->switch_width = other.switch_width;
+    this->use_switch = other.use_switch;
     return *this;
 }
 
@@ -362,7 +433,8 @@ int PyQMForce::getNeighbourListFrequency() const
 
 bool PyQMForce::getIsMechanical() const
 {
-    return this->is_mechanical;;
+    return this->is_mechanical;
+    ;
 }
 
 QVector<int> PyQMForce::getAtoms() const
@@ -390,6 +462,16 @@ QVector<double> PyQMForce::getCharges() const
     return this->charges;
 }
 
+double PyQMForce::getSwitchWidth() const
+{
+    return this->switch_width;
+}
+
+bool PyQMForce::getUseSwitch() const
+{
+    return this->use_switch;
+}
+
 const char *PyQMForce::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<PyQMForce>());
@@ -412,75 +494,88 @@ PyQMForce::call(
     return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell, idx_mm);
 }
 
+boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>, QVector<double>>
+PyQMForce::call4(
+    QVector<int> numbers_qm,
+    QVector<double> charges_mm,
+    QVector<QVector<double>> xyz_qm,
+    QVector<QVector<double>> xyz_mm,
+    QVector<QVector<double>> cell,
+    QVector<int> idx_mm) const
+{
+    return this->callback.call4(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell, idx_mm);
+}
+
 /////////
 ///////// OpenMM Serialization
 /////////
 
 namespace OpenMM
 {
-    class PyQMForceProxy : public SerializationProxy {
-        public:
-            PyQMForceProxy() : SerializationProxy("PyQMForce")
+    class PyQMForceProxy : public SerializationProxy
+    {
+    public:
+        PyQMForceProxy() : SerializationProxy("PyQMForce") {
+                           };
+
+        void serialize(const void *object, SerializationNode &node) const
+        {
+            // Serialize the object.
+            QByteArray data;
+            QDataStream ds(&data, QIODevice::WriteOnly);
+            PyQMForce pyqmforce = *static_cast<const PyQMForce *>(object);
+            ds << pyqmforce;
+
+            // Set the version.
+            node.setIntProperty("version", 0);
+
+            // Set the note attribute.
+            node.setStringProperty("note",
+                                   "This force only supports partial serialization, so can only be used "
+                                   "within the same session and memory space.");
+
+            // Set the data by converting the QByteArray to a hexidecimal string.
+            node.setStringProperty("data", data.toHex().data());
+        };
+
+        void *deserialize(const SerializationNode &node) const
+        {
+            // Check the version.
+            int version = node.getIntProperty("version");
+            if (version != 0)
             {
-            };
+                throw OpenMM::OpenMMException("Unsupported version number");
+            }
 
-            void serialize(const void* object, SerializationNode& node) const
+            // Get the data as a std::string.
+            auto string = node.getStringProperty("data");
+
+            // Convert to hexidecimal.
+            auto hex = QByteArray::fromRawData(string.data(), string.size());
+
+            // Convert to a QByteArray.
+            auto data = QByteArray::fromHex(hex);
+
+            // Deserialize the object.
+            QDataStream ds(data);
+            PyQMForce pyqmforce;
+
+            try
             {
-                // Serialize the object.
-                QByteArray data;
-                QDataStream ds(&data, QIODevice::WriteOnly);
-                PyQMForce pyqmforce = *static_cast<const PyQMForce*>(object);
-                ds << pyqmforce;
-
-                // Set the version.
-                node.setIntProperty("version", 0);
-
-                // Set the note attribute.
-                node.setStringProperty("note",
-                 "This force only supports partial serialization, so can only be used "
-                 "within the same session and memory space.");
-
-                // Set the data by converting the QByteArray to a hexidecimal string.
-                node.setStringProperty("data", data.toHex().data());
-            };
-
-            void* deserialize(const SerializationNode& node) const
+                ds >> pyqmforce;
+            }
+            catch (...)
             {
-                // Check the version.
-                int version = node.getIntProperty("version");
-                if (version != 0)
-                {
-                    throw OpenMM::OpenMMException("Unsupported version number");
-                }
+                throw OpenMM::OpenMMException("Unable to find UUID in the PyQMForce callback registry.");
+            }
 
-                // Get the data as a std::string.
-                auto string = node.getStringProperty("data");
-
-                // Convert to hexidecimal.
-                auto hex = QByteArray::fromRawData(string.data(), string.size());
-
-                // Convert to a QByteArray.
-                auto data = QByteArray::fromHex(hex);
-
-                // Deserialize the object.
-                QDataStream ds(data);
-                PyQMForce pyqmforce;
-
-                try
-                {
-                    ds >> pyqmforce;
-                }
-                catch (...)
-                {
-                    throw OpenMM::OpenMMException("Unable to find UUID in the PyQMForce callback registry.");
-                }
-
-                return new PyQMForce(pyqmforce);
-            };
+            return new PyQMForce(pyqmforce);
+        };
     };
 
     // Register the PyQMForce serialization proxy.
-    extern "C" void registerPyQMSerializationProxies() {
+    extern "C" void registerPyQMSerializationProxies()
+    {
         SerializationProxy::registerProxy(typeid(PyQMForce), new PyQMForceProxy());
     }
 };
@@ -503,9 +598,8 @@ OpenMM::ForceImpl *PyQMForce::createImpl() const
 }
 
 #ifdef SIRE_USE_CUSTOMCPPFORCE
-PyQMForceImpl::PyQMForceImpl(const PyQMForce &owner) :
-    OpenMM::CustomCPPForceImpl(owner),
-    owner(owner)
+PyQMForceImpl::PyQMForceImpl(const PyQMForce &owner) : OpenMM::CustomCPPForceImpl(owner),
+                                                       owner(owner)
 {
 }
 
@@ -530,13 +624,17 @@ double PyQMForceImpl::computeForce(
         this->cutoff = this->owner.getCutoff().value();
 
         // The neighbour list cutoff is 20% larger than the cutoff.
-        this->neighbour_list_cutoff = 1.2*this->cutoff;
+        this->neighbour_list_cutoff = 1.2 * this->cutoff;
 
         // Store the neighbour list update frequency.
         this->neighbour_list_frequency = this->owner.getNeighbourListFrequency();
 
         // Flag whether a neighbour list is used.
         this->is_neighbour_list = this->neighbour_list_frequency > 0;
+
+        // Cache switching function parameters.
+        this->use_switch = this->owner.getUseSwitch();
+        this->r_switch = (1.0 - this->owner.getSwitchWidth()) * this->cutoff;
     }
 
     // Get the current box vectors in nanometers.
@@ -545,17 +643,15 @@ double PyQMForceImpl::computeForce(
 
     // Create a triclinic space, converting to Angstrom.
     TriclinicBox space(
-        Vector(10*box_x[0], 10*box_x[1], 10*box_x[2]),
-        Vector(10*box_y[0], 10*box_y[1], 10*box_y[2]),
-        Vector(10*box_z[0], 10*box_z[1], 10*box_z[2])
-    );
+        Vector(10 * box_x[0], 10 * box_x[1], 10 * box_x[2]),
+        Vector(10 * box_y[0], 10 * box_y[1], 10 * box_y[2]),
+        Vector(10 * box_z[0], 10 * box_z[1], 10 * box_z[2]));
 
     // Store the cell vectors in Angstrom.
     QVector<QVector<double>> cell = {
-        {10*box_x[0], 10*box_x[1], 10*box_x[2]},
-        {10*box_y[0], 10*box_y[1], 10*box_y[2]},
-        {10*box_z[0], 10*box_z[1], 10*box_z[2]}
-    };
+        {10 * box_x[0], 10 * box_x[1], 10 * box_x[2]},
+        {10 * box_y[0], 10 * box_y[1], 10 * box_y[2]},
+        {10 * box_z[0], 10 * box_z[1], 10 * box_z[2]}};
 
     // Store the QM atomic indices and numbers.
     auto qm_atoms = this->owner.getAtoms();
@@ -578,12 +674,12 @@ double PyQMForceImpl::computeForce(
     for (const auto &idx : qm_atoms)
     {
         const auto &pos = positions[idx];
-        Vector qm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
+        Vector qm_vec(10 * pos[0], 10 * pos[1], 10 * pos[2]);
         xyz_qm_vec[i] = qm_vec;
         i++;
     }
 
-    // Next sure that the QM atoms are whole (unwrapped).
+    // Make sure that the QM atoms are whole (unwrapped).
     xyz_qm_vec = space.makeWhole(xyz_qm_vec);
 
     // Get the center of the QM atoms. We will use this as a reference when
@@ -608,6 +704,23 @@ double PyQMForceImpl::computeForce(
     // Store the current number of MM atoms.
     unsigned int num_mm = 0;
 
+    // ds/dr of the quintic switching function (zero outside the switching region).
+    // Defined at outer scope so the chain-rule correction loop can use it after
+    // the electrostatic-embedding block closes.
+    auto switch_deriv = [&](double r) -> double
+    {
+        if (not this->use_switch or r <= this->r_switch or r >= this->cutoff)
+            return 0.0;
+        const double x = (r - this->r_switch) / (this->cutoff - this->r_switch);
+        return -30.0 * x * x * (x - 1.0) * (x - 1.0) / (this->cutoff - this->r_switch);
+    };
+
+    // Unscaled charges and chain-rule data for accepted MM atoms.
+    // Declared at outer scope for the same reason as switch_deriv above.
+    QVector<double> charges_unscaled;
+    QVector<double> min_dists;
+    QVector<Vector> nearest_qm_vecs;
+
     // If we are using electrostatic embedding, the work out the MM point charges and
     // build the neighbour list.
     if (not this->owner.getIsMechanical())
@@ -617,7 +730,19 @@ double PyQMForceImpl::computeForce(
         QVector<QVector<double>> xyz_virtual;
         QVector<double> charges_virtual;
 
-        // Manually work out the MM point charges and build the neigbour list.
+        // Quintic switching function: scales charges smoothly to zero at the cutoff.
+        // Continuous through second derivative; r_switch and use_switch cached at step 0.
+        auto switching_function = [&](double r) -> double
+        {
+            if (not this->use_switch or r <= this->r_switch)
+                return 1.0;
+            if (r >= this->cutoff)
+                return 0.0;
+            const double x = (r - this->r_switch) / (this->cutoff - this->r_switch);
+            return 1.0 - x * x * x * (6.0 * x * x - 15.0 * x + 10.0);
+        };
+
+        // Manually work out the MM point charges and build the neighbour list.
         if (not this->is_neighbour_list or this->step_count % this->neighbour_list_frequency == 0)
         {
             // Clear the neighbour list.
@@ -636,13 +761,23 @@ double PyQMForceImpl::computeForce(
                     not mm2_atoms.contains(i))
                 {
                     // Store the MM atom position in Sire Vector format.
-                    Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
+                    Vector mm_vec(10 * pos[0], 10 * pos[1], 10 * pos[2]);
+
+                    // Find the minimum distance to any QM atom.
+                    double min_dist = std::numeric_limits<double>::max();
+                    Vector nearest_qm_vec;
 
                     // Loop over all of the QM atoms.
                     for (const auto &qm_vec : xyz_qm_vec)
                     {
-                        // Work out the distance between the current MM atom and QM atoms.
+                        // Work out the distance between the current MM atom and QM atom.
                         const auto dist = space.calcDist(mm_vec, qm_vec);
+
+                        if (dist < min_dist)
+                        {
+                            min_dist = dist;
+                            nearest_qm_vec = qm_vec;
+                        }
 
                         // The current MM atom is within the neighbour list cutoff.
                         if (this->is_neighbour_list and dist < this->neighbour_list_cutoff)
@@ -650,22 +785,24 @@ double PyQMForceImpl::computeForce(
                             // Insert the MM atom index into the neighbour list.
                             this->neighbour_list.insert(i);
                         }
+                    }
 
-                        // The current MM atom is within the cutoff, add it.
-                        if (dist < cutoff)
-                        {
-                            // Work out the minimum image position with respect to the
-                            // reference position and add to the vector.
-                            mm_vec = space.getMinimumImage(mm_vec, center);
-                            xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
+                    // The current MM atom is within the cutoff: add it.
+                    if (min_dist < cutoff)
+                    {
+                        // Work out the minimum image position with respect to the
+                        // reference position and add to the vector.
+                        mm_vec = space.getMinimumImage(mm_vec, center);
+                        xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
 
-                            // Add the charge and index.
-                            charges_mm.append(this->owner.getCharges()[i]);
-                            idx_mm.append(i);
+                        const double q = this->owner.getCharges()[i];
+                        charges_unscaled.append(q);
+                        min_dists.append(min_dist);
+                        nearest_qm_vecs.append(nearest_qm_vec);
 
-                            // Exit the inner loop.
-                            break;
-                        }
+                        // Scale charge by switching function.
+                        charges_mm.append(q * switching_function(min_dist));
+                        idx_mm.append(i);
                     }
                 }
 
@@ -680,41 +817,51 @@ double PyQMForceImpl::computeForce(
             for (const auto &idx : this->neighbour_list)
             {
                 // Store the MM atom position in Sire Vector format.
-                Vector mm_vec(10*positions[idx][0], 10*positions[idx][1], 10*positions[idx][2]);
+                Vector mm_vec(10 * positions[idx][0], 10 * positions[idx][1], 10 * positions[idx][2]);
 
-                // Loop over all of the QM atoms.
+                // Find the minimum distance to any QM atom.
+                double min_dist = std::numeric_limits<double>::max();
+                Vector nearest_qm_vec;
+
                 for (const auto &qm_vec : xyz_qm_vec)
                 {
-                    // The current MM atom is within the cutoff, add it.
-                    if (space.calcDist(mm_vec, qm_vec) < cutoff)
+                    const auto dist = space.calcDist(mm_vec, qm_vec);
+                    if (dist < min_dist)
                     {
-                        // Work out the minimum image position with respect to the
-                        // reference position and add to the vector.
-                        mm_vec = space.getMinimumImage(mm_vec, center);
-                        xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
-
-                        // Add the charge and index.
-                        charges_mm.append(this->owner.getCharges()[idx]);
-                        idx_mm.append(idx);
-
-                        // Exit the inner loop.
-                        break;
+                        min_dist = dist;
+                        nearest_qm_vec = qm_vec;
                     }
+                }
+
+                // The current MM atom is within the cutoff: add it.
+                if (min_dist < cutoff)
+                {
+                    mm_vec = space.getMinimumImage(mm_vec, center);
+                    xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
+
+                    const double q = this->owner.getCharges()[idx];
+                    charges_unscaled.append(q);
+                    min_dists.append(min_dist);
+                    nearest_qm_vecs.append(nearest_qm_vec);
+
+                    // Scale charge by switching function.
+                    charges_mm.append(q * switching_function(min_dist));
+                    idx_mm.append(idx);
                 }
             }
         }
 
         // Handle link atoms via the Charge Shift method.
         // See: https://www.ks.uiuc.edu/Research/qmmm
-        for (const auto &idx: mm1_to_mm2.keys())
+        for (const auto &idx : mm1_to_mm2.keys())
         {
             // Get the QM atom to which the current MM atom is bonded.
             const auto qm_idx = mm1_to_qm[idx];
 
             // Store the MM1 position in Sire Vector format, along with the
             // position of the QM atom to which it is bonded.
-            Vector mm1_vec(10*positions[idx][0], 10*positions[idx][1], 10*positions[idx][2]);
-            Vector qm_vec(10*positions[qm_idx][0], 10*positions[qm_idx][1], 10*positions[qm_idx][2]);
+            Vector mm1_vec(10 * positions[idx][0], 10 * positions[idx][1], 10 * positions[idx][2]);
+            Vector qm_vec(10 * positions[qm_idx][0], 10 * positions[qm_idx][1], 10 * positions[qm_idx][2]);
 
             // Work out the minimum image positions with respect to the reference position.
             mm1_vec = space.getMinimumImage(mm1_vec, center);
@@ -725,7 +872,7 @@ double PyQMForceImpl::computeForce(
             // where R0(QM-L) is the equilibrium bond length for the QM and link (L)
             // elements, and R0(QM-MM1) is the equilibrium bond length for the QM
             // and MM1 elements.
-            const auto link_vec = qm_vec + bond_scale_factors[idx]*(mm1_vec - qm_vec);
+            const auto link_vec = qm_vec + bond_scale_factors[idx] * (mm1_vec - qm_vec);
 
             // Add to the QM positions.
             xyz_qm.append(QVector<double>({link_vec[0], link_vec[1], link_vec[2]}));
@@ -747,10 +894,10 @@ double PyQMForceImpl::computeForce(
             // charge is redistributed over the MM2 atoms and two virtual point
             // charges are added either side of the MM2 atoms in order to preserve
             // the MM1-MM2 dipole.
-            for (const auto& mm2_idx : mm1_to_mm2[idx])
+            for (const auto &mm2_idx : mm1_to_mm2[idx])
             {
                 // Store the MM2 position in Sire Vector format.
-                Vector mm2_vec(10*positions[mm2_idx][0], 10*positions[mm2_idx][1], 10*positions[mm2_idx][2]);
+                Vector mm2_vec(10 * positions[mm2_idx][0], 10 * positions[mm2_idx][1], 10 * positions[mm2_idx][2]);
 
                 // Work out the minimum image position with respect to the reference position.
                 mm2_vec = space.getMinimumImage(mm2_vec, center);
@@ -768,12 +915,12 @@ double PyQMForceImpl::computeForce(
                 const auto normal = (mm2_vec - mm1_vec).normalise();
 
                 // Positive direction. (Away from MM1 atom.)
-                auto xyz = mm2_vec + VIRTUAL_PC_DELTA*normal;
+                auto xyz = mm2_vec + VIRTUAL_PC_DELTA * normal;
                 xyz_virtual.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
                 charges_virtual.append(-frac_charge);
 
                 // Negative direction (Towards MM1 atom.)
-                xyz = mm2_vec - VIRTUAL_PC_DELTA*normal;
+                xyz = mm2_vec - VIRTUAL_PC_DELTA * normal;
                 xyz_virtual.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
                 charges_virtual.append(frac_charge);
             }
@@ -791,20 +938,20 @@ double PyQMForceImpl::computeForce(
         }
     }
 
-    // Call the callback.
-    auto result = this->owner.call(
+    // Call the callback, requesting the optional dE/dcharges_mm fourth element.
+    auto result = this->owner.call4(
         numbers,
         charges_mm,
         xyz_qm,
         xyz_mm,
         cell,
-        idx_mm
-    );
+        idx_mm);
 
     // Extract the results. These will automatically be returned in OpenMM units.
     auto energy = result.get<0>();
     auto forces_qm = result.get<1>();
     auto forces_mm = result.get<2>();
+    const auto dE_dcharges_mm = result.get<3>();
 
     // The current interpolation (weighting) parameter.
     double lambda;
@@ -841,7 +988,7 @@ double PyQMForceImpl::computeForce(
     // Now update the force vector.
 
     // First the QM atoms.
-    for (int i=0; i<qm_atoms.size(); i++)
+    for (int i = 0; i < qm_atoms.size(); i++)
     {
         // Get the index of the atom.
         const auto idx = qm_atoms[i];
@@ -854,7 +1001,7 @@ double PyQMForceImpl::computeForce(
     }
 
     // Now the MM atoms.
-    for (int i=0; i<num_mm; i++)
+    for (int i = 0; i < num_mm; i++)
     {
         // Get the index of the atom.
         const auto idx = idx_mm[i];
@@ -864,6 +1011,28 @@ double PyQMForceImpl::computeForce(
 
         // Update the force vector.
         forces[idx] = lambda * omm_force;
+
+        // Chain-rule correction for the positional dependence of the switching function.
+        // F_correction = -(dE/dq_eff) * q_unscaled * (ds/dr) * r_hat
+        if (not dE_dcharges_mm.isEmpty() and i < dE_dcharges_mm.size() and
+            i < charges_unscaled.size())
+        {
+            const double dsdr = switch_deriv(min_dists[i]);
+            if (dsdr != 0.0)
+            {
+                // r_hat points from the nearest QM atom to the MM atom.
+                const Vector mm_vec(xyz_mm[i][0], xyz_mm[i][1], xyz_mm[i][2]);
+                const Vector r_hat = (mm_vec - nearest_qm_vecs[i]).normalise();
+                // dE_dcharges_mm is in kJ/mol/e (converted in Python); dsdr is in 1/Å;
+                // multiply by 10 to convert kJ/mol/Å → kJ/mol/nm (OpenMM units).
+                const double correction =
+                    -dE_dcharges_mm[i] * 10.0 * charges_unscaled[i] * dsdr;
+                forces[idx] += lambda * OpenMM::Vec3(
+                                            correction * r_hat[0],
+                                            correction * r_hat[1],
+                                            correction * r_hat[2]);
+            }
+        }
     }
 
     // Update the step count.
@@ -890,13 +1059,16 @@ PyQMEngine::PyQMEngine(
     SireUnits::Dimension::Length cutoff,
     int neighbour_list_frequency,
     bool is_mechanical,
-    double lambda) :
-    ConcreteProperty<PyQMEngine, QMEngine>(),
-    callback(py_object, name),
-    cutoff(cutoff),
-    neighbour_list_frequency(neighbour_list_frequency),
-    is_mechanical(is_mechanical),
-    lambda(lambda)
+    double lambda,
+    double switch_width,
+    bool use_switch) : ConcreteProperty<PyQMEngine, QMEngine>(),
+                       callback(py_object, name),
+                       cutoff(cutoff),
+                       neighbour_list_frequency(neighbour_list_frequency),
+                       is_mechanical(is_mechanical),
+                       lambda(lambda),
+                       switch_width(switch_width),
+                       use_switch(use_switch)
 {
     // Register the serialization proxies.
     OpenMM::registerPyQMSerializationProxies();
@@ -915,19 +1087,20 @@ PyQMEngine::PyQMEngine(
     }
 }
 
-PyQMEngine::PyQMEngine(const PyQMEngine &other) :
-    callback(other.callback),
-    cutoff(other.cutoff),
-    neighbour_list_frequency(other.neighbour_list_frequency),
-    is_mechanical(other.is_mechanical),
-    lambda(other.lambda),
-    atoms(other.atoms),
-    mm1_to_qm(other.mm1_to_qm),
-    mm1_to_mm2(other.mm1_to_mm2),
-    mm2_atoms(other.mm2_atoms),
-    bond_scale_factors(other.bond_scale_factors),
-    numbers(other.numbers),
-    charges(other.charges)
+PyQMEngine::PyQMEngine(const PyQMEngine &other) : callback(other.callback),
+                                                  cutoff(other.cutoff),
+                                                  neighbour_list_frequency(other.neighbour_list_frequency),
+                                                  is_mechanical(other.is_mechanical),
+                                                  lambda(other.lambda),
+                                                  switch_width(other.switch_width),
+                                                  use_switch(other.use_switch),
+                                                  atoms(other.atoms),
+                                                  mm1_to_qm(other.mm1_to_qm),
+                                                  mm1_to_mm2(other.mm1_to_mm2),
+                                                  mm2_atoms(other.mm2_atoms),
+                                                  bond_scale_factors(other.bond_scale_factors),
+                                                  numbers(other.numbers),
+                                                  charges(other.charges)
 {
 }
 
@@ -938,6 +1111,8 @@ PyQMEngine &PyQMEngine::operator=(const PyQMEngine &other)
     this->neighbour_list_frequency = other.neighbour_list_frequency;
     this->is_mechanical = other.is_mechanical;
     this->lambda = other.lambda;
+    this->switch_width = other.switch_width;
+    this->use_switch = other.use_switch;
     this->atoms = other.atoms;
     this->mm1_to_qm = other.mm1_to_qm;
     this->mm1_to_mm2 = other.mm1_to_mm2;
@@ -1069,6 +1244,30 @@ void PyQMEngine::setCharges(QVector<double> charges)
     this->charges = charges;
 }
 
+double PyQMEngine::getSwitchWidth() const
+{
+    return this->switch_width;
+}
+
+void PyQMEngine::setSwitchWidth(double switch_width)
+{
+    if (switch_width < 0.0)
+        switch_width = 0.0;
+    else if (switch_width > 1.0)
+        switch_width = 1.0;
+    this->switch_width = switch_width;
+}
+
+bool PyQMEngine::getUseSwitch() const
+{
+    return this->use_switch;
+}
+
+void PyQMEngine::setUseSwitch(bool use_switch)
+{
+    this->use_switch = use_switch;
+}
+
 const char *PyQMEngine::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<PyQMEngine>());
@@ -1091,7 +1290,7 @@ PyQMEngine::call(
     return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell, idx_mm);
 }
 
-QMForce* PyQMEngine::createForce() const
+QMForce *PyQMEngine::createForce() const
 {
     return new PyQMForce(
         this->callback,
@@ -1105,6 +1304,7 @@ QMForce* PyQMEngine::createForce() const
         this->bond_scale_factors,
         this->mm2_atoms,
         this->numbers,
-        this->charges
-    );
+        this->charges,
+        this->switch_width,
+        this->use_switch);
 }
