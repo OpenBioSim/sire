@@ -1752,12 +1752,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             }
         }
 
-        // Update CLJ exceptions for ring-breaking pairs: scale charge product by
-        // rb_kappa (0 at bonded end, 1 at nonbonded end) and by rest2_scale when
-        // both atoms are REST2 solute atoms. LJ stays at 1e-9 so the ring-break
-        // CustomBondForce provides the full LJ correction.
-        // Note: getBondParameters always returns the original unscaled q (bp[0])
-        // because setBondParameters is never called on ring_breaking_ff here.
+        // Update CLJ exceptions for ring-breaking pairs: the exception charge is
+        // rb_kappa * q_a0(λ) * q_a1(λ), where q_a0/q_a1 are read from the CLJ
+        // particle parameters that were already morphed (and REST2-scaled via
+        // sqrt_scale) earlier in this function. LJ stays at 1e-9; the ring-break
+        //  CustomBondForce provides the full LJ correction.
         if (cljff != nullptr and ring_breaking_ff != nullptr)
         {
             const auto rb_exc = perturbable_mol.getExceptionIndicies("ring-break");
@@ -1770,12 +1769,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 int a0, a1;
                 std::vector<double> bp;
                 ring_breaking_ff->getBondParameters(bond_idx, a0, a1, bp);
-                double q_scale = rb_kappa;
-                if (perturbable_mol.isRest2(a0 - start_index) and
-                    perturbable_mol.isRest2(a1 - start_index))
-                    q_scale *= rest2_scale;
+                double q_a0, sig_a0, eps_a0;
+                double q_a1, sig_a1, eps_a1;
+                cljff->getParticleParameters(a0, q_a0, sig_a0, eps_a0);
+                cljff->getParticleParameters(a1, q_a1, sig_a1, eps_a1);
                 cljff->setExceptionParameters(clj_idx, a0, a1,
-                                              q_scale * bp[0], 1e-9, 1e-9);
+                                              rb_kappa * q_a0 * q_a1, 1e-9, 1e-9);
                 has_changed_cljff = true;
             }
         }
@@ -1792,12 +1791,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 int a0, a1;
                 std::vector<double> bp;
                 ring_making_ff->getBondParameters(bond_idx, a0, a1, bp);
-                double q_scale = rm_kappa;
-                if (perturbable_mol.isRest2(a0 - start_index) and
-                    perturbable_mol.isRest2(a1 - start_index))
-                    q_scale *= rest2_scale;
+                double q_a0, sig_a0, eps_a0;
+                double q_a1, sig_a1, eps_a1;
+                cljff->getParticleParameters(a0, q_a0, sig_a0, eps_a0);
+                cljff->getParticleParameters(a1, q_a1, sig_a1, eps_a1);
                 cljff->setExceptionParameters(clj_idx, a0, a1,
-                                              q_scale * bp[0], 1e-9, 1e-9);
+                                              rm_kappa * q_a0 * q_a1, 1e-9, 1e-9);
                 has_changed_cljff = true;
             }
         }
