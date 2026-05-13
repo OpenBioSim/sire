@@ -2614,11 +2614,17 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 int idx = -1;
                 int nbidx = -1;
 
-                const bool is_ring_breaking = rb_pairs_local.contains(IndexPair(atom0, atom1));
-                const bool is_ring_making = rm_pairs_local.contains(IndexPair(atom0, atom1));
+                bool is_ring_breaking = rb_pairs_local.contains(IndexPair(atom0, atom1));
+                bool is_ring_making = rm_pairs_local.contains(IndexPair(atom0, atom1));
 
                 if (atom0_is_ghost or atom1_is_ghost)
                 {
+                    // don't add ring-breaking/making forces for pairs involving ghost atoms,
+                    // since the GhostNonbondedForce already provides a softcore interaction
+                    // for these pairs.
+                    is_ring_breaking = false;
+                    is_ring_making = false;
+
                     // don't include the LJ term, as this is calculated
                     // elsewhere - note that we need to use 1e-9 to
                     // make sure that OpenMM doesn't eagerly remove
