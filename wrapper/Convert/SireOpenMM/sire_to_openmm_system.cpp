@@ -1125,6 +1125,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     }
 
     // check to see if there are any perturbable molecules
+    bool any_ring_breaking = false;
+    bool any_ring_making = false;
+
     if (not ignore_perturbations)
     {
         for (int i = 0; i < nmols; ++i)
@@ -1132,8 +1135,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             if (openmm_mols_data[i].isPerturbable())
             {
                 any_perturbable = true;
-                break;
             }
+
+            if (not openmm_mols_data[i].ring_breaking_pairs.isEmpty())
+                any_ring_breaking = true;
+
+            if (not openmm_mols_data[i].ring_making_pairs.isEmpty())
+                any_ring_making = true;
         }
     }
 
@@ -1308,6 +1316,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     ///
 
     OpenMM::CustomBondForce *ghost_14ff = 0;
+    OpenMM::CustomBondForce *ring_breaking_ff = 0;
+    OpenMM::CustomBondForce *ring_making_ff = 0;
     OpenMM::CustomNonbondedForce *ghost_ghostff = 0;
     OpenMM::CustomNonbondedForce *ghost_nonghostff = 0;
 
@@ -1447,6 +1457,114 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                   .arg(shift_coulomb)
                                   .arg(shift_delta.to(SireUnits::nanometer))
                                   .toStdString();
+        }
+
+        // Ring-breaking/making softcore expressions: same functional form as
+        // ghost-14 but using global parameters so a single alpha/kappa value
+        // is shared across all bonds in each force and can be driven by the
+        // schedule without per-bond tracking infrastructure.
+        std::string rb_expression, rm_expression;
+        const bool need_rb = any_ring_breaking or any_ring_making;
+
+        // ring_break_kappa prefactor on Coulomb ensures zero interaction at the
+        // bonded end (kappa=0) and a clean handoff to the CLJ exception at the
+        // nonbonded end (kappa=1, softcore correction = kappa*(1/r - kappa/r) = 0).
+        // ring_make_kappa plays the same role for the opposite direction.
+        if (need_rb and use_beutler_softening)
+        {
+            rb_expression = QString(
+                                "coul_nrg+lj_nrg;"
+                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(ring_break_kappa/r_safe));"
+                                "lj_nrg=(1-ring_break_alpha)*four_epsilon*sig6*(sig6-1);"
+                                "sig6=(sigma^6)/(%2*sigma^6*ring_break_alpha + r_safe^6);"
+                                "r_safe=max(r, 0.001);")
+                                .arg(shift_coulomb)
+                                .arg(beutler_alpha)
+                                .toStdString();
+            rm_expression = QString(
+                                "coul_nrg+lj_nrg;"
+                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(ring_make_kappa/r_safe));"
+                                "lj_nrg=(1-ring_make_alpha)*four_epsilon*sig6*(sig6-1);"
+                                "sig6=(sigma^6)/(%2*sigma^6*ring_make_alpha + r_safe^6);"
+                                "r_safe=max(r, 0.001);")
+                                .arg(shift_coulomb)
+                                .arg(beutler_alpha)
+                                .toStdString();
+        }
+        else if (use_taylor_softening)
+        {
+            rb_expression = QString(
+                                "coul_nrg+lj_nrg;"
+                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(ring_break_kappa/r_safe));"
+                                "lj_nrg=four_epsilon*sig6*(sig6-1);"
+                                "sig6=(sigma^6)/(%2*sigma^6 + r_safe^6);"
+                                "r_safe=max(r, 0.001);")
+                                .arg(shift_coulomb)
+                                .arg(taylor_power_expression("ring_break_alpha", taylor_power))
+                                .toStdString();
+            rm_expression = QString(
+                                "coul_nrg+lj_nrg;"
+                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(ring_make_kappa/r_safe));"
+                                "lj_nrg=four_epsilon*sig6*(sig6-1);"
+                                "sig6=(sigma^6)/(%2*sigma^6 + r_safe^6);"
+                                "r_safe=max(r, 0.001);")
+                                .arg(shift_coulomb)
+                                .arg(taylor_power_expression("ring_make_alpha", taylor_power))
+                                .toStdString();
+        }
+        else
+        {
+            rb_expression = QString(
+                                "coul_nrg+lj_nrg;"
+                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(ring_break_kappa/r_safe));"
+                                "lj_nrg=four_epsilon*sig6*(sig6-1);"
+                                "sig6=(sigma^6)/(((sigma*delta)+r_safe^2)^3);"
+                                "r_safe=max(r, 0.001);"
+                                "delta=%2*ring_break_alpha;")
+                                .arg(shift_coulomb)
+                                .arg(shift_delta.to(SireUnits::nanometer))
+                                .toStdString();
+            rm_expression = QString(
+                                "coul_nrg+lj_nrg;"
+                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(ring_make_kappa/r_safe));"
+                                "lj_nrg=four_epsilon*sig6*(sig6-1);"
+                                "sig6=(sigma^6)/(((sigma*delta)+r_safe^2)^3);"
+                                "r_safe=max(r, 0.001);"
+                                "delta=%2*ring_make_alpha;")
+                                .arg(shift_coulomb)
+                                .arg(shift_delta.to(SireUnits::nanometer))
+                                .toStdString();
+        }
+
+        // ring_break_alpha=1 initially: fully soft at the bonded (ring-closed)
+        // end state so the pair interaction grows from zero as lambda moves into
+        // the morph stage. ring_break_kappa=0 initially: no coulomb contribution
+        // at the bonded end (pair is excluded there).
+        if (any_ring_breaking)
+        {
+            ring_breaking_ff = new OpenMM::CustomBondForce(rb_expression);
+            ring_breaking_ff->setName("RingBreakingBondForce");
+            ring_breaking_ff->addGlobalParameter("ring_break_alpha", 1.0);
+            ring_breaking_ff->addGlobalParameter("ring_break_kappa", 0.0);
+            ring_breaking_ff->addPerBondParameter("q");
+            ring_breaking_ff->addPerBondParameter("sigma");
+            ring_breaking_ff->addPerBondParameter("four_epsilon");
+            ring_breaking_ff->setUsesPeriodicBoundaryConditions(false);
+        }
+
+        // ring_make_alpha=0 initially: hard at the nonbonded (ring-open) end
+        // so the pair interacts normally there. ring_make_kappa=1 initially:
+        // full coulomb at the nonbonded end.
+        if (any_ring_making)
+        {
+            ring_making_ff = new OpenMM::CustomBondForce(rm_expression);
+            ring_making_ff->setName("RingMakingBondForce");
+            ring_making_ff->addGlobalParameter("ring_make_alpha", 0.0);
+            ring_making_ff->addGlobalParameter("ring_make_kappa", 1.0);
+            ring_making_ff->addPerBondParameter("q");
+            ring_making_ff->addPerBondParameter("sigma");
+            ring_making_ff->addPerBondParameter("four_epsilon");
+            ring_making_ff->setUsesPeriodicBoundaryConditions(false);
         }
 
         ghost_14ff = new OpenMM::CustomBondForce(nb14_expression);
@@ -1626,6 +1744,20 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_14ff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost-14", system.addForce(ghost_14ff));
         lambda_lever.setForceGroup("ghost-14", force_group_counter++);
+
+        if (ring_breaking_ff != 0)
+        {
+            ring_breaking_ff->setForceGroup(force_group_counter);
+            lambda_lever.setForceIndex("ring-break", system.addForce(ring_breaking_ff));
+            lambda_lever.setForceGroup("ring-break", force_group_counter++);
+        }
+
+        if (ring_making_ff != 0)
+        {
+            ring_making_ff->setForceGroup(force_group_counter);
+            lambda_lever.setForceIndex("ring-make", system.addForce(ring_making_ff));
+            lambda_lever.setForceGroup("ring-make", force_group_counter++);
+        }
     }
 
     // Analytic LRC for the NonbondedForce (all non-ghost atoms): E = lrc_background / V,
@@ -2410,6 +2542,27 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
         const bool is_perturbable = any_perturbable and mol.isPerturbable();
 
+        // Build local sets of ring-breaking/making pairs (molecule-local
+        // indices) for fast lookup during exception processing.
+        QSet<IndexPair> rb_pairs_local, rm_pairs_local;
+        // Per-exception index arrays for ring-break/make CLJ exceptions.
+        // Filled alongside exception_idxs; (-1,-1) for non-ring pairs.
+        QVector<boost::tuple<int, int>> rb_exception_idxs;
+        QVector<boost::tuple<int, int>> rm_exception_idxs;
+        int rb_bond_count = 0;
+        int rm_bond_count = 0;
+        if (is_perturbable)
+        {
+            for (const auto &p : mol.ring_breaking_pairs)
+                rb_pairs_local.insert(IndexPair(p.first, p.second));
+            for (const auto &p : mol.ring_making_pairs)
+                rm_pairs_local.insert(IndexPair(p.first, p.second));
+            rb_exception_idxs = QVector<boost::tuple<int, int>>(
+                mol.exception_params.count(), boost::make_tuple(-1, -1));
+            rm_exception_idxs = QVector<boost::tuple<int, int>>(
+                mol.exception_params.count(), boost::make_tuple(-1, -1));
+        }
+
         if (is_perturbable)
         {
             exception_idxs = QVector<boost::tuple<int, int>>(mol.exception_params.count(),
@@ -2461,8 +2614,17 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 int idx = -1;
                 int nbidx = -1;
 
+                bool is_ring_breaking = rb_pairs_local.contains(IndexPair(atom0, atom1));
+                bool is_ring_making = rm_pairs_local.contains(IndexPair(atom0, atom1));
+
                 if (atom0_is_ghost or atom1_is_ghost)
                 {
+                    // don't add ring-breaking/making forces for pairs involving ghost atoms,
+                    // since the GhostNonbondedForce already provides a softcore interaction
+                    // for these pairs.
+                    is_ring_breaking = false;
+                    is_ring_making = false;
+
                     // don't include the LJ term, as this is calculated
                     // elsewhere - note that we need to use 1e-9 to
                     // make sure that OpenMM doesn't eagerly remove
@@ -2506,6 +2668,65 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         excluded_ghost_pairs.insert(IndexPair(boost::get<0>(p), boost::get<1>(p)));
                     }
                 }
+                else if (is_ring_breaking or is_ring_making)
+                {
+                    // Add CLJ exception with near-zero charges initially; the
+                    // lambda lever will scale these by rb_kappa / rm_kappa each
+                    // step, growing the hard Coulomb as the ring opens/closes.
+                    // LJ stays at 1e-9: the ring-break/make CustomBondForce
+                    // provides the full softcore LJ.
+                    idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
+                                              1e-9, 1e-9, 1e-9, true);
+                    // nbidx stays -1 (no ghost-14 bond for ring-break pairs)
+
+                    if (is_ring_breaking and ring_breaking_ff != 0)
+                    {
+                        // CLJ parameters from the nonbonded end state (λ=1,
+                        // perturbed), where the bond is absent and the pair
+                        // interacts normally (full scale factors).
+                        auto pp = mol.perturbed->getException(
+                            atom0, atom1, start_index, 1.0, 1.0);
+                        std::vector<double> params_rb = {
+                            boost::get<2>(pp),
+                            boost::get<3>(pp),
+                            4.0 * boost::get<4>(pp)};
+                        if (params_rb[0] == 0)
+                            params_rb[0] = 1e-9;
+                        if (params_rb[1] == 0)
+                            params_rb[1] = 1e-9;
+                        ring_breaking_ff->addBond(boost::get<0>(p),
+                                                  boost::get<1>(p),
+                                                  params_rb);
+                        rb_exception_idxs[j] = boost::make_tuple(idx, rb_bond_count);
+                        ++rb_bond_count;
+                    }
+                    else if (is_ring_making and ring_making_ff != 0)
+                    {
+                        // CLJ parameters from the nonbonded end state (λ=0,
+                        // reference), where the bond is absent.
+                        auto pp = mol.getException(
+                            atom0, atom1, start_index, 1.0, 1.0);
+                        std::vector<double> params_rm = {
+                            boost::get<2>(pp),
+                            boost::get<3>(pp),
+                            4.0 * boost::get<4>(pp)};
+                        if (params_rm[0] == 0)
+                            params_rm[0] = 1e-9;
+                        if (params_rm[1] == 0)
+                            params_rm[1] = 1e-9;
+                        ring_making_ff->addBond(boost::get<0>(p),
+                                                boost::get<1>(p),
+                                                params_rm);
+                        rm_exception_idxs[j] = boost::make_tuple(idx, rm_bond_count);
+                        ++rm_bond_count;
+                    }
+
+                    // Store idx in exception_idxs so the main loop guard
+                    // (`if (boost::get<0>(idxs[j]) == -1) continue`) still
+                    // skips these pairs — we handle them separately below.
+                    // Reset idx to -1 so the guard works correctly.
+                    idx = -1;
+                }
                 else
                 {
                     idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
@@ -2538,6 +2759,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             auto pert_idx = idx_to_pert_idx.value(i, openmm_mols.count() + 1);
             lambda_lever.setExceptionIndicies(pert_idx,
                                               "clj", exception_idxs);
+            if (rb_bond_count > 0)
+                lambda_lever.setExceptionIndicies(pert_idx,
+                                                  "ring-break", rb_exception_idxs);
+            if (rm_bond_count > 0)
+                lambda_lever.setExceptionIndicies(pert_idx,
+                                                  "ring-make", rm_exception_idxs);
             lambda_lever.setConstraintIndicies(pert_idx,
                                                constraint_idxs);
         }

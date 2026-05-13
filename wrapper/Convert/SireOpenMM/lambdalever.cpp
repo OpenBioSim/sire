@@ -1299,6 +1299,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
     auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
     auto ghost_14ff = this->getForce<OpenMM::CustomBondForce>("ghost-14", system);
+    auto ring_breaking_ff = this->getForce<OpenMM::CustomBondForce>("ring-break", system);
+    auto ring_making_ff = this->getForce<OpenMM::CustomBondForce>("ring-make", system);
     auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
     auto angff = this->getForce<OpenMM::HarmonicAngleForce>("angle", system);
     auto dihff = this->getForce<OpenMM::PeriodicTorsionForce>("torsion", system);
@@ -1329,6 +1331,25 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     bool has_changed_angff = false;
     bool has_changed_dihff = false;
     bool has_changed_cmap = false;
+
+    // Pre-compute ring-break/make kappa values so the per-mol exception update
+    // loop and the later global-parameter block both use the same values.
+    const double rb_kappa = (ring_breaking_ff != nullptr)
+                                ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
+                                                                  "ring-break", "kappa", 0.0, 1.0, lambda_value)))
+                                : 0.0;
+    const double rb_alpha = (ring_breaking_ff != nullptr)
+                                ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
+                                                                  "ring-break", "alpha", 1.0, 0.0, lambda_value)))
+                                : 1.0;
+    const double rm_kappa = (ring_making_ff != nullptr)
+                                ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
+                                                                  "ring-make", "kappa", 1.0, 0.0, lambda_value)))
+                                : 1.0;
+    const double rm_alpha = (ring_making_ff != nullptr)
+                                ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
+                                                                  "ring-make", "alpha", 0.0, 1.0, lambda_value)))
+                                : 0.0;
 
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
@@ -1658,6 +1679,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                         scale = rest2_scale;
                     }
 
+                    // ring-breaking/making pairs have idx=-1 (their CLJ
+                    // exception is fixed at 1e-9 and must not be updated;
+                    // the ring force handles the interaction via global params)
+                    if (boost::get<0>(idxs[j]) == -1)
+                        continue;
+
                     // don't set LJ terms for ghost atoms
                     if (atom0_is_ghost or atom1_is_ghost)
                     {
@@ -1722,6 +1749,55 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                             boost::get<4>(p) * scale);
                     }
                 }
+            }
+        }
+
+        // Update CLJ exceptions for ring-breaking pairs: the exception charge is
+        // rb_kappa * q_a0(λ) * q_a1(λ), where q_a0/q_a1 are read from the CLJ
+        // particle parameters that were already morphed (and REST2-scaled via
+        // sqrt_scale) earlier in this function. LJ stays at 1e-9; the ring-break
+        //  CustomBondForce provides the full LJ correction.
+        if (cljff != nullptr and ring_breaking_ff != nullptr)
+        {
+            const auto rb_exc = perturbable_mol.getExceptionIndicies("ring-break");
+            for (int j = 0; j < rb_exc.count(); ++j)
+            {
+                const int clj_idx = boost::get<0>(rb_exc[j]);
+                if (clj_idx < 0)
+                    continue;
+                const int bond_idx = boost::get<1>(rb_exc[j]);
+                int a0, a1;
+                std::vector<double> bp;
+                ring_breaking_ff->getBondParameters(bond_idx, a0, a1, bp);
+                double q_a0, sig_a0, eps_a0;
+                double q_a1, sig_a1, eps_a1;
+                cljff->getParticleParameters(a0, q_a0, sig_a0, eps_a0);
+                cljff->getParticleParameters(a1, q_a1, sig_a1, eps_a1);
+                cljff->setExceptionParameters(clj_idx, a0, a1,
+                                              rb_kappa * q_a0 * q_a1, 1e-9, 1e-9);
+                has_changed_cljff = true;
+            }
+        }
+
+        if (cljff != nullptr and ring_making_ff != nullptr)
+        {
+            const auto rm_exc = perturbable_mol.getExceptionIndicies("ring-make");
+            for (int j = 0; j < rm_exc.count(); ++j)
+            {
+                const int clj_idx = boost::get<0>(rm_exc[j]);
+                if (clj_idx < 0)
+                    continue;
+                const int bond_idx = boost::get<1>(rm_exc[j]);
+                int a0, a1;
+                std::vector<double> bp;
+                ring_making_ff->getBondParameters(bond_idx, a0, a1, bp);
+                double q_a0, sig_a0, eps_a0;
+                double q_a1, sig_a1, eps_a1;
+                cljff->getParticleParameters(a0, q_a0, sig_a0, eps_a0);
+                cljff->getParticleParameters(a1, q_a1, sig_a1, eps_a1);
+                cljff->setExceptionParameters(clj_idx, a0, a1,
+                                              rm_kappa * q_a0 * q_a1, 1e-9, 1e-9);
+                has_changed_cljff = true;
             }
         }
 
@@ -2054,6 +2130,28 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         context.setParameter("lrc_scale", lrc_scale);
     }
 
+    // Update ring-breaking/making softcore force global parameters using the
+    // values pre-computed before the per-mol loop (rb_alpha/kappa, rm_alpha/kappa).
+    bool has_changed_ring_breaking_ff = false;
+    if (ring_breaking_ff != nullptr)
+    {
+        has_changed_ring_breaking_ff =
+            (rb_alpha != context.getParameter("ring_break_alpha") ||
+             rb_kappa != context.getParameter("ring_break_kappa"));
+        context.setParameter("ring_break_alpha", rb_alpha);
+        context.setParameter("ring_break_kappa", rb_kappa);
+    }
+
+    bool has_changed_ring_making_ff = false;
+    if (ring_making_ff != nullptr)
+    {
+        has_changed_ring_making_ff =
+            (rm_alpha != context.getParameter("ring_make_alpha") ||
+             rm_kappa != context.getParameter("ring_make_kappa"));
+        context.setParameter("ring_make_alpha", rm_alpha);
+        context.setParameter("ring_make_kappa", rm_kappa);
+    }
+
     // Update the NonbondedForce (background) LRC via its own CustomVolumeForce.
     // Ghost atoms have epsilon=0 in cljff so they contribute nothing naturally.
     auto background_lrc_ff = this->getForce<OpenMM::CustomVolumeForce>("background-lrc", system);
@@ -2179,6 +2277,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     last_changed_forces["background-lrc"] = has_changed_cljff;
     last_changed_forces["gcmc-lrc"] = false;
     last_changed_forces["ghost-14"] = has_changed_ghost14ff;
+    last_changed_forces["ring-break"] = has_changed_ring_breaking_ff;
+    last_changed_forces["ring-make"] = has_changed_ring_making_ff;
     last_changed_forces["bond"] = has_changed_bondff;
     last_changed_forces["angle"] = has_changed_angff;
     last_changed_forces["torsion"] = has_changed_dihff;

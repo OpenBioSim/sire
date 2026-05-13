@@ -3,17 +3,17 @@
 
 #include <OpenMM.h>
 
-#include "SireMol/moleculeinfo.h"
-#include "SireMol/core.h"
 #include "SireMol/atom.h"
+#include "SireMol/core.h"
+#include "SireMol/moleculeinfo.h"
 #include "SireMol/selector.hpp"
 
-#include "SireMM/mmdetail.h"
-#include "SireMM/excludedpairs.h"
 #include "SireMM/amberparams.h"
-#include "SireMM/bond.h"
 #include "SireMM/angle.h"
+#include "SireMM/bond.h"
 #include "SireMM/dihedral.h"
+#include "SireMM/excludedpairs.h"
+#include "SireMM/mmdetail.h"
 
 #include <boost/tuple/tuple.hpp>
 
@@ -34,7 +34,7 @@ namespace SireOpenMM
         };
 
         Type type;
-        int vsite_idx;            // molecule-local index of the virtual site atom
+        int vsite_idx;              // molecule-local index of the virtual site atom
         int p1_idx, p2_idx, p3_idx; // molecule-local parent indices (O, H1, H2)
 
         // Weights for ThreeParticleAverageSite: pos = w1*p1 + w2*p2 + w3*p3
@@ -207,6 +207,18 @@ namespace SireOpenMM
          *  state and are real in the perturbed state
          */
         QSet<qint32> from_ghost_idxs;
+
+        /** Pairs of atom indices (molecule-local) whose bond is present
+         *  at λ=0 but absent at λ=1 (ring-breaking). Already swapped if
+         *  swap_end_states was active at construction time.
+         */
+        QVector<QPair<qint32, qint32>> ring_breaking_pairs;
+
+        /** Pairs of atom indices (molecule-local) whose bond is absent
+         *  at λ=0 but present at λ=1 (ring-making). Already swapped if
+         *  swap_end_states was active at construction time.
+         */
+        QVector<QPair<qint32, qint32>> ring_making_pairs;
 
         /** What type of constraint to use */
         qint32 constraint_type;

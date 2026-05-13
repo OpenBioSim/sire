@@ -86,6 +86,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add support for using a switching function for QM/MM simulations.
 
+* Add softcore ``CustomBondForce`` for ring-breaking and ring-making pairs.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
