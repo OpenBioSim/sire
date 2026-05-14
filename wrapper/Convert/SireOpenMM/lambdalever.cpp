@@ -1327,6 +1327,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     bool has_changed_cljff = false;
     bool has_changed_ghostff = false;
     bool has_changed_ghost14ff = false;
+    bool has_changed_ring_breaking_ff = false;
+    bool has_changed_ring_making_ff = false;
     bool has_changed_bondff = false;
     bool has_changed_angff = false;
     bool has_changed_dihff = false;
@@ -1752,11 +1754,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             }
         }
 
-        // Update CLJ exceptions for ring-breaking pairs: the exception charge is
-        // rb_kappa * q_a0(λ) * q_a1(λ), where q_a0/q_a1 are read from the CLJ
-        // particle parameters that were already morphed (and REST2-scaled via
-        // sqrt_scale) earlier in this function. LJ stays at 1e-9; the ring-break
-        //  CustomBondForce provides the full LJ correction.
+        // Update CLJ exceptions and per-bond q for ring-breaking pairs.
+        // The CLJ exception carries kappa*q_a0(λ)*q_a1(λ) for the hard Coulomb
+        // (including RF/PME long-range). The CustomBondForce per-bond q is kept
+        // in sync so its correction term (softcore - 1/r) uses the same charge
+        // product and cancels the hard contribution exactly at all kappa values.
         if (cljff != nullptr and ring_breaking_ff != nullptr)
         {
             const auto rb_exc = perturbable_mol.getExceptionIndicies("ring-break");
@@ -1773,9 +1775,25 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double q_a1, sig_a1, eps_a1;
                 cljff->getParticleParameters(a0, q_a0, sig_a0, eps_a0);
                 cljff->getParticleParameters(a1, q_a1, sig_a1, eps_a1);
-                cljff->setExceptionParameters(clj_idx, a0, a1,
-                                              rb_kappa * q_a0 * q_a1, 1e-9, 1e-9);
-                has_changed_cljff = true;
+                const double rb_new_charge = rb_kappa * q_a0 * q_a1;
+                int rb_ea0, rb_ea1;
+                double rb_old_charge, rb_old_sig, rb_old_eps;
+                cljff->getExceptionParameters(clj_idx, rb_ea0, rb_ea1,
+                                              rb_old_charge, rb_old_sig, rb_old_eps);
+                if (rb_new_charge != rb_old_charge)
+                {
+                    cljff->setExceptionParameters(clj_idx, a0, a1,
+                                                  rb_new_charge, 1e-9, 1e-9);
+                    has_changed_cljff = true;
+                }
+                // Keep per-bond q in sync with morphed particle charges.
+                const double q_product = (q_a0 * q_a1 == 0.0) ? 1e-9 : q_a0 * q_a1;
+                if (bp[0] != q_product)
+                {
+                    bp[0] = q_product;
+                    ring_breaking_ff->setBondParameters(bond_idx, a0, a1, bp);
+                    has_changed_ring_breaking_ff = true;
+                }
             }
         }
 
@@ -1795,9 +1813,25 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double q_a1, sig_a1, eps_a1;
                 cljff->getParticleParameters(a0, q_a0, sig_a0, eps_a0);
                 cljff->getParticleParameters(a1, q_a1, sig_a1, eps_a1);
-                cljff->setExceptionParameters(clj_idx, a0, a1,
-                                              rm_kappa * q_a0 * q_a1, 1e-9, 1e-9);
-                has_changed_cljff = true;
+                const double rm_new_charge = rm_kappa * q_a0 * q_a1;
+                int rm_ea0, rm_ea1;
+                double rm_old_charge, rm_old_sig, rm_old_eps;
+                cljff->getExceptionParameters(clj_idx, rm_ea0, rm_ea1,
+                                              rm_old_charge, rm_old_sig, rm_old_eps);
+                if (rm_new_charge != rm_old_charge)
+                {
+                    cljff->setExceptionParameters(clj_idx, a0, a1,
+                                                  rm_new_charge, 1e-9, 1e-9);
+                    has_changed_cljff = true;
+                }
+                // Keep per-bond q in sync with morphed particle charges.
+                const double q_product = (q_a0 * q_a1 == 0.0) ? 1e-9 : q_a0 * q_a1;
+                if (bp[0] != q_product)
+                {
+                    bp[0] = q_product;
+                    ring_making_ff->setBondParameters(bond_idx, a0, a1, bp);
+                    has_changed_ring_making_ff = true;
+                }
             }
         }
 
@@ -2132,25 +2166,29 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     // Update ring-breaking/making softcore force global parameters using the
     // values pre-computed before the per-mol loop (rb_alpha/kappa, rm_alpha/kappa).
-    bool has_changed_ring_breaking_ff = false;
     if (ring_breaking_ff != nullptr)
     {
-        has_changed_ring_breaking_ff =
+        has_changed_ring_breaking_ff |=
             (rb_alpha != context.getParameter("ring_break_alpha") ||
              rb_kappa != context.getParameter("ring_break_kappa"));
         context.setParameter("ring_break_alpha", rb_alpha);
         context.setParameter("ring_break_kappa", rb_kappa);
     }
 
-    bool has_changed_ring_making_ff = false;
     if (ring_making_ff != nullptr)
     {
-        has_changed_ring_making_ff =
+        has_changed_ring_making_ff |=
             (rm_alpha != context.getParameter("ring_make_alpha") ||
              rm_kappa != context.getParameter("ring_make_kappa"));
         context.setParameter("ring_make_alpha", rm_alpha);
         context.setParameter("ring_make_kappa", rm_kappa);
     }
+
+    if (ring_breaking_ff and has_changed_ring_breaking_ff)
+        ring_breaking_ff->updateParametersInContext(context);
+
+    if (ring_making_ff and has_changed_ring_making_ff)
+        ring_making_ff->updateParametersInContext(context);
 
     // Update the NonbondedForce (background) LRC via its own CustomVolumeForce.
     // Ghost atoms have epsilon=0 in cljff so they contribute nothing naturally.

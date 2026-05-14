@@ -1466,15 +1466,20 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         std::string rb_expression, rm_expression;
         const bool need_rb = any_ring_breaking or any_ring_making;
 
-        // ring_break_kappa prefactor on Coulomb ensures zero interaction at the
-        // bonded end (kappa=0) and a clean handoff to the CLJ exception at the
-        // nonbonded end (kappa=1, softcore correction = kappa*(1/r - kappa/r) = 0).
-        // ring_make_kappa plays the same role for the opposite direction.
+        // The ring-break/make Coulomb follows the ghost-force correction pattern:
+        // the CLJ exception in NonbondedForce carries kappa*q_a0*q_a1, providing
+        // the full hard Coulomb (including RF/PME long-range) scaled by kappa.
+        // The CustomBondForce applies the short-range correction only:
+        //   kappa * C * q * (softcore(r) - 1/r)
+        // When alpha=0 this is zero (NonbondedForce provides everything); when
+        // alpha>0 the softcore replaces the hard 1/r term at short range.
+        // Using -1/r_safe (not -kappa/r_safe) ensures exact cancellation at all
+        // kappa values, not just at kappa=1.
         if (need_rb and use_beutler_softening)
         {
             rb_expression = QString(
                                 "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(ring_break_kappa/r_safe));"
+                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(1/r_safe));"
                                 "lj_nrg=(1-ring_break_alpha)*four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(%2*sigma^6*ring_break_alpha + r_safe^6);"
                                 "r_safe=max(r, 0.001);")
@@ -1483,7 +1488,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                 .toStdString();
             rm_expression = QString(
                                 "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(ring_make_kappa/r_safe));"
+                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(1/r_safe));"
                                 "lj_nrg=(1-ring_make_alpha)*four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(%2*sigma^6*ring_make_alpha + r_safe^6);"
                                 "r_safe=max(r, 0.001);")
@@ -1495,7 +1500,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             rb_expression = QString(
                                 "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(ring_break_kappa/r_safe));"
+                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(1/r_safe));"
                                 "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(%2*sigma^6 + r_safe^6);"
                                 "r_safe=max(r, 0.001);")
@@ -1504,7 +1509,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                 .toStdString();
             rm_expression = QString(
                                 "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(ring_make_kappa/r_safe));"
+                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(1/r_safe));"
                                 "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(%2*sigma^6 + r_safe^6);"
                                 "r_safe=max(r, 0.001);")
@@ -1516,7 +1521,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             rb_expression = QString(
                                 "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(ring_break_kappa/r_safe));"
+                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(1/r_safe));"
                                 "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(((sigma*delta)+r_safe^2)^3);"
                                 "r_safe=max(r, 0.001);"
@@ -1526,7 +1531,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                 .toStdString();
             rm_expression = QString(
                                 "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(ring_make_kappa/r_safe));"
+                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(1/r_safe));"
                                 "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(((sigma*delta)+r_safe^2)^3);"
                                 "r_safe=max(r, 0.001);"
@@ -2670,14 +2675,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 }
                 else if (is_ring_breaking or is_ring_making)
                 {
-                    // Add CLJ exception with near-zero charges initially; the
-                    // lambda lever will scale these by rb_kappa / rm_kappa each
-                    // step, growing the hard Coulomb as the ring opens/closes.
-                    // LJ stays at 1e-9: the ring-break/make CustomBondForce
-                    // provides the full softcore LJ.
-                    idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
-                                              1e-9, 1e-9, 1e-9, true);
-                    // nbidx stays -1 (no ghost-14 bond for ring-break pairs)
+                    // LJ stays at 1e-9 throughout: the ring-break/make CustomBondForce
+                    // provides the full softcore LJ. The Coulomb charge is initialised
+                    // to the correct value for each direction so the NonbondedForce
+                    // carries the right hard Coulomb (including RF/PME) from the start.
+                    // nbidx stays -1 (no ghost-14 bond for ring-break/make pairs).
 
                     if (is_ring_breaking and ring_breaking_ff != 0)
                     {
@@ -2694,6 +2696,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                             params_rb[0] = 1e-9;
                         if (params_rb[1] == 0)
                             params_rb[1] = 1e-9;
+                        // Initial kappa=0 for ring-break: charge starts at zero.
+                        // Use 1e-9 to prevent OpenMM from pruning the exception.
+                        idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
+                                                  1e-9, 1e-9, 1e-9, true);
                         ring_breaking_ff->addBond(boost::get<0>(p),
                                                   boost::get<1>(p),
                                                   params_rb);
@@ -2714,17 +2720,29 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                             params_rm[0] = 1e-9;
                         if (params_rm[1] == 0)
                             params_rm[1] = 1e-9;
+                        // Initial kappa=1 for ring-make: charge starts at the full
+                        // state0 charge product so NonbondedForce carries the correct
+                        // hard Coulomb from the very first energy evaluation.
+                        double init_charge = boost::get<2>(pp);
+                        if (init_charge == 0)
+                            init_charge = 1e-9;
+                        idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
+                                                  init_charge, 1e-9, 1e-9, true);
                         ring_making_ff->addBond(boost::get<0>(p),
                                                 boost::get<1>(p),
                                                 params_rm);
                         rm_exception_idxs[j] = boost::make_tuple(idx, rm_bond_count);
                         ++rm_bond_count;
                     }
+                    else
+                    {
+                        // force not yet created (should not occur in practice)
+                        idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
+                                                  1e-9, 1e-9, 1e-9, true);
+                    }
 
-                    // Store idx in exception_idxs so the main loop guard
-                    // (`if (boost::get<0>(idxs[j]) == -1) continue`) still
-                    // skips these pairs — we handle them separately below.
-                    // Reset idx to -1 so the guard works correctly.
+                    // Reset idx to -1 so the main exception_idxs guard skips
+                    // these pairs — they are tracked separately via rb/rm_exception_idxs.
                     idx = -1;
                 }
                 else
