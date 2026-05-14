@@ -1775,9 +1775,17 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double q_a1, sig_a1, eps_a1;
                 cljff->getParticleParameters(a0, q_a0, sig_a0, eps_a0);
                 cljff->getParticleParameters(a1, q_a1, sig_a1, eps_a1);
-                cljff->setExceptionParameters(clj_idx, a0, a1,
-                                              rb_kappa * q_a0 * q_a1, 1e-9, 1e-9);
-                has_changed_cljff = true;
+                const double rb_new_charge = rb_kappa * q_a0 * q_a1;
+                int rb_ea0, rb_ea1;
+                double rb_old_charge, rb_old_sig, rb_old_eps;
+                cljff->getExceptionParameters(clj_idx, rb_ea0, rb_ea1,
+                                              rb_old_charge, rb_old_sig, rb_old_eps);
+                if (rb_new_charge != rb_old_charge)
+                {
+                    cljff->setExceptionParameters(clj_idx, a0, a1,
+                                                  rb_new_charge, 1e-9, 1e-9);
+                    has_changed_cljff = true;
+                }
                 // Keep per-bond q in sync with morphed particle charges.
                 const double q_product = (q_a0 * q_a1 == 0.0) ? 1e-9 : q_a0 * q_a1;
                 if (bp[0] != q_product)
@@ -1805,9 +1813,17 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double q_a1, sig_a1, eps_a1;
                 cljff->getParticleParameters(a0, q_a0, sig_a0, eps_a0);
                 cljff->getParticleParameters(a1, q_a1, sig_a1, eps_a1);
-                cljff->setExceptionParameters(clj_idx, a0, a1,
-                                              rm_kappa * q_a0 * q_a1, 1e-9, 1e-9);
-                has_changed_cljff = true;
+                const double rm_new_charge = rm_kappa * q_a0 * q_a1;
+                int rm_ea0, rm_ea1;
+                double rm_old_charge, rm_old_sig, rm_old_eps;
+                cljff->getExceptionParameters(clj_idx, rm_ea0, rm_ea1,
+                                              rm_old_charge, rm_old_sig, rm_old_eps);
+                if (rm_new_charge != rm_old_charge)
+                {
+                    cljff->setExceptionParameters(clj_idx, a0, a1,
+                                                  rm_new_charge, 1e-9, 1e-9);
+                    has_changed_cljff = true;
+                }
                 // Keep per-bond q in sync with morphed particle charges.
                 const double q_product = (q_a0 * q_a1 == 0.0) ? 1e-9 : q_a0 * q_a1;
                 if (bp[0] != q_product)
