@@ -1334,24 +1334,30 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     bool has_changed_dihff = false;
     bool has_changed_cmap = false;
 
-    // Pre-compute ring-break/make kappa values so the per-mol exception update
-    // loop and the later global-parameter block both use the same values.
-    const double rb_kappa = (ring_breaking_ff != nullptr)
-                                ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
-                                                                  "ring-break", "kappa", 0.0, 1.0, lambda_value)))
-                                : 0.0;
+    // Pre-compute ring-break/make alpha and coul_kappa values so the per-mol
+    // exception update loop and the later global-parameter block both use the
+    // same values.
     const double rb_alpha = (ring_breaking_ff != nullptr)
                                 ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
                                                                   "ring-break", "alpha", 1.0, 0.0, lambda_value)))
-                                : 1.0;
-    const double rm_kappa = (ring_making_ff != nullptr)
-                                ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
-                                                                  "ring-make", "kappa", 1.0, 0.0, lambda_value)))
                                 : 1.0;
     const double rm_alpha = (ring_making_ff != nullptr)
                                 ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
                                                                   "ring-make", "alpha", 0.0, 1.0, lambda_value)))
                                 : 0.0;
+
+    // coul_kappa levers decouple Coulomb onset from LJ onset: zero during
+    // potential_swap/restraints_off/ring_open, ramps 0→1 in morph only.
+    // This prevents spurious Coulomb attraction when atoms are still at
+    // covalent distances during the ring_open stage.
+    const double rb_coul_kappa = (ring_breaking_ff != nullptr)
+                                     ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
+                                                                       "ring-break", "coul_kappa", 0.0, 1.0, lambda_value)))
+                                     : 0.0;
+    const double rm_coul_kappa = (ring_making_ff != nullptr)
+                                     ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
+                                                                       "ring-make", "coul_kappa", 1.0, 0.0, lambda_value)))
+                                     : 1.0;
 
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
@@ -1754,11 +1760,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             }
         }
 
-        // Update CLJ exceptions and per-bond q for ring-breaking pairs.
-        // The CLJ exception carries kappa*q_a0(λ)*q_a1(λ) for the hard Coulomb
-        // (including RF/PME long-range). The CustomBondForce per-bond q is kept
-        // in sync so its correction term (softcore - 1/r) uses the same charge
-        // product and cancels the hard contribution exactly at all kappa values.
+        // Update CLJ exceptions for ring-breaking pairs.
+        // The CLJ exception carries coul_kappa*q_a0*q_a1 for the hard Coulomb
+        // (including RF/PME long-range). coul_kappa is zero during
+        // potential_swap/restraints_off/ring_open and ramps 0→1 in morph only,
+        // so Coulomb only activates once the LJ softcore has already separated
+        // the atoms. The CustomBondForce handles softcore LJ only (no q param).
         if (cljff != nullptr and ring_breaking_ff != nullptr)
         {
             const auto rb_exc = perturbable_mol.getExceptionIndicies("ring-break");
@@ -1767,32 +1774,20 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 const int clj_idx = boost::get<0>(rb_exc[j]);
                 if (clj_idx < 0)
                     continue;
-                const int bond_idx = boost::get<1>(rb_exc[j]);
-                int a0, a1;
-                std::vector<double> bp;
-                ring_breaking_ff->getBondParameters(bond_idx, a0, a1, bp);
-                double q_a0, sig_a0, eps_a0;
-                double q_a1, sig_a1, eps_a1;
-                cljff->getParticleParameters(a0, q_a0, sig_a0, eps_a0);
-                cljff->getParticleParameters(a1, q_a1, sig_a1, eps_a1);
-                const double rb_new_charge = rb_kappa * q_a0 * q_a1;
                 int rb_ea0, rb_ea1;
                 double rb_old_charge, rb_old_sig, rb_old_eps;
                 cljff->getExceptionParameters(clj_idx, rb_ea0, rb_ea1,
                                               rb_old_charge, rb_old_sig, rb_old_eps);
+                double q_a0, sig_a0, eps_a0;
+                double q_a1, sig_a1, eps_a1;
+                cljff->getParticleParameters(rb_ea0, q_a0, sig_a0, eps_a0);
+                cljff->getParticleParameters(rb_ea1, q_a1, sig_a1, eps_a1);
+                const double rb_new_charge = rb_coul_kappa * q_a0 * q_a1;
                 if (rb_new_charge != rb_old_charge)
                 {
-                    cljff->setExceptionParameters(clj_idx, a0, a1,
+                    cljff->setExceptionParameters(clj_idx, rb_ea0, rb_ea1,
                                                   rb_new_charge, 1e-9, 1e-9);
                     has_changed_cljff = true;
-                }
-                // Keep per-bond q in sync with morphed particle charges.
-                const double q_product = (q_a0 * q_a1 == 0.0) ? 1e-9 : q_a0 * q_a1;
-                if (bp[0] != q_product)
-                {
-                    bp[0] = q_product;
-                    ring_breaking_ff->setBondParameters(bond_idx, a0, a1, bp);
-                    has_changed_ring_breaking_ff = true;
                 }
             }
         }
@@ -1805,32 +1800,20 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 const int clj_idx = boost::get<0>(rm_exc[j]);
                 if (clj_idx < 0)
                     continue;
-                const int bond_idx = boost::get<1>(rm_exc[j]);
-                int a0, a1;
-                std::vector<double> bp;
-                ring_making_ff->getBondParameters(bond_idx, a0, a1, bp);
-                double q_a0, sig_a0, eps_a0;
-                double q_a1, sig_a1, eps_a1;
-                cljff->getParticleParameters(a0, q_a0, sig_a0, eps_a0);
-                cljff->getParticleParameters(a1, q_a1, sig_a1, eps_a1);
-                const double rm_new_charge = rm_kappa * q_a0 * q_a1;
                 int rm_ea0, rm_ea1;
                 double rm_old_charge, rm_old_sig, rm_old_eps;
                 cljff->getExceptionParameters(clj_idx, rm_ea0, rm_ea1,
                                               rm_old_charge, rm_old_sig, rm_old_eps);
+                double q_a0, sig_a0, eps_a0;
+                double q_a1, sig_a1, eps_a1;
+                cljff->getParticleParameters(rm_ea0, q_a0, sig_a0, eps_a0);
+                cljff->getParticleParameters(rm_ea1, q_a1, sig_a1, eps_a1);
+                const double rm_new_charge = rm_coul_kappa * q_a0 * q_a1;
                 if (rm_new_charge != rm_old_charge)
                 {
-                    cljff->setExceptionParameters(clj_idx, a0, a1,
+                    cljff->setExceptionParameters(clj_idx, rm_ea0, rm_ea1,
                                                   rm_new_charge, 1e-9, 1e-9);
                     has_changed_cljff = true;
-                }
-                // Keep per-bond q in sync with morphed particle charges.
-                const double q_product = (q_a0 * q_a1 == 0.0) ? 1e-9 : q_a0 * q_a1;
-                if (bp[0] != q_product)
-                {
-                    bp[0] = q_product;
-                    ring_making_ff->setBondParameters(bond_idx, a0, a1, bp);
-                    has_changed_ring_making_ff = true;
                 }
             }
         }
@@ -2169,19 +2152,15 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     if (ring_breaking_ff != nullptr)
     {
         has_changed_ring_breaking_ff |=
-            (rb_alpha != context.getParameter("ring_break_alpha") ||
-             rb_kappa != context.getParameter("ring_break_kappa"));
+            (rb_alpha != context.getParameter("ring_break_alpha"));
         context.setParameter("ring_break_alpha", rb_alpha);
-        context.setParameter("ring_break_kappa", rb_kappa);
     }
 
     if (ring_making_ff != nullptr)
     {
         has_changed_ring_making_ff |=
-            (rm_alpha != context.getParameter("ring_make_alpha") ||
-             rm_kappa != context.getParameter("ring_make_kappa"));
+            (rm_alpha != context.getParameter("ring_make_alpha"));
         context.setParameter("ring_make_alpha", rm_alpha);
-        context.setParameter("ring_make_kappa", rm_kappa);
     }
 
     if (ring_breaking_ff and has_changed_ring_breaking_ff)
