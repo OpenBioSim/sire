@@ -1466,107 +1466,89 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         std::string rb_expression, rm_expression;
         const bool need_rb = any_ring_breaking or any_ring_making;
 
-        // The ring-break/make Coulomb follows the ghost-force correction pattern:
-        // the CLJ exception in NonbondedForce carries kappa*q_a0*q_a1, providing
-        // the full hard Coulomb (including RF/PME long-range) scaled by kappa.
-        // The CustomBondForce applies the short-range correction only:
-        //   kappa * C * q * (softcore(r) - 1/r)
-        // When alpha=0 this is zero (NonbondedForce provides everything); when
-        // alpha>0 the softcore replaces the hard 1/r term at short range.
-        // Using -1/r_safe (not -kappa/r_safe) ensures exact cancellation at all
-        // kappa values, not just at kappa=1.
+        // The ring-break/make CustomBondForce provides only the softcore LJ.
+        // Coulomb is handled separately: the CLJ exception in NonbondedForce
+        // carries coul_kappa*q_a0*q_a1, where coul_kappa is a dedicated schedule
+        // lever that is zero during potential_swap/restraints_off/ring_open and
+        // ramps 0→1 only during the morph stage (where atoms are already separated
+        // by the LJ softcore). Decoupling the Coulomb onset from the LJ onset
+        // avoids spurious attraction when the ring-break pair has opposite partial
+        // charges and the softcore LJ repulsion is still weak.
         if (need_rb and use_beutler_softening)
         {
             rb_expression = QString(
-                                "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(1/r_safe));"
+                                "lj_nrg;"
                                 "lj_nrg=(1-ring_break_alpha)*four_epsilon*sig6*(sig6-1);"
-                                "sig6=(sigma^6)/(%2*sigma^6*ring_break_alpha + r_safe^6);"
+                                "sig6=(sigma^6)/(%1*sigma^6*ring_break_alpha + r_safe^6);"
                                 "r_safe=max(r, 0.001);")
-                                .arg(shift_coulomb)
                                 .arg(beutler_alpha)
                                 .toStdString();
             rm_expression = QString(
-                                "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(1/r_safe));"
+                                "lj_nrg;"
                                 "lj_nrg=(1-ring_make_alpha)*four_epsilon*sig6*(sig6-1);"
-                                "sig6=(sigma^6)/(%2*sigma^6*ring_make_alpha + r_safe^6);"
+                                "sig6=(sigma^6)/(%1*sigma^6*ring_make_alpha + r_safe^6);"
                                 "r_safe=max(r, 0.001);")
-                                .arg(shift_coulomb)
                                 .arg(beutler_alpha)
                                 .toStdString();
         }
         else if (use_taylor_softening)
         {
             rb_expression = QString(
-                                "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(1/r_safe));"
+                                "lj_nrg;"
                                 "lj_nrg=four_epsilon*sig6*(sig6-1);"
-                                "sig6=(sigma^6)/(%2*sigma^6 + r_safe^6);"
+                                "sig6=(sigma^6)/(%1*sigma^6 + r_safe^6);"
                                 "r_safe=max(r, 0.001);")
-                                .arg(shift_coulomb)
                                 .arg(taylor_power_expression("ring_break_alpha", taylor_power))
                                 .toStdString();
             rm_expression = QString(
-                                "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(1/r_safe));"
+                                "lj_nrg;"
                                 "lj_nrg=four_epsilon*sig6*(sig6-1);"
-                                "sig6=(sigma^6)/(%2*sigma^6 + r_safe^6);"
+                                "sig6=(sigma^6)/(%1*sigma^6 + r_safe^6);"
                                 "r_safe=max(r, 0.001);")
-                                .arg(shift_coulomb)
                                 .arg(taylor_power_expression("ring_make_alpha", taylor_power))
                                 .toStdString();
         }
         else
         {
             rb_expression = QString(
-                                "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_break_kappa*138.9354558466661*q*((1/sqrt((%1*ring_break_alpha)+r_safe^2))-(1/r_safe));"
+                                "lj_nrg;"
                                 "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(((sigma*delta)+r_safe^2)^3);"
                                 "r_safe=max(r, 0.001);"
-                                "delta=%2*ring_break_alpha;")
-                                .arg(shift_coulomb)
+                                "delta=%1*ring_break_alpha;")
                                 .arg(shift_delta.to(SireUnits::nanometer))
                                 .toStdString();
             rm_expression = QString(
-                                "coul_nrg+lj_nrg;"
-                                "coul_nrg=ring_make_kappa*138.9354558466661*q*((1/sqrt((%1*ring_make_alpha)+r_safe^2))-(1/r_safe));"
+                                "lj_nrg;"
                                 "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(((sigma*delta)+r_safe^2)^3);"
                                 "r_safe=max(r, 0.001);"
-                                "delta=%2*ring_make_alpha;")
-                                .arg(shift_coulomb)
+                                "delta=%1*ring_make_alpha;")
                                 .arg(shift_delta.to(SireUnits::nanometer))
                                 .toStdString();
         }
 
         // ring_break_alpha=1 initially: fully soft at the bonded (ring-closed)
         // end state so the pair interaction grows from zero as lambda moves into
-        // the morph stage. ring_break_kappa=0 initially: no coulomb contribution
-        // at the bonded end (pair is excluded there).
+        // the morph stage. Coulomb is handled by the CLJ exception (coul_kappa
+        // lever), not per-bond parameters — only sigma and four_epsilon are needed.
         if (any_ring_breaking)
         {
             ring_breaking_ff = new OpenMM::CustomBondForce(rb_expression);
             ring_breaking_ff->setName("RingBreakingBondForce");
             ring_breaking_ff->addGlobalParameter("ring_break_alpha", 1.0);
-            ring_breaking_ff->addGlobalParameter("ring_break_kappa", 0.0);
-            ring_breaking_ff->addPerBondParameter("q");
             ring_breaking_ff->addPerBondParameter("sigma");
             ring_breaking_ff->addPerBondParameter("four_epsilon");
             ring_breaking_ff->setUsesPeriodicBoundaryConditions(false);
         }
 
         // ring_make_alpha=0 initially: hard at the nonbonded (ring-open) end
-        // so the pair interacts normally there. ring_make_kappa=1 initially:
-        // full coulomb at the nonbonded end.
+        // so the pair interacts normally there. Coulomb via CLJ exception only.
         if (any_ring_making)
         {
             ring_making_ff = new OpenMM::CustomBondForce(rm_expression);
             ring_making_ff->setName("RingMakingBondForce");
             ring_making_ff->addGlobalParameter("ring_make_alpha", 0.0);
-            ring_making_ff->addGlobalParameter("ring_make_kappa", 1.0);
-            ring_making_ff->addPerBondParameter("q");
             ring_making_ff->addPerBondParameter("sigma");
             ring_making_ff->addPerBondParameter("four_epsilon");
             ring_making_ff->setUsesPeriodicBoundaryConditions(false);
@@ -2683,20 +2665,19 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
                     if (is_ring_breaking and ring_breaking_ff != 0)
                     {
-                        // CLJ parameters from the nonbonded end state (λ=1,
+                        // LJ parameters from the nonbonded end state (λ=1,
                         // perturbed), where the bond is absent and the pair
-                        // interacts normally (full scale factors).
+                        // interacts normally. Coulomb is handled by the CLJ
+                        // exception via the coul_kappa lever in lambdalever.cpp,
+                        // not per-bond parameters.
                         auto pp = mol.perturbed->getException(
                             atom0, atom1, start_index, 1.0, 1.0);
                         std::vector<double> params_rb = {
-                            boost::get<2>(pp),
                             boost::get<3>(pp),
                             4.0 * boost::get<4>(pp)};
                         if (params_rb[0] == 0)
                             params_rb[0] = 1e-9;
-                        if (params_rb[1] == 0)
-                            params_rb[1] = 1e-9;
-                        // Initial kappa=0 for ring-break: charge starts at zero.
+                        // Initial coul_kappa=0 for ring-break: charge starts at zero.
                         // Use 1e-9 to prevent OpenMM from pruning the exception.
                         idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
                                                   1e-9, 1e-9, 1e-9, true);
@@ -2708,21 +2689,19 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     }
                     else if (is_ring_making and ring_making_ff != 0)
                     {
-                        // CLJ parameters from the nonbonded end state (λ=0,
-                        // reference), where the bond is absent.
+                        // LJ parameters from the nonbonded end state (λ=0,
+                        // reference), where the bond is absent. Coulomb is handled
+                        // by the CLJ exception via the coul_kappa lever.
                         auto pp = mol.getException(
                             atom0, atom1, start_index, 1.0, 1.0);
                         std::vector<double> params_rm = {
-                            boost::get<2>(pp),
                             boost::get<3>(pp),
                             4.0 * boost::get<4>(pp)};
                         if (params_rm[0] == 0)
                             params_rm[0] = 1e-9;
-                        if (params_rm[1] == 0)
-                            params_rm[1] = 1e-9;
-                        // Initial kappa=1 for ring-make: charge starts at the full
-                        // state0 charge product so NonbondedForce carries the correct
-                        // hard Coulomb from the very first energy evaluation.
+                        // Initial coul_kappa=1 for ring-make: charge starts at the
+                        // full state0 charge product so the CLJ exception carries the
+                        // correct hard Coulomb from the very first energy evaluation.
                         double init_charge = boost::get<2>(pp);
                         if (init_charge == 0)
                             init_charge = 1e-9;
