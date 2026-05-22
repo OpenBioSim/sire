@@ -40,6 +40,7 @@
 #include "SireMaths/maths.h"
 #include "SireMaths/vector.h"
 
+#include "SireBase/console.h"
 #include "SireBase/generalunitproperty.h"
 #include "SireBase/lengthproperty.h"
 #include "SireBase/parallel.h"
@@ -1179,12 +1180,22 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // all non-perturbable atoms
     OpenMM::NonbondedForce *cljff = new OpenMM::NonbondedForce();
 
+#ifdef SIRE_USE_CUSTOMVOLUMEFORCE
     bool use_dispersion_correction = false;
 
     if (map.specified("use_dispersion_correction"))
     {
         use_dispersion_correction = map["use_dispersion_correction"].value().asABoolean();
     }
+#else
+    if (map.specified("use_dispersion_correction"))
+    {
+        SireBase::Console::warning(QObject::tr(
+            "use_dispersion_correction is not supported because this version of "
+            "Sire was built against OpenMM < 8.3, which lacks CustomVolumeForce. "
+            "The option will be ignored."));
+    }
+#endif
 
     bool is_gcmc = false;
     int num_gcmc_waters = 0;
@@ -1715,6 +1726,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         lambda_lever.setForceIndex("ghost/non-ghost", system.addForce(ghost_nonghostff));
         lambda_lever.setForceGroup("ghost/non-ghost", force_group_counter++);
 
+#ifdef SIRE_USE_CUSTOMVOLUMEFORCE
         // Analytic LJ LRC: E = lrc_coeff / V, updated each lambda step via
         // a cached closed-form sum over interaction-group pairs.
         if (use_dispersion_correction && ffinfo.hasCutoff() && ffinfo.space().isPeriodic())
@@ -1727,6 +1739,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             lambda_lever.setForceIndex("ghost-lrc", system.addForce(ghost_lrc_ff));
             lambda_lever.setForceGroup("ghost-lrc", force_group_counter++);
         }
+#endif // SIRE_USE_CUSTOMVOLUMEFORCE
 
         ghost_14ff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost-14", system.addForce(ghost_14ff));
@@ -1747,6 +1760,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
     }
 
+#ifdef SIRE_USE_CUSTOMVOLUMEFORCE
     // Analytic LRC for the NonbondedForce (all non-ghost atoms): E = lrc_background / V,
     // updated each lambda step via a cached closed-form class-pair sum.
     if (use_dispersion_correction && ffinfo.hasCutoff() && ffinfo.space().isPeriodic())
@@ -1774,6 +1788,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         lambda_lever.setForceIndex("gcmc-lrc", system.addForce(gcmc_lrc_ff));
         lambda_lever.setForceGroup("gcmc-lrc", force_group_counter++);
     }
+#endif // SIRE_USE_CUSTOMVOLUMEFORCE
 
     // Stage 4 is complete. We now have all(*) of the forces we need to run
     // a perturbable simulation. (*) well, we will define the restraint
@@ -2346,6 +2361,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_nonghostff->addInteractionGroup(ghost_atoms_set, non_ghost_atoms_set);
     }
 
+#ifdef SIRE_USE_CUSTOMVOLUMEFORCE
     // Register GCMC water atom indices with the lambda lever and pre-compute the
     // fixed LRC coefficients (lrc_w_solute and lrc_ww_half) for the gcmc-lrc force.
     if (is_gcmc && use_dispersion_correction && ffinfo.hasCutoff() && ffinfo.space().isPeriodic())
@@ -2467,6 +2483,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             }
         }
     }
+#endif // SIRE_USE_CUSTOMVOLUMEFORCE
 
     // see if we want to remove COM motion
     const auto com_remove_prop = map["com_reset_frequency"];
