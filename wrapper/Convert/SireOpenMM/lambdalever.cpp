@@ -2059,6 +2059,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             ghost_nonghostff->updateParametersInContext(context);
     }
 
+#ifdef SIRE_USE_CUSTOMVOLUMEFORCE
     // Update the ghost LJ dispersion correction via the CustomVolumeForce.
     // At r > rc the soft-core shift is negligible, so the standard closed-form
     // LJ tail integral applies. Results are cached per lambda state.
@@ -2146,6 +2147,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             "ghost-lrc", "lrc_scale", 1.0, 1.0, lambda_value);
         context.setParameter("lrc_scale", lrc_scale);
     }
+#endif // SIRE_USE_CUSTOMVOLUMEFORCE
 
     // Update ring-breaking/making softcore force global parameters using the
     // values pre-computed before the per-mol loop (rb_alpha/kappa, rm_alpha/kappa).
@@ -2169,6 +2171,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     if (ring_making_ff and has_changed_ring_making_ff)
         ring_making_ff->updateParametersInContext(context);
 
+#ifdef SIRE_USE_CUSTOMVOLUMEFORCE
     // Update the NonbondedForce (background) LRC via its own CustomVolumeForce.
     // Ghost atoms have epsilon=0 in cljff so they contribute nothing naturally.
     auto background_lrc_ff = this->getForce<OpenMM::CustomVolumeForce>("background-lrc", system);
@@ -2234,6 +2237,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
         context.setParameter("lrc_background", lrc_coeff);
     }
+#endif // SIRE_USE_CUSTOMVOLUMEFORCE
 
     if (ghost_14ff and has_changed_ghost14ff)
         ghost_14ff->updateParametersInContext(context);

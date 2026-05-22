@@ -259,11 +259,13 @@ namespace SireOpenMM
         return "OpenMM::CustomCVForce";
     }
 
+#ifdef SIRE_USE_CUSTOMVOLUMEFORCE
     template <>
     inline QString _get_typename<OpenMM::CustomVolumeForce>()
     {
         return "OpenMM::CustomVolumeForce";
     }
+#endif
 
     template <>
     inline QString _get_typename<SireOpenMM::QMForce>()
