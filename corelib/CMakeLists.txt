@@ -662,7 +662,7 @@ elseif (MSVC)
     set ( SIRE_STATIC_LINK_FLAGS "/LTCG /OPT:REF /OPT:ICF" )
     set ( SIRE_EXE_LINK_FLAGS "/LTCG /OPT:REF /OPT:ICF" )
 
-    set ( SIRE_PLATFORM_FLAGS "/DSIRE_ALWAYS_INLINE=__forceinline" )
+    set ( SIRE_PLATFORM_FLAGS "/DSIRE_ALWAYS_INLINE=__forceinline /D_SECURE_SCL=0" )
 
 else()
     message( STATUS "CMAKE_SYSTEM_NAME == ${CMAKE_SYSTEM_NAME}" )
