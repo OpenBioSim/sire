@@ -720,6 +720,7 @@ double PyQMForceImpl::computeForce(
     QVector<double> charges_unscaled;
     QVector<double> min_dists;
     QVector<Vector> nearest_qm_vecs;
+    QVector<int> nearest_qm_atom_idxs;
 
     // If we are using electrostatic embedding, the work out the MM point charges and
     // build the neighbour list.
@@ -766,10 +767,13 @@ double PyQMForceImpl::computeForce(
                     // Find the minimum distance to any QM atom.
                     double min_dist = std::numeric_limits<double>::max();
                     Vector nearest_qm_vec;
+                    int nearest_qm_atom_idx = -1;
 
                     // Loop over all of the QM atoms.
-                    for (const auto &qm_vec : xyz_qm_vec)
+                    for (int qm_j = 0; qm_j < xyz_qm_vec.size(); ++qm_j)
                     {
+                        const auto &qm_vec = xyz_qm_vec[qm_j];
+
                         // Work out the distance between the current MM atom and QM atom.
                         const auto dist = space.calcDist(mm_vec, qm_vec);
 
@@ -777,6 +781,7 @@ double PyQMForceImpl::computeForce(
                         {
                             min_dist = dist;
                             nearest_qm_vec = qm_vec;
+                            nearest_qm_atom_idx = qm_atoms[qm_j];
                         }
 
                         // The current MM atom is within the neighbour list cutoff.
@@ -799,6 +804,7 @@ double PyQMForceImpl::computeForce(
                         charges_unscaled.append(q);
                         min_dists.append(min_dist);
                         nearest_qm_vecs.append(nearest_qm_vec);
+                        nearest_qm_atom_idxs.append(nearest_qm_atom_idx);
 
                         // Scale charge by switching function.
                         charges_mm.append(q * switching_function(min_dist));
@@ -822,14 +828,17 @@ double PyQMForceImpl::computeForce(
                 // Find the minimum distance to any QM atom.
                 double min_dist = std::numeric_limits<double>::max();
                 Vector nearest_qm_vec;
+                int nearest_qm_atom_idx = -1;
 
-                for (const auto &qm_vec : xyz_qm_vec)
+                for (int qm_j = 0; qm_j < xyz_qm_vec.size(); ++qm_j)
                 {
+                    const auto &qm_vec = xyz_qm_vec[qm_j];
                     const auto dist = space.calcDist(mm_vec, qm_vec);
                     if (dist < min_dist)
                     {
                         min_dist = dist;
                         nearest_qm_vec = qm_vec;
+                        nearest_qm_atom_idx = qm_atoms[qm_j];
                     }
                 }
 
@@ -843,6 +852,7 @@ double PyQMForceImpl::computeForce(
                     charges_unscaled.append(q);
                     min_dists.append(min_dist);
                     nearest_qm_vecs.append(nearest_qm_vec);
+                    nearest_qm_atom_idxs.append(nearest_qm_atom_idx);
 
                     // Scale charge by switching function.
                     charges_mm.append(q * switching_function(min_dist));
@@ -1027,10 +1037,13 @@ double PyQMForceImpl::computeForce(
                 // multiply by 10 to convert kJ/mol/Å → kJ/mol/nm (OpenMM units).
                 const double correction =
                     -dE_dcharges_mm[i] * 10.0 * charges_unscaled[i] * dsdr;
-                forces[idx] += lambda * OpenMM::Vec3(
-                                            correction * r_hat[0],
-                                            correction * r_hat[1],
-                                            correction * r_hat[2]);
+                const OpenMM::Vec3 f_corr(correction * r_hat[0],
+                                          correction * r_hat[1],
+                                          correction * r_hat[2]);
+                // Apply to MM atom.
+                forces[idx] += lambda * f_corr;
+                // Apply equal and opposite force to the nearest QM atom (Newton's 3rd law).
+                forces[nearest_qm_atom_idxs[i]] -= lambda * f_corr;
             }
         }
     }
