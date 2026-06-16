@@ -88,7 +88,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add softcore ``CustomBondForce`` for ring-breaking and ring-making pairs.
 
-* Add ``max_h_mass`` map option (default ``4.5`` g/mol) to control the mass threshold
+* Add ``max_h_mass`` map option (default ``3.5`` g/mol) to control the mass threshold
   used when identifying hydrogen atoms in the OpenMM conversion layer. Previously this
   was hardcoded to ``2.5`` g/mol, which caused hydrogen constraints to be skipped when
   an HMR factor greater than ~2.5 was applied.

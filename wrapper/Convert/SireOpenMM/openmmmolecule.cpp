@@ -614,7 +614,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         check_for_h_by_max_mass = map["check_for_h_by_max_mass"].value().asABoolean();
     }
 
-    double max_h_mass = 4.5;
+    double max_h_mass = 3.5;
 
     if (map.specified("max_h_mass"))
     {
