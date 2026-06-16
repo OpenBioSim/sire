@@ -1227,6 +1227,16 @@ namespace SireIO
                 // Reduce the mass.
                 mass -= delta_mass;
 
+                if (mass.value() < 0)
+                {
+                    qWarning().noquote() << QObject::tr(
+                                                "Hydrogen mass repartitioning with factor %1 has resulted "
+                                                "in a negative mass for atom index %2. Consider using a "
+                                                "smaller repartitioning factor.")
+                                                .arg(factor)
+                                                .arg(idx.value());
+                }
+
                 // Set the new mass.
                 edit_mol = edit_mol.atom(idx).setProperty(mass_prop, mass).molecule();
 

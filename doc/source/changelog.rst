@@ -93,6 +93,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   was hardcoded to ``2.5`` g/mol, which caused hydrogen constraints to be skipped when
   an HMR factor greater than ~2.5 was applied.
 
+* Warn if hydrogen mass repartiting produces a negative heavy atom mass.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
