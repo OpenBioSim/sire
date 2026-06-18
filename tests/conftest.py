@@ -234,6 +234,11 @@ def ghost_14_bug():
 
 
 @pytest.fixture(scope="session")
+def cyclopropyl_constraint_bug():
+    return sr.load_test_files("ejm_31_jmc_28.bss")
+
+
+@pytest.fixture(scope="session")
 def zero_lj_mols():
     return sr.load_test_files("zero_lj.prm7", "zero_lj.rst7")
 

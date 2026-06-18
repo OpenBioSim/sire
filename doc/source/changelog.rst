@@ -99,6 +99,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Allocate ``ghost-14`` slot if either end-state exception scale is nonzero.
 
+* Constrain perturbable bonds with unchanged parameters regardless of atom mass, matching
+  SOMD1, instead of requiring a light (hydrogen) atom to be present.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 

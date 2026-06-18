@@ -895,6 +895,19 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     auto bonds = params.bonds();
 
+    // Whether an atom's amber type changes between end states - used below
+    // to identify bonds that are part of the alchemical junction. Amber
+    // type, not charge, since charges can be redistributed across the whole
+    // ligand without affecting bonded parameters.
+    const auto params1_ambertypes = params1.amberTypes();
+
+    auto is_perturbing_atom = [&](int atom_idx) -> bool
+    {
+        const auto &cgatomidx = idx_to_cgatomidx_data[atom_idx];
+
+        return ambertypes.at(cgatomidx) != params1_ambertypes.at(cgatomidx);
+    };
+
     if (is_perturbable)
     {
         // add in any bonds that exist only in the other state
@@ -952,6 +965,34 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         bool bond_is_not_constrained = true;
         bool should_constrain_bond = false;
 
+        // Whether the bond's own k/r0 change between end states.
+        bool bond_is_perturbing = false;
+
+        // Whether the bond is part of the alchemical junction (touches a
+        // ghost or transmuting atom). SOMD1 constrains an unperturbing bond
+        // unconditionally only if it's part of the perturbation; ordinary
+        // unperturbed bonds elsewhere in the molecule are not affected.
+        bool bond_is_ghost_junction = false;
+
+        if (is_perturbable)
+        {
+            const auto bondparam1 = params1.bonds().value(it.key()).first;
+
+            double k_1 = bondparam1.k() * bond_k_to_openmm;
+            r0_1 = bondparam1.r0() * bond_r0_to_openmm;
+
+            if (r0_1 == 0)
+            {
+                // we cannot shrink the bond to 0 - this must be
+                // a bond that is disappearing - we should simply
+                // keep it the same length
+                r0_1 = r0;
+            }
+
+            bond_is_perturbing = (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3);
+            bond_is_ghost_junction = is_perturbing_atom(atom0) or is_perturbing_atom(atom1);
+        }
+
         if (this_constraint_type == CONSTRAIN_AUTO_BONDS)
         {
             // constrain the bond if its predicted vibrational frequency is less than
@@ -973,45 +1014,31 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             should_constrain_bond = vibrational_period < auto_constraints_factor * timestep_in_fs;
         }
         else if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or
-                                              (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
+                                              (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS)) or
+                                              (is_perturbable and not bond_is_perturbing and
+                                               bond_is_ghost_junction and
+                                               (this_constraint_type & CONSTRAIN_HBONDS))))
         {
             should_constrain_bond = true;
 
-            if (is_perturbable)
+            if (is_perturbable and bond_is_perturbing)
             {
-                // we need to see if this bond is being perturbed
-                const auto bondparam1 = params1.bonds().value(it.key()).first;
-
-                double k_1 = bondparam1.k() * bond_k_to_openmm;
-                r0_1 = bondparam1.r0() * bond_r0_to_openmm;
-
-                if (r0_1 == 0)
+                // we need to check against the "NOT_PERTURBED"-style constraints
+                if (this_constraint_type & CONSTRAIN_NOT_PERTURBED)
                 {
-                    // we cannot shrink the bond to 0 - this must be
-                    // a bond that is disappearing - we should simply
-                    // keep it the same length
-                    r0_1 = r0;
+                    // DO NOT CONSTRAIN any perturbing bonds
+                    should_constrain_bond = false;
                 }
-
-                if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
+                else if (this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED)
                 {
-                    // we need to check against the "NOT_PERTURBED"-style constraints
-                    if (this_constraint_type & CONSTRAIN_NOT_PERTURBED)
-                    {
-                        // DO NOT CONSTRAIN any perturbing bonds
-                        should_constrain_bond = false;
-                    }
-                    else if (this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED)
-                    {
-                        // DO NOT CONSTRAIN any perturbing bonds that DON'T contain hydrogen
-                        should_constrain_bond = has_light_atom;
-                    }
-                    else
-                    {
-                        // DO CONSTRAIN any perturbing bonds - we only don't constrain
-                        // perturbing bonds if we have one of the "NOT_PERTURBED" constraints
-                        should_constrain_bond = true;
-                    }
+                    // DO NOT CONSTRAIN any perturbing bonds that DON'T contain hydrogen
+                    should_constrain_bond = has_light_atom;
+                }
+                else
+                {
+                    // DO CONSTRAIN any perturbing bonds - we only don't constrain
+                    // perturbing bonds if we have one of the "NOT_PERTURBED" constraints
+                    should_constrain_bond = true;
                 }
             }
         }
