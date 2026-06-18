@@ -2641,7 +2641,25 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     auto to_from_ghost = (from_ghost_idxs.contains(atom0) and to_ghost_idxs.contains(atom1)) or
                                          (from_ghost_idxs.contains(atom1) and to_ghost_idxs.contains(atom0));
 
-                    if (not to_from_ghost and (coul_14_scl != 0 or lj_14_scl != 0))
+                    // Whether a ghost-14 slot is needed is decided here, once,
+                    // for the lifetime of the OpenMM::CustomBondForce - bonds
+                    // can't be added to it later, only updated. coul_14_scl/
+                    // lj_14_scl are this pair's state0 scale only; also check
+                    // the aligned state1 entry at the same index, since a pair
+                    // can be fully excluded in one end state's connectivity
+                    // and fully (or partially) unmasked in the other - e.g.
+                    // a 1-3 pair that becomes unmasked once a ring-breaking
+                    // bond removes the path between them. Missing this means
+                    // the pair is permanently excluded from ghost/non-ghost
+                    // and ghost/ghost too (their exclusion lists are built
+                    // from this same state0-only loop below), with no way to
+                    // recover the real interaction at the end where it exists.
+                    const auto &pert_param = mol.perturbed->exception_params[j];
+                    const auto coul_14_scl1 = boost::get<2>(pert_param);
+                    const auto lj_14_scl1 = boost::get<3>(pert_param);
+
+                    if (not to_from_ghost and (coul_14_scl != 0 or lj_14_scl != 0 or
+                                               coul_14_scl1 != 0 or lj_14_scl1 != 0))
                     {
                         // this is a 1-4 interaction that should be added
                         // to the ghost-14 forcefield

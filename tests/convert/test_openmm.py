@@ -489,3 +489,85 @@ def test_openmm_membrane_barostat(ala_mols, openmm_platform):
     assert barostat.getXYMode() == MonteCarloMembraneBarostat.XYIsotropic
     assert barostat.getZMode() == MonteCarloMembraneBarostat.ZFree
     assert barostat.getFrequency() == 50
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_ghost_14_bug(ghost_14_bug, openmm_platform):
+    """
+    Regression test for a bug where a pair involving a ghost atom whose
+    intrascale exclusion differs between end states (excluded at lambda=0,
+    a real 1-4 scale at lambda=1, because the connectivity path between the
+    two atoms only exists at lambda=1) never had a slot allocated in the
+    Ghost14BondForce. The construction-time check that decides whether a
+    pair needs a ghost-14 slot only looked at the lambda=0 exception scale,
+    so a pair that's excluded at lambda=0 but not at lambda=1 was silently
+    skipped, then permanently excluded from every nonbonded force for the
+    lifetime of the simulation - even at lambda=1, where it should have a
+    real interaction.
+
+    The test molecule (cyclopropane -> propane, a minimal "ring-breaking"
+    perturbation with no protein or water) reproduces this exactly: atom 2
+    (a ring/chain carbon) and atoms 9, 10, 11 (new hydrogens that only
+    exist on atom 0 at lambda=1, once the propane chain needs an extra H
+    that the cyclopropane ring didn't) are 1-3 excluded at lambda=0 and a
+    real 1-4 pair, (0.8333, 0.5), at lambda=1.
+    """
+    mols = sr.morph.link_to_reference(ghost_14_bug)
+    mol = mols[0]
+
+    d = mol.dynamics(
+        schedule=sr.cas.LambdaSchedule.standard_morph(),
+        platform=openmm_platform,
+        cutoff="none",
+    )
+
+    def get_force(d, name):
+        for force in d.context().getSystem().getForces():
+            if force.getName() == name:
+                return force
+        return None
+
+    # the bug-triggering pairs - atom 2 (C3) with the three new hydrogens
+    # on atom 0 (C1) that only exist at lambda=1
+    pairs = {(2, 9), (2, 10), (2, 11)}
+
+    def get_ghost14_params(d):
+        ghost14 = get_force(d, "Ghost14BondForce")
+        assert ghost14 is not None
+
+        found = {}
+        for i in range(ghost14.getNumBonds()):
+            p1, p2, params = ghost14.getBondParameters(i)
+            key = (min(p1, p2), max(p1, p2))
+            if key in pairs:
+                found[key] = list(params)
+        return found
+
+    # at every lambda, all three pairs must have a slot in Ghost14BondForce
+    # at all (this is what the bug broke - they were silently missing)
+    d.set_lambda(0.0)
+    params0 = get_ghost14_params(d)
+    assert set(params0.keys()) == pairs
+
+    d.set_lambda(0.5)
+    params_mid = get_ghost14_params(d)
+    assert set(params_mid.keys()) == pairs
+
+    d.set_lambda(1.0)
+    params1 = get_ghost14_params(d)
+    assert set(params1.keys()) == pairs
+
+    # at lambda=0 the pair is fully excluded, matching intrascale0 = (0,0)
+    # (four_epsilon is parameter index 2)
+    for params in params0.values():
+        assert params[2] == pytest.approx(0.0, abs=1e-6)
+
+    # the interaction should grow smoothly and monotonically as lambda
+    # goes from 0 to 1, ending up clearly nonzero (matching the real
+    # intrascale1 = (0.8333, 0.5) 1-4 scale)
+    for key in pairs:
+        assert params0[key][2] < params_mid[key][2] < params1[key][2]
+        assert params1[key][2] > 0.1
