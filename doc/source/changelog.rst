@@ -95,6 +95,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Warn if hydrogen mass repartiting produces a negative heavy atom mass.
 
+* Update merge code to handle ``kartograf`` API changes in version 2.0.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 
