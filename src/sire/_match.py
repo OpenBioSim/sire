@@ -91,7 +91,13 @@ def match_atoms(
             elif "KartografAtomMapper" in str(match.__class__):
                 # use Kartograf to get the mapping - convert to RDKit then Kartograf
                 from kartograf.atom_aligner import align_mol_shape
-                from kartograf import KartografAtomMapper, SmallMoleculeComponent
+                from kartograf import KartografAtomMapper
+
+                try:
+                    # kartograf >= 2.0 moved SmallMoleculeComponent to gufe
+                    from gufe import SmallMoleculeComponent
+                except ImportError:
+                    from kartograf import SmallMoleculeComponent
 
                 if not isinstance(match, KartografAtomMapper):
                     raise TypeError("match must be a KartografAtomMapper")

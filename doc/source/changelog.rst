@@ -88,6 +88,20 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add softcore ``CustomBondForce`` for ring-breaking and ring-making pairs.
 
+* Add ``max_h_mass`` map option (default ``3.5`` g/mol) to control the mass threshold
+  used when identifying hydrogen atoms in the OpenMM conversion layer. Previously this
+  was hardcoded to ``2.5`` g/mol, which caused hydrogen constraints to be skipped when
+  an HMR factor greater than ~2.5 was applied.
+
+* Warn if hydrogen mass repartiting produces a negative heavy atom mass.
+
+* Update merge code to handle ``kartograf`` API changes in version 2.0.
+
+* Allocate ``ghost-14`` slot if either end-state exception scale is nonzero.
+
+* Constrain perturbable bonds with unchanged parameters regardless of atom mass, matching
+  SOMD1, instead of requiring a light (hydrogen) atom to be present.
+
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------
 

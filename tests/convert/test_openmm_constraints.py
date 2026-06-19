@@ -458,6 +458,72 @@ def test_auto_constraints(ala_mols, openmm_platform):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+def test_cyclopropyl_anchor_bond_constraint(
+    cyclopropyl_constraint_bug, openmm_platform
+):
+    """
+    Regression test for an unperturbed anchor bond (to two alternate
+    heavy-atom substituents) not being constrained under
+    "h-bonds-not-heavy-perturbed", unlike SOMD1.
+    """
+    mols = sr.morph.link_to_reference(cyclopropyl_constraint_bug)
+    mol = mols[0]
+
+    # restrict light-atom detection to the maximum end-state mass, as SOMD2
+    # does, rather than Sire's broader (and individually buggy) defaults
+    map = {
+        "check_for_h_by_max_mass": True,
+        "check_for_h_by_mass": False,
+        "check_for_h_by_element": False,
+        "check_for_h_by_ambertype": False,
+    }
+
+    d = mol.dynamics(
+        constraint="h-bonds-not-heavy-perturbed",
+        platform=openmm_platform,
+        cutoff="none",
+        map=map,
+    )
+
+    anchor_idx = sr.mol.AtomIdx(17)
+    substituent_idxs = {sr.mol.AtomIdx(19), sr.mol.AtomIdx(32)}
+
+    def get_anchor_constraints(d):
+        found = {}
+
+        for constraint in d.get_constraints():
+            idx0 = constraint[0][0].index()
+            idx1 = constraint[0][1].index()
+
+            if anchor_idx in (idx0, idx1):
+                other = idx1 if idx0 == anchor_idx else idx0
+
+                if other in substituent_idxs:
+                    found[other] = constraint[1].value()
+
+        return found
+
+    found = get_anchor_constraints(d)
+
+    assert set(found.keys()) == substituent_idxs
+
+    # both anchor bonds should have the same, static length, matching
+    # SOMD1's value for this generic aromatic-C/sp3-C bond
+    for length in found.values():
+        assert length == pytest.approx(1.51234, abs=1e-3)
+
+    # the constraint should remain static (not lambda-dependent), since the
+    # bond's own parameters don't change between end states
+    d.set_lambda(1.0)
+    found_at_1 = get_anchor_constraints(d)
+
+    assert found_at_1 == found
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
 @pytest.mark.skipif(
     platform.system() != "Linux",
     reason="XMLSerializer doesn't preserve precision on Windows and macOS",
