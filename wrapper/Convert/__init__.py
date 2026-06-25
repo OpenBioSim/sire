@@ -93,6 +93,7 @@ try:
         _changed_torsions,
         _changed_exceptions,
         _changed_constraints,
+        _changed_cmaps,
         _get_lever_values,
     )
 
@@ -127,6 +128,7 @@ try:
     PerturbableOpenMMMolecule.changed_torsions = _changed_torsions
     PerturbableOpenMMMolecule.changed_exceptions = _changed_exceptions
     PerturbableOpenMMMolecule.changed_constraints = _changed_constraints
+    PerturbableOpenMMMolecule.changed_cmaps = _changed_cmaps
     PerturbableOpenMMMolecule.get_lever_values = _get_lever_values
 
     _has_openmm = True

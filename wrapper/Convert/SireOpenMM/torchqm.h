@@ -136,8 +136,9 @@ namespace SireOpenMM
             QMap<int, double> bond_scale_factors,
             QVector<int> mm2_atoms,
             QVector<int> numbers,
-            QVector<double> charges
-        );
+            QVector<double> charges,
+            double switch_width = 0.2,
+            bool use_switch = true);
 
         //! Copy constructor.
         TorchQMForce(const TorchQMForce &other);
@@ -164,7 +165,7 @@ namespace SireOpenMM
 #ifdef SIRE_USE_TORCH
         torch::jit::script::Module getTorchModule() const;
 #else
-        void* getTorchModule() const;
+        void *getTorchModule() const;
 #endif
 
         //! Get the lambda weighting factor.
@@ -243,6 +244,18 @@ namespace SireOpenMM
          */
         QVector<double> getCharges() const;
 
+        //! Get the switch width.
+        /*! \returns
+                The switch width as a fraction of the cutoff.
+         */
+        double getSwitchWidth() const;
+
+        //! Get whether a switching function is used.
+        /*! \returns
+                Whether a switching function is used.
+         */
+        bool getUseSwitch() const;
+
         //! Return the C++ name for this class.
         static const char *typeName();
 
@@ -270,6 +283,8 @@ namespace SireOpenMM
         QVector<int> mm2_atoms;
         QVector<int> numbers;
         QVector<double> charges;
+        double switch_width;
+        bool use_switch;
     };
 
 #if defined(SIRE_USE_CUSTOMCPPFORCE) && defined(SIRE_USE_TORCH)
@@ -289,13 +304,15 @@ namespace SireOpenMM
     private:
         const TorchQMForce &owner;
         torch::jit::script::Module torch_module;
-        unsigned long long step_count=0;
+        unsigned long long step_count = 0;
         double cutoff;
+        double r_switch;
+        bool use_switch;
         bool is_neighbour_list;
         int neighbour_list_frequency;
         double neighbour_list_cutoff;
         QSet<int> neighbour_list;
-        int max_num_mm=0;
+        int max_num_mm = 0;
         c10::DeviceType device;
     };
 #endif
@@ -326,11 +343,12 @@ namespace SireOpenMM
          */
         TorchQMEngine(
             QString module_path,
-            SireUnits::Dimension::Length cutoff=7.5*SireUnits::angstrom,
-            int neighbour_list_frequency=0,
-            bool is_mechanical=false,
-            double lambda=1.0
-        );
+            SireUnits::Dimension::Length cutoff = 7.5 * SireUnits::angstrom,
+            int neighbour_list_frequency = 0,
+            bool is_mechanical = false,
+            double lambda = 1.0,
+            double switch_width = 0.2,
+            bool use_switch = true);
 
         //! Copy constructor.
         TorchQMEngine(const TorchQMEngine &other);
@@ -481,6 +499,30 @@ namespace SireOpenMM
          */
         void setCharges(QVector<double> charges);
 
+        //! Get the switch width.
+        /*! \returns
+                The switch width as a fraction of the cutoff.
+         */
+        double getSwitchWidth() const;
+
+        //! Set the switch width.
+        /*! \param switch_width
+                The switch width as a fraction of the cutoff (0 to 1).
+         */
+        void setSwitchWidth(double switch_width);
+
+        //! Get whether a switching function is used.
+        /*! \returns
+                Whether a switching function is used.
+         */
+        bool getUseSwitch() const;
+
+        //! Set whether a switching function is used.
+        /*! \param use_switch
+                Whether to use a switching function.
+         */
+        void setUseSwitch(bool use_switch);
+
         //! Return the C++ name for this class.
         static const char *typeName();
 
@@ -488,7 +530,7 @@ namespace SireOpenMM
         const char *what() const;
 
         //! Create an EMLE force object.
-        QMForce* createForce() const;
+        QMForce *createForce() const;
 
     private:
         QString module_path;
@@ -496,6 +538,8 @@ namespace SireOpenMM
         int neighbour_list_frequency;
         bool is_mechanical;
         double lambda;
+        double switch_width;
+        bool use_switch;
         QVector<int> atoms;
         QMap<int, int> mm1_to_qm;
         QMap<int, QVector<int>> mm1_to_mm2;

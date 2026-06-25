@@ -45,6 +45,7 @@ jobs:
       SIRE_SILENT_PHONEHOME: 1
       SIRE_EMLE: 1
       REPO: "${{ github.event.pull_request.head.repo.full_name || github.repository }}"
+      SIRE_REMOTE: "https://github.com/${{ github.event.pull_request.head.repo.full_name || github.repository }}.git"
     steps:
       #
       - uses: actions/checkout@v4

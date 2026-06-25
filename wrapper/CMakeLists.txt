@@ -456,6 +456,7 @@ if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
   message( STATUS "Adding useful MSVC compiler options" )
   add_compile_options("/EHsc")  # exceptions are only thrown from C++ throw calls
   add_compile_options("/permissive-")  # disable MSVC's permissive mode - ensures code is standards conforming
+  add_compile_options("/FI${CMAKE_CURRENT_SOURCE_DIR}/../corelib/build/cmake/stdext_compat.h")
 endif()
 
 if (NOT DEFINED ${SIRE_VERSION})

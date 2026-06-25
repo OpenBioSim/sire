@@ -108,6 +108,7 @@ def emle(
     cutoff="7.5A",
     neighbour_list_frequency=0,
     redistribute_charge=True,
+    switch_width=0.2,
     map=None,
 ):
     """
@@ -143,6 +144,13 @@ def emle(
         molecule, the excess charge is redistributed over the MM atoms within
         the residues of the QM region.
 
+    switch_width : float, optional, default=0.2
+        The width of the switching region as a fraction of the cutoff (0 to 1).
+        A quintic switching function is applied to the MM charges over the last
+        ``switch_width * cutoff`` angstroms before the cutoff, smoothly scaling
+        them to zero. Set to 0 or None to disable switching (not recommended
+        for production MD with charged ML regions).
+
     Returns
     -------
 
@@ -159,7 +167,6 @@ def emle(
 
     try:
         import torch as _torch
-        from emle.models import EMLE as _EMLE
 
         has_model = True
     except:
@@ -227,6 +234,15 @@ def emle(
     if not isinstance(redistribute_charge, bool):
         raise TypeError("'redistribute_charge' must be of type 'bool'")
 
+    if switch_width is None:
+        switch_width = 0.0
+    if not isinstance(switch_width, (int, float)):
+        raise TypeError("'switch_width' must be of type 'int' or 'float'")
+    switch_width = float(switch_width)
+    if switch_width < 0.0 or switch_width > 1.0:
+        raise ValueError("'switch_width' must be between 0 and 1")
+    use_switch = switch_width > 0.0
+
     if map is not None:
         if not isinstance(map, dict):
             raise TypeError("'map' must be of type 'dict'")
@@ -246,7 +262,7 @@ def emle(
     # Create an engine from an EMLE model.
     else:
         try:
-            from emle.models import EMLE as _EMLE
+            pass
         except:
             raise ImportError(
                 "Could not import emle.models. Please reinstall emle-engine and try again."
@@ -275,6 +291,10 @@ def emle(
             )
         except Exception as e:
             raise ValueError("Unable to create a TorchEMLEEngine: " + str(e))
+
+    # Configure the switching function.
+    engine.set_switch_width(switch_width)
+    engine.set_use_switch(use_switch)
 
     from ._utils import (
         _check_charge,

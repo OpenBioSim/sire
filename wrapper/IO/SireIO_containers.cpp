@@ -37,14 +37,17 @@
 #include "Helpers/convertlist.hpp"
 #include "Helpers/tuples.hpp"
 
-#include "SireIO/moleculeparser.h"
 #include "SireIO/grotop.h"
+#include "SireIO/moleculeparser.h"
+
+#include "SireMM/cljnbpairs.h"
 
 #include "SireMol/molidx.h"
 
 #include "SireSystem/system.h"
 
 using namespace SireIO;
+using namespace SireMM;
 using namespace SireMol;
 using namespace SireSystem;
 
@@ -52,13 +55,14 @@ using boost::python::register_tuple;
 
 void register_SireIO_containers()
 {
-    register_list< QVector<QVector<float>> >();
-    register_list< QList<MoleculeParserPtr> >();
+    register_list<QVector<QVector<float>>>();
+    register_list<QList<MoleculeParserPtr>>();
 
-    register_list< QVector<GroMolType> >();
-    register_list< QVector<GroAtom> >();
+    register_list<QVector<GroMolType>>();
+    register_list<QVector<GroAtom>>();
 
-    register_dict< QHash<MolIdx,MolIdx> >();
+    register_dict<QHash<MolIdx, MolIdx>>();
 
-    register_tuple< boost::tuple<System,QHash<MolIdx,MolIdx>> >();
+    register_tuple<boost::tuple<System, QHash<MolIdx, MolIdx>>>();
+    register_tuple<boost::tuple<CLJNBPairs, CLJNBPairs>>();
 }

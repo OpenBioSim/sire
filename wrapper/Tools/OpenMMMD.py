@@ -1,11 +1,7 @@
-"""RUN SCRIPT to perform an MD simulation in Sire with OpenMM
-
-"""
+"""RUN SCRIPT to perform an MD simulation in Sire with OpenMM"""
 
 import os
 import sys
-import re
-import math
 import time
 import platform as pf
 import warnings
@@ -46,7 +42,6 @@ import Sire.Analysis
 from Sire.Tools.DCDFile import *
 from Sire.Tools import Parameter, resolveParameters
 import Sire.Stream
-
 
 __author__ = "Julien Michel, Gaetano Calabro, Antonia Mey, Hannes H Loeffler"
 __version__ = "0.2"
@@ -103,7 +98,7 @@ s3file = Parameter(
 restart_file = Parameter(
     "restart file",
     "sim_restart.s3",
-    "Filename of the restart file to use to save progress during the " "simulation.",
+    "Filename of the restart file to use to save progress during the simulation.",
 )
 
 dcd_root = Parameter(
@@ -115,7 +110,7 @@ dcd_root = Parameter(
 nmoves = Parameter(
     "nmoves",
     1000,
-    "Number of Molecular Dynamics moves to be performed during the " "simulation.",
+    "Number of Molecular Dynamics moves to be performed during the simulation.",
 )
 
 debug_seed = Parameter(
@@ -130,8 +125,7 @@ debug_seed = Parameter(
 ncycles = Parameter(
     "ncycles",
     1,
-    "The number of MD cycles. The total elapsed time will be "
-    "nmoves*ncycles*timestep",
+    "The number of MD cycles. The total elapsed time will be nmoves*ncycles*timestep",
 )
 
 maxcycles = Parameter(
@@ -158,7 +152,7 @@ buffered_coords_freq = Parameter(
 minimal_coordinate_saving = Parameter(
     "minimal coordinate saving",
     False,
-    "Reduce the number of coordiantes writing for states" "with lambda in ]0,1[",
+    "Reduce the number of coordiantes writing for states with lambda in ]0,1[",
 )
 
 time_to_skip = Parameter(
@@ -258,8 +252,7 @@ inverse_friction = Parameter(
 andersen = Parameter(
     "thermostat",
     True,
-    "Whether or not to use the Andersen thermostat (needed for NVT or NPT "
-    "simulation).",
+    "Whether or not to use the Andersen thermostat (needed for NVT or NPT simulation).",
 )
 
 barostat = Parameter(
@@ -432,7 +425,7 @@ hydrogen_mass_repartitioning_factor = Parameter(
 morphfile = Parameter(
     "morphfile",
     "MORPH.pert",
-    "Name of the morph file containing the perturbation to apply to the " "system.",
+    "Name of the morph file containing the perturbation to apply to the system.",
 )
 
 lambda_val = Parameter(
@@ -1396,7 +1389,7 @@ def setupBoreschRestraints(system):
     if anchors_not_present:
         print("Error! The following anchor points do not not exist in the system:")
         for anchor in anchors_not_present:
-            print(f"{anchor}: index {anchors_dict[anchor]-1}")
+            print(f"{anchor}: index {anchors_dict[anchor] - 1}")
         sys.exit(-1)
 
     # The solute will store all the information related to the Boresch restraints in the system
@@ -2515,7 +2508,10 @@ def selectWatersForPerturbation(system, charge_diff):
         # FIXME: select waters according to distance criterion
         # if mol.residue().name() == water_resname and cnt < nions:
         if mol.residues()[0].name() == water_resname and cnt < nions:
-            print ("Selected water residue %s for perturbation into ion" % (mol.residues()[0]))
+            print(
+                "Selected water residue %s for perturbation into ion"
+                % (mol.residues()[0])
+            )
             cnt += 1
 
             perturbed_water = mol.edit()
@@ -2526,6 +2522,10 @@ def selectWatersForPerturbation(system, charge_diff):
             mol = perturbed_water.commit()
             mol = water_pert.applyTemplate(mol)
             mol = mol.edit().rename(WATER_NAME).commit()
+
+            print(
+                "Selecting water %s for charge perturbation\n" % repr(mol.residues()[0])
+            )
 
             changedmols.add(mol)
 
@@ -2552,9 +2552,9 @@ def run():
 
     print("\n### Running Molecular Dynamics simulation on %s ###" % host)
     if verbose.val:
-        print("###================= Simulation Parameters=====================" "###")
+        print("###================= Simulation Parameters=====================###")
         Parameter.printAll()
-        print("###===========================================================" "###\n")
+        print("###===========================================================###\n")
 
     timer = Sire.Qt.QTime()
     timer.start()
@@ -2567,9 +2567,9 @@ def run():
         amber = Sire.IO.Amber()
 
         if os.path.exists(s3file.val):
-            (molecules, space) = Sire.Stream.load(s3file.val)
+            molecules, space = Sire.Stream.load(s3file.val)
         else:
-            (molecules, space) = amber.readCrdTop(crdfile.val, topfile.val)
+            molecules, space = amber.readCrdTop(crdfile.val, topfile.val)
             Sire.Stream.save((molecules, space), s3file.val)
 
         system = createSystem(molecules)
@@ -2582,12 +2582,10 @@ def run():
             system = setupRestraints(system)
 
         if turn_on_restraints_mode.val:
-            print(
-                """In "turn on receptor-ligand restraints mode". Receptor-ligand
+            print("""In "turn on receptor-ligand restraints mode". Receptor-ligand
                      restraint strengths will be scaled with lambda. Ensure that a dummy
                      pert file which maps all original ligand atom parameters to themselves
-                     has been supplied."""
-            )
+                     has been supplied.""")
             system = saveTurnOnRestraintsModeProperty(system)
 
         if use_distance_restraints.val:
@@ -2694,7 +2692,7 @@ def run():
             print("Energy minimization done.")
         integrator.setConstraintType(constraint.val)
         print(
-            "###===========================================================" "###\n",
+            "###===========================================================###\n",
             flush=True,
         )
 
@@ -2713,7 +2711,7 @@ def run():
             print("Energy after the equilibration: " + str(system.energy()))
             print("Equilibration done.\n")
         print(
-            "###===========================================================" "###\n",
+            "###===========================================================###\n",
             flush=True,
         )
 
@@ -2751,9 +2749,9 @@ def runFreeNrg():
     )
 
     if verbose.val:
-        print("###================= Simulation Parameters=====================" "###")
+        print("###================= Simulation Parameters=====================###")
         Parameter.printAll()
-        print("###===========================================================" "###\n")
+        print("###===========================================================###\n")
 
     timer = Sire.Qt.QTime()
     timer.start()
@@ -2837,8 +2835,8 @@ def runFreeNrg():
         if debug_seed.val != 0:
             print("Setting up the simulation with debugging seed %s" % debug_seed.val)
 
+        print("The difference in charge is", charge_diff.val)
         if charge_diff.val != 0:
-            print("The difference in charge is", charge_diff.val)
             system = selectWatersForPerturbation(system, charge_diff.val)
 
         moves = setupMovesFreeEnergy(system, debug_seed.val, gpu.val, lambda_val.val)
@@ -2863,8 +2861,7 @@ def runFreeNrg():
         )
         outfile.write(
             bytes(
-                "#For more information visit: "
-                "https://github.com/openbiosim/sire\n#\n",
+                "#For more information visit: https://github.com/openbiosim/sire\n#\n",
                 "UTF-8",
             )
         )
@@ -2966,8 +2963,7 @@ def runFreeNrg():
         print("Running minimization.")
         print(f"Tolerance for minimization: {str(minimise_tol.val)}")
         print(
-            "Maximum number of minimization iterations: "
-            f"{str(minimise_max_iter.val)}"
+            f"Maximum number of minimization iterations: {str(minimise_max_iter.val)}"
         )
 
         system = integrator.minimiseEnergy(
@@ -2976,11 +2972,9 @@ def runFreeNrg():
 
         system.mustNowRecalculateFromScratch()
 
-        print(
-            "Energy after the minimization: " f"{integrator.getPotentialEnergy(system)}"
-        )
+        print(f"Energy after the minimization: {integrator.getPotentialEnergy(system)}")
         print("Energy minimization done.")
-        print("###===========================================================" "###\n")
+        print("###===========================================================###\n")
 
     if equilibrate.val:
         print("###======================Equilibration========================###")
@@ -2998,7 +2992,7 @@ def runFreeNrg():
                 f"Energy after the annealing: {integrator.getPotentialEnergy(system)}"
             )
             print("Lambda annealing done.\n")
-        print("###===========================================================" "###\n")
+        print("###===========================================================###\n")
 
     print("###====================somd-freenrg run=======================###")
     print("Starting somd-freenrg run...")
@@ -3025,8 +3019,8 @@ def runFreeNrg():
 
         # saving all data
         beg = (
-            nmoves.val * (i - 1)
-        ) + energy_frequency.val  # Add energy_frequency beacuse energies not saved at t = 0
+            (nmoves.val * (i - 1)) + energy_frequency.val
+        )  # Add energy_frequency beacuse energies not saved at t = 0
         end = nmoves.val * (i - 1) + nmoves.val + energy_frequency.val
         steps = list(range(beg, end, energy_frequency.val))
         outdata = getAllData(integrator, steps)

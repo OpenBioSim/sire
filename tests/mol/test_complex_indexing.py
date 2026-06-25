@@ -442,7 +442,7 @@ def test_search_terms(ala_mols):
     check_mass = mols[0][0].mass().value()
 
     atoms = mols[0][
-        f"atom mass >= {check_mass-0.001} and atom mass <= {check_mass+0.001}"
+        f"atom mass >= {check_mass - 0.001} and atom mass <= {check_mass + 0.001}"
     ]
 
     assert len(atoms) > 0
@@ -460,7 +460,7 @@ def test_search_terms(ala_mols):
     check_charge = mols[0][1].charge().value()
 
     atoms = mols[0][
-        f"atom charge >= {check_charge-0.001} and atom charge <= {check_charge+0.001}"
+        f"atom charge >= {check_charge - 0.001} and atom charge <= {check_charge + 0.001}"
     ]
 
     assert len(atoms) > 0
@@ -527,8 +527,6 @@ def test_in_searches(ala_mols):
 def test_with_searches(ala_mols):
     mols = ala_mols
 
-    import sire as sr
-
     for mol in mols["molecules with count(atoms) >= 3"]:
         assert mol.num_atoms() >= 3
 
@@ -593,3 +591,29 @@ def test_count_searches(ala_mols):
 
     mol = mols["molecules with count(residues) == 3"]
     assert mol.num_residues() == 3
+
+
+def test_oob_molidx(ala_mols):
+    """
+    Regression test for issue #286: out-of-bounds molidx should raise KeyError,
+    not silently return the last molecule.
+    """
+    mols = ala_mols
+
+    n = mols.num_molecules()
+
+    # Valid boundary indices should work
+    assert mols["molidx 0"] == mols[0]
+    assert mols[f"molidx {n - 1}"] == mols[-1]
+    assert mols["molidx -1"] == mols[-1]
+
+    # Out-of-bounds positive index must raise KeyError
+    with pytest.raises(KeyError):
+        mols[f"molidx {n}"]
+
+    with pytest.raises(KeyError):
+        mols["molidx 10000"]
+
+    # Out-of-bounds negative index must raise KeyError
+    with pytest.raises(KeyError):
+        mols[f"molidx -{n + 1}"]

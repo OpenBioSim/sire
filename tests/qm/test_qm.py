@@ -451,3 +451,38 @@ def test_create_engine(ala_mols):
 
     # Make sure the energy is correct.
     assert nrg == 42
+
+
+def test_qmff_was_force_changed(ala_mols):
+    """
+    Verify that wasForceChanged("qmff") correctly tracks whether the qmff
+    lambda value changed between set_lambda calls.
+    """
+
+    def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell=None, idx_mm=None):
+        return (0.0, xyz_qm, xyz_mm)
+
+    mols = ala_mols.clone()
+    qm_mols, engine = sr.qm.create_engine(mols, mols[0], callback, callback=None)
+
+    d = qm_mols.dynamics(
+        timestep="1fs", constraint="none", qm_engine=engine, platform="cpu"
+    )
+
+    ctx = d._d._omm_mols
+    lever = ctx.get_lambda_lever()
+
+    # The context is initialised at lambda=1.0 (QM/MM default). Move to a
+    # different lambda so the qmff lambda changes.
+    ctx.set_lambda(0.5)
+    assert lever.was_force_changed("qmff"), "qmff should be changed when lambda changes"
+
+    # Same lambda again: qmff lambda is unchanged, so not changed.
+    ctx.set_lambda(0.5)
+    assert not lever.was_force_changed(
+        "qmff"
+    ), "qmff should not be changed when lambda is repeated"
+
+    # Different lambda: qmff lambda changes again.
+    ctx.set_lambda(1.0)
+    assert lever.was_force_changed("qmff"), "qmff should be changed when lambda changes"

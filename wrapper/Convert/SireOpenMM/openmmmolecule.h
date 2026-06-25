@@ -3,17 +3,17 @@
 
 #include <OpenMM.h>
 
-#include "SireMol/moleculeinfo.h"
-#include "SireMol/core.h"
 #include "SireMol/atom.h"
+#include "SireMol/core.h"
+#include "SireMol/moleculeinfo.h"
 #include "SireMol/selector.hpp"
 
-#include "SireMM/mmdetail.h"
-#include "SireMM/excludedpairs.h"
 #include "SireMM/amberparams.h"
-#include "SireMM/bond.h"
 #include "SireMM/angle.h"
+#include "SireMM/bond.h"
 #include "SireMM/dihedral.h"
+#include "SireMM/excludedpairs.h"
+#include "SireMM/mmdetail.h"
 
 #include <boost/tuple/tuple.hpp>
 
@@ -21,6 +21,28 @@ SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
 {
+
+    /** Describes a virtual site (extra point) in an OpenMM molecule.
+     *  Used for 4- and 5-point water models such as OPC, TIP4P, and TIP5P.
+     */
+    struct VirtualSiteInfo
+    {
+        enum Type
+        {
+            ThreeParticleAverage, // used for 4-point water (OPC, TIP4P)
+            OutOfPlane            // used for 5-point water (TIP5P)
+        };
+
+        Type type;
+        int vsite_idx;              // molecule-local index of the virtual site atom
+        int p1_idx, p2_idx, p3_idx; // molecule-local parent indices (O, H1, H2)
+
+        // Weights for ThreeParticleAverageSite: pos = w1*p1 + w2*p2 + w3*p3
+        double w1, w2, w3;
+
+        // Weights for OutOfPlaneSite: pos = p1 + w12*(p2-p1) + w13*(p3-p1) + wCross*(p2-p1)x(p3-p1)
+        double w12, w13, wCross;
+    };
 
     /** Internal class used to hold all of the extracted information
      *  of an OpenMM Molecule. You should not use this outside
@@ -72,6 +94,9 @@ namespace SireOpenMM
         QVector<qint8> getTorsionPeriodicities() const;
         QVector<double> getTorsionPhases() const;
         QVector<double> getTorsionKs() const;
+
+        QVector<double> getCMAPGrids() const;
+        QVector<int> getCMAPGridSizes() const;
 
         QVector<boost::tuple<qint32, qint32>> getExceptionAtoms() const;
 
@@ -136,6 +161,12 @@ namespace SireOpenMM
         /** All the dihedral and improper parameters */
         QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32, double, double>> dih_params;
 
+        /** All the CMAP parameters (atom0..4 indices, CMAPParameter) */
+        QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32, SireMM::CMAPParameter>> cmap_params;
+
+        /** Virtual site definitions for extra-point water models (OPC, TIP4P, TIP5P) */
+        QVector<VirtualSiteInfo> virtual_sites;
+
         /** All the constraints */
         QVector<boost::tuple<qint32, qint32, double>> constraints;
 
@@ -177,6 +208,18 @@ namespace SireOpenMM
          */
         QSet<qint32> from_ghost_idxs;
 
+        /** Pairs of atom indices (molecule-local) whose bond is present
+         *  at λ=0 but absent at λ=1 (ring-breaking). Already swapped if
+         *  swap_end_states was active at construction time.
+         */
+        QVector<QPair<qint32, qint32>> ring_breaking_pairs;
+
+        /** Pairs of atom indices (molecule-local) whose bond is absent
+         *  at λ=0 but present at λ=1 (ring-making). Already swapped if
+         *  swap_end_states was active at construction time.
+         */
+        QVector<QPair<qint32, qint32>> ring_making_pairs;
+
         /** What type of constraint to use */
         qint32 constraint_type;
 
@@ -192,6 +235,13 @@ namespace SireOpenMM
 
         /** The starting index of the first OpenMM atom in the original Sire system. */
         int start_atom_idx;
+
+        /** Virtual site properties */
+        bool has_vs;
+        int n_vs;
+        SireBase::Properties vs_parents;
+        SireBase::PropertyList vs_charges;
+        SireBase::Properties vs_properties;
 
     private:
         void constructFromAmber(const SireMol::Molecule &mol,
@@ -274,6 +324,14 @@ namespace SireOpenMM
         QVector<double> getTorsionPhases0() const;
         QVector<double> getTorsionPhases1() const;
 
+        const QVector<double> &getCMAPGrids0() const;
+        const QVector<double> &getCMAPGrids1() const;
+        const QVector<int> &getCMAPGridSizes() const;
+
+        /** Return the 5-atom indices (molecule-local) for each CMAP torsion,
+         *  in the same order as getCMAPGridSizes(). Used for REST2 scaling. */
+        QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32>> getCMAPAtoms() const;
+
         QVector<double> getChargeScales0() const;
         QVector<double> getChargeScales1() const;
         QVector<double> getLJScales0() const;
@@ -347,6 +405,16 @@ namespace SireOpenMM
         QVector<double> tors_phase0, tors_phase1;
         QVector<double> charge_scl0, charge_scl1;
         QVector<double> lj_scl0, lj_scl1;
+
+        /** Flat concatenation of all CMAP grid values (column-major, kJ/mol) for
+         *  state 0 and state 1. Grid k occupies cmap_grid_sizes[k]^2 entries. */
+        QVector<double> cmap_grid0, cmap_grid1;
+
+        /** The grid dimension N for each CMAP torsion (grid is N x N) */
+        QVector<int> cmap_grid_sizes;
+
+        /** Molecule-local 5-atom indices for each CMAP torsion (for REST2 checks) */
+        QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32>> cmap_atoms;
 
         /** The indexes of atoms that become ghosts in the
          *  perturbed state

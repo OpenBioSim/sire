@@ -971,7 +971,7 @@ def __fixed__dihedral__(obj, idx=None, idx1=None, idx2=None, idx3=None, map=None
         raise KeyError("There is no matching dihedral in this view.")
     elif len(dihedrals) > 1:
         raise KeyError(
-            "More than one dihedral matches. Number of " f"matches is {len(dihedrals)}."
+            f"More than one dihedral matches. Number of matches is {len(dihedrals)}."
         )
 
     return dihedrals[0]
@@ -986,7 +986,7 @@ def __fixed__improper__(obj, idx=None, idx1=None, idx2=None, idx3=None, map=None
         raise KeyError("There is no matching improper in this view.")
     elif len(impropers) > 1:
         raise KeyError(
-            "More than one improper matches. Number of " f"matches is {len(impropers)}."
+            f"More than one improper matches. Number of matches is {len(impropers)}."
         )
 
     return impropers[0]
@@ -1573,7 +1573,6 @@ def _dynamics(
     vacuum=None,
     shift_delta=None,
     shift_coulomb=None,
-    coulomb_power=None,
     restraints=None,
     fixed=None,
     platform=None,
@@ -1734,11 +1733,6 @@ def _dynamics(
         The shift_coulomb parameter that controls the electrostatic
         softening potential that smooths the creation and deletion
         of ghost atoms during a potential. This defaults to 1.0 A.
-
-    coulomb_power: int
-        The coulomb power parmeter that controls the electrostatic
-        softening potential that smooths the creation and deletion
-        of ghost atoms during a potential. This defaults to 0.
 
     restraints: sire.mm.Restraints or list[sire.mm.Restraints]
         A single set of restraints, or a list of sets of
@@ -1978,7 +1972,6 @@ def _dynamics(
         lambda_value=lambda_value,
         shift_delta=shift_delta,
         shift_coulomb=shift_coulomb,
-        coulomb_power=coulomb_power,
         swap_end_states=swap_end_states,
         ignore_perturbations=ignore_perturbations,
         restraints=restraints,
@@ -2003,7 +1996,6 @@ def _minimisation(
     vacuum=None,
     shift_delta=None,
     shift_coulomb=None,
-    coulomb_power=None,
     platform=None,
     device=None,
     precision=None,
@@ -2086,11 +2078,6 @@ def _minimisation(
         The shift_coulomb parameter that controls the electrostatic
         softening potential that smooths the creation and deletion
         of ghost atoms during a potential. This defaults to 1.0 A.
-
-    coulomb_power: int
-        The coulomb power parmeter that controls the electrostatic
-        softening potential that smooths the creation and deletion
-        of ghost atoms during a potential. This defaults to 0.
 
     restraints: sire.mm.Restraints or list[sire.mm.Restraints]
         A single set of restraints, or a list of sets of
@@ -2211,7 +2198,6 @@ def _minimisation(
         ignore_perturbations=ignore_perturbations,
         shift_delta=shift_delta,
         shift_coulomb=shift_coulomb,
-        coulomb_power=coulomb_power,
         restraints=restraints,
         fixed=fixed,
         map=map,

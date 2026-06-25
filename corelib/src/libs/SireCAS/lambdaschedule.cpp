@@ -28,6 +28,8 @@
 
 #include "lambdaschedule.h"
 
+#include "SireCAS/identities.h"
+#include "SireCAS/symbolexpression.h"
 #include "SireCAS/values.h"
 
 #include "SireBase/console.h"
@@ -65,7 +67,7 @@ static RegisterMetaType<LambdaSchedule> r_schedule;
 
 QDataStream &operator<<(QDataStream &ds, const LambdaSchedule &schedule)
 {
-    writeHeader(ds, r_schedule, 3);
+    writeHeader(ds, r_schedule, 5);
 
     SharedDataStream sds(ds);
 
@@ -75,6 +77,8 @@ QDataStream &operator<<(QDataStream &ds, const LambdaSchedule &schedule)
         << schedule.default_equations
         << schedule.stage_equations
         << schedule.mol_schedules
+        << schedule.coupled_levers
+        << schedule.stage_weights
         << static_cast<const Property &>(schedule);
 
     return ds;
@@ -91,20 +95,34 @@ QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
 {
     VersionID v = readHeader(ds, r_schedule);
 
-    if (v == 1 or v == 2 or v == 3)
+    if (v == 1 or v == 2 or v == 3 or v == 4 or v == 5)
     {
         SharedDataStream sds(ds);
 
         sds >> schedule.constant_values;
 
-        if (v == 3)
+        if (v >= 3)
             sds >> schedule.force_names;
 
         sds >> schedule.lever_names >> schedule.stage_names >>
             schedule.default_equations >> schedule.stage_equations;
 
-        if (v == 2 or v == 3)
+        if (v >= 2)
             sds >> schedule.mol_schedules;
+
+        if (v >= 4)
+            sds >> schedule.coupled_levers;
+        else
+        {
+            // Populate the default coupling for streams written before v4
+            schedule.coupled_levers[_get_lever_name("cmap", "cmap_grid")] =
+                _get_lever_name("torsion", "torsion_k");
+        }
+
+        if (v >= 5)
+            sds >> schedule.stage_weights;
+        else
+            schedule.stage_weights = QVector<double>(schedule.stage_names.count(), 1.0);
 
         if (v < 3)
         {
@@ -146,13 +164,17 @@ QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
         }
     }
     else
-        throw version_error(v, "1, 2, 3", r_schedule, CODELOC);
+        throw version_error(v, "1, 2, 3, 4, 5", r_schedule, CODELOC);
 
     return ds;
 }
 
 LambdaSchedule::LambdaSchedule() : ConcreteProperty<LambdaSchedule, Property>()
 {
+    // By default, cmap_grid falls back to torsion_k so that customising
+    // torsion scaling automatically keeps the CMAP correction in sync.
+    coupled_levers[_get_lever_name("cmap", "cmap_grid")] =
+        _get_lever_name("torsion", "torsion_k");
 }
 
 LambdaSchedule::LambdaSchedule(const LambdaSchedule &other)
@@ -162,7 +184,9 @@ LambdaSchedule::LambdaSchedule(const LambdaSchedule &other)
       force_names(other.force_names),
       lever_names(other.lever_names), stage_names(other.stage_names),
       default_equations(other.default_equations),
-      stage_equations(other.stage_equations)
+      stage_equations(other.stage_equations),
+      coupled_levers(other.coupled_levers),
+      stage_weights(other.stage_weights)
 {
 }
 
@@ -181,6 +205,8 @@ LambdaSchedule &LambdaSchedule::operator=(const LambdaSchedule &other)
         stage_names = other.stage_names;
         default_equations = other.default_equations;
         stage_equations = other.stage_equations;
+        coupled_levers = other.coupled_levers;
+        stage_weights = other.stage_weights;
         Property::operator=(other);
     }
 
@@ -195,7 +221,9 @@ bool LambdaSchedule::operator==(const LambdaSchedule &other) const
            lever_names == other.lever_names and
            stage_names == other.stage_names and
            default_equations == other.default_equations and
-           stage_equations == other.stage_equations;
+           stage_equations == other.stage_equations and
+           coupled_levers == other.coupled_levers and
+           stage_weights == other.stage_weights;
 }
 
 bool LambdaSchedule::operator!=(const LambdaSchedule &other) const
@@ -230,12 +258,27 @@ QString LambdaSchedule::toString() const
 
     QStringList lines;
 
+    bool any_non_default_weight = false;
+    for (const auto &w : this->stage_weights)
+    {
+        if (w != 1.0)
+        {
+            any_non_default_weight = true;
+            break;
+        }
+    }
+
     for (int i = 0; i < this->stage_names.count(); ++i)
     {
-
-        lines.append(QString("  %1: %2")
-                         .arg(this->stage_names[i])
-                         .arg(this->default_equations[i].toOpenMMString()));
+        if (any_non_default_weight)
+            lines.append(QString("  %1 (weight=%2): %3")
+                             .arg(this->stage_names[i])
+                             .arg(this->stage_weights[i])
+                             .arg(this->default_equations[i].toOpenMMString()));
+        else
+            lines.append(QString("  %1: %2")
+                             .arg(this->stage_names[i])
+                             .arg(this->default_equations[i].toOpenMMString()));
 
         auto keys = this->stage_equations[i].keys();
         std::sort(keys.begin(), keys.end());
@@ -617,13 +660,27 @@ std::tuple<int, double> LambdaSchedule::resolve_lambda(double lambda_value) cons
         return std::tuple<int, double>(this->nStages() - 1, 1.0);
     }
 
-    double stage_width = 1.0 / this->nStages();
+    double total_weight = 0.0;
+    for (const auto &w : this->stage_weights)
+        total_weight += w;
 
-    double resolved = lambda_value / stage_width;
+    double cumulative = 0.0;
+    for (int i = 0; i < this->nStages(); ++i)
+    {
+        double stage_start = cumulative / total_weight;
+        double stage_width = this->stage_weights[i] / total_weight;
+        double stage_end = stage_start + stage_width;
 
-    double stage = std::floor(resolved);
+        if (lambda_value < stage_end)
+        {
+            double local_lambda = (lambda_value - stage_start) / stage_width;
+            return std::tuple<int, double>(i, local_lambda);
+        }
 
-    return std::tuple<int, double>(int(stage), resolved - stage);
+        cumulative += this->stage_weights[i];
+    }
+
+    return std::tuple<int, double>(this->nStages() - 1, 1.0);
 }
 
 /** Return the name of the stage that controls the forcefield parameters
@@ -655,6 +712,7 @@ void LambdaSchedule::clear()
     this->stage_names.clear();
     this->stage_equations.clear();
     this->default_equations.clear();
+    this->stage_weights.clear();
     this->constant_values = Values();
 }
 
@@ -662,9 +720,9 @@ void LambdaSchedule::clear()
  *  standard stage that scales each forcefield parameter by
  *  (1-:lambda:).initial + :lambda:.final
  */
-void LambdaSchedule::addMorphStage(const QString &name)
+void LambdaSchedule::addMorphStage(const QString &name, double weight)
 {
-    this->addStage(name, default_morph_equation);
+    this->addStage(name, default_morph_equation, weight);
 }
 
 /** Append a morph stage onto this schedule. The morph stage is a
@@ -689,9 +747,10 @@ void LambdaSchedule::addDecoupleStage(bool perturbed_is_decoupled)
  *  state if `perturbed_is_decoupled` is true, otherwise the
  *  reference state is decoupled.
  */
-void LambdaSchedule::addDecoupleStage(const QString &name, bool perturbed_is_decoupled)
+void LambdaSchedule::addDecoupleStage(const QString &name, bool perturbed_is_decoupled,
+                                      double weight)
 {
-    this->addStage(name, default_morph_equation);
+    this->addStage(name, default_morph_equation, weight);
 
     // we now need to ensure that the ghost/ghost and ghost-14 parameters are
     // not perturbed
@@ -728,9 +787,10 @@ void LambdaSchedule::addAnnihilateStage(bool perturbed_is_annihilated)
  *  state if `perturbed_is_annihilated` is true, otherwise the
  *  reference state is annihilated.
  */
-void LambdaSchedule::addAnnihilateStage(const QString &name, bool perturbed_is_annihilated)
+void LambdaSchedule::addAnnihilateStage(const QString &name, bool perturbed_is_annihilated,
+                                        double weight)
 {
-    this->addStage(name, default_morph_equation);
+    this->addStage(name, default_morph_equation, weight);
 }
 
 /** Sandwich the current set of stages with a charge-descaling and
@@ -781,11 +841,18 @@ void LambdaSchedule::addChargeScaleStages(double scale)
  *  a custom lever for this stage.
  */
 void LambdaSchedule::prependStage(const QString &name,
-                                  const SireCAS::Expression &equation)
+                                  const SireCAS::Expression &equation,
+                                  double weight)
 {
     if (name == "*")
         throw SireError::invalid_key(QObject::tr(
                                          "The stage name '*' is reserved and cannot be used."),
+                                     CODELOC);
+
+    if (weight <= 0.0)
+        throw SireError::invalid_arg(QObject::tr(
+                                         "The stage weight must be positive. Got %1.")
+                                         .arg(weight),
                                      CODELOC);
 
     auto e = equation;
@@ -795,7 +862,7 @@ void LambdaSchedule::prependStage(const QString &name,
 
     if (this->nStages() == 0)
     {
-        this->appendStage(name, e);
+        this->appendStage(name, e, weight);
         return;
     }
 
@@ -808,6 +875,7 @@ void LambdaSchedule::prependStage(const QString &name,
     this->stage_names.prepend(name);
     this->default_equations.prepend(e);
     this->stage_equations.prepend(QHash<QString, Expression>());
+    this->stage_weights.prepend(weight);
 }
 
 /** Append a stage called 'name' which uses the passed 'equation'
@@ -816,7 +884,8 @@ void LambdaSchedule::prependStage(const QString &name,
  *  a custom lever for this stage.
  */
 void LambdaSchedule::appendStage(const QString &name,
-                                 const SireCAS::Expression &equation)
+                                 const SireCAS::Expression &equation,
+                                 double weight)
 {
     if (name == "*")
         throw SireError::invalid_key(QObject::tr(
@@ -829,6 +898,12 @@ void LambdaSchedule::appendStage(const QString &name,
                                          .arg(name),
                                      CODELOC);
 
+    if (weight <= 0.0)
+        throw SireError::invalid_arg(QObject::tr(
+                                         "The stage weight must be positive. Got %1.")
+                                         .arg(weight),
+                                     CODELOC);
+
     auto e = equation;
 
     if (e == default_morph_equation)
@@ -837,6 +912,7 @@ void LambdaSchedule::appendStage(const QString &name,
     this->stage_names.append(name);
     this->default_equations.append(e);
     this->stage_equations.append(QHash<QString, Expression>());
+    this->stage_weights.append(weight);
 }
 
 /** Insert a stage called 'name' at position `i` which uses the passed
@@ -846,11 +922,18 @@ void LambdaSchedule::appendStage(const QString &name,
  */
 void LambdaSchedule::insertStage(int i,
                                  const QString &name,
-                                 const SireCAS::Expression &equation)
+                                 const SireCAS::Expression &equation,
+                                 double weight)
 {
     if (name == "*")
         throw SireError::invalid_key(QObject::tr(
                                          "The stage name '*' is reserved and cannot be used."),
+                                     CODELOC);
+
+    if (weight <= 0.0)
+        throw SireError::invalid_arg(QObject::tr(
+                                         "The stage weight must be positive. Got %1.")
+                                         .arg(weight),
                                      CODELOC);
 
     auto e = equation;
@@ -860,12 +943,12 @@ void LambdaSchedule::insertStage(int i,
 
     if (i == 0)
     {
-        this->prependStage(name, e);
+        this->prependStage(name, e, weight);
         return;
     }
     else if (i >= this->nStages())
     {
-        this->appendStage(name, e);
+        this->appendStage(name, e, weight);
         return;
     }
 
@@ -878,6 +961,7 @@ void LambdaSchedule::insertStage(int i,
     this->stage_names.insert(i, name);
     this->default_equations.insert(i, e);
     this->stage_equations.insert(i, QHash<QString, Expression>());
+    this->stage_weights.insert(i, weight);
 }
 
 /** Remove the stage 'stage' */
@@ -891,6 +975,7 @@ void LambdaSchedule::removeStage(const QString &stage)
     this->stage_names.removeAt(idx);
     this->default_equations.removeAt(idx);
     this->stage_equations.removeAt(idx);
+    this->stage_weights.removeAt(idx);
 }
 
 /** Append a stage called 'name' which uses the passed 'equation'
@@ -899,14 +984,15 @@ void LambdaSchedule::removeStage(const QString &stage)
  *  a custom lever for this stage.
  */
 void LambdaSchedule::addStage(const QString &name,
-                              const Expression &equation)
+                              const Expression &equation,
+                              double weight)
 {
     if (name == "*")
         throw SireError::invalid_key(QObject::tr(
                                          "The stage name '*' is reserved and cannot be used."),
                                      CODELOC);
 
-    this->appendStage(name, equation);
+    this->appendStage(name, equation, weight);
 }
 
 /** Find the index of the stage called 'stage'. This returns
@@ -925,6 +1011,33 @@ int LambdaSchedule::find_stage(const QString &stage) const
                                      CODELOC);
 
     return idx;
+}
+
+/** Set the relative weight of the stage 'stage' in lambda space.
+ *  A stage with weight 2 occupies twice the lambda range as a
+ *  stage with weight 1. Weights must be positive.
+ */
+void LambdaSchedule::setStageWeight(const QString &stage, double weight)
+{
+    if (weight <= 0.0)
+        throw SireError::invalid_arg(QObject::tr(
+                                         "The stage weight must be positive. Got %1.")
+                                         .arg(weight),
+                                     CODELOC);
+
+    this->stage_weights[this->find_stage(stage)] = weight;
+}
+
+/** Return the relative weight of the stage 'stage' in lambda space. */
+double LambdaSchedule::getStageWeight(const QString &stage) const
+{
+    return this->stage_weights[this->find_stage(stage)];
+}
+
+/** Return the relative weights of all stages, in stage order. */
+QVector<double> LambdaSchedule::getStageWeights() const
+{
+    return this->stage_weights;
 }
 
 /** Set the default equation used to control levers for the
@@ -1006,6 +1119,32 @@ void LambdaSchedule::removeEquation(const QString &stage,
     this->stage_equations[idx].remove(_get_lever_name(force, lever));
 }
 
+/** Couple the lever 'force::lever' to 'fallback_force::fallback_lever'.
+ *  If no custom equation has been set for 'force::lever' at any stage,
+ *  the equation for 'fallback_force::fallback_lever' will be used instead
+ *  of the stage default. This is a single level of indirection — the
+ *  fallback lever is not itself followed further.
+ *
+ *  By default, 'cmap::cmap_grid' is coupled to 'torsion::torsion_k' so
+ *  that custom torsion schedules automatically keep the CMAP correction
+ *  in sync.
+ */
+void LambdaSchedule::coupleLever(const QString &force, const QString &lever,
+                                 const QString &fallback_force,
+                                 const QString &fallback_lever)
+{
+    coupled_levers[_get_lever_name(force, lever)] =
+        _get_lever_name(fallback_force, fallback_lever);
+}
+
+/** Remove any coupling for the lever 'force::lever', reverting it to
+ *  use the stage default equation when no custom equation is set.
+ */
+void LambdaSchedule::removeCoupledLever(const QString &force, const QString &lever)
+{
+    coupled_levers.remove(_get_lever_name(force, lever));
+}
+
 /** Return whether or not the specified 'lever' in the specified 'force'
  *  at the specified 'stage' has a custom equation set for it
  */
@@ -1075,6 +1214,32 @@ SireCAS::Expression LambdaSchedule::_getEquation(int stage,
     if (it != equations.end())
     {
         return it.value();
+    }
+
+    // Check coupled levers: if this lever is coupled to another, try to
+    // find a custom equation for the coupled lever before falling back to
+    // the stage default. This is a single level of indirection (no recursion)
+    // to prevent loops.
+    auto coupled_it = this->coupled_levers.find(lever_name);
+
+    if (coupled_it != this->coupled_levers.end())
+    {
+        const auto &coupled_name = coupled_it.value();
+        const int sep = coupled_name.indexOf("::");
+        const QString coupled_force = sep >= 0 ? coupled_name.left(sep) : "*";
+        const QString coupled_lever_part = sep >= 0 ? coupled_name.mid(sep + 2) : coupled_name;
+
+        it = equations.find(coupled_name);
+        if (it != equations.end())
+            return it.value();
+
+        it = equations.find(_get_lever_name(coupled_force, "*"));
+        if (it != equations.end())
+            return it.value();
+
+        it = equations.find(_get_lever_name("*", coupled_lever_part));
+        if (it != equations.end())
+            return it.value();
     }
 
     // we don't have any match, so return the default equation for this stage
@@ -1506,4 +1671,55 @@ QVector<int> LambdaSchedule::morph(const QString &force,
     }
 
     return morphed;
+}
+
+/** Return a new LambdaSchedule that is the reverse of this schedule.
+ *  The stages are reversed in order, and within each stage's equations
+ *  the lambda symbol is replaced by (1 - lambda) and the initial and
+ *  final symbols are swapped simultaneously. This flips the schedule
+ *  about its midpoint so that the end state becomes the start state
+ *  and vice versa.
+ *
+ *  The invariant is:
+ *    reversed.morph(force, lever, initial, final, λ)
+ *      == original.morph(force, lever, final, initial, 1-λ)
+ */
+LambdaSchedule LambdaSchedule::reverse() const
+{
+    if (this->isNull())
+        return *this;
+
+    // Simultaneous substitution: λ → (1-λ), initial ↔ final
+    const Identities ids(
+        SymbolExpression(lambda_symbol, 1.0 - Expression(lambda_symbol)),
+        SymbolExpression(initial_symbol, Expression(final_symbol)),
+        SymbolExpression(final_symbol, Expression(initial_symbol)));
+
+    auto transform = [&](const Expression &e) -> Expression
+    {
+        auto r = e.substitute(ids);
+        if (r == default_morph_equation)
+            r = default_morph_equation;
+        return r;
+    };
+
+    LambdaSchedule result(*this);
+
+    std::reverse(result.stage_names.begin(), result.stage_names.end());
+    std::reverse(result.default_equations.begin(), result.default_equations.end());
+    std::reverse(result.stage_equations.begin(), result.stage_equations.end());
+    std::reverse(result.stage_weights.begin(), result.stage_weights.end());
+
+    for (int i = 0; i < result.nStages(); ++i)
+    {
+        result.default_equations[i] = transform(result.default_equations[i]);
+
+        for (auto &eq : result.stage_equations[i])
+            eq = transform(eq);
+    }
+
+    for (auto &mol_sched : result.mol_schedules)
+        mol_sched = mol_sched.reverse();
+
+    return result;
 }

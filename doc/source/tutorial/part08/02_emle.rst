@@ -55,14 +55,20 @@ an engine to perform the calculation:
 ...     mols[0],
 ...     calculator,
 ...     cutoff="7.5A",
-...     neighbour_list_frequency=20
+...     neighbour_list_frequency=20,
+...     switch_width=0.2,
 ... )
 
 Here the first argument is the molecules that we are simulating, the second
 selection coresponding to the QM region (here this is the first molecule), and
-the third is calculator that was created above. The fourth and fifth arguments
-are optional, and specify the QM cutoff distance and the neighbour list update
-frequency respectively. (Shown are the default values.) The function returns a
+the third is calculator that was created above. The remaining arguments are
+optional and specify the QM cutoff distance, the neighbour list update frequency,
+and the width of the switching region as a fraction of the cutoff (``switch_width``,
+default 0.2). (Shown are the default values.) The switching function smoothly
+scales the MM charges to zero between ``(1 - switch_width) * cutoff`` and
+``cutoff``, which avoids force discontinuities as MM atoms enter or leave the
+cutoff sphere. This is particularly important for systems with a charged ML region.
+Setting ``switch_width=0`` disables switching. The function returns a
 modified version of the molecules containing a "merged" dipeptide that can be
 interpolated between MM and QM levels of theory, along with an engine. The
 engine registers a Python callback that uses ``emle-engine`` to perform the QM
@@ -182,7 +188,7 @@ computes the electrostatic embedding:
 Next we create a new engine bound to the calculator:
 
 >>> _, engine = sr.qm.emle(
->>> ... mols, mols[0], calculator, cutoff="7.5A", neighbour_list_frequency=20
+>>> ... mols, mols[0], calculator, cutoff="7.5A", neighbour_list_frequency=20, switch_width=0.2
 >>> ... )
 
 .. note::
@@ -423,7 +429,7 @@ The model is serialisable, so can be saved and loaded using the standard
 It is also possible to use the model with Sire when performing QM/MM dynamics:
 
 >>> qm_mols, engine = sr.qm.emle(
-...     mols, mols[0], model, cutoff="7.5A", neighbour_list_frequency=20
+...     mols, mols[0], model, cutoff="7.5A", neighbour_list_frequency=20, switch_width=0.2
 ... )
 
 The model will be serialised and loaded into a C++ ``TorchQMEngine`` object,

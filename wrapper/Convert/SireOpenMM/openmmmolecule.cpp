@@ -1,21 +1,20 @@
-
 #include "openmmmolecule.h"
 
-#include "SireMol/core.h"
-#include "SireMol/moleditor.h"
-#include "SireMol/atomelements.h"
 #include "SireMol/atomcharges.h"
 #include "SireMol/atomcoords.h"
+#include "SireMol/atomelements.h"
 #include "SireMol/atommasses.h"
 #include "SireMol/atomproperty.hpp"
-#include "SireMol/connectivity.h"
+#include "SireMol/atomvelocities.h"
 #include "SireMol/bondid.h"
 #include "SireMol/bondorder.h"
-#include "SireMol/atomvelocities.h"
+#include "SireMol/connectivity.h"
+#include "SireMol/core.h"
+#include "SireMol/moleditor.h"
 
+#include "SireMM/amberparams.h"
 #include "SireMM/atomljs.h"
 #include "SireMM/selectorbond.h"
-#include "SireMM/amberparams.h"
 #include "SireMM/twoatomfunctions.h"
 
 #include "SireMaths/vector.h"
@@ -67,6 +66,8 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         return;
     }
 
+    // Set up virtual site properties
+
     bool is_perturbable = false;
     bool swap_end_states = false;
 
@@ -87,6 +88,26 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
     else
     {
         ffinfo = mol.property(map["forcefield"]).asA<MMDetail>();
+    }
+
+    if (mol.hasProperty("n_virtual_sites") and mol.property("n_virtual_sites").asAnInteger() > 0)
+    {
+        this->has_vs = true;
+        this->vs_parents = mol.property("parents").asA<SireBase::Properties>();
+        this->vs_properties = mol.property("virtual_sites").asA<SireBase::Properties>();
+        this->n_vs = mol.property("n_virtual_sites").asAnInteger();
+        if (is_perturbable)
+        {
+            this->vs_charges = mol.property("vs_charges0").asAnArray();
+        }
+        else
+        {
+            this->vs_charges = mol.property("vs_charges").asAnArray();
+        }
+    }
+    else
+    {
+        this->has_vs = false;
     }
 
     if (map.specified("constraint"))
@@ -257,11 +278,11 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
             // its current coordinates (which should represent the
             // current lambda state)
             QStringList props = {"LJ", "ambertype", "angle", "atomtype",
-                                 "bond", "charge",
+                                 "bond", "charge", "cmap",
                                  "dihedral", "element", "forcefield",
                                  "gb_radii", "gb_screening", "improper",
                                  "intrascale", "mass", "name",
-                                 "parameters", "treechain"};
+                                 "parameters", "treechain", "vs_charges"};
 
             // we can't specialise these globally in case other molecules
             // are not of amber type
@@ -271,6 +292,36 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
             if (swap_end_states)
             {
                 std::swap(map0, map1);
+            }
+
+            // Read ring-breaking/making bond pairs from molecule properties,
+            // swapping them if end states are inverted so that the members
+            // always reflect the λ=0/λ=1 convention of the (possibly swapped)
+            // end states.
+            auto read_ring_pairs = [&](const QString &prop_name)
+            {
+                QVector<QPair<qint32, qint32>> pairs;
+                if (mol.hasProperty(prop_name))
+                {
+                    const auto &flat = mol.property(prop_name)
+                                           .asA<SireBase::IntegerArrayProperty>()
+                                           .toVector();
+                    pairs.reserve(flat.count() / 2);
+                    for (int k = 0; k + 1 < flat.count(); k += 2)
+                        pairs.append(QPair<qint32, qint32>(flat[k], flat[k + 1]));
+                }
+                return pairs;
+            };
+
+            if (swap_end_states)
+            {
+                this->ring_breaking_pairs = read_ring_pairs("ring_making_bonds");
+                this->ring_making_pairs = read_ring_pairs("ring_breaking_bonds");
+            }
+            else
+            {
+                this->ring_breaking_pairs = read_ring_pairs("ring_breaking_bonds");
+                this->ring_making_pairs = read_ring_pairs("ring_making_bonds");
             }
 
             // save this perturbable map - this will help us set
@@ -563,6 +614,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         check_for_h_by_max_mass = map["check_for_h_by_max_mass"].value().asABoolean();
     }
 
+    double max_h_mass = 3.5;
+
+    if (map.specified("max_h_mass"))
+    {
+        max_h_mass = map["max_h_mass"].value().asADouble();
+    }
+
     bool check_for_h_by_element = true;
 
     if (map.specified("check_for_h_by_element"))
@@ -599,8 +657,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             const double mass0 = params_masses.at(cgatomidx).to(SireUnits::g_per_mol);
             const double mass1 = params1_masses.at(cgatomidx).to(SireUnits::g_per_mol);
 
-            const bool mass0_is_light = (mass0 >= 1) and (mass0 < 2.5);
-            const bool mass1_is_light = (mass1 >= 1) and (mass1 < 2.5);
+            const bool mass0_is_light = (mass0 >= 1) and (mass0 < max_h_mass);
+            const bool mass1_is_light = (mass1 >= 1) and (mass1 < max_h_mass);
 
             double mass = std::max(mass0, mass1);
 
@@ -614,9 +672,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 // this must be a ghost in both end states?
                 light_atoms.insert(i);
             }
-            else if (check_for_h_by_max_mass and mass < 2.5)
+            else if (check_for_h_by_max_mass and mass < max_h_mass)
             {
-                // the maximum mass is less than 2.5, so this is a H
+                // the maximum mass is less than max_h_mass, so this is a H
                 light_atoms.insert(i);
             }
             else if (check_for_h_by_mass and (mass0_is_light or mass1_is_light))
@@ -674,12 +732,12 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 // this must be a ghost
                 light_atoms.insert(i);
             }
-            else if (check_for_h_by_max_mass and mass < 2.5)
+            else if (check_for_h_by_max_mass and mass < max_h_mass)
             {
-                // the maximum mass is less than 2.5, so this is a H
+                // the maximum mass is less than max_h_mass, so this is a H
                 light_atoms.insert(i);
             }
-            else if (check_for_h_by_mass and (mass >= 1 and mass < 2.5))
+            else if (check_for_h_by_mass and (mass >= 1 and mass < max_h_mass))
             {
                 // one of the atoms is H or He
                 light_atoms.insert(i);
@@ -701,7 +759,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     const auto params_charges = params.charges();
     const auto params_ljs = params.ljs();
 
-    this->cljs = QVector<boost::tuple<double, double, double>>(nats, boost::make_tuple(0.0, 0.0, 0.0));
+    int n_params = nats;
+    if (this->has_vs)
+    {
+        n_params += this->n_vs;
+    }
+    this->cljs = QVector<boost::tuple<double, double, double>>(n_params, boost::make_tuple(0.0, 0.0, 0.0));
+
     auto cljs_data = cljs.data();
 
     for (int i = 0; i < nats; ++i)
@@ -730,6 +794,19 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         cljs_data[i] = boost::make_tuple(chg, sig, eps);
     }
 
+    if (this->has_vs)
+    {
+        auto vs_charges = mol.property(map["vs_charges"]).asAnArray();
+        for (int vs = 0; vs < this->n_vs; ++vs)
+        {
+            double chg = vs_charges.at(vs).asADouble();
+            double sig = 1e-9;
+            double eps = 0.0;
+
+            cljs_data[nats + vs] = boost::make_tuple(chg, sig, eps);
+        }
+    }
+
     this->bond_params.clear();
     this->constraints.clear();
     this->perturbable_constraints.clear();
@@ -740,6 +817,28 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     for (int i = 0; i < nats; ++i)
     {
         this->unbonded_atoms.insert(i);
+    }
+
+    // Detect virtual site (extra point) atoms by name.
+    // Only 4- and 5-atom molecules can have EP atoms (TIP4P, OPC, TIP5P).
+    // Supported names: AMBER EPW / EP1 / EP2, GROMACS MW / LP1 / LP2.
+    // We remove them from unbonded_atoms so that buildExceptions does
+    // not try to add an erroneous constraint for them.
+    static const QSet<QString> vsite_names = {"EPW", "EP1", "EP2", "MW", "LP1", "LP2"};
+
+    QSet<int> vsite_idxs;
+
+    if (nats == 4 or nats == 5)
+    {
+        for (int i = 0; i < nats; ++i)
+        {
+            if (masses_data[i] < 0.05 and
+                vsite_names.contains(mol.atom(SireMol::AtomIdx(i)).name().value()))
+            {
+                vsite_idxs.insert(i);
+                unbonded_atoms.remove(i);
+            }
+        }
     }
 
     // now the bonds
@@ -796,6 +895,19 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     auto bonds = params.bonds();
 
+    // Whether an atom's amber type changes between end states - used below
+    // to identify bonds that are part of the alchemical junction. Amber
+    // type, not charge, since charges can be redistributed across the whole
+    // ligand without affecting bonded parameters.
+    const auto params1_ambertypes = params1.amberTypes();
+
+    auto is_perturbing_atom = [&](int atom_idx) -> bool
+    {
+        const auto &cgatomidx = idx_to_cgatomidx_data[atom_idx];
+
+        return ambertypes.at(cgatomidx) != params1_ambertypes.at(cgatomidx);
+    };
+
     if (is_perturbable)
     {
         // add in any bonds that exist only in the other state
@@ -825,6 +937,11 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         if (atom0 > atom1)
             std::swap(atom0, atom1);
 
+        // Skip bonds involving virtual site atoms: their positions are
+        // determined by OpenMM's VirtualSite machinery, not a HarmonicBondForce.
+        if (vsite_idxs.contains(atom0) or vsite_idxs.contains(atom1))
+            continue;
+
         const double k = bondparam.k() * bond_k_to_openmm;
         const double r0 = bondparam.r0() * bond_r0_to_openmm;
         double r0_1 = r0;
@@ -848,6 +965,34 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         bool bond_is_not_constrained = true;
         bool should_constrain_bond = false;
 
+        // Whether the bond's own k/r0 change between end states.
+        bool bond_is_perturbing = false;
+
+        // Whether the bond is part of the alchemical junction (touches a
+        // ghost or transmuting atom). SOMD1 constrains an unperturbing bond
+        // unconditionally only if it's part of the perturbation; ordinary
+        // unperturbed bonds elsewhere in the molecule are not affected.
+        bool bond_is_ghost_junction = false;
+
+        if (is_perturbable)
+        {
+            const auto bondparam1 = params1.bonds().value(it.key()).first;
+
+            double k_1 = bondparam1.k() * bond_k_to_openmm;
+            r0_1 = bondparam1.r0() * bond_r0_to_openmm;
+
+            if (r0_1 == 0)
+            {
+                // we cannot shrink the bond to 0 - this must be
+                // a bond that is disappearing - we should simply
+                // keep it the same length
+                r0_1 = r0;
+            }
+
+            bond_is_perturbing = (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3);
+            bond_is_ghost_junction = is_perturbing_atom(atom0) or is_perturbing_atom(atom1);
+        }
+
         if (this_constraint_type == CONSTRAIN_AUTO_BONDS)
         {
             // constrain the bond if its predicted vibrational frequency is less than
@@ -869,45 +1014,31 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             should_constrain_bond = vibrational_period < auto_constraints_factor * timestep_in_fs;
         }
         else if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or
-                                              (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
+                                              (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS)) or
+                                              (is_perturbable and not bond_is_perturbing and
+                                               bond_is_ghost_junction and
+                                               (this_constraint_type & CONSTRAIN_HBONDS))))
         {
             should_constrain_bond = true;
 
-            if (is_perturbable)
+            if (is_perturbable and bond_is_perturbing)
             {
-                // we need to see if this bond is being perturbed
-                const auto bondparam1 = params1.bonds().value(it.key()).first;
-
-                double k_1 = bondparam1.k() * bond_k_to_openmm;
-                r0_1 = bondparam1.r0() * bond_r0_to_openmm;
-
-                if (r0_1 == 0)
+                // we need to check against the "NOT_PERTURBED"-style constraints
+                if (this_constraint_type & CONSTRAIN_NOT_PERTURBED)
                 {
-                    // we cannot shrink the bond to 0 - this must be
-                    // a bond that is disappearing - we should simply
-                    // keep it the same length
-                    r0_1 = r0;
+                    // DO NOT CONSTRAIN any perturbing bonds
+                    should_constrain_bond = false;
                 }
-
-                if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
+                else if (this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED)
                 {
-                    // we need to check against the "NOT_PERTURBED"-style constraints
-                    if (this_constraint_type & CONSTRAIN_NOT_PERTURBED)
-                    {
-                        // DO NOT CONSTRAIN any perturbing bonds
-                        should_constrain_bond = false;
-                    }
-                    else if (this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED)
-                    {
-                        // DO NOT CONSTRAIN any perturbing bonds that DON'T contain hydrogen
-                        should_constrain_bond = has_light_atom;
-                    }
-                    else
-                    {
-                        // DO CONSTRAIN any perturbing bonds - we only don't constrain
-                        // perturbing bonds if we have one of the "NOT_PERTURBED" constraints
-                        should_constrain_bond = true;
-                    }
+                    // DO NOT CONSTRAIN any perturbing bonds that DON'T contain hydrogen
+                    should_constrain_bond = has_light_atom;
+                }
+                else
+                {
+                    // DO CONSTRAIN any perturbing bonds - we only don't constrain
+                    // perturbing bonds if we have one of the "NOT_PERTURBED" constraints
+                    should_constrain_bond = true;
                 }
             }
         }
@@ -971,6 +1102,10 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         if (atom0 > atom2)
             std::swap(atom0, atom2);
+
+        // Skip angles involving virtual site atoms.
+        if (vsite_idxs.contains(atom0) or vsite_idxs.contains(atom1) or vsite_idxs.contains(atom2))
+            continue;
 
         const double k = angparam.k() * angle_k_to_openmm;
         const double theta0 = angparam.theta0(); // already in radians
@@ -1166,6 +1301,222 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
     }
 
+    // now the CMAP terms
+    cmap_params.clear();
+
+    const auto cmap_funcs = params.cmapFunctions();
+
+    if (not cmap_funcs.isEmpty())
+    {
+        for (const auto &func : cmap_funcs.parameters())
+        {
+            const int atom0 = molinfo.atomIdx(func.atom0()).value();
+            const int atom1 = molinfo.atomIdx(func.atom1()).value();
+            const int atom2 = molinfo.atomIdx(func.atom2()).value();
+            const int atom3 = molinfo.atomIdx(func.atom3()).value();
+            const int atom4 = molinfo.atomIdx(func.atom4()).value();
+
+            cmap_params.append(boost::make_tuple(atom0, atom1, atom2, atom3, atom4,
+                                                 func.parameter()));
+        }
+    }
+
+    if (is_perturbable)
+    {
+        // Add any CMAP terms that exist only in the other state,
+        // using the same atoms but a zero grid for this (missing) state.
+        const auto cmap_funcs1 = params1.cmapFunctions();
+
+        for (const auto &func1 : cmap_funcs1.parameters())
+        {
+            const int atom0 = molinfo.atomIdx(func1.atom0()).value();
+            const int atom1 = molinfo.atomIdx(func1.atom1()).value();
+            const int atom2 = molinfo.atomIdx(func1.atom2()).value();
+            const int atom3 = molinfo.atomIdx(func1.atom3()).value();
+            const int atom4 = molinfo.atomIdx(func1.atom4()).value();
+
+            bool found = false;
+
+            for (const auto &existing : cmap_params)
+            {
+                if (boost::get<0>(existing) == atom0 and
+                    boost::get<1>(existing) == atom1 and
+                    boost::get<2>(existing) == atom2 and
+                    boost::get<3>(existing) == atom3 and
+                    boost::get<4>(existing) == atom4)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (not found)
+            {
+                const int N = func1.parameter().nRows();
+                const SireBase::Array2D<double> null_grid(N, N, 0.0);
+                cmap_params.append(boost::make_tuple(atom0, atom1, atom2, atom3, atom4,
+                                                     SireMM::CMAPParameter(null_grid)));
+            }
+        }
+    }
+
+    // Build virtual site definitions for any extra-point atoms detected above.
+    // Weights are derived from the actual atomic coordinates so that any 4- or
+    // 5-point water model (OPC, TIP4P, TIP5P, …) is handled automatically.
+    virtual_sites.clear();
+
+    if (not vsite_idxs.isEmpty())
+    {
+        // Map atom name → molecule-local index (first match wins).
+        QHash<QString, int> name_to_idx;
+
+        for (int i = 0; i < nats; ++i)
+        {
+            const QString name = mol.atom(SireMol::AtomIdx(i)).name().value();
+
+            if (not name_to_idx.contains(name))
+                name_to_idx.insert(name, i);
+        }
+
+        auto find_idx = [&](std::initializer_list<const char *> candidates) -> int
+        {
+            for (const char *n : candidates)
+            {
+                auto it = name_to_idx.find(QString(n));
+
+                if (it != name_to_idx.end())
+                    return it.value();
+            }
+
+            return -1;
+        };
+
+        const int o_idx = find_idx({"O", "OW"});
+        const int h1_idx = find_idx({"H1", "HW1"});
+        const int h2_idx = find_idx({"H2", "HW2"});
+
+        if (o_idx < 0 or h1_idx < 0 or h2_idx < 0)
+        {
+            throw SireError::incompatible_error(
+                QObject::tr("Molecule %1 contains virtual site atoms (%2) but the expected "
+                            "parent atoms (O/OW, H1/HW1, H2/HW2) could not be found. "
+                            "Cannot register virtual sites for this molecule.")
+                    .arg(number.toString())
+                    .arg(vsite_idxs.count()),
+                CODELOC);
+        }
+        else
+        {
+            const auto &O = coords[o_idx];
+            const auto &H1 = coords[h1_idx];
+            const auto &H2 = coords[h2_idx];
+
+            // Bisector vector in the molecular plane: (H1-O) + (H2-O)
+            const double bx = (H1[0] - O[0]) + (H2[0] - O[0]);
+            const double by = (H1[1] - O[1]) + (H2[1] - O[1]);
+            const double bz = (H1[2] - O[2]) + (H2[2] - O[2]);
+            const double bisect_sq = bx * bx + by * by + bz * bz;
+
+            // Cross product (H1-O) x (H2-O) — needed for out-of-plane sites (TIP5P)
+            const double d1x = H1[0] - O[0], d1y = H1[1] - O[1], d1z = H1[2] - O[2];
+            const double d2x = H2[0] - O[0], d2y = H2[1] - O[1], d2z = H2[2] - O[2];
+            const double cx = d1y * d2z - d1z * d2y;
+            const double cy = d1z * d2x - d1x * d2z;
+            const double cz = d1x * d2y - d1y * d2x;
+            const double cross_sq = cx * cx + cy * cy + cz * cz;
+
+            // ── 4-point water (OPC, TIP4P): single EP on the bisector ──────
+            const int ep_idx = find_idx({"EPW", "MW"});
+
+            if (ep_idx >= 0 and vsite_idxs.contains(ep_idx) and bisect_sq > 1e-20)
+            {
+                const auto &EP = coords[ep_idx];
+                const double ex = EP[0] - O[0];
+                const double ey = EP[1] - O[1];
+                const double ez = EP[2] - O[2];
+                const double a = (ex * bx + ey * by + ez * bz) / bisect_sq;
+
+                VirtualSiteInfo vs;
+                vs.type = VirtualSiteInfo::ThreeParticleAverage;
+                vs.vsite_idx = ep_idx;
+                vs.p1_idx = o_idx;
+                vs.p2_idx = h1_idx;
+                vs.p3_idx = h2_idx;
+                vs.w1 = 1.0 - 2.0 * a;
+                vs.w2 = a;
+                vs.w3 = a;
+                vs.w12 = vs.w13 = vs.wCross = 0.0;
+                virtual_sites.append(vs);
+            }
+
+            // ── 5-point water (TIP5P): two out-of-plane EPs ─────────────────
+            const int ep1_idx = find_idx({"EP1", "LP1"});
+            const int ep2_idx = find_idx({"EP2", "LP2"});
+
+            if (ep1_idx >= 0 and ep2_idx >= 0 and
+                vsite_idxs.contains(ep1_idx) and vsite_idxs.contains(ep2_idx) and
+                bisect_sq > 1e-20 and cross_sq > 1e-20)
+            {
+                const auto &EP1 = coords[ep1_idx];
+                const auto &EP2 = coords[ep2_idx];
+
+                // a = dot((EP1+EP2)/2 - O, bisect) / bisect_sq
+                const double mx = 0.5 * (EP1[0] + EP2[0]) - O[0];
+                const double my = 0.5 * (EP1[1] + EP2[1]) - O[1];
+                const double mz = 0.5 * (EP1[2] + EP2[2]) - O[2];
+                const double a = (mx * bx + my * by + mz * bz) / bisect_sq;
+
+                // b = dot(EP1-EP2, cross) / (2 * cross_sq)
+                const double dx = EP1[0] - EP2[0];
+                const double dy = EP1[1] - EP2[1];
+                const double dz = EP1[2] - EP2[2];
+                const double b = (dx * cx + dy * cy + dz * cz) / (2.0 * cross_sq);
+
+                // EP1: wCross = +b
+                {
+                    VirtualSiteInfo vs;
+                    vs.type = VirtualSiteInfo::OutOfPlane;
+                    vs.vsite_idx = ep1_idx;
+                    vs.p1_idx = o_idx;
+                    vs.p2_idx = h1_idx;
+                    vs.p3_idx = h2_idx;
+                    vs.w1 = vs.w2 = vs.w3 = 0.0;
+                    vs.w12 = a;
+                    vs.w13 = a;
+                    vs.wCross = b;
+                    virtual_sites.append(vs);
+                }
+
+                // EP2: wCross = -b
+                {
+                    VirtualSiteInfo vs;
+                    vs.type = VirtualSiteInfo::OutOfPlane;
+                    vs.vsite_idx = ep2_idx;
+                    vs.p1_idx = o_idx;
+                    vs.p2_idx = h1_idx;
+                    vs.p3_idx = h2_idx;
+                    vs.w1 = vs.w2 = vs.w3 = 0.0;
+                    vs.w12 = a;
+                    vs.w13 = a;
+                    vs.wCross = -b;
+                    virtual_sites.append(vs);
+                }
+            }
+        }
+
+        if (virtual_sites.size() != vsite_idxs.count())
+        {
+            throw SireError::incompatible_error(
+                QObject::tr("Molecule %1: detected %2 virtual site atom(s) but only "
+                            "registered %3. Check atom geometry (degenerate coordinates?) "
+                            "or atom naming conventions.")
+                    .arg(number.toString())
+                    .arg(vsite_idxs.count())
+                    .arg(virtual_sites.size()),
+                CODELOC);
+        }
+    }
+
     this->buildExceptions(mol, constrained_pairs, map);
 }
 
@@ -1207,7 +1558,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
     this->perturbed->alphas = this->alphas;
     this->perturbed->kappas = this->kappas;
 
-    for (int i = 0; i < cljs.count(); ++i)
+    for (int i = 0; i < this->nAtoms(); ++i)
     {
         const auto &clj0 = cljs.at(i);
         const auto &clj1 = perturbed->cljs.at(i);
@@ -1231,6 +1582,19 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                     // kappa is 1 for both end states for ghost atoms
                     this->kappas[i] = 1.0;
                     this->perturbed->kappas[i] = 1.0;
+
+                    if (this->has_vs)
+                    {
+                        auto atom_vs = this->vs_parents.property(std::to_string(i).c_str()).asAnArray();
+                        for (int vs = 0; vs < atom_vs.size(); ++vs)
+                        {
+                            int vs_index = this->nAtoms() + atom_vs.at(vs).asAnInteger();
+                            from_ghost_idxs.insert(vs_index);
+                            this->alphas[vs_index] = 1.0;
+                            this->kappas[vs_index] = 1.0;
+                            this->perturbed->kappas[vs_index] = 1.0;
+                        }
+                    }
                 }
             }
             else if (is_ghost(clj1))
@@ -1244,6 +1608,19 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                 // kappa is 1 for both end states for ghost atoms
                 this->kappas[i] = 1.0;
                 this->perturbed->kappas[i] = 1.0;
+
+                if (this->has_vs)
+                {
+                    auto atom_vs = this->vs_parents.property(std::to_string(i).c_str()).asAnArray();
+                    for (int vs = 0; vs < atom_vs.size(); ++vs)
+                    {
+                        int vs_index = this->nAtoms() + atom_vs.at(vs).asAnInteger();
+                        to_ghost_idxs.insert(vs_index);
+                        this->perturbed->alphas[vs_index] = 1.0;
+                        this->kappas[vs_index] = 1.0;
+                        this->perturbed->kappas[vs_index] = 1.0;
+                    }
+                }
             }
         }
     }
@@ -1553,6 +1930,89 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                                          .arg(perturbed->exception_params.count()),
                                      CODELOC);
     }
+
+    // align the CMAP parameters between the two end states
+    QVector<boost::tuple<int, int, int, int, int, SireMM::CMAPParameter>> cmap_params_1;
+    cmap_params_1.reserve(cmap_params.count());
+
+    found_index_0 = QVector<bool>(cmap_params.count(), false);
+    found_index_1 = QVector<bool>(perturbed->cmap_params.count(), false);
+
+    for (int i = 0; i < cmap_params.count(); ++i)
+    {
+        const auto &cmap0 = cmap_params.at(i);
+
+        const int atom0 = boost::get<0>(cmap0);
+        const int atom1 = boost::get<1>(cmap0);
+        const int atom2 = boost::get<2>(cmap0);
+        const int atom3 = boost::get<3>(cmap0);
+        const int atom4 = boost::get<4>(cmap0);
+
+        bool found = false;
+
+        for (int j = 0; j < perturbed->cmap_params.count(); ++j)
+        {
+            if (not found_index_1[j])
+            {
+                const auto &cmap1 = perturbed->cmap_params.at(j);
+
+                if (boost::get<0>(cmap1) == atom0 and
+                    boost::get<1>(cmap1) == atom1 and
+                    boost::get<2>(cmap1) == atom2 and
+                    boost::get<3>(cmap1) == atom3 and
+                    boost::get<4>(cmap1) == atom4)
+                {
+                    cmap_params_1.append(cmap1);
+                    found_index_0[i] = true;
+                    found_index_1[j] = true;
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (not found)
+        {
+            // add a null CMAP (zero grid) for the missing perturbed state
+            found_index_0[i] = true;
+            const int N = boost::get<5>(cmap0).nRows();
+            const SireBase::Array2D<double> null_grid(N, N, 0.0);
+            cmap_params_1.append(boost::make_tuple(atom0, atom1, atom2, atom3, atom4,
+                                                   SireMM::CMAPParameter(null_grid)));
+        }
+    }
+
+    for (int j = 0; j < perturbed->cmap_params.count(); ++j)
+    {
+        if (not found_index_1[j])
+        {
+            // add a CMAP term missing in the reference state
+            const auto &cmap1 = perturbed->cmap_params.at(j);
+
+            const int atom0 = boost::get<0>(cmap1);
+            const int atom1 = boost::get<1>(cmap1);
+            const int atom2 = boost::get<2>(cmap1);
+            const int atom3 = boost::get<3>(cmap1);
+            const int atom4 = boost::get<4>(cmap1);
+
+            // add a null CMAP to the reference state
+            const int N = boost::get<5>(cmap1).nRows();
+            const SireBase::Array2D<double> null_grid(N, N, 0.0);
+            cmap_params.append(boost::make_tuple(atom0, atom1, atom2, atom3, atom4,
+                                                 SireMM::CMAPParameter(null_grid)));
+            cmap_params_1.append(cmap1);
+            found_index_1[j] = true;
+        }
+    }
+
+    if (found_index_0.indexOf(false) != -1 or found_index_1.indexOf(false) != -1)
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "Failed to align the CMAP parameters!"),
+                                     CODELOC);
+    }
+
+    perturbed->cmap_params = cmap_params_1;
 }
 
 /** Internal function that builds all of the exceptions for all of the
@@ -1571,7 +2031,7 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
     if (unbonded_atoms.isEmpty())
         unbonded_atoms = QSet<qint32>();
 
-    const int nats = this->cljs.count();
+    const int nats = this->atoms.count();
 
     const auto &nbpairs = mol.property(map["intrascale"]).asA<CLJNBPairs>();
 
@@ -1802,6 +2262,45 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // Add virtual site exceptions
+    if (this->has_vs)
+    {
+        int n_exceptions = exception_params.count();
+        for (int exc = 0; exc < n_exceptions; ++exc)
+        {
+            const auto &param = exception_params[exc];
+            const auto atom0 = boost::get<0>(param);
+            const auto atom1 = boost::get<1>(param);
+            const auto coul_14_scale = boost::get<2>(param);
+            const auto lj_14_scale = boost::get<3>(param);
+
+            int n_atoms = this->coords.count();
+
+            auto vs_on_0 = vs_parents.property(std::to_string(atom0).c_str()).asAnArray();
+            auto vs_on_1 = vs_parents.property(std::to_string(atom1).c_str()).asAnArray();
+
+            // Not add_exception because we don't want to add constraints between virtual sites
+            // Scaling factors are inherited from the parent atom exception
+            for (int vs0 = 0; vs0 < vs_on_0.size(); ++vs0)
+            {
+                int vs0_index = vs_on_0.at(vs0).asAnInteger() + n_atoms;
+                exception_params.append(boost::make_tuple(vs0_index, atom1, coul_14_scale, lj_14_scale));
+                for (int vs1 = 0; vs1 < vs_on_1.size(); ++vs1)
+                {
+                    int vs1_index = vs_on_1.at(vs1).asAnInteger() + n_atoms;
+                    exception_params.append(boost::make_tuple(vs0_index, vs1_index, coul_14_scale, lj_14_scale));
+                }
+            }
+
+            // We need an additional loop for the case where atom 0 has no virtual sites
+            for (int vs1 = 0; vs1 < vs_on_1.size(); ++vs1)
+            {
+                int vs1_index = vs_on_1.at(vs1).asAnInteger() + n_atoms;
+                exception_params.append(boost::make_tuple(atom0, vs1_index, coul_14_scale, lj_14_scale));
             }
         }
     }
@@ -2050,6 +2549,52 @@ QVector<double> OpenMMMolecule::getTorsionKs() const
     return dih_ks;
 }
 
+/** Return all CMAP grid values (column-major order, kJ/mol) for all CMAP terms
+ *  concatenated. Grid k has getCMAPGridSizes()[k]^2 entries.
+ */
+QVector<double> OpenMMMolecule::getCMAPGrids() const
+{
+    const double cmap_k_to_openmm = (SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
+
+    QVector<double> grids;
+
+    for (const auto &cmap : this->cmap_params)
+    {
+        const auto &param = boost::get<5>(cmap);
+        // Apply the same AMBER→OpenMM grid transformation used by OpenMM's
+        // amber_file_parser.py: cyclic N/2 shift in both axes with phi↔psi swap.
+        // idx = ngrid*((j+ngrid//2)%ngrid)+((i+ngrid//2)%ngrid)
+        // where i=phi (outer/slow) and j=psi (inner/fast) in the output.
+        const auto flat_in = param.grid().toColumnMajorVector();
+        const int N = param.nRows();
+
+        for (int phi = 0; phi < N; ++phi)
+        {
+            for (int psi = 0; psi < N; ++psi)
+            {
+                const int src = ((psi + N / 2) % N) * N + ((phi + N / 2) % N);
+                grids.append(flat_in[src] * cmap_k_to_openmm);
+            }
+        }
+    }
+
+    return grids;
+}
+
+/** Return the grid dimension N for each CMAP torsion (grid is N x N) */
+QVector<int> OpenMMMolecule::getCMAPGridSizes() const
+{
+    QVector<int> sizes;
+    sizes.reserve(this->cmap_params.count());
+
+    for (const auto &cmap : this->cmap_params)
+    {
+        sizes.append(boost::get<5>(cmap).nRows());
+    }
+
+    return sizes;
+}
+
 /** Return the atom indexes of the atoms in the exceptions, in
  *  exception order for this molecule
  */
@@ -2237,6 +2782,18 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
     is_improper = mol.is_improper;
     is_rest2 = mol.is_rest2;
 
+    // populate the CMAP grid data and atom indices for both end states
+    cmap_grid0 = mol.getCMAPGrids();
+    cmap_grid1 = mol.perturbed->getCMAPGrids();
+    cmap_grid_sizes = mol.getCMAPGridSizes();
+
+    for (const auto &cmap : mol.cmap_params)
+    {
+        cmap_atoms.append(boost::make_tuple(boost::get<0>(cmap), boost::get<1>(cmap),
+                                            boost::get<2>(cmap), boost::get<3>(cmap),
+                                            boost::get<4>(cmap)));
+    }
+
     bool fix_perturbable_zero_sigmas = false;
 
     if (map.specified("fix_perturbable_zero_sigmas"))
@@ -2268,7 +2825,7 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
                 sig0[i] = sig1_data[i];
                 sig0_data = sig0.constData();
             }
-            else if (std::abs(sig1_data[i] <= 1e-9))
+            else if (std::abs(sig1_data[i]) <= 1e-9)
             {
                 sig1[i] = sig0_data[i];
                 sig1_data = sig1.constData();
@@ -2305,7 +2862,11 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMole
       constraint_idxs(other.constraint_idxs),
       start_atom_idx(other.start_atom_idx),
       is_improper(other.is_improper),
-      is_rest2(other.is_rest2)
+      is_rest2(other.is_rest2),
+      cmap_grid0(other.cmap_grid0),
+      cmap_grid1(other.cmap_grid1),
+      cmap_grid_sizes(other.cmap_grid_sizes),
+      cmap_atoms(other.cmap_atoms)
 {
 }
 
@@ -2333,7 +2894,9 @@ bool PerturbableOpenMMMolecule::operator==(const PerturbableOpenMMMolecule &othe
            lj_scl0 == other.lj_scl0 and lj_scl1 == other.lj_scl1 and
            to_ghost_idxs == other.to_ghost_idxs and from_ghost_idxs == other.from_ghost_idxs and
            exception_atoms == other.exception_atoms and exception_idxs == other.exception_idxs and
-           perturbable_constraints == other.perturbable_constraints and constraint_idxs == other.constraint_idxs;
+           perturbable_constraints == other.perturbable_constraints and constraint_idxs == other.constraint_idxs and
+           cmap_grid0 == other.cmap_grid0 and cmap_grid1 == other.cmap_grid1 and
+           cmap_grid_sizes == other.cmap_grid_sizes and cmap_atoms == other.cmap_atoms;
 }
 
 /** Comparison operator */
@@ -2401,6 +2964,11 @@ PerturbableOpenMMMolecule &PerturbableOpenMMMolecule::operator=(const Perturbabl
 
         perturbable_constraints = other.perturbable_constraints;
         constraint_idxs = other.constraint_idxs;
+
+        cmap_grid0 = other.cmap_grid0;
+        cmap_grid1 = other.cmap_grid1;
+        cmap_grid_sizes = other.cmap_grid_sizes;
+        cmap_atoms = other.cmap_atoms;
 
         Property::operator=(other);
     }
@@ -2754,6 +3322,33 @@ QList<Dihedral> PerturbableOpenMMMolecule::torsions() const
 QVector<bool> PerturbableOpenMMMolecule::getIsImproper() const
 {
     return is_improper;
+}
+
+/** Return the 5-atom indices (molecule-local) for each CMAP torsion,
+ *  in the same order as getCMAPGridSizes(). Used for REST2 scaling.
+ */
+QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32>>
+PerturbableOpenMMMolecule::getCMAPAtoms() const
+{
+    return cmap_atoms;
+}
+
+/** Return flat concatenated CMAP grid values for state 0 (column-major, kJ/mol) */
+const QVector<double> &PerturbableOpenMMMolecule::getCMAPGrids0() const
+{
+    return cmap_grid0;
+}
+
+/** Return flat concatenated CMAP grid values for state 1 (column-major, kJ/mol) */
+const QVector<double> &PerturbableOpenMMMolecule::getCMAPGrids1() const
+{
+    return cmap_grid1;
+}
+
+/** Return the grid dimension N for each CMAP torsion (grid is N x N) */
+const QVector<int> &PerturbableOpenMMMolecule::getCMAPGridSizes() const
+{
+    return cmap_grid_sizes;
 }
 
 /** Return the index of the first atom in the Sire system */

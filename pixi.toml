@@ -95,12 +95,14 @@ gromacs = "*"
 alchemlyb = "*"
 mdtraj = "*"
 mdanalysis = "*"
+openff-nagl = "*"
 # loch
 pyopencl = "*"
 pycuda = "*"
 
 [feature.obs.target.linux-aarch64.dependencies]
 gromacs = "*"
+openff-nagl = "*"
 # ambertools, alchemlyb, mdtraj, mdanalysis not available on linux-aarch64
 
 [feature.obs.target.osx-arm64.dependencies]
@@ -109,6 +111,7 @@ ambertools = ">=22"
 alchemlyb = "*"
 mdtraj = "*"
 mdanalysis = "*"
+openff-nagl = "*"
 # loch
 pyopencl = "*"
 
@@ -129,6 +132,9 @@ ase = "*"
 loguru = "*"
 pygit2 = "*"
 pyyaml = "*"
+
+[feature.emle.system-requirements]
+cuda = "12"
 
 [feature.emle.target.linux-64.dependencies]
 ambertools = ">=22"

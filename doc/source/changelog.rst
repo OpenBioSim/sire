@@ -12,10 +12,8 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - April 2026
-------------------------------------------------------------------------------------------
-
-* Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
+`2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
+-----------------------------------------------------------------------------------------
 
 * Fixed duplicate converter registrations in the Python wrappers for OpenMM-related classes,
   which caused ``RuntimeWarning: to-Python converter already registered`` warnings at import
@@ -30,11 +28,29 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed parsing of AMBER and GROMACS GLYCAM force field topologies.
 
+* Add support for CMAP terms in the OpenMM conversion layer.
+
 * Fix hang in ``sire.load`` function when shared GROMACS topology path is missing.
+
+* Add support for 4- and 5-point water models in the OpenMM conversion layer.
+
+* Named forces (``clj``, ``bond``, ``angle``, ``torsion``, ``cmap``, ghost
+  forces, restraints, etc.) are each assigned a unique OpenMM force group when
+  the system is built, enabling energy decomposition by force type via
+  ``getState(groups=...)``.
+
+* Add functionality for coupling one lambda lever to another.
+
+* Added support for Direct Morse Replacement (DMR) feature in ``sire.restraints.morse_potential``
+  which is enabled by default.
 
 * Don't mutate input system in the ``sire.legacy.IO.setCoordinates`` function.
 
 * Store OpenMM state at start of a dynamics run to use for crash recovery.
+
+* Print warning when ``sire.legacy.IO.AmberPrm`` parser re-orders residues due to covalent bonds between molecules.
+
+* Added internal implementation of virtual sites in the Sire-to-OpenMM conversion layer 
 
 * Use ``RDKit::determineBondOrders()`` in Sire-to-RDKit conversion to infer bond orders.
 
@@ -46,6 +62,43 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Reassign end-state mass and element properties in the ``sire.morph.create_from_pertfile``
   to undo ``SOMD`` modifications.
+
+* Added per-stage weights to :class:`~sire.cas.LambdaSchedule`, allowing stages to occupy unequal fractions of lambda space (e.g. ``add_morph_stage("morph", weight=2.0)``).
+
+* Added support for the Beutler et al. softcore potential (``use_beutler_softening``,
+  ``beutler_alpha`` map options), currently intended for ABFE calculations. Removed the
+  ``coulomb_power`` parameter, which was invalid for any non-zero value.
+
+* Added analytic LJ long-range correction (LRC) for periodic simulations
+  (``use_dispersion_correction`` map option). A background LRC is computed for all
+  non-ghost atoms. When ghost atoms are present, a separate ghost LRC covers ghost–ghost
+  and ghost–non-ghost interactions. Both are updated efficiently via the lambda lever
+  without recomputing the full dispersion correction on every λ change.
+
+* Added a ``reverse()`` method to :class:`~sire.cas.LambdaSchedule` that returns a new
+  schedule flipped about its midpoint. Stages are reversed in order and each equation is
+  transformed by substituting ``λ → (1-λ)`` and swapping ``initial`` ↔ ``final``
+  simultaneously. The invariant is that
+  ``reversed.morph(force, lever, initial, final, λ)`` equals
+  ``original.morph(force, lever, final, initial, 1-λ)``.
+
+* Add support for using a switching function for QM/MM simulations.
+
+* Add softcore ``CustomBondForce`` for ring-breaking and ring-making pairs.
+
+* Add ``max_h_mass`` map option (default ``3.5`` g/mol) to control the mass threshold
+  used when identifying hydrogen atoms in the OpenMM conversion layer. Previously this
+  was hardcoded to ``2.5`` g/mol, which caused hydrogen constraints to be skipped when
+  an HMR factor greater than ~2.5 was applied.
+
+* Warn if hydrogen mass repartiting produces a negative heavy atom mass.
+
+* Update merge code to handle ``kartograf`` API changes in version 2.0.
+
+* Allocate ``ghost-14`` slot if either end-state exception scale is nonzero.
+
+* Constrain perturbable bonds with unchanged parameters regardless of atom mass, matching
+  SOMD1, instead of requiring a light (hydrogen) atom to be present.
 
 `2025.4.0 <https://github.com/openbiosim/sire/compare/2025.3.0...2025.4.0>`__ - February 2026
 ---------------------------------------------------------------------------------------------

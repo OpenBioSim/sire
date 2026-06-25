@@ -649,6 +649,9 @@ elseif (MSVC)
     add_compile_options("/EHsc")
     add_compile_options("/permissive-")
     add_compile_options("/Zc:twoPhase-")
+    # Provide stdext::make_checked_array_iterator stub for MSVC 14.38+ where it was removed.
+    # Qt5's qvector.h uses it unconditionally on MSVC, so force-include a polyfill.
+    add_compile_options("/FI${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/stdext_compat.h")
     message( STATUS "Compiling with MSVC" )
     set( SIRE_COMPILER "MSVC" )
 

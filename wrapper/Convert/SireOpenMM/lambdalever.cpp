@@ -53,8 +53,15 @@ MolLambdaCache::MolLambdaCache(double lam)
 {
 }
 
+MolLambdaCache::MolLambdaCache(double lam, const MolLambdaCache &prev)
+    : lam_val(lam)
+{
+    QReadLocker lkr(&(const_cast<MolLambdaCache *>(&prev)->lock));
+    prev_cache = prev.cache;
+}
+
 MolLambdaCache::MolLambdaCache(const MolLambdaCache &other)
-    : lam_val(other.lam_val), cache(other.cache)
+    : lam_val(other.lam_val), cache(other.cache), prev_cache(other.prev_cache)
 {
 }
 
@@ -68,9 +75,42 @@ MolLambdaCache &MolLambdaCache::operator=(const MolLambdaCache &other)
     {
         lam_val = other.lam_val;
         cache = other.cache;
+        prev_cache = other.prev_cache;
     }
 
     return *this;
+}
+
+bool MolLambdaCache::hasChanged(const QString &force, const QString &key) const
+{
+    return this->hasChanged(force, key, QString());
+}
+
+bool MolLambdaCache::hasChanged(const QString &force, const QString &key,
+                                const QString &subkey) const
+{
+    if (prev_cache.isEmpty())
+        return true;
+
+    QString cache_key = key;
+
+    if (not subkey.isEmpty())
+        cache_key += ("::" + subkey);
+
+    const QString force_key = force + "::" + cache_key;
+
+    const auto prev_it = prev_cache.constFind(force_key);
+    if (prev_it == prev_cache.constEnd())
+        return true;
+
+    auto nonconst_this = const_cast<MolLambdaCache *>(this);
+    QReadLocker lkr(&(nonconst_this->lock));
+
+    const auto curr_it = cache.constFind(force_key);
+    if (curr_it == cache.constEnd())
+        return true;
+
+    return curr_it.value() != prev_it.value();
 }
 
 const QVector<double> &MolLambdaCache::morph(const LambdaSchedule &schedule,
@@ -155,7 +195,8 @@ LeverCache::LeverCache()
 {
 }
 
-LeverCache::LeverCache(const LeverCache &other) : cache(other.cache)
+LeverCache::LeverCache(const LeverCache &other)
+    : cache(other.cache), prev_lam_vals(other.prev_lam_vals)
 {
 }
 
@@ -168,6 +209,7 @@ LeverCache &LeverCache::operator=(const LeverCache &other)
     if (this != &other)
     {
         cache = other.cache;
+        prev_lam_vals = other.prev_lam_vals;
     }
 
     return *this;
@@ -188,9 +230,24 @@ const MolLambdaCache &LeverCache::get(int molidx, double lam_val) const
 
     if (it == mol_cache.constEnd())
     {
-        // need to create a new cache for this lambda value
-        it = mol_cache.insert(lam_val, MolLambdaCache(lam_val));
+        // Create a new cache for this lambda value, initialising prev_cache
+        // from the previous lambda's computed values so hasChanged() works.
+        auto prev_it = nonconst_this->prev_lam_vals.constFind(molidx);
+        if (prev_it != nonconst_this->prev_lam_vals.constEnd())
+        {
+            auto old_it = mol_cache.constFind(prev_it.value());
+            if (old_it != mol_cache.constEnd())
+                it = mol_cache.insert(lam_val, MolLambdaCache(lam_val, old_it.value()));
+            else
+                it = mol_cache.insert(lam_val, MolLambdaCache(lam_val));
+        }
+        else
+        {
+            it = mol_cache.insert(lam_val, MolLambdaCache(lam_val));
+        }
     }
+
+    nonconst_this->prev_lam_vals[molidx] = lam_val;
 
     return it.value();
 }
@@ -204,7 +261,10 @@ void LeverCache::clear()
 ////// Implementation of LambdaLever
 //////
 
-LambdaLever::LambdaLever() : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>()
+LambdaLever::LambdaLever()
+    : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>(),
+      last_rest2_scale(-1.0),
+      last_qmff_lam(-1.0)
 {
 }
 
@@ -212,11 +272,14 @@ LambdaLever::LambdaLever(const LambdaLever &other)
     : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>(other),
       name_to_ffidx(other.name_to_ffidx),
       name_to_restraintidx(other.name_to_restraintidx),
+      name_to_groupidx(other.name_to_groupidx),
       lambda_schedule(other.lambda_schedule),
       perturbable_mols(other.perturbable_mols),
       start_indices(other.start_indices),
       perturbable_maps(other.perturbable_maps),
-      lambda_cache(other.lambda_cache)
+      lambda_cache(other.lambda_cache),
+      last_rest2_scale(-1.0),
+      last_qmff_lam(-1.0)
 {
 }
 
@@ -230,6 +293,7 @@ LambdaLever &LambdaLever::operator=(const LambdaLever &other)
     {
         name_to_ffidx = other.name_to_ffidx;
         name_to_restraintidx = other.name_to_restraintidx;
+        name_to_groupidx = other.name_to_groupidx;
         lambda_schedule = other.lambda_schedule;
         perturbable_mols = other.perturbable_mols;
         start_indices = other.start_indices;
@@ -322,6 +386,61 @@ QString LambdaLever::getForceType(const QString &name,
     const OpenMM::Force &force = system.getForce(idx);
 
     return QString::fromStdString(force.getName());
+}
+
+/** Set the force group index for the force called 'name'. */
+void LambdaLever::setForceGroup(const QString &name, int group_idx)
+{
+    name_to_groupidx.insert(name, group_idx);
+}
+
+/** Set the force group index for the restraint called 'name'.
+ *  Unlike setForceGroup, this is a no-op if the name is already registered,
+ *  since multiple restraint forces can share the same name and group.
+ */
+void LambdaLever::setRestraintForceGroup(const QString &name, int group_idx)
+{
+    if (!name_to_groupidx.contains(name))
+        name_to_groupidx.insert(name, group_idx);
+}
+
+/** Get the force group index for the force called 'name'.
+ *  Returns -1 if there is no force with this name.
+ */
+int LambdaLever::getForceGroup(const QString &name) const
+{
+    auto it = name_to_groupidx.constFind(name);
+
+    if (it == name_to_groupidx.constEnd())
+        return -1;
+
+    return it.value();
+}
+
+/** Return the names of all forces and restraints that have been assigned
+ *  a force group index.
+ */
+QStringList LambdaLever::getForceNames() const
+{
+    return name_to_groupidx.keys();
+}
+
+/** Return whether the named force had parameters changed in the last
+ *  setLambda call. Returns false if the name is not recognised.
+ */
+bool LambdaLever::wasForceChanged(const QString &name) const
+{
+    auto it = last_changed_forces.constFind(name);
+
+    if (it == last_changed_forces.constEnd())
+        return false;
+
+    return it.value();
+}
+
+void LambdaLever::setGCMCWaterAtoms(const QVector<int> &atoms)
+{
+    gcmc_water_atoms = QSet<int>(atoms.begin(), atoms.end());
 }
 
 boost::tuple<int, int, double, double, double, double, double>
@@ -1107,6 +1226,27 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             idx += 1;
         }
 
+        const auto morphed_cmap_grid = cache.morph(
+            schedule,
+            "cmap", "cmap_grid",
+            mol.getCMAPGrids0(),
+            mol.getCMAPGrids1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_cmap_grid.count(); ++i)
+            {
+                column_names.append(QString("cmap-cmap_grid-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_cmap_grid)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
         is_first = false;
     }
 
@@ -1140,6 +1280,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // scale factor.
     rest2_scale = 1.0 / rest2_scale;
 
+    // Detect whether REST2 scaling changed since the last setLambda call.
+    // REST2 is applied on top of morphed parameters, so a change in scale
+    // requires re-uploading parameters even if morphed values are unchanged.
+    const bool rest2_changed = (rest2_scale != last_rest2_scale);
+    last_rest2_scale = rest2_scale;
+
     // Store the REST charge scaling factor for non-bonded interactions.
     const auto sqrt_rest2_scale = std::sqrt(rest2_scale);
 
@@ -1153,9 +1299,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
     auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
     auto ghost_14ff = this->getForce<OpenMM::CustomBondForce>("ghost-14", system);
+    auto ring_breaking_ff = this->getForce<OpenMM::CustomBondForce>("ring-break", system);
+    auto ring_making_ff = this->getForce<OpenMM::CustomBondForce>("ring-make", system);
     auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
     auto angff = this->getForce<OpenMM::HarmonicAngleForce>("angle", system);
     auto dihff = this->getForce<OpenMM::PeriodicTorsionForce>("torsion", system);
+    auto cmapff = this->getForce<OpenMM::CMAPTorsionForce>("cmap", system);
 
     // we know if we have peturbable ghost atoms if we have the ghost forcefields
     const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
@@ -1168,21 +1317,47 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     if (qmff != 0)
     {
         double lam = this->lambda_schedule.morph("qmff", "*", 0.0, 1.0, lambda_value);
+        last_changed_forces["qmff"] = (lam != last_qmff_lam);
         qmff->setLambda(lam);
+        last_qmff_lam = lam;
     }
 
-    // record the range of indices of the atoms, bonds, angles,
-    // torsions which change
-    int start_change_atom = -1;
-    int end_change_atom = -1;
-    int start_change_14 = -1;
-    int end_change_14 = -1;
-    int start_change_bond = -1;
-    int end_change_bond = -1;
-    int start_change_angle = -1;
-    int end_change_angle = -1;
-    int start_change_torsion = -1;
-    int end_change_torsion = -1;
+    // track whether parameters actually changed for each force, so we only
+    // call updateParametersInContext when necessary
+    bool has_changed_cljff = false;
+    bool has_changed_ghostff = false;
+    bool has_changed_ghost14ff = false;
+    bool has_changed_ring_breaking_ff = false;
+    bool has_changed_ring_making_ff = false;
+    bool has_changed_bondff = false;
+    bool has_changed_angff = false;
+    bool has_changed_dihff = false;
+    bool has_changed_cmap = false;
+
+    // Pre-compute ring-break/make alpha and coul_kappa values so the per-mol
+    // exception update loop and the later global-parameter block both use the
+    // same values.
+    const double rb_alpha = (ring_breaking_ff != nullptr)
+                                ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
+                                                                  "ring-break", "alpha", 1.0, 0.0, lambda_value)))
+                                : 1.0;
+    const double rm_alpha = (ring_making_ff != nullptr)
+                                ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
+                                                                  "ring-make", "alpha", 0.0, 1.0, lambda_value)))
+                                : 0.0;
+
+    // coul_kappa levers decouple Coulomb onset from LJ onset: zero during
+    // potential_swap/restraints_off/ring_open, ramps 0→1 in morph only.
+    // This prevents spurious Coulomb attraction when atoms are still at
+    // covalent distances during the ring_open stage.
+    const double rb_coul_kappa = (ring_breaking_ff != nullptr)
+                                     ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
+                                                                       "ring-break", "coul_kappa", 0.0, 1.0, lambda_value)))
+                                     : 0.0;
+    const double rm_coul_kappa = (ring_making_ff != nullptr)
+                                     ? std::max(0.0, std::min(1.0, this->lambda_schedule.morph(
+                                                                       "ring-make", "coul_kappa", 1.0, 0.0, lambda_value)))
+                                     : 1.0;
 
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
@@ -1348,15 +1523,38 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
             const int nparams = morphed_charges.count();
 
-            if (start_change_atom == -1)
-            {
-                start_change_atom = start_index;
-                end_change_atom = start_index + nparams;
-            }
-            else if (start_index >= end_change_atom)
-            {
-                end_change_atom = start_index + nparams;
-            }
+            // Detect whether any CLJ or ghost-14 parameters changed
+            // clang-format off
+            has_changed_cljff |= rest2_changed
+                || cache.hasChanged("clj", "charge")
+                || cache.hasChanged("clj", "sigma")
+                || cache.hasChanged("clj", "epsilon")
+                || cache.hasChanged("clj", "alpha")
+                || cache.hasChanged("clj", "kappa")
+                || cache.hasChanged("clj", "charge_scale")
+                || cache.hasChanged("clj", "lj_scale");
+
+            has_changed_ghostff |= rest2_changed
+                || cache.hasChanged("ghost/ghost", "charge")
+                || cache.hasChanged("ghost/ghost", "sigma")
+                || cache.hasChanged("ghost/ghost", "epsilon")
+                || cache.hasChanged("ghost/ghost", "alpha")
+                || cache.hasChanged("ghost/ghost", "kappa")
+                || cache.hasChanged("ghost/non-ghost", "charge")
+                || cache.hasChanged("ghost/non-ghost", "sigma")
+                || cache.hasChanged("ghost/non-ghost", "epsilon")
+                || cache.hasChanged("ghost/non-ghost", "alpha")
+                || cache.hasChanged("ghost/non-ghost", "kappa");
+
+            has_changed_ghost14ff |= rest2_changed
+                || cache.hasChanged("ghost-14", "charge")
+                || cache.hasChanged("ghost-14", "sigma")
+                || cache.hasChanged("ghost-14", "epsilon")
+                || cache.hasChanged("ghost-14", "alpha")
+                || cache.hasChanged("ghost-14", "kappa")
+                || cache.hasChanged("ghost-14", "charge_scale")
+                || cache.hasChanged("ghost-14", "lj_scale");
+            // clang-format on
 
             if (have_ghost_atoms)
             {
@@ -1433,7 +1631,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     else
                     {
                         cljff->setParticleParameters(
-                            start_index + j, sqrt_scale* morphed_charges[j],
+                            start_index + j, sqrt_scale * morphed_charges[j],
                             morphed_sigmas[j], scale * morphed_epsilons[j]);
                     }
                 }
@@ -1453,7 +1651,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     }
 
                     cljff->setParticleParameters(start_index + j, sqrt_scale * morphed_charges[j],
-                            morphed_sigmas[j], scale * morphed_epsilons[j]);
+                                                 morphed_sigmas[j], scale * morphed_epsilons[j]);
                 }
             }
 
@@ -1489,6 +1687,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                         scale = rest2_scale;
                     }
 
+                    // ring-breaking/making pairs have idx=-1 (their CLJ
+                    // exception is fixed at 1e-9 and must not be updated;
+                    // the ring force handles the interaction via global params)
+                    if (boost::get<0>(idxs[j]) == -1)
+                        continue;
+
                     // don't set LJ terms for ghost atoms
                     if (atom0_is_ghost or atom1_is_ghost)
                     {
@@ -1516,8 +1720,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
                             if (nbidx < 0)
                                 throw SireError::program_bug(QObject::tr(
-                                                                "Unset NB14 index for a ghost atom?"),
-                                                            CODELOC);
+                                                                 "Unset NB14 index for a ghost atom?"),
+                                                             CODELOC);
 
                             coul_14_scale = morphed_ghost14_charge_scale[j];
                             lj_14_scale = morphed_ghost14_lj_scale[j];
@@ -1536,22 +1740,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                                 boost::get<3>(p),
                                 4.0 * boost::get<4>(p) * scale,
                                 boost::get<5>(p),
-                                boost::get<6>(p)
-                            };
-
-                            if (start_change_14 == -1)
-                            {
-                                start_change_14 = nbidx;
-                                end_change_14 = nbidx + 1;
-                            }
-                            else
-                            {
-                                if (nbidx < start_change_14)
-                                    start_change_14 = nbidx;
-
-                                if (nbidx + 1 > end_change_14)
-                                    end_change_14 = nbidx + 1;
-                            }
+                                boost::get<6>(p)};
 
                             ghost_14ff->setBondParameters(nbidx,
                                                           boost::get<0>(p),
@@ -1567,6 +1756,64 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                             boost::get<2>(p) * scale, boost::get<3>(p),
                             boost::get<4>(p) * scale);
                     }
+                }
+            }
+        }
+
+        // Update CLJ exceptions for ring-breaking pairs.
+        // The CLJ exception carries coul_kappa*q_a0*q_a1 for the hard Coulomb
+        // (including RF/PME long-range). coul_kappa is zero during
+        // potential_swap/restraints_off/ring_open and ramps 0→1 in morph only,
+        // so Coulomb only activates once the LJ softcore has already separated
+        // the atoms. The CustomBondForce handles softcore LJ only (no q param).
+        if (cljff != nullptr and ring_breaking_ff != nullptr)
+        {
+            const auto rb_exc = perturbable_mol.getExceptionIndicies("ring-break");
+            for (int j = 0; j < rb_exc.count(); ++j)
+            {
+                const int clj_idx = boost::get<0>(rb_exc[j]);
+                if (clj_idx < 0)
+                    continue;
+                int rb_ea0, rb_ea1;
+                double rb_old_charge, rb_old_sig, rb_old_eps;
+                cljff->getExceptionParameters(clj_idx, rb_ea0, rb_ea1,
+                                              rb_old_charge, rb_old_sig, rb_old_eps);
+                double q_a0, sig_a0, eps_a0;
+                double q_a1, sig_a1, eps_a1;
+                cljff->getParticleParameters(rb_ea0, q_a0, sig_a0, eps_a0);
+                cljff->getParticleParameters(rb_ea1, q_a1, sig_a1, eps_a1);
+                const double rb_new_charge = rb_coul_kappa * q_a0 * q_a1;
+                if (rb_new_charge != rb_old_charge)
+                {
+                    cljff->setExceptionParameters(clj_idx, rb_ea0, rb_ea1,
+                                                  rb_new_charge, 1e-9, 1e-9);
+                    has_changed_cljff = true;
+                }
+            }
+        }
+
+        if (cljff != nullptr and ring_making_ff != nullptr)
+        {
+            const auto rm_exc = perturbable_mol.getExceptionIndicies("ring-make");
+            for (int j = 0; j < rm_exc.count(); ++j)
+            {
+                const int clj_idx = boost::get<0>(rm_exc[j]);
+                if (clj_idx < 0)
+                    continue;
+                int rm_ea0, rm_ea1;
+                double rm_old_charge, rm_old_sig, rm_old_eps;
+                cljff->getExceptionParameters(clj_idx, rm_ea0, rm_ea1,
+                                              rm_old_charge, rm_old_sig, rm_old_eps);
+                double q_a0, sig_a0, eps_a0;
+                double q_a1, sig_a1, eps_a1;
+                cljff->getParticleParameters(rm_ea0, q_a0, sig_a0, eps_a0);
+                cljff->getParticleParameters(rm_ea1, q_a1, sig_a1, eps_a1);
+                const double rm_new_charge = rm_coul_kappa * q_a0 * q_a1;
+                if (rm_new_charge != rm_old_charge)
+                {
+                    cljff->setExceptionParameters(clj_idx, rm_ea0, rm_ea1,
+                                                  rm_new_charge, 1e-9, 1e-9);
+                    has_changed_cljff = true;
                 }
             }
         }
@@ -1625,20 +1872,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
             const int nparams = morphed_bond_k.count();
 
-            if (start_change_bond == -1)
-            {
-                start_change_bond = start_index;
-                end_change_bond = start_index + nparams;
-            }
-            else if (start_index < start_change_bond)
-            {
-                start_change_bond = start_index;
-            }
-
-            if (start_index + nparams > end_change_bond)
-            {
-                end_change_bond = start_index + nparams;
-            }
+            has_changed_bondff |= cache.hasChanged("bond", "bond_k") || cache.hasChanged("bond", "bond_length");
 
             for (int j = 0; j < nparams; ++j)
             {
@@ -1648,11 +1882,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double length, k;
 
                 bondff->getBondParameters(index, particle1, particle2,
-                                        length, k);
+                                          length, k);
 
                 bondff->setBondParameters(index, particle1, particle2,
-                                        morphed_bond_length[j],
-                                        morphed_bond_k[j]);
+                                          morphed_bond_length[j],
+                                          morphed_bond_k[j]);
             }
         }
 
@@ -1674,20 +1908,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
             const int nparams = morphed_angle_k.count();
 
-            if (start_change_angle == -1)
-            {
-                start_change_angle = start_index;
-                end_change_angle = start_index + nparams;
-            }
-            else if (start_index < start_change_angle)
-            {
-                start_change_angle = start_index;
-            }
-
-            if (start_index + nparams > end_change_angle)
-            {
-                end_change_angle = start_index + nparams;
-            }
+            has_changed_angff |= cache.hasChanged("angle", "angle_k") || cache.hasChanged("angle", "angle_size");
 
             for (int j = 0; j < nparams; ++j)
             {
@@ -1697,13 +1918,13 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 double size, k;
 
                 angff->getAngleParameters(index,
-                                        particle1, particle2, particle3,
-                                        size, k);
+                                          particle1, particle2, particle3,
+                                          size, k);
 
                 angff->setAngleParameters(index,
-                                        particle1, particle2, particle3,
-                                        morphed_angle_size[j],
-                                        morphed_angle_k[j]);
+                                          particle1, particle2, particle3,
+                                          morphed_angle_size[j],
+                                          morphed_angle_k[j]);
             }
         }
 
@@ -1727,20 +1948,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
             const auto is_improper = perturbable_mol.getIsImproper();
 
-            if (start_change_torsion == -1)
-            {
-                start_change_torsion = start_index;
-                end_change_torsion = start_index + nparams;
-            }
-            else if (start_index < start_change_torsion)
-            {
-                start_change_torsion = start_index;
-            }
-
-            if (start_index + nparams > end_change_torsion)
-            {
-                end_change_torsion = start_index + nparams;
-            }
+            has_changed_dihff |= rest2_changed || cache.hasChanged("torsion", "torsion_k") || cache.hasChanged("torsion", "torsion_phase");
 
             for (int j = 0; j < nparams; ++j)
             {
@@ -1781,66 +1989,270 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                                             morphed_torsion_k[j] * scale);
             }
         }
+
+        // update CMAP parameters for this perturbable molecule
+        start_index = start_idxs.value("cmap", -1);
+
+        if (start_index != -1 and cmapff != 0)
+        {
+            const auto &grid0 = perturbable_mol.getCMAPGrids0();
+            const auto &grid1 = perturbable_mol.getCMAPGrids1();
+            const auto &sizes = perturbable_mol.getCMAPGridSizes();
+            const auto &atoms = perturbable_mol.getCMAPAtoms();
+
+            // morph all grid values together using the lambda schedule
+            const auto morphed_grids = cache.morph(
+                schedule,
+                "cmap", "cmap_grid",
+                grid0,
+                grid1);
+
+            if (rest2_changed or cache.hasChanged("cmap", "cmap_grid"))
+            {
+                has_changed_cmap = true;
+
+                int offset = 0;
+
+                for (int j = 0; j < sizes.count(); ++j)
+                {
+                    const int N = sizes[j];
+                    const int map_size = N * N;
+
+                    // CMAP is always a proper backbone dihedral pair, never improper.
+                    // Apply REST2 scaling if all 5 atoms are within the REST2 region.
+                    double scale = 1.0;
+
+                    const auto &cmap_atms = atoms[j];
+
+                    if (perturbable_mol.isRest2(boost::get<0>(cmap_atms)) and
+                        perturbable_mol.isRest2(boost::get<1>(cmap_atms)) and
+                        perturbable_mol.isRest2(boost::get<2>(cmap_atms)) and
+                        perturbable_mol.isRest2(boost::get<3>(cmap_atms)) and
+                        perturbable_mol.isRest2(boost::get<4>(cmap_atms)))
+                    {
+                        scale = rest2_scale;
+                    }
+
+                    std::vector<double> energy(map_size);
+
+                    for (int k = 0; k < map_size; ++k)
+                    {
+                        energy[k] = morphed_grids[offset + k] * scale;
+                    }
+
+                    cmapff->setMapParameters(start_index + j, N, energy);
+                    offset += map_size;
+                }
+            }
+        }
     }
 
-    // update the parameters in the context
-    const auto num_changed_atoms = end_change_atom - start_change_atom;
-    const auto num_changed_bonds = end_change_bond - start_change_bond;
-    const auto num_changed_angles = end_change_angle - start_change_angle;
-    const auto num_changed_torsions = end_change_torsion - start_change_torsion;
-    const auto num_changed_14 = end_change_14 - start_change_14;
+    // update the parameters in the context for forces whose parameters changed
+    if (has_changed_cljff and cljff)
+        cljff->updateParametersInContext(context);
 
-    if (num_changed_atoms > 0)
+    if (has_changed_ghostff)
     {
-        if (cljff)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-            cljff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
-#else
-            cljff->updateParametersInContext(context);
-#endif
-
         if (ghost_ghostff)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-            ghost_ghostff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
-#else
             ghost_ghostff->updateParametersInContext(context);
-#endif
-
         if (ghost_nonghostff)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-            ghost_nonghostff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
-#else
             ghost_nonghostff->updateParametersInContext(context);
-#endif
     }
 
-    if (ghost_14ff and num_changed_14 > 0)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-        ghost_14ff->updateSomeParametersInContext(start_change_14, num_changed_14, context);
-#else
+#ifdef SIRE_USE_CUSTOMVOLUMEFORCE
+    // Update the ghost LJ dispersion correction via the CustomVolumeForce.
+    // At r > rc the soft-core shift is negligible, so the standard closed-form
+    // LJ tail integral applies. Results are cached per lambda state.
+    auto ghost_lrc_ff = this->getForce<OpenMM::CustomVolumeForce>("ghost-lrc", system);
+    if (ghost_lrc_ff != nullptr && ghost_ghostff != nullptr && ghost_nonghostff != nullptr)
+    {
+        const qint64 lam_key = qRound64(lambda_value * 1e5);
+        double lrc_coeff = 0.0;
+
+        if (this->lrc_coeff_cache.contains(lam_key))
+        {
+            lrc_coeff = this->lrc_coeff_cache[lam_key];
+        }
+        else
+        {
+            const double cutoff = ghost_ghostff->getCutoffDistance();
+            const double rc3 = cutoff * cutoff * cutoff;
+            const double rc9 = rc3 * rc3 * rc3;
+            const double four_pi = 4.0 * M_PI;
+
+            // Interaction group sets: ghost atoms and non-ghost atoms.
+            std::set<int> ghost_set, dummy_set, nonghost_set;
+            ghost_ghostff->getInteractionGroupParameters(0, ghost_set, dummy_set);
+            ghost_nonghostff->getInteractionGroupParameters(0, dummy_set, nonghost_set);
+
+            // Cache half_sigma and two_sqrt_epsilon for each ghost atom.
+            QHash<int, QPair<double, double>> ghost_params;
+            for (int i : ghost_set)
+            {
+                std::vector<double> p;
+                ghost_ghostff->getParticleParameters(i, p);
+                ghost_params[i] = {p[1], p[2]}; // half_sigma, two_sqrt_epsilon
+            }
+
+            // Cache non-ghost params.
+            QHash<int, QPair<double, double>> nonghost_params;
+            for (int j : nonghost_set)
+            {
+                std::vector<double> p;
+                ghost_nonghostff->getParticleParameters(j, p);
+                nonghost_params[j] = {p[1], p[2]};
+            }
+
+            // ghost-ghost unique pairs (i < j).
+            for (auto it_i = ghost_set.cbegin(); it_i != ghost_set.cend(); ++it_i)
+            {
+                const auto &pi = ghost_params[*it_i];
+                auto it_j = it_i;
+                for (++it_j; it_j != ghost_set.cend(); ++it_j)
+                {
+                    const auto &pj = ghost_params[*it_j];
+                    const double sig = pi.first + pj.first;
+                    const double sig2 = sig * sig;
+                    const double sig6 = sig2 * sig2 * sig2;
+                    const double eps_pair = pi.second * pj.second;
+                    lrc_coeff += four_pi * eps_pair * sig6 * (sig6 / (9.0 * rc9) - 1.0 / (3.0 * rc3));
+                }
+            }
+
+            // ghost-nonghost all pairs.
+            for (auto it_i = ghost_set.cbegin(); it_i != ghost_set.cend(); ++it_i)
+            {
+                const auto &pi = ghost_params[*it_i];
+                for (int j : nonghost_set)
+                {
+                    const auto &pj = nonghost_params[j];
+                    const double sig = pi.first + pj.first;
+                    const double sig2 = sig * sig;
+                    const double sig6 = sig2 * sig2 * sig2;
+                    const double eps_pair = pi.second * pj.second;
+                    lrc_coeff += four_pi * eps_pair * sig6 * (sig6 / (9.0 * rc9) - 1.0 / (3.0 * rc3));
+                }
+            }
+
+            this->lrc_coeff_cache[lam_key] = lrc_coeff;
+        }
+
+        context.setParameter("lrc_coeff", lrc_coeff);
+
+        // lrc_scale defaults to 1.0 (no effect). Schedules that fix epsilon
+        // (e.g. Beutler softcore) should set a force-specific equation for
+        // lever "lrc_scale" on force "ghost-lrc" to scale it to zero as the
+        // ghost is annihilated/decoupled.
+        double lrc_scale = this->lambda_schedule.morph(
+            "ghost-lrc", "lrc_scale", 1.0, 1.0, lambda_value);
+        context.setParameter("lrc_scale", lrc_scale);
+    }
+#endif // SIRE_USE_CUSTOMVOLUMEFORCE
+
+    // Update ring-breaking/making softcore force global parameters using the
+    // values pre-computed before the per-mol loop (rb_alpha/kappa, rm_alpha/kappa).
+    if (ring_breaking_ff != nullptr)
+    {
+        has_changed_ring_breaking_ff |=
+            (rb_alpha != context.getParameter("ring_break_alpha"));
+        context.setParameter("ring_break_alpha", rb_alpha);
+    }
+
+    if (ring_making_ff != nullptr)
+    {
+        has_changed_ring_making_ff |=
+            (rm_alpha != context.getParameter("ring_make_alpha"));
+        context.setParameter("ring_make_alpha", rm_alpha);
+    }
+
+    if (ring_breaking_ff and has_changed_ring_breaking_ff)
+        ring_breaking_ff->updateParametersInContext(context);
+
+    if (ring_making_ff and has_changed_ring_making_ff)
+        ring_making_ff->updateParametersInContext(context);
+
+#ifdef SIRE_USE_CUSTOMVOLUMEFORCE
+    // Update the NonbondedForce (background) LRC via its own CustomVolumeForce.
+    // Ghost atoms have epsilon=0 in cljff so they contribute nothing naturally.
+    auto background_lrc_ff = this->getForce<OpenMM::CustomVolumeForce>("background-lrc", system);
+    if (background_lrc_ff != nullptr && cljff != nullptr)
+    {
+        const qint64 lam_key = qRound64(lambda_value * 1e5);
+        double lrc_coeff = 0.0;
+
+        if (this->background_lrc_coeff_cache.contains(lam_key))
+        {
+            lrc_coeff = this->background_lrc_coeff_cache[lam_key];
+        }
+        else
+        {
+            const double cutoff = cljff->getCutoffDistance();
+            const double rc3 = cutoff * cutoff * cutoff;
+            const double rc9 = rc3 * rc3 * rc3;
+            const double four_pi = 4.0 * M_PI;
+
+            // Classify particles by (sigma, epsilon); ghost atoms (epsilon=0),
+            // virtual sites, and GCMC water atoms are skipped.
+            std::map<std::pair<double, double>, int> class_counts;
+            for (int i = 0; i < cljff->getNumParticles(); ++i)
+            {
+                double charge, sigma, epsilon;
+                cljff->getParticleParameters(i, charge, sigma, epsilon);
+                if (epsilon == 0.0)
+                    continue;
+                if (!gcmc_water_atoms.isEmpty() && gcmc_water_atoms.contains(i))
+                    continue;
+                class_counts[{sigma, epsilon}]++;
+            }
+
+            // Diagonal pairs (same class, unique i<j).
+            for (const auto &[key, n] : class_counts)
+            {
+                const double n_pairs = static_cast<double>(n) * (n - 1) * 0.5;
+                if (n_pairs == 0.0)
+                    continue;
+                const double sig2 = key.first * key.first;
+                const double sig6 = sig2 * sig2 * sig2;
+                const double eps_pair = 4.0 * key.second;
+                lrc_coeff += n_pairs * four_pi * eps_pair * sig6 * (sig6 / (9.0 * rc9) - 1.0 / (3.0 * rc3));
+            }
+
+            // Off-diagonal pairs (class i != class j).
+            for (auto it1 = class_counts.cbegin(); it1 != class_counts.cend(); ++it1)
+            {
+                auto it2 = it1;
+                for (++it2; it2 != class_counts.cend(); ++it2)
+                {
+                    const double sigma_ij = 0.5 * (it1->first.first + it2->first.first);
+                    const double eps_pair = 4.0 * std::sqrt(it1->first.second * it2->first.second);
+                    const double n_pairs = static_cast<double>(it1->second) * it2->second;
+                    const double sig2 = sigma_ij * sigma_ij;
+                    const double sig6 = sig2 * sig2 * sig2;
+                    lrc_coeff += n_pairs * four_pi * eps_pair * sig6 * (sig6 / (9.0 * rc9) - 1.0 / (3.0 * rc3));
+                }
+            }
+
+            this->background_lrc_coeff_cache[lam_key] = lrc_coeff;
+        }
+
+        context.setParameter("lrc_background", lrc_coeff);
+    }
+#endif // SIRE_USE_CUSTOMVOLUMEFORCE
+
+    if (ghost_14ff and has_changed_ghost14ff)
         ghost_14ff->updateParametersInContext(context);
-#endif
 
-    if (bondff and num_changed_bonds > 0)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-        bondff->updateSomeParametersInContext(start_change_bond, num_changed_bonds, context);
-#else
+    if (bondff and has_changed_bondff)
         bondff->updateParametersInContext(context);
-#endif
 
-    if (angff and num_changed_angles > 0)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-        angff->updateSomeParametersInContext(start_change_angle, num_changed_angles, context);
-#else
+    if (angff and has_changed_angff)
         angff->updateParametersInContext(context);
-#endif
 
-    if (dihff and num_changed_torsions > 0)
-#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-        dihff->updateSomeParametersInContext(start_change_torsion, num_changed_torsions, context);
-#else
+    if (dihff and has_changed_dihff)
         dihff->updateParametersInContext(context);
-#endif
+
+    if (cmapff and has_changed_cmap)
+        cmapff->updateParametersInContext(context);
 
     // now update any restraints that are scaled
     for (const auto &restraint : this->name_to_restraintidx.keys())
@@ -1853,11 +2265,18 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                                                  1.0, 1.0,
                                                  lambda_value);
 
-        for (auto &ff : this->getRestraints(restraint, system))
+        const double prev_rho = last_restraint_rho.value(restraint, -1.0);
+        last_restraint_rho[restraint] = rho;
+        last_changed_forces[restraint] = (rho != prev_rho);
+
+        if (rho != prev_rho)
         {
-            if (ff != 0)
+            for (auto &ff : this->getRestraints(restraint, system))
             {
-                this->updateRestraintInContext(*ff, rho, context);
+                if (ff != 0)
+                {
+                    this->updateRestraintInContext(*ff, rho, context);
+                }
             }
         }
     }
@@ -1870,6 +2289,23 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         // reinitialize the context, preserving the state
         context.reinitialize(true);
     }
+
+    // record which named forces had parameters changed in this call
+    last_changed_forces["clj"] = has_changed_cljff;
+    last_changed_forces["ghost/ghost"] = has_changed_ghostff;
+    last_changed_forces["ghost/non-ghost"] = has_changed_ghostff;
+    last_changed_forces["ghost-lrc"] = has_changed_ghostff;
+    last_changed_forces["background-lrc"] = has_changed_cljff;
+    last_changed_forces["gcmc-lrc"] = false;
+    last_changed_forces["ghost-14"] = has_changed_ghost14ff;
+    last_changed_forces["ring-break"] = has_changed_ring_breaking_ff;
+    last_changed_forces["ring-make"] = has_changed_ring_making_ff;
+    last_changed_forces["bond"] = has_changed_bondff;
+    last_changed_forces["angle"] = has_changed_angff;
+    last_changed_forces["torsion"] = has_changed_dihff;
+    last_changed_forces["cmap"] = has_changed_cmap;
+    if (qmff == 0)
+        last_changed_forces["qmff"] = false;
 
     return lambda_value;
 }

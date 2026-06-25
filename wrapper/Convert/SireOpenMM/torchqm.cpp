@@ -33,6 +33,8 @@
 #include <torch/csrc/autograd/autograd.h>
 #endif
 
+#include <limits>
+
 #include "SireError/errors.h"
 #include "SireMaths/vector.h"
 #include "SireStream/datastream.h"
@@ -61,14 +63,15 @@ static const RegisterMetaType<TorchQMForce> r_torchqmforce(NO_ROOT);
 
 QDataStream &operator<<(QDataStream &ds, const TorchQMForce &torchqmforce)
 {
-    writeHeader(ds, r_torchqmforce, 1);
+    writeHeader(ds, r_torchqmforce, 2);
 
     SharedDataStream sds(ds);
 
     sds << torchqmforce.module_path << torchqmforce.cutoff << torchqmforce.neighbour_list_frequency
         << torchqmforce.is_mechanical << torchqmforce.lambda << torchqmforce.atoms
         << torchqmforce.mm1_to_qm << torchqmforce.mm1_to_mm2 << torchqmforce.bond_scale_factors
-        << torchqmforce.mm2_atoms << torchqmforce.numbers << torchqmforce.charges;
+        << torchqmforce.mm2_atoms << torchqmforce.numbers << torchqmforce.charges
+        << torchqmforce.switch_width << torchqmforce.use_switch;
 
     return ds;
 }
@@ -77,20 +80,29 @@ QDataStream &operator>>(QDataStream &ds, TorchQMForce &torchqmforce)
 {
     VersionID v = readHeader(ds, r_torchqmforce);
 
-    if (v == 1)
+    if (v == 2)
     {
         SharedDataStream sds(ds);
 
-        sds >> torchqmforce.module_path >> torchqmforce.cutoff >> torchqmforce.neighbour_list_frequency
-            >> torchqmforce.is_mechanical >> torchqmforce.lambda >> torchqmforce.atoms
-            >> torchqmforce.mm1_to_qm >> torchqmforce.mm1_to_mm2 >> torchqmforce.bond_scale_factors
-            >> torchqmforce.mm2_atoms >> torchqmforce.numbers >> torchqmforce.charges;
+        sds >> torchqmforce.module_path >> torchqmforce.cutoff >> torchqmforce.neighbour_list_frequency >> torchqmforce.is_mechanical >> torchqmforce.lambda >> torchqmforce.atoms >> torchqmforce.mm1_to_qm >> torchqmforce.mm1_to_mm2 >> torchqmforce.bond_scale_factors >> torchqmforce.mm2_atoms >> torchqmforce.numbers >> torchqmforce.charges >> torchqmforce.switch_width >> torchqmforce.use_switch;
+
+        // Re-load the Torch module.
+        torchqmforce.setModulePath(torchqmforce.getModulePath());
+    }
+    else if (v == 1)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> torchqmforce.module_path >> torchqmforce.cutoff >> torchqmforce.neighbour_list_frequency >> torchqmforce.is_mechanical >> torchqmforce.lambda >> torchqmforce.atoms >> torchqmforce.mm1_to_qm >> torchqmforce.mm1_to_mm2 >> torchqmforce.bond_scale_factors >> torchqmforce.mm2_atoms >> torchqmforce.numbers >> torchqmforce.charges;
+
+        torchqmforce.switch_width = 0.2;
+        torchqmforce.use_switch = true;
 
         // Re-load the Torch module.
         torchqmforce.setModulePath(torchqmforce.getModulePath());
     }
     else
-        throw version_error(v, "1", r_torchqmforce, CODELOC);
+        throw version_error(v, "2", r_torchqmforce, CODELOC);
 
     return ds;
 }
@@ -111,37 +123,41 @@ TorchQMForce::TorchQMForce(
     QMap<int, double> bond_scale_factors,
     QVector<int> mm2_atoms,
     QVector<int> numbers,
-    QVector<double> charges) :
-    cutoff(cutoff),
-    neighbour_list_frequency(neighbour_list_frequency),
-    is_mechanical(is_mechanical),
-    lambda(lambda),
-    atoms(atoms),
-    mm1_to_qm(mm1_to_qm),
-    mm1_to_mm2(mm1_to_mm2),
-    bond_scale_factors(bond_scale_factors),
-    mm2_atoms(mm2_atoms),
-    numbers(numbers),
-    charges(charges)
+    QVector<double> charges,
+    double switch_width,
+    bool use_switch) : cutoff(cutoff),
+                       neighbour_list_frequency(neighbour_list_frequency),
+                       is_mechanical(is_mechanical),
+                       lambda(lambda),
+                       atoms(atoms),
+                       mm1_to_qm(mm1_to_qm),
+                       mm1_to_mm2(mm1_to_mm2),
+                       bond_scale_factors(bond_scale_factors),
+                       mm2_atoms(mm2_atoms),
+                       numbers(numbers),
+                       charges(charges),
+                       switch_width(switch_width),
+                       use_switch(use_switch)
 {
     // Try to load the Torch module.
     this->setModulePath(module_path);
 }
 
-TorchQMForce::TorchQMForce(const TorchQMForce &other) :
-    module_path(other.module_path),
-    torch_module(other.torch_module),
-    cutoff(other.cutoff),
-    neighbour_list_frequency(other.neighbour_list_frequency),
-    is_mechanical(other.is_mechanical),
-    lambda(other.lambda),
-    atoms(other.atoms),
-    mm1_to_qm(other.mm1_to_qm),
-    mm1_to_mm2(other.mm1_to_mm2),
-    mm2_atoms(other.mm2_atoms),
-    bond_scale_factors(other.bond_scale_factors),
-    numbers(other.numbers),
-    charges(other.charges)
+TorchQMForce::TorchQMForce(const TorchQMForce &other) : module_path(other.module_path),
+                                                        torch_module(other.torch_module),
+                                                        cutoff(other.cutoff),
+                                                        neighbour_list_frequency(other.neighbour_list_frequency),
+                                                        is_mechanical(other.is_mechanical),
+                                                        lambda(other.lambda),
+                                                        atoms(other.atoms),
+                                                        mm1_to_qm(other.mm1_to_qm),
+                                                        mm1_to_mm2(other.mm1_to_mm2),
+                                                        mm2_atoms(other.mm2_atoms),
+                                                        bond_scale_factors(other.bond_scale_factors),
+                                                        numbers(other.numbers),
+                                                        charges(other.charges),
+                                                        switch_width(other.switch_width),
+                                                        use_switch(other.use_switch)
 {
 }
 
@@ -160,6 +176,8 @@ TorchQMForce &TorchQMForce::operator=(const TorchQMForce &other)
     this->bond_scale_factors = other.bond_scale_factors;
     this->numbers = other.numbers;
     this->charges = other.charges;
+    this->switch_width = other.switch_width;
+    this->use_switch = other.use_switch;
     return *this;
 }
 
@@ -173,13 +191,14 @@ void TorchQMForce::setModulePath(QString module_path)
         this->torch_module = torch::jit::load(module_path.toStdString());
         this->torch_module.eval();
     }
-    catch (const c10::Error& e)
+    catch (const c10::Error &e)
     {
         throw SireError::io_error(
-                QObject::tr(
-                    "Unable to load the TorchScript module '%1'. The error was '%2'.")
-                    .arg(module_path).arg(e.what()),
-                    CODELOC);
+            QObject::tr(
+                "Unable to load the TorchScript module '%1'. The error was '%2'.")
+                .arg(module_path)
+                .arg(e.what()),
+            CODELOC);
     }
 #endif
 
@@ -194,7 +213,7 @@ QString TorchQMForce::getModulePath() const
 #ifdef SIRE_USE_TORCH
 torch::jit::script::Module TorchQMForce::getTorchModule() const
 #else
-void* TorchQMForce::getTorchModule() const
+void *TorchQMForce::getTorchModule() const
 #endif
 {
     return this->torch_module;
@@ -231,7 +250,8 @@ int TorchQMForce::getNeighbourListFrequency() const
 
 bool TorchQMForce::getIsMechanical() const
 {
-    return this->is_mechanical;;
+    return this->is_mechanical;
+    ;
 }
 
 QVector<int> TorchQMForce::getAtoms() const
@@ -259,6 +279,16 @@ QVector<double> TorchQMForce::getCharges() const
     return this->charges;
 }
 
+double TorchQMForce::getSwitchWidth() const
+{
+    return this->switch_width;
+}
+
+bool TorchQMForce::getUseSwitch() const
+{
+    return this->use_switch;
+}
+
 const char *TorchQMForce::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<TorchQMForce>());
@@ -275,69 +305,70 @@ const char *TorchQMForce::what() const
 
 namespace OpenMM
 {
-    class TorchQMForceProxy : public SerializationProxy {
-        public:
-            TorchQMForceProxy() : SerializationProxy("TorchQMForce")
+    class TorchQMForceProxy : public SerializationProxy
+    {
+    public:
+        TorchQMForceProxy() : SerializationProxy("TorchQMForce") {
+                              };
+
+        void serialize(const void *object, SerializationNode &node) const
+        {
+            // Serialize the object.
+            QByteArray data;
+            QDataStream ds(&data, QIODevice::WriteOnly);
+            TorchQMForce torchqmforce = *static_cast<const TorchQMForce *>(object);
+            ds << torchqmforce;
+
+            // Set the version.
+            node.setIntProperty("version", 0);
+
+            // Set the note attribute.
+            node.setStringProperty("note",
+                                   "This force only supports partial serialization, so can only be used "
+                                   "within the same session and memory space.");
+
+            // Set the data by converting the QByteArray to a hexidecimal string.
+            node.setStringProperty("data", data.toHex().data());
+        };
+
+        void *deserialize(const SerializationNode &node) const
+        {
+            // Check the version.
+            int version = node.getIntProperty("version");
+            if (version != 0)
             {
-            };
+                throw OpenMM::OpenMMException("Unsupported version number");
+            }
 
-            void serialize(const void* object, SerializationNode& node) const
+            // Get the data as a std::string.
+            auto string = node.getStringProperty("data");
+
+            // Convert to hexidecimal.
+            auto hex = QByteArray::fromRawData(string.data(), string.size());
+
+            // Convert to a QByteArray.
+            auto data = QByteArray::fromHex(hex);
+
+            // Deserialize the object.
+            QDataStream ds(data);
+            TorchQMForce torchqmforce;
+
+            try
             {
-                // Serialize the object.
-                QByteArray data;
-                QDataStream ds(&data, QIODevice::WriteOnly);
-                TorchQMForce torchqmforce = *static_cast<const TorchQMForce*>(object);
-                ds << torchqmforce;
-
-                // Set the version.
-                node.setIntProperty("version", 0);
-
-                // Set the note attribute.
-                node.setStringProperty("note",
-                 "This force only supports partial serialization, so can only be used "
-                 "within the same session and memory space.");
-
-                // Set the data by converting the QByteArray to a hexidecimal string.
-                node.setStringProperty("data", data.toHex().data());
-            };
-
-            void* deserialize(const SerializationNode& node) const
+                ds >> torchqmforce;
+            }
+            catch (...)
             {
-                // Check the version.
-                int version = node.getIntProperty("version");
-                if (version != 0)
-                {
-                    throw OpenMM::OpenMMException("Unsupported version number");
-                }
+                throw OpenMM::OpenMMException("Unable deserialize TorchQMForce");
+            }
 
-                // Get the data as a std::string.
-                auto string = node.getStringProperty("data");
-
-                // Convert to hexidecimal.
-                auto hex = QByteArray::fromRawData(string.data(), string.size());
-
-                // Convert to a QByteArray.
-                auto data = QByteArray::fromHex(hex);
-
-                // Deserialize the object.
-                QDataStream ds(data);
-                TorchQMForce torchqmforce;
-
-                try
-                {
-                    ds >> torchqmforce;
-                }
-                catch (...)
-                {
-                    throw OpenMM::OpenMMException("Unable deserialize TorchQMForce");
-                }
-
-                return new TorchQMForce(torchqmforce);
-            };
+            return new TorchQMForce(torchqmforce);
+        };
     };
 
     // Register the TorchQMForce serialization proxy.
-    extern "C" void registerTorchQMSerializationProxies() {
+    extern "C" void registerTorchQMSerializationProxies()
+    {
         SerializationProxy::registerProxy(typeid(TorchQMForce), new TorchQMForceProxy());
     }
 };
@@ -360,9 +391,8 @@ OpenMM::ForceImpl *TorchQMForce::createImpl() const
 }
 
 #if defined(SIRE_USE_CUSTOMCPPFORCE) and defined(SIRE_USE_TORCH)
-TorchQMForceImpl::TorchQMForceImpl(const TorchQMForce &owner) :
-    OpenMM::CustomCPPForceImpl(owner),
-    owner(owner)
+TorchQMForceImpl::TorchQMForceImpl(const TorchQMForce &owner) : OpenMM::CustomCPPForceImpl(owner),
+                                                                owner(owner)
 {
     this->torch_module = owner.getTorchModule();
 }
@@ -409,13 +439,17 @@ double TorchQMForceImpl::computeForce(
         this->cutoff = this->owner.getCutoff().value();
 
         // The neighbour list cutoff is 20% larger than the cutoff.
-        this->neighbour_list_cutoff = 1.2*this->cutoff;
+        this->neighbour_list_cutoff = 1.2 * this->cutoff;
 
         // Store the neighbour list update frequency.
         this->neighbour_list_frequency = this->owner.getNeighbourListFrequency();
 
         // Flag whether a neighbour list is used.
         this->is_neighbour_list = this->neighbour_list_frequency > 0;
+
+        // Cache switching function parameters.
+        this->use_switch = this->owner.getUseSwitch();
+        this->r_switch = (1.0 - this->owner.getSwitchWidth()) * this->cutoff;
     }
 
     // Get the current box vectors in nanometers.
@@ -424,17 +458,15 @@ double TorchQMForceImpl::computeForce(
 
     // Create a triclinic space, converting to Angstrom.
     TriclinicBox space(
-        Vector(10*box_x[0], 10*box_x[1], 10*box_x[2]),
-        Vector(10*box_y[0], 10*box_y[1], 10*box_y[2]),
-        Vector(10*box_z[0], 10*box_z[1], 10*box_z[2])
-    );
+        Vector(10 * box_x[0], 10 * box_x[1], 10 * box_x[2]),
+        Vector(10 * box_y[0], 10 * box_y[1], 10 * box_y[2]),
+        Vector(10 * box_z[0], 10 * box_z[1], 10 * box_z[2]));
 
     // Store the cell vectors in Angstrom.
     QVector<QVector<double>> cell = {
-        {10*box_x[0], 10*box_x[1], 10*box_x[2]},
-        {10*box_y[0], 10*box_y[1], 10*box_y[2]},
-        {10*box_z[0], 10*box_z[1], 10*box_z[2]}
-    };
+        {10 * box_x[0], 10 * box_x[1], 10 * box_x[2]},
+        {10 * box_y[0], 10 * box_y[1], 10 * box_y[2]},
+        {10 * box_z[0], 10 * box_z[1], 10 * box_z[2]}};
 
     // Store the QM atomic indices and numbers.
     auto qm_atoms = this->owner.getAtoms();
@@ -450,19 +482,19 @@ double TorchQMForceImpl::computeForce(
 
     // Initialise a vector to hold the current positions for the QM atoms.
     QVector<Vector> xyz_qm_vec(qm_atoms.size());
-    std::vector<float> xyz_qm(3*qm_atoms.size());
+    std::vector<float> xyz_qm(3 * qm_atoms.size());
 
     // First loop over all QM atoms and store the positions.
     int i = 0;
     for (const auto &idx : qm_atoms)
     {
         const auto &pos = positions[idx];
-        Vector qm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
+        Vector qm_vec(10 * pos[0], 10 * pos[1], 10 * pos[2]);
         xyz_qm_vec[i] = qm_vec;
         i++;
     }
 
-    // Next sure that the QM atoms are whole (unwrapped).
+    // Make sure that the QM atoms are whole (unwrapped).
     xyz_qm_vec = space.makeWhole(xyz_qm_vec);
 
     // Get the center of the QM atoms. We will use this as a reference when
@@ -471,9 +503,9 @@ double TorchQMForceImpl::computeForce(
     i = 0;
     for (const auto &qm_vec : xyz_qm_vec)
     {
-        xyz_qm[3*i] = qm_vec[0];
-        xyz_qm[3*i+1] = qm_vec[1];
-        xyz_qm[3*i+2] = qm_vec[2];
+        xyz_qm[3 * i] = qm_vec[0];
+        xyz_qm[3 * i + 1] = qm_vec[1];
+        xyz_qm[3 * i + 2] = qm_vec[2];
         center += qm_vec;
         i++;
     }
@@ -489,6 +521,24 @@ double TorchQMForceImpl::computeForce(
     // Store the current number of MM atoms.
     unsigned int num_mm = 0;
 
+    // ds/dr of the quintic switching function (zero outside the switching region).
+    // Defined at outer scope so the chain-rule correction loop can use it after
+    // the electrostatic-embedding block closes.
+    auto switch_deriv = [&](double r) -> double
+    {
+        if (not this->use_switch or r <= this->r_switch or r >= this->cutoff)
+            return 0.0;
+        const double x = (r - this->r_switch) / (this->cutoff - this->r_switch);
+        return -30.0 * x * x * (x - 1.0) * (x - 1.0) / (this->cutoff - this->r_switch);
+    };
+
+    // Unscaled charges and chain-rule data for accepted MM atoms.
+    // Declared at outer scope for the same reason as switch_deriv above.
+    QVector<double> charges_unscaled;
+    QVector<double> min_dists;
+    QVector<Vector> nearest_qm_vecs;
+    QVector<int> nearest_qm_atom_idxs;
+
     // If we are using electrostatic embedding, the work out the MM point charges and
     // build the neighbour list.
     if (not this->owner.getIsMechanical())
@@ -498,7 +548,19 @@ double TorchQMForceImpl::computeForce(
         std::vector<float> xyz_virtual;
         QVector<double> charges_virtual;
 
-        // Manually work out the MM point charges and build the neigbour list.
+        // Quintic switching function: scales charges smoothly to zero at the cutoff.
+        // Continuous through second derivative; r_switch and use_switch cached at step 0.
+        auto switching_function = [&](double r) -> double
+        {
+            if (not this->use_switch or r <= this->r_switch)
+                return 1.0;
+            if (r >= this->cutoff)
+                return 0.0;
+            const double x = (r - this->r_switch) / (this->cutoff - this->r_switch);
+            return 1.0 - x * x * x * (6.0 * x * x - 15.0 * x + 10.0);
+        };
+
+        // Manually work out the MM point charges and build the neighbour list.
         if (not this->is_neighbour_list or this->step_count % this->neighbour_list_frequency == 0)
         {
             // Clear the neighbour list.
@@ -517,13 +579,27 @@ double TorchQMForceImpl::computeForce(
                     not mm2_atoms.contains(i))
                 {
                     // Store the MM atom position in Sire Vector format.
-                    Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
+                    Vector mm_vec(10 * pos[0], 10 * pos[1], 10 * pos[2]);
+
+                    // Find the minimum distance to any QM atom.
+                    double min_dist = std::numeric_limits<double>::max();
+                    Vector nearest_qm_vec;
+                    int nearest_qm_atom_idx = -1;
 
                     // Loop over all of the QM atoms.
-                    for (const auto &qm_vec : xyz_qm_vec)
+                    for (int qm_j = 0; qm_j < xyz_qm_vec.size(); ++qm_j)
                     {
-                        // Work out the distance between the current MM atom and QM atoms.
+                        const auto &qm_vec = xyz_qm_vec[qm_j];
+
+                        // Work out the distance between the current MM atom and QM atom.
                         const auto dist = space.calcDist(mm_vec, qm_vec);
+
+                        if (dist < min_dist)
+                        {
+                            min_dist = dist;
+                            nearest_qm_vec = qm_vec;
+                            nearest_qm_atom_idx = qm_atoms[qm_j];
+                        }
 
                         // The current MM atom is within the neighbour list cutoff.
                         if (this->is_neighbour_list and dist < this->neighbour_list_cutoff)
@@ -531,24 +607,27 @@ double TorchQMForceImpl::computeForce(
                             // Insert the MM atom index into the neighbour list.
                             this->neighbour_list.insert(i);
                         }
+                    }
 
-                        // The current MM atom is within the cutoff, add it.
-                        if (dist < cutoff)
-                        {
-                            // Work out the minimum image position with respect to the
-                            // reference position and add to the vector.
-                            mm_vec = space.getMinimumImage(mm_vec, center);
-                            xyz_mm.push_back(mm_vec[0]);
-                            xyz_mm.push_back(mm_vec[1]);
-                            xyz_mm.push_back(mm_vec[2]);
+                    // The current MM atom is within the cutoff: add it.
+                    if (min_dist < cutoff)
+                    {
+                        // Work out the minimum image position with respect to the
+                        // reference position and add to the vector.
+                        mm_vec = space.getMinimumImage(mm_vec, center);
+                        xyz_mm.push_back(mm_vec[0]);
+                        xyz_mm.push_back(mm_vec[1]);
+                        xyz_mm.push_back(mm_vec[2]);
 
-                            // Add the charge and index.
-                            charges_mm.append(this->owner.getCharges()[i]);
-                            idx_mm.append(i);
+                        const double q = this->owner.getCharges()[i];
+                        charges_unscaled.append(q);
+                        min_dists.append(min_dist);
+                        nearest_qm_vecs.append(nearest_qm_vec);
+                        nearest_qm_atom_idxs.append(nearest_qm_atom_idx);
 
-                            // Exit the inner loop.
-                            break;
-                        }
+                        // Scale charge by switching function.
+                        charges_mm.append(q * switching_function(min_dist));
+                        idx_mm.append(i);
                     }
                 }
 
@@ -563,43 +642,57 @@ double TorchQMForceImpl::computeForce(
             for (const auto &idx : this->neighbour_list)
             {
                 // Store the MM atom position in Sire Vector format.
-                Vector mm_vec(10*positions[idx][0], 10*positions[idx][1], 10*positions[idx][2]);
+                Vector mm_vec(10 * positions[idx][0], 10 * positions[idx][1], 10 * positions[idx][2]);
 
-                // Loop over all of the QM atoms.
-                for (const auto &qm_vec : xyz_qm_vec)
+                // Find the minimum distance to any QM atom.
+                double min_dist = std::numeric_limits<double>::max();
+                Vector nearest_qm_vec;
+                int nearest_qm_atom_idx = -1;
+
+                for (int qm_j = 0; qm_j < xyz_qm_vec.size(); ++qm_j)
                 {
-                    // The current MM atom is within the cutoff, add it.
-                    if (space.calcDist(mm_vec, qm_vec) < cutoff)
+                    const auto &qm_vec = xyz_qm_vec[qm_j];
+                    const auto dist = space.calcDist(mm_vec, qm_vec);
+                    if (dist < min_dist)
                     {
-                        // Work out the minimum image position with respect to the
-                        // reference position and add to the vector.
-                        mm_vec = space.getMinimumImage(mm_vec, center);
-                        xyz_mm.push_back(mm_vec[0]);
-                        xyz_mm.push_back(mm_vec[1]);
-                        xyz_mm.push_back(mm_vec[2]);
-
-                        // Add the charge and index.
-                        charges_mm.append(this->owner.getCharges()[idx]);
-                        idx_mm.append(idx);
-
-                        // Exit the inner loop.
-                        break;
+                        min_dist = dist;
+                        nearest_qm_vec = qm_vec;
+                        nearest_qm_atom_idx = qm_atoms[qm_j];
                     }
+                }
+
+                // The current MM atom is within the cutoff: add it.
+                if (min_dist < cutoff)
+                {
+                    mm_vec = space.getMinimumImage(mm_vec, center);
+                    xyz_mm.push_back(mm_vec[0]);
+                    xyz_mm.push_back(mm_vec[1]);
+                    xyz_mm.push_back(mm_vec[2]);
+
+                    const double q = this->owner.getCharges()[idx];
+                    charges_unscaled.append(q);
+                    min_dists.append(min_dist);
+                    nearest_qm_vecs.append(nearest_qm_vec);
+                    nearest_qm_atom_idxs.append(nearest_qm_atom_idx);
+
+                    // Scale charge by switching function.
+                    charges_mm.append(q * switching_function(min_dist));
+                    idx_mm.append(idx);
                 }
             }
         }
 
         // Handle link atoms via the Charge Shift method.
         // See: https://www.ks.uiuc.edu/Research/qmmm
-        for (const auto &idx: mm1_to_mm2.keys())
+        for (const auto &idx : mm1_to_mm2.keys())
         {
             // Get the QM atom to which the current MM atom is bonded.
             const auto qm_idx = mm1_to_qm[idx];
 
             // Store the MM1 position in Sire Vector format, along with the
             // position of the QM atom to which it is bonded.
-            Vector mm1_vec(10*positions[idx][0], 10*positions[idx][1], 10*positions[idx][2]);
-            Vector qm_vec(10*positions[qm_idx][0], 10*positions[qm_idx][1], 10*positions[qm_idx][2]);
+            Vector mm1_vec(10 * positions[idx][0], 10 * positions[idx][1], 10 * positions[idx][2]);
+            Vector qm_vec(10 * positions[qm_idx][0], 10 * positions[qm_idx][1], 10 * positions[qm_idx][2]);
 
             // Work out the minimum image positions with respect to the reference position.
             mm1_vec = space.getMinimumImage(mm1_vec, center);
@@ -610,7 +703,7 @@ double TorchQMForceImpl::computeForce(
             // where R0(QM-L) is the equilibrium bond length for the QM and link (L)
             // elements, and R0(QM-MM1) is the equilibrium bond length for the QM
             // and MM1 elements.
-            const auto link_vec = qm_vec + bond_scale_factors[idx]*(mm1_vec - qm_vec);
+            const auto link_vec = qm_vec + bond_scale_factors[idx] * (mm1_vec - qm_vec);
 
             // Add to the QM positions.
             xyz_qm.push_back(link_vec[0]);
@@ -634,10 +727,10 @@ double TorchQMForceImpl::computeForce(
             // charge is redistributed over the MM2 atoms and two virtual point
             // charges are added either side of the MM2 atoms in order to preserve
             // the MM1-MM2 dipole.
-            for (const auto& mm2_idx : mm1_to_mm2[idx])
+            for (const auto &mm2_idx : mm1_to_mm2[idx])
             {
                 // Store the MM2 position in Sire Vector format.
-                Vector mm2_vec(10*positions[mm2_idx][0], 10*positions[mm2_idx][1], 10*positions[mm2_idx][2]);
+                Vector mm2_vec(10 * positions[mm2_idx][0], 10 * positions[mm2_idx][1], 10 * positions[mm2_idx][2]);
 
                 // Work out the minimum image position with respect to the reference position.
                 mm2_vec = space.getMinimumImage(mm2_vec, center);
@@ -657,14 +750,14 @@ double TorchQMForceImpl::computeForce(
                 const auto normal = (mm2_vec - mm1_vec).normalise();
 
                 // Positive direction. (Away from MM1 atom.)
-                auto xyz = mm2_vec + VIRTUAL_PC_DELTA*normal;
+                auto xyz = mm2_vec + VIRTUAL_PC_DELTA * normal;
                 xyz_virtual.push_back(xyz[0]);
                 xyz_virtual.push_back(xyz[1]);
                 xyz_virtual.push_back(xyz[2]);
                 charges_virtual.append(-frac_charge);
 
                 // Negative direction (Towards MM1 atom.)
-                xyz = mm2_vec - VIRTUAL_PC_DELTA*normal;
+                xyz = mm2_vec - VIRTUAL_PC_DELTA * normal;
                 xyz_virtual.push_back(xyz[0]);
                 xyz_virtual.push_back(xyz[1]);
                 xyz_virtual.push_back(xyz[2]);
@@ -694,38 +787,44 @@ double TorchQMForceImpl::computeForce(
             // Resize the charges and positions vectors to the maximum number of MM atoms.
             // This is to try to preserve a static compute graph to avoid re-jitting.
             charges_mm.resize(this->max_num_mm);
-            xyz_mm.resize(3*this->max_num_mm);
+            xyz_mm.resize(3 * this->max_num_mm);
         }
     }
 
     // Convert input to Torch tensors.
 
-    // MM charges.
+    // MM charges. requires_grad_(true) must be set before the forward pass so
+    // that the computation graph tracks the dependency on charges, enabling the
+    // chain-rule correction for the switching function.
     torch::Tensor charges_mm_torch = torch::from_blob(charges_mm.data(), {charges_mm.size()},
-        torch::TensorOptions().dtype(torch::kFloat64))
-                              .to(torch::kFloat32).to(device);
+                                                      torch::TensorOptions().dtype(torch::kFloat64))
+                                         .to(torch::kFloat32)
+                                         .to(device);
+    charges_mm_torch.requires_grad_(true);
 
     // Atomic numbers.
     torch::Tensor atomic_numbers_torch = torch::from_blob(numbers.data(), {numbers.size()},
-        torch::TensorOptions().dtype(torch::kInt32))
-                              .to(torch::kInt64).to(device);
+                                                          torch::TensorOptions().dtype(torch::kInt32))
+                                             .to(torch::kInt64)
+                                             .to(device);
 
     // QM positions.
     torch::Tensor xyz_qm_torch = torch::from_blob(xyz_qm.data(), {numbers.size(), 3},
-        torch::TensorOptions().dtype(torch::kFloat32))
-                              .to(device);
+                                                  torch::TensorOptions().dtype(torch::kFloat32))
+                                     .to(device);
     xyz_qm_torch.requires_grad_(true);
 
     // MM positions.
     torch::Tensor xyz_mm_torch = torch::from_blob(xyz_mm.data(), {charges_mm.size(), 3},
-        torch::TensorOptions().dtype(torch::kFloat32))
-                              .to(device);
+                                                  torch::TensorOptions().dtype(torch::kFloat32))
+                                     .to(device);
     xyz_mm_torch.requires_grad_(true);
 
     // Cell vectors.
     torch::Tensor cell_torch = torch::from_blob(cell.data(), {3, 3},
-        torch::TensorOptions().dtype(torch::kFloat64))
-                              .to(torch::kFloat32).to(device);
+                                                torch::TensorOptions().dtype(torch::kFloat64))
+                                   .to(torch::kFloat32)
+                                   .to(device);
     cell_torch.requires_grad_(false);
 
     // Create the input vector.
@@ -734,8 +833,7 @@ double TorchQMForceImpl::computeForce(
         charges_mm_torch,
         xyz_qm_torch,
         xyz_mm_torch,
-        cell_torch
-    };
+        cell_torch};
 
     // Compute the energies.
     auto energies = this->torch_module.forward(input).toTensor();
@@ -743,19 +841,27 @@ double TorchQMForceImpl::computeForce(
     // Store the sum of the energy in kJ.
     const auto energy = energies.sum().item<double>() * HARTREE_TO_KJ_MOL;
 
-    // If there are no MM atoms, then we need to allow unused tensors.
-    bool allow_unused = num_mm == 0;
+    // Always allow unused: xyz_mm/charges_mm may not be connected when there are
+    // no MM atoms, and the TorchScript model may not propagate gradients through
+    // charges even when they are in the graph. We guard each gradient before use.
+    const bool allow_unused = true;
 
-    // Compute the gradients.
+    // Compute the gradients w.r.t. QM positions, MM positions, and MM charges.
     const auto gradients = torch::autograd::grad(
-        {energies.sum()}, {xyz_qm_torch, xyz_mm_torch}, {}, c10::nullopt, false, allow_unused);
+        {energies.sum()}, {xyz_qm_torch, xyz_mm_torch, charges_mm_torch},
+        {}, c10::nullopt, false, allow_unused);
 
     // Compute the forces, converting from Hatree/Anstrom to kJ/mol/nm.
     const auto forces_qm = -(gradients[0] * HARTREE_TO_KJ_MOL * 10).detach().cpu();
     torch::Tensor forces_mm;
+    torch::Tensor dE_dq;
     if (num_mm > 0)
     {
         forces_mm = -(gradients[1] * HARTREE_TO_KJ_MOL * 10).detach().cpu();
+        if (gradients[2].defined())
+        {
+            dE_dq = gradients[2].detach().cpu();
+        }
     }
     else
     {
@@ -805,35 +911,58 @@ double TorchQMForceImpl::computeForce(
         forces_mm.data_ptr<float>() + forces_mm.numel());
 
     // First the QM atoms.
-    for (int i=0; i<qm_atoms.size(); i++)
+    for (int i = 0; i < qm_atoms.size(); i++)
     {
         // Get the index of the atom.
         const auto idx = qm_atoms[i];
 
         // Convert to OpenMM format.
         OpenMM::Vec3 omm_force(
-            forces_qm_flat[3*i],
-            forces_qm_flat[3*i+1],
-            forces_qm_flat[3*i+2]);
+            forces_qm_flat[3 * i],
+            forces_qm_flat[3 * i + 1],
+            forces_qm_flat[3 * i + 2]);
 
         // Update the force vector.
         forces[idx] = lambda * omm_force;
     }
 
     // Now the MM atoms.
-    for (int i=0; i<num_mm; i++)
+    for (int i = 0; i < num_mm; i++)
     {
         // Get the index of the atom.
         const auto idx = idx_mm[i];
 
         // Convert to OpenMM format.
         OpenMM::Vec3 omm_force(
-            forces_mm_flat[3*i],
-            forces_mm_flat[3*i+1],
-            forces_mm_flat[3*i+2]);
+            forces_mm_flat[3 * i],
+            forces_mm_flat[3 * i + 1],
+            forces_mm_flat[3 * i + 2]);
 
         // Update the force vector.
         forces[idx] = lambda * omm_force;
+
+        // Chain-rule correction for the positional dependence of the switching function.
+        // F_correction = -(dE/dq_eff) * q_unscaled * (ds/dr) * r_hat
+        if (dE_dq.defined() and i < charges_unscaled.size())
+        {
+            const double dsdr = switch_deriv(min_dists[i]);
+            if (dsdr != 0.0)
+            {
+                // r_hat points from the nearest QM atom to the MM atom.
+                const Vector mm_vec(xyz_mm[3 * i], xyz_mm[3 * i + 1], xyz_mm[3 * i + 2]);
+                const Vector r_hat = (mm_vec - nearest_qm_vecs[i]).normalise();
+                // dE_dq is in Hartree/e; dsdr is in 1/Å; multiply by HARTREE_TO_KJ_MOL*10
+                // to convert to kJ/mol/nm, matching the units of forces_qm/forces_mm.
+                const double correction = -dE_dq[i].item<float>() * HARTREE_TO_KJ_MOL * 10.0 * charges_unscaled[i] * dsdr;
+                const OpenMM::Vec3 f_corr(correction * r_hat[0],
+                                          correction * r_hat[1],
+                                          correction * r_hat[2]);
+                // Apply to MM atom.
+                forces[idx] += lambda * f_corr;
+                // Apply equal and opposite force to the nearest QM atom (Newton's 3rd law).
+                forces[nearest_qm_atom_idxs[i]] -= lambda * f_corr;
+            }
+        }
     }
 
     // Update the step count.
@@ -859,19 +988,22 @@ TorchQMEngine::TorchQMEngine(
     SireUnits::Dimension::Length cutoff,
     int neighbour_list_frequency,
     bool is_mechanical,
-    double lambda) :
-    ConcreteProperty<TorchQMEngine, QMEngine>(),
-    module_path(module_path),
-    cutoff(cutoff),
-    neighbour_list_frequency(neighbour_list_frequency),
-    is_mechanical(is_mechanical),
-    lambda(lambda)
+    double lambda,
+    double switch_width,
+    bool use_switch) : ConcreteProperty<TorchQMEngine, QMEngine>(),
+                       module_path(module_path),
+                       cutoff(cutoff),
+                       neighbour_list_frequency(neighbour_list_frequency),
+                       is_mechanical(is_mechanical),
+                       lambda(lambda),
+                       switch_width(switch_width),
+                       use_switch(use_switch)
 {
 #ifndef SIRE_USE_TORCH
     throw SireError::unsupported(QObject::tr(
-            "Unable to create an TorchQMEngine because Sire has been compiled "
-            "without Torch support."),
-        CODELOC);
+                                     "Unable to create an TorchQMEngine because Sire has been compiled "
+                                     "without Torch support."),
+                                 CODELOC);
 #endif
 
     // Register the serialization proxies.
@@ -891,19 +1023,20 @@ TorchQMEngine::TorchQMEngine(
     }
 }
 
-TorchQMEngine::TorchQMEngine(const TorchQMEngine &other) :
-    module_path(other.module_path),
-    cutoff(other.cutoff),
-    neighbour_list_frequency(other.neighbour_list_frequency),
-    is_mechanical(other.is_mechanical),
-    lambda(other.lambda),
-    atoms(other.atoms),
-    mm1_to_qm(other.mm1_to_qm),
-    mm1_to_mm2(other.mm1_to_mm2),
-    mm2_atoms(other.mm2_atoms),
-    bond_scale_factors(other.bond_scale_factors),
-    numbers(other.numbers),
-    charges(other.charges)
+TorchQMEngine::TorchQMEngine(const TorchQMEngine &other) : module_path(other.module_path),
+                                                           cutoff(other.cutoff),
+                                                           neighbour_list_frequency(other.neighbour_list_frequency),
+                                                           is_mechanical(other.is_mechanical),
+                                                           lambda(other.lambda),
+                                                           switch_width(other.switch_width),
+                                                           use_switch(other.use_switch),
+                                                           atoms(other.atoms),
+                                                           mm1_to_qm(other.mm1_to_qm),
+                                                           mm1_to_mm2(other.mm1_to_mm2),
+                                                           mm2_atoms(other.mm2_atoms),
+                                                           bond_scale_factors(other.bond_scale_factors),
+                                                           numbers(other.numbers),
+                                                           charges(other.charges)
 {
 }
 
@@ -914,6 +1047,8 @@ TorchQMEngine &TorchQMEngine::operator=(const TorchQMEngine &other)
     this->neighbour_list_frequency = other.neighbour_list_frequency;
     this->is_mechanical = other.is_mechanical;
     this->lambda = other.lambda;
+    this->switch_width = other.switch_width;
+    this->use_switch = other.use_switch;
     this->atoms = other.atoms;
     this->mm1_to_qm = other.mm1_to_qm;
     this->mm1_to_mm2 = other.mm1_to_mm2;
@@ -1045,6 +1180,30 @@ void TorchQMEngine::setCharges(QVector<double> charges)
     this->charges = charges;
 }
 
+double TorchQMEngine::getSwitchWidth() const
+{
+    return this->switch_width;
+}
+
+void TorchQMEngine::setSwitchWidth(double switch_width)
+{
+    if (switch_width < 0.0)
+        switch_width = 0.0;
+    else if (switch_width > 1.0)
+        switch_width = 1.0;
+    this->switch_width = switch_width;
+}
+
+bool TorchQMEngine::getUseSwitch() const
+{
+    return this->use_switch;
+}
+
+void TorchQMEngine::setUseSwitch(bool use_switch)
+{
+    this->use_switch = use_switch;
+}
+
 const char *TorchQMEngine::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<TorchQMEngine>());
@@ -1055,7 +1214,7 @@ const char *TorchQMEngine::what() const
     return TorchQMEngine::typeName();
 }
 
-QMForce* TorchQMEngine::createForce() const
+QMForce *TorchQMEngine::createForce() const
 {
     return new TorchQMForce(
         this->module_path,
@@ -1069,6 +1228,7 @@ QMForce* TorchQMEngine::createForce() const
         this->bond_scale_factors,
         this->mm2_atoms,
         this->numbers,
-        this->charges
-    );
+        this->charges,
+        this->switch_width,
+        this->use_switch);
 }

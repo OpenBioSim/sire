@@ -1539,24 +1539,12 @@ QStringList AmberParams::validateAndFix()
                                         }
                                         if (has_short_path)
                                         {
-                                            if (not is_perturbable)
-                                            {
-                                                QMutexLocker lkr(&mutex);
-                                                qWarning().noquote()
-                                                    << QObject::tr(
-                                                           "WARNING: Have a 1-4 scaling factor "
-                                                           "(%1/%2) between atoms %3:%4 and %5:%6 "
-                                                           "that are fewer than 4 bonds apart. "
-                                                           "Skipping — connectivity will enforce "
-                                                           "their exclusion. This may indicate a "
-                                                           "topology issue.")
-                                                           .arg(s.coulomb())
-                                                           .arg(s.lj())
-                                                           .arg(molinfo.name(atm0).value())
-                                                           .arg(atm0.value())
-                                                           .arg(molinfo.name(atm3).value())
-                                                           .arg(atm3.value());
-                                            }
+                                            // These atoms are fewer than 4 bonds apart so
+                                            // connectivity will enforce their exclusion
+                                            // regardless of what the intrascale says. Repair
+                                            // the entry so exc_atoms is self-consistent.
+                                            QMutexLocker lkr(&mutex);
+                                            new_exc.set(atm0, atm3, CLJScaleFactor(0, 0));
                                             continue;
                                         }
                                     }

@@ -143,6 +143,7 @@ class Perturbation:
             "atomtype",
             "bond",
             "charge",
+            "cmap",
             "coordinates",
             "dihedral",
             "element",

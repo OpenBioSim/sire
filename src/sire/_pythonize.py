@@ -105,6 +105,10 @@ def _pythonize(C, delete_old: bool = True) -> None:
         # change "RDKit" to "Rdkit"
         new_attr = new_attr.replace("RDKit", "Rdkit")
 
+        # change "CMAP" into "Cmap" (it will then be converted to _cmap by
+        # the code below)
+        new_attr = new_attr.replace("CMAP", "Cmap")
+
         # change "MCS" into "Mcs" (it will then be converted to _mcs by
         # the code below)
         new_attr = new_attr.replace("MCS", "Mcs")
@@ -238,12 +242,13 @@ def _load_new_api_modules(delete_old: bool = True, is_base: bool = False):
         delete_old=delete_old,
     )
 
-    # Pythonize the QM classes.
-    _pythonize(Convert._SireOpenMM.PyQMCallback, delete_old=delete_old)
-    _pythonize(Convert._SireOpenMM.PyQMEngine, delete_old=delete_old)
-    _pythonize(Convert._SireOpenMM.PyQMForce, delete_old=delete_old)
-    _pythonize(Convert._SireOpenMM.TorchQMEngine, delete_old=delete_old)
-    _pythonize(Convert._SireOpenMM.TorchQMForce, delete_old=delete_old)
+    # Pythonize the QM classes (only if OpenMM loaded successfully).
+    if Convert._has_openmm:
+        _pythonize(Convert._SireOpenMM.PyQMCallback, delete_old=delete_old)
+        _pythonize(Convert._SireOpenMM.PyQMEngine, delete_old=delete_old)
+        _pythonize(Convert._SireOpenMM.PyQMForce, delete_old=delete_old)
+        _pythonize(Convert._SireOpenMM.TorchQMEngine, delete_old=delete_old)
+        _pythonize(Convert._SireOpenMM.TorchQMForce, delete_old=delete_old)
 
     try:
         import lazy_import

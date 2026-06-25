@@ -53,7 +53,11 @@ def test_merge(ose_mols, zan_mols, openmm_platform):
     zan = zan_mols[0]
 
     merged = sr.morph.merge(
-        ose, zan, match=KartografAtomMapper(atom_map_hydrogens=True)
+        ose,
+        zan,
+        match=KartografAtomMapper(
+            atom_map_hydrogens=True, map_hydrogens_on_hydrogens_only=False
+        ),
     )
 
     ose_nrg = ose.dynamics(platform=openmm_platform).current_potential_energy()
@@ -74,7 +78,11 @@ def test_merge(ose_mols, zan_mols, openmm_platform):
     assert extracted_zan_nrg.value() == pytest.approx(zan_nrg.value())
 
     merged = sr.morph.merge(
-        zan, ose, match=KartografAtomMapper(atom_map_hydrogens=True)
+        zan,
+        ose,
+        match=KartografAtomMapper(
+            atom_map_hydrogens=True, map_hydrogens_on_hydrogens_only=False
+        ),
     )
 
     extracted_zan = merged.perturbation().extract_reference()
@@ -152,7 +160,11 @@ def test_merge_neopentane_methane(neopentane_methane, openmm_platform):
     nrg_met = methane.dynamics(platform=openmm_platform).current_potential_energy()
 
     merged = sr.morph.merge(
-        neopentane, methane, match=KartografAtomMapper(atom_map_hydrogens=True)
+        neopentane,
+        methane,
+        match=KartografAtomMapper(
+            atom_map_hydrogens=True, map_hydrogens_on_hydrogens_only=False
+        ),
     )
 
     nrg_merged_0 = merged.dynamics(

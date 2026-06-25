@@ -5,8 +5,56 @@ __all__ = [
     "_changed_torsions",
     "_changed_exceptions",
     "_changed_constraints",
+    "_changed_cmaps",
     "_get_lever_values",
 ]
+
+
+def _changed_cmaps(obj, to_pandas: bool = True):
+    """
+    Return a list of the CMAP torsions that change parameters in this
+    perturbation
+
+    Parameters
+    ----------
+
+    to_pandas: bool, optional, default=True
+        If True then the list of CMAP torsions will be returned as a pandas
+        DataFrame
+    """
+    changed_cmaps = []
+
+    atoms = obj.atoms()
+    sizes = list(obj.get_cmap_grid_sizes())
+    grids0 = list(obj.get_cmap_grids0())
+    grids1 = list(obj.get_cmap_grids1())
+
+    offset = 0
+    for torsion, n in zip(obj.get_cmap_atoms(), sizes):
+        ns = n * n
+        g0 = grids0[offset : offset + ns]
+        g1 = grids1[offset : offset + ns]
+        offset += ns
+
+        if g0 != g1:
+            atom0, atom1, atom2, atom3, atom4 = (atoms[i] for i in torsion)
+
+            torsion_atoms = (atom0, atom1, atom2, atom3, atom4)
+
+            if to_pandas:
+                torsion_atoms = "-".join(_name(a) for a in torsion_atoms)
+
+            changed_cmaps.append((torsion_atoms, n))
+
+    if to_pandas:
+        import pandas as pd
+
+        changed_cmaps = pd.DataFrame(
+            changed_cmaps,
+            columns=["torsion", "grid_size"],
+        )
+
+    return changed_cmaps
 
 
 def _get_lever_values(

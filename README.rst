@@ -166,6 +166,22 @@ Developers guide
 Please `visit the website <https://sire.openbiosim.org>`__ for information on how to
 develop applications using sire.
 
+The repository uses `pre-commit <https://pre-commit.com>`__ to enforce
+consistent code style. After setting up your development environment, install
+the hooks with:
+
+.. code-block:: bash
+
+    pre-commit install
+
+Python code in ``src/``, ``tests/``, and ``wrapper/`` is formatted with
+`ruff <https://docs.astral.sh/ruff/>`__; C++ code in ``corelib/`` and
+``wrapper/`` is formatted with
+`clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ using the
+``.clang-format`` file in the repository root. The C++ formatter runs only
+on files staged for commit, allowing the codebase to drift gradually toward
+a consistent style without a blanket one-time reformatting.
+
 GitHub actions
 --------------
 Since sire is quite large, a build can take quite long and might not be neccessary
