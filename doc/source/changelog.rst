@@ -12,10 +12,8 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - April 2026
-------------------------------------------------------------------------------------------
-
-* Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
+`2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
+-----------------------------------------------------------------------------------------
 
 * Fixed duplicate converter registrations in the Python wrappers for OpenMM-related classes,
   which caused ``RuntimeWarning: to-Python converter already registered`` warnings at import
