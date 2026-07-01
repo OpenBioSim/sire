@@ -74,9 +74,7 @@ QDataStream &operator>>(QDataStream &ds, BoreschRestraint &borrest)
     {
         SharedDataStream sds(ds);
 
-        sds >> borrest.receptor_atms >> borrest.ligand_atms >> borrest._r0
-            >> borrest._theta0 >> borrest._phi0 >> borrest._kr >> borrest._ktheta
-            >> borrest._kphi >> static_cast<Property &>(borrest);
+        sds >> borrest.receptor_atms >> borrest.ligand_atms >> borrest._r0 >> borrest._theta0 >> borrest._phi0 >> borrest._kr >> borrest._ktheta >> borrest._kphi >> static_cast<Property &>(borrest);
     }
     else
         throw version_error(v, "1", r_borrest, CODELOC);
@@ -345,11 +343,11 @@ static const RegisterMetaType<BoreschRestraints> r_borrests;
 
 QDataStream &operator<<(QDataStream &ds, const BoreschRestraints &borrests)
 {
-    writeHeader(ds, r_borrests, 2);
+    writeHeader(ds, r_borrests, 3);
 
     SharedDataStream sds(ds);
 
-    sds << borrests.r << borrests.use_pbc
+    sds << borrests.r << borrests.use_pbc << borrests.angle_potential
         << static_cast<const Restraints &>(borrests);
 
     return ds;
@@ -364,16 +362,26 @@ QDataStream &operator>>(QDataStream &ds, BoreschRestraints &borrests)
         SharedDataStream sds(ds);
 
         sds >> borrests.r >> static_cast<Restraints &>(borrests);
+
+        borrests.use_pbc = false;
+        borrests.angle_potential = "harmonic";
     }
     else if (v == 2)
     {
         SharedDataStream sds(ds);
 
-        sds >> borrests.r >> borrests.use_pbc
-            >> static_cast<Restraints &>(borrests);
+        sds >> borrests.r >> borrests.use_pbc >> static_cast<Restraints &>(borrests);
+
+        borrests.angle_potential = "harmonic";
+    }
+    else if (v == 3)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> borrests.r >> borrests.use_pbc >> borrests.angle_potential >> static_cast<Restraints &>(borrests);
     }
     else
-        throw version_error(v, "1,2", r_borrests, CODELOC);
+        throw version_error(v, "1,2,3", r_borrests, CODELOC);
 
     return ds;
 }
@@ -426,7 +434,8 @@ BoreschRestraints::BoreschRestraints(const QString &name,
 }
 
 BoreschRestraints::BoreschRestraints(const BoreschRestraints &other)
-    : ConcreteProperty<BoreschRestraints, Restraints>(other), r(other.r), use_pbc(other.use_pbc)
+    : ConcreteProperty<BoreschRestraints, Restraints>(other), r(other.r), use_pbc(other.use_pbc),
+      angle_potential(other.angle_potential)
 {
 }
 
@@ -438,6 +447,7 @@ BoreschRestraints &BoreschRestraints::operator=(const BoreschRestraints &other)
 {
     r = other.r;
     use_pbc = other.use_pbc;
+    angle_potential = other.angle_potential;
     Restraints::operator=(other);
     return *this;
 }
@@ -445,7 +455,7 @@ BoreschRestraints &BoreschRestraints::operator=(const BoreschRestraints &other)
 bool BoreschRestraints::operator==(const BoreschRestraints &other) const
 {
     return r == other.r and Restraints::operator==(other) and
-           use_pbc == other.use_pbc;
+           use_pbc == other.use_pbc and angle_potential == other.angle_potential;
 }
 
 bool BoreschRestraints::operator!=(const BoreschRestraints &other) const
@@ -499,11 +509,12 @@ QString BoreschRestraints::toString() const
         }
     }
 
-    return QObject::tr("BoreschRestraints( name=%1, size=%2, use_pbc=%3\n%4\n)")
-            .arg(this->name())
-            .arg(n)
-            .arg(this->use_pbc ? "true" : "false")
-            .arg(parts.join("\n"));
+    return QObject::tr("BoreschRestraints( name=%1, size=%2, use_pbc=%3, angle_potential=%4\n%5\n)")
+        .arg(this->name())
+        .arg(n)
+        .arg(this->use_pbc ? "true" : "false")
+        .arg(this->angle_potential)
+        .arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */
@@ -609,4 +620,27 @@ void BoreschRestraints::setUsesPbc(bool use_pbc)
 bool BoreschRestraints::usesPbc() const
 {
     return this->use_pbc;
+}
+
+/** Set the functional form used for the two Boresch angle restraint terms.
+ *  Must be either "harmonic" (the default) or "restricted_bending". */
+void BoreschRestraints::setAnglePotential(const QString &angle_potential)
+{
+    if (angle_potential != "harmonic" and angle_potential != "restricted_bending")
+    {
+        throw SireError::invalid_arg(QObject::tr(
+                                         "'angle_potential' must be either 'harmonic' or "
+                                         "'restricted_bending', got '%1'.")
+                                         .arg(angle_potential),
+                                     CODELOC);
+    }
+
+    this->angle_potential = angle_potential;
+}
+
+/** Return the functional form used for the two Boresch angle restraint terms,
+ *  either "harmonic" or "restricted_bending". */
+QString BoreschRestraints::anglePotential() const
+{
+    return this->angle_potential;
 }

@@ -94,31 +94,71 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
     //
     // e_restraint = rho * (e_bond + e_angle + e_torsion)
     // e_bond = kr (r - r0)^2
-    // e_angle_i = ktheta_i (theta_i - theta0_i)^2
     // e_torsion_i = k_phi_i (min(dphi_i, 2pi-dphi_i))^2 where
     // dphi_i = abs(phi_i - phi0_i)
     //
-    const auto energy_expression = QString(
-                                       "rho*(e_bond + e_angle_A + e_angle_B + e_torsion_A + e_torsion_B + e_torsion_C);"
-                                       "e_bond=kr*(r-r0)^2;"
-                                       "e_angle_B=ktheta_B*(theta_B-theta0_B)^2;"
-                                       "e_angle_A=ktheta_A*(theta_A-theta0_A)^2;"
-                                       "e_torsion_C=kphi_C*(min(dphi_C, two_pi-dphi_C))^2;"
-                                       "e_torsion_B=kphi_B*(min(dphi_B, two_pi-dphi_B))^2;"
-                                       "e_torsion_A=kphi_A*(min(dphi_A, two_pi-dphi_A))^2;"
-                                       "dphi_C=abs(phi_C-phi0_C);"
-                                       "dphi_B=abs(phi_B-phi0_B);"
-                                       "dphi_A=abs(phi_A-phi0_A);"
-                                       "two_pi=6.283185307179586;"
-                                       "phi_C=dihedral(p1, p4, p5, p6);"
-                                       "phi_B=dihedral(p2, p1, p4, p5);"
-                                       "phi_A=dihedral(p3, p2, p1, p4);"
-                                       "theta_B=angle(p1, p4, p5);"
-                                       "theta_A=angle(p2, p1, p4);"
-                                       "r=distance(p1, p4);")
-                                       .toStdString();
+    // The two angle terms use one of two functional forms, selected by
+    // restraints.anglePotential():
+    //
+    // "harmonic" (default): e_angle_i = ktheta_i (theta_i - theta0_i)^2
+    //
+    // "restricted_bending": e_angle_i = ktheta_i * (cos(theta_i) - cos(theta0_i))^2 / sin(theta_i)^2
+    //   (see the GROMACS manual, "Restricted Bending Potential"). The
+    //   sin(theta)^2 denominator diverges as theta approaches 0 or pi,
+    //   preventing the restraint angle from ever reaching the Boresch
+    //   collinearity singularity, unlike the harmonic form which only
+    //   penalises deviation from theta0 with no protection near the poles.
+    //   To leading order in a large-force-constant expansion around theta0
+    //   (away from the poles) this form has the same local curvature as
+    //   the harmonic form with the same ktheta, so no change is needed to
+    //   the analytic standard state correction formula.
+    //
+    QString energy_expression;
 
-    auto *restraintff = new OpenMM::CustomCompoundBondForce(6, energy_expression);
+    if (restraints.anglePotential() == "restricted_bending")
+    {
+        energy_expression = QString(
+            "rho*(e_bond + e_angle_A + e_angle_B + e_torsion_A + e_torsion_B + e_torsion_C);"
+            "e_bond=kr*(r-r0)^2;"
+            "e_angle_A=ktheta_A*(cos(theta_A)-cos(theta0_A))^2/sin(theta_A)^2;"
+            "e_angle_B=ktheta_B*(cos(theta_B)-cos(theta0_B))^2/sin(theta_B)^2;"
+            "e_torsion_C=kphi_C*(min(dphi_C, two_pi-dphi_C))^2;"
+            "e_torsion_B=kphi_B*(min(dphi_B, two_pi-dphi_B))^2;"
+            "e_torsion_A=kphi_A*(min(dphi_A, two_pi-dphi_A))^2;"
+            "dphi_C=abs(phi_C-phi0_C);"
+            "dphi_B=abs(phi_B-phi0_B);"
+            "dphi_A=abs(phi_A-phi0_A);"
+            "two_pi=6.283185307179586;"
+            "phi_C=dihedral(p1, p4, p5, p6);"
+            "phi_B=dihedral(p2, p1, p4, p5);"
+            "phi_A=dihedral(p3, p2, p1, p4);"
+            "theta_B=angle(p1, p4, p5);"
+            "theta_A=angle(p2, p1, p4);"
+            "r=distance(p1, p4);");
+    }
+    else
+    {
+        energy_expression = QString(
+            "rho*(e_bond + e_angle_A + e_angle_B + e_torsion_A + e_torsion_B + e_torsion_C);"
+            "e_bond=kr*(r-r0)^2;"
+            "e_angle_B=ktheta_B*(theta_B-theta0_B)^2;"
+            "e_angle_A=ktheta_A*(theta_A-theta0_A)^2;"
+            "e_torsion_C=kphi_C*(min(dphi_C, two_pi-dphi_C))^2;"
+            "e_torsion_B=kphi_B*(min(dphi_B, two_pi-dphi_B))^2;"
+            "e_torsion_A=kphi_A*(min(dphi_A, two_pi-dphi_A))^2;"
+            "dphi_C=abs(phi_C-phi0_C);"
+            "dphi_B=abs(phi_B-phi0_B);"
+            "dphi_A=abs(phi_A-phi0_A);"
+            "two_pi=6.283185307179586;"
+            "phi_C=dihedral(p1, p4, p5, p6);"
+            "phi_B=dihedral(p2, p1, p4, p5);"
+            "phi_A=dihedral(p3, p2, p1, p4);"
+            "theta_B=angle(p1, p4, p5);"
+            "theta_A=angle(p2, p1, p4);"
+            "r=distance(p1, p4);");
+    }
+
+    auto *restraintff = new OpenMM::CustomCompoundBondForce(6, energy_expression.toStdString());
     restraintff->setName("BoreschRestraintForce");
 
     restraintff->addPerBondParameter("rho");

@@ -26,6 +26,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   name '_fix_siremm' from 'sire.mm'``) if it was the first ``sire`` submodule touched in
   a process, due to ``use_new_api()`` being called before ``_fix_siremm`` was defined.
 
+* Added an optional ``angle_potential="restricted_bending"`` mode to ``BoreschRestraints``
+  (default remains ``"harmonic"``), which uses a ``sin(theta)^2``-weighted potential for the
+  two angle restraint terms to prevent the restraint angle from ever reaching the Boresch
+  collinearity singularity at 0/180 degrees.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
