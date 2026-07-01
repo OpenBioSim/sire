@@ -1,6 +1,7 @@
+import pickle
+
 import pytest
 
-import sire as sr
 from sire.restraints import boresch
 
 # Valid Boresch restraint parameters.
@@ -201,6 +202,35 @@ def test_boresch_restraint_params(thrombin_complex):
     assert boresch_restraint.phi0()[0].value() == 2.5569
     assert boresch_restraint.phi0()[1].value() == 2.9359
     assert boresch_restraint.phi0()[2].value() == 1.4147
+
+
+def test_boresch_restraints_pickles_ok(thrombin_complex):
+    """
+    Regression test: sire.restraints.boresch() used to set a dynamic
+    '_use_pbc' Python attribute on the returned BoreschRestraints instead of
+    calling set_uses_pbc(), which broke pickling (fixed).
+    """
+    boresch_restraints = boresch(
+        thrombin_complex,
+        receptor=thrombin_complex["protein"][
+            BORESCH_PARAMS_DEFAULT["receptor_selection"]
+        ],
+        ligand=thrombin_complex["resname LIG"][
+            BORESCH_PARAMS_DEFAULT["ligand_selection"]
+        ],
+        kr=BORESCH_PARAMS_DEFAULT["kr"],
+        ktheta=BORESCH_PARAMS_DEFAULT["ktheta"],
+        kphi=BORESCH_PARAMS_DEFAULT["kphi"],
+        r0=BORESCH_PARAMS_DEFAULT["r0"],
+        theta0=BORESCH_PARAMS_DEFAULT["theta0"],
+        phi0=BORESCH_PARAMS_DEFAULT["phi0"],
+        name=BORESCH_PARAMS_DEFAULT["name"],
+    )
+
+    data = pickle.dumps(boresch_restraints)
+    reloaded = pickle.loads(data)
+
+    assert reloaded[0].kr().value() == boresch_restraints[0].kr().value()
 
 
 @pytest.mark.parametrize(
