@@ -17,6 +17,15 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
+* Fixed ``sire.restraints.boresch()`` setting a dynamic ``_use_pbc`` Python attribute on
+  the returned ``BoreschRestraints`` instead of calling ``set_uses_pbc()``, which broke
+  pickling (e.g. for ``multiprocessing``/``ProcessPoolExecutor``) and meant the flag did
+  not survive a ``sire.stream.save``/``load`` round-trip.
+
+* Fixed a module load-order bug where ``sire.mm`` failed to import (``cannot import
+  name '_fix_siremm' from 'sire.mm'``) if it was the first ``sire`` submodule touched in
+  a process, due to ``use_new_api()`` being called before ``_fix_siremm`` was defined.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 

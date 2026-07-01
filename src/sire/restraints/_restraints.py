@@ -447,7 +447,7 @@ def boresch(
         b = BoreschRestraints(name, b)
 
     # Set the use_pbc flag.
-    b._use_pbc = use_pbc
+    b.set_uses_pbc(use_pbc)
 
     return b
 
@@ -876,7 +876,6 @@ def morse_potential(
         for bond in changed_bonds:
             bond_name, length0, length1, k0, k1 = bond
             if k1 == 0 or k0 == 0:
-
                 # If the bond is being created (k0 == 0), then we should
                 # use the parameters from the final state (length1, k1).
                 # If the bond is being annihilated (k1 == 0), then we don't
