@@ -31,6 +31,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   two angle restraint terms to prevent the restraint angle from ever reaching the Boresch
   collinearity singularity at 0/180 degrees.
 
+* Added ``sire.restraints.boresch_search()``, which automatically generates a
+  ``BoreschRestraints`` object and its standard state correction from a trajectory of
+  a protein-ligand complex, using either a hydrogen-bond-driven anchor search or a
+  reference distance-variance-driven protocol.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
