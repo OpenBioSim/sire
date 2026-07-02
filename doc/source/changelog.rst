@@ -26,6 +26,21 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   name '_fix_siremm' from 'sire.mm'``) if it was the first ``sire`` submodule touched in
   a process, due to ``use_new_api()`` being called before ``_fix_siremm`` was defined.
 
+* Added an optional ``angle_potential="restricted_bending"`` mode to ``BoreschRestraints``
+  (default remains ``"harmonic"``), which uses a ``sin(theta)^2``-weighted potential for the
+  two angle restraint terms to prevent the restraint angle from ever reaching the Boresch
+  collinearity singularity at 0/180 degrees.
+
+* Added ``sire.restraints.boresch_search()``, which automatically generates a
+  ``BoreschRestraints`` object and its standard state correction from a trajectory of
+  a protein-ligand complex, using either a hydrogen-bond-driven anchor search or a
+  reference distance-variance-driven protocol.
+
+* Added an optional ``restraint_lever="split"`` mode to ``BoreschRestraints`` (default
+  remains ``"combined"``), which converts the distance/angle and dihedral restraint
+  terms into two independently lambda-addressable OpenMM Forces, allowing them to be
+  turned on according to different lambda schedule equations.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 

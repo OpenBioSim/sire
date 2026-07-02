@@ -297,3 +297,111 @@ def test_boresch_creation_with_map(thrombin_complex):
     )
     boresch_restraint = boresch_restraints[0]
     assert boresch_restraint.kr().value() == 44.0
+
+
+def _make_default_boresch(thrombin_complex, **kwargs):
+    return boresch(
+        thrombin_complex,
+        receptor=thrombin_complex["protein"][
+            BORESCH_PARAMS_DEFAULT["receptor_selection"]
+        ],
+        ligand=thrombin_complex["resname LIG"][
+            BORESCH_PARAMS_DEFAULT["ligand_selection"]
+        ],
+        kr=BORESCH_PARAMS_DEFAULT["kr"],
+        ktheta=BORESCH_PARAMS_DEFAULT["ktheta"],
+        kphi=BORESCH_PARAMS_DEFAULT["kphi"],
+        r0=BORESCH_PARAMS_DEFAULT["r0"],
+        theta0=BORESCH_PARAMS_DEFAULT["theta0"],
+        phi0=BORESCH_PARAMS_DEFAULT["phi0"],
+        name=BORESCH_PARAMS_DEFAULT["name"],
+        **kwargs,
+    )
+
+
+def test_boresch_angle_potential_defaults_to_harmonic(thrombin_complex):
+    """
+    Check that the angle_potential defaults to "harmonic" when not specified,
+    matching the pre-existing behaviour (no change for existing callers).
+    """
+    boresch_restraints = _make_default_boresch(thrombin_complex)
+    assert boresch_restraints.angle_potential() == "harmonic"
+
+
+def test_boresch_angle_potential_restricted_bending(thrombin_complex):
+    """
+    Check that angle_potential="restricted_bending" is set correctly, and
+    that it doesn't change any of the other restraint parameters.
+    """
+    boresch_restraints = _make_default_boresch(
+        thrombin_complex, angle_potential="restricted_bending"
+    )
+    assert boresch_restraints.angle_potential() == "restricted_bending"
+
+    boresch_restraint = boresch_restraints[0]
+    assert boresch_restraint.kr().value() == 6.2012
+    assert boresch_restraint.theta0()[0].value() == 1.3031
+    assert boresch_restraint.theta0()[1].value() == 1.4777
+
+
+def test_boresch_angle_potential_invalid_raises(thrombin_complex):
+    """
+    Check that an invalid angle_potential value raises a ValueError.
+    """
+    with pytest.raises(ValueError, match="angle_potential"):
+        _make_default_boresch(thrombin_complex, angle_potential="not_a_real_potential")
+
+
+def test_boresch_angle_potential_via_map(thrombin_complex):
+    """
+    Check that angle_potential can also be set via the map, matching every
+    other boresch() option.
+    """
+    boresch_restraints = _make_default_boresch(
+        thrombin_complex, map={"angle_potential": "restricted_bending"}
+    )
+    assert boresch_restraints.angle_potential() == "restricted_bending"
+
+
+def test_boresch_restraint_lever_defaults_to_combined(thrombin_complex):
+    """
+    Check that restraint_lever defaults to "combined" when not specified,
+    matching the pre-existing behaviour (no change for existing callers).
+    """
+    boresch_restraints = _make_default_boresch(thrombin_complex)
+    assert boresch_restraints.restraint_lever() == "combined"
+
+
+def test_boresch_restraint_lever_split(thrombin_complex):
+    """
+    Check that restraint_lever="split" is set correctly, and that it
+    doesn't change any of the other restraint parameters.
+    """
+    boresch_restraints = _make_default_boresch(
+        thrombin_complex, restraint_lever="split"
+    )
+    assert boresch_restraints.restraint_lever() == "split"
+
+    boresch_restraint = boresch_restraints[0]
+    assert boresch_restraint.kr().value() == 6.2012
+    assert boresch_restraint.theta0()[0].value() == 1.3031
+    assert boresch_restraint.theta0()[1].value() == 1.4777
+
+
+def test_boresch_restraint_lever_invalid_raises(thrombin_complex):
+    """
+    Check that an invalid restraint_lever value raises a ValueError.
+    """
+    with pytest.raises(ValueError, match="restraint_lever"):
+        _make_default_boresch(thrombin_complex, restraint_lever="not_a_real_lever")
+
+
+def test_boresch_restraint_lever_via_map(thrombin_complex):
+    """
+    Check that restraint_lever can also be set via the map, matching every
+    other boresch() option.
+    """
+    boresch_restraints = _make_default_boresch(
+        thrombin_complex, map={"restraint_lever": "split"}
+    )
+    assert boresch_restraints.restraint_lever() == "split"

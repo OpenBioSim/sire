@@ -143,6 +143,8 @@ def boresch(
     name=None,
     map=None,
     temperature=u("298 K"),
+    angle_potential=None,
+    restraint_lever=None,
 ):
     """
     Create a set of Boresch restraints that will restrain the 6
@@ -232,6 +234,30 @@ def boresch(
         The temperature to use when checking for unstable restraints. If
         None, then this will default to 298 K. Default is None.
 
+    angle_potential : str, optional
+        The functional form used for the two angle restraint terms
+        (thetaA, thetaB), either "harmonic" or "restricted_bending". The
+        "restricted_bending" form (see the GROMACS manual, "Restricted
+        Bending Potential") diverges as the angle approaches 0 or pi,
+        preventing the restraint angles from ever reaching the Boresch
+        collinearity singularity, at the cost of no longer being a simple
+        harmonic potential away from theta0. Default is None, which is
+        equivalent to "harmonic".
+
+    restraint_lever : str, optional
+        How the restraint's six degrees of freedom are grouped into
+        lambda-addressable OpenMM Forces, either "combined" or "split".
+        With "combined" (the default), all six terms (distance, two
+        angles, three dihedrals) share a single scale factor and are
+        therefore always turned on/off together according to a single
+        lambda schedule equation. With "split", the distance and two
+        angle terms share one scale factor, and the three dihedral terms
+        share a second, independent scale factor, allowing the two
+        groups to be turned on according to different lambda schedule
+        equations (e.g. to reproduce the RXRX protocol's staged
+        restraint turn-on). Default is None, which is equivalent to
+        "combined".
+
     Returns
     -------
     BoreschRestraints : SireMM::BoreschRestraints
@@ -277,6 +303,23 @@ def boresch(
     temperature = (
         temperature if temperature is not None else map_dict.get("temperature", None)
     )
+    angle_potential = (
+        angle_potential
+        if angle_potential is not None
+        else map_dict.get("angle_potential", None)
+    )
+    restraint_lever = (
+        restraint_lever
+        if restraint_lever is not None
+        else map_dict.get("restraint_lever", None)
+    )
+    # Values retrieved from the map are wrapped as PropertyName, not a plain
+    # str, which the strict BoreschRestraints.set_angle_potential(QString)/
+    # set_restraint_lever(QString) signatures don't accept directly.
+    if angle_potential is not None:
+        angle_potential = str(angle_potential)
+    if restraint_lever is not None:
+        restraint_lever = str(restraint_lever)
 
     receptor = _to_atoms(mols, receptor)
     ligand = _to_atoms(mols, ligand)
@@ -295,6 +338,24 @@ def boresch(
             raise ValueError("'use_pbc' must be of type 'bool'")
     else:
         use_pbc = False
+
+    if angle_potential is not None:
+        if angle_potential not in ("harmonic", "restricted_bending"):
+            raise ValueError(
+                "'angle_potential' must be either 'harmonic' or "
+                f"'restricted_bending', got {angle_potential!r}"
+            )
+    else:
+        angle_potential = "harmonic"
+
+    if restraint_lever is not None:
+        if restraint_lever not in ("combined", "split"):
+            raise ValueError(
+                "'restraint_lever' must be either 'combined' or "
+                f"'split', got {restraint_lever!r}"
+            )
+    else:
+        restraint_lever = "combined"
 
     from .. import measure
 
@@ -448,6 +509,13 @@ def boresch(
 
     # Set the use_pbc flag.
     b.set_uses_pbc(use_pbc)
+
+    # Set the functional form used for the two angle restraint terms.
+    b.set_angle_potential(angle_potential)
+
+    # Set how the restraint's degrees of freedom are grouped into
+    # lambda-addressable OpenMM Forces.
+    b.set_restraint_lever(restraint_lever)
 
     return b
 
