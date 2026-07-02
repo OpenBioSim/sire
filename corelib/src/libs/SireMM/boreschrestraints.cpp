@@ -283,7 +283,7 @@ QString BoreschRestraint::toString() const
             .arg(k.join(", "))
             .arg(_r0.toString())
             .arg(t.join(", "))
-            .arg(p.join(', '));
+            .arg(p.join(", "));
     }
 }
 
