@@ -128,6 +128,7 @@ def _assemble_restraints(
     kp_str,
     temperature,
     angle_potential,
+    restraint_lever,
 ):
     """Build the sire.mm.BoreschRestraints object and standard state correction."""
     from ._restraints import boresch as _boresch
@@ -157,6 +158,7 @@ def _assemble_restraints(
         phi0=[f"{pA0:.6f} rad", f"{pB0:.6f} rad", f"{pC0:.6f} rad"],
         temperature=temperature,
         angle_potential=angle_potential,
+        restraint_lever=restraint_lever,
     )
 
     correction = _get_ssc(restraints[0], temperature)
@@ -208,6 +210,19 @@ def _validate_angle_potential(angle_potential):
         )
 
 
+def _validate_restraint_lever(restraint_lever):
+    """
+    Validate 'restraint_lever', shared by both search protocols. Must be
+    either "combined" or "split" (see sire.restraints.boresch's
+    restraint_lever parameter).
+    """
+    if restraint_lever not in ("combined", "split"):
+        raise ValueError(
+            "'restraint_lever' must be either 'combined' or 'split', "
+            f"got {restraint_lever!r}"
+        )
+
+
 # ---------------------------------------------------------------------------
 # RXRX protocol (default): H-bond-driven restraint search algorithm named
 # and described in:
@@ -233,6 +248,7 @@ def _boresch_search_rxrx(
     force_constant_angle=None,
     min_frames=50,
     angle_potential="restricted_bending",
+    restraint_lever="split",
 ):
     """
     Generate a Boresch restraint using the RXRX restraint search algorithm.
@@ -293,6 +309,13 @@ def _boresch_search_rxrx(
         diverges as the angle approaches 0 or 180 degrees, preventing it
         from ever reaching the Boresch collinearity singularity - the exact
         failure mode this restraint search is designed to avoid.
+
+    restraint_lever : str
+        How the restraint's six degrees of freedom are grouped into
+        lambda-addressable OpenMM Forces (see sire.restraints.boresch).
+        Defaults to "split", matching the RXRX protocol's staged restraint
+        turn-on, where the dihedral terms and the distance/angle terms are
+        turned on according to different lambda schedule equations.
 
     Returns
     -------
@@ -360,6 +383,7 @@ def _boresch_search_rxrx(
         raise ValueError(f"'min_frames' must be a positive int, got {min_frames!r}")
 
     _validate_angle_potential(angle_potential)
+    _validate_restraint_lever(restraint_lever)
 
     n_frames = system.num_frames()
     if n_frames < min_frames:
@@ -809,6 +833,7 @@ def _boresch_search_rxrx(
         kp_str,
         temperature,
         angle_potential,
+        restraint_lever,
     )
 
 
@@ -830,6 +855,7 @@ def _boresch_search_aldeghi(
     max_candidates=100,
     min_frames=50,
     angle_potential="restricted_bending",
+    restraint_lever="combined",
 ):
     """
     Generate a Boresch restraint for an ABFE simulation by analysing a
@@ -888,6 +914,12 @@ def _boresch_search_aldeghi(
         either "harmonic" or "restricted_bending" (see
         sire.restraints.boresch). Defaults to "restricted_bending".
 
+    restraint_lever : str
+        How the restraint's six degrees of freedom are grouped into
+        lambda-addressable OpenMM Forces (see sire.restraints.boresch).
+        Defaults to "combined", matching the Aldeghi protocol, where all
+        six restraint terms are turned on together.
+
     Returns
     -------
 
@@ -944,6 +976,7 @@ def _boresch_search_aldeghi(
         raise ValueError(f"'min_frames' must be a positive int, got {min_frames!r}")
 
     _validate_angle_potential(angle_potential)
+    _validate_restraint_lever(restraint_lever)
 
     n_frames = system.num_frames()
     if n_frames < min_frames:
@@ -1224,6 +1257,7 @@ def _boresch_search_aldeghi(
         kp_str,
         temperature,
         angle_potential,
+        restraint_lever,
     )
 
 
@@ -1249,6 +1283,7 @@ def boresch_search(
     force_constant=None,
     max_candidates=100,
     angle_potential="restricted_bending",
+    restraint_lever=None,
 ):
     """
     Generate a Boresch restraint for an ABFE simulation by analysing a
@@ -1293,6 +1328,15 @@ def boresch_search(
         diverges as the angle approaches 0 or 180 degrees, preventing it
         from ever reaching the Boresch collinearity singularity. Used by
         both protocols.
+
+    restraint_lever : str, optional
+        How the restraint's six degrees of freedom are grouped into
+        lambda-addressable OpenMM Forces (see sire.restraints.boresch).
+        Defaults to None, which is matched to ``protocol``: "split" for
+        "rxrx" (matching the RXRX protocol's staged restraint turn-on) and
+        "combined" for "aldeghi" (matching the Aldeghi protocol, where all
+        six restraint terms are turned on together). Used by both
+        protocols.
 
     protein_selection : str
         [rxrx only] Sire selection string used to identify protein atoms
@@ -1349,6 +1393,13 @@ def boresch_search(
     if not isinstance(protocol, str):
         raise TypeError(f"'protocol' must be a str, got {type(protocol)}")
 
+    if restraint_lever is None:
+        # Matches the paper: the RXRX protocol turns the dihedral and
+        # distance/angle restraint terms on according to different lambda
+        # schedule equations, whereas the Aldeghi protocol turns all six
+        # terms on together.
+        restraint_lever = "split" if protocol == "rxrx" else "combined"
+
     if protocol == "rxrx":
         return _boresch_search_rxrx(
             system,
@@ -1362,6 +1413,7 @@ def boresch_search(
             force_constant_angle=force_constant_angle,
             min_frames=min_frames,
             angle_potential=angle_potential,
+            restraint_lever=restraint_lever,
         )
     elif protocol == "aldeghi":
         return _boresch_search_aldeghi(
@@ -1374,6 +1426,7 @@ def boresch_search(
             max_candidates=max_candidates,
             min_frames=min_frames,
             angle_potential=angle_potential,
+            restraint_lever=restraint_lever,
         )
     else:
         raise ValueError(

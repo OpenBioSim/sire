@@ -97,6 +97,14 @@ void register_BoreschRestraints_class()
             BoreschRestraints_exposer.def(
                 "anglePotential", anglePotential_function_value, bp::release_gil_policy(), "Return the functional form used for the two Boresch angle restraint terms,\neither \"harmonic\" or \"restricted_bending\".");
         }
+        { //::SireMM::BoreschRestraints::restraintLever
+
+            typedef ::QString (::SireMM::BoreschRestraints::*restraintLever_function_type)() const;
+            restraintLever_function_type restraintLever_function_value(&::SireMM::BoreschRestraints::restraintLever);
+
+            BoreschRestraints_exposer.def(
+                "restraintLever", restraintLever_function_value, bp::release_gil_policy(), "Return how the restraint's six degrees of freedom are grouped into\nlambda-addressable OpenMM Forces, either \"combined\" or \"split\".");
+        }
         { //::SireMM::BoreschRestraints::isEmpty
 
             typedef bool (::SireMM::BoreschRestraints::*isEmpty_function_type)() const;
@@ -164,6 +172,14 @@ void register_BoreschRestraints_class()
 
             BoreschRestraints_exposer.def(
                 "setAnglePotential", setAnglePotential_function_value, (bp::arg("angle_potential")), bp::release_gil_policy(), "Set the functional form used for the two Boresch angle restraint terms.\nMust be either \"harmonic\" or \"restricted_bending\".");
+        }
+        { //::SireMM::BoreschRestraints::setRestraintLever
+
+            typedef void (::SireMM::BoreschRestraints::*setRestraintLever_function_type)(::QString const &);
+            setRestraintLever_function_type setRestraintLever_function_value(&::SireMM::BoreschRestraints::setRestraintLever);
+
+            BoreschRestraints_exposer.def(
+                "setRestraintLever", setRestraintLever_function_value, (bp::arg("restraint_lever")), bp::release_gil_policy(), "Set how the restraint's six degrees of freedom are grouped into\nlambda-addressable OpenMM Forces. Must be either \"combined\" (the\ndefault) or \"split\".");
         }
         { //::SireMM::BoreschRestraints::size
 

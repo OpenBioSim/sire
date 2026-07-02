@@ -113,78 +113,119 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
     //   the harmonic form with the same ktheta, so no change is needed to
     //   the analytic standard state correction formula.
     //
-    QString energy_expression;
+    // restraints.restraintLever() selects how these terms are grouped into
+    // lambda-addressable OpenMM Forces:
+    //
+    // "combined" (default): all six terms (distance, two angles, three
+    //   dihedrals) share a single scale factor 'rho', in a single Force,
+    //   registered under 'restraints.name()'.
+    //
+    // "split": the distance and two angle terms share one scale factor,
+    //   in a Force registered under 'restraints.name() + "_distance_angle"';
+    //   the three dihedral terms share a second, independent scale factor,
+    //   in a Force registered under 'restraints.name() + "_dihedral"'. This
+    //   allows the two groups to be turned on according to different lambda
+    //   schedule equations (e.g. to reproduce the RXRX protocol's staged
+    //   restraint turn-on).
+    //
+    const QString angle_terms =
+        restraints.anglePotential() == "restricted_bending"
+            ? QString("e_angle_A=ktheta_A*(cos(theta_A)-cos(theta0_A))^2/sin(theta_A)^2;"
+                      "e_angle_B=ktheta_B*(cos(theta_B)-cos(theta0_B))^2/sin(theta_B)^2;")
+            : QString("e_angle_B=ktheta_B*(theta_B-theta0_B)^2;"
+                      "e_angle_A=ktheta_A*(theta_A-theta0_A)^2;");
 
-    if (restraints.anglePotential() == "restricted_bending")
-    {
-        energy_expression = QString(
-            "rho*(e_bond + e_angle_A + e_angle_B + e_torsion_A + e_torsion_B + e_torsion_C);"
-            "e_bond=kr*(r-r0)^2;"
-            "e_angle_A=ktheta_A*(cos(theta_A)-cos(theta0_A))^2/sin(theta_A)^2;"
-            "e_angle_B=ktheta_B*(cos(theta_B)-cos(theta0_B))^2/sin(theta_B)^2;"
-            "e_torsion_C=kphi_C*(min(dphi_C, two_pi-dphi_C))^2;"
-            "e_torsion_B=kphi_B*(min(dphi_B, two_pi-dphi_B))^2;"
-            "e_torsion_A=kphi_A*(min(dphi_A, two_pi-dphi_A))^2;"
-            "dphi_C=abs(phi_C-phi0_C);"
-            "dphi_B=abs(phi_B-phi0_B);"
-            "dphi_A=abs(phi_A-phi0_A);"
-            "two_pi=6.283185307179586;"
-            "phi_C=dihedral(p1, p4, p5, p6);"
-            "phi_B=dihedral(p2, p1, p4, p5);"
-            "phi_A=dihedral(p3, p2, p1, p4);"
-            "theta_B=angle(p1, p4, p5);"
-            "theta_A=angle(p2, p1, p4);"
-            "r=distance(p1, p4);");
-    }
-    else
-    {
-        energy_expression = QString(
-            "rho*(e_bond + e_angle_A + e_angle_B + e_torsion_A + e_torsion_B + e_torsion_C);"
-            "e_bond=kr*(r-r0)^2;"
-            "e_angle_B=ktheta_B*(theta_B-theta0_B)^2;"
-            "e_angle_A=ktheta_A*(theta_A-theta0_A)^2;"
-            "e_torsion_C=kphi_C*(min(dphi_C, two_pi-dphi_C))^2;"
-            "e_torsion_B=kphi_B*(min(dphi_B, two_pi-dphi_B))^2;"
-            "e_torsion_A=kphi_A*(min(dphi_A, two_pi-dphi_A))^2;"
-            "dphi_C=abs(phi_C-phi0_C);"
-            "dphi_B=abs(phi_B-phi0_B);"
-            "dphi_A=abs(phi_A-phi0_A);"
-            "two_pi=6.283185307179586;"
-            "phi_C=dihedral(p1, p4, p5, p6);"
-            "phi_B=dihedral(p2, p1, p4, p5);"
-            "phi_A=dihedral(p3, p2, p1, p4);"
-            "theta_B=angle(p1, p4, p5);"
-            "theta_A=angle(p2, p1, p4);"
-            "r=distance(p1, p4);");
-    }
+    const QString distance_angle_expression =
+        QString("rho*(e_bond + e_angle_A + e_angle_B);"
+                "e_bond=kr*(r-r0)^2;%1"
+                "theta_B=angle(p1, p4, p5);"
+                "theta_A=angle(p2, p1, p4);"
+                "r=distance(p1, p4);")
+            .arg(angle_terms);
 
-    auto *restraintff = new OpenMM::CustomCompoundBondForce(6, energy_expression.toStdString());
-    restraintff->setName("BoreschRestraintForce");
+    const QString dihedral_expression =
+        QString("rho*(e_torsion_A + e_torsion_B + e_torsion_C);"
+                "e_torsion_C=kphi_C*(min(dphi_C, two_pi-dphi_C))^2;"
+                "e_torsion_B=kphi_B*(min(dphi_B, two_pi-dphi_B))^2;"
+                "e_torsion_A=kphi_A*(min(dphi_A, two_pi-dphi_A))^2;"
+                "dphi_C=abs(phi_C-phi0_C);"
+                "dphi_B=abs(phi_B-phi0_B);"
+                "dphi_A=abs(phi_A-phi0_A);"
+                "two_pi=6.283185307179586;"
+                "phi_C=dihedral(p1, p4, p5, p6);"
+                "phi_B=dihedral(p2, p1, p4, p5);"
+                "phi_A=dihedral(p3, p2, p1, p4);");
 
-    restraintff->addPerBondParameter("rho");
-    restraintff->addPerBondParameter("kr");
-    restraintff->addPerBondParameter("r0");
-    restraintff->addPerBondParameter("ktheta_A");
-    restraintff->addPerBondParameter("theta0_A");
-    restraintff->addPerBondParameter("ktheta_B");
-    restraintff->addPerBondParameter("theta0_B");
-    restraintff->addPerBondParameter("kphi_A");
-    restraintff->addPerBondParameter("phi0_A");
-    restraintff->addPerBondParameter("kphi_B");
-    restraintff->addPerBondParameter("phi0_B");
-    restraintff->addPerBondParameter("kphi_C");
-    restraintff->addPerBondParameter("phi0_C");
+    const QString combined_expression =
+        QString("rho*(e_bond + e_angle_A + e_angle_B + e_torsion_A + e_torsion_B + e_torsion_C);"
+                "e_bond=kr*(r-r0)^2;%1"
+                "e_torsion_C=kphi_C*(min(dphi_C, two_pi-dphi_C))^2;"
+                "e_torsion_B=kphi_B*(min(dphi_B, two_pi-dphi_B))^2;"
+                "e_torsion_A=kphi_A*(min(dphi_A, two_pi-dphi_A))^2;"
+                "dphi_C=abs(phi_C-phi0_C);"
+                "dphi_B=abs(phi_B-phi0_B);"
+                "dphi_A=abs(phi_A-phi0_A);"
+                "two_pi=6.283185307179586;"
+                "phi_C=dihedral(p1, p4, p5, p6);"
+                "phi_B=dihedral(p2, p1, p4, p5);"
+                "phi_A=dihedral(p3, p2, p1, p4);"
+                "theta_B=angle(p1, p4, p5);"
+                "theta_A=angle(p2, p1, p4);"
+                "r=distance(p1, p4);")
+            .arg(angle_terms);
 
-    restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
-
-    restraintff->setForceGroup(force_group_counter);
-    lambda_lever.addRestraintIndex(restraints.name(),
-                                   system.addForce(restraintff));
-    lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
+    const bool split_lever = restraints.restraintLever() == "split";
 
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
     const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / SireUnits::nanometer2);
     const double internal_to_ktheta = (1 * SireUnits::kcal_per_mol / (SireUnits::radian2)).to(SireUnits::kJ_per_mol / SireUnits::radian2);
+
+    // Create and register a CustomCompoundBondForce for 'restraints', with
+    // the passed name, energy expression and per-bond parameter names.
+    auto make_force = [&](const QString &name, const QString &expression,
+                          const QStringList &param_names)
+    {
+        auto *ff = new OpenMM::CustomCompoundBondForce(6, expression.toStdString());
+        ff->setName("BoreschRestraintForce");
+
+        for (const auto &param_name : param_names)
+        {
+            ff->addPerBondParameter(param_name.toStdString());
+        }
+
+        ff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
+
+        ff->setForceGroup(force_group_counter);
+        lambda_lever.addRestraintIndex(name, system.addForce(ff));
+        lambda_lever.setRestraintForceGroup(name, force_group_counter++);
+
+        return ff;
+    };
+
+    OpenMM::CustomCompoundBondForce *restraintff = nullptr;
+    OpenMM::CustomCompoundBondForce *distance_angle_ff = nullptr;
+    OpenMM::CustomCompoundBondForce *dihedral_ff = nullptr;
+
+    if (split_lever)
+    {
+        distance_angle_ff = make_force(restraints.name() + "_distance_angle",
+                                       distance_angle_expression,
+                                       {"rho", "kr", "r0", "ktheta_A", "theta0_A",
+                                        "ktheta_B", "theta0_B"});
+
+        dihedral_ff = make_force(restraints.name() + "_dihedral",
+                                 dihedral_expression,
+                                 {"rho", "kphi_A", "phi0_A", "kphi_B", "phi0_B",
+                                  "kphi_C", "phi0_C"});
+    }
+    else
+    {
+        restraintff = make_force(
+            restraints.name(),
+            combined_expression,
+            {"rho", "kr", "r0", "ktheta_A", "theta0_A", "ktheta_B", "theta0_B",
+             "kphi_A", "phi0_A", "kphi_B", "phi0_B", "kphi_C", "phi0_C"});
+    }
 
     for (const auto &restraint : restraints.restraints())
     {
@@ -193,9 +234,6 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
 
         std::vector<int> particles;
         particles.resize(6);
-
-        std::vector<double> parameters;
-        parameters.resize(13);
 
         for (int i = 0; i < 3; ++i)
         {
@@ -215,21 +253,33 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
             }
         }
 
-        parameters[0] = 1.0;                                                // rho
-        parameters[1] = restraint.kr().value() * internal_to_k;             // kr
-        parameters[2] = restraint.r0().value() * internal_to_nm;            // r0
-        parameters[3] = restraint.ktheta()[0].value() * internal_to_ktheta; // ktheta_A
-        parameters[4] = restraint.theta0()[0].value();                      // theta0_A (already in radians)
-        parameters[5] = restraint.ktheta()[1].value() * internal_to_ktheta; // ktheta_B
-        parameters[6] = restraint.theta0()[1].value();                      // theta0_B
-        parameters[7] = restraint.kphi()[0].value() * internal_to_ktheta;   // kphi_A
-        parameters[8] = restraint.phi0()[0].value();                        // phi0_A
-        parameters[9] = restraint.kphi()[1].value() * internal_to_ktheta;   // kphi_B
-        parameters[10] = restraint.phi0()[1].value();                       // phi0_B
-        parameters[11] = restraint.kphi()[2].value() * internal_to_ktheta;  // kphi_C
-        parameters[12] = restraint.phi0()[2].value();                       // phi0_C
+        const double kr = restraint.kr().value() * internal_to_k;
+        const double r0 = restraint.r0().value() * internal_to_nm;
+        const double ktheta_A = restraint.ktheta()[0].value() * internal_to_ktheta;
+        const double theta0_A = restraint.theta0()[0].value(); // already in radians
+        const double ktheta_B = restraint.ktheta()[1].value() * internal_to_ktheta;
+        const double theta0_B = restraint.theta0()[1].value();
+        const double kphi_A = restraint.kphi()[0].value() * internal_to_ktheta;
+        const double phi0_A = restraint.phi0()[0].value();
+        const double kphi_B = restraint.kphi()[1].value() * internal_to_ktheta;
+        const double phi0_B = restraint.phi0()[1].value();
+        const double kphi_C = restraint.kphi()[2].value() * internal_to_ktheta;
+        const double phi0_C = restraint.phi0()[2].value();
 
-        restraintff->addBond(particles, parameters);
+        if (split_lever)
+        {
+            distance_angle_ff->addBond(
+                particles, {1.0, kr, r0, ktheta_A, theta0_A, ktheta_B, theta0_B});
+
+            dihedral_ff->addBond(
+                particles, {1.0, kphi_A, phi0_A, kphi_B, phi0_B, kphi_C, phi0_C});
+        }
+        else
+        {
+            restraintff->addBond(particles, {1.0, kr, r0, ktheta_A, theta0_A, ktheta_B,
+                                             theta0_B, kphi_A, phi0_A, kphi_B, phi0_B,
+                                             kphi_C, phi0_C});
+        }
     }
 }
 

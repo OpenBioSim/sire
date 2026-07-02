@@ -57,6 +57,18 @@ class TestGenerateBoreschRestraint:
         restraints, _ = boresch_result
         assert restraints.angle_potential() == "restricted_bending"
 
+    def test_restraint_lever_matches_protocol(self, boresch_result, request):
+        """
+        boresch_search() defaults restraint_lever to match the protocol:
+        "split" for rxrx (matching the RXRX protocol's staged restraint
+        turn-on), "combined" for aldeghi (matching the Aldeghi protocol,
+        where all six restraint terms are turned on together).
+        """
+        restraints, _ = boresch_result
+        protocol = request.node.callspec.params["boresch_result"]
+        expected = "split" if protocol == "rxrx" else "combined"
+        assert restraints.restraint_lever() == expected
+
     def test_correction_is_negative(self, boresch_result):
         """Standard state correction is always negative (costs free energy to restrain)."""
         _, correction = boresch_result
@@ -136,6 +148,25 @@ class TestGenerateBoreschRestraint:
 
         with pytest.raises(ValueError, match="angle_potential"):
             boresch_search(abfe_system, protocol=protocol, angle_potential="nonsense")
+
+    @pytest.mark.parametrize("protocol", PROTOCOLS)
+    def test_restraint_lever_override(self, abfe_system, protocol):
+        from sire.restraints import boresch_search
+
+        # Explicitly pick whichever value isn't the protocol's own default,
+        # to confirm the override actually takes effect.
+        override = "combined" if protocol == "rxrx" else "split"
+        restraints, _ = boresch_search(
+            abfe_system, protocol=protocol, restraint_lever=override
+        )
+        assert restraints.restraint_lever() == override
+
+    @pytest.mark.parametrize("protocol", PROTOCOLS)
+    def test_restraint_lever_invalid_raises(self, abfe_system, protocol):
+        from sire.restraints import boresch_search
+
+        with pytest.raises(ValueError, match="restraint_lever"):
+            boresch_search(abfe_system, protocol=protocol, restraint_lever="nonsense")
 
     def test_force_constant_override(self, abfe_system):
         """'force_constant' is an Aldeghi-only kwarg (RXRX uses two separate

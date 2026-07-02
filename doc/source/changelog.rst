@@ -36,6 +36,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   a protein-ligand complex, using either a hydrogen-bond-driven anchor search or a
   reference distance-variance-driven protocol.
 
+* Added an optional ``restraint_lever="split"`` mode to ``BoreschRestraints`` (default
+  remains ``"combined"``), which converts the distance/angle and dihedral restraint
+  terms into two independently lambda-addressable OpenMM Forces, allowing them to be
+  turned on according to different lambda schedule equations.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 

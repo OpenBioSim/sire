@@ -200,6 +200,9 @@ namespace SireMM
         void setAnglePotential(const QString &angle_potential);
         QString anglePotential() const;
 
+        void setRestraintLever(const QString &restraint_lever);
+        QString restraintLever() const;
+
     private:
         /** The actual list of restraints*/
         QList<BoreschRestraint> r;
@@ -214,6 +217,15 @@ namespace SireMM
          *  theta approaches 0 or pi, preventing the restraint angles from
          *  ever reaching the Boresch collinearity singularity. */
         QString angle_potential = "harmonic";
+
+        /** How the restraint's six degrees of freedom are grouped into
+         *  lambda-addressable OpenMM Forces. Either "combined" (default,
+         *  all six terms share a single scale factor / lever) or "split"
+         *  (the distance and two angle terms share one scale factor, the
+         *  three dihedral terms share a second, independent scale factor -
+         *  allowing them to be turned on according to different lambda
+         *  schedules). */
+        QString restraint_lever = "combined";
     };
 
 }
