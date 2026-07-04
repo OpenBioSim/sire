@@ -132,6 +132,12 @@ ase = "*"
 loguru = "*"
 pygit2 = "*"
 pyyaml = "*"
+# nglview's JS widget still declares a hard dependency on
+# "@jupyter-widgets/jupyterlab-manager": "^3.0.0", which corresponds to
+# ipywidgets 7.x. ipywidgets>=8 ships jupyterlab-manager 5.x, which fails
+# JupyterLab's semver check and silently breaks trajectory viewing.
+ipywidgets = "<8"
+nglview = "*"
 
 [feature.emle.system-requirements]
 cuda = "12"
@@ -140,18 +146,20 @@ cuda = "12"
 ambertools = ">=22"
 deepmd-kit = "*"
 nnpops = "*"
-pytorch = "*"
+pytorch = "<2.8"
+torchani = ">=2.2.4,<2.7"
+xtb-python = "*"
 
 [feature.emle.target.linux-aarch64.dependencies]
-pytorch = "*"
+pytorch = "<2.8"
 # ambertools, deepmd-kit, nnpops not available on linux-aarch64
 
 [feature.emle.target.osx-arm64.dependencies]
 ambertools = ">=22"
 deepmd-kit = "*"
 nnpops = "*"
-pytorch = "*"
-torchani = "*"
+pytorch = "<2.8"
+torchani = ">=2.2.4,<2.7"
 xtb-python = "*"
 
 # EMLE has no Windows-specific deps (ambertools, pytorch etc. excluded on Windows)
