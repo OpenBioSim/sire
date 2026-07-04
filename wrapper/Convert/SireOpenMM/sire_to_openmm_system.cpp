@@ -128,10 +128,25 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
     //   schedule equations (e.g. to reproduce the RXRX protocol's staged
     //   restraint turn-on).
     //
+    // The restricted_bending sin(theta)^2 denominator is regularised with a
+    // small constant (sin_reg) so that the term stays finite as theta
+    // approaches 0 or pi. This matters because OpenMM always evaluates the
+    // full energy expression, even when the restraint is scaled off (rho=0):
+    // with a bare 1/sin(theta)^2, an unrestrained angle reaching collinearity
+    // gives inf, and rho*inf = 0*inf = NaN. This is exactly the regime the
+    // "split" restraint_lever visits, where the distance/angle group is held
+    // at rho=0 for a whole stage while its two Boresch angles are unrestrained
+    // (unlike GROMACS, where an inactive term is simply absent from the
+    // Hamiltonian). sin_reg is negligible when the restraint is active (theta
+    // is then held near theta0, away from the poles, where sin(theta)^2 ~ 1),
+    // but makes the scaled-off term finite so that 0*finite = 0 rather than
+    // 0*inf = NaN. The harmonic form has no denominator and so needs no
+    // regularisation.
     const QString angle_terms =
         restraints.anglePotential() == "restricted_bending"
-            ? QString("e_angle_A=ktheta_A*(cos(theta_A)-cos(theta0_A))^2/sin(theta_A)^2;"
-                      "e_angle_B=ktheta_B*(cos(theta_B)-cos(theta0_B))^2/sin(theta_B)^2;")
+            ? QString("e_angle_A=ktheta_A*(cos(theta_A)-cos(theta0_A))^2/(sin(theta_A)^2+sin_reg);"
+                      "e_angle_B=ktheta_B*(cos(theta_B)-cos(theta0_B))^2/(sin(theta_B)^2+sin_reg);"
+                      "sin_reg=1e-6;")
             : QString("e_angle_B=ktheta_B*(theta_B-theta0_B)^2;"
                       "e_angle_A=ktheta_A*(theta_A-theta0_A)^2;");
 
