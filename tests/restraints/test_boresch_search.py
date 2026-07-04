@@ -37,14 +37,24 @@ def boresch_result(request, abfe_system):
 
 class TestGenerateBoreschRestraint:
     def test_returns_tuple(self, boresch_result):
-        assert isinstance(boresch_result, tuple) and len(boresch_result) == 2
+        assert isinstance(boresch_result, tuple) and len(boresch_result) == 3
+
+    def test_starting_structure_is_system(self, boresch_result):
+        """
+        The third return value is a single trajectory frame (the least-strained
+        starting structure), returned as a sire System with the same molecules
+        as the search system.
+        """
+        _, _, starting_structure = boresch_result
+        assert isinstance(starting_structure, sr.system.System)
+        assert starting_structure.num_molecules() > 0
 
     def test_restraints_type(self, boresch_result):
-        restraints, _ = boresch_result
+        restraints, _, _ = boresch_result
         assert isinstance(restraints, _SireMM.BoreschRestraints)
 
     def test_single_restraint(self, boresch_result):
-        restraints, _ = boresch_result
+        restraints, _, _ = boresch_result
         assert restraints.at(0) is not None
 
     def test_angle_potential_defaults_to_restricted_bending(self, boresch_result):
@@ -54,7 +64,7 @@ class TestGenerateBoreschRestraint:
         directly avoids the collinearity singularity the restraint search
         protocols are designed to steer away from in the first place.
         """
-        restraints, _ = boresch_result
+        restraints, _, _ = boresch_result
         assert restraints.angle_potential() == "restricted_bending"
 
     def test_restraint_lever_matches_protocol(self, boresch_result, request):
@@ -64,31 +74,31 @@ class TestGenerateBoreschRestraint:
         turn-on), "combined" for aldeghi (matching the Aldeghi protocol,
         where all six restraint terms are turned on together).
         """
-        restraints, _ = boresch_result
+        restraints, _, _ = boresch_result
         protocol = request.node.callspec.params["boresch_result"]
         expected = "split" if protocol == "rxrx" else "combined"
         assert restraints.restraint_lever() == expected
 
     def test_correction_is_negative(self, boresch_result):
         """Standard state correction is always negative (costs free energy to restrain)."""
-        _, correction = boresch_result
+        _, correction, _ = boresch_result
         assert float(correction.to(sr.units.kcal_per_mol)) < 0
 
     def test_distance_positive(self, boresch_result):
-        restraints, _ = boresch_result
+        restraints, _, _ = boresch_result
         r = restraints.at(0)
         assert float(r.r0().value()) > 0
 
     def test_angles_not_collinear(self, boresch_result):
         """Both anchor angles must be away from 0° and 180° (our stability filter)."""
-        restraints, _ = boresch_result
+        restraints, _, _ = boresch_result
         r = restraints.at(0)
         for theta in r.theta0():
             deg = float(theta.to(sr.units.degrees))
             assert 10.0 < deg < 170.0
 
     def test_force_constants_positive(self, boresch_result):
-        restraints, _ = boresch_result
+        restraints, _, _ = boresch_result
         r = restraints.at(0)
         assert float(r.kr().value()) > 0
         for k in r.ktheta():
@@ -98,20 +108,20 @@ class TestGenerateBoreschRestraint:
 
     def test_receptor_atoms_count(self, boresch_result):
         """Receptor selection must yield exactly 3 anchor atoms."""
-        restraints, _ = boresch_result
+        restraints, _, _ = boresch_result
         assert len(list(restraints.at(0).receptor_atoms())) == 3
 
     def test_ligand_atoms_count(self, boresch_result):
         """Ligand selection must yield exactly 3 anchor atoms."""
-        restraints, _ = boresch_result
+        restraints, _, _ = boresch_result
         assert len(list(restraints.at(0).ligand_atoms())) == 3
 
     @pytest.mark.parametrize("protocol", PROTOCOLS)
     def test_restraint_idx_selects_different_candidate(self, abfe_system, protocol):
         from sire.restraints import boresch_search
 
-        r0, _ = boresch_search(abfe_system, protocol=protocol, restraint_idx=0)
-        r1, _ = boresch_search(abfe_system, protocol=protocol, restraint_idx=1)
+        r0, _, _ = boresch_search(abfe_system, protocol=protocol, restraint_idx=0)
+        r1, _, _ = boresch_search(abfe_system, protocol=protocol, restraint_idx=1)
         # Different candidates must differ in the receptor and/or ligand anchor
         # atoms: two candidates can share the same receptor anchor triplet
         # while using a different ligand triplet branching off the same l1,
@@ -137,7 +147,7 @@ class TestGenerateBoreschRestraint:
     def test_angle_potential_harmonic_override(self, abfe_system, protocol):
         from sire.restraints import boresch_search
 
-        restraints, _ = boresch_search(
+        restraints, _, _ = boresch_search(
             abfe_system, protocol=protocol, angle_potential="harmonic"
         )
         assert restraints.angle_potential() == "harmonic"
@@ -156,7 +166,7 @@ class TestGenerateBoreschRestraint:
         # Explicitly pick whichever value isn't the protocol's own default,
         # to confirm the override actually takes effect.
         override = "combined" if protocol == "rxrx" else "split"
-        restraints, _ = boresch_search(
+        restraints, _, _ = boresch_search(
             abfe_system, protocol=protocol, restraint_lever=override
         )
         assert restraints.restraint_lever() == override
@@ -174,7 +184,7 @@ class TestGenerateBoreschRestraint:
         from sire.restraints import boresch_search
 
         kval = 10.0
-        restraints, _ = boresch_search(
+        restraints, _, _ = boresch_search(
             abfe_system,
             protocol="aldeghi",
             force_constant=f"{kval} kcal mol-1 A-2",

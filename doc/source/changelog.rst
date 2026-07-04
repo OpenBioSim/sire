@@ -47,6 +47,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   gave ``0*inf = NaN``. The denominator is now regularised with a small constant, which is
   negligible while the restraint is active but keeps the scaled-off term finite.
 
+* ``sire.restraints.boresch_search()`` now also returns a starting structure (the
+  trajectory frame at which the generated restraint is least strained) as a third value,
+  alongside the restraints and standard state correction. Because the restraint
+  equilibrium values are trajectory averages, seeding production from this frame rather
+  than the original (pre-search) input avoids a large restraint force at ``t=0`` that could
+  otherwise destabilise the simulation as the restraint is switched on.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 

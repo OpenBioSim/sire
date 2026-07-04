@@ -113,6 +113,70 @@ def _sample_dofs(system, pert_mol_num, sextuplets, n_frames):
     return dof_r, dof_tA, dof_tB, dof_pA, dof_pB, dof_pC
 
 
+def _best_starting_frame(
+    system,
+    best_frame_idx,
+):
+    """
+    Extract a single trajectory frame as a standalone starting structure.
+
+    The equilibrium values of the generated restraint are trajectory
+    *averages*, so the structure the search was seeded from (e.g. the output
+    of a separate equilibration pipeline) is generally not consistent with
+    them - restarting production from it can leave the restraint badly
+    strained at t=0 and blow the simulation up as the restraint is switched
+    on. Returning the frame closest to the restraint equilibrium (see
+    ``_least_strained_frame``) lets the caller seed production from a
+    structure at which the restraint is essentially relaxed.
+    """
+    return system.trajectory()[best_frame_idx].current()
+
+
+def _least_strained_frame(
+    dof_r_b,
+    dof_tA_b,
+    dof_tB_b,
+    dof_pA_b,
+    dof_pB_b,
+    dof_pC_b,
+    r0,
+    tA0,
+    tB0,
+    pA0,
+    pB0,
+    pC0,
+    kr,
+    ktheta_A,
+    ktheta_B,
+    kphi_A,
+    kphi_B,
+    kphi_C,
+):
+    """
+    Index of the trajectory frame at which the generated restraint is least
+    strained, i.e. the frame whose six Boresch DOFs give the lowest total
+    restraint bias energy against the chosen equilibrium values (and force
+    constants). Dihedral deviations are wrapped into [-pi, pi]. All arguments
+    are per-frame arrays (the ``[best]`` slices) or scalars for the chosen
+    sextuplet; angles/dihedrals are in radians and r in Angstrom, matching
+    the units the equilibrium values and force constants are expressed in, so
+    the weighted sum is a genuine (kcal mol-1) restraint energy.
+    """
+
+    def _wrap(d):
+        return (d + _np.pi) % (2.0 * _np.pi) - _np.pi
+
+    strain = (
+        kr * (dof_r_b - r0) ** 2
+        + ktheta_A * (dof_tA_b - tA0) ** 2
+        + ktheta_B * (dof_tB_b - tB0) ** 2
+        + kphi_A * _wrap(dof_pA_b - pA0) ** 2
+        + kphi_B * _wrap(dof_pB_b - pB0) ** 2
+        + kphi_C * _wrap(dof_pC_b - pC0) ** 2
+    )
+    return int(_np.argmin(strain))
+
+
 def _assemble_restraints(
     system,
     pert_mol_num,
@@ -326,6 +390,15 @@ def _boresch_search_rxrx(
 
     correction : sire.units.GeneralUnit
         Standard state correction in kcal mol-1.
+
+    starting_structure : sire.system.System
+        The trajectory frame at which the generated restraint is least
+        strained (its six Boresch degrees of freedom are closest to the
+        restraint equilibrium values). Because the equilibrium values are
+        trajectory averages, the structure the search was seeded from is
+        generally not consistent with them; seeding production from this
+        frame instead avoids a large restraint force at t=0 that can
+        otherwise destabilise the simulation as the restraint is switched on.
     """
     from ..legacy import Mol as _SireMol
     from ..system import System as _System
@@ -818,7 +891,7 @@ def _boresch_search_rxrx(
     kt_str = [f"{ka_val:.6f} kcal mol-1 rad-2"] * 2
     kp_str = [f"{ka_val:.6f} kcal mol-1 rad-2"] * 3
 
-    return _assemble_restraints(
+    restraints, correction = _assemble_restraints(
         system,
         pert_mol_num,
         s,
@@ -835,6 +908,32 @@ def _boresch_search_rxrx(
         angle_potential,
         restraint_lever,
     )
+
+    starting_structure = _best_starting_frame(
+        system,
+        _least_strained_frame(
+            dof_r[best],
+            dof_tA[best],
+            dof_tB[best],
+            dof_pA[best],
+            dof_pB[best],
+            dof_pC[best],
+            r0,
+            tA0,
+            tB0,
+            pA0,
+            pB0,
+            pC0,
+            kr_val,
+            ka_val,
+            ka_val,
+            ka_val,
+            ka_val,
+            ka_val,
+        ),
+    )
+
+    return restraints, correction, starting_structure
 
 
 # ---------------------------------------------------------------------------
@@ -929,6 +1028,15 @@ def _boresch_search_aldeghi(
 
     correction : sire.units.GeneralUnit
         Standard state correction in kcal mol-1.
+
+    starting_structure : sire.system.System
+        The trajectory frame at which the generated restraint is least
+        strained (its six Boresch degrees of freedom are closest to the
+        restraint equilibrium values). Because the equilibrium values are
+        trajectory averages, the structure the search was seeded from is
+        generally not consistent with them; seeding production from this
+        frame instead avoids a large restraint force at t=0 that can
+        otherwise destabilise the simulation as the restraint is switched on.
     """
 
     from ..legacy import Mol as _SireMol
@@ -1222,27 +1330,36 @@ def _boresch_search_aldeghi(
         kr_str = f"{fc_val:.6f} kcal mol-1 A-2"
         kt_str = [f"{fc_val:.6f} kcal mol-1 rad-2"] * 2
         kp_str = [f"{fc_val:.6f} kcal mol-1 rad-2"] * 3
+        # Per-DOF weights (kcal mol-1 units) for the least-strained-frame pick.
+        kr_w = ktA_w = ktB_w = kpA_w = kpB_w = kpC_w = fc_val
     else:
         # Equipartition: k = kBT / (2σ²).
         # Sire's boresch() uses E = k·x² (half-spring-constant convention).
         def _k(sigma):
             return kBT / (2.0 * float(sigma) ** 2)
 
-        kr_str = f"{_k(dof_r[best].std()):.6f} kcal mol-1 A-2"
+        kr_w = _k(dof_r[best].std())
+        ktA_w = _k(dof_tA[best].std())
+        ktB_w = _k(dof_tB[best].std())
+        kpA_w = _k(std_pA_best)
+        kpB_w = _k(std_pB_best)
+        kpC_w = _k(std_pC_best)
+
+        kr_str = f"{kr_w:.6f} kcal mol-1 A-2"
         kt_str = [
-            f"{_k(dof_tA[best].std()):.6f} kcal mol-1 rad-2",
-            f"{_k(dof_tB[best].std()):.6f} kcal mol-1 rad-2",
+            f"{ktA_w:.6f} kcal mol-1 rad-2",
+            f"{ktB_w:.6f} kcal mol-1 rad-2",
         ]
         kp_str = [
-            f"{_k(std_pA_best):.6f} kcal mol-1 rad-2",
-            f"{_k(std_pB_best):.6f} kcal mol-1 rad-2",
-            f"{_k(std_pC_best):.6f} kcal mol-1 rad-2",
+            f"{kpA_w:.6f} kcal mol-1 rad-2",
+            f"{kpB_w:.6f} kcal mol-1 rad-2",
+            f"{kpC_w:.6f} kcal mol-1 rad-2",
         ]
 
     # -------------------------------------------------------------------------
-    # 8. Build the BoreschRestraints object.
+    # 8. Build the BoreschRestraints object and pick the least-strained frame.
     # -------------------------------------------------------------------------
-    return _assemble_restraints(
+    restraints, correction = _assemble_restraints(
         system,
         pert_mol_num,
         s,
@@ -1259,6 +1376,32 @@ def _boresch_search_aldeghi(
         angle_potential,
         restraint_lever,
     )
+
+    starting_structure = _best_starting_frame(
+        system,
+        _least_strained_frame(
+            dof_r[best],
+            dof_tA[best],
+            dof_tB[best],
+            dof_pA[best],
+            dof_pB[best],
+            dof_pC[best],
+            r0,
+            tA0,
+            tB0,
+            pA0,
+            pB0,
+            pC0,
+            kr_w,
+            ktA_w,
+            ktB_w,
+            kpA_w,
+            kpB_w,
+            kpC_w,
+        ),
+    )
+
+    return restraints, correction, starting_structure
 
 
 # ---------------------------------------------------------------------------
@@ -1389,6 +1532,15 @@ def boresch_search(
 
     correction : sire.units.GeneralUnit
         Standard state correction in kcal mol-1.
+
+    starting_structure : sire.system.System
+        The trajectory frame at which the generated restraint is least
+        strained (its six Boresch degrees of freedom are closest to the
+        restraint equilibrium values). Because the equilibrium values are
+        trajectory averages, the structure the search was seeded from is
+        generally not consistent with them; seeding production from this
+        frame instead avoids a large restraint force at t=0 that can
+        otherwise destabilise the simulation as the restraint is switched on.
     """
     if not isinstance(protocol, str):
         raise TypeError(f"'protocol' must be a str, got {type(protocol)}")
