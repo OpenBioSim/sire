@@ -34,25 +34,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added ``sire.restraints.boresch_search()``, which automatically generates a
   ``BoreschRestraints`` object and its standard state correction from a trajectory of
   a protein-ligand complex, using either a hydrogen-bond-driven anchor search or a
-  reference distance-variance-driven protocol.
+  reference distance-variance-driven protocol. A starting structure is also returned,
+  which is the trajectory frame at which the generated restraint is least strained.
 
 * Added an optional ``restraint_lever="split"`` mode to ``BoreschRestraints`` (default
   remains ``"combined"``), which converts the distance/angle and dihedral restraint
   terms into two independently lambda-addressable OpenMM Forces, allowing them to be
   turned on according to different lambda schedule equations.
-
-* Fixed ``NaN`` energies/forces when using the ``angle_potential="restricted_bending"``
-  Boresch restraint, caused by the ``sin(theta)^2`` denominator being evaluated even when
-  the restraint is scaled off (``rho=0``): an unrestrained angle reaching collinearity
-  gave ``0*inf = NaN``. The denominator is now regularised with a small constant, which is
-  negligible while the restraint is active but keeps the scaled-off term finite.
-
-* ``sire.restraints.boresch_search()`` now also returns a starting structure (the
-  trajectory frame at which the generated restraint is least strained) as a third value,
-  alongside the restraints and standard state correction. Because the restraint
-  equilibrium values are trajectory averages, seeding production from this frame rather
-  than the original (pre-search) input avoids a large restraint force at ``t=0`` that could
-  otherwise destabilise the simulation as the restraint is switched on.
 
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------

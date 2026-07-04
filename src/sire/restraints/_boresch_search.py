@@ -198,17 +198,20 @@ def _assemble_restraints(
     from ._restraints import boresch as _boresch
     from ._standard_state_correction import get_standard_state_correction as _get_ssc
 
-    # atomidx is molecule-local, so scope with molnum to disambiguate. Comma-
-    # separated atomidx values preserve listed order in the returned
-    # SelectorAtom, giving the required [r1, r2, r3] / [l1, l2, l3] sequence.
-    receptor_atoms = system[
-        f"(molnum {s['r1_mol_num'].value()}) and "
-        f"(atomidx {s['r1_idx'].value()}, {s['r2_idx'].value()}, {s['r3_idx'].value()})"
-    ].atoms()
-    ligand_atoms = system[
-        f"(molnum {pert_mol_num.value()}) and "
-        f"(atomidx {s['l1_idx'].value()}, {s['l2_idx'].value()}, {s['l3_idx'].value()})"
-    ].atoms()
+    # Select the anchor atoms in the exact [r1, r2, r3] / [l1, l2, l3] order.
+    # NB: an "atomidx a, b, c" search string returns the atoms sorted by index,
+    # NOT in listed order, so it cannot be used here - it would scramble the
+    # anchor ordering relative to the sampled DOFs (r0/theta0/phi0), producing a
+    # restraint whose equilibrium values do not match its own anchor geometry.
+    # List-indexing a molecule's atoms preserves the given order.
+    receptor_mol_atoms = system.molecule(s["r1_mol_num"]).atoms()
+    receptor_atoms = receptor_mol_atoms[
+        [s["r1_idx"].value(), s["r2_idx"].value(), s["r3_idx"].value()]
+    ]
+    ligand_mol_atoms = system.molecule(pert_mol_num).atoms()
+    ligand_atoms = ligand_mol_atoms[
+        [s["l1_idx"].value(), s["l2_idx"].value(), s["l3_idx"].value()]
+    ]
 
     restraints = _boresch(
         system,

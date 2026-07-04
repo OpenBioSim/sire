@@ -49,6 +49,48 @@ class TestGenerateBoreschRestraint:
         assert isinstance(starting_structure, sr.system.System)
         assert starting_structure.num_molecules() > 0
 
+    def test_equilibria_match_anchor_geometry(self, boresch_result):
+        """
+        The restraint's stored equilibrium values must match the geometry of its
+        own anchor atoms, measured on the returned starting structure. This guards
+        against the anchor atoms being reordered relative to the sampled DOFs: an
+        "atomidx a, b, c" selection returns the atoms sorted by index rather than
+        in the required [r1, r2, r3] / [l1, l2, l3] order, which would scramble the
+        equilibria (r0/theta0/phi0) onto the wrong atoms and badly strain the
+        restraint. The starting structure is the least-strained frame, so on it the
+        deviation from the equilibria is small; a scrambled restraint deviates by
+        up to ~180 degrees.
+        """
+        restraints, _, start = boresch_result
+        r = restraints.at(0)
+        rec = list(r.receptor_atoms())
+        lig = list(r.ligand_atoms())
+        a = start.atoms()
+        R1, R2, R3 = a[rec[0]], a[rec[1]], a[rec[2]]
+        L1, L2, L3 = a[lig[0]], a[lig[1]], a[lig[2]]
+
+        # Distance.
+        assert abs(float(sr.measure(L1, R1).value()) - float(r.r0().value())) < 1.5
+
+        # Angles and dihedrals (wrap the dihedral deviation into [0, 180]).
+        measured_angles = [
+            float(sr.measure(R2, R1, L1).to(sr.units.degrees)),
+            float(sr.measure(R1, L1, L2).to(sr.units.degrees)),
+        ]
+        target_angles = [float(t.to(sr.units.degrees)) for t in r.theta0()]
+        for got, tgt in zip(measured_angles, target_angles):
+            assert abs(got - tgt) < 45.0
+
+        measured_dih = [
+            float(sr.measure(R3, R2, R1, L1).to(sr.units.degrees)),
+            float(sr.measure(R2, R1, L1, L2).to(sr.units.degrees)),
+            float(sr.measure(R1, L1, L2, L3).to(sr.units.degrees)),
+        ]
+        target_dih = [float(p.to(sr.units.degrees)) for p in r.phi0()]
+        for got, tgt in zip(measured_dih, target_dih):
+            delta = abs(got - tgt) % 360.0
+            assert min(delta, 360.0 - delta) < 45.0
+
     def test_restraints_type(self, boresch_result):
         restraints, _, _ = boresch_result
         assert isinstance(restraints, _SireMM.BoreschRestraints)
