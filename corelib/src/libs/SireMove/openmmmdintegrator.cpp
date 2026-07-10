@@ -26,8 +26,10 @@
  *
 \*********************************************/
 
-#include "openmmmdintegrator.h"
+#include <cfloat>
+
 #include "ensemble.h"
+#include "openmmmdintegrator.h"
 
 #include "SireMol/atomcoords.h"
 #include "SireMol/atommasses.h"
@@ -494,10 +496,10 @@ void OpenMMMDIntegrator::initialise()
             const double surface_Tension = 0;
             OpenMM::MonteCarloMembraneBarostat::XYMode xymode = OpenMM::MonteCarloMembraneBarostat::XYIsotropic;
             OpenMM::MonteCarloMembraneBarostat::ZMode zmode = OpenMM::MonteCarloMembraneBarostat::ZFree;
-            OpenMM::MonteCarloMembraneBarostat * barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
+            OpenMM::MonteCarloMembraneBarostat *barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
             system_openmm->addForce(barostat);
         }
-        else    // normal barostat
+        else // normal barostat
         {
             OpenMM::MonteCarloBarostat *barostat =
                 new OpenMM::MonteCarloBarostat(converted_Pressure, converted_Temperature, MCBarostat_frequency);
@@ -696,7 +698,7 @@ void OpenMMMDIntegrator::initialise()
                 }
             system_index = system_index + 1;
         } // end of loop on atoms in molecule
-    }     // end of loop on molecules in workspace
+    } // end of loop on molecules in workspace
 
     int num_atoms_till_i = 0;
 

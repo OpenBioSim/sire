@@ -11,7 +11,6 @@ python = "*"
 cmake = ">=3.30.0"
 git = "*"
 pybind11 = "*"
-gsl = "*"
 lazy_import = "*"
 libboost-devel = "*"
 libboost-python-devel = "*"
@@ -24,6 +23,7 @@ qt-main = "*"
 rich = "*"
 tbb = "*"
 tbb-devel = "*"
+eigen = ">=3.4.0,<6"
 
 # Unix build tools
 [target.linux-64.dependencies]

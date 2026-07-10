@@ -48,8 +48,6 @@
 #endif
 #endif // GCCXML_PARSE
 
-#include <gsl/gsl_sys.h>
-
 #include "constants.h"
 
 #ifdef SIRE_MAX
@@ -434,21 +432,33 @@ namespace SireMaths
         return float(1.0) / std::sqrt(x);
     }
 
-    /** Return true if two numbers are equal. This uses gsl_fcmp
-        for the comparison, and the values must be equal to within
-        a range of 2*delta, where delta = 2^k * epsilon, where
-        k equals the maximum base-2 exponent of val0 and val1 as
-        calculated via frexp(). This should normally be a value
-        around 1e-6 */
+    /** Return true if two numbers are equal to within a range of 2*delta,
+        where delta = 2^k * epsilon, where k equals the maximum base-2
+        exponent of val0 and val1 as calculated via frexp(). This should
+        normally be a value around 1e-6.
+
+        This reimplements GSL's gsl_fcmp algorithm directly (val0/val1 are
+        equal iff their difference doesn't exceed delta, computed via
+        frexp/ldexp so the tolerance scales with the magnitude of the
+        values being compared, rather than being a fixed absolute epsilon). */
     SIRE_ALWAYS_INLINE bool areEqual(double val0, double val1, double epsilon)
     {
-        return not(gsl_fcmp(val0, val1, epsilon));
+        if (val0 == val1)
+            return true;
+
+        int exponent;
+        std::frexp(std::abs(val0) > std::abs(val1) ? val0 : val1, &exponent);
+
+        const double delta = std::ldexp(epsilon, exponent);
+        const double difference = val0 - val1;
+
+        return not(difference > delta or difference < -delta);
     }
 
     /** Return true if two numbers are equal */
     SIRE_ALWAYS_INLINE bool areEqual(double val0, double val1)
     {
-        return not(gsl_fcmp(val0, val1, 1e-6));
+        return areEqual(val0, val1, 1e-6);
     }
 
     /** Return true if this number is equal to zero */

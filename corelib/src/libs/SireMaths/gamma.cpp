@@ -29,7 +29,7 @@
 
 #include "gamma.h"
 
-#include <gsl/gsl_sf_gamma.h>
+#include <boost/math/special_functions/gamma.hpp>
 
 namespace SireMaths
 {
@@ -39,7 +39,7 @@ namespace SireMaths
     */
     double Gamma(double alpha)
     {
-        return gsl_sf_gamma(alpha);
+        return boost::math::tgamma(alpha);
     }
 
     /** Synonym for SireMaths::Gamma */
@@ -52,14 +52,20 @@ namespace SireMaths
         \Gamma(\alpha) = \int_x^{\infty} t^{\alpha-1} e^{-t} dt */
     double Gamma(double alpha, double x)
     {
-        return gsl_sf_gamma_inc_Q(alpha, x) * gsl_sf_gamma(alpha);
+        // boost::math::gamma_q is the regularized upper incomplete gamma
+        // function Q(alpha,x) = Gamma(alpha,x)/Gamma(alpha), matching GSL's
+        // gsl_sf_gamma_inc_Q
+        return boost::math::gamma_q(alpha, x) * boost::math::tgamma(alpha);
     }
 
     /** Return the incomplete gamma function
         \Gamma(\alpha) = \int_0^{x} t^{\alpha-1} e^{-t} dt */
     double gamma(double alpha, double x)
     {
-        return gsl_sf_gamma_inc_P(alpha, x) * gsl_sf_gamma(alpha);
+        // boost::math::gamma_p is the regularized lower incomplete gamma
+        // function P(alpha,x) = gamma(alpha,x)/Gamma(alpha), matching GSL's
+        // gsl_sf_gamma_inc_P
+        return boost::math::gamma_p(alpha, x) * boost::math::tgamma(alpha);
     }
 
     /** Synonym for gamma(alpha,x) */

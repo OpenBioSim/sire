@@ -6,8 +6,7 @@
 
 # Third Party dependencies of this module
 include_directories( ${BOOST_INCLUDE_DIR}
-                     ${PYTHON_INCLUDE_DIR}
-                     ${SIRE_GSL_INCLUDE_PATH} )
+                     ${PYTHON_INCLUDE_DIR} )
 
 # Sire include paths
 include_directories( BEFORE ${SIRE_INCLUDE_DIR}/SireVol
