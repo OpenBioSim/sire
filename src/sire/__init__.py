@@ -803,56 +803,66 @@ __branch__ = config.sire_repository_branch
 __repository__ = config.sire_repository_url
 __revisionid__ = config.sire_repository_version[0:7]
 
-_can_lazy_import = False
+from .utils._lazy_import import lazy_module as _lazy_module
 
-if "SIRE_NO_LAZY_IMPORT" not in _os.environ:
-    try:
-        import lazy_import as _lazy_import
-        import logging as _logging
-
-        _logger = _logging.getLogger("lazy_import")
-        _logger.setLevel(_logging.ERROR)
-
-        # Previously needed to filter to remove excessive warnings
-        # from 'frozen importlib' when lazy loading.
-        # import warnings
-        # warnings.filterwarnings("ignore")
-
-        _can_lazy_import = True
-
-    except Exception as e:
-        print("Lazy import disabled")
-        print(e)
-        _can_lazy_import = False
-
+_can_lazy_import = "SIRE_NO_LAZY_IMPORT" not in _os.environ
 
 # Lazy import the modules for speed, and also to prevent pythonizing them
 # if the users wants to run in legacy mode
 if _can_lazy_import:
-    analysis = _lazy_import.lazy_module("sire.analysis")
-    base = _lazy_import.lazy_module("sire.base")
-    cas = _lazy_import.lazy_module("sire.cas")
-    convert = _lazy_import.lazy_module("sire.convert")
-    cluster = _lazy_import.lazy_module("sire.cluster")
-    error = _lazy_import.lazy_module("sire.error")
-    ff = _lazy_import.lazy_module("sire.ff")
-    id = _lazy_import.lazy_module("sire.id")
-    io = _lazy_import.lazy_module("sire.io")
-    maths = _lazy_import.lazy_module("sire.maths")
-    mm = _lazy_import.lazy_module("sire.mm")
-    mol = _lazy_import.lazy_module("sire.mol")
-    morph = _lazy_import.lazy_module("sire.morph")
-    move = _lazy_import.lazy_module("sire.move")
-    options = _lazy_import.lazy_module("sire.options")
-    qm = _lazy_import.lazy_module("sire.qm")
-    qt = _lazy_import.lazy_module("sire.qt")
-    restraints = _lazy_import.lazy_module("sire.restraints")
-    search = _lazy_import.lazy_module("sire.search")
-    squire = _lazy_import.lazy_module("sire.squire")
-    stream = _lazy_import.lazy_module("sire.stream")
-    units = _lazy_import.lazy_module("sire.units")
-    utils = _lazy_import.lazy_module("sire.utils")
-    vol = _lazy_import.lazy_module("sire.vol")
+    analysis = _lazy_module("sire.analysis")
+    base = _lazy_module("sire.base")
+    cas = _lazy_module("sire.cas")
+    convert = _lazy_module("sire.convert")
+    cluster = _lazy_module("sire.cluster")
+    error = _lazy_module("sire.error")
+    ff = _lazy_module("sire.ff")
+    id = _lazy_module("sire.id")
+    io = _lazy_module("sire.io")
+    maths = _lazy_module("sire.maths")
+    mm = _lazy_module("sire.mm")
+    mol = _lazy_module("sire.mol")
+    morph = _lazy_module("sire.morph")
+    move = _lazy_module("sire.move")
+    options = _lazy_module("sire.options")
+    qm = _lazy_module("sire.qm")
+    qt = _lazy_module("sire.qt")
+    restraints = _lazy_module("sire.restraints")
+    search = _lazy_module("sire.search")
+    squire = _lazy_module("sire.squire")
+    stream = _lazy_module("sire.stream")
+    units = _lazy_module("sire.units")
+    utils = _lazy_module("sire.utils")
+    vol = _lazy_module("sire.vol")
+else:
+    # SIRE_NO_LAZY_IMPORT is set - import everything eagerly instead, so
+    # these are still bound as expected
+    from . import (
+        analysis,
+        base,
+        cas,
+        convert,
+        cluster,
+        error,
+        ff,
+        id,
+        io,
+        maths,
+        mm,
+        mol,
+        morph,
+        move,
+        options,
+        qm,
+        qt,
+        restraints,
+        search,
+        squire,
+        stream,
+        units,
+        utils,
+        vol,
+    )
 
 
 def _version_string():

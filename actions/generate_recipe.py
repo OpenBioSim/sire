@@ -36,7 +36,6 @@ BUILD_DEPS = {
 }
 
 RUN_DEPS = {
-    "lazy_import",
     "libnetcdf",
     "openmm",
     "pandas",

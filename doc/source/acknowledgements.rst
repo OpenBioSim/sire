@@ -64,9 +64,9 @@ have to do anything yourself.
 
 :mod:`sire` is itself distributed under the terms of the GPL version 3
 (or any later GPL license). The C++ source code is licensed
-under the GPL 3 or later, and linking with GPL3 dependencies
-(e.g. `lazy_import`) means that the entire package is licensed under GPL 3
-or later.
+under the GPL 3 or later, and this includes some GPL-derived code
+(e.g. the RDKit bond-order inference heuristic, based on MDAnalysis)
+which means that the entire package is licensed under GPL 3 or later.
 
 C++ Dependencies
 ================
@@ -466,12 +466,6 @@ The header documentation reads;
  TODO:
      imshow does not plot axis yet.
      make a correct documentation
-
-lazy_import
------------
-
-:mod:`sire` uses `lazy_import <https://github.com/mnmelo/lazy_import>`__ to
-lazy load the modules. This is licensed under the GPLv3.
 
 rich
 ----
