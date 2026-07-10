@@ -19,6 +19,7 @@ if (SIRE_HAS_CPP_20)
     include_directories( ${BOOST_INCLUDE_DIR}
                          ${PYTHON_INCLUDE_DIR}
                          ${RDKIT_INCLUDE_DIR} )
+    add_definitions("-DQT_NO_SIGNALS_SLOTS_KEYWORDS")
 
     if (WIN32)
       # RDKit needs this definition set on Windows

@@ -5,12 +5,15 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/MolOps.h>
+#include <GraphMol/MolPickler.h>
 #include <GraphMol/MonomerInfo.h>
 #include <GraphMol/PeriodicTable.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+
+#include "boost/python.hpp"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -55,8 +58,89 @@ using SireBase::PropertyMap;
 using SireMol::Molecule;
 using SireMol::SelectorMol;
 
+namespace bp = boost::python;
+
+// RAII wrapper to acquire/release the Python GIL before calling back into
+// Python from arbitrary C++ contexts (including non-Python-created threads).
+// Same pattern as wrapper/Convert/SireOpenMM/pyqm.cpp's GILLock.
+class GILLock
+{
+public:
+    GILLock() { state_ = PyGILState_Ensure(); }
+    ~GILLock() { PyGILState_Release(state_); }
+
+private:
+    PyGILState_STATE state_;
+};
+
 namespace SireRDKit
 {
+    // Optional Python callback used as a fallback for RDKit bond-order/
+    // formal-charge inference. Registered (if at all) from the Python layer
+    // - see wrapper/Convert/__init__.py - which wires this up to call the
+    // real MDAnalysis package, if it is installed. Left as nullptr if never
+    // registered, in which case the fallback is simply skipped.
+    //
+    // Deliberately a heap-allocated pointer, never freed: a *static*
+    // bp::object's destructor calls Py_DECREF at C++ static-destruction
+    // time (i.e. program exit), which can run during/after the Python
+    // interpreter's own finalization - calling into a torn-down
+    // interpreter like that segfaults. Leaking this one, rarely-set,
+    // process-lifetime object avoids that entirely.
+    static bp::object *bond_order_inference_callback = nullptr;
+
+    void set_bond_order_inference_callback(bp::object callback)
+    {
+        bond_order_inference_callback = new bp::object(callback);
+    }
+
+    /** Run the registered bond-order inference callback (if any) on
+        'molecule', mutating it in place with the inferred bond orders and
+        formal charges. Does nothing if no callback has been registered. */
+    void infer_bond_info(RDKit::RWMol &molecule)
+    {
+        if (bond_order_inference_callback == nullptr or bond_order_inference_callback->is_none())
+            return;
+
+        GILLock lock;
+
+        try
+        {
+            std::string pickle;
+            RDKit::MolPickler::pickleMol(molecule, pickle);
+
+            // Marshal the pickle as a Python 'bytes' object rather than
+            // relying on boost::python's implicit std::string<->str
+            // conversion, which assumes UTF-8 text: the RDKit binary
+            // pickle format is arbitrary binary data and is not valid
+            // UTF-8 in general.
+            bp::object pickle_bytes(bp::handle<>(
+                PyBytes_FromStringAndSize(pickle.data(), pickle.size())));
+
+            bp::object result_obj = (*bond_order_inference_callback)(pickle_bytes);
+
+            char *buf;
+            Py_ssize_t len;
+            PyBytes_AsStringAndSize(result_obj.ptr(), &buf, &len);
+            std::string result(buf, len);
+
+            // Depickle into a fresh molecule rather than 'molecule' itself:
+            // molFromPickle() appends the pickled atoms/bonds/conformers on
+            // top of whatever is already there, so depickling directly into
+            // the (non-empty) input molecule leaves a mismatch between the
+            // total atom count and the newly-added conformer's atom count.
+            RDKit::RWMol new_molecule;
+            RDKit::MolPickler::molFromPickle(result, &new_molecule);
+            molecule = new_molecule;
+        }
+        catch (const bp::error_already_set &)
+        {
+            PyErr_Print();
+            // leave 'molecule' as-is - same graceful-degradation behaviour
+            // as when determineBondOrders() itself fails
+        }
+    }
+
     bool use_parallel(int n, const SireBase::PropertyMap &map)
     {
 #ifdef Q_OS_WIN
@@ -269,27 +353,6 @@ namespace SireRDKit
         }
     }
 
-    RDKit::Bond::BondType order_to_bondtype(int order)
-    {
-        switch (order)
-        {
-        case 0:
-            return RDKit::Bond::ZERO;
-        case 1:
-            return RDKit::Bond::SINGLE;
-        case 2:
-            return RDKit::Bond::DOUBLE;
-        case 3:
-            return RDKit::Bond::TRIPLE;
-        case 4:
-            return RDKit::Bond::QUADRUPLE;
-        case 5:
-            return RDKit::Bond::HEXTUPLE;
-        default:
-            return RDKit::Bond::OTHER;
-        }
-    }
-
     RDKit::Bond::BondType string_to_bondtype(const QString &typ)
     {
         const static std::map<QString, RDKit::Bond::BondType> types = {
@@ -332,266 +395,6 @@ namespace SireRDKit
 
         if (name.hasSource())
             atom.setProperty(name.source(), value);
-    }
-
-    /**
-     *
-        """Calculate the number of unpaired electrons (NUE) of an atom
-
-        Parameters
-        ----------
-        atom: rdkit.Chem.rdchem.Atom
-            The atom for which the NUE will be computed
-
-        Returns
-        -------
-        nue : list
-            The NUE for each possible valence of the atom
-        """
-
-    */
-    QVector<int> get_nb_unpaired_electrons(const RDKit::Atom &atom)
-    {
-        const RDKit::PeriodicTable *PERIODIC_TABLE = RDKit::PeriodicTable::getTable();
-
-        auto expected_vs = PERIODIC_TABLE->getValenceList(atom.getAtomicNum());
-
-        auto current_v = atom.getTotalValence() - atom.getFormalCharge();
-
-        QVector<int> ret;
-        ret.reserve(expected_vs.size());
-
-        for (int i = 0; i < expected_vs.size(); ++i)
-        {
-            ret.append(expected_vs[i] - current_v);
-        }
-
-        return ret;
-    }
-
-    /** Infer the bond info and charge state for all atoms of 'molecule'.
-     *  This is heavily based on _infer_bond_info from MDAnalysis,
-     *  as described here:
-     *  https://blog.matteoferla.com/2020/02/guess-bond-order-in-rdkit-by-number-of.html
-     *
-     *  https://docs.mdanalysis.org/2.0.0/_modules/MDAnalysis/converters/RDKit.html#_infer_bo_and_charges
-     *
-     *  MDAnalysis code was written by Matteo Ferla and was released
-     *  under the GPL. This is a C++ port of the original python code
-     *
-     *  The molecule is edited in place and must have all hydrogens added.
-     *  Quoting the MDAnalysis docs
-     *
-        Since most MD topology files don't explicitly retain information on bond
-        orders or charges, it has to be guessed from the topology. This is done by
-        looping over each atom and comparing its expected valence to the current
-        valence to get the Number of Unpaired Electrons (NUE).
-        If an atom has a negative NUE, it needs a positive formal charge (-NUE).
-        If two neighbouring atoms have UEs, the bond between them most
-        likely has to be increased by the value of the smallest NUE.
-        If after this process, an atom still has UEs, it needs a negative formal
-        charge of -NUE.
-
-        Parameters
-        ----------
-        mol : rdkit.Chem.rdchem.RWMol
-            The molecule is modified inplace and must have all hydrogens added
-
-        Notes
-        -----
-        This algorithm is order dependant. For example, for a carboxylate group
-        R-C(-O)-O the first oxygen read will receive a double bond and the other
-        one will be charged. It will also affect more complex conjugated systems.
-     *
-     */
-    void infer_bond_info(RDKit::RWMol &molecule)
-    {
-        // get all the atoms
-        QList<std::pair<QVector<int>, RDKit::Atom *>> atoms;
-
-        for (auto atom : molecule.atoms())
-        {
-            if (atom->getAtomicNum() > 1)
-            {
-                atom->setNoImplicit(true);
-                atoms.append(std::make_pair(get_nb_unpaired_electrons(*atom),
-                                            atom));
-            }
-        }
-
-        // sort these atoms so that the ones with most unpaired electrons
-        // come first
-        std::stable_sort(atoms.begin(), atoms.end(),
-                         [](const std::pair<QVector<int>, RDKit::Atom *> &atom0,
-                            const std::pair<QVector<int>, RDKit::Atom *> &atom1)
-                         {
-                             return std::get<0>(atom0).at(0) > std::get<0>(atom1).at(0);
-                         });
-
-        for (const auto &p : atoms)
-        {
-            // for this atom...
-            RDKit::Atom *atom = std::get<1>(p);
-
-            if (atom->getDegree() == 0)
-            {
-                // no neighbors, so no bonds - this could be a monovalent cation
-                switch (atom->getAtomicNum())
-                {
-                case 3:
-                case 11:
-                case 19:
-                case 37:
-                case 47:
-                case 55:
-                    atom->setFormalCharge(1);
-                    break;
-                case 12:
-                case 20:
-                case 29:
-                case 30:
-                case 38:
-                case 56:
-                case 26:
-                    atom->setFormalCharge(2);
-                    break;
-                case 13:
-                    // Fe could also be + 3
-                    atom->setFormalCharge(3);
-                    break;
-                default:
-                    // no, it is an anion - use the negative of the number of
-                    // unpaired electrons
-                    atom->setFormalCharge(-get_nb_unpaired_electrons(*atom)[0]);
-                    break;
-                }
-
-                molecule.updatePropertyCache(false);
-                continue;
-            }
-
-            // number of unpaired electrons
-            auto nue = get_nb_unpaired_electrons(*atom);
-
-            // if there's only one possible valence state and the corresponding
-            // nue is negative, it means we can only add a positive charge to
-            // the atom
-            if (nue.count() == 1 and nue[0] < 0)
-            {
-                atom->setFormalCharge(-nue[0]);
-                molecule.updatePropertyCache(false);
-            }
-
-            if (nue.count() == 1 and nue[0] <= 0)
-            {
-                // go to the next atom if above case or atom has
-                // no unpaired electrons
-                continue;
-            }
-
-            // get the neighbors
-            QList<std::pair<QVector<int>, RDKit::Atom *>> neighbors;
-
-            for (auto n : molecule.atomNeighbors(atom))
-            {
-                neighbors.append(std::make_pair(get_nb_unpaired_electrons(*n),
-                                                n));
-            }
-
-            std::stable_sort(neighbors.begin(), neighbors.end(),
-                             [](const std::pair<QVector<int>, RDKit::Atom *> &atom0,
-                                const std::pair<QVector<int>, RDKit::Atom *> &atom1)
-                             {
-                                 return std::get<0>(atom0).at(0) > std::get<0>(atom1).at(0);
-                             });
-
-            for (int i = 0; i < neighbors.count(); ++i)
-            {
-                int min_nue = 0;
-
-                for (const auto n : nue)
-                {
-                    if (n > 0)
-                    {
-                        if (min_nue == 0 or n < min_nue)
-                            min_nue = n;
-                    }
-                }
-
-                const auto na_nue = std::get<0>(neighbors.at(i));
-                auto neighbor = std::get<1>(neighbors.at(i));
-
-                int min_na_nue = 0;
-
-                for (const auto n : na_nue)
-                {
-                    if (n > 0)
-                    {
-                        if (min_na_nue == 0 or n < min_na_nue)
-                            min_na_nue = n;
-                    }
-                }
-
-                // check if one of the neighbors has a common nue
-                auto common_nue = std::min(min_nue, min_na_nue);
-
-                // a common nue of 0 means we don't need to do anything
-                if (common_nue != 0)
-                {
-                    auto bond = molecule.getBondBetweenAtoms(
-                        atom->getIdx(), neighbor->getIdx());
-
-                    int order = common_nue + 1;
-                    bond->setBondType(order_to_bondtype(order));
-                    molecule.updatePropertyCache(false);
-
-                    if (i < neighbors.count())
-                    {
-                        // recalculate the nue for this atom
-                        nue = get_nb_unpaired_electrons(*atom);
-                    }
-
-                    bool any_equal_zero = false;
-
-                    for (auto n : nue)
-                    {
-                        if (n == 0)
-                        {
-                            any_equal_zero = true;
-                            break;
-                        }
-                    }
-
-                    if (any_equal_zero)
-                    {
-                        // we can stop here
-                        break;
-                    }
-                }
-            } // end of loop over neighbours
-
-            // recalculate the nue for this atom
-            nue = get_nb_unpaired_electrons(*atom);
-
-            bool any_equal_zero = false;
-
-            for (auto n : nue)
-            {
-                if (n == 0)
-                {
-                    any_equal_zero = true;
-                    break;
-                }
-            }
-
-            if (not any_equal_zero)
-            {
-                // transform it to a negative charge
-                atom->setFormalCharge(-nue[0]);
-                atom->setNumRadicalElectrons(0);
-                molecule.updatePropertyCache(false);
-            }
-        }
     }
 
     ROMOL_SPTR sire_to_rdkit(const Molecule &mol, const PropertyMap &map)
@@ -905,7 +708,8 @@ namespace SireRDKit
 
             // Prefer RDKit's determineBondOrders, which is based on the xyz2mol
             // linear-programming algorithm and is significantly more robust than the
-            // MDAnalysis heuristic implemented in infer_bond_info().
+            // MDAnalysis-based fallback in infer_bond_info() (only used if a Python
+            // callback has been registered - see set_bond_order_inference_callback).
             //
             // determineBondOrders() needs all heavy atoms to have noImplicit set so
             // that it does not try to add implicit hydrogens (all H are explicit when

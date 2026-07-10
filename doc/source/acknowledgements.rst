@@ -64,9 +64,10 @@ have to do anything yourself.
 
 :mod:`sire` is itself distributed under the terms of the GPL version 3
 (or any later GPL license). The C++ source code is licensed
-under the GPL 3 or later, and this includes some GPL-derived code
-(e.g. the RDKit bond-order inference heuristic, based on MDAnalysis)
-which means that the entire package is licensed under GPL 3 or later.
+under the GPL 3 or later, and this includes some optional GPLv2-licensed
+dependencies (e.g. `emle-engine <https://github.com/chemle/emle-engine>`__,
+conditionally imported for QM/MM calculations) which means that the entire
+package is licensed under GPL 3 or later.
 
 C++ Dependencies
 ================
@@ -383,17 +384,6 @@ available https://github.com/charnley/rmsd, and under license;
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         =======================
 
-mdanalysis
-----------
-
-I have written a C++ implementation of the ``_infer_bo_and_charges``
-algorithm from `mdanalysis <https://mdanalysis.org>`__.
-
-The algorithm is `described here <https://blog.matteoferla.com/2020/02/guess-bond-order-in-rdkit-by-number-of.html>`__
-and `here <https://docs.mdanalysis.org/2.0.0/_modules/MDAnalysis/converters/RDKit.html#_infer_bo_and_charges>`__.
-
-The code was written by Matteo Ferla and was released under the GPL.
-
 gemmi
 -----
 
@@ -480,3 +470,14 @@ pandas
 :mod:`sire` uses `pandas <https://pandas.pydata.org/docs/>`__ to output
 data in DataFrames that can be more easily operated on and explored
 by users. Pandas is BSD-licensed, so compatible with the GPL.
+
+MDAnalysis
+----------
+
+:mod:`sire` optionally uses `MDAnalysis <https://www.mdanalysis.org>`__,
+if it is installed, to infer bond orders and formal charges when converting
+to RDKit and RDKit's own ``determineBondOrders`` algorithm fails (e.g. for
+molecules containing dummy atoms). This is a genuinely optional dependency -
+if MDAnalysis is not installed, this fallback is simply skipped. MDAnalysis
+is used under the terms of the LGPL v2.1 or later license (as of release
+2.8.0, the package as a whole is LGPLv3+, compatible with the GPL).
