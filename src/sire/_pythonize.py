@@ -250,75 +250,65 @@ def _load_new_api_modules(delete_old: bool = True, is_base: bool = False):
         _pythonize(Convert._SireOpenMM.TorchQMEngine, delete_old=delete_old)
         _pythonize(Convert._SireOpenMM.TorchQMForce, delete_old=delete_old)
 
-    try:
-        import lazy_import
+    from ._lazy_import import force_load
 
-        have_lazy_import = True
-    except ImportError:
-        have_lazy_import = False
+    # Now make sure that all new modules have been loaded
+    # (we need to import base first)
+    from . import base
 
-    if have_lazy_import:
-        # Now make sure that all new modules have been loaded
-        # (we need to import base first)
-        from . import base
+    force_load(base)
 
-        if lazy_import.LazyModule in type(base).mro():
-            # this module is lazily loaded - use 'dir' to load it
-            dir(base)
+    if is_base:
+        # return, as we will only import base here
+        _is_in_loading_process = False
+        return
 
-        if is_base:
-            # return, as we will only import base here
-            _is_in_loading_process = False
-            return
+    from . import (
+        move,
+        io,
+        system,
+        squire,
+        mm,
+        convert,
+        ff,
+        mol,
+        analysis,
+        cas,
+        cluster,
+        error,
+        id,
+        maths,
+        morph,
+        restraints,
+        qt,
+        stream,
+        units,
+        vol,
+    )
 
-        from . import (
-            move,
-            io,
-            system,
-            squire,
-            mm,
-            convert,
-            ff,
-            mol,
-            analysis,
-            cas,
-            cluster,
-            error,
-            id,
-            maths,
-            morph,
-            restraints,
-            qt,
-            stream,
-            units,
-            vol,
-        )
-
-        for M in [
-            move,
-            io,
-            system,
-            squire,
-            mm,
-            convert,
-            ff,
-            mol,
-            analysis,
-            cas,
-            cluster,
-            error,
-            id,
-            maths,
-            morph,
-            restraints,
-            qt,
-            stream,
-            units,
-            vol,
-        ]:
-            if lazy_import.LazyModule in type(M).mro():
-                # this module is lazily loaded - use 'dir' to load it
-                dir(M)
+    for M in [
+        move,
+        io,
+        system,
+        squire,
+        mm,
+        convert,
+        ff,
+        mol,
+        analysis,
+        cas,
+        cluster,
+        error,
+        id,
+        maths,
+        morph,
+        restraints,
+        qt,
+        stream,
+        units,
+        vol,
+    ]:
+        force_load(M)
 
     _is_in_loading_process = False
 
