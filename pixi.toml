@@ -20,6 +20,10 @@ libnetcdf = "*"
 librdkit-dev = ">2024.09.6"
 openmm = ">=8.1"
 cuda-version = "==12.6"
+# AMBER's CUDA 12.6 dev-tools need krb5<1.22. Newer rdkit builds pull in
+# libpq>=18.3, which requires krb5>=1.22.2 -- pin krb5 so the solver picks
+# rdkit/libpq versions compatible with the CUDA toolchain instead.
+krb5 = "<1.22"
 pandas = "*"
 qt-main = "*"
 rich = "*"
