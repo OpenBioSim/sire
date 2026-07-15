@@ -16,13 +16,16 @@ lazy_import = "*"
 libboost-devel = "*"
 libboost-python-devel = "*"
 libcblas = "*"
-libnetcdf = "*"
+# libnetcdf>=4.10.0 rebuilds link against libcurl>=8.19.0, which requires
+# krb5>=1.22.2. AMBER's CUDA 12.6 dev-tools need krb5<1.22, so cap libnetcdf
+# below the builds that pull in the newer libcurl/krb5.
+libnetcdf = "<4.10"
 librdkit-dev = ">2024.09.6"
 openmm = ">=8.1"
 cuda-version = "==12.6"
-# AMBER's CUDA 12.6 dev-tools need krb5<1.22. Newer rdkit builds pull in
-# libpq>=18.3, which requires krb5>=1.22.2 -- pin krb5 so the solver picks
-# rdkit/libpq versions compatible with the CUDA toolchain instead.
+# rdkit>=2025.09.6 requires libpq>=18.3, which also needs krb5>=1.22.2 --
+# same clash as above. Pin krb5 so the solver is forced to pick rdkit/libpq
+# versions compatible with the CUDA toolchain.
 krb5 = "<1.22"
 pandas = "*"
 qt-main = "*"
