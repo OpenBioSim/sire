@@ -110,6 +110,32 @@ class SOMMContext(_Context):
             }
 
             self._energy_cache = {}
+
+            # The coulomb-aa/bb/sum forces (present only for perturbable
+            # systems) are three extra static-charge NonbondedForces added
+            # directly to this context's own System, purely so their
+            # reciprocal-space (PME) energy can be queried on demand to
+            # reconstruct foreign-lambda Coulomb energies - see
+            # get_coulomb_quadratic_coefficients() below. They must never
+            # contribute to propagation or to the "whole system" energy, so
+            # they're excluded from both the integrator (via
+            # setIntegrationForceGroups(), which LocalEnergyMinimizer also
+            # respects) and from get_potential_energy()'s group mask.
+            accelerator_names = ("coulomb-aa", "coulomb-bb", "coulomb-sum")
+            self._has_coulomb_accelerator = all(
+                name in self._force_group_map for name in accelerator_names
+            )
+
+            all_groups = (1 << 32) - 1
+
+            if self._has_coulomb_accelerator:
+                self._main_groups = all_groups
+                for name in accelerator_names:
+                    self._main_groups &= ~(1 << self._force_group_map[name])
+
+                integrator.setIntegrationForceGroups(self._main_groups)
+            else:
+                self._main_groups = all_groups
         else:
             self._atom_index = None
             self._lambda_lever = None
@@ -117,6 +143,8 @@ class SOMMContext(_Context):
             self._map = None
             self._force_group_map = {}
             self._energy_cache = {}
+            self._has_coulomb_accelerator = False
+            self._main_groups = (1 << 32) - 1
 
         self._is_non_pert_rest2 = False
 
@@ -244,6 +272,20 @@ class SOMMContext(_Context):
         """
         return self._lambda_lever
 
+    def get_main_groups(self):
+        """
+        Return the force-group bitmask covering every "real" force in this
+        context's System, i.e. everything except the PME foreign-lambda
+        accelerator's static coulomb-aa/bb/sum forces (present only for
+        perturbable systems - see sire_to_openmm_system.cpp). Any caller
+        that queries this context's total potential energy via a raw
+        getState(getEnergy=True) - rather than get_potential_energy() -
+        must pass groups=get_main_groups() explicitly, or it will silently
+        double-count those accelerator forces, since they live directly in
+        the main System now (unlike the earlier standalone-System design).
+        """
+        return self._main_groups
+
     def get_lambda_schedule(self):
         """
         Return the LambdaSchedule used to control how different forcefield
@@ -344,13 +386,120 @@ class SOMMContext(_Context):
 
         if "_total" not in self._energy_cache:
             total_kj = (
-                self.getState(getEnergy=True)
+                self.getState(getEnergy=True, groups=self._main_groups)
                 .getPotentialEnergy()
                 .value_in_unit(openmm.unit.kilojoule_per_mole)
             )
             self._energy_cache["_total"] = total_kj
 
         total_kj = self._energy_cache["_total"]
+
+        if to_sire_units:
+            from ...units import kcal_per_mol
+
+            return (total_kj / 4.184) * kcal_per_mol
+        else:
+            return total_kj * openmm.unit.kilojoule_per_mole
+
+    def get_coulomb_quadratic_coefficients(self):
+        """
+        Return (e_aa, e_bb, e_ab), the three coefficients needed to
+        reconstruct the reciprocal-space Coulomb energy at any lambda value
+        from the current positions, in kJ/mol. e_aa and e_bb are the
+        reciprocal-space-only PME energies with all perturbable charges set
+        to their end-state-0 and end-state-1 values respectively; e_ab is
+        the cross term, obtained from a third evaluation with the two
+        end-state charges summed. Cached against the current positions/box,
+        so cheap to call repeatedly within a single foreign-lambda energy
+        scan.
+
+        The coulomb-aa/bb/sum forces live directly in this context's own
+        System (see sire_to_openmm_system.cpp), excluded from both
+        propagation and get_potential_energy() via their own force groups,
+        so this just queries this context directly - no separate Context,
+        no position copy, and no cross-replica locking required.
+        """
+        import openmm
+
+        if "_coulomb_quadratic" not in self._energy_cache:
+
+            def group_energy(name):
+                group = self._force_group_map[name]
+                return (
+                    self.getState(getEnergy=True, groups={group})
+                    .getPotentialEnergy()
+                    .value_in_unit(openmm.unit.kilojoule_per_mole)
+                )
+
+            e_aa = group_energy("coulomb-aa")
+            e_bb = group_energy("coulomb-bb")
+            e_sum = group_energy("coulomb-sum")
+            e_ab = 0.5 * (e_sum - e_aa - e_bb)
+
+            self._energy_cache["_coulomb_quadratic"] = (e_aa, e_bb, e_ab)
+
+        return self._energy_cache["_coulomb_quadratic"]
+
+    def get_foreign_lambda_energy(
+        self,
+        lambda_value: float,
+        rest2_scale: float = None,
+        to_sire_units: bool = True,
+    ):
+        """
+        Return the potential energy at 'lambda_value', without leaving the
+        context's own lambda value changed for propagation. When the
+        Coulomb accelerator is available, this reconstructs the
+        reciprocal-space Coulomb contribution analytically from
+        get_coulomb_quadratic_coefficients() instead of re-evaluating PME,
+        which is what makes scanning many lambda windows cheap: "clj"'s
+        reciprocal-space force group is excluded from the main energy
+        query (see setReciprocalSpaceForceGroup in sire_to_openmm_system.cpp)
+        and the reconstructed term is added back on top. Otherwise falls
+        back to a normal set_lambda() + get_potential_energy().
+        """
+        import openmm
+
+        if not self._has_coulomb_accelerator:
+            self.set_lambda(
+                lambda_value, rest2_scale=rest2_scale, update_constraints=False
+            )
+            return self.get_potential_energy(to_sire_units=to_sire_units)
+
+        if rest2_scale is None:
+            rest2_scale = self._rest2_scale
+
+        # Deliberately calls the lambda lever directly rather than
+        # self.set_lambda(), which would clear _energy_cache (including the
+        # cached quadratic coefficients this relies on staying warm across
+        # a whole foreign-lambda scan).
+        self._lambda_value = self._lambda_lever.set_lambda(
+            self,
+            lambda_value=lambda_value,
+            rest2_scale=rest2_scale,
+            update_constraints=False,
+        )
+
+        # main_groups already excludes coulomb-aa/bb/sum; also drop
+        # clj-reciprocal so the reconstructed term below isn't double
+        # counted.
+        reciprocal_group = self._force_group_map["clj-reciprocal"]
+        other_groups = self._main_groups & ~(1 << reciprocal_group)
+
+        other_kj = (
+            self.getState(getEnergy=True, groups=other_groups)
+            .getPotentialEnergy()
+            .value_in_unit(openmm.unit.kilojoule_per_mole)
+        )
+
+        e_aa, e_bb, e_ab = self.get_coulomb_quadratic_coefficients()
+
+        f = self._lambda_lever.get_schedule().morph(
+            "clj", "charge", 0.0, 1.0, lambda_value
+        )
+        coulomb_kj = (1.0 - f) ** 2 * e_aa + 2.0 * f * (1.0 - f) * e_ab + f * f * e_bb
+
+        total_kj = other_kj + coulomb_kj
 
         if to_sire_units:
             from ...units import kcal_per_mol

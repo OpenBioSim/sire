@@ -42,6 +42,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   terms into two independently lambda-addressable OpenMM Forces, allowing them to be
   turned on according to different lambda schedule equations.
 
+* Added a PME foreign-lambda energy accelerator for alchemical free energy calculations:
+  Coulomb energies at foreign lambda values (used for MBAR) are now reconstructed
+  analytically from three cached static PME evaluations instead of a fresh PME
+  evaluation per window, speeding up multi-window energy scans without adding cost
+  to normal dynamics propagation.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 

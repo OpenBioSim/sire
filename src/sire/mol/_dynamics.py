@@ -410,11 +410,14 @@ class DynamicsData:
                 getPositions=True,
                 getVelocities=save_velocities,
                 enforcePeriodicBox=self._enforce_periodic_box,
+                groups=self._omm_mols.get_main_groups(),
             )
 
             self._omm_state_has_cv = (True, save_velocities)
         else:
-            self._omm_state = self._omm_mols.getState(getEnergy=True)
+            self._omm_state = self._omm_mols.getState(
+                getEnergy=True, groups=self._omm_mols.get_main_groups()
+            )
             self._omm_state_has_cv = (False, False)
 
         current_time = (
@@ -504,13 +507,10 @@ class DynamicsData:
                                 not has_lambda_index
                                 or abs(lambda_index - i) <= num_energy_neighbours
                             ):
-                                self._omm_mols.set_lambda(
+                                nrg = self._omm_mols.get_foreign_lambda_energy(
                                     lambda_value,
                                     rest2_scale=rest2_scale,
-                                    update_constraints=False,
-                                )
-                                nrg = self._omm_mols.get_potential_energy(
-                                    to_sire_units=False
+                                    to_sire_units=False,
                                 ).value_in_unit(openmm.unit.kilocalorie_per_mole)
                                 if self._pressure is not None:
                                     nrg += self._pressure * volume
@@ -580,9 +580,12 @@ class DynamicsData:
                 getPositions=include_coords,
                 getVelocities=include_velocities,
                 enforcePeriodicBox=self._enforce_periodic_box,
+                groups=self._omm_mols.get_main_groups(),
             )
         else:
-            self._omm_state = self._omm_mols.getState(getEnergy=True)
+            self._omm_state = self._omm_mols.getState(
+                getEnergy=True, groups=self._omm_mols.get_main_groups()
+            )
 
         self._omm_state_has_cv = (include_coords, include_velocities)
 

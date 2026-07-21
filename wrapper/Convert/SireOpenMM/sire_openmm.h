@@ -6,15 +6,15 @@
 #include "SireMol/selectormol.h"
 #include "SireVol/space.h"
 
-#include "SireMol/core.h"
-#include "SireMol/selectorm.hpp"
 #include "SireMol/atom.h"
+#include "SireMol/core.h"
 #include "SireMol/molnum.h"
+#include "SireMol/selectorm.hpp"
 
 #include "SireBase/propertymap.h"
 
-#include "openmmmolecule.h"
 #include "lambdalever.h"
+#include "openmmmolecule.h"
 
 namespace SireOpenMM
 {

@@ -58,7 +58,17 @@ def test_force_groups_assigned(perturbable_omm):
 
 def test_cached_energy_matches_full(perturbable_omm):
     """
-    get_potential_energy() must match a direct getState() at lambda=0, 0.5, and 1.
+    get_potential_energy() must match a direct getState() restricted to the
+    same "main" force groups, at lambda=0, 0.5, and 1.
+
+    A plain unrestricted getState() is not the right comparison here: for
+    perturbable systems the PME foreign-lambda accelerator adds three extra
+    static-charge NonbondedForces (coulomb-aa/bb/sum) directly to the main
+    System, in their own force groups, purely so their energy can be queried
+    on demand (see get_coulomb_quadratic_coefficients() in _sommcontext.py).
+    They are deliberately excluded from get_potential_energy() (and from
+    propagation, via the integrator's setIntegrationForceGroups()), so an
+    unrestricted getState() would double-count them and shouldn't match.
     """
     import openmm
 
@@ -71,7 +81,7 @@ def test_cached_energy_matches_full(perturbable_omm):
             openmm.unit.kilojoule_per_mole
         )
         full_kj = (
-            omm.getState(getEnergy=True)
+            omm.getState(getEnergy=True, groups=omm._main_groups)
             .getPotentialEnergy()
             .value_in_unit(openmm.unit.kilojoule_per_mole)
         )
@@ -93,9 +103,9 @@ def test_cache_stable_without_state_change(perturbable_omm):
     nrg1 = omm.get_potential_energy(to_sire_units=True).value()
     nrg2 = omm.get_potential_energy(to_sire_units=True).value()
 
-    assert nrg1 == pytest.approx(
-        nrg2, rel=1e-10
-    ), "Energy changed between two consecutive calls with no state change"
+    assert nrg1 == pytest.approx(nrg2, rel=1e-10), (
+        "Energy changed between two consecutive calls with no state change"
+    )
 
 
 def test_set_positions_invalidates_cache(perturbable_omm):
@@ -143,9 +153,9 @@ def test_set_periodic_box_vectors_invalidates_cache(perturbable_omm):
     box = omm.getState(getPositions=True).getPeriodicBoxVectors()
     omm.setPeriodicBoxVectors(*box)
 
-    assert (
-        len(omm._energy_cache) == 0
-    ), "Cache should be empty after setPeriodicBoxVectors()"
+    assert len(omm._energy_cache) == 0, (
+        "Cache should be empty after setPeriodicBoxVectors()"
+    )
 
 
 def test_set_lambda_invalidates_cache(perturbable_omm):
@@ -254,13 +264,13 @@ def test_fixed_lever_not_changed(merged_ethane_methanol, openmm_platform, fixed_
     if fixed_force == "clj":
         for name in _CLJ_RELATED:
             if lever.get_force_group(name) >= 0:
-                assert not lever.was_force_changed(
-                    name
-                ), f"'{name}' should not be changed when its levers are pinned"
+                assert not lever.was_force_changed(name), (
+                    f"'{name}' should not be changed when its levers are pinned"
+                )
     else:
-        assert not lever.was_force_changed(
-            fixed_force
-        ), f"'{fixed_force}' should not be changed when its levers are pinned"
+        assert not lever.was_force_changed(fixed_force), (
+            f"'{fixed_force}' should not be changed when its levers are pinned"
+        )
 
     # All other morphing forces must be marked changed.
     # Exclude "cmap": molecules without CMAP terms have no CMAP parameters to
@@ -271,11 +281,11 @@ def test_fixed_lever_not_changed(merged_ethane_methanol, openmm_platform, fixed_
     for other in other_forces:
         if other == "clj":
             if lever.get_force_group("clj") >= 0:
-                assert lever.was_force_changed(
-                    "clj"
-                ), f"'clj' should be changed (fixed_force='{fixed_force}')"
+                assert lever.was_force_changed("clj"), (
+                    f"'clj' should be changed (fixed_force='{fixed_force}')"
+                )
         else:
             if lever.get_force_group(other) >= 0:
-                assert lever.was_force_changed(
-                    other
-                ), f"'{other}' should be changed (fixed_force='{fixed_force}')"
+                assert lever.was_force_changed(other), (
+                    f"'{other}' should be changed (fixed_force='{fixed_force}')"
+                )

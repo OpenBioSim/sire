@@ -42,15 +42,15 @@
 
 // COPIED FROM SO POST - https://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c
 
+#include <Python.h>
 #include <chrono>
-#include <cmath> // std::isnan, std::fpclassify
-#include <iostream>
+#include <cmath>   // std::isnan, std::fpclassify
 #include <iomanip> // std::setw
-#include <limits>
+#include <iostream>
 #include <limits.h> // CHAR_BIT
+#include <limits>
 #include <sstream>
 #include <stdint.h> // uint64_t
-#include <Python.h>
 
 inline auto is_ieee754_nan(double const x)
     -> bool
@@ -81,15 +81,15 @@ inline auto is_ieee754_nan(double const x)
     return (bits & exp_mask) == exp_mask and (bits & mantissa_mask) != 0;
 }
 
+#include "lbgfs/lbfgs.h"
 #include "openmm/OpenMMException.h"
 #include "openmm/Platform.h"
 #include "openmm/VerletIntegrator.h"
-#include "lbgfs/lbfgs.h"
+#include <algorithm>
 #include <cmath>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #include "SireError/errors.h"
 
@@ -127,6 +127,14 @@ namespace SireOpenMM
 
             if (cpu_context.get() == 0)
             {
+                // Match the original context's integration force groups, so
+                // that any forces excluded from integration there (e.g. the
+                // PME foreign-lambda accelerator's static coulomb-aa/bb/sum
+                // forces, which must never contribute to real physics) are
+                // also excluded here.
+                cpu_integrator.setIntegrationForceGroups(
+                    context->getIntegrator().getIntegrationForceGroups());
+
                 OpenMM::Platform *cpu_platform;
                 try
                 {
@@ -729,12 +737,11 @@ namespace SireOpenMM
                 }
             }
 
-
             data.addLog(QString("Minimisation loop - %1 steps from %2").arg(data.getIteration()).arg(data.getMaxIterations()));
 
             try
             {
-                energy_before = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+                energy_before = context.getState(OpenMM::State::Energy, false, context.getIntegrator().getIntegrationForceGroups()).getPotentialEnergy();
                 data.addLog(QString("Starting energy: %1 kJ mol-1").arg(energy_before));
 
                 if (std::isinf(energy_before) or std::isnan(energy_before) or is_ieee754_nan(energy_before))
@@ -800,7 +807,7 @@ namespace SireOpenMM
 
                     data.addLog(QString("About to minimise - %1 steps from %2...").arg(data.getIteration()).arg(data.getMaxIterations()));
 
-                    fx = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+                    fx = context.getState(OpenMM::State::Energy, false, context.getIntegrator().getIntegrationForceGroups()).getPotentialEnergy();
 
                     data.addLog(QString("Energy before minimisation: %1 kJ mol-1").arg(fx));
 
@@ -1008,7 +1015,7 @@ namespace SireOpenMM
 
             try
             {
-                auto energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+                auto energy_after = context.getState(OpenMM::State::Energy, false, context.getIntegrator().getIntegrationForceGroups()).getPotentialEnergy();
 
                 data.addLog(QString("Final energy: %1 kJ mol-1").arg(energy_after));
 
@@ -1027,7 +1034,7 @@ namespace SireOpenMM
 
                     // Recalculate the energy after the constraints have been applied.
                     energy_before = energy_after;
-                    energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+                    energy_after = context.getState(OpenMM::State::Energy, false, context.getIntegrator().getIntegrationForceGroups()).getPotentialEnergy();
 
                     const auto delta_energy = energy_after - energy_before;
 

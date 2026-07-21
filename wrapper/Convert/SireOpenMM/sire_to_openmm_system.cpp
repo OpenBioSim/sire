@@ -583,6 +583,9 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     auto cljff = lambda_lever.getForce<OpenMM::NonbondedForce>("clj", system);
     auto ghost_ghostff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
     auto ghost_nonghostff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
+    auto coulaaff = lambda_lever.getForce<OpenMM::NonbondedForce>("coulomb-aa", system);
+    auto coulbbff = lambda_lever.getForce<OpenMM::NonbondedForce>("coulomb-bb", system);
+    auto coulsumff = lambda_lever.getForce<OpenMM::NonbondedForce>("coulomb-sum", system);
 
     std::vector<double> custom_params = {1.0, 0.0, 0.0};
     // Null parameters for anchor particles added to the ghost forces {q, half_sigma, two_sqrt_epsilon, alpha, kappa}
@@ -621,6 +624,13 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
                 cljff->addParticle(0, 0, 0);
             }
 
+            if (coulaaff != 0)
+            {
+                coulaaff->addParticle(0, 0, 0);
+                coulbbff->addParticle(0, 0, 0);
+                coulsumff->addParticle(0, 0, 0);
+            }
+
             if (ghost_ghostff != 0)
             {
                 ghost_ghostff->addParticle(custom_clj_params);
@@ -642,6 +652,13 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
             // the atom being positionally restrained and
             // the anchor
             cljff->addException(anchor_index, atom_index, 0, 0, 0, true);
+        }
+
+        if (coulaaff != 0)
+        {
+            coulaaff->addException(anchor_index, atom_index, 0, 0, 0, true);
+            coulbbff->addException(anchor_index, atom_index, 0, 0, 0, true);
+            coulsumff->addException(anchor_index, atom_index, 0, 0, 0, true);
         }
 
         if (ghost_ghostff != 0)
@@ -1322,6 +1339,25 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // the infomation in ffinfo
     _set_clj_cutoff(*cljff, ffinfo);
 
+    // For perturbable systems, three extra static NonbondedForces (end-state-0
+    // charges, end-state-1 charges, and their sum) are added directly to the
+    // main System, each in its own force group, used to reconstruct
+    // foreign-lambda Coulomb energies from cached PME evaluations without
+    // needing a fresh PME evaluation per foreign lambda value - see
+    // SOMMContext.get_coulomb_quadratic_coefficients() in _sommcontext.py.
+    // Each force has direct-space interactions disabled
+    // (setIncludeDirectSpace(false)) so it represents reciprocal-space-only
+    // Coulomb energy, matching what cljff's own reciprocal-space force group
+    // (see setReciprocalSpaceForceGroup below) contributes. They are excluded
+    // from propagation via Integrator::setIntegrationForceGroups() (set in
+    // _sommcontext.py), so they cost nothing during dynamics - they're only
+    // evaluated when a foreign-lambda energy query explicitly requests their
+    // groups. Created here (pointers only) and added to the System further
+    // below, once force_group_counter exists.
+    OpenMM::NonbondedForce *coulaaff = 0;
+    OpenMM::NonbondedForce *coulbbff = 0;
+    OpenMM::NonbondedForce *coulsumff = 0;
+
     // now create the base bond, angle, torsion and CMAP forcefields
     OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
     OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
@@ -1392,6 +1428,47 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     cljff->setForceGroup(force_group_counter);
     lambda_lever.setForceIndex("clj", system.addForce(cljff));
     lambda_lever.setForceGroup("clj", force_group_counter++);
+
+    if (any_perturbable)
+    {
+        // Route cljff's reciprocal-space (PME) contribution into its own
+        // force group, distinct from its direct-space (LJ + short-range
+        // Coulomb) group. This lets the foreign-lambda energy scan query
+        // "everything except reciprocal-space Coulomb" cheaply (no PME)
+        // from cljff directly, then add back a reconstructed reciprocal
+        // term from the coulomb-aa/bb/sum forces below - without needing
+        // a second NonbondedForce evaluated during propagation.
+        cljff->setReciprocalSpaceForceGroup(force_group_counter);
+        lambda_lever.setForceGroup("clj-reciprocal", force_group_counter++);
+
+        coulaaff = new OpenMM::NonbondedForce();
+        coulbbff = new OpenMM::NonbondedForce();
+        coulsumff = new OpenMM::NonbondedForce();
+
+        _set_clj_cutoff(*coulaaff, ffinfo);
+        _set_clj_cutoff(*coulbbff, ffinfo);
+        _set_clj_cutoff(*coulsumff, ffinfo);
+
+        coulaaff->setIncludeDirectSpace(false);
+        coulbbff->setIncludeDirectSpace(false);
+        coulsumff->setIncludeDirectSpace(false);
+
+        coulaaff->setUseDispersionCorrection(false);
+        coulbbff->setUseDispersionCorrection(false);
+        coulsumff->setUseDispersionCorrection(false);
+
+        coulaaff->setForceGroup(force_group_counter);
+        lambda_lever.setForceIndex("coulomb-aa", system.addForce(coulaaff));
+        lambda_lever.setForceGroup("coulomb-aa", force_group_counter++);
+
+        coulbbff->setForceGroup(force_group_counter);
+        lambda_lever.setForceIndex("coulomb-bb", system.addForce(coulbbff));
+        lambda_lever.setForceGroup("coulomb-bb", force_group_counter++);
+
+        coulsumff->setForceGroup(force_group_counter);
+        lambda_lever.setForceIndex("coulomb-sum", system.addForce(coulsumff));
+        lambda_lever.setForceGroup("coulomb-sum", force_group_counter++);
+    }
 
     // We also want to name the levers available for this force,
     // e.g. we can change the charge, sigma and epsilon parameters
@@ -2138,6 +2215,20 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                        boost::get<2>(clj));
                     non_ghost_atoms.append(atom_index);
                 }
+
+                // coulaaff/coulbbff/coulsumff carry the fixed end-state-0,
+                // end-state-1, and summed charges respectively, and are
+                // never updated after construction.
+                double chargeB = boost::get<0>(mol.perturbed->cljs.constData()[j]);
+
+                if (chargeB == 0.0)
+                {
+                    chargeB = 1.0e-6;
+                }
+
+                coulaaff->addParticle(charge, 1e-9, 0.0);
+                coulbbff->addParticle(chargeB, 1e-9, 0.0);
+                coulsumff->addParticle(charge + chargeB, 1e-9, 0.0);
             }
         }
         else
@@ -2166,6 +2257,17 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
                 // Add the particle to the standard CLJ forcefield
                 cljff->addParticle(boost::get<0>(clj), boost::get<1>(clj), boost::get<2>(clj));
+
+                if (coulaaff != 0)
+                {
+                    // this atom is not perturbable, so its charge is the
+                    // same in both end states - coulsumff needs double the
+                    // single charge for E(chargeA+chargeB) to hold
+                    const double charge = boost::get<0>(clj);
+                    coulaaff->addParticle(charge, 1e-9, 0.0);
+                    coulbbff->addParticle(charge, 1e-9, 0.0);
+                    coulsumff->addParticle(2.0 * charge, 1e-9, 0.0);
+                }
 
                 real_atoms.append(atom_index);
 
@@ -2242,6 +2344,25 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // so epsilon and sigma are hard-coded to 0 in all cases
                 double vs_charge = mol.vs_charges.at(k).asADouble();
                 cljff->addParticle(vs_charge, 1.0, 0.0);
+
+                if (coulaaff != 0)
+                {
+                    // mol.vs_charges is always read from the literal
+                    // "vs_charges0" property (see the OpenMMMolecule
+                    // constructor), even on mol.perturbed - it can't be
+                    // used to get state1's charge. mol.perturbed->cljs
+                    // (populated via the map-based "vs_charges" lookup)
+                    // does hold the correct per-state value, exactly like
+                    // it does for real atoms.
+                    double vs_chargeB = vs_charge;
+                    if (mol.isPerturbable())
+                        vs_chargeB = boost::get<0>(
+                            mol.perturbed->cljs.constData()[mol.molinfo.nAtoms() + k]);
+
+                    coulaaff->addParticle(vs_charge, 1e-9, 0.0);
+                    coulbbff->addParticle(vs_chargeB, 1e-9, 0.0);
+                    coulsumff->addParticle(vs_charge + vs_chargeB, 1e-9, 0.0);
+                }
 
                 if (any_perturbable and mol.isPerturbable())
                 {
@@ -2715,6 +2836,40 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                       coul_14_scale,
                                       lj_14_scale);
 
+            // Static end-state-0/end-state-1/summed chargeProds for
+            // coulaaff/coulbbff/coulsumff (see the Coulomb accelerator
+            // forces above). Ring-breaking/making pairs are treated here as if
+            // coul_kappa==1 (ordinary interpolation) - an accepted
+            // approximation for the foreign-lambda accelerator only; the
+            // production "clj" exception below still gets the exact,
+            // coul_kappa-gated value.
+            double chargeProdAA = 0.0, chargeProdBB = 0.0, chargeProdSum = 0.0;
+
+            if (is_perturbable)
+            {
+                chargeProdAA = boost::get<2>(p);
+
+                const auto &pert_param = mol.perturbed->exception_params[j];
+                const auto coul_14_scale1 = boost::get<2>(pert_param);
+                const auto lj_14_scale1 = boost::get<3>(pert_param);
+
+                auto p1 = mol.perturbed->getException(atom0, atom1, start_index,
+                                                      coul_14_scale1, lj_14_scale1);
+                chargeProdBB = boost::get<2>(p1);
+
+                const double qA0 = boost::get<0>(mol.cljs.constData()[atom0]);
+                const double qA1 = boost::get<0>(mol.cljs.constData()[atom1]);
+                const double qB0 = boost::get<0>(mol.perturbed->cljs.constData()[atom0]);
+                const double qB1 = boost::get<0>(mol.perturbed->cljs.constData()[atom1]);
+                chargeProdSum = coul_14_scale * (qA0 + qB0) * (qA1 + qB1);
+            }
+            else if (any_perturbable)
+            {
+                chargeProdAA = boost::get<2>(p);
+                chargeProdBB = chargeProdAA;
+                chargeProdSum = 4.0 * chargeProdAA;
+            }
+
             if (is_perturbable)
             {
                 const bool atom0_is_ghost = mol.isGhostAtom(atom0);
@@ -2874,12 +3029,32 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // these are the indexes of the exception in the
                 // non-bonded forcefields and also the ghost-14 forcefield
                 exception_idxs[j] = boost::make_tuple(idx, nbidx);
+
+                if (coulaaff != 0)
+                {
+                    coulaaff->addException(boost::get<0>(p), boost::get<1>(p),
+                                           chargeProdAA, 1e-9, 0.0, true);
+                    coulbbff->addException(boost::get<0>(p), boost::get<1>(p),
+                                           chargeProdBB, 1e-9, 0.0, true);
+                    coulsumff->addException(boost::get<0>(p), boost::get<1>(p),
+                                            chargeProdSum, 1e-9, 0.0, true);
+                }
             }
             else
             {
                 cljff->addException(boost::get<0>(p), boost::get<1>(p),
                                     boost::get<2>(p), boost::get<3>(p),
                                     boost::get<4>(p), true);
+
+                if (coulaaff != 0)
+                {
+                    coulaaff->addException(boost::get<0>(p), boost::get<1>(p),
+                                           chargeProdAA, 1e-9, 0.0, true);
+                    coulbbff->addException(boost::get<0>(p), boost::get<1>(p),
+                                           chargeProdBB, 1e-9, 0.0, true);
+                    coulsumff->addException(boost::get<0>(p), boost::get<1>(p),
+                                            chargeProdSum, 1e-9, 0.0, true);
+                }
             }
 
             // we need to make sure that the list of exclusions in
@@ -2926,6 +3101,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         ghost_ghostff->addExclusion(vs0_index, start_index + a);
                         ghost_nonghostff->addExclusion(vs0_index, start_index + a);
                     }
+                    if (coulaaff != 0)
+                    {
+                        coulaaff->addException(vs0_index, start_index + a, 0.0, 1, 0, false);
+                        coulbbff->addException(vs0_index, start_index + a, 0.0, 1, 0, false);
+                        coulsumff->addException(vs0_index, start_index + a, 0.0, 1, 0, false);
+                    }
 
                     for (int v1 = v0 + 1; v1 < atom_vs.size(); ++v1)
                     {
@@ -2937,6 +3118,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         {
                             ghost_ghostff->addExclusion(vs0_index, vs1_index);
                             ghost_nonghostff->addExclusion(vs0_index, vs1_index);
+                        }
+                        if (coulaaff != 0)
+                        {
+                            coulaaff->addException(vs0_index, vs1_index, 0.0, 1, 0, false);
+                            coulbbff->addException(vs0_index, vs1_index, 0.0, 1, 0, false);
+                            coulsumff->addException(vs0_index, vs1_index, 0.0, 1, 0, false);
                         }
                     }
                 }
@@ -2970,6 +3157,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     ghost_nonghostff->addExclusion(from_ghost_idx, to_ghost_idx);
                     cljff->addException(from_ghost_idx, to_ghost_idx,
                                         0.0, 1e-9, 1e-9, false);
+                    if (coulaaff != 0)
+                    {
+                        coulaaff->addException(from_ghost_idx, to_ghost_idx, 0.0, 1e-9, 1e-9, false);
+                        coulbbff->addException(from_ghost_idx, to_ghost_idx, 0.0, 1e-9, 1e-9, false);
+                        coulsumff->addException(from_ghost_idx, to_ghost_idx, 0.0, 1e-9, 1e-9, false);
+                    }
                 }
             }
         }
@@ -3157,6 +3350,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     }
 
     // All done - we can return the metadata
-    return OpenMMMetaData(SireMol::SelectorM<SireMol::Atom>(order_of_added_atoms),
-                          coords, vels, boxvecs, lambda_lever);
+    OpenMMMetaData metadata(SireMol::SelectorM<SireMol::Atom>(order_of_added_atoms),
+                            coords, vels, boxvecs, lambda_lever);
+
+    return metadata;
 }

@@ -3,27 +3,29 @@
 
 #include <OpenMM.h>
 
+#include <sstream>
+
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
 #include "SireSystem/forcefieldinfo.h"
 
-#include "SireMol/core.h"
-#include "SireMol/moleditor.h"
-#include "SireMol/atomelements.h"
 #include "SireMol/atomcharges.h"
 #include "SireMol/atomcoords.h"
+#include "SireMol/atomelements.h"
 #include "SireMol/atommasses.h"
 #include "SireMol/atomproperty.hpp"
-#include "SireMol/connectivity.h"
+#include "SireMol/atomvelocities.h"
 #include "SireMol/bondid.h"
 #include "SireMol/bondorder.h"
-#include "SireMol/atomvelocities.h"
+#include "SireMol/connectivity.h"
+#include "SireMol/core.h"
+#include "SireMol/moleditor.h"
 #include "SireMol/selectorm.hpp"
 
+#include "SireMM/amberparams.h"
 #include "SireMM/atomljs.h"
 #include "SireMM/selectorbond.h"
-#include "SireMM/amberparams.h"
 
 #include "SireVol/periodicbox.h"
 #include "SireVol/triclinicbox.h"
@@ -495,7 +497,7 @@ namespace SireOpenMM
         {
             offsets[i] = offset;
             offset += mols[i].nAtoms();
-            if (mols[i].hasProperty("n_virtual_sites")) 
+            if (mols[i].hasProperty("n_virtual_sites"))
             {
                 offset += mols[i].property("n_virtual_sites").asAnInteger();
             }
@@ -826,7 +828,7 @@ namespace SireOpenMM
         {
             offsets[i] = offset;
             offset += mols[i].nAtoms();
-            if (mols[i].hasProperty("n_virtual_sites")) 
+            if (mols[i].hasProperty("n_virtual_sites"))
             {
                 offset += mols[i].property("n_virtual_sites").asAnInteger();
             }
