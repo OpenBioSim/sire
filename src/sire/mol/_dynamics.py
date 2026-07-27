@@ -8,6 +8,26 @@ class DynamicsData:
     of molecule(s).
     """
 
+    # The attributes that make up the simulation clock. These track the
+    # progress of the simulation and schedule the saving of frames and
+    # energies. They are captured and restored together by _get_clock()
+    # and _set_clock(), which allows a single dynamics object to be
+    # re-used to propagate multiple independent trajectories.
+    _CLOCK_ATTRS = (
+        "_current_step",
+        "_current_time",
+        "_elapsed_time",
+        "_prev_step",
+        "_prev_current_time",
+        "_prev_elapsed_time",
+        "_next_save_frame",
+        "_next_save_energy",
+        "_prev_frame_frequency_steps",
+        "_prev_energy_frequency_steps",
+        "_prev_no_frame",
+        "_prev_no_energy",
+    )
+
     def __init__(self, mols=None, map=None, **kwargs):
         from ..base import create_map
 
@@ -181,6 +201,16 @@ class DynamicsData:
             self._walltime = 0 * nanosecond
             self._is_running = False
             self._schedule_changed = False
+
+            # Save frequency counters. These are set on the first call to
+            # run(), but are initialised here so that the full clock state
+            # can be captured and restored before any dynamics has been run.
+            self._next_save_frame = None
+            self._next_save_energy = None
+            self._prev_frame_frequency_steps = None
+            self._prev_energy_frequency_steps = None
+            self._prev_no_frame = None
+            self._prev_no_energy = None
 
             # Initialise the GCMC sampler. This will be updated externally.
             # if the dynamics object is coupled to a sampler.
@@ -808,6 +838,29 @@ class DynamicsData:
         else:
             return self._omm_mols.getPlatform().getName()
 
+    def _get_clock(self):
+        if self.is_null():
+            return None
+        else:
+            return {attr: getattr(self, attr) for attr in self._CLOCK_ATTRS}
+
+    def _set_clock(self, clock):
+        if self.is_null():
+            return
+
+        from openmm.unit import picosecond
+
+        for attr, value in clock.items():
+            if attr not in self._CLOCK_ATTRS:
+                raise KeyError(f"'{attr}' is not a valid clock attribute")
+            setattr(self, attr, value)
+
+        # The OpenMM context has its own clock, which must be kept in sync
+        # with the elapsed time. _exit_dynamics_block() computes the time
+        # delta for a block as the difference between the two, so restoring
+        # one without the other would corrupt the recorded times.
+        self._omm_mols.setTime(self._elapsed_time.to("picosecond") * picosecond)
+
     def current_step(self):
         if self.is_null():
             return 0
@@ -882,6 +935,17 @@ class DynamicsData:
 
     def energy_trajectory(self):
         return self._energy_trajectory.clone()
+
+    def set_energy_trajectory(self, energy_trajectory):
+        if self.is_null():
+            return
+
+        from ..legacy.Maths import EnergyTrajectory
+
+        if not isinstance(energy_trajectory, EnergyTrajectory):
+            raise TypeError("'energy_trajectory' must be of type 'EnergyTrajectory'")
+
+        self._energy_trajectory = energy_trajectory
 
     def _current_energy_array(self):
         try:
@@ -1290,10 +1354,13 @@ class DynamicsData:
 
         nsteps_before_run = self._current_step
 
-        # if this is the first call, then set the save frequencies
-        if nsteps_before_run == 0:
-            self._next_save_frame = frame_frequency_steps
-            self._next_save_energy = energy_frequency_steps
+        # if this is the first call, then set the save frequencies. The
+        # counters are also unset if a clock was restored from a dynamics
+        # object that had yet to be run, in which case schedule the first
+        # save relative to the restored step count.
+        if nsteps_before_run == 0 or self._next_save_frame is None:
+            self._next_save_frame = nsteps_before_run + frame_frequency_steps
+            self._next_save_energy = nsteps_before_run + energy_frequency_steps
             self._prev_frame_frequency_steps = frame_frequency_steps
             self._prev_energy_frequency_steps = energy_frequency_steps
             self._prev_no_frame = no_save_frame
@@ -2084,6 +2151,32 @@ class Dynamics:
         """
         return self._d.timestep()
 
+    def _get_clock(self):
+        """
+        Return the current state of the simulation clock as a dictionary.
+
+        This captures the completed time and step count, along with the
+        counters that schedule the saving of frames and energies. Passing
+        the result to _set_clock() rewinds (or advances) the simulation to
+        that point, which allows a single dynamics object to be re-used to
+        propagate several independent trajectories.
+        """
+        return self._d._get_clock()
+
+    def _set_clock(self, clock):
+        """
+        Restore the state of the simulation clock from a dictionary
+        returned by _get_clock(). This also updates the time held by the
+        OpenMM context, so that the two remain in sync.
+
+        Parameters
+        ----------
+
+        clock: dict
+            The clock state, as returned by _get_clock().
+        """
+        self._d._set_clock(clock)
+
     def current_step(self):
         """
         Return the current number of completed steps of dynamics
@@ -2240,6 +2333,23 @@ class Dynamics:
             )
         else:
             return t
+
+    def set_energy_trajectory(self, energy_trajectory):
+        """
+        Replace the energy trajectory that is accumulated during dynamics.
+
+        Subsequent energy saves are appended to 'energy_trajectory', and it
+        is the trajectory that is attached to the system by commit(). This
+        allows a single dynamics object to be re-used to propagate several
+        independent trajectories, each accumulating its own energies.
+
+        Parameters
+        ----------
+
+        energy_trajectory: :class: `EnergyTrajectory <sire.legacy.Maths.EnergyTrajectory>`
+            The energy trajectory to accumulate into.
+        """
+        self._d.set_energy_trajectory(energy_trajectory)
 
     def _current_energy_array(self):
         """

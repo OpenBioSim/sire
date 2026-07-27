@@ -42,6 +42,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   terms into two independently lambda-addressable OpenMM Forces, allowing them to be
   turned on according to different lambda schedule equations.
 
+* Added ``Dynamics.set_energy_trajectory()``, along with internal
+  ``Dynamics._get_clock()``/``_set_clock()``, which allow a single dynamics object to
+  propagate several independent trajectories by swapping the energy trajectory and
+  simulation clock between blocks.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
