@@ -196,3 +196,108 @@ def test_crash_report(merged_ethane_methanol, openmm_platform):
     finally:
         # Change back to the old directory.
         os.chdir(old_dir)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_clock_and_energy_trajectory_swap(ala_mols):
+    """
+    Test that a single dynamics object can propagate several independent
+    trajectories by swapping the clock and energy trajectory between blocks.
+
+    This underpins replica exchange runs that re-use a bounded number of
+    OpenMM contexts across a larger number of replicas.
+
+    The NVE ensemble is used on the Reference platform so that the integrator
+    is deterministic and has no random number stream. A thermostat would make
+    the comparison meaningless, since the cached run interleaves the replicas
+    through a single integrator and so consumes its RNG stream in a different
+    order to separate dynamics objects.
+    """
+
+    from sire.base import ProgressBar
+
+    ProgressBar.set_silent()
+
+    mols = ala_mols.clone()
+    mols.delete_all_frames()
+
+    num_cycles = 5
+    num_replicas = 2
+
+    # No temperature, so this is NVE and the integrator has no RNG.
+    kwargs = dict(platform="Reference", timestep="1 fs")
+    run_kwargs = dict(
+        energy_frequency="2 fs",
+        frame_frequency="2 fs",
+        lambda_windows=[0.0, 0.5, 1.0],
+    )
+
+    def potentials(traj):
+        return [round(float(v), 8) for v in traj.to_pandas()["potential"]]
+
+    # Build distinct starting states, so that the replicas follow genuinely
+    # different trajectories and the test is not vacuous.
+    seed = mols.dynamics(**kwargs)
+    start_states = []
+    for r in range(num_replicas):
+        if r > 0:
+            seed.run("10 fs", energy_frequency=0, frame_frequency=0)
+        start_states.append(
+            seed.context().getState(getPositions=True, getVelocities=True)
+        )
+
+    # Reference: one dynamics object per replica.
+    ref = []
+    for r in range(num_replicas):
+        d = mols.dynamics(**kwargs)
+        d.context().setState(start_states[r])
+        d._d._clear_state()
+        ref.append(d)
+
+    for i in range(num_cycles):
+        for d in ref:
+            d.run("2 fs", **run_kwargs)
+
+    ref_nrgs = [potentials(d.energy_trajectory()) for d in ref]
+    ref_steps = [d.current_step() for d in ref]
+
+    # Cached: a single dynamics object, with a clock and energy trajectory
+    # per replica.
+    slot = mols.dynamics(**kwargs)
+
+    # Seed the per-replica trajectories from the slot's own, so that the
+    # "ensemble" property is carried over.
+    trajs = [slot._d.energy_trajectory() for _ in range(num_replicas)]
+    assert all(len(t) == 0 for t in trajs)
+
+    clocks = [slot._get_clock() for _ in range(num_replicas)]
+    states = list(start_states)
+
+    for i in range(num_cycles):
+        for r in range(num_replicas):
+            slot.context().setState(states[r])
+            slot._set_clock(clocks[r])
+            slot.set_energy_trajectory(trajs[r])
+            slot._d._clear_state()
+
+            slot.run("2 fs", **run_kwargs)
+
+            clocks[r] = slot._get_clock()
+            states[r] = slot.context().getState(getPositions=True, getVelocities=True)
+            slot._d._sire_mols.delete_all_frames()
+
+    cache_nrgs = [potentials(t) for t in trajs]
+    cache_steps = [c["_current_step"] for c in clocks]
+
+    # The replicas must be distinct, otherwise nothing is being tested.
+    assert ref_nrgs[0] != ref_nrgs[1]
+
+    # Each replica must have accumulated its own energies, and the clock must
+    # have advanced as if it had a dynamics object to itself.
+    assert cache_steps == ref_steps
+    for r in range(num_replicas):
+        assert len(cache_nrgs[r]) == num_cycles
+        assert cache_nrgs[r] == ref_nrgs[r]
