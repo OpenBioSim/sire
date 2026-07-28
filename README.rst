@@ -153,6 +153,21 @@ this:
     pixi shell -e dev
     ln -s /etc/OpenCL/vendors "${CONDA_PREFIX}/etc/OpenCL/vendors/ocl-icd-system"
 
+Note that we don't pin ``cuda-version`` in ``pixi.toml``, which is pulled in
+as a transitive dependency of OpenMM. This means that the version you end up
+with might not be compatible with the CUDA driver installed on your system. If
+you need a specific version, then add it to the ``[dependencies]`` section of
+``pixi.toml`` before creating the environment, e.g.:
+
+.. code-block:: toml
+
+    [dependencies]
+    cuda-version = "==12.6"
+
+This is intended as a local development tweak only and shouldn't be committed,
+since ``actions/generate_recipe.py`` reads the ``[dependencies]`` section when
+generating the conda recipe, so the pin would also end up in our packages.
+
 Support and Development
 =======================
 
