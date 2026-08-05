@@ -27,19 +27,28 @@ class _LazyModule(_types.ModuleType):
     reachable (sys.modules, and the attribute of whatever parent package
     holds it) with the real thing.
 
-    Known limitation: this replacement only reaches places that look the
-    name up again later (sys.modules, or a parent's own attribute) - a
-    name already bound to *this* stub before the load happened (e.g.
-    `import pkg.sub as x`, which binds `x` to whatever was in
-    sys.modules at that moment) keeps pointing at the stub forever.
-    Reads through that binding still work, via __getattr__ delegating to
-    the real module below - but a write (`x.SOME_ATTR = value`) lands on
-    the stub's own __dict__ instead, invisible to sys.modules["pkg.sub"]
-    or anyone else holding a reference obtained afterwards. Narrow (it
-    needs a pre-load `as` import specifically, then a write, not just a
-    read), but worth knowing: it's the same two-objects-one-name shape
-    this module exists to eliminate, just for writes through a stale
-    pre-load reference rather than for reads or for class identity.
+    Known limitations:
+
+    - This replacement only reaches places that look the name up again
+      later (sys.modules, or a parent's own attribute) - a name already
+      bound to *this* stub before the load happened (e.g. `import
+      pkg.sub as x`, which binds `x` to whatever was in sys.modules at
+      that moment) keeps pointing at the stub forever. Reads through
+      that binding still work, via __getattr__ delegating to the real
+      module below - but a write (`x.SOME_ATTR = value`) lands on the
+      stub's own __dict__ instead, invisible to sys.modules["pkg.sub"]
+      or anyone else holding a reference obtained afterwards.
+
+    - importlib.reload() on a module that hasn't been touched at all
+      yet doesn't work: reload() calls exec_module() directly on
+      whatever object sys.modules already holds, bypassing this class's
+      own _load() (and everything it does - the lock, the parent-
+      attribute fixup, the child-stub sweep) entirely. Call
+      force_load()/touch an attribute first, then reload() the (by then
+      real) module as normal. This isn't specific to this
+      implementation - any lazy-loading scheme built on a sys.modules
+      stand-in has the same gap, since reload()'s entry point isn't one
+      this class - or any other module object - gets a say in.
     """
 
     def __init__(self, name: str, search_locations=None, spec=None):

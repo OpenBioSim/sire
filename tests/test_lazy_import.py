@@ -621,3 +621,52 @@ def test_star_import_of_module_without_all(tmp_path):
         value = pool.apply(_star_import_without_all_worker, (root,))
 
     assert value == 123
+
+
+def _force_load_then_reload_worker(root):
+    """Runs in a fresh process. force_load()s a stub, then calls
+    importlib.reload() on the resulting real module, and checks the
+    module still works afterwards."""
+    import importlib
+    import sys
+
+    sys.path.insert(0, root)
+
+    from sire._lazy_import import force_load, lazy_module
+
+    lazy_module("synth_reload_pkg")
+    stub = sys.modules["synth_reload_pkg.leaf"]
+
+    force_load(stub)
+    real_before = sys.modules["synth_reload_pkg.leaf"]
+
+    reloaded = importlib.reload(real_before)
+
+    return (
+        type(real_before).__name__,
+        reloaded is sys.modules["synth_reload_pkg.leaf"],
+        reloaded.VALUE,
+    )
+
+
+def test_reload_after_force_load(tmp_path):
+    """
+    force_load() followed by importlib.reload() on the resulting module
+    works exactly as reload() does for any ordinary, non-lazy module.
+    """
+    root = _make_synthetic_package(
+        str(tmp_path), "synth_reload_pkg", "leaf", "VALUE = 5\n"
+    )
+
+    from multiprocessing import get_context
+
+    ctx = get_context("spawn")
+
+    with ctx.Pool(1) as pool:
+        real_type, same_module, value = pool.apply(
+            _force_load_then_reload_worker, (root,)
+        )
+
+    assert real_type == "module"
+    assert same_module
+    assert value == 5
