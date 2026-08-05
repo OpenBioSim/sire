@@ -568,3 +568,56 @@ def test_reentrant_import_before_module_exists_raises_clearly(tmp_path):
     assert "circular import" in caught[0]
     assert "synth_reentrant_pkg.leaf" in caught[0]
     assert value == 1
+
+
+def _make_star_import_package(root, pkg_name):
+    """Write a package root/pkg_name whose __init__.py does
+    `from .leaf import *`, where leaf.py defines a public name and has
+    no __all__. Returns str(root)."""
+    import os
+
+    pkg_dir = os.path.join(root, pkg_name)
+    os.makedirs(pkg_dir, exist_ok=True)
+
+    with open(os.path.join(pkg_dir, "__init__.py"), "w") as f:
+        f.write("from .leaf import *\n")
+
+    with open(os.path.join(pkg_dir, "leaf.py"), "w") as f:
+        f.write("VALUE = 123\n")
+
+    return str(root)
+
+
+def _star_import_without_all_worker(root):
+    """Runs in a fresh process. Registers a lazy stub for a package
+    whose __init__.py star-imports a submodule with no __all__, and
+    checks that the star-imported name is reachable on the parent."""
+    import sys
+
+    sys.path.insert(0, root)
+
+    from sire._lazy_import import lazy_module
+
+    lazy_module("synth_star_pkg")
+    stub = sys.modules["synth_star_pkg"]
+
+    return stub.VALUE
+
+
+def test_star_import_of_module_without_all(tmp_path):
+    """
+    `from .sibling import *`, where sibling has no __all__, makes every
+    one of sibling's public names reachable on the package that did the
+    star import, the same as it would for a module with __all__ or for
+    a plain, non-lazy import.
+    """
+    root = _make_star_import_package(str(tmp_path), "synth_star_pkg")
+
+    from multiprocessing import get_context
+
+    ctx = get_context("spawn")
+
+    with ctx.Pool(1) as pool:
+        value = pool.apply(_star_import_without_all_worker, (root,))
+
+    assert value == 123

@@ -314,6 +314,27 @@ class _LazyModule(_types.ModuleType):
 
                     if _child_attr not in real_module.__dict__:
                         setattr(real_module, _child_attr, _child_module)
+
+                # Mirror the real module's own content onto this stub's
+                # __dict__ too, not just sys.modules and the parent's
+                # attribute. This matters for `from .sibling import *`
+                # where 'sibling' has no __all__: CPython's IMPORT_STAR
+                # opcode, for that case, reads getattr(mod, '__dict__')
+                # directly - bypassing __getattr__ below entirely, since
+                # every object always has a __dict__, so it's never
+                # "missing" in the way that would trigger it - and
+                # enumerates its keys. At that point 'mod' in the
+                # caller's bytecode is still this stub, not real_module,
+                # even though a preceding hasattr(mod, '__all__') check
+                # just triggered this very _load() as a side effect (to
+                # answer that hasattr). Without this, `from .sibling
+                # import *` for any __all__-less module reached through
+                # a lazy stub would silently import nothing at all.
+                for _attr, _value in real_module.__dict__.items():
+                    if _attr.startswith("_lazy"):
+                        continue
+
+                    self.__dict__[_attr] = _value
             except BaseException:
                 # Leave this stub fully retryable - CPython itself leaves a
                 # failed import retryable (a broken module, or one with a
