@@ -221,10 +221,10 @@ except ImportError:
 # sire.mm is the first Sire submodule touched in a process, calling
 # use_new_api() before _fix_siremm is defined means that reentrant load of
 # sire.mol fails with 'cannot import name _fix_siremm from sire.mm', which
-# then cascades into 'sire.mm could not be loaded' via the lazy_import
-# wrapper. Nothing above this point depends on use_new_api() having run
-# (it only pythonizes names already pulled directly from the raw legacy
-# _MM module), so it is safe to defer to here.
+# then causes the whole sire.mm import to fail. Nothing above this point
+# depends on use_new_api() having run (it only pythonizes names already
+# pulled directly from the raw legacy _MM module), so it is safe to defer
+# to here.
 from .. import use_new_api as _use_new_api
 
 _use_new_api()

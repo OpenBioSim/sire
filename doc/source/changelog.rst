@@ -17,6 +17,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
+* Replaced the third-party ``lazy_import`` dependency (GPLv3) with a minimal, standard-library-only
+  ``importlib``-based implementation in ``sire.utils._lazy_import``. This also fixes a bug where
+  lazily-loaded modules could end up with two distinct class objects for the same module path
+  (e.g. via unpickling in a separate process), causing spurious ``isinstance()`` failures.
+
 * Fixed ``sire.restraints.boresch()`` setting a dynamic ``_use_pbc`` Python attribute on
   the returned ``BoreschRestraints`` instead of calling ``set_uses_pbc()``, which broke
   pickling (e.g. for ``multiprocessing``/``ProcessPoolExecutor``) and meant the flag did
