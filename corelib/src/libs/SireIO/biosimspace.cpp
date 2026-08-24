@@ -466,7 +466,7 @@ namespace SireIO
             }
 
             // OPC
-            if (model == "OPC")
+            else if (model == "OPC")
             {
                 double a = 0.1477224;
 
@@ -592,7 +592,7 @@ namespace SireIO
             }
 
             // OPC
-            if (model == "OPC")
+            else if (model == "OPC")
             {
                 double a = 0.1477224;
 

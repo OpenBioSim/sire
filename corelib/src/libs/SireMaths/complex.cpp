@@ -396,7 +396,7 @@ namespace SireMaths
     /** Subtraction */
     Complex operator-(double x, const Complex &z)
     {
-        return z - x;
+        return Complex(x) - z;
     }
 
     /** Multiplication */
