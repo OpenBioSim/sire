@@ -52,6 +52,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   propagate several independent trajectories by swapping the energy trajectory and
   simulation clock between blocks.
 
+* Fixed the ``double - Complex`` subtraction operator in ``SireMaths::Complex``.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
