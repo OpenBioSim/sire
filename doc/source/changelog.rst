@@ -54,6 +54,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed the ``double - Complex`` subtraction operator in ``SireMaths::Complex``.
 
+* Fixed a dangling ``else`` statement that caused ``setAmberWater`` and
+  ``setGromacsWater`` to fail when using the TIP4P water model.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
