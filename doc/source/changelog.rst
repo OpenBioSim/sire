@@ -57,6 +57,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a dangling ``else`` statement that caused ``setAmberWater`` and
   ``setGromacsWater`` to fail when using the TIP4P water model.
 
+* Added a ``determine_bond_orders`` keyword argument (and equivalent property map
+  option) to the Sire-to-RDKit conversion functions. This defaults to ``True``,
+  but can be set to ``False`` to fall back on the internal bond inference
+  heuristic, which is much faster for large molecules, e.g. proteins.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
