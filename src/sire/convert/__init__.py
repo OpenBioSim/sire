@@ -48,7 +48,7 @@ def supported_formats():
     return _supported_formats()
 
 
-def to(obj, format: str = "sire", map=None, determine_bond_orders: bool = True):
+def to(obj, format: str = "sire", map=None):
     """
     Convert the passed object from its current object format to the
     specified object format (default "sire"). Typically this will be converting
@@ -62,19 +62,13 @@ def to(obj, format: str = "sire", map=None, determine_bond_orders: bool = True):
             The format to convert to
         map:
             The property map to use for the conversion
-        determine_bond_orders: bool (default True)
-            Whether to use RDKit's ``determineBondOrders`` function when bond
-            orders need to be inferred during conversion to rdkit format. This
-            is more robust than the internal heuristic, but can be slow for
-            large molecules, e.g. proteins. (Only used when converting to
-            rdkit format.)
     """
     format = format.lower()
 
     if format == "sire":
         return to_sire(obj, map=map)
     elif format == "rdkit":
-        return to_rdkit(obj, map=map, determine_bond_orders=determine_bond_orders)
+        return to_rdkit(obj, map=map)
     elif format == "gemmi":
         return to_gemmi(obj, map=map)
     elif format == "biosimspace":

@@ -36,6 +36,8 @@
 
 #include <QDebug>
 
+#include <cstdlib>
+
 using namespace SireBase;
 
 static QString getUserName()
