@@ -53,6 +53,8 @@
 
 #include <QDebug>
 
+#include <cstdlib>
+
 using namespace SireCluster;
 using namespace SireCluster::MPI;
 
