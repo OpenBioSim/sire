@@ -13,32 +13,16 @@ def toluene_methane():
     return sr.load_test_files("toluene_methane.s3")
 
 
-@pytest.mark.parametrize("mols", ["ala_mols", "merged_ethane_methanol"])
-def test_rest2_selection_multiple_molecules(mols, request):
+def test_rest2_selection_multiple_molecules(ala_mols):
     """
     Test that a REST2 selection spanning multiple molecules is applied to the
     atoms in each of the selected molecules.
     """
 
-    mols = request.getfixturevalue(mols)
+    mols = ala_mols
 
-    # Link to the reference state.
-    try:
-        mols = sr.morph.link_to_reference(mols)
-    except:
-        pass
-
-    # The REST2 region is the union of the first two molecules. Work out the
-    # system indices of their atoms. Perturbable molecules are scaled via the
-    # lambda lever rather than the NonbondedForce, so are excluded here.
-    scaled_atoms = set()
-    num_selected_atoms = 0
-    for mol in [mols[0], mols[1]]:
-        if not mol.has_property("is_perturbable"):
-            scaled_atoms.update(
-                range(num_selected_atoms, num_selected_atoms + mol.num_atoms())
-            )
-        num_selected_atoms += mol.num_atoms()
+    # The REST2 region is the union of the first two molecules.
+    num_rest2_atoms = mols[0].num_atoms() + mols[1].num_atoms()
 
     # Create a dynamics object, selecting the first two molecules.
     d = mols.dynamics(platform="Reference", rest2_selection="molidx 0 or molidx 1")
@@ -68,10 +52,86 @@ def test_rest2_selection_multiple_molecules(mols, request):
     for i in range(force.getNumParticles()):
         charge, _, epsilon = nonbonded_params_initial[i]
         charge_modified, _, epsilon_modified = force.getParticleParameters(i)
-        if i in scaled_atoms:
+        if i < num_rest2_atoms:
             assert isclose(charge_modified._value, charge._value * scale**0.5)
             assert isclose(epsilon_modified._value, epsilon._value * scale)
-        elif i >= num_selected_atoms:
+        else:
+            assert isclose(charge_modified._value, charge._value)
+            assert isclose(epsilon_modified._value, epsilon._value)
+
+
+@pytest.mark.parametrize(
+    ["rest2_selection", "pert_atoms", "extra_mols"],
+    [
+        # No selection, so the region is the entire perturbable molecule.
+        (None, None, []),
+        # A whole non-perturbable molecule, which is added to the entire
+        # perturbable molecule.
+        ("molidx 1", None, [1]),
+        # Part of the perturbable molecule, which narrows the region to those
+        # atoms alone.
+        ("molidx 0 and atomidx 0,1", [0, 1], []),
+        # Part of the perturbable molecule plus a whole non-perturbable
+        # molecule, which are combined.
+        ("(molidx 0 and atomidx 0,1) or molidx 1", [0, 1], [1]),
+    ],
+)
+def test_rest2_selection_semantics(
+    merged_ethane_methanol, rest2_selection, pert_atoms, extra_mols
+):
+    """
+    Test that a REST2 selection adds to the default region of the whole
+    perturbable molecule, and that selecting atoms within the perturbable
+    molecule narrows the region to those atoms.
+    """
+
+    mols = sr.morph.link_to_reference(merged_ethane_methanol)
+
+    # Work out the system index of the first atom of each molecule.
+    offsets = []
+    offset = 0
+    for mol in mols:
+        offsets.append(offset)
+        offset += mol.num_atoms()
+
+    # Work out the system indices of the atoms in the REST2 region. The
+    # perturbable molecule is molecule zero.
+    if pert_atoms is None:
+        pert_atoms = range(mols[0].num_atoms())
+    rest2_atoms = {offsets[0] + i for i in pert_atoms}
+    for i in extra_mols:
+        rest2_atoms.update(range(offsets[i], offsets[i] + mols[i].num_atoms()))
+
+    # Create a dynamics object.
+    d = mols.dynamics(platform="Reference", rest2_selection=rest2_selection)
+
+    # Find the NonbondedForce.
+    for force in d.context().getSystem().getForces():
+        if force.getName() == "NonbondedForce":
+            break
+
+    # Store the unscaled parameters at the same lambda value, so that the
+    # comparison isolates the REST2 scaling from the lambda lever.
+    d.set_lambda(0.0, rest2_scale=1.0)
+    nonbonded_params_initial = [
+        force.getParticleParameters(i) for i in range(force.getNumParticles())
+    ]
+
+    # Update the REST2 scaling factor.
+    d.set_lambda(0.0, rest2_scale=2.0)
+
+    # Store the scaling factor.
+    scale = 0.5
+
+    # Only the atoms in the REST2 region should be scaled.
+    for i in range(force.getNumParticles()):
+        charge, _, epsilon = nonbonded_params_initial[i]
+        charge_modified, _, epsilon_modified = force.getParticleParameters(i)
+        if i in rest2_atoms:
+            assert isclose(charge_modified._value, charge._value * scale**0.5)
+            if epsilon._value > 1e-6:
+                assert isclose(epsilon_modified._value, epsilon._value * scale)
+        else:
             assert isclose(charge_modified._value, charge._value)
             assert isclose(epsilon_modified._value, epsilon._value)
 
