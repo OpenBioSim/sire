@@ -62,6 +62,16 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   but can be set to ``False`` to fall back on the internal bond inference
   heuristic, which is much faster for large molecules, e.g. proteins.
 
+* Fixed a bug where a ``rest2_selection`` spanning more than one molecule raised
+  ``list.remove(x): x not in list``, since ``selection_to_atoms`` returns a
+  ``SelectorM`` whose ``to_list()`` gives one view per molecule, rather than a flat
+  list of atoms.
+
+* Fixed the atom index offset used when preparing the REST2 data structures, which
+  was applied to every atom in the selection rather than only those belonging to the
+  molecule being processed. This gave incorrect indices when a ``rest2_selection``
+  spanned more than one non-perturbable molecule.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
