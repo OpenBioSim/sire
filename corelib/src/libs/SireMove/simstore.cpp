@@ -38,6 +38,8 @@
 
 #include <QDebug>
 
+#include <cstdlib>
+
 using namespace SireMove;
 using namespace SireSystem;
 using namespace SireStream;

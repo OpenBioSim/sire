@@ -218,40 +218,38 @@ class DynamicsData:
                     )
 
                 # Store all the perturbable molecules associated with the selection
-                # and remove perturbable atoms from the selection. Remove alchemical ions
-                # from the selection.
+                # and exclude perturbable atoms and alchemical ions from the selection.
                 pert_mols = {}
-                non_pert_atoms = atoms.to_list()
+                non_pert_atoms = []
                 for atom in atoms:
                     mol = atom.molecule()
                     if mol.has_property("is_alchemical_ion"):
-                        non_pert_atoms.remove(atom)
+                        continue
                     elif mol.has_property("is_perturbable"):
-                        non_pert_atoms.remove(atom)
                         if mol.number() not in pert_mols:
                             pert_mols[mol.number()] = [atom]
                         else:
                             pert_mols[mol.number()].append(atom)
+                    else:
+                        non_pert_atoms.append(atom)
 
                 # Now create a boolean is_rest2 mask for the atoms in the perturbable molecules.
-                # Only do this if there are perturbable atoms in the selection.
-                if len(non_pert_atoms) != len(atoms):
-                    for num in pert_mols:
-                        mol = self._sire_mols[num]
-                        is_rest2 = [False] * mol.num_atoms()
-                        for atom in pert_mols[num]:
-                            is_rest2[atom.index().value()] = True
+                for num in pert_mols:
+                    mol = self._sire_mols[num]
+                    is_rest2 = [False] * mol.num_atoms()
+                    for atom in pert_mols[num]:
+                        is_rest2[atom.index().value()] = True
 
-                        # Set the is_rest2 property for each perturbable molecule.
-                        mol = (
-                            mol.edit()
-                            .set_property("is_rest2", is_rest2)
-                            .molecule()
-                            .commit()
-                        )
+                    # Set the is_rest2 property for each perturbable molecule.
+                    mol = (
+                        mol.edit()
+                        .set_property("is_rest2", is_rest2)
+                        .molecule()
+                        .commit()
+                    )
 
-                        # Update the system.
-                        self._sire_mols.update(mol)
+                    # Update the system.
+                    self._sire_mols.update(mol)
 
             # Search for alchemical ions and exclude them via a REST2 mask.
             try:

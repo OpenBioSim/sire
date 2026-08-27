@@ -33,6 +33,8 @@
 
 #include "sire_version.h"
 
+#include <cstdlib>
+
 using namespace SireCluster;
 using namespace SireMove;
 using namespace SireSystem;
