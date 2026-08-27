@@ -45,6 +45,8 @@
 
 #include <QDebug>
 
+#include <cstdlib>
+
 using std::shared_ptr;
 
 using namespace SireIO;
