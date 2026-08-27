@@ -510,15 +510,15 @@ class SOMMContext(_Context):
             for i in range(mol_idx):
                 num_atoms += system_mols[i].num_atoms()
 
-            # Create a list of system indices for the selected atoms in this molecule.
-            atom_idxs = [
+            # Create a set of system indices for the selected atoms in this molecule.
+            atom_idxs = {
                 atom.index().value() + num_atoms
                 for atom in atoms
                 if atom.molecule().number() == mol.number()
-            ]
+            }
 
             # Gather the nonbonded parameters for the atoms in the selection.
-            for idx in atom_idxs:
+            for idx in sorted(atom_idxs):
                 self._nonbonded_params[idx] = nonbonded_force.getParticleParameters(idx)
 
             # Store the exception parameters.

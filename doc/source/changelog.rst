@@ -72,6 +72,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   molecule being processed. This gave incorrect indices when a ``rest2_selection``
   spanned more than one non-perturbable molecule.
 
+* Used a set rather than a list for the atom indices when preparing the REST2 data
+  structures. The indices are membership tested against every exception and torsion
+  in the system, which was quadratic for large REST2 regions, e.g. proteins.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
