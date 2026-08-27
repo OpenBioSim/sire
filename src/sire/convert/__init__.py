@@ -48,7 +48,7 @@ def supported_formats():
     return _supported_formats()
 
 
-def to(obj, format: str = "sire", map=None):
+def to(obj, format: str = "sire", map=None, determine_bond_orders: bool = True):
     """
     Convert the passed object from its current object format to the
     specified object format (default "sire"). Typically this will be converting
@@ -62,13 +62,19 @@ def to(obj, format: str = "sire", map=None):
             The format to convert to
         map:
             The property map to use for the conversion
+        determine_bond_orders: bool (default True)
+            Whether to use RDKit's ``determineBondOrders`` function when bond
+            orders need to be inferred during conversion to rdkit format. This
+            is more robust than the internal heuristic, but can be slow for
+            large molecules, e.g. proteins. (Only used when converting to
+            rdkit format.)
     """
     format = format.lower()
 
     if format == "sire":
         return to_sire(obj, map=map)
     elif format == "rdkit":
-        return to_rdkit(obj, map=map)
+        return to_rdkit(obj, map=map, determine_bond_orders=determine_bond_orders)
     elif format == "gemmi":
         return to_gemmi(obj, map=map)
     elif format == "biosimspace":
@@ -77,7 +83,7 @@ def to(obj, format: str = "sire", map=None):
         return to_openmm(obj, map=map)
     else:
         raise ValueError(
-            f"Cannot convert {obj} as the format '{format}' is " "not recognised."
+            f"Cannot convert {obj} as the format '{format}' is not recognised."
         )
 
 
@@ -184,12 +190,24 @@ def to_biosimspace(obj, map=None):
     return sire_to_biosimspace(to_sire(obj, map=map), map=map)
 
 
-def to_rdkit(obj, map=None):
+def to_rdkit(obj, map=None, determine_bond_orders: bool = True):
     """
     Convert the passed object from its current object format to a
     rdkit object format.
+
+    Args:
+        obj:
+            The input object to convert
+        map:
+            The property map to use for the conversion
+        determine_bond_orders: bool (default True)
+            Whether to use RDKit's ``determineBondOrders`` function when bond
+            orders need to be inferred. This is more robust than the internal
+            heuristic, but can be slow for large molecules, e.g. proteins.
     """
-    return sire_to_rdkit(to_sire(obj, map=map), map=map)
+    return sire_to_rdkit(
+        to_sire(obj, map=map), map=map, determine_bond_orders=determine_bond_orders
+    )
 
 
 def to_gemmi(obj, map=None):
@@ -425,10 +443,20 @@ def rdkit_to_sire(obj, map=None):
         return mols
 
 
-def sire_to_rdkit(obj, map=None):
+def sire_to_rdkit(obj, map=None, determine_bond_orders: bool = True):
     """
     Convert the passed sire object (either a molecule or list
     of molecules) to a rdkit equivalent
+
+    Args:
+        obj:
+            The sire object to convert
+        map:
+            The property map to use for the conversion
+        determine_bond_orders: bool (default True)
+            Whether to use RDKit's ``determineBondOrders`` function when bond
+            orders need to be inferred. This is more robust than the internal
+            heuristic, but can be slow for large molecules, e.g. proteins.
     """
     obj = _to_selectormol(obj)
 
@@ -441,9 +469,15 @@ def sire_to_rdkit(obj, map=None):
             "'conda install -c conda-forge rdkit'"
         )
 
-    from ..base import create_map
+    from ..base import create_map, wrap
 
-    mols = _sire_to_rdkit(obj, map=create_map(map))
+    map = create_map(map)
+
+    # only use the kwarg if this hasn't already been set in the property map
+    if not map.specified("determine_bond_orders"):
+        map.set("determine_bond_orders", wrap(determine_bond_orders))
+
+    mols = _sire_to_rdkit(obj, map=map)
 
     if mols is None:
         return None

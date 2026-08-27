@@ -678,6 +678,15 @@ namespace SireRDKit
             force_stereo_inference = map["force_stereo_inference"].value().asABoolean();
         }
 
+        // Whether to use RDKit's determineBondOrders() to infer bond orders. This
+        // is more robust than our heuristic, but can be prohibitively slow for
+        // large molecules, e.g. proteins.
+        bool determine_bond_orders = true;
+        if (map.specified("determine_bond_orders"))
+        {
+            determine_bond_orders = map["determine_bond_orders"].value().asABoolean();
+        }
+
         for (int i = 0; i < atoms.count(); ++i)
         {
             const auto atom = atoms(i);
@@ -860,34 +869,39 @@ namespace SireRDKit
             // integer formal charge of the molecule).
             int total_charge = 0;
 
-            if (has_bond_info and force_stereo_inference)
+            if (determine_bond_orders)
             {
-                for (auto a : molecule.atoms())
+                if (has_bond_info and force_stereo_inference)
                 {
-                    total_charge += a->getFormalCharge();
-                }
-            }
-            else
-            {
-                try
-                {
-                    double charge_sum = 0.0;
-                    for (int i = 0; i < atoms.count(); ++i)
+                    for (auto a : molecule.atoms())
                     {
-                        charge_sum += atoms(i).property<SireUnits::Dimension::Charge>(map["charge"]).to(SireUnits::mod_electron);
+                        total_charge += a->getFormalCharge();
                     }
-                    total_charge = static_cast<int>(std::round(charge_sum));
                 }
-                catch (...)
+                else
                 {
-                    total_charge = 0;
+                    try
+                    {
+                        double charge_sum = 0.0;
+                        for (int i = 0; i < atoms.count(); ++i)
+                        {
+                            charge_sum += atoms(i).property<SireUnits::Dimension::Charge>(map["charge"]).to(SireUnits::mod_electron);
+                        }
+                        total_charge = static_cast<int>(std::round(charge_sum));
+                    }
+                    catch (...)
+                    {
+                        total_charge = 0;
+                    }
                 }
             }
 
             // When bond info is present but force_stereo_inference is requested,
-            // reset all bonds to SINGLE and clear formal charges so that the
-            // inference algorithm starts from a clean connectivity graph.
-            if (has_bond_info and force_stereo_inference)
+            // reset all bonds to SINGLE and clear formal charges so that
+            // determineBondOrders() starts from a clean connectivity graph. The
+            // heuristic in infer_bond_info() works from the unpaired electron
+            // count of each atom, so doesn't need (or want) this reset.
+            if (determine_bond_orders and has_bond_info and force_stereo_inference)
             {
                 for (auto b : molecule.bonds())
                 {
@@ -903,49 +917,52 @@ namespace SireRDKit
                 molecule.updatePropertyCache(false);
             }
 
-            // Prefer RDKit's determineBondOrders, which is based on the xyz2mol
-            // linear-programming algorithm and is significantly more robust than the
-            // MDAnalysis heuristic implemented in infer_bond_info().
-            //
-            // determineBondOrders() needs all heavy atoms to have noImplicit set so
-            // that it does not try to add implicit hydrogens (all H are explicit when
-            // loaded from formats such as AMBER that carry all hydrogen atoms).
-            for (auto a : molecule.atoms())
-            {
-                if (a->getAtomicNum() > 1)
-                {
-                    a->setNoImplicit(true);
-                }
-            }
-
-            // Check for dummy atoms (atomic_num == 0): determineBondOrders may not
-            // handle them correctly, so fall back to the heuristic in that case.
-            bool has_dummy_atoms = false;
-            for (auto a : molecule.atoms())
-            {
-                if (a->getAtomicNum() == 0)
-                {
-                    has_dummy_atoms = true;
-                    break;
-                }
-            }
-
             bool inferred = false;
 
-            if (not has_dummy_atoms)
+            if (determine_bond_orders)
             {
-                try
+                // Prefer RDKit's determineBondOrders, which is based on the xyz2mol
+                // linear-programming algorithm and is significantly more robust than the
+                // MDAnalysis heuristic implemented in infer_bond_info().
+                //
+                // determineBondOrders() needs all heavy atoms to have noImplicit set so
+                // that it does not try to add implicit hydrogens (all H are explicit when
+                // loaded from formats such as AMBER that carry all hydrogen atoms).
+                for (auto a : molecule.atoms())
                 {
-                    // embedChiral=false: we call sanitizeMol ourselves below,
-                    // and assignStereochemistryFrom3D is called afterwards.
-                    RDKit::determineBondOrders(molecule, total_charge,
-                                               /*allowChargedFragments=*/true,
-                                               /*embedChiral=*/false,
-                                               /*useAtomMap=*/false);
-                    inferred = true;
+                    if (a->getAtomicNum() > 1)
+                    {
+                        a->setNoImplicit(true);
+                    }
                 }
-                catch (...)
+
+                // Check for dummy atoms (atomic_num == 0): determineBondOrders may not
+                // handle them correctly, so fall back to the heuristic in that case.
+                bool has_dummy_atoms = false;
+                for (auto a : molecule.atoms())
                 {
+                    if (a->getAtomicNum() == 0)
+                    {
+                        has_dummy_atoms = true;
+                        break;
+                    }
+                }
+
+                if (not has_dummy_atoms)
+                {
+                    try
+                    {
+                        // embedChiral=false: we call sanitizeMol ourselves below,
+                        // and assignStereochemistryFrom3D is called afterwards.
+                        RDKit::determineBondOrders(molecule, total_charge,
+                                                   /*allowChargedFragments=*/true,
+                                                   /*embedChiral=*/false,
+                                                   /*useAtomMap=*/false);
+                        inferred = true;
+                    }
+                    catch (...)
+                    {
+                    }
                 }
             }
 
