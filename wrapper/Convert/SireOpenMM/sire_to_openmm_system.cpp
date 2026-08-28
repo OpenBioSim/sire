@@ -2274,6 +2274,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         ghost_atoms.append(atom_index);
                         from_ghost_idxs.append(atom_index);
                     }
+                    else
+                    {
+                        // the parent isn't a ghost, so this virtual site must
+                        // join the non-ghost group, else its interaction with
+                        // any ghost atom would be left hard
+                        non_ghost_atoms.append(atom_index);
+                    }
                 }
                 else if (any_perturbable)
                 {

@@ -1,3 +1,5 @@
+from math import isclose
+
 import sire as sr
 import pytest
 
@@ -150,6 +152,199 @@ def test_vsite_pertubation(ethane_12dichloroethane, openmm_platform):
             ]
             nb_charge = nb_force.getParticleParameters(mol.num_atoms() + vs_index)[0]
             assert expected_charge == nb_charge.value_in_unit(unit.elementary_charge)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+@pytest.mark.parametrize(
+    ["rest2_selection", "rest2_vsites"],
+    [
+        # No selection, so the whole perturbable molecule is the REST2 region
+        # and both virtual sites are scaled.
+        (None, [0, 1]),
+        # Only the parent atom of the first virtual site is in the REST2
+        # region, so only that virtual site is scaled.
+        ("atomidx 0,1,2", [0]),
+    ],
+)
+def test_vsite_rest2(
+    ethane_12dichloroethane, openmm_platform, rest2_selection, rest2_vsites
+):
+    # Do virtual sites inherit the REST2 flag of their parent atom?
+    mols = ethane_12dichloroethane
+
+    # Just dichloroethane
+    mol = mols[0]
+
+    # Set vsite properties. The parent atoms are 0 and 3, i.e. the first
+    # index of each vs_indices list.
+    vsite_dict = {
+        "0": {
+            "vs_indices": [0, 1, 2],
+            "vs_ows": [1, 0, 0],
+            "vs_xs": [1, -1, 0],
+            "vs_ys": [0, 1, -1],
+            "vs_local": [0.03, 0, 0],
+        },
+        "1": {
+            "vs_indices": [3, 2, 1],
+            "vs_ows": [1, 0, 0],
+            "vs_xs": [1, -1, 0],
+            "vs_ys": [0, 1, -1],
+            "vs_local": [0.03, 0, 0],
+        },
+    }
+
+    parents_dict = {str(atom_i): [] for atom_i in range(mol.num_atoms())}
+    for v, vs in enumerate(vsite_dict):
+        parent = vsite_dict[vs]["vs_indices"][0]
+        parents_dict[str(parent)].append(v)
+
+    n_virtual_sites = len(vsite_dict)
+    vs_charges0 = [0.1, 0.1]
+    vs_charges1 = [0.2, 0.2]
+
+    cursor = mol.cursor()
+    cursor.set("n_virtual_sites", n_virtual_sites)
+    cursor.set("vs_charges0", vs_charges0)
+    cursor.set("vs_charges1", vs_charges1)
+    cursor.set("virtual_sites", vsite_dict)
+    cursor.set("parents", parents_dict)
+    mol = cursor.commit()
+
+    mol = sr.morph.link_to_reference(mol)
+
+    d = mol.dynamics(
+        lambda_value=0.0,
+        platform=openmm_platform,
+        rest2_selection=rest2_selection,
+    )
+
+    nb_force = next(
+        force
+        for force in d.context().getSystem().getForces()
+        if force.getName() == "NonbondedForce"
+    )
+
+    # Store the unscaled charges at the same lambda value, so that the
+    # comparison isolates the REST2 scaling from the lambda lever.
+    d.set_lambda(0.0, rest2_scale=1.0)
+    charges_initial = [
+        nb_force.getParticleParameters(i)[0]._value
+        for i in range(nb_force.getNumParticles())
+    ]
+
+    # Update the REST2 scaling factor.
+    d.set_lambda(0.0, rest2_scale=2.0)
+
+    # Store the scaling factor.
+    scale = 0.5
+
+    for vs_index in range(n_virtual_sites):
+        parent = vsite_dict[str(vs_index)]["vs_indices"][0]
+
+        # The virtual sites are appended after the atoms of the molecule.
+        for i in [parent, mol.num_atoms() + vs_index]:
+            charge = nb_force.getParticleParameters(i)[0]._value
+
+            if vs_index in rest2_vsites:
+                assert isclose(charge, charges_initial[i] * scale**0.5)
+            else:
+                assert isclose(charge, charges_initial[i])
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_vsite_ghost_interaction_groups(solvated_neopentane_methane, openmm_platform):
+    # Are virtual sites placed in the same softcore interaction group as their
+    # parent atom?
+    mols = solvated_neopentane_methane
+
+    mol0 = mols[0]
+
+    # Atom 0 (C1) becomes a ghost at lambda = 1, while atom 1 (C2) is present
+    # in both end states, so the two virtual sites cover both cases.
+    vsite_dict = {
+        "0": {
+            "vs_indices": [0, 1, 2],
+            "vs_ows": [1, 0, 0],
+            "vs_xs": [1, -1, 0],
+            "vs_ys": [0, 1, -1],
+            "vs_local": [0.03, 0, 0],
+        },
+        "1": {
+            "vs_indices": [1, 2, 3],
+            "vs_ows": [1, 0, 0],
+            "vs_xs": [1, -1, 0],
+            "vs_ys": [0, 1, -1],
+            "vs_local": [0.03, 0, 0],
+        },
+    }
+
+    parents_dict = {str(atom_i): [] for atom_i in range(mol0.num_atoms())}
+    for v, vs in enumerate(vsite_dict):
+        parent = vsite_dict[vs]["vs_indices"][0]
+        parents_dict[str(parent)].append(v)
+
+    n_virtual_sites = len(vsite_dict)
+    vs_charges0 = [0.1, 0.1]
+    vs_charges1 = [0.2, 0.2]
+
+    cursor = mol0.cursor()
+    cursor.set("n_virtual_sites", n_virtual_sites)
+    cursor.set("vs_charges0", vs_charges0)
+    cursor.set("vs_charges1", vs_charges1)
+    cursor.set("virtual_sites", vsite_dict)
+    cursor.set("parents", parents_dict)
+    mol0 = cursor.commit()
+    mols.update(mol0)
+
+    mols = sr.morph.link_to_reference(mols)
+
+    d = mols.dynamics(lambda_value=0.0, platform=openmm_platform)
+    system = d.context().getSystem()
+
+    forces = {force.getName(): force for force in system.getForces()}
+
+    # The ghost/ghost group is the ghost atoms paired with themselves, and the
+    # ghost/non-ghost group is the ghost atoms paired with everything else.
+    ghosts, ghosts_again = forces[
+        "GhostGhostNonbondedForce"
+    ].getInteractionGroupParameters(0)
+    assert set(ghosts) == set(ghosts_again)
+
+    ghosts_check, non_ghosts = forces[
+        "GhostNonGhostNonbondedForce"
+    ].getInteractionGroupParameters(0)
+    assert set(ghosts_check) == set(ghosts)
+
+    ghosts = set(ghosts)
+    non_ghosts = set(non_ghosts)
+
+    # Every particle, including every virtual site, must be in exactly one of
+    # the two groups. A particle in neither would be left hard.
+    assert ghosts.isdisjoint(non_ghosts)
+    assert ghosts | non_ghosts == set(range(system.getNumParticles()))
+
+    # The virtual sites are appended after the atoms of the molecule, which is
+    # the first molecule in the system.
+    for vs_index in range(n_virtual_sites):
+        parent = vsite_dict[str(vs_index)]["vs_indices"][0]
+        particle = mol0.num_atoms() + vs_index
+
+        if parent in ghosts:
+            assert particle in ghosts
+        else:
+            assert particle in non_ghosts
+
+    # Make sure that both cases were actually covered, i.e. that the choice of
+    # parent atoms above still holds for this perturbation.
+    assert vsite_dict["0"]["vs_indices"][0] in ghosts
+    assert vsite_dict["1"]["vs_indices"][0] in non_ghosts
 
 
 @pytest.mark.skipif(

@@ -549,6 +549,24 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         is_rest2 = QVector<bool>(nats, true);
     }
 
+    // Virtual sites are appended as extra particles after the atoms, so the
+    // mask must cover them too. Each virtual site inherits the REST2 flag of
+    // its parent atom.
+    if (this->has_vs)
+    {
+        is_rest2.resize(nats + this->n_vs);
+
+        for (int i = 0; i < nats; ++i)
+        {
+            auto atom_vs = this->vs_parents.property(std::to_string(i).c_str()).asAnArray();
+
+            for (int vs = 0; vs < atom_vs.size(); ++vs)
+            {
+                is_rest2[nats + atom_vs.at(vs).asAnInteger()] = is_rest2[i];
+            }
+        }
+    }
+
     if (nats <= 0)
     {
         return;
