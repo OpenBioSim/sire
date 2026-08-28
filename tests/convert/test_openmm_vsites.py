@@ -259,6 +259,98 @@ def test_vsite_rest2(
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+def test_vsite_ghost_interaction_groups(solvated_neopentane_methane, openmm_platform):
+    # Are virtual sites placed in the same softcore interaction group as their
+    # parent atom?
+    mols = solvated_neopentane_methane
+
+    mol0 = mols[0]
+
+    # Atom 0 (C1) becomes a ghost at lambda = 1, while atom 1 (C2) is present
+    # in both end states, so the two virtual sites cover both cases.
+    vsite_dict = {
+        "0": {
+            "vs_indices": [0, 1, 2],
+            "vs_ows": [1, 0, 0],
+            "vs_xs": [1, -1, 0],
+            "vs_ys": [0, 1, -1],
+            "vs_local": [0.03, 0, 0],
+        },
+        "1": {
+            "vs_indices": [1, 2, 3],
+            "vs_ows": [1, 0, 0],
+            "vs_xs": [1, -1, 0],
+            "vs_ys": [0, 1, -1],
+            "vs_local": [0.03, 0, 0],
+        },
+    }
+
+    parents_dict = {str(atom_i): [] for atom_i in range(mol0.num_atoms())}
+    for v, vs in enumerate(vsite_dict):
+        parent = vsite_dict[vs]["vs_indices"][0]
+        parents_dict[str(parent)].append(v)
+
+    n_virtual_sites = len(vsite_dict)
+    vs_charges0 = [0.1, 0.1]
+    vs_charges1 = [0.2, 0.2]
+
+    cursor = mol0.cursor()
+    cursor.set("n_virtual_sites", n_virtual_sites)
+    cursor.set("vs_charges0", vs_charges0)
+    cursor.set("vs_charges1", vs_charges1)
+    cursor.set("virtual_sites", vsite_dict)
+    cursor.set("parents", parents_dict)
+    mol0 = cursor.commit()
+    mols.update(mol0)
+
+    mols = sr.morph.link_to_reference(mols)
+
+    d = mols.dynamics(lambda_value=0.0, platform=openmm_platform)
+    system = d.context().getSystem()
+
+    forces = {force.getName(): force for force in system.getForces()}
+
+    # The ghost/ghost group is the ghost atoms paired with themselves, and the
+    # ghost/non-ghost group is the ghost atoms paired with everything else.
+    ghosts, ghosts_again = forces[
+        "GhostGhostNonbondedForce"
+    ].getInteractionGroupParameters(0)
+    assert set(ghosts) == set(ghosts_again)
+
+    ghosts_check, non_ghosts = forces[
+        "GhostNonGhostNonbondedForce"
+    ].getInteractionGroupParameters(0)
+    assert set(ghosts_check) == set(ghosts)
+
+    ghosts = set(ghosts)
+    non_ghosts = set(non_ghosts)
+
+    # Every particle, including every virtual site, must be in exactly one of
+    # the two groups. A particle in neither would be left hard.
+    assert ghosts.isdisjoint(non_ghosts)
+    assert ghosts | non_ghosts == set(range(system.getNumParticles()))
+
+    # The virtual sites are appended after the atoms of the molecule, which is
+    # the first molecule in the system.
+    for vs_index in range(n_virtual_sites):
+        parent = vsite_dict[str(vs_index)]["vs_indices"][0]
+        particle = mol0.num_atoms() + vs_index
+
+        if parent in ghosts:
+            assert particle in ghosts
+        else:
+            assert particle in non_ghosts
+
+    # Make sure that both cases were actually covered, i.e. that the choice of
+    # parent atoms above still holds for this perturbation.
+    assert vsite_dict["0"]["vs_indices"][0] in ghosts
+    assert vsite_dict["1"]["vs_indices"][0] in non_ghosts
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
 def test_vsite_restraints(solvated_neopentane_methane, openmm_platform):
     # Are restraints added correctly to vsite systems
     mols = solvated_neopentane_methane
