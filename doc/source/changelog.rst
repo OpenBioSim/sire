@@ -76,6 +76,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   structures. The indices are membership tested against every exception and torsion
   in the system, which was quadratic for large REST2 regions, e.g. proteins.
 
+* Fixed the REST2 region mask not covering off-site charges (virtual sites), which
+  are appended to the OpenMM system as extra particles after the atoms of each
+  molecule. This caused an out-of-bounds read when applying the REST2 scaling to a
+  perturbable molecule with virtual sites. Each virtual site now inherits the REST2
+  flag of its parent atom, so its charge is scaled along with it.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
