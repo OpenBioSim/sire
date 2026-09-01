@@ -36,8 +36,8 @@ It is used as a key component of `BioSimSpace <https://biosimspace.org>`__,
 and is distributed and supported as an open source community project by
 `OpenBioSim <https://openbiosim.org>`__.
 
-For more information about how to use Sire, and about application
-built with Sire, please `visit the Sire website <https://sire.openbiosim.org>`__.
+For more information about how to use sire, and about applications
+built with sire, please `visit the sire website <https://sire.openbiosim.org>`__.
 
 * `Features <https://sire.openbiosim.org/features.html>`__
 * `Quick start guide <https://sire.openbiosim.org/quickstart/index.html>`__
@@ -46,7 +46,7 @@ built with Sire, please `visit the Sire website <https://sire.openbiosim.org>`__
 Installation
 ============
 
-The easiest way to install Sire is using our `conda channel <https://anaconda.org/openbiosim/repo>`__.
+The easiest way to install sire is using our `conda channel <https://anaconda.org/openbiosim/repo>`__.
 Sire is built using dependencies from `conda-forge <https://conda-forge.org/>`__,
 so please ensure that the channel takes strict priority. We recommend using
 `miniforge3 <https://github.com/conda-forge/miniforge#miniforge3>`__.
@@ -135,7 +135,9 @@ Other pixi environments are available depending on your needs:
 * ``pixi install -e default`` - core sire dependencies only
 * ``pixi install -e obs`` - include downstream OpenBioSim package dependencies
 * ``pixi install -e emle`` - include `emle-engine <https://github.com/chemle/emle-engine>`__ dependencies
-* ``pixi install -e dev`` - all of the above plus test dependencies
+* ``pixi install -e test`` - include test dependencies
+* ``pixi install -e full`` - include both the ``obs`` and ``emle`` dependencies
+* ``pixi install -e dev`` - all of the above, plus linting tools
 
 Any additional startup commands can be specified in the ``pixi.sh`` file
 in the root of the sire repository. This file is automatically sourced when
@@ -174,7 +176,7 @@ Support and Development
 Bugs, Comments, Questions
 -------------------------
 For bug reports/suggestions/complaints please file an issue on
-`GitHub <http://github.com/OpenBioSim/sire/issues>`__.
+`GitHub <https://github.com/OpenBioSim/sire/issues>`__.
 
 Developers guide
 ----------------
@@ -199,14 +201,14 @@ a consistent style without a blanket one-time reformatting.
 
 GitHub actions
 --------------
-Since sire is quite large, a build can take quite long and might not be neccessary
-if a commit is only fixing a couple of typos. Simply add ``ci skip``
+Since sire is quite large, a build can take quite a long time and might not be
+necessary if a commit is only fixing a couple of typos. Simply add ``ci skip``
 to your commit message and GitHub actions will not invoke an autobuild.
 
 Note that every time you commit to devel, it will trigger a build of sire,
 full testing, construction of a Conda package and upload to our Anaconda
 channel. Please think twice before committing directly to devel. You should
-ideally be working in a _feature_ branch, and only commit to devel once you are
+ideally be working in a *feature* branch, and only commit to devel once you are
 happy the code works on your branch. Use ``ci skip`` until you are happy that
 you want to trigger a full build, test and deployment. This full pipeline will
 take several hours to complete.
