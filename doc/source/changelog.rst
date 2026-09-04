@@ -92,6 +92,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   dynamics block that didn't save energies, since the context's energy cache was
   only invalidated when an energy was recorded.
 
+* Fixed a data race in ``AmberParams::validateAndFix()`` that could segfault when
+  creating an OpenMM system. GROMACS topologies can contain torsions with a zero
+  force constant, which the ``GroTop`` reader drops. As those torsions are what
+  carry the 1-4 scaling in AMBER-derived topologies, the parameters had to be
+  rebuilt for every affected 1-4 pair, and the parallel loop that did this read
+  the shared dihedral hash without holding the mutex that guarded the inserts.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
