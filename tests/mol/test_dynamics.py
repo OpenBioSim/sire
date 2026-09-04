@@ -153,7 +153,8 @@ def test_sample_frequency(ala_mols, openmm_platform):
 )
 def test_crash_report(merged_ethane_methanol, openmm_platform):
     """
-    Test that energies and frames are saved at the correct frequency.
+    Test that a crash writes a report. The system is deliberately not
+    minimised first, so that the dynamics blows up.
     """
 
     import os
@@ -179,7 +180,11 @@ def test_crash_report(merged_ethane_methanol, openmm_platform):
         os.chdir(tmpdir.name)
 
         # Run a short simulation, forcing a crash.
-        d.run("1ps", save_crash_report=True)
+        try:
+            d.run("1ps", save_crash_report=True)
+        except Exception:
+            # Ignore exceptions raised during the dynamics run.
+            pass
 
         # Glob for the crash report files.
         crash_log = glob.glob("crash_*.log")
@@ -190,9 +195,6 @@ def test_crash_report(merged_ethane_methanol, openmm_platform):
         assert len(crash_log) == 1
         assert len(crash_system) == 1
         assert len(crash_positions) == 1
-    except:
-        # Ingore exceptions raised during the dynamics run.
-        pass
     finally:
         # Change back to the old directory.
         os.chdir(old_dir)
