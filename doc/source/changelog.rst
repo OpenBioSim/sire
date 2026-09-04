@@ -88,6 +88,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   ``NonbondedForce`` alone, i.e. without softening, and without the subtraction of the
   coulomb energy that the softcore replaces.
 
+* Fixed ``Dynamics.current_potential_energy()`` returning a stale value after a
+  dynamics block that didn't save energies, since the context's energy cache was
+  only invalidated when an energy was recorded.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 

@@ -445,6 +445,10 @@ class DynamicsData:
             self._omm_state = self._omm_mols.getState(getEnergy=True)
             self._omm_state_has_cv = (False, False)
 
+        # dynamics has advanced the positions without going through
+        # setPositions(), so the context's energy cache is stale
+        self._omm_mols.clear_energy_cache()
+
         current_time = (
             self._omm_state.getTime().value_in_unit(openmm.unit.nanosecond) * nanosecond
         )
@@ -511,10 +515,6 @@ class DynamicsData:
                 nrg_sim_lambda_value = nrg
 
                 if lambda_windows is not None:
-                    # Positions have just changed (dynamics completed), so
-                    # invalidate all cached per-group energies before the scan.
-                    self._omm_mols.clear_energy_cache()
-
                     # get the index of the simulation lambda value in the
                     # lambda windows list
                     try:
@@ -573,10 +573,6 @@ class DynamicsData:
             # Store the current energies.
             self._nrgs = nrgs
             self._nrgs_array = nrgs_array
-
-            # Repex synchronisation point: a peer replica may push new
-            # positions into this context, so the cache must be invalidated.
-            self._omm_mols.clear_energy_cache()
 
             # update the interpolation lambda value
             if self._is_interpolate:

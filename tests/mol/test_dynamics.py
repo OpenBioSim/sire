@@ -301,3 +301,42 @@ def test_clock_and_energy_trajectory_swap(ala_mols):
     for r in range(num_replicas):
         assert len(cache_nrgs[r]) == num_cycles
         assert cache_nrgs[r] == ref_nrgs[r]
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_energy_cache_cleared_after_dynamics(ala_mols):
+    """
+    The context's energy cache must be invalidated after every dynamics block,
+    not just one that saved energies. The integrator advances the positions
+    without going through setPositions(), so nothing else clears it.
+    """
+    import openmm
+
+    mols = ala_mols
+
+    d = mols.dynamics(timestep="1fs", temperature="300K", platform="Reference")
+
+    def direct():
+        return (
+            d.context()
+            .getState(getEnergy=True)
+            .getPotentialEnergy()
+            .value_in_unit(openmm.unit.kilocalorie_per_mole)
+        )
+
+    assert d.current_potential_energy().value() == pytest.approx(direct())
+
+    # A block that doesn't record an energy.
+    d.run("50fs")
+    assert d.current_potential_energy().value() == pytest.approx(direct())
+
+    # A block that does.
+    d.run("50fs", energy_frequency="10fs")
+    assert d.current_potential_energy().value() == pytest.approx(direct())
+
+    # A block that doesn't, again, now that a trajectory exists.
+    d.run("50fs")
+    assert d.current_potential_energy().value() == pytest.approx(direct())
