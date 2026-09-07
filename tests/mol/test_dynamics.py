@@ -153,8 +153,10 @@ def test_sample_frequency(ala_mols, openmm_platform):
 )
 def test_crash_report(merged_ethane_methanol, openmm_platform):
     """
-    Test that a crash writes a report. The system is deliberately not
-    minimised first, so that the dynamics blows up.
+    Test that a crash writes a report. The timestep is deliberately far too
+    large so that the blow-up is certain. An unminimised system alone is not
+    enough, since whether it survives depends on the random start velocities,
+    which made this test fail intermittently.
     """
 
     import os
@@ -167,7 +169,7 @@ def test_crash_report(merged_ethane_methanol, openmm_platform):
     mols = merged_ethane_methanol.clone()
     mols = sr.morph.link_to_reference(mols)
 
-    d = mols.dynamics(platform=openmm_platform)
+    d = mols.dynamics(platform=openmm_platform, timestep="20fs", constraint="none")
 
     # Run a short simulation within a temporary directory.
     tmpdir = tempfile.TemporaryDirectory()
