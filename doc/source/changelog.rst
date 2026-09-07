@@ -99,6 +99,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   rebuilt for every affected 1-4 pair, and the parallel loop that did this read
   the shared dihedral hash without holding the mutex that guarded the inserts.
 
+* Fixed CMAP grids not being converted between kcal mol-1 and kJ mol-1 when writing
+  to, and reading from, GROMACS topology files.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
