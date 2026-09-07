@@ -79,9 +79,9 @@ def test_amber_multichain_cmap(tmpdir, multichain_cmap):
         if mol.has_property("cmap"):
             cmap_counts[i] = len(mol.property("cmap").parameters())
 
-    assert (
-        len(cmap_counts) >= 2
-    ), "Expected at least two molecules with CMAP terms in this topology"
+    assert len(cmap_counts) >= 2, (
+        "Expected at least two molecules with CMAP terms in this topology"
+    )
 
     dir = tmpdir.mkdir("test_amber_multichain_cmap")
 
@@ -95,13 +95,13 @@ def test_amber_multichain_cmap(tmpdir, multichain_cmap):
     # roundtrip.
     for i, count in cmap_counts.items():
         mol2 = mols2[i]
-        assert mol2.has_property(
-            "cmap"
-        ), f"Molecule at index {i} lost its cmap property after roundtrip"
+        assert mol2.has_property("cmap"), (
+            f"Molecule at index {i} lost its cmap property after roundtrip"
+        )
         count2 = len(mol2.property("cmap").parameters())
-        assert (
-            count2 == count
-        ), f"Molecule at index {i}: CMAP count changed from {count} to {count2}"
+        assert count2 == count, (
+            f"Molecule at index {i}: CMAP count changed from {count} to {count2}"
+        )
 
     # Verify a second write also succeeds without error.
     sr.save(mols2, dir.join("output2"), format="prm7")
@@ -169,3 +169,58 @@ def test_amber_cmap_grotop(tmpdir, amber_cmap):
                 found = True
 
         assert found
+
+
+def test_amber_cmap_grotop_units(tmpdir, amber_cmap):
+    """Testing that CMAP grids are converted to kJ mol-1 when written to gromacs."""
+    mols = amber_cmap.clone()
+
+    dir = tmpdir.mkdir("test_amber_cmap_grotop_units")
+
+    # Save to a temporary file in GroTop format.
+    f = sr.save(mols, dir.join("output"), format="GroTop")[0]
+
+    # Read the values from the [ cmaptypes ] section of the file.
+    file_values = []
+    in_cmaptypes = False
+
+    for line in open(f):
+        line = line.strip()
+
+        if line.startswith("["):
+            in_cmaptypes = line.replace(" ", "") == "[cmaptypes]"
+            continue
+
+        if not in_cmaptypes or not line or line.startswith(";"):
+            continue
+
+        # strip the line continuation, then drop the leading
+        # "atm0 atm1 atm2 atm3 atm4 func nrows ncols" of a header line
+        parts = line.rstrip("\\").split()
+
+        try:
+            float(parts[0])
+        except ValueError:
+            parts = parts[8:]
+
+        file_values += [float(x) for x in parts]
+
+    # Gather the grid values held in memory, which are in kcal mol-1. Only the
+    # unique grids are written to the file, so deduplicate to match.
+    mol_values = []
+    seen = set()
+
+    for cmap in mols[0].property("cmap").parameters():
+        values = tuple(cmap.parameter().values())
+
+        if values not in seen:
+            seen.add(values)
+            mol_values += list(values)
+
+    assert len(file_values) == len(mol_values)
+
+    # The written values must be the in-memory values converted to kJ mol-1.
+    kcal_to_kj = sr.u("1 kcal mol-1").to("kJ mol-1")
+
+    for written, expected in zip(sorted(file_values), sorted(mol_values)):
+        assert written == pytest.approx(expected * kcal_to_kj, rel=1e-5)
