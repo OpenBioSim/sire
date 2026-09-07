@@ -66,6 +66,8 @@
 
 #include <QDebug>
 
+#include <mutex>
+
 using namespace SireMol;
 using namespace SireCAS;
 using namespace SireMM;
@@ -1453,8 +1455,10 @@ QStringList AmberParams::validateAndFix()
 
     if (not exc_atoms.isEmpty())
     {
+        // the connectivity implied by the bonds - only built if a worker below
+        // actually needs it, as many molecules (e.g. water) have no 1-4 pairs
         Connectivity conn;
-        bool has_connectivity = false;
+        std::once_flag conn_flag;
 
         auto new_dihedrals = amber_dihedrals;
         auto new_nb14s = amber_nb14s;
@@ -1504,17 +1508,9 @@ QStringList AmberParams::validateAndFix()
                                     const auto atm3 =
                                         molinfo.atomIdx(CGAtomIdx(CGIdx(jcg), Index(j)));
 
-                                    if (not has_connectivity)
-                                    {
-                                        // have to use the connectivity that is implied by the
-                                        // bonds
-                                        QMutexLocker lkr(&mutex);
-                                        if (not has_connectivity)
-                                        {
-                                            conn = this->connectivity();
-                                            has_connectivity = true;
-                                        }
-                                    }
+                                    std::call_once(conn_flag,
+                                                   [&]()
+                                                   { conn = this->connectivity(); });
 
                                     // find the shortest bonded paths between these two atoms
                                     const auto paths = conn.findPaths(atm0, atm3, 4);
@@ -1577,6 +1573,10 @@ QStringList AmberParams::validateAndFix()
                                         auto dih = this->convert(
                                             DihedralID(path[0], path[1], path[2], path[3]));
 
+                                        // the check and the updates below must be a single
+                                        // atomic operation, as workers share these containers
+                                        QMutexLocker lkr(&mutex);
+
                                         // skip if we already have this dihedral
                                         if (new_dihedrals.contains(dih))
                                             continue;
@@ -1603,7 +1603,6 @@ QStringList AmberParams::validateAndFix()
 
                                         // create a null dihedral parameter and add this to the
                                         // set
-                                        QMutexLocker lkr(&mutex);
                                         new_dihedrals.insert(
                                             dih,
                                             qMakePair(AmberDihedral(Expression(0), Symbol("phi")),
