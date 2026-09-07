@@ -457,7 +457,10 @@ static QList<QString> cmap_id_to_atomtypes(const QString &cmap_id)
     return parts.mid(0, 5);
 }
 
-static QString cmap_to_string(const CMAPParameter &cmap)
+/** Serialise the CMAP grid, scaling the values by 'scale'. This is used both for
+    the in-memory string representation (scale of 1) and for writing to file,
+    where the grid must be converted from kcal mol-1 to kJ mol-1 */
+static QString cmap_to_string(const CMAPParameter &cmap, double scale = 1.0)
 {
     // format is "1 nRows nCols param param param..."
     QStringList params;
@@ -471,7 +474,7 @@ static QString cmap_to_string(const CMAPParameter &cmap)
 
     for (int i = 0; i < vals.size(); ++i)
     {
-        line.append(QString::number(vals[i], 'f', 8));
+        line.append(QString::number(vals[i] * scale, 'f', 8));
 
         if (line.count() == 10)
         {
@@ -3717,10 +3720,11 @@ static QStringList writeCMAPTypes(const QHash<QString, CMAPParameter> &cmap_para
         const auto &cmap = cmap_params[key];
         key = key.replace(";", " ");
 
-        // Create the line with the parameters.
+        // Create the line with the parameters, converting the grid from
+        // kcal mol-1 to the kJ mol-1 expected by gromacs.
         lines.append(QString("%1 %2")
                          .arg(key)
-                         .arg(cmap_to_string(cmap)));
+                         .arg(cmap_to_string(cmap, (1 * kcal_per_mol).to(kJ_per_mol))));
     }
 
     lines.append("");
@@ -7406,9 +7410,12 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
                 continue;
             }
 
-            // we can now read in the cmap values
+            // we can now read in the cmap values, converting the grid from the
+            // kJ mol-1 used by gromacs to the kcal mol-1 used by sire
             QVector<double> cmap_values(nrows * ncols);
             auto *cmap_values_data = cmap_values.data();
+
+            const double to_kcal_per_mol = (1 * kJ_per_mol).to(kcal_per_mol);
 
             ok = true;
 
@@ -7426,7 +7433,7 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
                     break;
                 }
 
-                cmap_values_data[i] = value;
+                cmap_values_data[i] = value * to_kcal_per_mol;
             }
 
             if (not ok)
