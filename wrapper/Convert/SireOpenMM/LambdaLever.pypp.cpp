@@ -2,8 +2,8 @@
 
 // (C) Christopher Woods, GPL >= 3 License
 
-#include "boost/python.hpp"
 #include "LambdaLever.pypp.hpp"
+#include "boost/python.hpp"
 
 namespace bp = boost::python;
 
@@ -31,7 +31,7 @@ namespace bp = boost::python;
 
 #include "tostring.h"
 
-SireOpenMM::LambdaLever __copy__(const SireOpenMM::LambdaLever &other){ return SireOpenMM::LambdaLever(other); }
+SireOpenMM::LambdaLever __copy__(const SireOpenMM::LambdaLever &other) { return SireOpenMM::LambdaLever(other); }
 
 #include "Helpers/copy.hpp"
 
@@ -39,303 +39,216 @@ SireOpenMM::LambdaLever __copy__(const SireOpenMM::LambdaLever &other){ return S
 
 #include "Helpers/release_gil_policy.hpp"
 
+#include "Helpers/scoped_gil_release.hpp"
+
 #include "Qt/qdatastream.hpp"
 
-void register_LambdaLever_class(){
+namespace
+{
+    /** setLambda holds the GIL for the whole parameter update, which
+        serialises replica exchange workers against one another. Nothing in
+        the call touches Python, so the GIL is dropped for the duration.
+    */
+    double setLambda_no_gil(const SireOpenMM::LambdaLever &lever,
+                            OpenMM::Context &context,
+                            double lambda_value,
+                            double rest2_scale,
+                            bool update_constraints)
+    {
+        SireHelpers::ScopedGILRelease release_gil;
+        return lever.setLambda(context, lambda_value, rest2_scale, update_constraints);
+    }
+}
+
+void register_LambdaLever_class()
+{
 
     { //::SireOpenMM::LambdaLever
-        typedef bp::class_< SireOpenMM::LambdaLever > LambdaLever_exposer_t;
-        LambdaLever_exposer_t LambdaLever_exposer = LambdaLever_exposer_t( "LambdaLever", "This is a lever that is used to change the parameters in an OpenMM\ncontext according to a lambda value. This is actually a collection\nof levers, each of which is controlled by the main lever.\n\nYou can use SireCAS expressions to control how each lever changes\neach parameter\n", bp::init< >("") );
-        bp::scope LambdaLever_scope( LambdaLever_exposer );
-        LambdaLever_exposer.def( bp::init< SireOpenMM::LambdaLever const & >(( bp::arg("other") ), "") );
+        typedef bp::class_<SireOpenMM::LambdaLever> LambdaLever_exposer_t;
+        LambdaLever_exposer_t LambdaLever_exposer = LambdaLever_exposer_t("LambdaLever", "This is a lever that is used to change the parameters in an OpenMM\ncontext according to a lambda value. This is actually a collection\nof levers, each of which is controlled by the main lever.\n\nYou can use SireCAS expressions to control how each lever changes\neach parameter\n", bp::init<>(""));
+        bp::scope LambdaLever_scope(LambdaLever_exposer);
+        LambdaLever_exposer.def(bp::init<SireOpenMM::LambdaLever const &>((bp::arg("other")), ""));
         { //::SireOpenMM::LambdaLever::addLever
-        
-            typedef void ( ::SireOpenMM::LambdaLever::*addLever_function_type)( ::QString const & ) ;
-            addLever_function_type addLever_function_value( &::SireOpenMM::LambdaLever::addLever );
-            
-            LambdaLever_exposer.def( 
-                "addLever"
-                , addLever_function_value
-                , ( bp::arg("lever_name") )
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef void (::SireOpenMM::LambdaLever::*addLever_function_type)(::QString const &);
+            addLever_function_type addLever_function_value(&::SireOpenMM::LambdaLever::addLever);
+
+            LambdaLever_exposer.def(
+                "addLever", addLever_function_value, (bp::arg("lever_name")), bp::release_gil_policy(), "");
         }
         { //::SireOpenMM::LambdaLever::addPerturbableMolecule
-        
-            typedef int ( ::SireOpenMM::LambdaLever::*addPerturbableMolecule_function_type)( ::SireOpenMM::OpenMMMolecule const &,::QHash< QString, int > const &,::SireBase::PropertyMap const & ) ;
-            addPerturbableMolecule_function_type addPerturbableMolecule_function_value( &::SireOpenMM::LambdaLever::addPerturbableMolecule );
-            
-            LambdaLever_exposer.def( 
-                "addPerturbableMolecule"
-                , addPerturbableMolecule_function_value
-                , ( bp::arg("molecule"), bp::arg("start_indicies"), bp::arg("map")=SireBase::PropertyMap() )
-                , "Add info for the passed perturbable OpenMMMolecule, returning\n  its index in the list of perturbable molecules\n" );
-        
+
+            typedef int (::SireOpenMM::LambdaLever::*addPerturbableMolecule_function_type)(::SireOpenMM::OpenMMMolecule const &, ::QHash<QString, int> const &, ::SireBase::PropertyMap const &);
+            addPerturbableMolecule_function_type addPerturbableMolecule_function_value(&::SireOpenMM::LambdaLever::addPerturbableMolecule);
+
+            LambdaLever_exposer.def(
+                "addPerturbableMolecule", addPerturbableMolecule_function_value, (bp::arg("molecule"), bp::arg("start_indicies"), bp::arg("map") = SireBase::PropertyMap()), "Add info for the passed perturbable OpenMMMolecule, returning\n  its index in the list of perturbable molecules\n");
         }
         { //::SireOpenMM::LambdaLever::addRestraintIndex
-        
-            typedef void ( ::SireOpenMM::LambdaLever::*addRestraintIndex_function_type)( ::QString const &,int ) ;
-            addRestraintIndex_function_type addRestraintIndex_function_value( &::SireOpenMM::LambdaLever::addRestraintIndex );
-            
-            LambdaLever_exposer.def( 
-                "addRestraintIndex"
-                , addRestraintIndex_function_value
-                , ( bp::arg("force"), bp::arg("index") )
-                , bp::release_gil_policy()
-                , "Add the index of a restraint force called restraint in the\n  OpenMM System. There can be multiple restraint forces with\n  the same name\n" );
-        
+
+            typedef void (::SireOpenMM::LambdaLever::*addRestraintIndex_function_type)(::QString const &, int);
+            addRestraintIndex_function_type addRestraintIndex_function_value(&::SireOpenMM::LambdaLever::addRestraintIndex);
+
+            LambdaLever_exposer.def(
+                "addRestraintIndex", addRestraintIndex_function_value, (bp::arg("force"), bp::arg("index")), bp::release_gil_policy(), "Add the index of a restraint force called restraint in the\n  OpenMM System. There can be multiple restraint forces with\n  the same name\n");
         }
         { //::SireOpenMM::LambdaLever::getForceIndex
-        
-            typedef int ( ::SireOpenMM::LambdaLever::*getForceIndex_function_type)( ::QString const & ) const;
-            getForceIndex_function_type getForceIndex_function_value( &::SireOpenMM::LambdaLever::getForceIndex );
-            
-            LambdaLever_exposer.def( 
-                "getForceIndex"
-                , getForceIndex_function_value
-                , ( bp::arg("name") )
-                , bp::release_gil_policy()
-                , "Get the index of the force called name. Returns -1 if\n  there is no force with this name\n" );
-        
+
+            typedef int (::SireOpenMM::LambdaLever::*getForceIndex_function_type)(::QString const &) const;
+            getForceIndex_function_type getForceIndex_function_value(&::SireOpenMM::LambdaLever::getForceIndex);
+
+            LambdaLever_exposer.def(
+                "getForceIndex", getForceIndex_function_value, (bp::arg("name")), bp::release_gil_policy(), "Get the index of the force called name. Returns -1 if\n  there is no force with this name\n");
         }
         { //::SireOpenMM::LambdaLever::getForceType
-        
-            typedef ::QString ( ::SireOpenMM::LambdaLever::*getForceType_function_type)( ::QString const &,::OpenMM::System const & ) const;
-            getForceType_function_type getForceType_function_value( &::SireOpenMM::LambdaLever::getForceType );
-            
-            LambdaLever_exposer.def( 
-                "getForceType"
-                , getForceType_function_value
-                , ( bp::arg("name"), bp::arg("system") )
-                , bp::release_gil_policy()
-                , "Get the C++ type of the force called name. Returns an\n  empty string if there is no such force\n" );
-        
+
+            typedef ::QString (::SireOpenMM::LambdaLever::*getForceType_function_type)(::QString const &, ::OpenMM::System const &) const;
+            getForceType_function_type getForceType_function_value(&::SireOpenMM::LambdaLever::getForceType);
+
+            LambdaLever_exposer.def(
+                "getForceType", getForceType_function_value, (bp::arg("name"), bp::arg("system")), bp::release_gil_policy(), "Get the C++ type of the force called name. Returns an\n  empty string if there is no such force\n");
         }
         { //::SireOpenMM::LambdaLever::getLeverValues
-        
-            typedef ::SireBase::PropertyList ( ::SireOpenMM::LambdaLever::*getLeverValues_function_type)( ::QVector< double > const &,::SireOpenMM::PerturbableOpenMMMolecule const & ) const;
-            getLeverValues_function_type getLeverValues_function_value( &::SireOpenMM::LambdaLever::getLeverValues );
-            
-            LambdaLever_exposer.def( 
-                "getLeverValues"
-                , getLeverValues_function_value
-                , ( bp::arg("lambda_values"), bp::arg("mol") )
-                , bp::release_gil_policy()
-                , "Get all of the lever values that would be set for the passed\n  lambda values using the current context. This returns a PropertyList\n  of columns, where each column is a PropertyMap with the column name\n  and either double or QString array property of values.\n\n  This is designed to be used by a higher-level python function that\n  will convert this output into, e.g. a pandas DataFrame\n" );
-        
+
+            typedef ::SireBase::PropertyList (::SireOpenMM::LambdaLever::*getLeverValues_function_type)(::QVector<double> const &, ::SireOpenMM::PerturbableOpenMMMolecule const &) const;
+            getLeverValues_function_type getLeverValues_function_value(&::SireOpenMM::LambdaLever::getLeverValues);
+
+            LambdaLever_exposer.def(
+                "getLeverValues", getLeverValues_function_value, (bp::arg("lambda_values"), bp::arg("mol")), bp::release_gil_policy(), "Get all of the lever values that would be set for the passed\n  lambda values using the current context. This returns a PropertyList\n  of columns, where each column is a PropertyMap with the column name\n  and either double or QString array property of values.\n\n  This is designed to be used by a higher-level python function that\n  will convert this output into, e.g. a pandas DataFrame\n");
         }
         { //::SireOpenMM::LambdaLever::getPerturbableMoleculeMaps
-        
-            typedef ::QHash< SireMol::MolNum, SireBase::PropertyMap > ( ::SireOpenMM::LambdaLever::*getPerturbableMoleculeMaps_function_type)(  ) const;
-            getPerturbableMoleculeMaps_function_type getPerturbableMoleculeMaps_function_value( &::SireOpenMM::LambdaLever::getPerturbableMoleculeMaps );
-            
-            LambdaLever_exposer.def( 
-                "getPerturbableMoleculeMaps"
-                , getPerturbableMoleculeMaps_function_value
-                , bp::release_gil_policy()
-                , "Return all of the property maps used to find the perturbable properties\n  of the perturbable molecules. This is indexed by molecule number\n" );
-        
+
+            typedef ::QHash<SireMol::MolNum, SireBase::PropertyMap> (::SireOpenMM::LambdaLever::*getPerturbableMoleculeMaps_function_type)() const;
+            getPerturbableMoleculeMaps_function_type getPerturbableMoleculeMaps_function_value(&::SireOpenMM::LambdaLever::getPerturbableMoleculeMaps);
+
+            LambdaLever_exposer.def(
+                "getPerturbableMoleculeMaps", getPerturbableMoleculeMaps_function_value, bp::release_gil_policy(), "Return all of the property maps used to find the perturbable properties\n  of the perturbable molecules. This is indexed by molecule number\n");
         }
         { //::SireOpenMM::LambdaLever::getRestraints
-        
-            typedef ::QList< OpenMM::Force * > ( ::SireOpenMM::LambdaLever::*getRestraints_function_type)( ::QString const &,::OpenMM::System & ) const;
-            getRestraints_function_type getRestraints_function_value( &::SireOpenMM::LambdaLever::getRestraints );
-            
-            LambdaLever_exposer.def( 
-                "getRestraints"
-                , getRestraints_function_value
-                , ( bp::arg("name"), bp::arg("system") )
-                , bp::release_gil_policy()
-                , "Return the pointers to all of the forces from the passed System\n  are restraints called restraint. This returns an empty\n  list if there are no restraints with this name" );
-        
+
+            typedef ::QList<OpenMM::Force *> (::SireOpenMM::LambdaLever::*getRestraints_function_type)(::QString const &, ::OpenMM::System &) const;
+            getRestraints_function_type getRestraints_function_value(&::SireOpenMM::LambdaLever::getRestraints);
+
+            LambdaLever_exposer.def(
+                "getRestraints", getRestraints_function_value, (bp::arg("name"), bp::arg("system")), bp::release_gil_policy(), "Return the pointers to all of the forces from the passed System\n  are restraints called restraint. This returns an empty\n  list if there are no restraints with this name");
         }
         { //::SireOpenMM::LambdaLever::getSchedule
-        
-            typedef ::SireCAS::LambdaSchedule ( ::SireOpenMM::LambdaLever::*getSchedule_function_type)(  ) const;
-            getSchedule_function_type getSchedule_function_value( &::SireOpenMM::LambdaLever::getSchedule );
-            
-            LambdaLever_exposer.def( 
-                "getSchedule"
-                , getSchedule_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef ::SireCAS::LambdaSchedule (::SireOpenMM::LambdaLever::*getSchedule_function_type)() const;
+            getSchedule_function_type getSchedule_function_value(&::SireOpenMM::LambdaLever::getSchedule);
+
+            LambdaLever_exposer.def(
+                "getSchedule", getSchedule_function_value, bp::release_gil_policy(), "");
         }
         { //::SireOpenMM::LambdaLever::hasLever
-        
-            typedef bool ( ::SireOpenMM::LambdaLever::*hasLever_function_type)( ::QString const & ) ;
-            hasLever_function_type hasLever_function_value( &::SireOpenMM::LambdaLever::hasLever );
-            
-            LambdaLever_exposer.def( 
-                "hasLever"
-                , hasLever_function_value
-                , ( bp::arg("lever_name") )
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef bool (::SireOpenMM::LambdaLever::*hasLever_function_type)(::QString const &);
+            hasLever_function_type hasLever_function_value(&::SireOpenMM::LambdaLever::hasLever);
+
+            LambdaLever_exposer.def(
+                "hasLever", hasLever_function_value, (bp::arg("lever_name")), bp::release_gil_policy(), "");
         }
-        LambdaLever_exposer.def( bp::self != bp::self );
+        LambdaLever_exposer.def(bp::self != bp::self);
         { //::SireOpenMM::LambdaLever::operator=
-        
-            typedef ::SireOpenMM::LambdaLever & ( ::SireOpenMM::LambdaLever::*assign_function_type)( ::SireOpenMM::LambdaLever const & ) ;
-            assign_function_type assign_function_value( &::SireOpenMM::LambdaLever::operator= );
-            
-            LambdaLever_exposer.def( 
-                "assign"
-                , assign_function_value
-                , ( bp::arg("other") )
-                , bp::return_self< >()
-                , "" );
-        
+
+            typedef ::SireOpenMM::LambdaLever &(::SireOpenMM::LambdaLever::*assign_function_type)(::SireOpenMM::LambdaLever const &);
+            assign_function_type assign_function_value(&::SireOpenMM::LambdaLever::operator=);
+
+            LambdaLever_exposer.def(
+                "assign", assign_function_value, (bp::arg("other")), bp::return_self<>(), "");
         }
-        LambdaLever_exposer.def( bp::self == bp::self );
+        LambdaLever_exposer.def(bp::self == bp::self);
         { //::SireOpenMM::LambdaLever::setConstraintIndicies
-        
-            typedef void ( ::SireOpenMM::LambdaLever::*setConstraintIndicies_function_type)( int,::QVector< int > const & ) ;
-            setConstraintIndicies_function_type setConstraintIndicies_function_value( &::SireOpenMM::LambdaLever::setConstraintIndicies );
-            
-            LambdaLever_exposer.def( 
-                "setConstraintIndicies"
-                , setConstraintIndicies_function_value
-                , ( bp::arg("idx"), bp::arg("constraint_idxs") )
-                , bp::release_gil_policy()
-                , "Set the constraint indicies for the perturbable molecule at\n  index mol_idx\n" );
-        
+
+            typedef void (::SireOpenMM::LambdaLever::*setConstraintIndicies_function_type)(int, ::QVector<int> const &);
+            setConstraintIndicies_function_type setConstraintIndicies_function_value(&::SireOpenMM::LambdaLever::setConstraintIndicies);
+
+            LambdaLever_exposer.def(
+                "setConstraintIndicies", setConstraintIndicies_function_value, (bp::arg("idx"), bp::arg("constraint_idxs")), bp::release_gil_policy(), "Set the constraint indicies for the perturbable molecule at\n  index mol_idx\n");
         }
         { //::SireOpenMM::LambdaLever::setExceptionIndicies
-        
-            typedef void ( ::SireOpenMM::LambdaLever::*setExceptionIndicies_function_type)( int,::QString const &,::QVector< boost::tuples::tuple< int, int > > const & ) ;
-            setExceptionIndicies_function_type setExceptionIndicies_function_value( &::SireOpenMM::LambdaLever::setExceptionIndicies );
-            
-            LambdaLever_exposer.def( 
-                "setExceptionIndicies"
-                , setExceptionIndicies_function_value
-                , ( bp::arg("idx"), bp::arg("ff"), bp::arg("exception_idxs") )
-                , bp::release_gil_policy()
-                , "Set the exception indices for the perturbable molecule at\n  index mol_idx\n" );
-        
+
+            typedef void (::SireOpenMM::LambdaLever::*setExceptionIndicies_function_type)(int, ::QString const &, ::QVector<boost::tuples::tuple<int, int>> const &);
+            setExceptionIndicies_function_type setExceptionIndicies_function_value(&::SireOpenMM::LambdaLever::setExceptionIndicies);
+
+            LambdaLever_exposer.def(
+                "setExceptionIndicies", setExceptionIndicies_function_value, (bp::arg("idx"), bp::arg("ff"), bp::arg("exception_idxs")), bp::release_gil_policy(), "Set the exception indices for the perturbable molecule at\n  index mol_idx\n");
         }
         { //::SireOpenMM::LambdaLever::setForceIndex
 
-            typedef void ( ::SireOpenMM::LambdaLever::*setForceIndex_function_type)( ::QString const &,int ) ;
-            setForceIndex_function_type setForceIndex_function_value( &::SireOpenMM::LambdaLever::setForceIndex );
+            typedef void (::SireOpenMM::LambdaLever::*setForceIndex_function_type)(::QString const &, int);
+            setForceIndex_function_type setForceIndex_function_value(&::SireOpenMM::LambdaLever::setForceIndex);
 
             LambdaLever_exposer.def(
-                "setForceIndex"
-                , setForceIndex_function_value
-                , ( bp::arg("force"), bp::arg("index") )
-                , bp::release_gil_policy()
-                , "Set the index of the force called force in the OpenMM System.\n  There can only be one force with this name. Attempts to add\n  a duplicate will cause an error to be raised.\n" );
-
+                "setForceIndex", setForceIndex_function_value, (bp::arg("force"), bp::arg("index")), bp::release_gil_policy(), "Set the index of the force called force in the OpenMM System.\n  There can only be one force with this name. Attempts to add\n  a duplicate will cause an error to be raised.\n");
         }
         { //::SireOpenMM::LambdaLever::setForceGroup
 
-            typedef void ( ::SireOpenMM::LambdaLever::*setForceGroup_function_type)( ::QString const &,int ) ;
-            setForceGroup_function_type setForceGroup_function_value( &::SireOpenMM::LambdaLever::setForceGroup );
+            typedef void (::SireOpenMM::LambdaLever::*setForceGroup_function_type)(::QString const &, int);
+            setForceGroup_function_type setForceGroup_function_value(&::SireOpenMM::LambdaLever::setForceGroup);
 
             LambdaLever_exposer.def(
-                "setForceGroup"
-                , setForceGroup_function_value
-                , ( bp::arg("name"), bp::arg("group_idx") )
-                , bp::release_gil_policy()
-                , "Set the force group index for the named force." );
-
+                "setForceGroup", setForceGroup_function_value, (bp::arg("name"), bp::arg("group_idx")), bp::release_gil_policy(), "Set the force group index for the named force.");
         }
         { //::SireOpenMM::LambdaLever::getForceGroup
 
-            typedef int ( ::SireOpenMM::LambdaLever::*getForceGroup_function_type)( ::QString const & ) const;
-            getForceGroup_function_type getForceGroup_function_value( &::SireOpenMM::LambdaLever::getForceGroup );
+            typedef int (::SireOpenMM::LambdaLever::*getForceGroup_function_type)(::QString const &) const;
+            getForceGroup_function_type getForceGroup_function_value(&::SireOpenMM::LambdaLever::getForceGroup);
 
             LambdaLever_exposer.def(
-                "getForceGroup"
-                , getForceGroup_function_value
-                , ( bp::arg("name") )
-                , bp::release_gil_policy()
-                , "Get the force group index for the named force. Returns -1 if not found." );
-
+                "getForceGroup", getForceGroup_function_value, (bp::arg("name")), bp::release_gil_policy(), "Get the force group index for the named force. Returns -1 if not found.");
         }
         { //::SireOpenMM::LambdaLever::getForceNames
 
-            typedef ::QStringList ( ::SireOpenMM::LambdaLever::*getForceNames_function_type)(  ) const;
-            getForceNames_function_type getForceNames_function_value( &::SireOpenMM::LambdaLever::getForceNames );
+            typedef ::QStringList (::SireOpenMM::LambdaLever::*getForceNames_function_type)() const;
+            getForceNames_function_type getForceNames_function_value(&::SireOpenMM::LambdaLever::getForceNames);
 
             LambdaLever_exposer.def(
-                "getForceNames"
-                , getForceNames_function_value
-                , bp::release_gil_policy()
-                , "Return the names of all forces and restraints that have been assigned a force group index." );
-
+                "getForceNames", getForceNames_function_value, bp::release_gil_policy(), "Return the names of all forces and restraints that have been assigned a force group index.");
         }
         { //::SireOpenMM::LambdaLever::wasForceChanged
 
-            typedef bool ( ::SireOpenMM::LambdaLever::*wasForceChanged_function_type)( ::QString const & ) const;
-            wasForceChanged_function_type wasForceChanged_function_value( &::SireOpenMM::LambdaLever::wasForceChanged );
+            typedef bool (::SireOpenMM::LambdaLever::*wasForceChanged_function_type)(::QString const &) const;
+            wasForceChanged_function_type wasForceChanged_function_value(&::SireOpenMM::LambdaLever::wasForceChanged);
 
             LambdaLever_exposer.def(
-                "wasForceChanged"
-                , wasForceChanged_function_value
-                , ( bp::arg("name") )
-                , bp::release_gil_policy()
-                , "Return whether the named force had parameters changed in the last setLambda call." );
-
+                "wasForceChanged", wasForceChanged_function_value, (bp::arg("name")), bp::release_gil_policy(), "Return whether the named force had parameters changed in the last setLambda call.");
         }
         { //::SireOpenMM::LambdaLever::setLambda
-        
-            typedef double ( ::SireOpenMM::LambdaLever::*setLambda_function_type)( ::OpenMM::Context &,double,double,bool ) const;
-            setLambda_function_type setLambda_function_value( &::SireOpenMM::LambdaLever::setLambda );
-            
-            LambdaLever_exposer.def( 
-                "setLambda"
-                , setLambda_function_value
-                , ( bp::arg("system"), bp::arg("lambda_value"), bp::arg("rest2_scale")=(double)(1.0), bp::arg("update_constraints")=(bool)(true) )
-                , "Set the value of lambda in the passed context. Returns the\n  actual value of lambda set.\n" );
-        
+
+            LambdaLever_exposer.def(
+                "setLambda", &setLambda_no_gil, (bp::arg("system"), bp::arg("lambda_value"), bp::arg("rest2_scale") = (double)(1.0), bp::arg("update_constraints") = (bool)(true)), "Set the value of lambda in the passed context. Returns the\n  actual value of lambda set.\n");
         }
         { //::SireOpenMM::LambdaLever::setSchedule
-        
-            typedef void ( ::SireOpenMM::LambdaLever::*setSchedule_function_type)( ::SireCAS::LambdaSchedule const & ) ;
-            setSchedule_function_type setSchedule_function_value( &::SireOpenMM::LambdaLever::setSchedule );
-            
-            LambdaLever_exposer.def( 
-                "setSchedule"
-                , setSchedule_function_value
-                , ( bp::arg("schedule") )
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef void (::SireOpenMM::LambdaLever::*setSchedule_function_type)(::SireCAS::LambdaSchedule const &);
+            setSchedule_function_type setSchedule_function_value(&::SireOpenMM::LambdaLever::setSchedule);
+
+            LambdaLever_exposer.def(
+                "setSchedule", setSchedule_function_value, (bp::arg("schedule")), bp::release_gil_policy(), "");
         }
         { //::SireOpenMM::LambdaLever::typeName
-        
-            typedef char const * ( *typeName_function_type )(  );
-            typeName_function_type typeName_function_value( &::SireOpenMM::LambdaLever::typeName );
-            
-            LambdaLever_exposer.def( 
-                "typeName"
-                , typeName_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef char const *(*typeName_function_type)();
+            typeName_function_type typeName_function_value(&::SireOpenMM::LambdaLever::typeName);
+
+            LambdaLever_exposer.def(
+                "typeName", typeName_function_value, bp::release_gil_policy(), "");
         }
         { //::SireOpenMM::LambdaLever::what
-        
-            typedef char const * ( ::SireOpenMM::LambdaLever::*what_function_type)(  ) const;
-            what_function_type what_function_value( &::SireOpenMM::LambdaLever::what );
-            
-            LambdaLever_exposer.def( 
-                "what"
-                , what_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
-        }
-        LambdaLever_exposer.staticmethod( "typeName" );
-        LambdaLever_exposer.def( "__copy__", &__copy__<SireOpenMM::LambdaLever>);
-        LambdaLever_exposer.def( "__deepcopy__", &__copy__<SireOpenMM::LambdaLever>);
-        LambdaLever_exposer.def_pickle(sire_pickle_suite< ::SireOpenMM::LambdaLever >());
-        LambdaLever_exposer.def( "clone", &__copy__<SireOpenMM::LambdaLever>);
-        LambdaLever_exposer.def( "__str__", &__str__< ::SireOpenMM::LambdaLever > );
-        LambdaLever_exposer.def( "__repr__", &__str__< ::SireOpenMM::LambdaLever > );
-    }
 
+            typedef char const *(::SireOpenMM::LambdaLever::*what_function_type)() const;
+            what_function_type what_function_value(&::SireOpenMM::LambdaLever::what);
+
+            LambdaLever_exposer.def(
+                "what", what_function_value, bp::release_gil_policy(), "");
+        }
+        LambdaLever_exposer.staticmethod("typeName");
+        LambdaLever_exposer.def("__copy__", &__copy__<SireOpenMM::LambdaLever>);
+        LambdaLever_exposer.def("__deepcopy__", &__copy__<SireOpenMM::LambdaLever>);
+        LambdaLever_exposer.def_pickle(sire_pickle_suite<::SireOpenMM::LambdaLever>());
+        LambdaLever_exposer.def("clone", &__copy__<SireOpenMM::LambdaLever>);
+        LambdaLever_exposer.def("__str__", &__str__<::SireOpenMM::LambdaLever>);
+        LambdaLever_exposer.def("__repr__", &__str__<::SireOpenMM::LambdaLever>);
+    }
 }

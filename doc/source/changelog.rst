@@ -102,6 +102,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed CMAP grids not being converted between kcal mol-1 and kJ mol-1 when writing
   to, and reading from, GROMACS topology files.
 
+* Released the GIL for the duration of ``LambdaLever::setLambda``, so that threaded
+  callers, such as replica exchange workers, are no longer serialised against one
+  another while lambda is being updated in a context.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
