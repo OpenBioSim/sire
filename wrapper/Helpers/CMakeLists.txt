@@ -23,6 +23,7 @@ set ( WRAPHELPERS_SOURCES
 
       release_gil_policy.hpp
       release_gil_policy.cpp
+      scoped_gil_release.hpp
 
     )
 
