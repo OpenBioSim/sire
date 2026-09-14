@@ -115,7 +115,7 @@ add_subdirectory (vol)
 
 install( FILES __init__.py _load.py _match.py
                _parallel.py _pythonize.py
-               _measure.py _colname.py
+               _measure.py _colname.py _lazy_import.py
          DESTINATION ${SIRE_PYTHON}/sire
        )
 

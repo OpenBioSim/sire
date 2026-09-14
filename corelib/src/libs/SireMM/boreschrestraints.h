@@ -197,12 +197,35 @@ namespace SireMM
         void setUsesPbc(bool use_pbc);
         bool usesPbc() const;
 
+        void setAnglePotential(const QString &angle_potential);
+        QString anglePotential() const;
+
+        void setRestraintLever(const QString &restraint_lever);
+        QString restraintLever() const;
+
     private:
         /** The actual list of restraints*/
         QList<BoreschRestraint> r;
 
         /** Whether the restraints use periodic boundary conditions */
         bool use_pbc = false;
+
+        /** The functional form used for the two Boresch angle restraint
+         *  terms (thetaA, thetaB). Either "harmonic" (default) or
+         *  "restricted_bending" - the latter uses
+         *  k*(cos(theta)-cos(theta0))^2/sin(theta)^2, which diverges as
+         *  theta approaches 0 or pi, preventing the restraint angles from
+         *  ever reaching the Boresch collinearity singularity. */
+        QString angle_potential = "harmonic";
+
+        /** How the restraint's six degrees of freedom are grouped into
+         *  lambda-addressable OpenMM Forces. Either "combined" (default,
+         *  all six terms share a single scale factor / lever) or "split"
+         *  (the distance and two angle terms share one scale factor, the
+         *  three dihedral terms share a second, independent scale factor -
+         *  allowing them to be turned on according to different lambda
+         *  schedules). */
+        QString restraint_lever = "combined";
     };
 
 }

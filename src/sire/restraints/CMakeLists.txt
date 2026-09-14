@@ -7,6 +7,7 @@
 # Add your script to this list
 set ( SCRIPTS
         __init__.py
+        _boresch_search.py
         _restraints.py
         _standard_state_correction.py
     )

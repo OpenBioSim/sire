@@ -428,7 +428,7 @@ BoreschRestraint( [1574, 1554, 1576] => [4, 3, 5],
                   k=[5 kcal mol-1 Å-2, 0.0152309 kcal mol-1 °-2, 0.0152309 kcal mol-1 °-2,
                   0.0152309 kcal mol-1 °-2, 0.0152309 kcal mol-1 °-2, 0.0152309 kcal mol-1 °-2]
                   r0=15.1197 Å, theta0=[80.5212°, 59.818°],
-                  phi0=[170.562°Ⱐ128.435°Ⱐ192.21°] )
+                  phi0=[170.562°, 128.435°, 192.21°] )
 
 creates a Boresch restraint where the receptor anchor atoms are r1 = 1574, r2 = 1554, and r3 = 1576,
 and the ligand anchor atoms are l1 = 4, l2 = 3, and l3 = 5. The default half force constants have been set
@@ -461,13 +461,16 @@ Alternatively, we could have explicitly set the half force constants and equilib
 BoreschRestraint( [1574, 1554, 1576] => [4, 3, 5],
                   k=[6.2012 kcal mol-1 Å-2, 0.00876339 kcal mol-1 °-2, 0.00756073 kcal mol-1 °-2, 0.0182352 kcal mol-1 °-2, 0.000241348 kcal mol-1 °-2, 0.016808 kcal mol-1 °-2]
                   r0=16 Å, theta0=[68.7549°, 74.4845°],
-                  phi0=[126.051°Ⱐ143.239°Ⱐ85.9437°] )
+                  phi0=[126.051°, 143.239°, 85.9437°] )
 
 .. note::
 
    :func:`sire.restraints.boresch` returns a list of Boresch restraints. If you are only
    interested in a single Boresch restraint, you can extract it with the index, e.g.
    ``boresch_restraint = boresch_restraints[0]``.
+
+   :func:`sire.restraints.boresch` always creates just a single restraint, but the
+   returned :class:`~sire.mm.BoreschRestraints` container can hold several.
 
 When performing an alchemical absolute binding free energy calculation, it is necessary to
 calculate the free energy of releasing the decoupled ligand to the standard state volume.
@@ -481,6 +484,42 @@ selected (see 10.26434/chemrxiv-2023-8s9dz-v2). This can be calculated with
 >>> print(correction)
 -6.2399 kcal mol-1
 
+Automatic Boresch Restraint Search
+-----------------------------------
+
+Choosing suitable Boresch anchor atoms and equilibrium values by hand is
+tedious and error-prone. The :func:`sire.restraints.boresch_search` function
+automates this by analysing a trajectory of the protein-ligand complex
+(e.g. from a short run at :math:`\lambda=0`) and returning a
+:class:`~sire.mm.BoreschRestraints` object together with its standard state
+correction, ready to pass to ``restraints``.
+
+>>> mols = sr.load_test_files("boresch_restraints.prm7", "boresch_restraints.dcd")
+>>> mols.update(sr.morph.decouple(mols.molecule(1), as_new_molecule=False))  # molecule 1 is the ligand
+>>> restraints, correction = sr.restraints.boresch_search(mols, temperature="298 K")
+>>> print(restraints[0])
+BoreschRestraint( [692, 702, 704] => [1496, 1498, 1499],
+                  k=[1 kcal mol-1 Å-2, 0.0243694 kcal mol-1 °-2, 0.0243694 kcal mol-1 °-2,
+                  0.0243694 kcal mol-1 °-2, 0.0243694 kcal mol-1 °-2, 0.0243694 kcal mol-1 °-2]
+                  r0=4.56908 Å, theta0=[82.5581°, 94.9595°],
+                  phi0=[27.9429°, 125.68°, -107.008°] )
+>>> print(correction)
+-10.5706 kcal mol-1
+
+Two search protocols are available via the ``protocol`` argument. The
+default, ``"rxrx"``, seeds candidate anchor atoms from protein-ligand
+hydrogen bonds and scores them to avoid angles close to the Boresch
+collinearity singularity. The alternative, ``"aldeghi"``, is a reference
+implementation of the distance-variance-driven approach used by
+MDRestraintsGenerator/BioSimSpace, kept for comparison.
+
+.. note::
+
+   :func:`sire.restraints.boresch_search` defaults to
+   ``angle_potential="restricted_bending"`` for the restraints it generates
+   (unlike :func:`sire.restraints.boresch`, which defaults to
+   ``"harmonic"``), since this directly avoids the collinearity instability
+   that the search protocols are otherwise designed to steer away from.
 
 Using restraints in minimisation or dynamics
 --------------------------------------------

@@ -5,6 +5,7 @@ __all__ = [
     "dihedral",
     "distance",
     "boresch",
+    "boresch_search",
     "inverse_bond",
     "inverse_distance",
     "rmsd",
@@ -25,3 +26,4 @@ from ._restraints import (
     rmsd,
 )
 from ._standard_state_correction import get_standard_state_correction
+from ._boresch_search import boresch_search

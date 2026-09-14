@@ -12,6 +12,100 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
+----------------------------------------------------------------------------------------------
+
+* Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
+
+* Replaced the third-party ``lazy_import`` dependency (GPLv3) with a minimal, standard-library-only
+  ``importlib``-based implementation in ``sire.utils._lazy_import``. This also fixes a bug where
+  lazily-loaded modules could end up with two distinct class objects for the same module path
+  (e.g. via unpickling in a separate process), causing spurious ``isinstance()`` failures.
+
+* Fixed ``sire.restraints.boresch()`` setting a dynamic ``_use_pbc`` Python attribute on
+  the returned ``BoreschRestraints`` instead of calling ``set_uses_pbc()``, which broke
+  pickling (e.g. for ``multiprocessing``/``ProcessPoolExecutor``) and meant the flag did
+  not survive a ``sire.stream.save``/``load`` round-trip.
+
+* Fixed a module load-order bug where ``sire.mm`` failed to import (``cannot import
+  name '_fix_siremm' from 'sire.mm'``) if it was the first ``sire`` submodule touched in
+  a process, due to ``use_new_api()`` being called before ``_fix_siremm`` was defined.
+
+* Added an optional ``angle_potential="restricted_bending"`` mode to ``BoreschRestraints``
+  (default remains ``"harmonic"``), which uses a ``sin(theta)^2``-weighted potential for the
+  two angle restraint terms to prevent the restraint angle from ever reaching the Boresch
+  collinearity singularity at 0/180 degrees.
+
+* Added ``sire.restraints.boresch_search()``, which automatically generates a
+  ``BoreschRestraints`` object and its standard state correction from a trajectory of
+  a protein-ligand complex, using either a hydrogen-bond-driven anchor search or a
+  reference distance-variance-driven protocol. A starting structure is also returned,
+  which is the trajectory frame at which the generated restraint is least strained.
+
+* Added an optional ``restraint_lever="split"`` mode to ``BoreschRestraints`` (default
+  remains ``"combined"``), which converts the distance/angle and dihedral restraint
+  terms into two independently lambda-addressable OpenMM Forces, allowing them to be
+  turned on according to different lambda schedule equations.
+
+* Added ``Dynamics.set_energy_trajectory()``, along with internal
+  ``Dynamics._get_clock()``/``_set_clock()``, which allow a single dynamics object to
+  propagate several independent trajectories by swapping the energy trajectory and
+  simulation clock between blocks.
+
+* Fixed the ``double - Complex`` subtraction operator in ``SireMaths::Complex``.
+
+* Fixed a dangling ``else`` statement that caused ``setAmberWater`` and
+  ``setGromacsWater`` to fail when using the TIP4P water model.
+
+* Added a ``determine_bond_orders`` keyword argument (and equivalent property map
+  option) to the Sire-to-RDKit conversion functions. This defaults to ``True``,
+  but can be set to ``False`` to fall back on the internal bond inference
+  heuristic, which is much faster for large molecules, e.g. proteins.
+
+* Fixed a bug where a ``rest2_selection`` spanning more than one molecule raised
+  ``list.remove(x): x not in list``, since ``selection_to_atoms`` returns a
+  ``SelectorM`` whose ``to_list()`` gives one view per molecule, rather than a flat
+  list of atoms.
+
+* Fixed the atom index offset used when preparing the REST2 data structures, which
+  was applied to every atom in the selection rather than only those belonging to the
+  molecule being processed. This gave incorrect indices when a ``rest2_selection``
+  spanned more than one non-perturbable molecule.
+
+* Used a set rather than a list for the atom indices when preparing the REST2 data
+  structures. The indices are membership tested against every exception and torsion
+  in the system, which was quadratic for large REST2 regions, e.g. proteins.
+
+* Fixed the REST2 region mask not covering off-site charges (virtual sites), which
+  are appended to the OpenMM system as extra particles after the atoms of each
+  molecule. This caused an out-of-bounds read when applying the REST2 scaling to a
+  perturbable molecule with virtual sites. Each virtual site now inherits the REST2
+  flag of its parent atom, so its charge is scaled along with it.
+
+* Fixed off-site charges (virtual sites) on non-ghost atoms of a perturbable molecule
+  being added to neither the ghost nor the non-ghost interaction group of the softcore
+  forces. Their interaction with any ghost atom was evaluated by the standard
+  ``NonbondedForce`` alone, i.e. without softening, and without the subtraction of the
+  coulomb energy that the softcore replaces.
+
+* Fixed ``Dynamics.current_potential_energy()`` returning a stale value after a
+  dynamics block that didn't save energies, since the context's energy cache was
+  only invalidated when an energy was recorded.
+
+* Fixed a data race in ``AmberParams::validateAndFix()`` that could segfault when
+  creating an OpenMM system. GROMACS topologies can contain torsions with a zero
+  force constant, which the ``GroTop`` reader drops. As those torsions are what
+  carry the 1-4 scaling in AMBER-derived topologies, the parameters had to be
+  rebuilt for every affected 1-4 pair, and the parallel loop that did this read
+  the shared dihedral hash without holding the mutex that guarded the inserts.
+
+* Fixed CMAP grids not being converted between kcal mol-1 and kJ mol-1 when writing
+  to, and reading from, GROMACS topology files.
+
+* Released the GIL for the duration of ``LambdaLever::setLambda``, so that threaded
+  callers, such as replica exchange workers, are no longer serialised against one
+  another while lambda is being updated in a context.
+
 `2026.1.0 <https://github.com/openbiosim/sire/compare/2025.4.0...2026.1.0>`__ - June 2026
 -----------------------------------------------------------------------------------------
 
