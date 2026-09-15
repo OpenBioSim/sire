@@ -15,8 +15,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
-* Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
-
 * Replaced the third-party ``lazy_import`` dependency (GPLv3) with a minimal, standard-library-only
   ``importlib``-based implementation in ``sire.utils._lazy_import``. This also fixes a bug where
   lazily-loaded modules could end up with two distinct class objects for the same module path
