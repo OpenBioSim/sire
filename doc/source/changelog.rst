@@ -12,10 +12,13 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
-----------------------------------------------------------------------------------------------
+`2026.3.0 <https://github.com/openbiosim/sire/compare/2026.2.0...2026.3.0>`__ - December 2026
+---------------------------------------------------------------------------------------------
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
+
+`2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
+----------------------------------------------------------------------------------------------
 
 * Replaced the third-party ``lazy_import`` dependency (GPLv3) with a minimal, standard-library-only
   ``importlib``-based implementation in ``sire.utils._lazy_import``. This also fixes a bug where
