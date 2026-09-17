@@ -48,22 +48,21 @@ try:
         charges, rather than keeping a derived copy of its algorithm in
         Sire's own source.
         """
-        import warnings
-
         from rdkit import Chem
         from MDAnalysis.converters.RDKitInferring import MDAnalysisInferrer
 
         mol = Chem.Mol(pickle)
 
-        with warnings.catch_warnings():
-            # we're not going through MDAnalysis's own AtomGroup-to-RDKit
-            # converter, so the atoms have no '_MDAnalysis_index' property
-            # for its (optional) atom-reordering step to use - expected,
-            # not an error, so silence the warning it would otherwise emit
-            warnings.filterwarnings(
-                "ignore", message=".*_MDAnalysis_index.*not available.*"
-            )
-            mol = MDAnalysisInferrer()(mol)
+        # All hydrogens are explicit. Without this, RDKit fills any missing
+        # valence with implicit hydrogens and MDAnalysis sees nothing to infer.
+        # The index property lets MDAnalysis restore the original atom order
+        # after its pattern standardisation step, which can renumber atoms.
+        for i, atom in enumerate(mol.GetAtoms()):
+            if atom.GetAtomicNum() > 1:
+                atom.SetNoImplicit(True)
+            atom.SetIntProp("_MDAnalysis_index", i)
+
+        mol = MDAnalysisInferrer()(mol)
 
         return mol.ToBinary()
 
