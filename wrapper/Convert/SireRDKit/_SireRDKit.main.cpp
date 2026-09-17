@@ -7,10 +7,23 @@
 #include "sire_rdkit.h"
 
 #include "Helpers/convertlist.hpp"
+#include "Helpers/scoped_gil_release.hpp"
 
 namespace bp = boost::python;
 
 using namespace SireRDKit;
+
+namespace
+{
+    // Release the GIL so that the bond-order inference callback (which
+    // re-acquires it via GILLock) can run from TBB worker threads.
+    QList<RDKit::ROMOL_SPTR> sire_to_rdkit_no_gil(const SireMol::SelectorMol &mols,
+                                                  const SireBase::PropertyMap &map)
+    {
+        SireHelpers::ScopedGILRelease release_gil;
+        return sire_to_rdkit(mols, map);
+    }
+}
 
 BOOST_PYTHON_MODULE(_SireRDKit)
 {
@@ -33,7 +46,7 @@ BOOST_PYTHON_MODULE(_SireRDKit)
     typedef RDKit::ROMOL_SPTR (*smarts_to_rdkit_function_type2)(QString const &, QString const &, SireBase::PropertyMap const &);
 
     rdkit_to_sire_function_type rdkit_to_sire_function_value(&rdkit_to_sire);
-    sire_to_rdkit_function_type sire_to_rdkit_function_value(&sire_to_rdkit);
+    sire_to_rdkit_function_type sire_to_rdkit_function_value(&sire_to_rdkit_no_gil);
 
     rdkit_to_smiles_function_type rdkit_to_smiles_function_value(&rdkit_to_smiles);
     rdkit_to_smiles_function_type2 rdkit_to_smiles_function_value2(&rdkit_to_smiles);
