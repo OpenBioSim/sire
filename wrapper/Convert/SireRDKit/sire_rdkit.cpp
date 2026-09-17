@@ -39,11 +39,14 @@
 
 #include "SireMaths/vector.h"
 
+#include "SireBase/console.h"
 #include "SireBase/parallel.h"
 #include "SireBase/propertylist.h"
 #include "SireBase/stringproperty.h"
 
 #include "SireUnits/units.h"
+
+#include "SireError/errors.h"
 
 #include "tostring.h"
 
@@ -96,11 +99,11 @@ namespace SireRDKit
 
     /** Run the registered bond-order inference callback (if any) on
         'molecule', mutating it in place with the inferred bond orders and
-        formal charges. Does nothing if no callback has been registered. */
-    void infer_bond_info(RDKit::RWMol &molecule)
+        formal charges. Returns false if no callback has been registered. */
+    bool infer_bond_info(RDKit::RWMol &molecule)
     {
         if (bond_order_inference_callback == nullptr or bond_order_inference_callback->is_none())
-            return;
+            return false;
 
         GILLock lock;
 
@@ -139,6 +142,8 @@ namespace SireRDKit
             // leave 'molecule' as-is - same graceful-degradation behaviour
             // as when determineBondOrders() itself fails
         }
+
+        return true;
     }
 
     bool use_parallel(int n, const SireBase::PropertyMap &map)
@@ -482,8 +487,8 @@ namespace SireRDKit
         }
 
         // Whether to use RDKit's determineBondOrders() to infer bond orders. This
-        // is more robust than our heuristic, but can be prohibitively slow for
-        // large molecules, e.g. proteins.
+        // is more robust than the MDAnalysis heuristic, but can be prohibitively
+        // slow for large molecules, e.g. proteins.
         bool determine_bond_orders = true;
         if (map.specified("determine_bond_orders"))
         {
@@ -770,10 +775,24 @@ namespace SireRDKit
                 }
             }
 
-            if (not inferred)
+            if (not inferred and not infer_bond_info(molecule))
             {
-                // Fall back to the MDAnalysis-based heuristic.
-                infer_bond_info(molecule);
+                if (not determine_bond_orders)
+                {
+                    throw SireError::unsupported(QObject::tr(
+                                                     "Cannot infer bond orders with 'determine_bond_orders=False' "
+                                                     "as MDAnalysis is not installed. Please install it using "
+                                                     "`conda install -c conda-forge mdanalysis` or set "
+                                                     "'determine_bond_orders=True'."),
+                                                 CODELOC);
+                }
+
+                SireBase::Console::warning(QObject::tr(
+                                               "RDKit's determineBondOrders() could not infer bond orders for "
+                                               "molecule '%1' and the MDAnalysis fallback is not available as "
+                                               "MDAnalysis is not installed. All bonds will be treated as single "
+                                               "with no formal charges.")
+                                               .arg(mol.name().value()));
             }
         }
 

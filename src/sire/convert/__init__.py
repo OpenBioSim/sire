@@ -196,8 +196,9 @@ def to_rdkit(obj, map=None, determine_bond_orders: bool = True):
             The property map to use for the conversion
         determine_bond_orders: bool (default True)
             Whether to use RDKit's ``determineBondOrders`` function when bond
-            orders need to be inferred. This is more robust than the internal
-            heuristic, but can be slow for large molecules, e.g. proteins.
+            orders need to be inferred. This is more robust than the MDAnalysis
+            heuristic, but can be slow for large molecules, e.g. proteins. If
+            ``False``, MDAnalysis must be installed.
     """
     return sire_to_rdkit(
         to_sire(obj, map=map), map=map, determine_bond_orders=determine_bond_orders
@@ -449,8 +450,9 @@ def sire_to_rdkit(obj, map=None, determine_bond_orders: bool = True):
             The property map to use for the conversion
         determine_bond_orders: bool (default True)
             Whether to use RDKit's ``determineBondOrders`` function when bond
-            orders need to be inferred. This is more robust than the internal
-            heuristic, but can be slow for large molecules, e.g. proteins.
+            orders need to be inferred. This is more robust than the MDAnalysis
+            heuristic, but can be slow for large molecules, e.g. proteins. If
+            ``False``, MDAnalysis must be installed.
     """
     obj = _to_selectormol(obj)
 
