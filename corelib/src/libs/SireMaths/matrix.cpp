@@ -651,8 +651,8 @@ boost::tuple<Matrix, Matrix, Matrix> Matrix::singleValueDecomposition() const
 
     Matrix s(S[0], 0, 0, 0, S[1], 0, 0, 0, S[2]);
 
-    // the tuple's third element is V^T, not V - see sire-eigen-rewrite-scope.md
-    // for why this convention matters (kabasch() in align.cpp relies on it)
+    // the tuple's third element is V^T, not V - kabasch() in align.cpp
+    // relies on this convention
     Matrix w = Matrix(V(0, 0), V(0, 1), V(0, 2), V(1, 0), V(1, 1), V(1, 2), V(2, 0), V(2, 1), V(2, 2)).transpose();
 
     return boost::tuple<Matrix, Matrix, Matrix>(a, s, w);
