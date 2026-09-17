@@ -40,12 +40,9 @@
 
 #include "third_party/eig3/eig3.h" // CONDITIONAL_INCLUDE
 
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_eigen.h>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
+#include <Eigen/Dense>
+
+#include <algorithm>
 
 #include <QDebug>
 
@@ -160,29 +157,6 @@ Matrix::Matrix(const NMatrix &m)
     {
         for (int i = 0; i < 9; ++i)
             array[i] = d[i];
-    }
-}
-
-/** Construct from a GSL matrix. This must obviously be a 3x3 matrix! */
-Matrix::Matrix(const gsl_matrix *m)
-{
-    if (m->size1 > 3 or m->size2 > 3)
-        throw SireError::incompatible_error(
-            QObject::tr("SireMaths::Matrix is a 3x3 matrix class and cannot be initialised "
-                        "from a gsl_matrix of size %1x%2.")
-                .arg(m->size1)
-                .arg(m->size2),
-            CODELOC);
-
-    for (int i = 0; i < 9; ++i)
-        array[i] = 0;
-
-    for (int i = 0; i < m->size1; ++i)
-    {
-        for (int j = 0; j < m->size2; ++j)
-        {
-            this->operator()(i, j) = gsl_matrix_get(m, i, j);
-        }
     }
 }
 
@@ -611,11 +585,6 @@ void Matrix::enforceSymmetric()
     array[5] = zy();
 }
 
-Matrix convertGSLMatrix(gsl_matrix *mat)
-{
-    return Matrix(mat);
-}
-
 /** Obtain the principal axes of this matrix. This can only be performed if this
     matrix is symmetric. You should only call this function for matricies that
     you know are symmetric, as this function will assume that the matrix is
@@ -627,39 +596,32 @@ Matrix Matrix::getPrincipalAxes() const
     // assume that this matrix is symmetrical - we will thus
     // only look at the values in the upper-right diagonal
 
-    // now use the GNU Scientific Library to solve the eigenvalue
-    // problem for this matrix
-    double new_array[9];
-    memcpy(new_array, array, 9 * sizeof(double));
+    // use the same public-domain (JAMA-derived) symmetric eigensolver
+    // as Matrix::diagonalise()
+    double A[3][3], V[3][3], d[3];
 
-    gsl_matrix_view m = gsl_matrix_view_array(new_array, 3, 3);
+    A[0][0] = array[0];
+    A[0][1] = array[1];
+    A[0][2] = array[2];
+    A[1][0] = array[3];
+    A[1][1] = array[4];
+    A[1][2] = array[5];
+    A[2][0] = array[6];
+    A[2][1] = array[7];
+    A[2][2] = array[8];
 
-    // allocate space for the resulting eigenvectors and eigenvalues
-    gsl_vector *eig_val = gsl_vector_alloc(3);
-    gsl_matrix *eig_vec = gsl_matrix_alloc(3, 3);
+    eigen_decomposition(A, V, d);
 
-    // now allocate some workspace for the calculation...
-    gsl_eigen_symmv_workspace *w = gsl_eigen_symmv_alloc(3);
+    // sort the eigenvectors from the smallest to the largest absolute
+    // eigenvalue
+    int order[3] = {0, 1, 2};
 
-    // perform the calculation
-    gsl_eigen_symmv(&m.matrix, eig_val, eig_vec, w);
+    std::sort(order, order + 3, [&](int a, int b)
+              { return std::abs(d[a]) < std::abs(d[b]); });
 
-    // free the space used by the calculation
-    gsl_eigen_symmv_free(w);
-
-    // now sort the eigenvectors from the smallest eigenvalue to
-    // the largest
-    gsl_eigen_symmv_sort(eig_val, eig_vec, GSL_EIGEN_SORT_ABS_ASC);
-
-    // now copy the results back into a new Matrix
-    Matrix ret = convertGSLMatrix(eig_vec);
-
-    // free up the memory used by the GSL data...
-    gsl_vector_free(eig_val);
-    gsl_matrix_free(eig_vec);
-
-    // finally, return the matrix of principal components
-    return ret;
+    return Matrix(V[0][order[0]], V[0][order[1]], V[0][order[2]],
+                  V[1][order[0]], V[1][order[1]], V[1][order[2]],
+                  V[2][order[0]], V[2][order[1]], V[2][order[2]]);
 }
 
 /** Return the single value decomposition of this matrix.
@@ -669,61 +631,31 @@ Matrix Matrix::getPrincipalAxes() const
 */
 boost::tuple<Matrix, Matrix, Matrix> Matrix::singleValueDecomposition() const
 {
-    // use GSL
-    gsl_matrix *A = 0;
-    gsl_matrix *W = 0;
-    gsl_vector *S = 0;
+    Eigen::Matrix3d A;
 
-    try
+    for (int i = 0; i < 3; ++i)
     {
-        // Disable the error handler and check return codes for errors.
-        // This is required since the gsl_linalg_SV_decomp_jacobi function
-        // can segmentation fault when trying to handle errors internally.
-        gsl_set_error_handler_off();
-
-        // copy this matrix into A
-        A = gsl_matrix_alloc(3, 3);
-
-        for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
         {
-            for (int j = 0; j < 3; ++j)
-            {
-                gsl_matrix_set(A, i, j, array[offset(i, j)]);
-            }
+            A(i, j) = array[offset(i, j)];
         }
-
-        // create space to hold the matrices for single value decomposition
-        S = gsl_vector_alloc(3);
-        W = gsl_matrix_alloc(3, 3);
-
-        // calculate single value decomposition of A into V S W^T
-        int ok = gsl_linalg_SV_decomp_jacobi(A, W, S);
-
-        if (ok != 0)
-            throw SireMaths::domain_error(
-                QObject::tr("Could not calculate the single value decomposition of %1.").arg(this->toString()),
-                CODELOC);
-
-        // copy out the results...
-        Matrix a(A);
-        Matrix w = Matrix(W).transpose();
-        Matrix s(gsl_vector_get(S, 0), 0, 0, 0, gsl_vector_get(S, 1), 0, 0, 0, gsl_vector_get(S, 2));
-
-        gsl_matrix_free(A);
-        gsl_vector_free(S);
-        gsl_matrix_free(W);
-
-        return boost::tuple<Matrix, Matrix, Matrix>(a, s, w);
     }
-    catch (...)
-    {
-        gsl_matrix_free(A);
-        gsl_vector_free(S);
-        gsl_matrix_free(W);
-        throw;
 
-        return boost::tuple<Matrix, Matrix, Matrix>();
-    }
+    Eigen::JacobiSVD<Eigen::Matrix3d> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
+
+    const Eigen::Matrix3d &U = svd.matrixU();
+    const Eigen::Matrix3d &V = svd.matrixV();
+    const Eigen::Vector3d &S = svd.singularValues();
+
+    Matrix a(U(0, 0), U(0, 1), U(0, 2), U(1, 0), U(1, 1), U(1, 2), U(2, 0), U(2, 1), U(2, 2));
+
+    Matrix s(S[0], 0, 0, 0, S[1], 0, 0, 0, S[2]);
+
+    // the tuple's third element is V^T, not V - see sire-eigen-rewrite-scope.md
+    // for why this convention matters (kabasch() in align.cpp relies on it)
+    Matrix w = Matrix(V(0, 0), V(0, 1), V(0, 2), V(1, 0), V(1, 1), V(1, 2), V(2, 0), V(2, 1), V(2, 2)).transpose();
+
+    return boost::tuple<Matrix, Matrix, Matrix>(a, s, w);
 }
 
 /** Return the single value decomposition of this matrix.
@@ -779,60 +711,24 @@ Matrix Matrix::covariance(const QVector<Vector> &p, const QVector<Vector> &q, in
         n = qMin(p.count(), q.count());
     }
 
-    gsl_matrix *P = 0;
-    gsl_matrix *Q = 0;
-    gsl_matrix *C = 0;
+    Eigen::MatrixXd P(n, 3);
+    Eigen::MatrixXd Q(n, 3);
 
-    try
+    for (int i = 0; i < n; ++i)
     {
-        // convert the two vectors of points into GSL matrices
-        P = gsl_matrix_alloc(n, 3);
-        Q = gsl_matrix_alloc(n, 3);
+        P(i, 0) = p[i].x();
+        P(i, 1) = p[i].y();
+        P(i, 2) = p[i].z();
 
-        for (int i = 0; i < n; ++i)
-        {
-            gsl_matrix_set(P, i, 0, p[i].x());
-            gsl_matrix_set(P, i, 1, p[i].y());
-            gsl_matrix_set(P, i, 2, p[i].z());
-
-            gsl_matrix_set(Q, i, 0, q[i].x());
-            gsl_matrix_set(Q, i, 1, q[i].y());
-            gsl_matrix_set(Q, i, 2, q[i].z());
-        }
-
-        // create space to hold the covariance matrix
-        C = gsl_matrix_alloc(3, 3);
-
-        for (int i = 0; i < 3; ++i)
-        {
-            for (int j = 0; j < 3; ++j)
-            {
-                gsl_matrix_set(C, i, j, 0);
-            }
-        }
-
-        // compute the covariance matrix P^T Q
-        int ok = gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, P, Q, 0.0, C);
-
-        if (ok != 0)
-            throw SireMaths::domain_error(QObject::tr("Something went wrong with the dgemm in covariance!"), CODELOC);
-
-        Matrix c(C);
-
-        gsl_matrix_free(P);
-        gsl_matrix_free(Q);
-        gsl_matrix_free(C);
-
-        return c;
+        Q(i, 0) = q[i].x();
+        Q(i, 1) = q[i].y();
+        Q(i, 2) = q[i].z();
     }
-    catch (...)
-    {
-        gsl_matrix_free(P);
-        gsl_matrix_free(Q);
-        gsl_matrix_free(C);
-        throw;
-        return Matrix();
-    }
+
+    // compute the covariance matrix P^T Q
+    Eigen::Matrix3d C = P.transpose() * Q;
+
+    return Matrix(C(0, 0), C(0, 1), C(0, 2), C(1, 0), C(1, 1), C(1, 2), C(2, 0), C(2, 1), C(2, 2));
 }
 
 const char *Matrix::typeName()

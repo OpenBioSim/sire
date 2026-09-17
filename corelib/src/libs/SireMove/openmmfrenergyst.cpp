@@ -26,8 +26,10 @@
  *
 \*********************************************/
 
-#include "openmmfrenergyst.h"
+#include <cfloat>
+
 #include "ensemble.h"
+#include "openmmfrenergyst.h"
 
 #include "SireMol/atomcoords.h"
 #include "SireMol/atommasses.h"
@@ -1248,9 +1250,9 @@ void OpenMMFrEnergyST::initialise()
             const double surface_Tension = 0;
             OpenMM::MonteCarloMembraneBarostat::XYMode xymode = OpenMM::MonteCarloMembraneBarostat::XYIsotropic;
             OpenMM::MonteCarloMembraneBarostat::ZMode zmode = OpenMM::MonteCarloMembraneBarostat::ZFree;
-            OpenMM::MonteCarloMembraneBarostat * barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
+            OpenMM::MonteCarloMembraneBarostat *barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
 
-            //Set The random seed
+            // Set The random seed
             barostat->setRandomNumberSeed(random_seed);
 
             system_openmm->addForce(barostat);
@@ -3156,7 +3158,7 @@ void OpenMMFrEnergyST::initialise()
             }
 
         } // end of loop over molecules in system
-    }     // end of bond link flag
+    } // end of bond link flag
 
     bool UseBoresch_flag = true;
 

@@ -108,12 +108,13 @@ set_target_properties (SireMaths PROPERTIES
                        SOVERSION ${S_VERSION_MAJOR}
                       )
 
-# Link to other Sire libraries, and GSL
+# Link to other Sire libraries
 target_link_libraries (SireMaths
                        SireID
                        SireBase
                        SireUnits
                        SireStream
+                       Eigen3::Eigen
                        ${SIREMATHS_EXTRA_LIBRARIES}
                       )
 

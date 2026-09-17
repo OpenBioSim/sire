@@ -190,6 +190,14 @@ set (CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 # Path to the project's extra cmake files
 set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
 
+# Eigen3::Eigen is an imported CMake target, not a plain library path, so it must be
+# re-found here too - imported targets don't cross between separate CMake
+# invocations (corelib and wrapper are built as separate projects), so
+# Sire::SireMaths's exported link interface (in SireLibraries.cmake, included below
+# via find_package(Sire)) would otherwise reference a target that doesn't exist yet
+# in this project.
+find_package (Eigen3 REQUIRED NO_MODULE)
+
 # Find the Sire libraries
 find_package (Sire 0.0.1 REQUIRED)
 
@@ -264,10 +272,6 @@ include_directories (BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 if (TBB_INCLUDE_DIR)
   include_directories (${TBB_INCLUDE_DIR})
   message( STATUS "Using TBB from ${TBB_INCLUDE_DIR}")
-endif()
-
-if (SIRE_GSL_INCLUDE_PATH)
-  include_directories (${SIRE_GSL_INCLUDE_PATH})
 endif()
 
 if(CMAKE_GENERATOR MATCHES "Visual Studio")  # MSBuild
