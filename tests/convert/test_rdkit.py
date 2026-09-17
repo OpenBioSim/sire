@@ -210,6 +210,44 @@ def test_rdkit_bond_order_inference():
     "rdkit" not in sr.convert.supported_formats(),
     reason="rdkit support is not available",
 )
+def test_rdkit_mdanalysis_fallback(ejm55_sdf, ejm55_gro):
+    """
+    With determine_bond_orders=False, bond orders are inferred via the
+    MDAnalysis callback. If no callback is registered this must raise
+    rather than silently leaving all bonds single.
+    """
+    import importlib.util
+    from sire.legacy.Convert import _set_bond_order_inference_callback
+
+    sdf = ejm55_sdf[0].molecule()
+    gro = ejm55_gro["not (protein or water)"].molecule()
+
+    has_mdanalysis = importlib.util.find_spec("MDAnalysis") is not None
+
+    try:
+        _set_bond_order_inference_callback(None)
+
+        with pytest.raises(RuntimeError, match="MDAnalysis is not installed"):
+            sr.convert.to_rdkit(gro, determine_bond_orders=False)
+    finally:
+        if has_mdanalysis:
+            from sire.legacy.Convert import _infer_bond_info_via_mdanalysis
+
+            _set_bond_order_inference_callback(_infer_bond_info_via_mdanalysis)
+
+    if has_mdanalysis:
+        from rdkit import Chem
+
+        rdmol_gro = sr.convert.to_rdkit(gro, determine_bond_orders=False)
+        rdmol_sdf = sr.convert.to_rdkit(sdf)
+
+        assert Chem.MolToSmiles(rdmol_gro) == Chem.MolToSmiles(rdmol_sdf)
+
+
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
 def test_rdkit_sdf_tags(tagged_sdf):
 
     # store the sdf data property
