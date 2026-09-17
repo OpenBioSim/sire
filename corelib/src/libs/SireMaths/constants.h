@@ -28,53 +28,55 @@
 #ifndef SIREMATHS_CONSTANTS_H
 #define SIREMATHS_CONSTANTS_H
 
-#include <gsl/gsl_math.h>
-
 #include <limits>
 
 #include "sireglobal.h"
 
 SIRE_BEGIN_HEADER
 
-/** expose GSL #define constants as const double values */
+/** These used to be exposed via GSL's gsl_math.h #define constants; now
+    hardcoded directly (to the same precision GSL/glibc's math.h use) so
+    this doesn't depend on GSL, or on non-standard math.h extensions like
+    M_PI_2/M_SQRT2 that aren't guaranteed portable (e.g. not defined by
+    MSVC without _USE_MATH_DEFINES) */
 namespace SireMaths
 {
 
-    const double e = M_E; /* e */
+    const double e = 2.71828182845904523536; /* e */
 
-    const double log2_e = M_LOG2E; /* log_2 (e) */
+    const double log2_e = 1.44269504088896340736; /* log_2 (e) */
 
-    const double log10_e = M_LOG10E; /* log_10 (e) */
+    const double log10_e = 0.43429448190325182765; /* log_10 (e) */
 
-    const double sqrt_two = M_SQRT2; /* sqrt(2) */
+    const double sqrt_two = 1.41421356237309504880; /* sqrt(2) */
 
-    const double sqrt_half = M_SQRT1_2; /* sqrt(1/2) */
+    const double sqrt_half = 0.70710678118654752440; /* sqrt(1/2) */
 
-    const double sqrt_three = M_SQRT3; /* sqrt(3) */
+    const double sqrt_three = 1.73205080756887729353; /* sqrt(3) */
 
     const double pi = 3.141592653589793238462643383279; /* pi */
 
     const double two_pi = double(2) * pi; /* 2 * pi */
 
-    const double pi_over_two = M_PI_2; /* pi/2 */
+    const double pi_over_two = 1.57079632679489661923; /* pi/2 */
 
-    const double pi_4 = M_PI_4; /* pi/4 */
+    const double pi_4 = 0.78539816339744830962; /* pi/4 */
 
-    const double sqrtpi = M_SQRTPI; /* sqrt(pi) */
+    const double sqrtpi = 1.77245385090551602730; /* sqrt(pi) */
 
-    const double two_sqrtpi = M_2_SQRTPI; /* 2/sqrt(pi) */
+    const double two_sqrtpi = 1.12837916709551257390; /* 2/sqrt(pi) */
 
-    const double one_over_pi = M_1_PI; /* 1/pi */
+    const double one_over_pi = 0.31830988618379067154; /* 1/pi */
 
-    const double two_over_pi = M_2_PI; /* 2/pi */
+    const double two_over_pi = 0.63661977236758134308; /* 2/pi */
 
-    const double ln_ten = M_LN10; /* ln(10) */
+    const double ln_ten = 2.30258509299404568402; /* ln(10) */
 
-    const double ln_two = M_LN2; /* ln(2) */
+    const double ln_two = 0.69314718055994530942; /* ln(2) */
 
-    const double ln_pi = M_LNPI; /* ln(pi) */
+    const double ln_pi = 1.14472988584940017414; /* ln(pi) */
 
-    const double euler = M_EULER; /* Euler constant */
+    const double euler = 0.57721566490153286061; /* Euler constant */
 
     // now expose some sizes...
     /** A small number */

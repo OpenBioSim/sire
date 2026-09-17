@@ -26,8 +26,10 @@
  *
 \*********************************************/
 
-#include "openmmfrenergyst.h"
+#include <cfloat>
+
 #include "ensemble.h"
+#include "openmmfrenergyst.h"
 
 #include "SireMol/atomcoords.h"
 #include "SireMol/atommasses.h"

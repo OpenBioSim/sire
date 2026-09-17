@@ -10,7 +10,6 @@ platforms = ["linux-64", "linux-aarch64", "osx-arm64", "win-64"]
 python = "*"
 cmake = ">=3.30.0"
 git = "*"
-gsl = "*"
 libboost-devel = "*"
 libboost-python-devel = "*"
 libcblas = "*"
@@ -22,6 +21,7 @@ qt-main = "*"
 rich = "*"
 tbb = "*"
 tbb-devel = "*"
+eigen = ">=3.4.0,<6"
 
 # Unix build tools
 [target.linux-64.dependencies]

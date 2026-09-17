@@ -689,7 +689,7 @@ set(CMAKE_AUTOMOC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set (SIRE_FOUND_TBB FALSE)
-set (SIRE_FOUND_GSL FALSE)
+set (SIRE_FOUND_EIGEN FALSE)
 set (SIRE_FOUND_BOOST FALSE)
 set (SIRE_FOUND_BLASLAPACK FALSE)
 set (SIRE_FOUND_QT FALSE)
@@ -771,18 +771,17 @@ if (NOT ${SIRE_FOUND_BOOST})
   endif()
 endif()
 
-if (NOT ${SIRE_FOUND_GSL})
-  # Sire depends on >= GSL 1.6
-  find_package(GSL 1.6 QUIET REQUIRED)
-
-  message( STATUS "GSL paths ${GSL_LINK_DIRECTORIES} "
-                  "${GSL_LIBRARIES} | ${GSL_INCLUDE_DIR}" )
-
-  list(APPEND SIREMATHS_EXTRA_LIBRARIES ${GSL_LIBRARIES})
-
-  include_directories( BEFORE ${GSL_INCLUDE_DIR})
-
-  save_sire_variable( "SIRE_GSL_INCLUDE_PATH" "${GSL_INCLUDE_DIR}" )
+if (NOT ${SIRE_FOUND_EIGEN})
+  # Sire depends on Eigen (header-only) for small dense linear algebra.
+  # The acceptable version range is pinned in pixi.toml, not here, since
+  # Eigen's CMake package version compatibility is same-major-version only
+  # and its major version has jumped around across releases.
+  #
+  # Modern Eigen3Config.cmake only exports the Eigen3::Eigen imported
+  # target (not an EIGEN3_INCLUDE_DIR variable), so consumers link
+  # against that target rather than adding an include directory here -
+  # see corelib/src/libs/SireMaths/CMakeLists.txt.
+  find_package(Eigen3 QUIET REQUIRED NO_MODULE)
 endif()
 
 set( SIRE_USE_BLAS OFF )
