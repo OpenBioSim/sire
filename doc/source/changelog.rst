@@ -17,6 +17,16 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Please add an item to this CHANGELOG for any new features or bug fixes when creating a PR.
 
+* Removed the GSL (GPLv3) dependency. Complex arithmetic, matrix operations and special
+  functions in ``SireMaths`` are now implemented with Eigen and ``std::complex``.
+
+* Removed the GPL-licensed ``regress`` third-party code from ``SireAnalysis``. The polynomial
+  regression used by ``TI`` is now implemented with Eigen.
+
+* Removed the GPL-derived MDAnalysis bond-order inference heuristic from ``SireRDKit``. The
+  fallback (used when RDKit's ``determineBondOrders()`` fails) now calls MDAnalysis directly via
+  a Python callback if it is installed, otherwise no fallback is applied.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
