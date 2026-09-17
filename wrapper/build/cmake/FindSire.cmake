@@ -9,7 +9,7 @@
 #
 # SIRE_INCLUDE_DIR contains the Sire root directory, and
 # SIRE_EXTRA_INCLUDES contains the paths to the header files
-# of the dependencies of Sire (GSL, Boost and MPI)
+# of the dependencies of Sire (Boost and MPI)
 #
 #  SIRE_INSTALL_PREFIX - the installation prefix to the installed corelib
 #  SIRE_INCLUDE_DIR    - where to find the Sire include files

@@ -34,8 +34,6 @@
 
 #include "vector.h"
 
-#include <gsl/gsl_matrix.h>
-
 #include <boost/tuple/tuple.hpp>
 
 SIRE_BEGIN_HEADER
@@ -86,7 +84,6 @@ namespace SireMaths
         Matrix(const tuple<Vector, Vector, Vector> &rows);
 
         Matrix(const NMatrix &m);
-        Matrix(const gsl_matrix *m);
 
         Matrix(const Matrix &m);
 
