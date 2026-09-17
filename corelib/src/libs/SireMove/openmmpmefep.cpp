@@ -26,6 +26,7 @@
  *
 \********************************************/
 
+#include <cfloat>
 #include <cmath>
 #include <iostream>
 

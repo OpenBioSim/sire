@@ -282,7 +282,7 @@ set_target_properties (SireMol PROPERTIES
                        SOVERSION ${S_VERSION_MAJOR}
                       )
 
-# Link to other Sire libraries, and GSL
+# Link to other Sire libraries
 target_link_libraries (SireMol
                        SireVol
                        SireCAS

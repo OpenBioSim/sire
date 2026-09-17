@@ -76,8 +76,6 @@ in gsl_complex_math.h.
 #######################################################################
 */
 
-#include <gsl/gsl_complex.h>
-
 #include <QString>
 
 #include <complex>
@@ -102,19 +100,14 @@ namespace SireMaths
 
     /**
     This class represents a complex number to the same precision as 'double'.
-    This is merely a thin wrapper around the gsl_complex struct, and the
-    gsl_complex functions.
-
-    (indeed, this is publically derived from gsl_complex, so you can use
-    this class whereever you would normally use a gsl_complex)
+    Internally, it is backed by a std::complex<double>.
 
     @author Christopher Woods
     */
-    class SIREMATHS_EXPORT Complex : public gsl_complex
+    class SIREMATHS_EXPORT Complex
     {
     public:
         Complex(double r = 0.0, double i = 0.0);
-        Complex(const gsl_complex &complex);
 
         template <typename T>
         Complex(const std::complex<T> &stdcomplex);
@@ -194,6 +187,9 @@ namespace SireMaths
         Complex inverse() const;
 
         Complex negative() const;
+
+    private:
+        std::complex<double> val;
     };
 
     SIREMATHS_EXPORT Complex operator+(const Complex &z0, const Complex &z1);
@@ -255,7 +251,7 @@ namespace SireMaths
     /** Construct from a std::complex */
     template <typename T>
     Complex::Complex(const std::complex<T> &stdcomplex)
-        : gsl_complex(gsl_complex_rect(stdcomplex.real(), stdcomplex.imag()))
+        : val(stdcomplex.real(), stdcomplex.imag())
     {
     }
 

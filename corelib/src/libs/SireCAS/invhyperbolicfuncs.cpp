@@ -38,9 +38,7 @@
 
 #include "SireStream/datastream.h"
 
-#ifndef HAVE_ASINH
-#define asinh gsl_asinh
-#endif
+#include <cmath>
 
 using namespace SireCAS;
 using namespace SireStream;
@@ -310,7 +308,7 @@ bool ArcSinh::operator==(const ExBase &other) const
 /** Evaluate this function */
 double ArcSinh::evaluate(const Values &values) const
 {
-    return asinh(x().evaluate(values));
+    return std::asinh(x().evaluate(values));
 }
 
 /** Complex evaluation */
