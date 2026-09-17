@@ -65,7 +65,7 @@ have to do anything yourself.
 :mod:`sire` is itself distributed under the terms of the GPL version 3
 (or any later GPL license). The C++ source code is licensed
 under the GPL 3 or later, and linking with GPL3 dependencies
-(e.g. GSL) means that the entire package is licensed under GPL 3
+(e.g. `regress`) means that the entire package is licensed under GPL 3
 or later.
 
 C++ Dependencies
@@ -136,13 +136,15 @@ library for within-node
 parallelisation. This is licensed under the open source
 `Apache 2.0 license <https://www.threadingbuildingblocks.org/faq/10>`__.
 
-Gnu Scientific Library (GSL)
-----------------------------
+Eigen
+-----
 
-:mod:`sire` uses some of the routines from the Gnu Scientific Library.
-This is used under the terms of the `GPL v3 <http://www.gnu.org/copyleft/gpl.html>`__
-license. More information
-about GSL and its license can be `found here <http://www.gnu.org/software/gsl/>`__.
+:mod:`sire` uses `Eigen <https://eigen.tuxfamily.org>`__ for small dense linear
+algebra routines (e.g. matrix eigendecomposition, SVD, and alignment/RMSD
+fitting). This is a header-only library used under the terms of the
+`Mozilla Public License 2.0 <https://www.mozilla.org/en-US/MPL/2.0/>`__, which
+is compatible with the GPL. More information about Eigen and its license can
+be `found here <https://eigen.tuxfamily.org/index.php?title=Main_Page#License>`__.
 
 NetCDF
 ------

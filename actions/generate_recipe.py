@@ -35,7 +35,6 @@ BUILD_DEPS = {
 }
 
 RUN_DEPS = {
-    "gsl",
     "libnetcdf",
     "openmm",
     "pandas",
