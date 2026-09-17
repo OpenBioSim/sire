@@ -37,6 +37,18 @@ import pytest
 import sire.legacy.Analysis as A
 
 
+@pytest.fixture(autouse=True, scope="module")
+def _ensure_pythonized():
+    # pythonize TIPMF directly, rather than relying on some other test
+    # module triggering the global use_new_api() sweep first (unreliable)
+    # or doing it here at collection time (too early - would clash with
+    # test files that must be the first to pick an API mode, e.g.
+    # tests/biosimspace/test_select.py's use_mixed_api())
+    from sire._pythonize import _pythonize
+
+    _pythonize(A.TIPMF, delete_old=True)
+
+
 def _fit_coeffs(x, y, degree):
     return npoly.polyfit(x, y, degree)
 
@@ -73,7 +85,7 @@ def _extend_with_endpoints(x, y, range_min, range_max):
 def _make_pmf(x, y, range_min, range_max, order):
     dps = [A.DataPoint(float(xi), float(yi)) for xi, yi in zip(x, y)]
     pmf = A.TIPMF(range_min, range_max, order)
-    pmf.setGradients(dps)
+    pmf.set_gradients(dps)
     return pmf
 
 
@@ -130,7 +142,7 @@ def test_ti_pmf_smoothed_gradients_match_polyfit_oracle(
     pmf = _make_pmf(x, y, range_min, range_max, order)
     coeffs = _fit_coeffs(x, y, order)
 
-    smoothed = pmf.smoothedGradients()
+    smoothed = pmf.smoothed_gradients()
     assert len(smoothed) > 0
 
     # the range endpoints are the most numerically sensitive (extrapolation-
@@ -152,8 +164,8 @@ def test_ti_pmf_order_and_range_accessors():
     pmf = _make_pmf(x, y, 0.0, 1.0, 2)
 
     assert pmf.order() == 2
-    assert pmf.rangeMin() == pytest.approx(0.0)
-    assert pmf.rangeMax() == pytest.approx(1.0)
+    assert pmf.range_min() == pytest.approx(0.0)
+    assert pmf.range_max() == pytest.approx(1.0)
 
 
 def test_ti_pmf_empty_gives_zero():
