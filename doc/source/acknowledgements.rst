@@ -65,7 +65,7 @@ have to do anything yourself.
 :mod:`sire` is itself distributed under the terms of the GPL version 3
 (or any later GPL license). The C++ source code is licensed
 under the GPL 3 or later, and linking with GPL3 dependencies
-(e.g. `regress`) means that the entire package is licensed under GPL 3
+(e.g. `lazy_import`) means that the entire package is licensed under GPL 3
 or later.
 
 C++ Dependencies
@@ -162,16 +162,6 @@ dynamics (e.g. as part of the ``somd`` program), and also via an
 interconversion layer to switch between sire and OpenMM system representations.
 This is licensed under either the MIT or LGPL licenses,
 so compatible with the GPL.
-
-Regress
--------
-
-:mod:`sire` uses the linear least squares regression library, `regress`, for
-polynomial least squares fitting. This is used under the terms of
-the GPLv3 license.
-
-The source code for this module can be
-`found here <https://github.com/openbiosim/sire/blob/devel/corelib/src/libs/:mod:`sire`Analysis/third_party/regress.cpp>`__.
 
 eig3
 ----
