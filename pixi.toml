@@ -93,7 +93,7 @@ ambertools = ">=22"
 gromacs = "*"
 alchemlyb = "*"
 mdtraj = "*"
-mdanalysis = "*"
+mdanalysis = ">=2.8.0"
 openff-nagl = "*"
 # loch
 pyopencl = "*"
@@ -109,7 +109,7 @@ ambertools = ">=22"
 # gromacs not available on osx-arm64
 alchemlyb = "*"
 mdtraj = "*"
-mdanalysis = "*"
+mdanalysis = ">=2.8.0"
 openff-nagl = "*"
 # loch
 pyopencl = "*"
@@ -118,7 +118,7 @@ pyopencl = "*"
 # ambertools and gromacs not available on Windows
 alchemlyb = "*"
 mdtraj = "*"
-mdanalysis = "*"
+mdanalysis = ">=2.8.0"
 # loch
 pycuda = "*"
 pyopencl = "*"
@@ -166,16 +166,23 @@ rdkit = ">=2023.0.0"
 [feature.test.target.linux-64.dependencies]
 kartograf = ">=1.0.0"
 gemmi = ">=0.6.4,<0.7.0"
+# >=2.8.0 is the first release where the package as a whole (not just new
+# contributions) is LGPLv3+ rather than GPLv3+ - used as an optional
+# fallback for RDKit bond-order inference, see wrapper/Convert/__init__.py
+mdanalysis = ">=2.8.0"
 
 [feature.test.target.linux-aarch64.dependencies]
 kartograf = ">=1.0.0"
+# mdanalysis not available on linux-aarch64
 
 [feature.test.target.osx-arm64.dependencies]
 kartograf = ">=1.0.0"
 gemmi = ">=0.6.4,<0.7.0"
+mdanalysis = ">=2.8.0"
 
 [feature.test.target.win-64.dependencies]
 gemmi = ">=0.6.4,<0.7.0"
+mdanalysis = ">=2.8.0"
 
 # kartograf excluded from Windows test deps
 
