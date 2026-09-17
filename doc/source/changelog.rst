@@ -75,6 +75,16 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   Ewald error tolerance. The result can be passed as the ``pme_alpha`` and ``pme_grid``
   map options, and the relative force errors can optionally be returned too.
 
+* Removed the GSL (GPLv3) dependency. Complex arithmetic, matrix operations and special
+  functions in ``SireMaths`` are now implemented with Eigen and ``std::complex``.
+
+* Removed the GPL-licensed ``regress`` third-party code from ``SireAnalysis``. The polynomial
+  regression used by ``TI`` is now implemented with Eigen.
+
+* Removed the GPL-derived MDAnalysis bond-order inference heuristic from ``SireRDKit``. The
+  fallback (used when RDKit's ``determineBondOrders()`` fails) now calls MDAnalysis directly via
+  a Python callback if it is installed, otherwise no fallback is applied.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
