@@ -24,8 +24,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   regression used by ``TI`` is now implemented with Eigen.
 
 * Removed the GPL-derived MDAnalysis bond-order inference heuristic from ``SireRDKit``. The
-  fallback (used when RDKit's ``determineBondOrders()`` fails) now calls MDAnalysis directly via
-  a Python callback if it is installed, otherwise no fallback is applied.
+  fallback (used when RDKit's ``determineBondOrders()`` fails, or when
+  ``determine_bond_orders=False``) now calls MDAnalysis directly via a Python callback. If
+  MDAnalysis is not installed, ``determine_bond_orders=False`` raises an error and a failed
+  ``determineBondOrders()`` emits a warning rather than silently leaving all bonds single.
 
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
