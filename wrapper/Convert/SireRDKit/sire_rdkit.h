@@ -13,6 +13,10 @@
 
 #include <QList>
 
+#include "boost/python.hpp"
+
+namespace bp = boost::python;
+
 namespace SireRDKit
 {
 
@@ -57,6 +61,12 @@ namespace SireRDKit
                                       const SireBase::PropertyMap &map);
 
     void register_smarts_search();
+
+    // Register a Python callback used as a fallback for RDKit bond-order/
+    // formal-charge inference, when RDKit's own determineBondOrders() fails
+    // (e.g. dummy atoms present). Optional - if never called, this simply
+    // stays unset and the fallback is skipped.
+    void set_bond_order_inference_callback(bp::object callback);
 }
 
 #endif

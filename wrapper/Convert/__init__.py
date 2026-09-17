@@ -36,10 +36,49 @@ try:
         smiles_to_rdkit,
         smarts_to_rdkit,
         _register_smarts_search,
+        _set_bond_order_inference_callback,
     )
 
     _has_rdkit = True
     _register_smarts_search()
+
+    def _infer_bond_info_via_mdanalysis(pickle: bytes) -> bytes:
+        """
+        Callback registered with the C++ layer as the fallback used when
+        RDKit's own determineBondOrders() fails (e.g. dummy atoms present).
+        Calls the real MDAnalysis package to infer bond orders/formal
+        charges, rather than keeping a derived copy of its algorithm in
+        Sire's own source.
+        """
+        import warnings
+
+        from rdkit import Chem
+        from MDAnalysis.converters.RDKitInferring import MDAnalysisInferrer
+
+        mol = Chem.Mol(pickle)
+
+        with warnings.catch_warnings():
+            # we're not going through MDAnalysis's own AtomGroup-to-RDKit
+            # converter, so the atoms have no '_MDAnalysis_index' property
+            # for its (optional) atom-reordering step to use - expected,
+            # not an error, so silence the warning it would otherwise emit
+            warnings.filterwarnings(
+                "ignore", message=".*_MDAnalysis_index.*not available.*"
+            )
+            mol = MDAnalysisInferrer()(mol)
+
+        return mol.ToBinary()
+
+    try:
+        import MDAnalysis  # noqa: F401
+
+        _set_bond_order_inference_callback(_infer_bond_info_via_mdanalysis)
+    except Exception:
+        # MDAnalysis is an optional soft dependency - if it isn't installed,
+        # simply don't register the callback. RDKit's own determineBondOrders
+        # is tried first regardless and normally succeeds; this is only a
+        # fallback for the rare cases (e.g. dummy atoms) where it doesn't.
+        pass
 
 except Exception as e:
     _rdkit_import_error = e
