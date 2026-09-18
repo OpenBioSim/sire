@@ -19,7 +19,7 @@ can be recognised.
 * `@fjclark <https://github.com/fjclark>`__
 * `@Steboss <https://github.com/Steboss>`__
 * `@nigel-palmer <https://github.com/nigel-palmer>`__
-* `@msuruzon <https://github.com/msuruzhon>`__
+* `@msuruzhon <https://github.com/msuruzhon>`__
 * `@kexul <https://github.com/kexul>`__
 * `@mb2055 <https://github.com/mb2055>`__
 * `@akalpokas <https://github.com/akalpokas>`__
