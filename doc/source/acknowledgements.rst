@@ -76,8 +76,8 @@ Qt 5
 ----
 
 :mod:`sire` is built on top of Qt.Core from Qt 5. This is used under the terms
-of the `LGPL 2 <http://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html>`__
-or later. :mod:`sire` does not modify Qt, so this license allows both
+of the `LGPL 3 <https://www.gnu.org/licenses/lgpl-3.0.en.html>`__.
+:mod:`sire` does not modify Qt, so this license allows both
 commercial and non-commercial use without fee. You can find out more
 about Qt and its license `from here <https://www.qt.io/terms-conditions/>`__.
 
