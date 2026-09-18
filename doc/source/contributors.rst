@@ -24,3 +24,5 @@ can be recognised.
 * `@mb2055 <https://github.com/mb2055>`__
 * `@akalpokas <https://github.com/akalpokas>`__
 * `@BenTanYK <https://github.com/BenTanYK>`__
+* `@JMorado <https://github.com/JMorado>`__
+* `@tom-potter-cresset <https://github.com/tom-potter-cresset>`__
