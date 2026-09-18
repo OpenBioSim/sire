@@ -1577,7 +1577,7 @@ This comprised 2495 commits, from developers
 `@fjclark <https://github.com/fjclark>`__,
 `@Steboss <https://github.com/Steboss>`__,
 `@nigel-palmer <https://github.com/nigel-palmer>`__,
-`@msuruzon <https://github.com/msuruzhon>`__ and
+`@msuruzhon <https://github.com/msuruzhon>`__ and
 `@kexul <https://github.com/kexul>`__.
 
 Here is the changelog for this stage of development.
