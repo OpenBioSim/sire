@@ -1405,35 +1405,31 @@ class DynamicsData:
 
                 with ThreadPoolExecutor() as pool:
                     while completed < steps_to_run:
-                        block_size = 50
+                        # Each block ends at the next frame or energy save, or the end
+                        # of the run. Shorter blocks are only needed to update the
+                        # progress bar, and cost a GPU sync each.
+                        block_size = steps_to_run - completed
+                        if not ProgressBar.is_silent():
+                            block_size = min(block_size, 50)
 
                         steps_till_frame = self._next_save_frame - (
                             completed + nsteps_before_run
                         )
-                        if steps_till_frame <= 0 or (
-                            steps_till_frame <= block_size
-                            and steps_till_frame <= steps_to_run - completed
-                        ):
-                            save_frame = True
-                            self._next_save_frame += frame_frequency_steps
-                            if frame_frequency_steps < block_size:
-                                block_size = frame_frequency_steps
-                        else:
-                            save_frame = False
-
                         steps_till_energy = self._next_save_energy - (
                             completed + nsteps_before_run
                         )
-                        if steps_till_energy <= 0 or (
-                            steps_till_energy <= block_size
-                            and steps_till_energy <= steps_to_run - completed
-                        ):
-                            save_energy = True
+                        if 0 < steps_till_frame < block_size:
+                            block_size = steps_till_frame
+                        if 0 < steps_till_energy < block_size:
+                            block_size = steps_till_energy
+
+                        save_frame = steps_till_frame <= block_size
+                        if save_frame:
+                            self._next_save_frame += frame_frequency_steps
+
+                        save_energy = steps_till_energy <= block_size
+                        if save_energy:
                             self._next_save_energy += energy_frequency_steps
-                            if energy_frequency_steps < block_size:
-                                block_size = energy_frequency_steps
-                        else:
-                            save_energy = False
 
                         # save the last frame if we're about to exit and the user
                         # has requested it
