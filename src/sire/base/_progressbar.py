@@ -3,6 +3,7 @@ __all__ = ["ProgressBar"]
 from ..legacy.Base import ProgressBar as _ProgressBar
 
 _cached_in_notebook = None
+_is_silent = False
 
 
 def _in_notebook():
@@ -113,4 +114,10 @@ class ProgressBar:
 
     @staticmethod
     def set_silent():
+        global _is_silent
+        _is_silent = True
         _ProgressBar.set_silent()
+
+    @staticmethod
+    def is_silent():
+        return _is_silent
