@@ -80,7 +80,6 @@ openff-toolkit-base = "*"
 parmed = "*"
 py3dmol = "*"
 pydot = "*"
-pygtail = "*"
 pyyaml = "*"
 # somd2
 loguru = "*"
