@@ -593,7 +593,7 @@ Molecule ZmatrixMaker::applyTemplates(Molecule &molecule)
             {
                 linetemplate = restemplate.getZmatrixLineTemplate(atom.name().value());
             }
-            catch (SireError::invalid_key)
+            catch (const SireError::invalid_key &)
             {
                 /** If this fails, look also in the matching backbone zmatrix*/
                 ZmatrixTemplate chain = restemplate.getChain(position);

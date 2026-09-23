@@ -1191,7 +1191,7 @@ Molecule PerturbationsLibrary::applyTemplate(const Molecule &molecule) const
             SireUnits::Dimension::Charge icharge = pert.getInitCharge(iname);
             atom.setProperty(initial_charge_property, icharge);
         }
-        catch (const SireError::invalid_key)
+        catch (const SireError::invalid_key &)
         {
             continue;
         }
@@ -1200,7 +1200,7 @@ Molecule PerturbationsLibrary::applyTemplate(const Molecule &molecule) const
             SireUnits::Dimension::Charge fcharge = pert.getFinalCharge(iname);
             atom.setProperty(final_charge_property, fcharge);
         }
-        catch (const SireError::invalid_key)
+        catch (const SireError::invalid_key &)
         {
             continue;
         }
@@ -1210,7 +1210,7 @@ Molecule PerturbationsLibrary::applyTemplate(const Molecule &molecule) const
             LJParameter ilj = pert.getInitLJ(iname);
             atom.setProperty(initial_LJ_property, ilj);
         }
-        catch (const SireError::invalid_key)
+        catch (const SireError::invalid_key &)
         {
             continue;
         }
@@ -1219,7 +1219,7 @@ Molecule PerturbationsLibrary::applyTemplate(const Molecule &molecule) const
             LJParameter flj = pert.getFinalLJ(iname);
             atom.setProperty(final_LJ_property, flj);
         }
-        catch (const SireError::invalid_key)
+        catch (const SireError::invalid_key &)
         {
             continue;
         }
@@ -1229,7 +1229,7 @@ Molecule PerturbationsLibrary::applyTemplate(const Molecule &molecule) const
             QString iatype = pert.getInitType(iname);
             atom.setProperty(initial_ambertype_property, iatype);
         }
-        catch (const SireError::invalid_key)
+        catch (const SireError::invalid_key &)
         {
             continue;
         }
@@ -1238,7 +1238,7 @@ Molecule PerturbationsLibrary::applyTemplate(const Molecule &molecule) const
             QString fatype = pert.getFinalType(iname);
             atom.setProperty(final_ambertype_property, fatype);
         }
-        catch (const SireError::invalid_key)
+        catch (const SireError::invalid_key &)
         {
             continue;
         }
