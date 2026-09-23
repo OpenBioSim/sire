@@ -4148,32 +4148,33 @@ boost::tuples::tuple<double, double, double> OpenMMFrEnergyST::calculateGradient
 {
     double double_increment = incr_plus - incr_minus;
     double gradient = 0;
-    double potential_energy_lambda_plus_delta;
-    double potential_energy_lambda_minus_delta;
     double forward_m;
     double backward_m;
-    if (incr_plus <= 1.0)
-    {
-        potential_energy_lambda_plus_delta = getPotentialEnergyAtLambda(incr_plus);
-    }
-    if (incr_minus >= 0.0)
-    {
-        potential_energy_lambda_minus_delta = getPotentialEnergyAtLambda(incr_minus);
-    }
     if (incr_minus < 0.0)
     {
+        if (incr_plus > 1.0)
+            throw SireError::invalid_arg(QObject::tr("The lambda increment is too large to compute a gradient."),
+                                         CODELOC);
+
+        double potential_energy_lambda_plus_delta = getPotentialEnergyAtLambda(incr_plus);
+
         gradient = (potential_energy_lambda_plus_delta - p_energy_lambda) * 2 / double_increment;
         backward_m = exp(beta * (potential_energy_lambda_plus_delta - p_energy_lambda));
         forward_m = exp(-beta * (potential_energy_lambda_plus_delta - p_energy_lambda));
     }
     else if (incr_plus > 1.0)
     {
+        double potential_energy_lambda_minus_delta = getPotentialEnergyAtLambda(incr_minus);
+
         gradient = -(potential_energy_lambda_minus_delta - p_energy_lambda) * 2 / double_increment;
         backward_m = exp(-beta * (potential_energy_lambda_minus_delta - p_energy_lambda));
         forward_m = exp(beta * (potential_energy_lambda_minus_delta - p_energy_lambda));
     }
     else
     {
+        double potential_energy_lambda_plus_delta = getPotentialEnergyAtLambda(incr_plus);
+        double potential_energy_lambda_minus_delta = getPotentialEnergyAtLambda(incr_minus);
+
         gradient = (potential_energy_lambda_plus_delta - potential_energy_lambda_minus_delta) / double_increment;
 
         backward_m = exp(-beta * (potential_energy_lambda_minus_delta - p_energy_lambda));
