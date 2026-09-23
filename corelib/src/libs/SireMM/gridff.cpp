@@ -808,9 +808,9 @@ void GridFF::addToGrid(const QVector<GridFF::Vector4> &coords_and_charges)
         }
 #else
         {
-            int i = 0;
-            int j = 0;
-            int k = 0;
+            quint32 i = 0;
+            quint32 j = 0;
+            quint32 k = 0;
 
             double gx = minpoint.x();
             double gy = minpoint.y();
@@ -1031,9 +1031,9 @@ void GridFF::addToGrid(const QVector<GridFF::Vector4> &coords_and_charges)
         }
 #else
         {
-            int i = 0;
-            int j = 0;
-            int k = 0;
+            quint32 i = 0;
+            quint32 j = 0;
+            quint32 k = 0;
 
             double gx = minpoint.x();
             double gy = minpoint.y();
@@ -1244,9 +1244,9 @@ void GridFF::addToGrid(const QVector<GridFF::Vector4> &coords_and_charges)
         }
 #else
         {
-            int i = 0;
-            int j = 0;
-            int k = 0;
+            quint32 i = 0;
+            quint32 j = 0;
+            quint32 k = 0;
 
             double gx = minpoint.x();
             double gy = minpoint.y();

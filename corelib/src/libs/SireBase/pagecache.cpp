@@ -30,18 +30,18 @@
 
 #include "SireError/errors.h"
 
-#include "SireBase/parallel.h"
-#include "SireBase/console.h"
 #include "SireBase/atexit.h"
+#include "SireBase/console.h"
+#include "SireBase/parallel.h"
 
+#include <QAtomicInt>
 #include <QDir>
-#include <QThread>
-#include <QQueue>
 #include <QHash>
 #include <QMutex>
-#include <QTemporaryFile>
+#include <QQueue>
 #include <QTemporaryDir>
-#include <QAtomicInt>
+#include <QTemporaryFile>
+#include <QThread>
 
 #include <boost/noncopyable.hpp>
 
@@ -1074,7 +1074,7 @@ void CacheData::run()
 
                 const unsigned int n_bytes = static_cast<unsigned int>(data.size());
 
-                if (n_bytes >= page_size)
+                if (n_bytes >= static_cast<unsigned int>(page_size))
                 {
                     // this is bigger than a page, so needs to have its
                     // own page!

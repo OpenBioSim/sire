@@ -1096,7 +1096,7 @@ void GridFF2::rebuildGrid()
     {
         double grid_sum = 0;
 
-        for (int ipt = 0; ipt < (dimx * dimy * dimz); ++ipt)
+        for (quint32 ipt = 0; ipt < (dimx * dimy * dimz); ++ipt)
         {
             grid_sum += gridpot.at(ipt);
         }
