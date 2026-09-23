@@ -102,6 +102,7 @@ namespace SireMol
         using SireID::Index_T_<ChainIdx>::operator--;
 
         using SireID::Index_T_<ChainIdx>::map;
+        using ChainID::map;
 
         QList<ChainIdx> map(const MolInfo &molinfo) const;
     };
