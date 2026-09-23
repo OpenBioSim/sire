@@ -21,6 +21,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   in fixed blocks of 50 steps, which cost a force evaluation and a GPU sync each. The 50
   step blocks are kept when a progress bar is shown, since they only exist to update it.
 
+* Fixed the SireOpenMM wrapper generation dropping ``SireBase::Property`` as a base class,
+  and added it to the ``QMEngine``, ``NullQMEngine``, ``LambdaLever`` and
+  ``PerturbableOpenMMMolecule`` wrappers.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

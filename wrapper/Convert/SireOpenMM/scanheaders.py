@@ -6,11 +6,8 @@
 #  be exposed in Python
 #
 
-import sys
-import os
 import re
 import pickle
-import string
 
 from glob import glob
 
@@ -202,15 +199,15 @@ def add_doc(function, docs, db):
 
             i += 1
 
-        if not cls in db:
+        if cls not in db:
             db[cls] = {}
 
-        if not nam in db[cls]:
+        if nam not in db[cls]:
             db[cls][nam] = {}
 
         nargs = len(args)
 
-        if not nargs in db[cls][nam]:
+        if nargs not in db[cls][nam]:
             db[cls][nam][nargs] = []
 
         db[cls][nam][nargs].append((args, docs))
@@ -487,11 +484,33 @@ def scanFiles(
     return exposed_classes
 
 
+def scanCorelibClasses(root):
+    """Return the classes exposed by the corelib, so that create_wrappers.py
+    keeps them as bases (e.g. SireBase::Property)"""
+
+    classes = []
+
+    for header in glob("%s/*/*.h" % root) + glob("%s/*/*.hpp" % root):
+        text = open(header, "r").read()
+
+        for m in re.finditer(match_class, text):
+            classes.append(m.groups()[0].strip())
+
+        for m in re.finditer(match_alias, text):
+            classes.append(m.groups()[0].strip())
+
+    return classes
+
+
 if __name__ == "__main__":
     siredir = "."
     outdir = "."
+    corelib = "../../../corelib/src/libs"
 
     exposed_classes = {}
+
+    for clas in scanCorelibClasses(corelib):
+        exposed_classes[clas] = 1
 
     atom_properties = Properties()
     cg_properties = Properties()
@@ -504,7 +523,7 @@ if __name__ == "__main__":
 
     print("Module SireOpenMM", file=FILE)
     print("Source SireOpenMM", file=FILE)
-    print("Root ../../../corelib/src/libs", file=FILE)
+    print("Root %s" % corelib, file=FILE)
 
     FILE.close()
 
