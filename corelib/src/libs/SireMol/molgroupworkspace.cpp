@@ -171,7 +171,7 @@ void MolGroupWorkspace::returnToMemoryPool()
     if (d.get() == 0)
         return;
 
-    if (not d.unique())
+    if (d.use_count() != 1)
     {
         d.reset();
         return;
@@ -224,7 +224,7 @@ void MolGroupWorkspace::detach()
 {
     if (d.get() != 0)
     {
-        if (not d.unique())
+        if (d.use_count() != 1)
         {
             std::shared_ptr<detail::MolGroupWorkspaceData> d2 = d;
 

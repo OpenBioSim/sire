@@ -28,9 +28,9 @@
 
 #include "progressbar.h"
 
+#include <QAtomicInteger>
 #include <QDateTime>
 #include <QThread>
-#include <QAtomicInteger>
 
 #include <boost/noncopyable.hpp>
 
@@ -450,7 +450,7 @@ namespace SireBase
             {
                 QMutexLocker lkr(&mutex);
 
-                if (not bar.d.unique())
+                if (bar.d.use_count() != 1)
                     bar.d = bar.d->clone();
 
                 if (has_finished)

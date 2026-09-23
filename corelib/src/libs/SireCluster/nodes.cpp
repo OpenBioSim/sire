@@ -180,7 +180,7 @@ Nodes::Nodes(const Nodes &other) : d(other.d)
 /** Destructor */
 Nodes::~Nodes()
 {
-    if (d.unique())
+    if (d.use_count() == 1)
     {
         this->removeAll();
     }

@@ -516,7 +516,7 @@ void CLJWorkspace::returnToMemoryPool()
     if (d.get() == 0)
         return;
 
-    if (not d.unique())
+    if (d.use_count() != 1)
     {
         d.reset();
         return;
@@ -541,7 +541,7 @@ void CLJWorkspace::createFromMemoryPool()
 {
     if (d.get() != 0)
     {
-        if (d.unique())
+        if (d.use_count() == 1)
         {
             d->clear();
             return;
@@ -694,7 +694,7 @@ void CLJWorkspace::detach()
 {
     if (d.get() != 0)
     {
-        if (not d.unique())
+        if (d.use_count() != 1)
         {
             std::shared_ptr<detail::CLJWorkspaceData> d2 = d;
             d.reset();
