@@ -2932,6 +2932,8 @@ void OpenMMFrEnergyST::initialise()
                 sigma_avg_end = Sigend_p1 * Sigend_p2;
                 sigma_avg_mix = Sigend_p1 * Sigstart_p2 + Sigstart_p1 * Sigend_p2;
             }
+            else
+                throw SireError::program_bug(QObject::tr("Unknown combining rules."), CODELOC);
 
             epsilon_avg_start = Epstart_p1 * Epstart_p2 * LennardJones14Scale_tmp * LennardJones14Scale_tmp;
             epsilon_avg_end = Epend_p1 * Epend_p2 * LennardJones14Scale_tmp * LennardJones14Scale_tmp;
