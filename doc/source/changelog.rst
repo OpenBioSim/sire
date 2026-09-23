@@ -25,6 +25,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   and added it to the ``QMEngine``, ``NullQMEngine``, ``LambdaLever`` and
   ``PerturbableOpenMMMolecule`` wrappers.
 
+* Build the SireOpenMM module with C++20 on Windows when Torch is available, since
+  recent versions of the libtorch headers require it.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
