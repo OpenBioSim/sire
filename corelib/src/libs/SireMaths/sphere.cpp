@@ -199,11 +199,12 @@ double Sphere::intersectionVolume(const Sphere &other) const
         //  h0 is the cap distance for sphere 0, h1 is the cap distance for sphere 1,
         //  and d is the distance between the center of the spheres
 
-        //         O         O
-        //   r0  / |  x    x | \  r1
-        //     /   |         |   \
-        //    O----O         O----O
-        //     r0-h0         r1-h1
+        /*         O         O
+             r0  / |  x    x | \  r1
+               /   |         |   \
+              O----O         O----O
+               r0-h0         r1-h1
+        */
 
         //  this gives us three equations with three unknowns (x, h0 and h1)
         //
