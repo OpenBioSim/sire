@@ -25,7 +25,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   and added it to the ``QMEngine``, ``NullQMEngine``, ``LambdaLever`` and
   ``PerturbableOpenMMMolecule`` wrappers.
 
-* Fix ``MoleculeGroup::version()`` returning a dangling reference into its workspace.
+* Fixed ``MoleculeGroup::version()`` returning a dangling reference into its workspace.
+
+* Fixed ``CMAPFunctions::set`` comparing ``atom0`` with the unmapped ``atom4`` index.
 
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
