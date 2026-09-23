@@ -4152,11 +4152,11 @@ boost::tuples::tuple<double, double, double> OpenMMFrEnergyST::calculateGradient
     double potential_energy_lambda_minus_delta;
     double forward_m;
     double backward_m;
-    if (incr_plus < 1.0)
+    if (incr_plus <= 1.0)
     {
         potential_energy_lambda_plus_delta = getPotentialEnergyAtLambda(incr_plus);
     }
-    if (incr_minus > 0.0)
+    if (incr_minus >= 0.0)
     {
         potential_energy_lambda_minus_delta = getPotentialEnergyAtLambda(incr_minus);
     }

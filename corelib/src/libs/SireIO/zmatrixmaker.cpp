@@ -217,7 +217,7 @@ void ZmatrixTemplate::setDihedralDelta(const QString &atom, const QString &bond,
 // Implementation of ZmatrixResidue
 //
 
-ZmatrixResidue::ZmatrixResidue(const QString &name) : ZmatrixTemplate(name)
+ZmatrixResidue::ZmatrixResidue(const QString &name) : ZmatrixTemplate(name), rotate(0), translate(0)
 {
 }
 
