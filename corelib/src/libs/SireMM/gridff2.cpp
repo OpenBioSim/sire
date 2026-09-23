@@ -923,9 +923,6 @@ void GridFF2::rebuildGrid()
     far_mols_z.reserve(1024);
     far_mols_q.reserve(1024);
 
-    int atomcount = 0;
-    int gridcount = 0;
-
     const double image_cutoff = coul_cutoff + gridbox.halfExtents().length();
 
     if (fixedatoms_coords.count() > 0)
@@ -949,7 +946,6 @@ void GridFF2::rebuildGrid()
                 // only explicitly evaluate points within the LJ cutoff of the grid
                 if (dist < lj_cutoff)
                 {
-                    atomcount += 1;
                     cmols_x.append(c.x());
                     cmols_y.append(c.y());
                     cmols_z.append(c.z());
@@ -971,7 +967,6 @@ void GridFF2::rebuildGrid()
                         if (far_mols_x.count() > 1023)
                         {
                             addToGrid(far_mols_x, far_mols_y, far_mols_z, far_mols_q);
-                            gridcount += far_mols_x.count();
                             far_mols_x.clear();
                             far_mols_y.clear();
                             far_mols_z.clear();
@@ -985,7 +980,6 @@ void GridFF2::rebuildGrid()
         }
 
         addToGrid(far_mols_x, far_mols_y, far_mols_z, far_mols_q);
-        gridcount += far_mols_x.count();
         far_mols_x.clear();
         far_mols_y.clear();
         far_mols_z.clear();
@@ -994,12 +988,8 @@ void GridFF2::rebuildGrid()
 
     if (not cljmols.isEmpty())
     {
-        int nmols = 0;
-
         for (ChunkedVector<CLJMolecule>::const_iterator it = cljmols.constBegin(); it != cljmols.constEnd(); ++it)
         {
-            nmols += 1;
-
             const CLJMolecule &cljmol = *it;
 
             // loop through each CutGroup of this molecule
@@ -1034,7 +1024,6 @@ void GridFF2::rebuildGrid()
                         // only explicitly evaluate points within the LJ cutoff of the grid
                         if (dist < lj_cutoff)
                         {
-                            atomcount += 1;
                             cmols_x.append(c.x());
                             cmols_y.append(c.y());
                             cmols_z.append(c.z());
@@ -1056,7 +1045,6 @@ void GridFF2::rebuildGrid()
                                 if (far_mols_x.count() > 1023)
                                 {
                                     addToGrid(far_mols_x, far_mols_y, far_mols_z, far_mols_q);
-                                    gridcount += far_mols_x.count();
                                     far_mols_x.clear();
                                     far_mols_y.clear();
                                     far_mols_z.clear();
@@ -1070,7 +1058,6 @@ void GridFF2::rebuildGrid()
         }
 
         addToGrid(far_mols_x, far_mols_y, far_mols_z, far_mols_q);
-        gridcount += far_mols_x.count();
         far_mols_x.clear();
         far_mols_y.clear();
         far_mols_z.clear();
@@ -1091,15 +1078,6 @@ void GridFF2::rebuildGrid()
     {
         close_mols_sig[i] = close_mols_sig[i].sqrt();
         close_mols_eps[i] = close_mols_eps[i].sqrt();
-    }
-
-    {
-        double grid_sum = 0;
-
-        for (quint32 ipt = 0; ipt < (dimx * dimy * dimz); ++ipt)
-        {
-            grid_sum += gridpot.at(ipt);
-        }
     }
 }
 
@@ -1566,14 +1544,8 @@ void GridFF2::recalculateEnergy()
 
     if (must_recalculate)
     {
-        QElapsedTimer t;
-        t.start();
-
         this->mustNowRecalculateFromScratch();
         this->rebuildGrid();
-
-        qint64 ns = t.nsecsElapsed();
-        t.restart();
 
         double total_cnrg(0);
         double total_ljnrg(0);
@@ -1624,8 +1596,6 @@ void GridFF2::recalculateEnergy()
             total_cnrg += cnrg;
             total_ljnrg += ljnrg;
         }
-
-        ns = t.nsecsElapsed();
 
         this->components().setEnergy(*this, CLJEnergy(total_cnrg, total_ljnrg));
     }
