@@ -33,6 +33,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed dangling reference to temporary ``CLJAtoms`` IDs in ``CLJWorkspace::isSingleID``.
 
+* Fixed uninitialised energy in ``calculateGradient`` at lambda one increment from 0 or 1.
+
+* Fixed dangling reference to a temporary ``AABox`` center in ``CloseMols::recalculate``.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
