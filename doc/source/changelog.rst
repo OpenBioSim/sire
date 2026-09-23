@@ -29,6 +29,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed ``CMAPFunctions::set`` comparing ``atom0`` with the unmapped ``atom4`` index.
 
+* Fixed ``NMatrix * Vector`` returning a zero vector for non-3x3 matrices.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
