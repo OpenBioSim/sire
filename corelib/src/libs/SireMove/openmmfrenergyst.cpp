@@ -184,7 +184,7 @@ OpenMMFrEnergyST::OpenMMFrEnergyST(bool frequent_save)
       Temperature(300.0 * kelvin), platform_type("Reference"), Restraint_flag(false), CMMremoval_frequency(0),
       buffer_frequency(0), energy_frequency(100), device_index("0"), precision("single"), Alchemical_value(0.5),
       coulomb_power(0), shift_delta(2.0), delta_alchemical(0.001), alchemical_array(), finite_diff_gradients(),
-      pot_energies(), perturbed_energies(), reduced_perturbed_energies(), forward_Metropolis(), backward_Metropolis(),
+      pot_energies(), forward_Metropolis(), backward_Metropolis(), reduced_perturbed_energies(), perturbed_energies(),
       Integrator_type("leapfrogverlet"), friction(1.0 / picosecond), integration_tol(0.001), timeskip(0.0 * picosecond),
       reinitialise_context(false), Debug(false)
 {
@@ -203,7 +203,7 @@ OpenMMFrEnergyST::OpenMMFrEnergyST(const MoleculeGroup &molecule_group, const Mo
       Temperature(300.0 * kelvin), platform_type("Reference"), Restraint_flag(false), CMMremoval_frequency(0),
       buffer_frequency(0), energy_frequency(100), device_index("0"), precision("single"), Alchemical_value(0.5),
       coulomb_power(0), shift_delta(2.0), delta_alchemical(0.001), alchemical_array(), finite_diff_gradients(),
-      pot_energies(), perturbed_energies(), reduced_perturbed_energies(), forward_Metropolis(), backward_Metropolis(),
+      pot_energies(), forward_Metropolis(), backward_Metropolis(), reduced_perturbed_energies(), perturbed_energies(),
       Integrator_type("leapfrogverlet"), friction(1.0 / picosecond), integration_tol(0.001), timeskip(0.0 * picosecond),
       reinitialise_context(false), Debug(false)
 {
@@ -225,8 +225,8 @@ OpenMMFrEnergyST::OpenMMFrEnergyST(const OpenMMFrEnergyST &other)
       Alchemical_value(other.Alchemical_value), coulomb_power(other.coulomb_power), shift_delta(other.shift_delta),
       delta_alchemical(other.delta_alchemical), alchemical_array(other.alchemical_array),
       finite_diff_gradients(other.finite_diff_gradients), pot_energies(other.pot_energies),
-      perturbed_energies(other.perturbed_energies), reduced_perturbed_energies(other.reduced_perturbed_energies),
       forward_Metropolis(other.forward_Metropolis), backward_Metropolis(other.backward_Metropolis),
+      reduced_perturbed_energies(other.reduced_perturbed_energies), perturbed_energies(other.perturbed_energies),
       Integrator_type(other.Integrator_type), friction(other.friction), integration_tol(other.integration_tol),
       timeskip(other.timeskip), reinitialise_context(other.reinitialise_context), Debug(other.Debug)
 {
@@ -1248,9 +1248,9 @@ void OpenMMFrEnergyST::initialise()
             const double surface_Tension = 0;
             OpenMM::MonteCarloMembraneBarostat::XYMode xymode = OpenMM::MonteCarloMembraneBarostat::XYIsotropic;
             OpenMM::MonteCarloMembraneBarostat::ZMode zmode = OpenMM::MonteCarloMembraneBarostat::ZFree;
-            OpenMM::MonteCarloMembraneBarostat * barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
+            OpenMM::MonteCarloMembraneBarostat *barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
 
-            //Set The random seed
+            // Set The random seed
             barostat->setRandomNumberSeed(random_seed);
 
             system_openmm->addForce(barostat);
@@ -3156,7 +3156,7 @@ void OpenMMFrEnergyST::initialise()
             }
 
         } // end of loop over molecules in system
-    }     // end of bond link flag
+    } // end of bond link flag
 
     bool UseBoresch_flag = true;
 
