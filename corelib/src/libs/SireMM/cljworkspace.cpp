@@ -108,7 +108,7 @@ namespace SireMM
                 {
                     // loop over the old and new atoms
                     {
-                        const QVector<MultiInt> &ids = deltas.constData()[i].newAtoms().ID();
+                        const QVector<MultiInt> ids = deltas.constData()[i].newAtoms().ID();
 
                         for (int j = 0; j < ids.count(); ++j)
                         {
@@ -131,7 +131,7 @@ namespace SireMM
 
                     // loop over the old and new atoms
                     {
-                        const QVector<MultiInt> &ids = deltas.constData()[i].oldAtoms().ID();
+                        const QVector<MultiInt> ids = deltas.constData()[i].oldAtoms().ID();
 
                         for (int j = 0; j < ids.count(); ++j)
                         {
