@@ -429,12 +429,14 @@ void MolGroupWorkspace::setVersion(const MajorMinorVersion &version)
 }
 
 /** Return the version of the current workspace */
-MajorMinorVersion MolGroupWorkspace::version() const
+const MajorMinorVersion &MolGroupWorkspace::version() const
 {
+    static const MajorMinorVersion null_version;
+
     if (d.get())
         return d->version();
     else
-        return MajorMinorVersion();
+        return null_version;
 }
 
 /** Increment the major version */
