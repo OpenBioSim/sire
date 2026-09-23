@@ -4197,7 +4197,7 @@ QVector<double> OpenMMFrEnergyST::computeReducedPerturbedEnergies(double beta)
     {
         for (i = perturbed.begin(); i != perturbed.end(); i++)
         {
-            qDebug() << "bias is: " << *i << endl;
+            qDebug() << "bias is: " << *i << Qt::endl;
         }
     }
     return perturbed;
