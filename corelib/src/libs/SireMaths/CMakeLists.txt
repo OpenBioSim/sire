@@ -101,6 +101,11 @@ set ( SIREMATHS_SOURCES
       ${SIREMATHS_HEADERS}
     )
 
+# NaN is used to mark missing values, so it must survive -ffast-math.
+if (NOT MSVC)
+  set_source_files_properties(energytrajectory.cpp PROPERTIES COMPILE_OPTIONS "-fno-finite-math-only")
+endif()
+
 add_library (SireMaths ${SIREMATHS_SOURCES})
 
 set_target_properties (SireMaths PROPERTIES
