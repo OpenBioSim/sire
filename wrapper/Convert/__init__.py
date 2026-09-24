@@ -24,6 +24,8 @@ __all__ = [
     "TorchQMEngine",
 ]
 
+import warnings as _warnings
+
 try:
     from ._SireRDKit import (
         sire_to_rdkit,
@@ -138,8 +140,7 @@ try:
 
         if type(mols) is not openmm.Context:
             raise TypeError(
-                "You can only convert an openmm.Context to sire, not "
-                f"a {type(mols)}."
+                f"You can only convert an openmm.Context to sire, not a {type(mols)}."
             )
 
         # Need to be sure that 'mols' is an openmm.System or else
@@ -148,8 +149,7 @@ try:
 
         if type(system) is not openmm.System:
             raise TypeError(
-                "You can only convert an openmm.System to sire, not "
-                f"a {type(system)}"
+                f"You can only convert an openmm.System to sire, not a {type(system)}"
             )
 
         sire_mols = _openmm_system_to_sire(system, map)
@@ -181,8 +181,7 @@ try:
 
         if not timestep.has_same_units(femtosecond):
             raise TypeError(
-                "The timestep should be in units of time. You cannot use "
-                f"'{timestep}'"
+                f"The timestep should be in units of time. You cannot use '{timestep}'"
             )
 
         timestep_in_fs = timestep.to(femtosecond)
@@ -242,7 +241,7 @@ try:
             if integrator == "verlet" or integrator == "leapfrog":
                 if not ensemble.is_nve():
                     raise ValueError(
-                        "You cannot use a verlet integrator with the " f"{ensemble}"
+                        f"You cannot use a verlet integrator with the {ensemble}"
                     )
 
                 integrator = openmm.VerletIntegrator(timestep)
@@ -564,6 +563,8 @@ try:
 
 except Exception as e:
     _openmm_import_exception = e
+
+    _warnings.warn(f"Unable to load the Sire OpenMM plugin: {e}")
 
     # OpenMM support is not available
     def _no_openmm():

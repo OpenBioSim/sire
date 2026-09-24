@@ -35,25 +35,6 @@ using namespace SireMaths;
 
 #define DOUBLE64 double
 
-const DOUBLE64 double_magic = double(6755399441055744.0); // 2^(52-16) * 1.5
-                                                          // as double has 52 bits of mantissa
-
-static QString toBinary(qint64 value)
-{
-    QStringList vals;
-
-    const unsigned char *c = reinterpret_cast<const unsigned char *>(&(value));
-
-    QString val("0x");
-
-    for (unsigned int j = 0; j < sizeof(qint64); ++j)
-    {
-        val.append(QString("%1").arg((unsigned short)(c[j]), 2, 16, QChar('0')));
-    }
-
-    return val;
-}
-
 static const double SCALE_TO_FIXED = 2LL << 32;
 static const double SCALE_FROM_FIXED = double(1) / SCALE_TO_FIXED;
 

@@ -1638,13 +1638,13 @@ void CLJAtoms::append(const CLJAtoms &other, int n)
 
         if (n_whole > 0)
         {
-            std::memcpy(&(_x[start_idx]), &(other._x[0]), n_whole * sizeof(MultiFloat));
-            std::memcpy(&(_y[start_idx]), &(other._y[0]), n_whole * sizeof(MultiFloat));
-            std::memcpy(&(_z[start_idx]), &(other._z[0]), n_whole * sizeof(MultiFloat));
-            std::memcpy(&(_q[start_idx]), &(other._q[0]), n_whole * sizeof(MultiFloat));
-            std::memcpy(&(_sig[start_idx]), &(other._sig[0]), n_whole * sizeof(MultiFloat));
-            std::memcpy(&(_eps[start_idx]), &(other._eps[0]), n_whole * sizeof(MultiFloat));
-            std::memcpy(&(_id[start_idx]), &(other._id[0]), n_whole * sizeof(MultiInt));
+            std::memcpy(static_cast<void *>(&(_x[start_idx])), &(other._x[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(static_cast<void *>(&(_y[start_idx])), &(other._y[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(static_cast<void *>(&(_z[start_idx])), &(other._z[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(static_cast<void *>(&(_q[start_idx])), &(other._q[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(static_cast<void *>(&(_sig[start_idx])), &(other._sig[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(static_cast<void *>(&(_eps[start_idx])), &(other._eps[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(static_cast<void *>(&(_id[start_idx])), &(other._id[0]), n_whole * sizeof(MultiInt));
         }
 
         if (n_partial > 0)
@@ -1888,13 +1888,13 @@ void CLJAtoms::copyIn(const CLJAtoms &other)
 
     const int nelements = other._x.count();
 
-    std::memcpy(_x.data(), other._x.constData(), nelements * sizeof(MultiFloat));
-    std::memcpy(_y.data(), other._y.constData(), nelements * sizeof(MultiFloat));
-    std::memcpy(_z.data(), other._z.constData(), nelements * sizeof(MultiFloat));
-    std::memcpy(_q.data(), other._q.constData(), nelements * sizeof(MultiFloat));
-    std::memcpy(_sig.data(), other._sig.constData(), nelements * sizeof(MultiFloat));
-    std::memcpy(_eps.data(), other._eps.constData(), nelements * sizeof(MultiFloat));
-    std::memcpy(_id.data(), other._id.constData(), nelements * sizeof(MultiInt));
+    std::memcpy(static_cast<void *>(_x.data()), other._x.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(static_cast<void *>(_y.data()), other._y.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(static_cast<void *>(_z.data()), other._z.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(static_cast<void *>(_q.data()), other._q.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(static_cast<void *>(_sig.data()), other._sig.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(static_cast<void *>(_eps.data()), other._eps.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(static_cast<void *>(_id.data()), other._id.constData(), nelements * sizeof(MultiInt));
 }
 
 /** Return a copy of these CLJAtoms where the charge and LJ epsilon parameters

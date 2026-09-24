@@ -153,7 +153,9 @@ pytorch = "*"
 torchani = "*"
 xtb-python = "*"
 
-# EMLE has no Windows-specific deps (ambertools, pytorch etc. excluded on Windows)
+[feature.emle.target.win-64.dependencies]
+pytorch = "*"
+# ambertools, deepmd-kit, nnpops not available on Windows
 
 # =============================================================================
 # Test feature

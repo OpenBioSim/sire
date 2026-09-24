@@ -30,6 +30,7 @@
 
 #include <boost/assert.hpp>
 
+#include "atomidxmapping.h"
 #include "atommatcher.h"
 #include "atomselection.h"
 #include "connectivity.h"
@@ -37,7 +38,6 @@
 #include "moleculeinfo.h"
 #include "moleculeinfodata.h"
 #include "moleculeview.h"
-#include "atomidxmapping.h"
 
 #include "angleid.h"
 #include "bondid.h"
@@ -46,8 +46,8 @@
 
 #include "SireMol/errors.h"
 
-#include "SireBase/errors.h"
 #include "SireBase/console.h"
+#include "SireBase/errors.h"
 #include "SireBase/parallel.h"
 
 #include "SireError/errors.h"
@@ -400,7 +400,7 @@ PropertyPtr ConnectivityBase::_pvt_makeCompatibleWith(const MoleculeInfoData &mo
                 // remove any bond properties that refer to atoms that no longer exist
                 for (auto it = ret.bond_props.begin(); it != ret.bond_props.end();)
                 {
-                    if (it.key().atom0 >= nats or it.key().atom1 >= nats)
+                    if (it.key().atom0 >= static_cast<quint32>(nats) or it.key().atom1 >= static_cast<quint32>(nats))
                     {
                         it = ret.bond_props.erase(it);
                     }
@@ -2414,7 +2414,7 @@ QList<SireMol::detail::IDPair> _getBonds(const QVector<QSet<AtomIdx>> &connectio
             QList<SireMol::detail::IDPair> my_bonds;
             my_bonds.reserve(4 * (r.end() - r.begin()));
 
-            for (quint32 i = r.begin(); i < r.end(); ++i)
+            for (quint32 i = r.begin(); i < static_cast<quint32>(r.end()); ++i)
             {
                 for (const AtomIdx &j_idx : connections_array[i])
                 {
@@ -2435,7 +2435,7 @@ QList<SireMol::detail::IDPair> _getBonds(const QVector<QSet<AtomIdx>> &connectio
     }
     else
     {
-        for (quint32 i = 0; i < nats; ++i)
+        for (quint32 i = 0; i < static_cast<quint32>(nats); ++i)
         {
             for (const AtomIdx &j_idx : connections_array[i])
             {
@@ -2664,7 +2664,7 @@ QList<SireMol::detail::IDTriple> _getAngles(const QVector<QSet<AtomIdx>> &connec
             QList<SireMol::detail::IDTriple> my_angs;
             my_angs.reserve(3 * (r.end() - r.begin()));
 
-            for (quint32 i = r.begin(); i < r.end(); ++i)
+            for (quint32 i = r.begin(); i < static_cast<quint32>(r.end()); ++i)
             {
                 for (const AtomIdx &j_idx : connections_array[i])
                 {
@@ -2688,7 +2688,7 @@ QList<SireMol::detail::IDTriple> _getAngles(const QVector<QSet<AtomIdx>> &connec
     }
     else
     {
-        for (quint32 i = 0; i < nats; ++i)
+        for (quint32 i = 0; i < static_cast<quint32>(nats); ++i)
         {
             for (const auto &j_idx : connections_array[i])
             {
@@ -2833,7 +2833,7 @@ QList<SireMol::detail::IDQuad> _getDihedrals(const QVector<QSet<AtomIdx>> &conne
             QList<SireMol::detail::IDQuad> my_dihs;
             my_dihs.reserve(3 * (r.end() - r.begin()));
 
-            for (quint32 i = r.begin(); i < r.end(); ++i)
+            for (quint32 i = r.begin(); i < static_cast<quint32>(r.end()); ++i)
             {
                 for (const auto &j_idx : connections_array[i])
                 {
@@ -2862,7 +2862,7 @@ QList<SireMol::detail::IDQuad> _getDihedrals(const QVector<QSet<AtomIdx>> &conne
     }
     else
     {
-        for (quint32 i = 0; i < nats; ++i)
+        for (quint32 i = 0; i < static_cast<quint32>(nats); ++i)
         {
             for (const auto &j_idx : connections_array[i])
             {

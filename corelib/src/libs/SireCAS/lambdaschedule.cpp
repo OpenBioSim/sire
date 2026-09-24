@@ -185,8 +185,8 @@ LambdaSchedule::LambdaSchedule(const LambdaSchedule &other)
       lever_names(other.lever_names), stage_names(other.stage_names),
       default_equations(other.default_equations),
       stage_equations(other.stage_equations),
-      coupled_levers(other.coupled_levers),
-      stage_weights(other.stage_weights)
+      stage_weights(other.stage_weights),
+      coupled_levers(other.coupled_levers)
 {
 }
 

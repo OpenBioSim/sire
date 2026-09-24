@@ -217,7 +217,7 @@ void ZmatrixTemplate::setDihedralDelta(const QString &atom, const QString &bond,
 // Implementation of ZmatrixResidue
 //
 
-ZmatrixResidue::ZmatrixResidue(const QString &name) : ZmatrixTemplate(name)
+ZmatrixResidue::ZmatrixResidue(const QString &name) : ZmatrixTemplate(name), rotate(0), translate(0)
 {
 }
 
@@ -593,7 +593,7 @@ Molecule ZmatrixMaker::applyTemplates(Molecule &molecule)
             {
                 linetemplate = restemplate.getZmatrixLineTemplate(atom.name().value());
             }
-            catch (SireError::invalid_key)
+            catch (const SireError::invalid_key &)
             {
                 /** If this fails, look also in the matching backbone zmatrix*/
                 ZmatrixTemplate chain = restemplate.getChain(position);

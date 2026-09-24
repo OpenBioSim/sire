@@ -91,6 +91,11 @@ set ( SIRECAS_SOURCES
 
     )
 
+# NaN is used to mark missing values, so it must survive -ffast-math.
+if (NOT MSVC)
+  set_source_files_properties(lambdaschedule.cpp PROPERTIES COMPILE_OPTIONS "-fno-finite-math-only")
+endif()
+
 add_library (SireCAS ${SIRECAS_SOURCES})
 
 set_target_properties (SireCAS PROPERTIES

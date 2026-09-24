@@ -316,7 +316,7 @@ RanGenerator::~RanGenerator()
 /** Detach from shared storage */
 void RanGenerator::detach()
 {
-    if (not d.unique())
+    if (d.use_count() != 1)
     {
         d.reset(new RanGeneratorPvt(*d));
     }
@@ -352,7 +352,7 @@ RanGeneratorPvt &RanGenerator::nonconst_d() const
     this explicitly shared copy of the generator */
 void RanGenerator::seed()
 {
-    if (d.unique())
+    if (d.use_count() == 1)
         d->seed();
     else
         d.reset(new RanGeneratorPvt());
@@ -362,7 +362,7 @@ void RanGenerator::seed()
     this explicitly shared copy of the generator */
 void RanGenerator::seed(quint32 s)
 {
-    if (d.unique())
+    if (d.use_count() == 1)
         d->seed(s);
     else
         d.reset(new RanGeneratorPvt(s));
@@ -372,7 +372,7 @@ void RanGenerator::seed(quint32 s)
     this explicitly shared copy of the generator */
 void RanGenerator::seed(const QVector<quint32> &s)
 {
-    if (d.unique())
+    if (d.use_count() == 1)
         d->seed(s);
     else
         d.reset(new RanGeneratorPvt(s));
@@ -894,7 +894,7 @@ QVector<quint32> RanGenerator::getState() const
 */
 void RanGenerator::setState(const QVector<quint32> &state)
 {
-    if (d.unique())
+    if (d.use_count() == 1)
     {
         d->loadState(state);
     }

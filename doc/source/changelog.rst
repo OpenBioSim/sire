@@ -21,6 +21,22 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   in fixed blocks of 50 steps, which cost a force evaluation and a GPU sync each. The 50
   step blocks are kept when a progress bar is shown, since they only exist to update it.
 
+* Fixed the SireOpenMM wrapper generation dropping ``SireBase::Property`` as a base class,
+  and added it to the ``QMEngine``, ``NullQMEngine``, ``LambdaLever`` and
+  ``PerturbableOpenMMMolecule`` wrappers.
+
+* Fixed ``MoleculeGroup::version()`` returning a dangling reference into its workspace.
+
+* Fixed ``CMAPFunctions::set`` comparing ``atom0`` with the unmapped ``atom4`` index.
+
+* Fixed ``NMatrix * Vector`` returning a zero vector for non-3x3 matrices.
+
+* Fixed dangling reference to temporary ``CLJAtoms`` IDs in ``CLJWorkspace::isSingleID``.
+
+* Fixed uninitialised energy in ``calculateGradient`` at lambda one increment from 0 or 1.
+
+* Fixed dangling reference to a temporary ``AABox`` center in ``CloseMols::recalculate``.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

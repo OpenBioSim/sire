@@ -121,6 +121,7 @@ namespace Squire
         AtomCharges calculateCharges(const Molecule &molecule, const PropertyMap &map) const;
 
     protected:
+        using QMProgram::calculateEnergy;
         double calculateEnergy(const QMPotential::Molecules &molecules, int ntries = 5) const;
 
         QString energyCommandFile(const QMPotential::Molecules &molecules) const;

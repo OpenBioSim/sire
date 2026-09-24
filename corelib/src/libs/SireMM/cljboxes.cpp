@@ -116,7 +116,7 @@ void CLJBox::findGaps()
 
     const QVector<MultiInt> &ids = atms.ID();
 
-    const quint32 dummy_id = CLJAtoms::idOfDummy()[0];
+    const qint32 dummy_id = CLJAtoms::idOfDummy()[0];
 
     for (int i = ids.count() - 1; i >= 0; --i)
     {

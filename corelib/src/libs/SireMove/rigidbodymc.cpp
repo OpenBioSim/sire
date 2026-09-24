@@ -122,7 +122,7 @@ QDataStream &operator>>(QDataStream &ds, RigidBodyMC &rbmc)
         else
             rbmc.mol_reflectors.clear();
 
-        for (int i = 0; i < nreflect; ++i)
+        for (quint32 i = 0; i < nreflect; ++i)
         {
             MolNum molnum;
             Vector center;
@@ -156,7 +156,7 @@ QDataStream &operator>>(QDataStream &ds, RigidBodyMC &rbmc)
         else
             rbmc.mol_reflectors.clear();
 
-        for (int i = 0; i < nreflect; ++i)
+        for (quint32 i = 0; i < nreflect; ++i)
         {
             MolNum molnum;
             Vector center;

@@ -85,7 +85,7 @@ QDataStream &operator>>(QDataStream &ds, AngleRestraint &angrest)
 /** Null constructor */
 AngleRestraint::AngleRestraint()
     : ConcreteProperty<AngleRestraint, Property>(),
-      _ktheta(0), _theta0(0)
+      _theta0(0), _ktheta(0)
 {
 }
 
@@ -253,8 +253,7 @@ QDataStream &operator>>(QDataStream &ds, AngleRestraints &angrests)
     {
         SharedDataStream sds(ds);
 
-        sds >> angrests.r >> angrests.use_pbc
-            >> static_cast<Restraints &>(angrests);
+        sds >> angrests.r >> angrests.use_pbc >> static_cast<Restraints &>(angrests);
     }
     else
         throw version_error(v, "1,2", r_angrests, CODELOC);

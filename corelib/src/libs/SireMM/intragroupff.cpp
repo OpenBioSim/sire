@@ -154,7 +154,7 @@ namespace SireMM
             /** Whether or not this group needs accepting */
             bool needs_accepting;
 
-            IntraGroupFFMolData() : RefCountData(), connectivity_version(0), intrascale_version(0), needs_energy_calc(false), needs_accepting(false)
+            IntraGroupFFMolData() : RefCountData(), intrascale_version(0), connectivity_version(0), needs_energy_calc(false), needs_accepting(false)
             {
             }
 
@@ -188,8 +188,8 @@ namespace SireMM
                 : RefCountData(), cljgroup0(other.cljgroup0), cljgroup1(other.cljgroup1), cljfuncs(other.cljfuncs),
                   cty(other.cty), excl_pairs(other.excl_pairs), nrg(other.nrg), connectivity_property(other.connectivity_property),
                   intrascale_property(other.intrascale_property),
-                  connectivity_version(other.connectivity_version),
                   intrascale_version(other.intrascale_version),
+                  connectivity_version(other.connectivity_version),
                   needs_energy_calc(other.needs_energy_calc),
                   needs_accepting(other.needs_accepting)
             {

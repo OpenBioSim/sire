@@ -107,6 +107,7 @@ namespace SireMol
         using SireID::Index_T_<CGIdx>::operator--;
 
         using SireID::Index_T_<CGIdx>::map;
+        using CGID::map;
 
         QList<CGIdx> map(const MolInfo &molinfo) const;
     };
