@@ -26,7 +26,6 @@ from pyplusplus.code_creators import algorithm
 from pyplusplus.code_creators import free_function_t
 from pyplusplus.code_creators import mem_fun_t
 from pyplusplus.decl_wrappers import call_policies
-import pyplusplus
 
 from pygccxml.declarations.matchers import access_type_matcher_t
 from pygccxml import declarations
@@ -499,7 +498,7 @@ def export_class(
                     class_name = re.sub(r"\s\[class\]", "", str(c))
                     class_name = re.sub(r"\s\[struct\]", "", class_name)
 
-                    if not (class_name in has_copy_function):
+                    if class_name not in has_copy_function:
                         has_copy_function[class_name] = True
 
                         made_copy_function = True
@@ -760,7 +759,6 @@ if __name__ == "__main__":
     qtdir = "%s/../include/qt" % os.path.abspath(dir)
     boostdir = "%s/../include" % os.path.abspath(dir)
     pydir = glob("%s/../include/python3*" % os.path.abspath(dir))[0]
-    gsldir = boostdir
     openmm_include_dir = boostdir
 
     need_input = False
@@ -779,13 +777,6 @@ if __name__ == "__main__":
         )
         need_input = True
 
-    if gsldir is None:
-        print(
-            "You must set the environmental variable GSLDIR to the location "
-            + "of the GSL header files"
-        )
-        need_input = True
-
     if need_input:
         print("Cannot continue as I don't know where the header files are")
         sys.exit(-1)
@@ -794,7 +785,6 @@ if __name__ == "__main__":
 
     qt_include_dirs = [qtdir, "%s/QtCore" % qtdir]
     boost_include_dirs = [boostdir, pydir]
-    gsl_include_dirs = [gsldir]
 
     generator_path, generator_name = pygccxml.utils.find_xml_generator()
 
@@ -821,10 +811,7 @@ if __name__ == "__main__":
             xml_generator=generator_name,
             compiler="gcc",
             cflags="-m64 -fPIC -std=c++14",
-            include_paths=sire_include_dirs
-            + qt_include_dirs
-            + boost_include_dirs
-            + gsl_include_dirs,
+            include_paths=sire_include_dirs + qt_include_dirs + boost_include_dirs,
             define_symbols=[
                 "GCCXML_PARSE",
                 "__PIC__",
@@ -850,7 +837,6 @@ if __name__ == "__main__":
             include_paths=sire_include_dirs
             + qt_include_dirs
             + boost_include_dirs
-            + gsl_include_dirs
             + openmm_include_dirs,
             define_symbols=[
                 "GCCXML_PARSE",
