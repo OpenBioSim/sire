@@ -194,7 +194,7 @@ Process::Process(const Process &other) : d(other.d)
 /** Destructor */
 Process::~Process()
 {
-    if (d.unique())
+    if (d.use_count() == 1)
     {
         this->kill();
     }

@@ -481,7 +481,7 @@ int read_trr_natoms(char *fn, int *natoms)
 int write_trr(XDRFILE *xd, int natoms, int step, float t, float lambda,
               matrix box, rvec *x, rvec *v, rvec *f)
 {
-  int *plcholder;
+  int *plcholder = NULL;
   return do_trn(xd, 0, &step, &t, &lambda, box, &natoms, x, v, f, plcholder);
 }
 

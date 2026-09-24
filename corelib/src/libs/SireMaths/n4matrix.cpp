@@ -156,9 +156,9 @@ N4Matrix::N4Matrix(const SireBase::Array2D<NMatrix> &array4d)
 
         const NMatrix *array4d_data = array4d.constData();
 
-        for (uint i = 0; i < array4d.nRows(); ++i)
+        for (int i = 0; i < array4d.nRows(); ++i)
         {
-            for (uint j = 0; j < array4d.nColumns(); ++j)
+            for (int j = 0; j < array4d.nColumns(); ++j)
             {
                 int idx = array4d.map(i, j);
 

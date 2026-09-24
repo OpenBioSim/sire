@@ -779,7 +779,7 @@ NetCDFDataInfo::NetCDFDataInfo(const NetCDFDataInfo &other, const NetCDFHyperSla
 
         for (int i = 0; i < dim_sizes.count(); ++i)
         {
-            if (slab.starts()[i] < 0 or slab.starts()[i] + slab.counts()[i] > dim_sizes[i])
+            if (slab.starts()[i] + slab.counts()[i] > static_cast<size_t>(dim_sizes[i]))
             {
                 throw SireError::invalid_index(QObject::tr(
                                                    "The slab for dimension %1 has the wrong shape (%2, %3) when the "

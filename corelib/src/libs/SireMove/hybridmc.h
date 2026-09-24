@@ -83,6 +83,7 @@ namespace SireMove
         /** Generate the velocites in the passed MD object,
             returning the biasing factor for the HMC algorithm */
         virtual double generate(const System &system, MolecularDynamics &md) = 0;
+        using VelocityGenerator::generate;
 
         /** Return the bias for the velocities in the passed MD object */
         virtual double getBias(const MolecularDynamics &md) = 0;

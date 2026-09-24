@@ -30,9 +30,9 @@
 
 #include "SireSystem/system.h"
 
+#include "SireMol/core.h"
 #include "SireMol/molecule.h"
 #include "SireMol/selectormol.h"
-#include "SireMol/core.h"
 
 #include "SireVol/cartesian.h"
 
@@ -298,7 +298,8 @@ ForceFieldInfo::ForceFieldInfo(const SireMol::SelectorMol &mols,
         // use the first space found from the molecule
         for (int i = 0; i < mols.count(); ++i)
         {
-            const auto &moldata = mols[i].data();
+            const auto mol = mols[i];
+            const auto &moldata = mol.data();
 
             if (moldata.hasProperty(space_prop.source()))
             {

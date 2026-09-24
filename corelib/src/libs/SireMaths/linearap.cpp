@@ -946,14 +946,10 @@ namespace SireMaths
 
         if (check_result)
         {
-            // calculate optimal cost.
-            double total_cost = 0;
-
             for (int i = 0; i < dim; ++i)
             {
                 int j = rows_to_columns[i];
                 u[i] = costs(i, j) - v[j];
-                total_cost += costs(i, j);
             }
 
             // qDebug() << "\n(final) rows_to_columns" << rows_to_columns;

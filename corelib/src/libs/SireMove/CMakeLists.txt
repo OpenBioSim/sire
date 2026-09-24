@@ -161,6 +161,11 @@ else()
   set ( SIRE_OPENMM_LIBRARIES "" )
 endif()
 
+# The NaN/inf input checks must not be optimised away by -ffast-math.
+if (NOT MSVC)
+  set_source_files_properties(rigidbodymc.cpp PROPERTIES COMPILE_OPTIONS "-fno-finite-math-only")
+endif()
+
 add_library (SireMove ${SIREMOVE_SOURCES})
 
 

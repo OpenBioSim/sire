@@ -479,10 +479,44 @@ def test_qmff_was_force_changed(ala_mols):
 
     # Same lambda again: qmff lambda is unchanged, so not changed.
     ctx.set_lambda(0.5)
-    assert not lever.was_force_changed(
-        "qmff"
-    ), "qmff should not be changed when lambda is repeated"
+    assert not lever.was_force_changed("qmff"), (
+        "qmff should not be changed when lambda is repeated"
+    )
 
     # Different lambda: qmff lambda changes again.
     ctx.set_lambda(1.0)
     assert lever.was_force_changed("qmff"), "qmff should be changed when lambda changes"
+
+
+def test_property_bases(ala_mols):
+    """
+    Make sure that the SireOpenMM property classes are exposed as
+    SireBase::Property, so that they can be stored and retrieved as properties.
+    """
+
+    from sire.legacy.Base import Properties, Property
+    from sire.legacy.Convert._SireOpenMM import NullQMEngine, PyQMEngine, QMEngine
+
+    def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell=None, idx_mm=None):
+        return (0.0, xyz_qm, xyz_mm)
+
+    mols = ala_mols.clone()
+    qm_mols, engine = sr.qm.create_engine(mols, mols[0], callback, callback=None)
+
+    props = Properties()
+
+    for name, obj, cls in [
+        ("null", NullQMEngine(), NullQMEngine),
+        ("py", engine, PyQMEngine),
+    ]:
+        assert isinstance(obj, QMEngine)
+        assert isinstance(obj, Property)
+        props.set_property(name, obj)
+        assert isinstance(props.property(name), cls)
+
+    d = qm_mols.dynamics(
+        timestep="1fs", constraint="none", qm_engine=engine, platform="cpu"
+    )
+
+    lever = d._d._omm_mols.get_lambda_lever()
+    assert isinstance(lever, Property)

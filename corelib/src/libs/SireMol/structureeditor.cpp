@@ -74,8 +74,8 @@
 #include "resproperty.hpp"
 #include "segproperty.hpp"
 
-#include "SireBase/properties.h"
 #include "SireBase/console.h"
+#include "SireBase/properties.h"
 
 #include "tostring.h"
 
@@ -4731,7 +4731,7 @@ void StructureEditor::convertToSingleCutGroupMolecule()
         return;
     }
 
-    for (quint32 i = 0; i < this->nAtomsInMolecule(); ++i)
+    for (int i = 0; i < this->nAtomsInMolecule(); ++i)
     {
         this->reparentAtom(i, CGIdx(0));
     }

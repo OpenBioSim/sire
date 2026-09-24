@@ -158,7 +158,7 @@ bool CloseMols::recalculate()
         for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
         {
             // just get the center of the whole molecule
-            const Vector &center = it->data().property(coords_property).asA<AtomCoords>().array().aaBox().center();
+            const Vector center = it->data().property(coords_property).asA<AtomCoords>().array().aaBox().center();
 
             const double dist = space.calcDist(point, center);
             close_mols.insert(it.key(), dist);
@@ -176,7 +176,7 @@ bool CloseMols::recalculate()
     for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
     {
         // just get the center of the whole molecule
-        const Vector &center = it->data().property(coords_property).asA<AtomCoords>().array().aaBox().center();
+        const Vector center = it->data().property(coords_property).asA<AtomCoords>().array().aaBox().center();
 
         const double dist2 = space.calcDist2(point, center);
 
@@ -235,7 +235,7 @@ bool CloseMols::recalculate(MolNum changed_mol)
     const PropertyName &coords_property = map["coordinates"];
 
     // calculate the distance from the new molecule to the point
-    const Vector &center = it->data().property(coords_property).asA<AtomCoords>().array().aaBox().center();
+    const Vector center = it->data().property(coords_property).asA<AtomCoords>().array().aaBox().center();
 
     const double dist2 = space.calcDist2(point, center);
 
@@ -311,13 +311,13 @@ bool CloseMols::recalculate(const Molecules &changed_mols)
             continue;
 
         // calculate the distance from the new molecule to the point
-        const Vector &center = molecules.constFind(changed_mol)
-                                   ->data()
-                                   .property(coords_property)
-                                   .asA<AtomCoords>()
-                                   .array()
-                                   .aaBox()
-                                   .center();
+        const Vector center = molecules.constFind(changed_mol)
+                                  ->data()
+                                  .property(coords_property)
+                                  .asA<AtomCoords>()
+                                  .array()
+                                  .aaBox()
+                                  .center();
 
         const double dist2 = space.calcDist2(point, center);
 

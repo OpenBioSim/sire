@@ -227,7 +227,7 @@ bool Node::release()
 
     d.reset();
 
-    return my_d.unique();
+    return my_d.use_count() == 1;
 }
 
 /** Force the release of this node. This aborts any running
@@ -243,7 +243,7 @@ void Node::forceRelease()
 
     d.reset();
 
-    if (my_d.unique())
+    if (my_d.use_count() == 1)
     {
         // just reset this pointer, and we are ok
         my_d.reset();

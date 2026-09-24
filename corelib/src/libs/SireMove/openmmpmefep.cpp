@@ -395,7 +395,7 @@ void OpenMMPMEFEP::addMCBarostat(OpenMM::System &system)
         OpenMM::MonteCarloMembraneBarostat::ZMode zmode = OpenMM::MonteCarloMembraneBarostat::ZFree;
         auto barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
 
-        //Set The random seed
+        // Set The random seed
         barostat->setRandomNumberSeed(random_seed);
 
         system.addForce(barostat);
@@ -880,8 +880,8 @@ void OpenMMPMEFEP::initialise(bool fullPME)
     /*** BOND LINK FORCE FIELD ***/
     /* FC 12/21 CustomBondForce now (OpenMM 7.4.0) allows application of PBC checks*/
 
-    OpenMM::CustomBondForce * custom_link_bond = new OpenMM::CustomBondForce("delta(min(0, r_eff))*(lamrest^5)*kl*r_eff^2;"
-                                                                             "r_eff=abs(r-reql)-dl");
+    OpenMM::CustomBondForce *custom_link_bond = new OpenMM::CustomBondForce("delta(min(0, r_eff))*(lamrest^5)*kl*r_eff^2;"
+                                                                            "r_eff=abs(r-reql)-dl");
     custom_link_bond->addPerBondParameter("reql");
     custom_link_bond->addPerBondParameter("kl");
     custom_link_bond->addPerBondParameter("dl");
@@ -1049,7 +1049,7 @@ void OpenMMPMEFEP::initialise(bool fullPME)
             system_index = system_index + 1;
 
         } // end of loop on atoms in molecule
-    }     // end of loop on molecules in workspace
+    } // end of loop on molecules in workspace
 
     int num_atoms_till_i = 0;
 
@@ -1960,7 +1960,7 @@ void OpenMMPMEFEP::initialise(bool fullPME)
                     }
 
                 } // end if (pert.isA<InternalPerturbation>())
-            }     // end for perturbations
+            } // end for perturbations
 
         } // end solute molecule perturbation
 
@@ -2373,6 +2373,8 @@ void OpenMMPMEFEP::initialise(bool fullPME)
                 sigma_avg_end = Sigend_p1 * Sigend_p2;
                 sigma_avg_mix = Sigend_p1 * Sigstart_p2 + Sigstart_p1 * Sigend_p2;
             }
+            else
+                throw SireError::program_bug(QObject::tr("Unknown combining rules."), CODELOC);
 
             epsilon_avg_start = Epstart_p1 * Epstart_p2 * LennardJones14Scale_tmp * LennardJones14Scale_tmp;
             epsilon_avg_end = Epend_p1 * Epend_p2 * LennardJones14Scale_tmp * LennardJones14Scale_tmp;
@@ -2592,10 +2594,9 @@ void OpenMMPMEFEP::initialise(bool fullPME)
         }
     } // if (!fullPME)
 
-
     if (turn_on_restraints_mode)
     {
-        perturbed_energies_tmp[9] = true; //Lambda will be used to turn on the receptor-ligand restraints
+        perturbed_energies_tmp[9] = true; // Lambda will be used to turn on the receptor-ligand restraints
         if (Debug)
             qDebug() << "Added Perturbed Receptor-Ligand Restraint energy term";
     }
@@ -2981,7 +2982,7 @@ void OpenMMPMEFEP::createContext(IntegratorWorkspace &workspace, SireUnits::Dime
     // TriclinicBox
     else if (ptr_sys.property(space_property).isA<TriclinicBox>())
     {
-		TriclinicBox space = ptr_sys.property(space_property).asA<TriclinicBox>();
+        TriclinicBox space = ptr_sys.property(space_property).asA<TriclinicBox>();
 
         // Make sure the box is in reduced form. This is necessary since SOMD reads
         // the box vectors from fixed precision AMBER RST7 files. The OpenMM C++ API
@@ -3682,7 +3683,7 @@ void OpenMMPMEFEP::updateOpenMMContextLambda(double lambda)
 
     // RECEPTOR-LIGAND RESTRAINTS
     if (perturbed_energies[9])
-        openmm_context->setParameter("lamrest", lambda); //Receptor-ligand restraints
+        openmm_context->setParameter("lamrest", lambda); // Receptor-ligand restraints
 
     // lambda for the offsets (linear scaling) of the charges in
     // reciprocal space
