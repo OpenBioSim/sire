@@ -184,7 +184,7 @@ OpenMMFrEnergyST::OpenMMFrEnergyST(bool frequent_save)
       Temperature(300.0 * kelvin), platform_type("Reference"), Restraint_flag(false), CMMremoval_frequency(0),
       buffer_frequency(0), energy_frequency(100), device_index("0"), precision("single"), Alchemical_value(0.5),
       coulomb_power(0), shift_delta(2.0), delta_alchemical(0.001), alchemical_array(), finite_diff_gradients(),
-      pot_energies(), perturbed_energies(), reduced_perturbed_energies(), forward_Metropolis(), backward_Metropolis(),
+      pot_energies(), forward_Metropolis(), backward_Metropolis(), reduced_perturbed_energies(), perturbed_energies(),
       Integrator_type("leapfrogverlet"), friction(1.0 / picosecond), integration_tol(0.001), timeskip(0.0 * picosecond),
       reinitialise_context(false), Debug(false)
 {
@@ -203,7 +203,7 @@ OpenMMFrEnergyST::OpenMMFrEnergyST(const MoleculeGroup &molecule_group, const Mo
       Temperature(300.0 * kelvin), platform_type("Reference"), Restraint_flag(false), CMMremoval_frequency(0),
       buffer_frequency(0), energy_frequency(100), device_index("0"), precision("single"), Alchemical_value(0.5),
       coulomb_power(0), shift_delta(2.0), delta_alchemical(0.001), alchemical_array(), finite_diff_gradients(),
-      pot_energies(), perturbed_energies(), reduced_perturbed_energies(), forward_Metropolis(), backward_Metropolis(),
+      pot_energies(), forward_Metropolis(), backward_Metropolis(), reduced_perturbed_energies(), perturbed_energies(),
       Integrator_type("leapfrogverlet"), friction(1.0 / picosecond), integration_tol(0.001), timeskip(0.0 * picosecond),
       reinitialise_context(false), Debug(false)
 {
@@ -225,8 +225,8 @@ OpenMMFrEnergyST::OpenMMFrEnergyST(const OpenMMFrEnergyST &other)
       Alchemical_value(other.Alchemical_value), coulomb_power(other.coulomb_power), shift_delta(other.shift_delta),
       delta_alchemical(other.delta_alchemical), alchemical_array(other.alchemical_array),
       finite_diff_gradients(other.finite_diff_gradients), pot_energies(other.pot_energies),
-      perturbed_energies(other.perturbed_energies), reduced_perturbed_energies(other.reduced_perturbed_energies),
       forward_Metropolis(other.forward_Metropolis), backward_Metropolis(other.backward_Metropolis),
+      reduced_perturbed_energies(other.reduced_perturbed_energies), perturbed_energies(other.perturbed_energies),
       Integrator_type(other.Integrator_type), friction(other.friction), integration_tol(other.integration_tol),
       timeskip(other.timeskip), reinitialise_context(other.reinitialise_context), Debug(other.Debug)
 {
@@ -1248,9 +1248,9 @@ void OpenMMFrEnergyST::initialise()
             const double surface_Tension = 0;
             OpenMM::MonteCarloMembraneBarostat::XYMode xymode = OpenMM::MonteCarloMembraneBarostat::XYIsotropic;
             OpenMM::MonteCarloMembraneBarostat::ZMode zmode = OpenMM::MonteCarloMembraneBarostat::ZFree;
-            OpenMM::MonteCarloMembraneBarostat * barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
+            OpenMM::MonteCarloMembraneBarostat *barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
 
-            //Set The random seed
+            // Set The random seed
             barostat->setRandomNumberSeed(random_seed);
 
             system_openmm->addForce(barostat);
@@ -2932,6 +2932,8 @@ void OpenMMFrEnergyST::initialise()
                 sigma_avg_end = Sigend_p1 * Sigend_p2;
                 sigma_avg_mix = Sigend_p1 * Sigstart_p2 + Sigstart_p1 * Sigend_p2;
             }
+            else
+                throw SireError::program_bug(QObject::tr("Unknown combining rules."), CODELOC);
 
             epsilon_avg_start = Epstart_p1 * Epstart_p2 * LennardJones14Scale_tmp * LennardJones14Scale_tmp;
             epsilon_avg_end = Epend_p1 * Epend_p2 * LennardJones14Scale_tmp * LennardJones14Scale_tmp;
@@ -3156,7 +3158,7 @@ void OpenMMFrEnergyST::initialise()
             }
 
         } // end of loop over molecules in system
-    }     // end of bond link flag
+    } // end of bond link flag
 
     bool UseBoresch_flag = true;
 
@@ -4148,32 +4150,33 @@ boost::tuples::tuple<double, double, double> OpenMMFrEnergyST::calculateGradient
 {
     double double_increment = incr_plus - incr_minus;
     double gradient = 0;
-    double potential_energy_lambda_plus_delta;
-    double potential_energy_lambda_minus_delta;
     double forward_m;
     double backward_m;
-    if (incr_plus < 1.0)
-    {
-        potential_energy_lambda_plus_delta = getPotentialEnergyAtLambda(incr_plus);
-    }
-    if (incr_minus > 0.0)
-    {
-        potential_energy_lambda_minus_delta = getPotentialEnergyAtLambda(incr_minus);
-    }
     if (incr_minus < 0.0)
     {
+        if (incr_plus > 1.0)
+            throw SireError::invalid_arg(QObject::tr("The lambda increment is too large to compute a gradient."),
+                                         CODELOC);
+
+        double potential_energy_lambda_plus_delta = getPotentialEnergyAtLambda(incr_plus);
+
         gradient = (potential_energy_lambda_plus_delta - p_energy_lambda) * 2 / double_increment;
         backward_m = exp(beta * (potential_energy_lambda_plus_delta - p_energy_lambda));
         forward_m = exp(-beta * (potential_energy_lambda_plus_delta - p_energy_lambda));
     }
     else if (incr_plus > 1.0)
     {
+        double potential_energy_lambda_minus_delta = getPotentialEnergyAtLambda(incr_minus);
+
         gradient = -(potential_energy_lambda_minus_delta - p_energy_lambda) * 2 / double_increment;
         backward_m = exp(-beta * (potential_energy_lambda_minus_delta - p_energy_lambda));
         forward_m = exp(beta * (potential_energy_lambda_minus_delta - p_energy_lambda));
     }
     else
     {
+        double potential_energy_lambda_plus_delta = getPotentialEnergyAtLambda(incr_plus);
+        double potential_energy_lambda_minus_delta = getPotentialEnergyAtLambda(incr_minus);
+
         gradient = (potential_energy_lambda_plus_delta - potential_energy_lambda_minus_delta) / double_increment;
 
         backward_m = exp(-beta * (potential_energy_lambda_minus_delta - p_energy_lambda));
@@ -4194,7 +4197,7 @@ QVector<double> OpenMMFrEnergyST::computeReducedPerturbedEnergies(double beta)
     {
         for (i = perturbed.begin(); i != perturbed.end(); i++)
         {
-            qDebug() << "bias is: " << *i << endl;
+            qDebug() << "bias is: " << *i << Qt::endl;
         }
     }
     return perturbed;

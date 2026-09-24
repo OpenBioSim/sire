@@ -26,8 +26,8 @@
 \*********************************************/
 
 #include "trajectory.h"
-#include "trajectoryaligner.h"
 #include "atomidxmapping.h"
+#include "trajectoryaligner.h"
 
 #include "SireID/index.h"
 
@@ -40,17 +40,17 @@
 #include "SireUnits/dimensions.h"
 #include "SireUnits/units.h"
 
+#include "SireBase/console.h"
 #include "SireBase/generalunitproperty.h"
 #include "SireBase/lazyevaluator.h"
-#include "SireBase/console.h"
 
 #include "SireBase/slice.h"
 
 #include "SireError/errors.h"
 
 #include "SireStream/datastream.h"
-#include "SireStream/shareddatastream.h"
 #include "SireStream/magic_error.h"
+#include "SireStream/shareddatastream.h"
 
 using namespace SireMol;
 using namespace SireVol;
@@ -1494,7 +1494,7 @@ Frame Frame::fromByteArray(const QByteArray &data)
         }
 
         coords.resize(val);
-        std::memcpy(coords.data(), data_ptr, val * sizeof(Vector));
+        std::memcpy(static_cast<void *>(coords.data()), data_ptr, val * sizeof(Vector));
         data_ptr += val * sizeof(Vector);
     }
 
@@ -1518,7 +1518,7 @@ Frame Frame::fromByteArray(const QByteArray &data)
         }
 
         vels.resize(val);
-        std::memcpy(vels.data(), data_ptr, val * sizeof(Velocity3D));
+        std::memcpy(static_cast<void *>(vels.data()), data_ptr, val * sizeof(Velocity3D));
         data_ptr += val * sizeof(Velocity3D);
     }
 
@@ -1542,7 +1542,7 @@ Frame Frame::fromByteArray(const QByteArray &data)
         }
 
         frcs.resize(val);
-        std::memcpy(frcs.data(), data_ptr, val * sizeof(Force3D));
+        std::memcpy(static_cast<void *>(frcs.data()), data_ptr, val * sizeof(Force3D));
         data_ptr += val * sizeof(Force3D);
     }
 
@@ -2107,17 +2107,17 @@ Frame Frame::join(const QVector<Frame> &frames,
                 const int start_idx = start_idxs_data[i];
 
                 if (have_coords and frame.hasCoordinates())
-                    std::memcpy(coords_data + start_idx,
+                    std::memcpy(static_cast<void *>(coords_data + start_idx),
                                 frame.coordinates().constData(),
                                 frame.nAtoms() * sizeof(Vector));
 
                 if (have_vels and frame.hasVelocities())
-                    std::memcpy(vels_data + start_idx,
+                    std::memcpy(static_cast<void *>(vels_data + start_idx),
                                 frame.velocities().constData(),
                                 frame.nAtoms() * sizeof(Velocity3D));
 
                 if (have_frcs and frame.hasForces())
-                    std::memcpy(frcs_data + start_idx,
+                    std::memcpy(static_cast<void *>(frcs_data + start_idx),
                                 frame.forces().constData(),
                                 frame.nAtoms() * sizeof(Force3D));
             } });
@@ -2130,17 +2130,17 @@ Frame Frame::join(const QVector<Frame> &frames,
             const int start_idx = start_idxs_data[i];
 
             if (have_coords and frame.hasCoordinates())
-                std::memcpy(coords_data + start_idx,
+                std::memcpy(static_cast<void *>(coords_data + start_idx),
                             frame.coordinates().constData(),
                             frame.nAtoms() * sizeof(Vector));
 
             if (have_vels and frame.hasVelocities())
-                std::memcpy(vels_data + start_idx,
+                std::memcpy(static_cast<void *>(vels_data + start_idx),
                             frame.velocities().constData(),
                             frame.nAtoms() * sizeof(Velocity3D));
 
             if (have_frcs and frame.hasForces())
-                std::memcpy(frcs_data + start_idx,
+                std::memcpy(static_cast<void *>(frcs_data + start_idx),
                             frame.forces().constData(),
                             frame.nAtoms() * sizeof(Force3D));
         }

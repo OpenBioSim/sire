@@ -64,7 +64,7 @@ void register_LambdaLever_class()
 {
 
     { //::SireOpenMM::LambdaLever
-        typedef bp::class_<SireOpenMM::LambdaLever> LambdaLever_exposer_t;
+        typedef bp::class_<SireOpenMM::LambdaLever, bp::bases<SireBase::Property>> LambdaLever_exposer_t;
         LambdaLever_exposer_t LambdaLever_exposer = LambdaLever_exposer_t("LambdaLever", "This is a lever that is used to change the parameters in an OpenMM\ncontext according to a lambda value. This is actually a collection\nof levers, each of which is controlled by the main lever.\n\nYou can use SireCAS expressions to control how each lever changes\neach parameter\n", bp::init<>(""));
         bp::scope LambdaLever_scope(LambdaLever_exposer);
         LambdaLever_exposer.def(bp::init<SireOpenMM::LambdaLever const &>((bp::arg("other")), ""));

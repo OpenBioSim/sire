@@ -31,8 +31,8 @@
 #include "SireMol/errors.h"
 
 #include "SireBase/lazyevaluator.h"
-#include "SireBase/parallel.h"
 #include "SireBase/pagecache.h"
+#include "SireBase/parallel.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -464,7 +464,7 @@ void SystemFrames::saveFrame(const Molecules &mols,
                     return;
                 }
 
-                std::memcpy(coordinates_data + start_atom, coords.constData(CGIdx(0)),
+                std::memcpy(static_cast<void *>(coordinates_data + start_atom), coords.constData(CGIdx(0)),
                             nats * sizeof(Vector));
             }
             catch (...)
@@ -483,7 +483,7 @@ void SystemFrames::saveFrame(const Molecules &mols,
                     return;
                 }
 
-                std::memcpy(velocities_data + start_atom, vels.constData(CGIdx(0)),
+                std::memcpy(static_cast<void *>(velocities_data + start_atom), vels.constData(CGIdx(0)),
                             nats * sizeof(Velocity3D));
             }
             catch (...)
@@ -502,7 +502,7 @@ void SystemFrames::saveFrame(const Molecules &mols,
                     return;
                 }
 
-                std::memcpy(forces_data + start_atom, frcs.constData(CGIdx(0)),
+                std::memcpy(static_cast<void *>(forces_data + start_atom), frcs.constData(CGIdx(0)),
                             nats * sizeof(Force3D));
             }
             catch (...)

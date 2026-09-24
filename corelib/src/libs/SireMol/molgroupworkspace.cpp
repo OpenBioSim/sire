@@ -171,7 +171,7 @@ void MolGroupWorkspace::returnToMemoryPool()
     if (d.get() == 0)
         return;
 
-    if (not d.unique())
+    if (d.use_count() != 1)
     {
         d.reset();
         return;
@@ -224,7 +224,7 @@ void MolGroupWorkspace::detach()
 {
     if (d.get() != 0)
     {
-        if (not d.unique())
+        if (d.use_count() != 1)
         {
             std::shared_ptr<detail::MolGroupWorkspaceData> d2 = d;
 
@@ -429,12 +429,14 @@ void MolGroupWorkspace::setVersion(const MajorMinorVersion &version)
 }
 
 /** Return the version of the current workspace */
-MajorMinorVersion MolGroupWorkspace::version() const
+const MajorMinorVersion &MolGroupWorkspace::version() const
 {
+    static const MajorMinorVersion null_version;
+
     if (d.get())
         return d->version();
     else
-        return MajorMinorVersion();
+        return null_version;
 }
 
 /** Increment the major version */

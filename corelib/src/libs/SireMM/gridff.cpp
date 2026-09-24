@@ -808,9 +808,9 @@ void GridFF::addToGrid(const QVector<GridFF::Vector4> &coords_and_charges)
         }
 #else
         {
-            int i = 0;
-            int j = 0;
-            int k = 0;
+            quint32 i = 0;
+            quint32 j = 0;
+            quint32 k = 0;
 
             double gx = minpoint.x();
             double gy = minpoint.y();
@@ -1031,9 +1031,9 @@ void GridFF::addToGrid(const QVector<GridFF::Vector4> &coords_and_charges)
         }
 #else
         {
-            int i = 0;
-            int j = 0;
-            int k = 0;
+            quint32 i = 0;
+            quint32 j = 0;
+            quint32 k = 0;
 
             double gx = minpoint.x();
             double gy = minpoint.y();
@@ -1244,9 +1244,9 @@ void GridFF::addToGrid(const QVector<GridFF::Vector4> &coords_and_charges)
         }
 #else
         {
-            int i = 0;
-            int j = 0;
-            int k = 0;
+            quint32 i = 0;
+            quint32 j = 0;
+            quint32 k = 0;
 
             double gx = minpoint.x();
             double gy = minpoint.y();
@@ -1487,9 +1487,6 @@ void GridFF::rebuildGrid()
 
     QVector<Vector4> far_mols;
 
-    int atomcount = 0;
-    int gridcount = 0;
-
     closemols_coords.reserve(cljmols.count() + (fixedatoms_coords.count() / 2));
     closemols_params.reserve(cljmols.count() + (fixedatoms_coords.count() / 2));
 
@@ -1515,7 +1512,6 @@ void GridFF::rebuildGrid()
             // only explicitly evaluate points within the LJ cutoff of the grid
             if (dist < lj_cutoff)
             {
-                atomcount += 1;
                 closemols_coords.append(coords);
                 closemols_params.append(params);
             }
@@ -1529,7 +1525,6 @@ void GridFF::rebuildGrid()
                     if (far_mols.count() > 1023)
                     {
                         addToGrid(far_mols);
-                        gridcount += far_mols.count();
                         far_mols.clear();
                         // qDebug() << "Added" << i+1 << "of" << fixedatoms_coords.count()
                         //          << "fixed atoms to the grid...";
@@ -1539,18 +1534,13 @@ void GridFF::rebuildGrid()
         }
 
         addToGrid(far_mols);
-        gridcount += far_mols.count();
         far_mols.clear();
     }
 
     if (not cljmols.isEmpty())
     {
-        int nmols = 0;
-
         for (ChunkedVector<CLJMolecule>::const_iterator it = cljmols.constBegin(); it != cljmols.constEnd(); ++it)
         {
-            nmols += 1;
-
             const CLJMolecule &cljmol = *it;
 
             // loop through each CutGroup of this molecule
@@ -1585,7 +1575,6 @@ void GridFF::rebuildGrid()
                     // only explicitly evaluate points within the LJ cutoff of the grid
                     if (dist < lj_cutoff)
                     {
-                        atomcount += 1;
                         closemols_coords.append(coords);
                         closemols_params.append(params);
                     }
@@ -1599,7 +1588,6 @@ void GridFF::rebuildGrid()
                             if (far_mols.count() > 1023)
                             {
                                 addToGrid(far_mols);
-                                gridcount += far_mols.count();
                                 far_mols.clear();
                             }
                         }
@@ -1609,7 +1597,6 @@ void GridFF::rebuildGrid()
         }
 
         addToGrid(far_mols);
-        gridcount += far_mols.count();
         far_mols.clear();
     }
 
@@ -2349,14 +2336,8 @@ void GridFF::recalculateEnergy()
 
     if (must_recalculate)
     {
-        QElapsedTimer t;
-        t.start();
-
         this->mustNowRecalculateFromScratch();
         this->rebuildGrid();
-
-        qint64 ns = t.nsecsElapsed();
-        t.restart();
 
         double total_cnrg(0);
         double total_ljnrg(0);
@@ -2407,8 +2388,6 @@ void GridFF::recalculateEnergy()
             total_cnrg += cnrg;
             total_ljnrg += ljnrg;
         }
-
-        ns = t.nsecsElapsed();
 
         this->components().setEnergy(*this, CLJEnergy(total_cnrg, total_ljnrg));
     }

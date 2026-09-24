@@ -482,12 +482,8 @@ void Tinker::loadParameters(const QString &prmfile)
 
     QTextStream ts(&f);
 
-    int linenum = -1;
-
     while (not ts.atEnd())
     {
-        ++linenum;
-
         QString line = ts.readLine().simplified();
 
         if (line.isEmpty() or line.startsWith("#"))

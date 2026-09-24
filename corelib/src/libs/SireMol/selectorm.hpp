@@ -33,8 +33,8 @@
 #include "core.h"
 
 #include "SireBase/booleanproperty.h"
-#include "SireBase/parallel.h"
 #include "SireBase/lazyevaluator.h"
+#include "SireBase/parallel.h"
 
 #include "SireMol/errors.h"
 
@@ -547,7 +547,7 @@ namespace SireMol
                 }
             }
         }
-    }  // end of namespace detail
+    } // end of namespace detail
 #endif // GCCXML_PARSE
 
     template <class T>
@@ -1442,7 +1442,7 @@ namespace SireMol
     {
         SelectorM<T> ret(*this);
 
-        for (const auto vw : other.vws)
+        for (const auto &vw : other.vws)
         {
             ret._append(vw);
         }

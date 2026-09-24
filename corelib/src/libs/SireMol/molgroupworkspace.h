@@ -98,7 +98,7 @@ namespace SireMol
 
         void clear();
 
-        MajorMinorVersion version() const;
+        const MajorMinorVersion &version() const;
 
         void incrementMinor();
         void incrementMajor();

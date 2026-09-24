@@ -120,7 +120,8 @@ namespace SireMol
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    const auto &moldata = molecules[i].data();
+                    const auto mol = molecules[i];
+                    const auto &moldata = mol.data();
 
                     if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
                     {
@@ -132,7 +133,8 @@ namespace SireMol
         {
             for (int i = 0; i < molecules.count(); ++i)
             {
-                const auto &moldata = molecules[i].data();
+                const auto mol = molecules[i];
+                const auto &moldata = mol.data();
 
                 if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
                 {

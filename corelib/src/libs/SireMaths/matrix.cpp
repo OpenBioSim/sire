@@ -177,9 +177,9 @@ Matrix::Matrix(const gsl_matrix *m)
     for (int i = 0; i < 9; ++i)
         array[i] = 0;
 
-    for (int i = 0; i < m->size1; ++i)
+    for (size_t i = 0; i < m->size1; ++i)
     {
-        for (int j = 0; j < m->size2; ++j)
+        for (size_t j = 0; j < m->size2; ++j)
         {
             this->operator()(i, j) = gsl_matrix_get(m, i, j);
         }

@@ -74,7 +74,7 @@
 #include <iostream>
 /* include <QElapsedTimer> */
 #include <QDebug>
-#include <QTime>
+#include <QElapsedTimer>
 
 using namespace SireMove;
 using namespace SireSystem;
@@ -528,7 +528,7 @@ void OpenMMFrEnergyDT::initialise()
             const double surface_Tension = 0;
             OpenMM::MonteCarloMembraneBarostat::XYMode xymode = OpenMM::MonteCarloMembraneBarostat::XYIsotropic;
             OpenMM::MonteCarloMembraneBarostat::ZMode zmode = OpenMM::MonteCarloMembraneBarostat::ZFree;
-            OpenMM::MonteCarloMembraneBarostat * barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
+            OpenMM::MonteCarloMembraneBarostat *barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
             system_openmm->addForce(barostat);
         }
         else
@@ -1105,7 +1105,7 @@ void OpenMMFrEnergyDT::integrate(IntegratorWorkspace &workspace, const Symbol &n
 
     bool Debug = false;
 
-    QTime timer;
+    QElapsedTimer timer;
 
     timer.start();
 
@@ -1822,13 +1822,13 @@ bool OpenMMFrEnergyDT::getMCBarostat(void)
 /** Set Monte Carlo membrane Barostat on/off */
 void OpenMMFrEnergyDT::setMCBarostat_membrane(bool MCBarostat_membrane)
 {
-	MCBarostat_membrane_flag = MCBarostat_membrane;
+    MCBarostat_membrane_flag = MCBarostat_membrane;
 }
 
 bool OpenMMFrEnergyDT::getMCBarostat_membrane(void)
 {
 
-	return MCBarostat_membrane_flag;
+    return MCBarostat_membrane_flag;
 }
 
 /** Get the Monte Carlo Barostat frequency in time speps */

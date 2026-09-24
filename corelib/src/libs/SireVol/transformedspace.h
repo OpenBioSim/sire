@@ -124,6 +124,8 @@ namespace SireVol
 
         double minimumDistance(const Vector &p, const AABox &box) const;
 
+        using Space::minimumDistance;
+
         Vector getRandomPoint(const Vector &center, const RanGenerator &generator) const;
 
         Vector getBoxCenter(const Vector &p) const;

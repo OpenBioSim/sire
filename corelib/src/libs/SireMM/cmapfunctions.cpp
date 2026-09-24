@@ -32,11 +32,11 @@
 
 #include "SireBase/console.h"
 
+#include "SireMol/atommapping.h"
 #include "SireMol/atommatcher.h"
 #include "SireMol/atomselection.h"
-#include "SireMol/moleculeinfodata.h"
 #include "SireMol/moleculedata.h"
-#include "SireMol/atommapping.h"
+#include "SireMol/moleculeinfodata.h"
 
 #include "SireError/errors.h"
 
@@ -365,7 +365,7 @@ void CMAPFunctions::set(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2,
     quint32 atm3 = atom3.map(info().nAtoms());
     quint32 atm4 = atom4.map(info().nAtoms());
 
-    if (atm0 == atm1 or atm0 == atm2 or atm0 == atm3 or atm0 == atom4 or
+    if (atm0 == atm1 or atm0 == atm2 or atm0 == atm3 or atm0 == atm4 or
         atm1 == atm2 or atm1 == atm3 or atm1 == atm4 or
         atm2 == atm3 or atm2 == atm4 or atm3 == atm4)
         throw SireMol::duplicate_atom(QObject::tr("You cannot add a function that acts between the same atoms! "

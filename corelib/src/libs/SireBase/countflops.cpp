@@ -215,8 +215,10 @@ double FlopsMark::operator-(const FlopsMark &other) const
     return (1000.0 * dnflops) / dms;
 }
 
+#ifdef SIRE_TIME_ROUTINES
 Q_GLOBAL_STATIC_WITH_ARGS(double, benchmarkSum, (0.0))
 Q_GLOBAL_STATIC(QMutex, benchmarkMutex)
+#endif
 
 /** Perform a simple benchmark to work out what the realistic maximum
     FLOPS count for this processor (compiled with this compiler)

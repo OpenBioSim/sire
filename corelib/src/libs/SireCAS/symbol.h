@@ -112,6 +112,13 @@ namespace SireCAS
 
         bool operator==(const ExBase &other) const;
 
+        /** Exact match so C++20 doesn't find this ambiguous with the
+            reversed Expression overload */
+        bool operator==(const Symbol &other) const
+        {
+            return this->operator==(static_cast<const ExBase &>(other));
+        }
+
         bool operator<(const Symbol &other) const;
         bool operator>(const Symbol &other) const;
         bool operator<=(const Symbol &other) const;

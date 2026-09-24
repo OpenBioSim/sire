@@ -26,11 +26,11 @@
 \*********************************************/
 
 #include "SireMol/select.h"
+#include "SireMol/atommatch.h"
 #include "SireMol/moleculegroup.h"
 #include "SireMol/molecules.h"
-#include "SireMol/parser.h"
-#include "SireMol/atommatch.h"
 #include "SireMol/mover_metaid.h"
+#include "SireMol/parser.h"
 
 #include "SireMol/core.h"
 
@@ -474,6 +474,12 @@ QString Select::objectType() const
         return QObject::tr("atoms");
     case SireMol::parser::SelectEngine::BOND:
         return QObject::tr("bonds");
+    case SireMol::parser::SelectEngine::ANGLE:
+        return QObject::tr("angles");
+    case SireMol::parser::SelectEngine::DIHEDRAL:
+        return QObject::tr("dihedrals");
+    case SireMol::parser::SelectEngine::IMPROPER:
+        return QObject::tr("impropers");
     case SireMol::parser::SelectEngine::CUTGROUP:
         return QObject::tr("cutgroups");
     case SireMol::parser::SelectEngine::RESIDUE:
@@ -484,6 +490,10 @@ QString Select::objectType() const
         return QObject::tr("segments");
     case SireMol::parser::SelectEngine::MOLECULE:
         return QObject::tr("molecules");
+    case SireMol::parser::SelectEngine::MATCH:
+        return QObject::tr("atom matches");
+    case SireMol::parser::SelectEngine::VIEW:
+        return QObject::tr("views");
     }
 
     return QObject::tr("nothing");

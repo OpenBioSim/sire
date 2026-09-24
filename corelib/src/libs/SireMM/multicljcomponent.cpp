@@ -112,7 +112,7 @@ QDataStream &operator>>(QDataStream &ds, MultiCLJEnergy &nrg)
 
 void MultiCLJEnergy::assertValidCoulombIndex(quint32 i) const
 {
-    if (i >= cnrgs.count())
+    if (i >= static_cast<quint32>(cnrgs.count()))
         throw SireError::invalid_index(
             QObject::tr("There is no CoulombEnergy at index '%1'. Number of energies equals %2.")
                 .arg(i)
@@ -122,7 +122,7 @@ void MultiCLJEnergy::assertValidCoulombIndex(quint32 i) const
 
 void MultiCLJEnergy::assertValidLJIndex(quint32 i) const
 {
-    if (i >= ljnrgs.count())
+    if (i >= static_cast<quint32>(ljnrgs.count()))
         throw SireError::invalid_index(
             QObject::tr("There is no LJEnergy at index '%1'. Number of energies equals %2.").arg(i).arg(ljnrgs.count()),
             CODELOC);

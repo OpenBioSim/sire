@@ -750,6 +750,8 @@ NVector NMatrix::operator*(const Vector &vector) const
             {
                 sum += vector[j] * d[offset(i, j)];
             }
+
+            v[i] = sum;
         }
 
         return v;

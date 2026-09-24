@@ -298,7 +298,7 @@ namespace SireMM
                 return CLJEnergy::coulomb();
             else
             {
-                if (i >= cnrgs.count())
+                if (i >= static_cast<quint32>(cnrgs.count()))
                     assertValidCoulombIndex(i);
 
                 return cnrgs.at(i);
@@ -311,7 +311,7 @@ namespace SireMM
                 return CLJEnergy::lj();
             else
             {
-                if (i >= ljnrgs.count())
+                if (i >= static_cast<quint32>(ljnrgs.count()))
                     assertValidLJIndex(i);
 
                 return ljnrgs.at(i);
