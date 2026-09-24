@@ -378,7 +378,8 @@ LatticeCharges QMMMElecEmbedPotential::getLatticeCharges(const QMMolecules &qmmo
         // nasty code - I need the atom elements and am going to have to assume they
         // are correct. I need to update the QMMM potential to properly get the
         // charge and element property from each atom so that this nasty hack is not needed.
-        const AtomElements &elems = mmmol.molecule().molecule().property("element").asA<AtomElements>();
+        const auto mol = mmmol.molecule().molecule();
+        const AtomElements &elems = mol.property("element").asA<AtomElements>();
 
         BOOST_ASSERT(ngroups == mmmol.parameters().atomicParameters().nArrays());
 

@@ -4040,7 +4040,8 @@ SelectResult IDClosestEngine::select(const SelectResult &mols, const PropertyMap
                 if (mol->nAtoms() == 1)
                 {
                     // this is an atom search
-                    const Vector &coords = mol->atom().property<Vector>(coords_property);
+                    const auto atom = mol->atom();
+                    const Vector &coords = atom.property<Vector>(coords_property);
 
                     for (int j = 0; j < nreference; ++j)
                     {
@@ -4079,7 +4080,8 @@ SelectResult IDClosestEngine::select(const SelectResult &mols, const PropertyMap
             if (mol->nAtoms() == 1)
             {
                 // this is an atom search
-                const Vector &coords = mol->atom().property<Vector>(coords_property);
+                const auto atom = mol->atom();
+                const Vector &coords = atom.property<Vector>(coords_property);
 
                 for (int j = 0; j < nreference; ++j)
                 {
