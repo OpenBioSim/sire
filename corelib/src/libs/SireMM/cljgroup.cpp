@@ -329,7 +329,8 @@ void CLJGroup::update(const MoleculeView &molview)
     {
         if (cljexts.count() == 1)
         {
-            const CLJExtractor &ext = cljexts.constBegin().value();
+            const auto it = cljexts.constBegin();
+            const CLJExtractor &ext = it.value();
 
             if (ext.extractingByMolecule() or (ext.extractingByResidue() and molview.data().info().nResidues() == 1) or
                 (ext.extractingByCutGroup() and molview.data().info().nCutGroups() == 1))
