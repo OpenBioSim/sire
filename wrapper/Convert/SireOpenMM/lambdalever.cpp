@@ -40,6 +40,26 @@ using namespace SireOpenMM;
 using namespace SireCAS;
 using namespace SireBase;
 
+namespace
+{
+    /** Update the constraints in the context following a change to the constraint
+        parameters in the system. Newer versions of OpenMM can do this without
+        rebuilding the force kernels, which is far faster than reinitialising.
+        The first overload is only viable when that method exists, and is preferred
+        over the second, since an int argument is an exact match for the tag. */
+    template <typename T>
+    auto updateConstraints(T &context, int) -> decltype(context.updateConstraintsInContext(), void())
+    {
+        context.updateConstraintsInContext();
+    }
+
+    template <typename T>
+    void updateConstraints(T &context, long)
+    {
+        context.reinitialize(true);
+    }
+}
+
 //////
 ////// Implementation of MolLambdaCache
 //////
@@ -2281,13 +2301,10 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         }
     }
 
-    // we need to reinitialize the context if the constraints have changed
-    // since updating the parameters in the system will not update the context
-    // itself
+    // update the constraints in the context
     if (have_constraints_changed)
     {
-        // reinitialize the context, preserving the state
-        context.reinitialize(true);
+        updateConstraints(context, 0);
     }
 
     // record which named forces had parameters changed in this call
