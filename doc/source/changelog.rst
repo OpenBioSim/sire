@@ -21,6 +21,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   in fixed blocks of 50 steps, which cost a force evaluation and a GPU sync each. The 50
   step blocks are kept when a progress bar is shown, since they only exist to update it.
 
+* Use ``Context::updateConstraintsInContext()`` when the version of OpenMM being built
+  against provides it, rather than reinitialising the context whenever a perturbable
+  constraint changes length. This makes re-using contexts across lambda values practical
+  for perturbations that change constraints, where reinitialising had dominated the run.
+
 * Fixed the SireOpenMM wrapper generation dropping ``SireBase::Property`` as a base class,
   and added it to the ``QMEngine``, ``NullQMEngine``, ``LambdaLever`` and
   ``PerturbableOpenMMMolecule`` wrappers.
