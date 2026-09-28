@@ -734,6 +734,41 @@ double PyQMForceImpl::computeForce(
     QVector<Vector> virtual_normals;
     QVector<double> virtual_lengths;
 
+    // Add a link atom to the QM region for each QM-MM1 bond.
+    for (const auto &idx : mm1_to_mm2.keys())
+    {
+        // Get the QM atom to which the current MM atom is bonded.
+        const auto qm_idx = mm1_to_qm[idx];
+
+        // Store the MM1 position in Sire Vector format, along with the
+        // position of the QM atom to which it is bonded.
+        Vector mm1_vec(10 * positions[idx][0], 10 * positions[idx][1], 10 * positions[idx][2]);
+        Vector qm_vec(10 * positions[qm_idx][0], 10 * positions[qm_idx][1], 10 * positions[qm_idx][2]);
+
+        // Work out the minimum image positions with respect to the reference position.
+        mm1_vec = space.getMinimumImage(mm1_vec, center);
+        qm_vec = space.getMinimumImage(qm_vec, center);
+
+        // Work out the position of the link atom. Here we use a bond length
+        // scale factor taken from the MM bond potential, i.e. R0(QM-L) / R0(QM-MM1),
+        // where R0(QM-L) is the equilibrium bond length for the QM and link (L)
+        // elements, and R0(QM-MM1) is the equilibrium bond length for the QM
+        // and MM1 elements.
+        const auto link_vec = qm_vec + bond_scale_factors[idx] * (mm1_vec - qm_vec);
+
+        // Add to the QM positions.
+        xyz_qm.append(QVector<double>({link_vec[0], link_vec[1], link_vec[2]}));
+
+        // Store the link atom info so that its force can be split between
+        // the QM1 and MM1 atoms.
+        link_qm1_idxs.append(qm_idx);
+        link_mm1_idxs.append(idx);
+        link_scales.append(bond_scale_factors[idx]);
+
+        // Append a hydrogen element to the numbers vector.
+        numbers.append(1);
+    }
+
     // If we are using electrostatic embedding, the work out the MM point charges and
     // build the neighbour list.
     if (not this->owner.getIsMechanical())
@@ -877,36 +912,11 @@ double PyQMForceImpl::computeForce(
         // See: https://www.ks.uiuc.edu/Research/qmmm
         for (const auto &idx : mm1_to_mm2.keys())
         {
-            // Get the QM atom to which the current MM atom is bonded.
-            const auto qm_idx = mm1_to_qm[idx];
-
-            // Store the MM1 position in Sire Vector format, along with the
-            // position of the QM atom to which it is bonded.
+            // Store the MM1 position in Sire Vector format.
             Vector mm1_vec(10 * positions[idx][0], 10 * positions[idx][1], 10 * positions[idx][2]);
-            Vector qm_vec(10 * positions[qm_idx][0], 10 * positions[qm_idx][1], 10 * positions[qm_idx][2]);
 
-            // Work out the minimum image positions with respect to the reference position.
+            // Work out the minimum image position with respect to the reference position.
             mm1_vec = space.getMinimumImage(mm1_vec, center);
-            qm_vec = space.getMinimumImage(qm_vec, center);
-
-            // Work out the position of the link atom. Here we use a bond length
-            // scale factor taken from the MM bond potential, i.e. R0(QM-L) / R0(QM-MM1),
-            // where R0(QM-L) is the equilibrium bond length for the QM and link (L)
-            // elements, and R0(QM-MM1) is the equilibrium bond length for the QM
-            // and MM1 elements.
-            const auto link_vec = qm_vec + bond_scale_factors[idx] * (mm1_vec - qm_vec);
-
-            // Add to the QM positions.
-            xyz_qm.append(QVector<double>({link_vec[0], link_vec[1], link_vec[2]}));
-
-            // Store the link atom info so that its force can be split between
-            // the QM1 and MM1 atoms.
-            link_qm1_idxs.append(qm_idx);
-            link_mm1_idxs.append(idx);
-            link_scales.append(bond_scale_factors[idx]);
-
-            // Append a hydrogen element to the numbers vector.
-            numbers.append(1);
 
             // Store the number of MM2 atoms.
             const auto num_mm2 = mm1_to_mm2[idx].size();

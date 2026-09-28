@@ -478,7 +478,8 @@ def test_create_engine(ala_mols):
     assert nrg == 42
 
 
-def test_link_atom_forces(ala_mols):
+@pytest.mark.parametrize("mechanical_embedding", [False, True])
+def test_link_atom_forces(ala_mols, mechanical_embedding):
     """
     Make sure that the forces on the QM1, MM1 and MM2 atoms around each link
     atom are the negative gradient of the QM energy.
@@ -494,9 +495,13 @@ def test_link_atom_forces(ala_mols):
     # which are the final rows of xyz_mm.
     virtual_coeffs = np.array([[10.0, -5.0, 8.0], [-7.0, 12.0, 3.0]])
 
+    # The number of QM rows passed to the callback.
+    num_rows = []
+
     # A callback returning an energy that is linear in the QM and virtual
     # point charge positions.
     def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell=None, idx_mm=None):
+        num_rows.append(len(xyz_qm))
         num_qm = len(xyz_qm) - len(link_coeffs)
         coeffs_qm = np.vstack(
             [0.1 * np.outer(np.arange(1, num_qm + 1), [1.0, 2.0, 3.0]), link_coeffs]
@@ -516,7 +521,12 @@ def test_link_atom_forces(ala_mols):
 
     # Residue 1 has link atoms with MM1 atoms 4 and 16 bonded to QM1 atoms 6 and 14,
     # and MM2 atoms 1, 5 and 17, 18.
-    qm_mols, engine = sr.qm.create_engine(mols, mols[0]["residx 1"], callback)
+    qm_mols, engine = sr.qm.create_engine(
+        mols,
+        mols[0]["residx 1"],
+        callback,
+        mechanical_embedding=mechanical_embedding,
+    )
 
     d = qm_mols[0].dynamics(
         timestep="1fs",
@@ -534,6 +544,9 @@ def test_link_atom_forces(ala_mols):
 
     state = context.getState(getPositions=True, getForces=True)
     positions = state.getPositions(asNumpy=True).value_in_unit(nm)
+
+    # Make sure that both link atoms were added to the QM region.
+    assert num_rows[-1] == mols[0]["residx 1"].num_atoms() + 2
     forces = state.getForces(asNumpy=True).value_in_unit(kj / nm)
 
     def energy(pos):
