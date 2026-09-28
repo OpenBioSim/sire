@@ -241,3 +241,50 @@ class TestGenerateBoreschRestraint:
 
         with pytest.raises(ValueError, match="cutoff"):
             boresch_search(abfe_system, protocol="aldeghi", cutoff="0.1 A")
+
+
+@pytest.fixture(scope="module")
+def no_hbond_system(abfe_system):
+    """The test system with the ligand's N/O atoms changed to carbon."""
+    mols = abfe_system.clone()
+    cursor = mols.molecules("property is_perturbable")[0].cursor()
+    for atom in cursor.atoms():
+        if atom["element0"].symbol() in ("N", "O"):
+            atom["element0"] = sr.mol.Element("C")
+    mols.update(cursor.commit())
+    return mols
+
+
+class TestCheckBoreschSearch:
+    @pytest.mark.parametrize("protocol", PROTOCOLS)
+    def test_valid_system_passes(self, abfe_system, protocol):
+        from sire.restraints import check_boresch_search
+
+        check_boresch_search(abfe_system, protocol=protocol)
+
+    def test_no_frames_required(self, abfe_system):
+        from sire.restraints import check_boresch_search
+
+        mols = abfe_system.clone()
+        mols.delete_all_frames()
+        check_boresch_search(mols)
+
+    def test_rxrx_no_hbond_partners_raises(self, no_hbond_system):
+        from sire.restraints import boresch_search, check_boresch_search
+
+        with pytest.raises(ValueError, match="N/O"):
+            check_boresch_search(no_hbond_system, protocol="rxrx")
+
+        with pytest.raises(ValueError, match="N/O"):
+            boresch_search(no_hbond_system, protocol="rxrx")
+
+    def test_aldeghi_no_hbond_partners_passes(self, no_hbond_system):
+        from sire.restraints import check_boresch_search
+
+        check_boresch_search(no_hbond_system, protocol="aldeghi")
+
+    def test_invalid_protocol_raises(self, abfe_system):
+        from sire.restraints import check_boresch_search
+
+        with pytest.raises(ValueError, match="protocol"):
+            check_boresch_search(abfe_system, protocol="nonsense")
