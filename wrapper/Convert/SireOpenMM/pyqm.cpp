@@ -727,6 +727,13 @@ double PyQMForceImpl::computeForce(
     QVector<int> link_mm1_idxs;
     QVector<double> link_scales;
 
+    // The MM1 and MM2 indices, MM1-MM2 unit vector and bond length for each
+    // pair of virtual point charges.
+    QVector<int> virtual_mm1_idxs;
+    QVector<int> virtual_mm2_idxs;
+    QVector<Vector> virtual_normals;
+    QVector<double> virtual_lengths;
+
     // If we are using electrostatic embedding, the work out the MM point charges and
     // build the neighbour list.
     if (not this->owner.getIsMechanical())
@@ -932,6 +939,13 @@ double PyQMForceImpl::computeForce(
                 // Compute the normal vector from the MM1 to MM2 atom.
                 const auto normal = (mm2_vec - mm1_vec).normalise();
 
+                // Store the info needed to project the virtual point charge
+                // forces onto the MM1 and MM2 atoms.
+                virtual_mm1_idxs.append(idx);
+                virtual_mm2_idxs.append(mm2_idx);
+                virtual_normals.append(normal);
+                virtual_lengths.append((mm2_vec - mm1_vec).length());
+
                 // Positive direction. (Away from MM1 atom.)
                 auto xyz = mm2_vec + VIRTUAL_PC_DELTA * normal;
                 xyz_virtual.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
@@ -1067,6 +1081,26 @@ double PyQMForceImpl::computeForce(
                 forces[nearest_qm_atom_idxs[i]] -= lambda * f_corr;
             }
         }
+    }
+
+    // Project the virtual point charge forces onto the MM1 and MM2 atoms, since
+    // their positions are MM2 +/- delta * n, where n is the MM1-MM2 unit vector.
+    for (int j = 0; j < virtual_mm1_idxs.size(); j++)
+    {
+        const auto i = num_mm + 2 * j;
+
+        const Vector f_plus(forces_mm[i][0], forces_mm[i][1], forces_mm[i][2]);
+        const Vector f_minus(forces_mm[i + 1][0], forces_mm[i + 1][1], forces_mm[i + 1][2]);
+
+        // The component from the change in direction of n.
+        const auto &n = virtual_normals[j];
+        const auto f_diff = f_plus - f_minus;
+        const auto f_rot = (VIRTUAL_PC_DELTA / virtual_lengths[j]) *
+                           (f_diff - Vector::dot(f_diff, n) * n);
+
+        const auto f_mm2 = f_plus + f_minus + f_rot;
+        forces[virtual_mm2_idxs[j]] += lambda * OpenMM::Vec3(f_mm2[0], f_mm2[1], f_mm2[2]);
+        forces[virtual_mm1_idxs[j]] -= lambda * OpenMM::Vec3(f_rot[0], f_rot[1], f_rot[2]);
     }
 
     // Update the step count.

@@ -455,8 +455,8 @@ def test_create_engine(ala_mols):
 
 def test_link_atom_forces(ala_mols):
     """
-    Make sure that the forces on the QM1 and MM1 atoms either side of each
-    link atom are the negative gradient of the QM energy.
+    Make sure that the forces on the QM1, MM1 and MM2 atoms around each link
+    atom are the negative gradient of the QM energy.
     """
 
     import openmm
@@ -465,19 +465,32 @@ def test_link_atom_forces(ala_mols):
     # final rows of xyz_qm.
     link_coeffs = np.array([[50.0, -30.0, 20.0], [-40.0, 25.0, 60.0]])
 
-    # A callback returning an energy that is linear in the QM positions.
+    # Energy coefficients (kJ/mol/A) for each pair of virtual point charges,
+    # which are the final rows of xyz_mm.
+    virtual_coeffs = np.array([[10.0, -5.0, 8.0], [-7.0, 12.0, 3.0]])
+
+    # A callback returning an energy that is linear in the QM and virtual
+    # point charge positions.
     def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell=None, idx_mm=None):
         num_qm = len(xyz_qm) - len(link_coeffs)
-        coeffs = np.vstack(
+        coeffs_qm = np.vstack(
             [0.1 * np.outer(np.arange(1, num_qm + 1), [1.0, 2.0, 3.0]), link_coeffs]
         )
-        energy = float(np.sum(coeffs * np.array(xyz_qm)))
-        return (energy, (-10.0 * coeffs).tolist(), [[0.0, 0.0, 0.0]] * len(xyz_mm))
+        num_pairs = (len(xyz_mm) - len(idx_mm)) // 2
+        coeffs_mm = np.vstack(
+            [np.zeros((len(idx_mm), 3)), np.tile(virtual_coeffs, (num_pairs, 1))]
+        )
+        energy = float(
+            np.sum(coeffs_qm * np.array(xyz_qm))
+            + np.sum(coeffs_mm * np.array(xyz_mm).reshape(-1, 3))
+        )
+        return (energy, (-10.0 * coeffs_qm).tolist(), (-10.0 * coeffs_mm).tolist())
 
     # Create a local copy of the test system.
     mols = ala_mols.clone()
 
-    # Residue 1 has link atoms with MM1 atoms 4 and 16 bonded to QM1 atoms 6 and 14.
+    # Residue 1 has link atoms with MM1 atoms 4 and 16 bonded to QM1 atoms 6 and 14,
+    # and MM2 atoms 1, 5 and 17, 18.
     qm_mols, engine = sr.qm.create_engine(mols, mols[0]["residx 1"], callback)
 
     d = qm_mols[0].dynamics(
@@ -504,7 +517,7 @@ def test_link_atom_forces(ala_mols):
 
     # Compare the forces to central finite differences of the total energy.
     delta = 1e-4
-    for idx in [4, 6, 10, 14, 16]:
+    for idx in [1, 4, 5, 6, 10, 14, 16, 17, 18]:
         fd_force = np.zeros(3)
         for k in range(3):
             pos = positions.copy()

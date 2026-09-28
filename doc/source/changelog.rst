@@ -46,6 +46,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   overwrote the force on the bonded QM atom and the MM atom received none. It is now split
   between the two according to the link atom bond scale factor.
 
+* Project the forces on the charge shift virtual point charges onto the MM1 and MM2 atoms
+  that define their positions, rather than discarding them.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
