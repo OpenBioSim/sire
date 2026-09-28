@@ -37,6 +37,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed dangling reference to a temporary ``AABox`` center in ``CloseMols::recalculate``.
 
+* Added ``sire.restraints.check_boresch_search()``, which checks that a system's ligand is
+  suitable for ``boresch_search()`` with a given protocol without needing any trajectory
+  frames, so that failures such as a ligand with no N/O atoms to act as hydrogen-bond
+  partners for the ``"rxrx"`` protocol can be caught before a trajectory is generated.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
