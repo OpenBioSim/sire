@@ -478,14 +478,58 @@ def test_create_engine(ala_mols):
     assert nrg == 42
 
 
+def _check_link_atom_forces(qm_mols, engine, atol):
+    """
+    Compare the forces on the atoms around the residue 1 link atoms of the
+    alanine dipeptide to central finite differences of the total energy.
+    """
+
+    import openmm
+
+    d = qm_mols[0].dynamics(
+        timestep="1fs",
+        constraint="none",
+        qm_engine=engine,
+        cutoff_type="pme",
+        cutoff="7.5 A",
+        platform="reference",
+    )
+
+    context = d.context()
+
+    nm = openmm.unit.nanometer
+    kj = openmm.unit.kilojoule_per_mole
+
+    state = context.getState(getPositions=True, getForces=True)
+    positions = state.getPositions(asNumpy=True).value_in_unit(nm)
+    forces = state.getForces(asNumpy=True).value_in_unit(kj / nm)
+
+    def energy(pos):
+        context.setPositions(pos * nm)
+        return context.getState(getEnergy=True).getPotentialEnergy().value_in_unit(kj)
+
+    # MM1 atoms 4 and 16 are bonded to QM1 atoms 6 and 14, with MM2 atoms
+    # 1, 5 and 17, 18. Atom 10 is a QM control.
+    delta = 1e-4
+    for idx in [1, 4, 5, 6, 10, 14, 16, 17, 18]:
+        fd_force = np.zeros(3)
+        for k in range(3):
+            pos = positions.copy()
+            pos[idx, k] += delta
+            e_plus = energy(pos)
+            pos[idx, k] -= 2 * delta
+            e_minus = energy(pos)
+            fd_force[k] = -(e_plus - e_minus) / (2 * delta)
+
+        assert np.allclose(forces[idx], fd_force, atol=atol)
+
+
 @pytest.mark.parametrize("mechanical_embedding", [False, True])
 def test_link_atom_forces(ala_mols, mechanical_embedding):
     """
     Make sure that the forces on the QM1, MM1 and MM2 atoms around each link
     atom are the negative gradient of the QM energy.
     """
-
-    import openmm
 
     # Energy coefficients (kJ/mol/A) for the two link atoms, which are the
     # final rows of xyz_qm.
@@ -519,8 +563,6 @@ def test_link_atom_forces(ala_mols, mechanical_embedding):
     # Create a local copy of the test system.
     mols = ala_mols.clone()
 
-    # Residue 1 has link atoms with MM1 atoms 4 and 16 bonded to QM1 atoms 6 and 14,
-    # and MM2 atoms 1, 5 and 17, 18.
     qm_mols, engine = sr.qm.create_engine(
         mols,
         mols[0]["residx 1"],
@@ -528,44 +570,59 @@ def test_link_atom_forces(ala_mols, mechanical_embedding):
         mechanical_embedding=mechanical_embedding,
     )
 
-    d = qm_mols[0].dynamics(
-        timestep="1fs",
-        constraint="none",
-        qm_engine=engine,
-        cutoff_type="pme",
-        cutoff="7.5 A",
-        platform="reference",
-    )
-
-    context = d.context()
-
-    nm = openmm.unit.nanometer
-    kj = openmm.unit.kilojoule_per_mole
-
-    state = context.getState(getPositions=True, getForces=True)
-    positions = state.getPositions(asNumpy=True).value_in_unit(nm)
+    _check_link_atom_forces(qm_mols, engine, atol=0.1)
 
     # Make sure that both link atoms were added to the QM region.
     assert num_rows[-1] == mols[0]["residx 1"].num_atoms() + 2
-    forces = state.getForces(asNumpy=True).value_in_unit(kj / nm)
 
-    def energy(pos):
-        context.setPositions(pos * nm)
-        return context.getState(getEnergy=True).getPotentialEnergy().value_in_unit(kj)
 
-    # Compare the forces to central finite differences of the total energy.
-    delta = 1e-4
-    for idx in [1, 4, 5, 6, 10, 14, 16, 17, 18]:
-        fd_force = np.zeros(3)
-        for k in range(3):
-            pos = positions.copy()
-            pos[idx, k] += delta
-            e_plus = energy(pos)
-            pos[idx, k] -= 2 * delta
-            e_minus = energy(pos)
-            fd_force[k] = -(e_plus - e_minus) / (2 * delta)
+@pytest.mark.skipif(not has_emle, reason="emle-engine is not installed")
+def test_link_atom_forces_torch(ala_mols, tmp_path, monkeypatch):
+    """
+    Make sure that the forces on the QM1, MM1 and MM2 atoms around each link
+    atom are the negative gradient of the energy of a TorchScript QM model.
+    """
 
-        assert np.allclose(forces[idx], fd_force, atol=0.1)
+    import torch
+
+    # The engine saves the TorchScript module to the working directory.
+    monkeypatch.chdir(tmp_path)
+
+    # A model returning an energy (Hartree) that is linear in the QM and MM
+    # positions, with distinct coefficients for the two link atoms, which
+    # are the final rows of xyz_qm.
+    class LinearModel(torch.nn.Module):
+        _is_emle = True
+
+        def forward(
+            self,
+            atomic_numbers: torch.Tensor,
+            charges_mm: torch.Tensor,
+            xyz_qm: torch.Tensor,
+            xyz_mm: torch.Tensor,
+            cell: torch.Tensor,
+        ) -> torch.Tensor:
+            assert xyz_qm.shape[0] == 12
+            coeffs = 1e-4 * torch.outer(
+                torch.arange(1, 13, dtype=torch.float64),
+                torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64),
+            )
+            coeffs[10] = torch.tensor([5e-3, -3e-3, 2e-3], dtype=torch.float64)
+            coeffs[11] = torch.tensor([-4e-3, 2.5e-3, 6e-3], dtype=torch.float64)
+            mm_coeffs = torch.tensor([1e-3, -5e-4, 8e-4], dtype=torch.float64)
+            return (coeffs * xyz_qm.double()).sum() + (
+                mm_coeffs * xyz_mm.double()
+            ).sum()
+
+    # Create a local copy of the test system.
+    mols = ala_mols.clone()
+
+    qm_mols, engine = sr.qm.emle(
+        mols, mols[0]["residx 1"], LinearModel(), switch_width=0.0
+    )
+
+    # The model uses single precision positions, so allow for rounding.
+    _check_link_atom_forces(qm_mols, engine, atol=1.0)
 
 
 def test_qmff_was_force_changed(ala_mols):
