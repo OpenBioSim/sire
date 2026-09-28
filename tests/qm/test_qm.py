@@ -453,6 +453,70 @@ def test_create_engine(ala_mols):
     assert nrg == 42
 
 
+def test_link_atom_forces(ala_mols):
+    """
+    Make sure that the forces on the QM1 and MM1 atoms either side of each
+    link atom are the negative gradient of the QM energy.
+    """
+
+    import openmm
+
+    # Energy coefficients (kJ/mol/A) for the two link atoms, which are the
+    # final rows of xyz_qm.
+    link_coeffs = np.array([[50.0, -30.0, 20.0], [-40.0, 25.0, 60.0]])
+
+    # A callback returning an energy that is linear in the QM positions.
+    def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell=None, idx_mm=None):
+        num_qm = len(xyz_qm) - len(link_coeffs)
+        coeffs = np.vstack(
+            [0.1 * np.outer(np.arange(1, num_qm + 1), [1.0, 2.0, 3.0]), link_coeffs]
+        )
+        energy = float(np.sum(coeffs * np.array(xyz_qm)))
+        return (energy, (-10.0 * coeffs).tolist(), [[0.0, 0.0, 0.0]] * len(xyz_mm))
+
+    # Create a local copy of the test system.
+    mols = ala_mols.clone()
+
+    # Residue 1 has link atoms with MM1 atoms 4 and 16 bonded to QM1 atoms 6 and 14.
+    qm_mols, engine = sr.qm.create_engine(mols, mols[0]["residx 1"], callback)
+
+    d = qm_mols[0].dynamics(
+        timestep="1fs",
+        constraint="none",
+        qm_engine=engine,
+        cutoff_type="pme",
+        cutoff="7.5 A",
+        platform="reference",
+    )
+
+    context = d.context()
+
+    nm = openmm.unit.nanometer
+    kj = openmm.unit.kilojoule_per_mole
+
+    state = context.getState(getPositions=True, getForces=True)
+    positions = state.getPositions(asNumpy=True).value_in_unit(nm)
+    forces = state.getForces(asNumpy=True).value_in_unit(kj / nm)
+
+    def energy(pos):
+        context.setPositions(pos * nm)
+        return context.getState(getEnergy=True).getPotentialEnergy().value_in_unit(kj)
+
+    # Compare the forces to central finite differences of the total energy.
+    delta = 1e-4
+    for idx in [4, 6, 10, 14, 16]:
+        fd_force = np.zeros(3)
+        for k in range(3):
+            pos = positions.copy()
+            pos[idx, k] += delta
+            e_plus = energy(pos)
+            pos[idx, k] -= 2 * delta
+            e_minus = energy(pos)
+            fd_force[k] = -(e_plus - e_minus) / (2 * delta)
+
+        assert np.allclose(forces[idx], fd_force, atol=0.1)
+
+
 def test_qmff_was_force_changed(ala_mols):
     """
     Verify that wasForceChanged("qmff") correctly tracks whether the qmff

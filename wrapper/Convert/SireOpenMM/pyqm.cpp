@@ -49,7 +49,7 @@ using namespace SireStream;
 using namespace SireVol;
 
 // The delta used to place virtual point charges either side of the MM2
-// atoms, in nanometers.
+// atoms, in Angstrom.
 static const double VIRTUAL_PC_DELTA = 0.01;
 
 class GILLock
@@ -722,6 +722,11 @@ double PyQMForceImpl::computeForce(
     QVector<Vector> nearest_qm_vecs;
     QVector<int> nearest_qm_atom_idxs;
 
+    // The QM1 and MM1 indices and bond scale factor for each link atom.
+    QVector<int> link_qm1_idxs;
+    QVector<int> link_mm1_idxs;
+    QVector<double> link_scales;
+
     // If we are using electrostatic embedding, the work out the MM point charges and
     // build the neighbour list.
     if (not this->owner.getIsMechanical())
@@ -887,8 +892,11 @@ double PyQMForceImpl::computeForce(
             // Add to the QM positions.
             xyz_qm.append(QVector<double>({link_vec[0], link_vec[1], link_vec[2]}));
 
-            // Add the MM1 index to the QM atoms vector.
-            qm_atoms.append(qm_idx);
+            // Store the link atom info so that its force can be split between
+            // the QM1 and MM1 atoms.
+            link_qm1_idxs.append(qm_idx);
+            link_mm1_idxs.append(idx);
+            link_scales.append(bond_scale_factors[idx]);
 
             // Append a hydrogen element to the numbers vector.
             numbers.append(1);
@@ -1008,6 +1016,19 @@ double PyQMForceImpl::computeForce(
 
         // Update the force vector.
         forces[idx] = lambda * omm_force;
+    }
+
+    // Split the link atom forces between the QM1 and MM1 atoms, since the
+    // link atom position is L = QM1 + g * (MM1 - QM1).
+    for (int j = 0; j < link_qm1_idxs.size(); j++)
+    {
+        const auto i = qm_atoms.size() + j;
+
+        OpenMM::Vec3 omm_force(forces_qm[i][0], forces_qm[i][1], forces_qm[i][2]);
+
+        const auto g = link_scales[j];
+        forces[link_qm1_idxs[j]] += lambda * (1.0 - g) * omm_force;
+        forces[link_mm1_idxs[j]] += lambda * g * omm_force;
     }
 
     // Now the MM atoms.
