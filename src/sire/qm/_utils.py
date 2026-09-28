@@ -409,6 +409,24 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
                         mm_bonds.append(bond_idx)
                 mm2_atoms[mm1_idx] = mm_bonds
 
+        # The charge shift method can't handle MM1 atoms that are bonded to
+        # each other, or MM2 atoms that are shared between MM1 atoms.
+        seen_mm2 = set()
+        for mm1_idx, mm_bonds in mm2_atoms.items():
+            for mm2_idx in mm_bonds:
+                abs_idx = mols.atoms().find(qm_mol.atoms()[mm2_idx])
+                if mm2_idx in mm2_atoms:
+                    raise Exception(
+                        f"MM atom (index {abs_idx}) is bonded to the QM region and "
+                        "to another MM atom that is bonded to the QM region!"
+                    )
+                if mm2_idx in seen_mm2:
+                    raise Exception(
+                        f"MM atom (index {abs_idx}) is bonded to more than one "
+                        "MM atom that is bonded to the QM region!"
+                    )
+                seen_mm2.add(mm2_idx)
+
         # Convert MM1 to QM atom dictionary to absolute indices.
         mm1_to_qm_local = {}
         for k, v in mm1_atoms.items():
@@ -505,7 +523,7 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
             if not qm_link_bond_found:
                 # First find a standard C-H bond length.
                 carbon = _Mol.Element("C")
-                bonds = qm_mol[f"element C"].bonds()
+                bonds = qm_mol["element C"].bonds()
                 ch_bond_length = None
                 for bond in bonds:
                     atom0 = bond.atom0()

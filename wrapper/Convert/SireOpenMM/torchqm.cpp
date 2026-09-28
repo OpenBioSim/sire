@@ -49,7 +49,7 @@ using namespace SireStream;
 using namespace SireVol;
 
 // The delta used to place virtual point charges either side of the MM2
-// atoms, in nanometers.
+// atoms, in Angstrom.
 static const double VIRTUAL_PC_DELTA = 0.01;
 
 // Conversion factor from Hartree to kJ/mol.
@@ -539,6 +539,55 @@ double TorchQMForceImpl::computeForce(
     QVector<Vector> nearest_qm_vecs;
     QVector<int> nearest_qm_atom_idxs;
 
+    // The QM1 and MM1 indices and bond scale factor for each link atom.
+    QVector<int> link_qm1_idxs;
+    QVector<int> link_mm1_idxs;
+    QVector<double> link_scales;
+
+    // The MM1 and MM2 indices, MM1-MM2 unit vector and bond length for each
+    // pair of virtual point charges.
+    QVector<int> virtual_mm1_idxs;
+    QVector<int> virtual_mm2_idxs;
+    QVector<Vector> virtual_normals;
+    QVector<double> virtual_lengths;
+
+    // Add a link atom to the QM region for each QM-MM1 bond.
+    for (const auto &idx : mm1_to_mm2.keys())
+    {
+        // Get the QM atom to which the current MM atom is bonded.
+        const auto qm_idx = mm1_to_qm[idx];
+
+        // Store the MM1 position in Sire Vector format, along with the
+        // position of the QM atom to which it is bonded.
+        Vector mm1_vec(10 * positions[idx][0], 10 * positions[idx][1], 10 * positions[idx][2]);
+        Vector qm_vec(10 * positions[qm_idx][0], 10 * positions[qm_idx][1], 10 * positions[qm_idx][2]);
+
+        // Work out the minimum image positions with respect to the reference position.
+        mm1_vec = space.getMinimumImage(mm1_vec, center);
+        qm_vec = space.getMinimumImage(qm_vec, center);
+
+        // Work out the position of the link atom. Here we use a bond length
+        // scale factor taken from the MM bond potential, i.e. R0(QM-L) / R0(QM-MM1),
+        // where R0(QM-L) is the equilibrium bond length for the QM and link (L)
+        // elements, and R0(QM-MM1) is the equilibrium bond length for the QM
+        // and MM1 elements.
+        const auto link_vec = qm_vec + bond_scale_factors[idx] * (mm1_vec - qm_vec);
+
+        // Add to the QM positions.
+        xyz_qm.push_back(link_vec[0]);
+        xyz_qm.push_back(link_vec[1]);
+        xyz_qm.push_back(link_vec[2]);
+
+        // Store the link atom info so that its force can be split between
+        // the QM1 and MM1 atoms.
+        link_qm1_idxs.append(qm_idx);
+        link_mm1_idxs.append(idx);
+        link_scales.append(bond_scale_factors[idx]);
+
+        // Append a hydrogen element to the numbers vector.
+        numbers.append(1);
+    }
+
     // If we are using electrostatic embedding, the work out the MM point charges and
     // build the neighbour list.
     if (not this->owner.getIsMechanical())
@@ -686,35 +735,11 @@ double TorchQMForceImpl::computeForce(
         // See: https://www.ks.uiuc.edu/Research/qmmm
         for (const auto &idx : mm1_to_mm2.keys())
         {
-            // Get the QM atom to which the current MM atom is bonded.
-            const auto qm_idx = mm1_to_qm[idx];
-
-            // Store the MM1 position in Sire Vector format, along with the
-            // position of the QM atom to which it is bonded.
+            // Store the MM1 position in Sire Vector format.
             Vector mm1_vec(10 * positions[idx][0], 10 * positions[idx][1], 10 * positions[idx][2]);
-            Vector qm_vec(10 * positions[qm_idx][0], 10 * positions[qm_idx][1], 10 * positions[qm_idx][2]);
 
-            // Work out the minimum image positions with respect to the reference position.
+            // Work out the minimum image position with respect to the reference position.
             mm1_vec = space.getMinimumImage(mm1_vec, center);
-            qm_vec = space.getMinimumImage(qm_vec, center);
-
-            // Work out the position of the link atom. Here we use a bond length
-            // scale factor taken from the MM bond potential, i.e. R0(QM-L) / R0(QM-MM1),
-            // where R0(QM-L) is the equilibrium bond length for the QM and link (L)
-            // elements, and R0(QM-MM1) is the equilibrium bond length for the QM
-            // and MM1 elements.
-            const auto link_vec = qm_vec + bond_scale_factors[idx] * (mm1_vec - qm_vec);
-
-            // Add to the QM positions.
-            xyz_qm.push_back(link_vec[0]);
-            xyz_qm.push_back(link_vec[1]);
-            xyz_qm.push_back(link_vec[2]);
-
-            // Add the MM1 index to the QM atoms vector.
-            qm_atoms.append(qm_idx);
-
-            // Append a hydrogen element to the numbers vector.
-            numbers.append(1);
 
             // Store the number of MM2 atoms.
             const auto num_mm2 = mm1_to_mm2[idx].size();
@@ -748,6 +773,13 @@ double TorchQMForceImpl::computeForce(
 
                 // Compute the normal vector from the MM1 to MM2 atom.
                 const auto normal = (mm2_vec - mm1_vec).normalise();
+
+                // Store the info needed to project the virtual point charge
+                // forces onto the MM1 and MM2 atoms.
+                virtual_mm1_idxs.append(idx);
+                virtual_mm2_idxs.append(mm2_idx);
+                virtual_normals.append(normal);
+                virtual_lengths.append((mm2_vec - mm1_vec).length());
 
                 // Positive direction. (Away from MM1 atom.)
                 auto xyz = mm2_vec + VIRTUAL_PC_DELTA * normal;
@@ -926,6 +958,22 @@ double TorchQMForceImpl::computeForce(
         forces[idx] = lambda * omm_force;
     }
 
+    // Split the link atom forces between the QM1 and MM1 atoms, since the
+    // link atom position is L = QM1 + g * (MM1 - QM1).
+    for (int j = 0; j < link_qm1_idxs.size(); j++)
+    {
+        const auto i = qm_atoms.size() + j;
+
+        OpenMM::Vec3 omm_force(
+            forces_qm_flat[3 * i],
+            forces_qm_flat[3 * i + 1],
+            forces_qm_flat[3 * i + 2]);
+
+        const auto g = link_scales[j];
+        forces[link_qm1_idxs[j]] += lambda * (1.0 - g) * omm_force;
+        forces[link_mm1_idxs[j]] += lambda * g * omm_force;
+    }
+
     // Now the MM atoms.
     for (int i = 0; i < num_mm; i++)
     {
@@ -963,6 +1011,32 @@ double TorchQMForceImpl::computeForce(
                 forces[nearest_qm_atom_idxs[i]] -= lambda * f_corr;
             }
         }
+    }
+
+    // Project the virtual point charge forces onto the MM1 and MM2 atoms, since
+    // their positions are MM2 +/- delta * n, where n is the MM1-MM2 unit vector.
+    for (int j = 0; j < virtual_mm1_idxs.size(); j++)
+    {
+        const auto i = num_mm + 2 * j;
+
+        const Vector f_plus(
+            forces_mm_flat[3 * i],
+            forces_mm_flat[3 * i + 1],
+            forces_mm_flat[3 * i + 2]);
+        const Vector f_minus(
+            forces_mm_flat[3 * i + 3],
+            forces_mm_flat[3 * i + 4],
+            forces_mm_flat[3 * i + 5]);
+
+        // The component from the change in direction of n.
+        const auto &n = virtual_normals[j];
+        const auto f_diff = f_plus - f_minus;
+        const auto f_rot = (VIRTUAL_PC_DELTA / virtual_lengths[j]) *
+                           (f_diff - Vector::dot(f_diff, n) * n);
+
+        const auto f_mm2 = f_plus + f_minus + f_rot;
+        forces[virtual_mm2_idxs[j]] += lambda * OpenMM::Vec3(f_mm2[0], f_mm2[1], f_mm2[2]);
+        forces[virtual_mm1_idxs[j]] -= lambda * OpenMM::Vec3(f_rot[0], f_rot[1], f_rot[2]);
     }
 
     // Update the step count.
