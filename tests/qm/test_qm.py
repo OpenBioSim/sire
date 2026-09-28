@@ -187,6 +187,31 @@ def test_link_atoms_non_carbon():
     )
 
 
+@pytest.mark.parametrize(
+    "selection, match",
+    [
+        # MM1 atoms 4 and 6 are bonded to each other.
+        ("atomidx 0:4 or atomidx 8:22", "to another MM atom"),
+        # MM1 atoms 4 and 8 share MM2 atom 6.
+        ("atomidx 0:4 or atomidx 14:22", "more than one MM atom"),
+    ],
+)
+def test_link_atoms_unsupported(ala_mols, selection, match):
+    """
+    Make sure that link atom layouts the charge shift method can't handle
+    are rejected.
+    """
+
+    from sire.base import create_map as _create_map
+    from sire.qm._utils import _create_qm_mol_to_atoms, _get_link_atoms
+
+    qm_atoms = ala_mols[0][selection].atoms()
+    qm_mol_to_atoms = _create_qm_mol_to_atoms(qm_atoms)
+
+    with pytest.raises(Exception, match=match):
+        _get_link_atoms(ala_mols, qm_mol_to_atoms, _create_map({}))
+
+
 def test_charge_redistribution():
     """
     Make sure that charge redistribution works correctly.

@@ -49,6 +49,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Project the forces on the charge shift virtual point charges onto the MM1 and MM2 atoms
   that define their positions, rather than discarding them.
 
+* Raise an error for QM/MM link atom layouts that the charge shift method can't handle,
+  i.e. MM1 atoms that are bonded to each other, or MM2 atoms shared between MM1 atoms.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
