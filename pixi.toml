@@ -128,8 +128,13 @@ pyopencl = "*"
 [feature.emle.dependencies]
 ase = "*"
 loguru = "*"
+psutil = "*"
 pygit2 = "*"
+pytorch = "*"
 pyyaml = "*"
+torchani = ">=2.7"
+xtb-python = "*"
+# ambertools, deepmd-kit, nnpops not available on Windows
 
 [feature.emle.system-requirements]
 cuda = "12"
@@ -138,23 +143,16 @@ cuda = "12"
 ambertools = ">=22"
 deepmd-kit = "*"
 nnpops = "*"
-pytorch = "*"
 
 [feature.emle.target.linux-aarch64.dependencies]
-pytorch = "*"
-# ambertools, deepmd-kit, nnpops not available on linux-aarch64
+ambertools = ">=22"
+# nnpops not available on linux-aarch64, and deepmd-kit requires pytorch <2.7,
+# which is incompatible with torchani >=2.7
 
 [feature.emle.target.osx-arm64.dependencies]
 ambertools = ">=22"
 deepmd-kit = "*"
 nnpops = "*"
-pytorch = "*"
-torchani = "*"
-xtb-python = "*"
-
-[feature.emle.target.win-64.dependencies]
-pytorch = "*"
-# ambertools, deepmd-kit, nnpops not available on Windows
 
 # =============================================================================
 # Test feature
