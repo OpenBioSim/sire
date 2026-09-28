@@ -42,6 +42,18 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   frames, so that failures such as a ligand with no N/O atoms to act as hydrogen-bond
   partners for the ``"rxrx"`` protocol can be caught before a trajectory is generated.
 
+* Fixed QM/MM link atom forces in ``PyQMForce`` and ``TorchQMForce``. The link atom force
+  overwrote the force on the bonded QM atom and the MM atom received none. It is now split
+  between the two according to the link atom bond scale factor.
+
+* Project the forces on the charge shift virtual point charges onto the MM1 and MM2 atoms
+  that define their positions, rather than discarding them.
+
+* Raise an error for QM/MM link atom layouts that the charge shift method can't handle,
+  i.e. MM1 atoms that are bonded to each other, or MM2 atoms shared between MM1 atoms.
+
+* Add link atoms to the QM region when using mechanical embedding.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
