@@ -74,6 +74,9 @@ QDataStream &operator>>(QDataStream &ds, TriclinicBox &box)
     else if (v == 2)
     {
         ds >> box.v0 >> box.v1 >> box.v2 >> box.rotation_matrix >> box.cell_matrix >> box.cell_matrix_inverse >> box.dist_max >> box._alpha >> box._beta >> box._gamma >> box.vol >> box.is_rotated >> box.is_reduced >> box.invlength;
+
+        // M and max_length aren't streamed, so recompute them.
+        box.setAttributes();
     }
     else
         throw version_error(v, "1,2", r_box, CODELOC);
@@ -269,7 +272,6 @@ void TriclinicBox::rotate(double precision)
         this->v1.setZ(0);
     }
 
-
     // Now set the box attributes.
     this->setAttributes();
 }
@@ -405,6 +407,7 @@ TriclinicBox &TriclinicBox::operator=(const TriclinicBox &other)
         rotation_matrix = other.rotation_matrix;
         cell_matrix = other.cell_matrix;
         cell_matrix_inverse = other.cell_matrix_inverse;
+        M = other.M;
         dist_max = other.dist_max;
         max_length = other.max_length;
         _alpha = other._alpha;
@@ -571,7 +574,7 @@ SireUnits::Dimension::Length TriclinicBox::maximumCutoff() const
     if (this->isReduced())
     {
         QList<double> diagonals = {this->v0.x(), this->v1.y(), this->v2.z()};
-        return SireUnits::Dimension::Length(*std::min_element(diagonals.begin(), diagonals.end())/2.0);
+        return SireUnits::Dimension::Length(*std::min_element(diagonals.begin(), diagonals.end()) / 2.0);
     }
     // Otherwise, use half the norm of the smallest box vector.
     else

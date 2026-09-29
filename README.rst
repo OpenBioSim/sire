@@ -130,6 +130,10 @@ Now compile and install sire:
 
 A small word of warning, the compilation can easily take over an hour!
 
+If `ccache <https://ccache.dev>`__ is on your ``PATH``, then ``setup.py`` will
+use it automatically, which makes rebuilds much faster when developing. It
+isn't included in the pixi environments, so install it separately if needed.
+
 Other pixi environments are available depending on your needs:
 
 * ``pixi install -e default`` - core sire dependencies only
