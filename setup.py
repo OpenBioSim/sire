@@ -270,6 +270,24 @@ def add_default_cmake_defs(cmake_defs, ncores):
         cmake_defs.append(["SIRE_DISABLE_AVX=ON"])
         cmake_defs.append(["SIRE_DISABLE_AVX512F=ON"])
 
+    cmake_defs.extend([d] for d in _get_ccache_defs())
+
+
+def _get_ccache_defs():
+    # Visual Studio generators ignore compiler launchers.
+    if is_windows or os.environ.get("CONDA_BUILD") == "1":
+        return []
+
+    ccache = shutil.which("ccache")
+    if ccache is None:
+        return []
+
+    print(f"Using ccache: {ccache}")
+    return [
+        f"CMAKE_C_COMPILER_LAUNCHER={ccache}",
+        f"CMAKE_CXX_COMPILER_LAUNCHER={ccache}",
+    ]
+
 
 def _detect_vs_generator():
     # Map the installed VS major version to the CMake generator name.
@@ -417,7 +435,8 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
 
     if os.path.exists("CMakeCache.txt"):
         # we have run cmake in this directory before. Run it again.
-        status = subprocess.run([cmake, "."])
+        ccache_defs = sum([["-D", d] for d in _get_ccache_defs()], [])
+        status = subprocess.run([cmake, *ccache_defs, "."])
     else:
         # this is the first time we are running cmake
         sourcedir = os.path.join(
@@ -512,7 +531,8 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
 
     if os.path.exists("CMakeCache.txt"):
         # we have run cmake in this directory before. Run it again.
-        status = subprocess.run([cmake, "."])
+        ccache_defs = sum([["-D", d] for d in _get_ccache_defs()], [])
+        status = subprocess.run([cmake, *ccache_defs, "."])
     else:
         # this is the first time we are running cmake
         sourcedir = os.path.join(
