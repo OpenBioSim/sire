@@ -54,6 +54,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Add link atoms to the QM region when using mechanical embedding.
 
+* Updated to gemmi 0.7, which uses nanobind rather than pybind11 for its Python
+  bindings. Structures are now exchanged with the gemmi Python module using gemmi's
+  own binary serialization, removing the pybind11 dependency.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

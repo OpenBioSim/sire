@@ -613,11 +613,32 @@ except Exception as e:
 
 
 try:
-    from ._SireGemmi import sire_to_gemmi, gemmi_to_sire, _register_pdbx_loader
+    from ._SireGemmi import (
+        _sire_to_gemmi_state,
+        _gemmi_state_to_sire,
+        _gemmi_version,
+        _register_pdbx_loader,
+    )
 
-    # make sure we have also import gemmi so that we
-    # have the gemmi objects registered with python
-    import gemmi as _gemmi  # noqa: F401
+    import gemmi as _gemmi
+
+    def _check_gemmi_version():
+        if _gemmi.__version__ != _gemmi_version:
+            raise ModuleNotFoundError(
+                f"Sire was compiled against gemmi {_gemmi_version}, but "
+                f"gemmi {_gemmi.__version__} is installed. Please install "
+                f"gemmi {_gemmi_version} to convert to/from gemmi."
+            )
+
+    def sire_to_gemmi(mols, map):
+        _check_gemmi_version()
+        structure = _gemmi.Structure.__new__(_gemmi.Structure)
+        structure.__setstate__(_sire_to_gemmi_state(mols, map))
+        return structure
+
+    def gemmi_to_sire(mols, map):
+        _check_gemmi_version()
+        return _gemmi_state_to_sire(mols.__getstate__(), map)
 
     _has_gemmi = True
     _register_pdbx_loader()
