@@ -58,6 +58,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   bindings. Structures are now exchanged with the gemmi Python module using gemmi's
   own binary serialization, removing the pybind11 dependency.
 
+* Fixed ``TriclinicBox`` losing its metric matrix when streamed or assigned, which gave
+  wrong minimum image distances from ``calc_dist``, e.g. for trajectory frame spaces. This
+  broke ``sire.restraints.boresch_search()`` for triclinic boxes.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
