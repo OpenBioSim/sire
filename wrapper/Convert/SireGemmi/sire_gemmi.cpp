@@ -2,24 +2,29 @@
 #include "sire_gemmi.h"
 
 #include "gemmi/cif.hpp"
+#include "gemmi/mmcif.hpp"
 #include "gemmi/modify.hpp"
 #include "gemmi/polyheur.hpp"
+#include "gemmi/read_cif.hpp"
 #include "gemmi/to_cif.hpp"
 #include "gemmi/to_mmcif.hpp"
-#include "gemmi/mmcif.hpp"
+
+// gemmi/serialize.hpp requires the zpp serializer to be included first
+#include "gemmi/serialize.hpp"
+#include "third_party/serializer.h"
 
 #include "SireIO/pdbx.h"
 
 #include "SireMol/core.h"
-#include "SireMol/moleditor.h"
 #include "SireMol/element.h"
+#include "SireMol/moleditor.h"
 
-#include "SireMol/atomproperty.hpp"
-#include "SireMol/atomelements.h"
-#include "SireMol/atomcoords.h"
 #include "SireMol/atomcharges.h"
-#include "SireMol/connectivity.h"
+#include "SireMol/atomcoords.h"
+#include "SireMol/atomelements.h"
+#include "SireMol/atomproperty.hpp"
 #include "SireMol/bondhunter.h"
+#include "SireMol/connectivity.h"
 
 #include "SireMol/iswater.h"
 
@@ -30,9 +35,9 @@
 
 #include "SireError/errors.h"
 
-#include <string>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 namespace cif = gemmi::cif;
 
@@ -1263,6 +1268,30 @@ namespace SireGemmi
         auto lines = QString::fromStdString(stream.str()).split("\n");
 
         return lines;
+    }
+
+    SireSystem::System gemmi_state_to_sire(const std::string &state,
+                                           const SireBase::PropertyMap &map)
+    {
+        gemmi::Structure structure;
+
+        zpp::serializer::memory_view_input_archive in(
+            reinterpret_cast<const unsigned char *>(state.data()), state.size());
+        in(structure);
+
+        return gemmi_to_sire(structure, map);
+    }
+
+    std::string sire_to_gemmi_state(const SireSystem::System &system,
+                                    const SireBase::PropertyMap &map)
+    {
+        const auto structure = sire_to_gemmi(system, map);
+
+        std::vector<unsigned char> data;
+        zpp::serializer::memory_output_archive out(data);
+        out(structure);
+
+        return std::string(data.begin(), data.end());
     }
 
     void register_pdbx_loader()

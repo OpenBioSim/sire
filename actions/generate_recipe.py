@@ -31,7 +31,6 @@ BUILD_DEPS = {
     "git",
     "make",
     "libtool",
-    "pybind11",
     "sysroot_linux-64",
 }
 

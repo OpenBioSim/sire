@@ -4,23 +4,19 @@
 #
 ##########################################
 
-# Find gemmi and pybind11 libraries
+# Find gemmi library
 find_package(gemmi)
-find_package(pybind11)
 
-if (${gemmi_FOUND} AND ${pybind11_FOUND})
+if (${gemmi_FOUND})
   # Only compile and install if we have gemmi
   message( STATUS "Compiling SireGemmi converter" )
 
   get_target_property(GEMMI_LOCATION gemmi::gemmi_cpp IMPORTED_LOCATION_RELEASE)
   message( STATUS "gemmi location: ${GEMMI_LOCATION}" )
-  message( STATUS "PYBIND11 INCLUDE ${pybind11_INCLUDE_DIR}")
-  message( STATUS "PYBIND11 LIBRARY ${pybind11_LIBRARIES}" )
   message( STATUS "ZLIB LIBRARIES ${ZLIB_LIBRARIES}" )
 
   # Third Party dependencies of this module
   include_directories( ${PYTHON_INCLUDE_DIR}
-                       ${pybind11_INCLUDE_DIR}
                        ${gemmi_INCLUDE_DIR} )
 
   # Sire include paths
@@ -59,7 +55,6 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
                           SIRE_SireStream
                           SIRE_SireError
                           gemmi::gemmi_cpp
-                          ${pybind11_LIBRARIES}
                         )
 
   include( LimitSirePythonExportSymbols )
