@@ -143,6 +143,43 @@ def test_stream():
     assert recovered_box == box
 
 
+def test_stream_calc_dist():
+    """
+    Test that a streamed TriclinicBox gives the same minimum image distance
+    as the original.
+    """
+
+    tmp_dir = tempfile.TemporaryDirectory()
+    s3_file = f"{tmp_dir.name}/box.s3"
+
+    box = sr.vol.TriclinicBox.truncated_octahedron(50.0, True, True)
+
+    sr.stream.save(box, s3_file)
+    recovered_box = sr.stream.load(s3_file)
+
+    p0 = sr.maths.Vector(1, 2, 3)
+    p1 = sr.maths.Vector(7, -2, 5)
+    dist = sr.maths.Vector.distance(p0, p1).value()
+
+    assert box.calc_dist(p0, p1) == pytest.approx(dist)
+    assert recovered_box.calc_dist(p0, p1) == pytest.approx(dist)
+
+
+def test_default_calc_dist():
+    """
+    Test that a default constructed TriclinicBox gives Cartesian distances.
+    """
+
+    box = sr.vol.TriclinicBox()
+
+    p0 = sr.maths.Vector(1, 2, 3)
+    p1 = sr.maths.Vector(7, -2, 5)
+
+    assert box.calc_dist(p0, p1) == pytest.approx(
+        sr.maths.Vector.distance(p0, p1).value()
+    )
+
+
 def test_max_cutoff(ala_mols):
     """
     Test that the maximum cutoff is set correctly.
