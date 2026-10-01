@@ -102,9 +102,9 @@ def tune_pme(
         target_error = default_error
 
     def grid_for(n):
-        # grid with n points along the longest box vector, at the same spacing in the others
-        spacing = max(box) / n
-        return [max(6, math.ceil(length / spacing)) for length in box]
+        # n points along the longest box vector, at the same spacing in the others,
+        # allowing for rounding so equal-length vectors get equal grids
+        return [max(6, math.ceil(n * length / max(box) - 1e-6)) for length in box]
 
     def is_fft_friendly(n):
         for f in (2, 3, 5, 7):
@@ -112,14 +112,20 @@ def tune_pme(
                 n //= f
         return n == 1
 
+    # only consider grids with fewer points than the default
     n_lo = max(6, math.ceil(max(box) / max_spacing))
     n_hi = default_grid[box.index(max(box))]
-    candidates = [n for n in range(n_lo, n_hi + 1) if is_fft_friendly(n)]
+    candidates = [
+        n
+        for n in range(n_lo, n_hi + 1)
+        if is_fft_friendly(n) and math.prod(grid_for(n)) < math.prod(default_grid)
+    ]
 
-    # bracket the splitting parameter between OpenMM's choice for the target
-    # and that for a real-space error twenty times smaller
-    alpha_lo = math.sqrt(-math.log(2.0 * target_error)) / cutoff
-    alpha_hi = math.sqrt(-math.log(0.1 * target_error)) / cutoff
+    # bracket the splitting parameter using the tolerance that corresponds to the
+    # target, from OpenMM's choice to that for a real-space error 100 times smaller
+    tol = min(0.1, tolerance * target_error / default_error)
+    alpha_lo = math.sqrt(-math.log(2.0 * tol)) / cutoff
+    alpha_hi = math.sqrt(-math.log(0.02 * tol)) / cutoff
 
     def best_alpha(grid, iterations=5):
         ratio = (math.sqrt(5) - 1) / 2

@@ -65,7 +65,8 @@ def test_pme_spacing(fixture, openmm_platform, request):
     assert [nx, ny, nz] == [math.ceil(x / 0.12) for x in _box_lengths(omm)]
 
 
-def test_tune_pme(kigaki_mols, openmm_platform):
+@pytest.mark.parametrize("fixture", ["kigaki_mols", "triclinic_protein"])
+def test_tune_pme(fixture, openmm_platform, request):
     if openmm_platform not in ["CUDA", "OpenCL"]:
         pytest.skip("PME tuning is only supported on GPU platforms")
 
@@ -73,24 +74,29 @@ def test_tune_pme(kigaki_mols, openmm_platform):
 
     from openmm import NonbondedForce
 
+    mols = request.getfixturevalue(fixture)
+
     m = {"cutoff_type": "PME", "cutoff": "9 A", "platform": openmm_platform}
 
-    omm = sr.convert.to(kigaki_mols, "openmm", map=m)
+    omm = sr.convert.to(mols, "openmm", map=m)
     nbff = [f for f in omm.getSystem().getForces() if isinstance(f, NonbondedForce)][0]
     _, *default_grid = nbff.getPMEParametersInContext(omm)
 
-    options = tune_pme(kigaki_mols, return_errors=True, map=m)
+    options = tune_pme(mols, return_errors=True, map=m)
 
     assert options.pop("pme_error") <= options.pop("pme_target_error")
 
     if options:
         alpha, *grid = _pme_parameters(
-            sr.convert.to(kigaki_mols, "openmm", map={**m, **options})
+            sr.convert.to(mols, "openmm", map={**m, **options})
         )
 
         assert alpha == pytest.approx(options["pme_alpha"])
         assert grid == options["pme_grid"]
-        assert all(n <= d for n, d in zip(grid, default_grid))
+        assert math.prod(grid) <= math.prod(default_grid)
+
+        # both boxes have equal-length box vectors
+        assert len(set(grid)) == 1
 
 
 @pytest.mark.parametrize(
