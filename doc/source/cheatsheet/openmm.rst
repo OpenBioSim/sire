@@ -179,6 +179,17 @@ Available keys and allowable values are listed below.
 | platform                     | Any valid OpenMM platform string, e.g. ``CUDA``,         |
 |                              | ``OpenCL``, ``Metal``, ```CPU``, ``Reference``           |
 +------------------------------+----------------------------------------------------------+
+| pme_alpha                    | The PME splitting parameter in inverse nanometers, e.g.  |
+|                              | ``3.47``. Requires ``pme_grid`` or ``pme_spacing``. If   |
+|                              | not set, it is derived from ``tolerance``.               |
++------------------------------+----------------------------------------------------------+
+| pme_grid                     | The PME grid size, either a single integer or one per    |
+|                              | box vector, e.g. ``72`` or ``[72, 72, 64]``              |
++------------------------------+----------------------------------------------------------+
+| pme_spacing                  | The maximum PME grid spacing, from which the grid size   |
+|                              | is calculated using the box vector lengths, e.g.         |
+|                              | ``"0.12 nm"``                                            |
++------------------------------+----------------------------------------------------------+
 | precision                    | Any valid OpenMM platform precision value, e.g.          |
 |                              | ``single``, ``mixed`` or ``double``.                     |
 +------------------------------+----------------------------------------------------------+

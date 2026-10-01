@@ -62,6 +62,19 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   wrong minimum image distances from ``calc_dist``, e.g. for trajectory frame spaces. This
   broke ``sire.restraints.boresch_search()`` for triclinic boxes.
 
+* Added ``pme_alpha``, ``pme_grid`` and ``pme_spacing`` map options to set the PME
+  parameters explicitly, rather than having OpenMM choose them from the Ewald error
+  tolerance. If ``pme_alpha`` isn't given it is derived from the tolerance, as OpenMM does.
+
+* Fixed numeric ``ForceFieldInfo`` map options, e.g. ``tolerance`` and ``dielectric``, being
+  silently ignored when passed as strings. They are now parsed, and an error is raised if
+  the string isn't a number.
+
+* Added ``sire.convert.openmm.tune_pme()``, which finds the smallest PME grid, and the
+  splitting parameter for it, that is at least as accurate as OpenMM's choice from the
+  Ewald error tolerance. The result can be passed as the ``pme_alpha`` and ``pme_grid``
+  map options, and the relative force errors can optionally be returned too.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

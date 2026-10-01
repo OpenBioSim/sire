@@ -897,13 +897,62 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
     }
 }
 
+/** Set explicit PME parameters if a grid or grid spacing was requested.
+ *  If alpha wasn't given, it is derived from the tolerance using the
+ *  same formula as OpenMM.
+ */
+void _set_pme_parameters(OpenMM::NonbondedForce &cljff,
+                         const ForceFieldInfo &ffinfo,
+                         double tolerance,
+                         const std::vector<OpenMM::Vec3> &boxvecs)
+{
+    const auto params = ffinfo.parameters();
+
+    double spacing = 0;
+
+    if (params.hasProperty("pme_spacing"))
+        spacing = ffinfo.getParameter("pme_spacing").to(SireUnits::Dimension::GeneralUnit(SireUnits::nanometer));
+
+    const int grid_x = int(ffinfo.getParameter("pme_grid_x").value());
+
+    if (grid_x <= 0 and spacing <= 0)
+        return;
+
+    double alpha = ffinfo.getParameter("pme_alpha").value();
+
+    if (alpha <= 0)
+    {
+        const double cutoff = ffinfo.cutoff().to(SireUnits::nanometers);
+        alpha = std::sqrt(-std::log(2.0 * tolerance)) / cutoff;
+    }
+
+    int nx, ny, nz;
+
+    if (grid_x > 0)
+    {
+        nx = grid_x;
+        ny = int(ffinfo.getParameter("pme_grid_y").value());
+        nz = int(ffinfo.getParameter("pme_grid_z").value());
+    }
+    else
+    {
+        // use the box vector lengths so that triclinic boxes are no coarser than the requested spacing
+        nx = std::max(6, int(std::ceil(std::sqrt(boxvecs[0].dot(boxvecs[0])) / spacing)));
+        ny = std::max(6, int(std::ceil(std::sqrt(boxvecs[1].dot(boxvecs[1])) / spacing)));
+        nz = std::max(6, int(std::ceil(std::sqrt(boxvecs[2].dot(boxvecs[2])) / spacing)));
+    }
+
+    cljff.setPMEParameters(alpha, nx, ny, nz);
+}
+
 /** Set the coulomb and LJ cutoff in the passed NonbondedForce,
  *  based on the information in the passed ForceFieldInfo.
  *  This sets the cutoff type (e.g. PME) and the actual
  *  cutoff length (if one is used)
  */
 void _set_clj_cutoff(OpenMM::NonbondedForce &cljff,
-                     const ForceFieldInfo &ffinfo)
+                     const ForceFieldInfo &ffinfo,
+                     const std::shared_ptr<std::vector<OpenMM::Vec3>> &boxvecs)
 {
     if (ffinfo.hasCutoff())
     {
@@ -934,6 +983,9 @@ void _set_clj_cutoff(OpenMM::NonbondedForce &cljff,
                 tolerance = 0.001;
 
             cljff.setEwaldErrorTolerance(tolerance);
+
+            if (typ == "PME")
+                _set_pme_parameters(cljff, ffinfo, tolerance, *boxvecs);
         }
         else if (typ == "REACTION_FIELD")
         {
@@ -1320,7 +1372,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     // set the non-bonded cutoff type and length based on
     // the infomation in ffinfo
-    _set_clj_cutoff(*cljff, ffinfo);
+    _set_clj_cutoff(*cljff, ffinfo, boxvecs);
 
     // now create the base bond, angle, torsion and CMAP forcefields
     OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
