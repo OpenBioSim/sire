@@ -897,11 +897,6 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
     }
 }
 
-/** Set the coulomb and LJ cutoff in the passed NonbondedForce,
- *  based on the information in the passed ForceFieldInfo.
- *  This sets the cutoff type (e.g. PME) and the actual
- *  cutoff length (if one is used)
- */
 /** Set explicit PME parameters if a grid or grid spacing was requested.
  *  If alpha wasn't given, it is derived from the tolerance using the
  *  same formula as OpenMM.
@@ -950,6 +945,11 @@ void _set_pme_parameters(OpenMM::NonbondedForce &cljff,
     cljff.setPMEParameters(alpha, nx, ny, nz);
 }
 
+/** Set the coulomb and LJ cutoff in the passed NonbondedForce,
+ *  based on the information in the passed ForceFieldInfo.
+ *  This sets the cutoff type (e.g. PME) and the actual
+ *  cutoff length (if one is used)
+ */
 void _set_clj_cutoff(OpenMM::NonbondedForce &cljff,
                      const ForceFieldInfo &ffinfo,
                      const std::shared_ptr<std::vector<OpenMM::Vec3>> &boxvecs)
