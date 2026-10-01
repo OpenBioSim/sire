@@ -65,6 +65,32 @@ def test_pme_spacing(fixture, openmm_platform, request):
     assert [nx, ny, nz] == [math.ceil(x / 0.12) for x in _box_lengths(omm)]
 
 
+def test_tune_pme(kigaki_mols, openmm_platform):
+    if openmm_platform not in ["CUDA", "OpenCL"]:
+        pytest.skip("PME tuning is only supported on GPU platforms")
+
+    from sire.convert.openmm import tune_pme
+
+    from openmm import NonbondedForce
+
+    m = {"cutoff_type": "PME", "cutoff": "9 A", "platform": openmm_platform}
+
+    omm = sr.convert.to(kigaki_mols, "openmm", map=m)
+    nbff = [f for f in omm.getSystem().getForces() if isinstance(f, NonbondedForce)][0]
+    _, *default_grid = nbff.getPMEParametersInContext(omm)
+
+    options = tune_pme(kigaki_mols, map=m)
+
+    if options:
+        alpha, *grid = _pme_parameters(
+            sr.convert.to(kigaki_mols, "openmm", map={**m, **options})
+        )
+
+        assert alpha == pytest.approx(options["pme_alpha"])
+        assert grid == options["pme_grid"]
+        assert all(n <= d for n, d in zip(grid, default_grid))
+
+
 @pytest.mark.parametrize(
     "options",
     [

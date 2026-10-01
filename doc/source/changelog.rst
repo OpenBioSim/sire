@@ -70,6 +70,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   silently ignored when passed as strings. They are now parsed, and an error is raised if
   the string isn't a number.
 
+* Added ``sire.convert.openmm.tune_pme()``, which finds the smallest PME grid, and the
+  splitting parameter for it, that is at least as accurate as OpenMM's choice from the
+  Ewald error tolerance. The result can be passed as the ``pme_alpha`` and ``pme_grid``
+  map options.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
