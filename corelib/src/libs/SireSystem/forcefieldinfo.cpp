@@ -474,6 +474,36 @@ void ForceFieldInfo::setCutoffType(QString cutoff_type)
     this->setCutoffType(cutoff_type, PropertyMap());
 }
 
+/** Read the numeric map option 'key', which may be given as a value or
+ *  as a string (e.g. "5e-4"). Returns false if it wasn't set.
+ */
+static bool get_number_option(const PropertyMap &map, const QString &key, double &value)
+{
+    const auto prop = map[key];
+
+    if (prop.hasValue())
+    {
+        value = prop.value().asADouble();
+        return true;
+    }
+
+    if (prop.source() == key)
+        return false;
+
+    bool ok;
+    value = prop.source().toDouble(&ok);
+
+    if (not ok)
+    {
+        throw SireError::invalid_arg(QObject::tr(
+                                         "The '%1' option must be a number, not '%2'.")
+                                         .arg(key, prop.source()),
+                                     CODELOC);
+    }
+
+    return true;
+}
+
 void ForceFieldInfo::setCutoffType(QString s_cutoff_type,
                                    const PropertyMap &map)
 {
@@ -512,32 +542,18 @@ void ForceFieldInfo::setCutoffType(QString s_cutoff_type,
         if (cutoff_type == EWALD or cutoff_type == PME)
         {
             // set the EWALD parameters
-            const auto tolerance_prop = map["tolerance"];
-
-            if (tolerance_prop.hasValue())
-            {
-                this->setParameter("tolerance", GeneralUnit(tolerance_prop.value().asADouble()));
-            }
-            else
-            {
-                this->setParameter("tolerance", GeneralUnit(0.0001));
-            }
+            double tolerance = 0.0001;
+            get_number_option(map, "tolerance", tolerance);
+            this->setParameter("tolerance", GeneralUnit(tolerance));
 
             if (cutoff_type == PME)
                 this->setPMEParameters(map);
         }
         else if (cutoff_type == REACTION_FIELD)
         {
-            const auto dielectric_prop = map["dielectric"];
-
-            if (dielectric_prop.hasValue())
-            {
-                this->setParameter("dielectric", GeneralUnit(dielectric_prop.value().asADouble()));
-            }
-            else
-            {
-                this->setParameter("dielectric", GeneralUnit(78.3));
-            }
+            double dielectric = 78.3;
+            get_number_option(map, "dielectric", dielectric);
+            this->setParameter("dielectric", GeneralUnit(dielectric));
         }
     }
 
@@ -552,28 +568,30 @@ void ForceFieldInfo::setCutoffType(QString s_cutoff_type,
  */
 void ForceFieldInfo::setPMEParameters(const PropertyMap &map)
 {
-    const auto alpha_prop = map["pme_alpha"];
     const auto grid_prop = map["pme_grid"];
     const auto spacing_prop = map["pme_spacing"];
 
-    if (grid_prop.hasValue() and spacing_prop.hasValue())
+    double alpha = 0;
+    const bool has_alpha = get_number_option(map, "pme_alpha", alpha);
+    const bool has_grid = grid_prop.hasValue() or grid_prop.source() != "pme_grid";
+    const bool has_spacing = spacing_prop.hasValue() or spacing_prop.source() != "pme_spacing";
+
+    if (has_grid and has_spacing)
     {
         throw SireError::invalid_arg(QObject::tr(
                                          "You cannot specify both 'pme_grid' and 'pme_spacing'."),
                                      CODELOC);
     }
 
-    if (alpha_prop.hasValue() and not(grid_prop.hasValue() or spacing_prop.hasValue()))
+    if (has_alpha and not(has_grid or has_spacing))
     {
         throw SireError::invalid_arg(QObject::tr(
                                          "'pme_alpha' requires either 'pme_grid' or 'pme_spacing' to be set."),
                                      CODELOC);
     }
 
-    if (alpha_prop.hasValue())
+    if (has_alpha)
     {
-        const double alpha = alpha_prop.value().asADouble();
-
         if (alpha <= 0)
         {
             throw SireError::invalid_arg(QObject::tr(
@@ -585,22 +603,22 @@ void ForceFieldInfo::setPMEParameters(const PropertyMap &map)
         this->setParameter("pme_alpha", GeneralUnit(alpha));
     }
 
-    if (grid_prop.hasValue())
+    if (has_grid)
     {
-        const auto &value = grid_prop.value();
-
         QVector<int> grid;
 
-        if (value.isAnArray())
+        if (grid_prop.hasValue() and grid_prop.value().isAnArray())
         {
-            const auto values = value.asAnArray();
+            const auto values = grid_prop.value().asAnArray();
 
             for (int i = 0; i < values.count(); ++i)
                 grid.append(values.at(i).asAnInteger());
         }
         else
         {
-            grid.append(value.asAnInteger());
+            double n = 0;
+            get_number_option(map, "pme_grid", n);
+            grid.append(int(n));
         }
 
         if (grid.count() == 1)
@@ -629,8 +647,16 @@ void ForceFieldInfo::setPMEParameters(const PropertyMap &map)
         this->setParameter("pme_grid_y", GeneralUnit(grid[1]));
         this->setParameter("pme_grid_z", GeneralUnit(grid[2]));
     }
-    else if (spacing_prop.hasValue())
+    else if (has_spacing)
     {
+        if (not spacing_prop.hasValue())
+        {
+            throw SireError::invalid_arg(QObject::tr(
+                                             "'pme_spacing' must be a length, e.g. 0.12 * sire.units.nanometer, not '%1'.")
+                                             .arg(spacing_prop.source()),
+                                         CODELOC);
+        }
+
         const auto spacing = spacing_prop.value().asA<GeneralUnitProperty>().toUnit<Length>();
 
         if (spacing.value() <= 0)
