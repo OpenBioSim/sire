@@ -87,19 +87,35 @@ def tune_pme(
     # reference forces from a tolerance an order of magnitude below the target
     ref_tolerance = min(tolerance, target_error or tolerance) / 10
     nbff.setEwaldErrorTolerance(ref_tolerance)
-    set_pme(0.0, [0, 0, 0])
-    ref_forces = get_forces()
+
+    try:
+        set_pme(0.0, [0, 0, 0])
+        ref_forces = get_forces()
+    except Exception:
+        # e.g. the reference grid doesn't fit in memory, so tuning isn't possible
+        ref_forces = None
+
     nbff.setEwaldErrorTolerance(tolerance)
 
-    ref_norm = np.mean(np.sum(ref_forces**2, axis=1))
-
     def error(forces):
-        return math.sqrt(np.mean(np.sum((forces - ref_forces) ** 2, axis=1)) / ref_norm)
+        if ref_forces is None:
+            return math.inf
+
+        with np.errstate(divide="ignore", invalid="ignore"):
+            err = math.sqrt(
+                np.mean(np.sum((forces - ref_forces) ** 2, axis=1))
+                / np.mean(np.sum(ref_forces**2, axis=1))
+            )
+
+        return err if math.isfinite(err) else math.inf
 
     default_error = error(default_forces)
 
     if target_error is None:
         target_error = default_error
+
+    # e.g. a system without charges, where there is nothing to tune
+    can_tune = all(math.isfinite(x) and x > 0 for x in (default_error, target_error))
 
     def grid_for(n):
         # n points along the longest box vector, at the same spacing in the others,
@@ -118,21 +134,28 @@ def tune_pme(
     candidates = [
         n
         for n in range(n_lo, n_hi + 1)
-        if is_fft_friendly(n) and math.prod(grid_for(n)) < math.prod(default_grid)
+        if can_tune
+        and is_fft_friendly(n)
+        and math.prod(grid_for(n)) < math.prod(default_grid)
     ]
 
-    # bracket the splitting parameter using the tolerance that corresponds to the
-    # target, from OpenMM's choice to that for a real-space error 100 times smaller
-    tol = min(0.1, tolerance * target_error / default_error)
-    alpha_lo = math.sqrt(-math.log(2.0 * tol)) / cutoff
-    alpha_hi = math.sqrt(-math.log(0.02 * tol)) / cutoff
+    if candidates:
+        # bracket the splitting parameter using the tolerance that corresponds to the
+        # target, from OpenMM's choice to that for a real-space error 100 times smaller
+        tol = min(0.1, tolerance * target_error / default_error)
+        alpha_lo = math.sqrt(-math.log(2.0 * tol)) / cutoff
+        alpha_hi = math.sqrt(-math.log(0.02 * tol)) / cutoff
 
     def best_alpha(grid, iterations=5):
         ratio = (math.sqrt(5) - 1) / 2
 
         def evaluate(alpha):
-            set_pme(alpha, grid)
-            return error(get_forces()), alpha
+            # a candidate that fails is treated as not meeting the target
+            try:
+                set_pme(alpha, grid)
+                return error(get_forces()), alpha
+            except Exception:
+                return math.inf, alpha
 
         a, b = alpha_lo, alpha_hi
         c = b - ratio * (b - a)
