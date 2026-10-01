@@ -207,6 +207,14 @@ try:
 
                     map.set("cutoff", u(cutoff))
 
+        if map.specified("pme_spacing"):
+            spacing = map["pme_spacing"]
+
+            if spacing.has_source():
+                from ... import u
+
+                map.set("pme_spacing", u(spacing.source()))
+
         if map.specified("integrator"):
             integrator = map["integrator"]
 

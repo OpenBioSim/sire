@@ -36,6 +36,8 @@
 
 #include "SireVol/cartesian.h"
 
+#include "SireBase/propertylist.h"
+
 #include "SireUnits/units.h"
 
 #include "SireStream/datastream.h"
@@ -520,6 +522,9 @@ void ForceFieldInfo::setCutoffType(QString s_cutoff_type,
             {
                 this->setParameter("tolerance", GeneralUnit(0.0001));
             }
+
+            if (cutoff_type == PME)
+                this->setPMEParameters(map);
         }
         else if (cutoff_type == REACTION_FIELD)
         {
@@ -537,6 +542,107 @@ void ForceFieldInfo::setCutoffType(QString s_cutoff_type,
     }
 
     ctff_typ = cutoff_type;
+}
+
+/** Read the optional explicit PME parameters from the passed map.
+ *  'pme_alpha' is the Ewald splitting parameter in nm^-1, and the grid
+ *  is given either by 'pme_grid' (one integer, or one per box vector)
+ *  or by 'pme_spacing' (a length). If neither is given then the PME
+ *  parameters are chosen by OpenMM from the tolerance.
+ */
+void ForceFieldInfo::setPMEParameters(const PropertyMap &map)
+{
+    const auto alpha_prop = map["pme_alpha"];
+    const auto grid_prop = map["pme_grid"];
+    const auto spacing_prop = map["pme_spacing"];
+
+    if (grid_prop.hasValue() and spacing_prop.hasValue())
+    {
+        throw SireError::invalid_arg(QObject::tr(
+                                         "You cannot specify both 'pme_grid' and 'pme_spacing'."),
+                                     CODELOC);
+    }
+
+    if (alpha_prop.hasValue() and not(grid_prop.hasValue() or spacing_prop.hasValue()))
+    {
+        throw SireError::invalid_arg(QObject::tr(
+                                         "'pme_alpha' requires either 'pme_grid' or 'pme_spacing' to be set."),
+                                     CODELOC);
+    }
+
+    if (alpha_prop.hasValue())
+    {
+        const double alpha = alpha_prop.value().asADouble();
+
+        if (alpha <= 0)
+        {
+            throw SireError::invalid_arg(QObject::tr(
+                                             "'pme_alpha' must be positive, not %1.")
+                                             .arg(alpha),
+                                         CODELOC);
+        }
+
+        this->setParameter("pme_alpha", GeneralUnit(alpha));
+    }
+
+    if (grid_prop.hasValue())
+    {
+        const auto &value = grid_prop.value();
+
+        QVector<int> grid;
+
+        if (value.isAnArray())
+        {
+            const auto values = value.asAnArray();
+
+            for (int i = 0; i < values.count(); ++i)
+                grid.append(values.at(i).asAnInteger());
+        }
+        else
+        {
+            grid.append(value.asAnInteger());
+        }
+
+        if (grid.count() == 1)
+            grid = QVector<int>(3, grid[0]);
+
+        if (grid.count() != 3)
+        {
+            throw SireError::invalid_arg(QObject::tr(
+                                             "'pme_grid' must be a single integer or three integers, not %1 values.")
+                                             .arg(grid.count()),
+                                         CODELOC);
+        }
+
+        for (int n : grid)
+        {
+            if (n < 6)
+            {
+                throw SireError::invalid_arg(QObject::tr(
+                                                 "Each 'pme_grid' dimension must be at least 6, not %1.")
+                                                 .arg(n),
+                                             CODELOC);
+            }
+        }
+
+        this->setParameter("pme_grid_x", GeneralUnit(grid[0]));
+        this->setParameter("pme_grid_y", GeneralUnit(grid[1]));
+        this->setParameter("pme_grid_z", GeneralUnit(grid[2]));
+    }
+    else if (spacing_prop.hasValue())
+    {
+        const auto spacing = spacing_prop.value().asA<GeneralUnitProperty>().toUnit<Length>();
+
+        if (spacing.value() <= 0)
+        {
+            throw SireError::invalid_arg(QObject::tr(
+                                             "'pme_spacing' must be positive, not %1.")
+                                             .arg(spacing.toString()),
+                                         CODELOC);
+        }
+
+        this->setParameter("pme_spacing", GeneralUnit(spacing));
+    }
 }
 
 QStringList ForceFieldInfo::cutoffTypes()

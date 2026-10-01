@@ -29,8 +29,8 @@
 #ifndef SIRESYSTEM_FORCEFIELDINFO_H
 #define SIRESYSTEM_FORCEFIELDINFO_H
 
-#include "SireBase/property.h"
 #include "SireBase/properties.h"
+#include "SireBase/property.h"
 #include "SireBase/propertymap.h"
 
 #include "SireVol/space.h"
@@ -138,6 +138,8 @@ namespace SireSystem
 
         static CUTOFF_TYPE string_to_cutoff_type(QString s);
         static QString cutoff_type_to_string(CUTOFF_TYPE type);
+
+        void setPMEParameters(const SireBase::PropertyMap &map);
 
         /** The system space */
         SireVol::SpacePtr spc;

@@ -62,6 +62,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   wrong minimum image distances from ``calc_dist``, e.g. for trajectory frame spaces. This
   broke ``sire.restraints.boresch_search()`` for triclinic boxes.
 
+* Added ``pme_alpha``, ``pme_grid`` and ``pme_spacing`` map options to set the PME
+  parameters explicitly, rather than having OpenMM choose them from the Ewald error
+  tolerance. If ``pme_alpha`` isn't given it is derived from the tolerance, as OpenMM does.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

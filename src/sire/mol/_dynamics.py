@@ -121,6 +121,14 @@ class DynamicsData:
 
                         self._map.set("cutoff", u(cutoff))
 
+            if map.specified("pme_spacing"):
+                spacing = map["pme_spacing"]
+
+                if spacing.has_source():
+                    from .. import u
+
+                    self._map.set("pme_spacing", u(spacing.source()))
+
             # get the forcefield info from the passed parameters
             # and from whatever we can glean from the molecules
             from ..system import ForceFieldInfo, System
