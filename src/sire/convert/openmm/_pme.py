@@ -1,7 +1,9 @@
 __all__ = ["tune_pme"]
 
 
-def tune_pme(mols, target_error=None, max_spacing=0.16, map=None, **kwargs):
+def tune_pme(
+    mols, target_error=None, max_spacing=0.16, return_errors=False, map=None, **kwargs
+):
     """
     Find the smallest PME grid, and the splitting parameter for it, whose
     forces are at least as accurate as the target. Since the real-space cost
@@ -23,6 +25,13 @@ def tune_pme(mols, target_error=None, max_spacing=0.16, map=None, **kwargs):
     max_spacing: float
         The coarsest grid spacing to consider, in nanometers.
 
+    return_errors: bool
+        Whether to also return the relative force error of the chosen
+        parameters ('pme_error'), or of OpenMM's choice if no smaller grid
+        meets the target, and the target itself ('pme_target_error').
+        These aren't map options, so remove them before passing the
+        result to `dynamics`.
+
     map: dict
         The property map, as passed to `dynamics`.
 
@@ -34,8 +43,8 @@ def tune_pme(mols, target_error=None, max_spacing=0.16, map=None, **kwargs):
     -------
 
     dict
-        The `pme_alpha` and `pme_grid` map options to use. This is empty
-        if no grid smaller than OpenMM's choice meets the target.
+        The `pme_alpha` and `pme_grid` map options to use. These are
+        omitted if no grid smaller than OpenMM's choice meets the target.
     """
     import math
 
@@ -87,8 +96,10 @@ def tune_pme(mols, target_error=None, max_spacing=0.16, map=None, **kwargs):
     def error(forces):
         return math.sqrt(np.mean(np.sum((forces - ref_forces) ** 2, axis=1)) / ref_norm)
 
+    default_error = error(default_forces)
+
     if target_error is None:
-        target_error = error(default_forces)
+        target_error = default_error
 
     def grid_for(n):
         # grid with n points along the longest box vector, at the same spacing in the others
@@ -146,16 +157,23 @@ def tune_pme(mols, target_error=None, max_spacing=0.16, map=None, **kwargs):
         err, alpha = best_alpha(grid)
 
         if err <= target_error:
-            best = (alpha, grid)
+            best = (alpha, grid, err)
             hi = mid - 1
         else:
             lo = mid + 1
 
     del d
 
+    result = {}
+
     if best is None:
-        return {}
+        err = default_error
+    else:
+        alpha, grid, err = best
+        result = {"pme_alpha": alpha, "pme_grid": grid}
 
-    alpha, grid = best
+    if return_errors:
+        result["pme_error"] = err
+        result["pme_target_error"] = target_error
 
-    return {"pme_alpha": alpha, "pme_grid": grid}
+    return result

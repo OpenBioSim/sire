@@ -73,7 +73,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added ``sire.convert.openmm.tune_pme()``, which finds the smallest PME grid, and the
   splitting parameter for it, that is at least as accurate as OpenMM's choice from the
   Ewald error tolerance. The result can be passed as the ``pme_alpha`` and ``pme_grid``
-  map options.
+  map options, and the relative force errors can optionally be returned too.
 
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------

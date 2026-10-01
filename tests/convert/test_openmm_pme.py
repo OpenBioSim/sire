@@ -79,7 +79,9 @@ def test_tune_pme(kigaki_mols, openmm_platform):
     nbff = [f for f in omm.getSystem().getForces() if isinstance(f, NonbondedForce)][0]
     _, *default_grid = nbff.getPMEParametersInContext(omm)
 
-    options = tune_pme(kigaki_mols, map=m)
+    options = tune_pme(kigaki_mols, return_errors=True, map=m)
+
+    assert options.pop("pme_error") <= options.pop("pme_target_error")
 
     if options:
         alpha, *grid = _pme_parameters(
