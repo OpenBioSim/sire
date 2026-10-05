@@ -1,10 +1,8 @@
 
 #include "boost/python.hpp"
 
-#include "SireBase/releasegil.h"
 #include "SireBase/console.h"
-
-#include <QMutex>
+#include "SireBase/releasegil.h"
 
 #include <QDebug>
 
@@ -261,25 +259,15 @@ protected:
 
     SireBase::GILHandle releaseGIL() const
     {
-        QMutexLocker lkr(&release_mutex);
+        // Each release belongs to the thread that made it. Threads without the
+        // GIL, e.g. worker threads, and nested calls get an empty handle.
+        if (not PyGILState_Check())
+            return SireBase::GILHandle();
 
-        auto handle = current_state.lock();
-
-        if (handle.get() != 0)
-            return handle;
-
-        auto thread_state = PyEval_SaveThread();
-        handle = SireBase::GILHandle(new ReleaseGIL(thread_state));
-
-        current_state = handle;
-
-        return handle;
+        return SireBase::GILHandle(new ReleaseGIL(PyEval_SaveThread()));
     }
 
 private:
-    static QMutex release_mutex;
-    static std::weak_ptr<SireBase::detail::ReleaseGILBase> current_state;
-
     PyThreadState *thread_state;
 };
 
@@ -445,10 +433,6 @@ private:
 
     PyObject *pyconsole;
 };
-
-QMutex ReleaseGIL::release_mutex;
-
-std::weak_ptr<SireBase::detail::ReleaseGILBase> ReleaseGIL::current_state;
 
 void register_releasegil()
 {
