@@ -197,6 +197,89 @@ def test_lazy_import_thread_race(tmp_path):
     assert exec_count == 1
 
 
+def _import_system_race_worker(root):
+    """Runs in a fresh process. One thread starts loading a slow submodule
+    through its stub, then other threads reach the same module through the
+    import system and through its parent package while its body is still
+    running. Returns (errors, results)."""
+    import sys
+    import threading
+    import time
+
+    sys.path.insert(0, root)
+
+    from sire._lazy_import import force_load, lazy_module
+
+    # The parent is loaded, as sire itself is, so only the submodule is lazy.
+    force_load(lazy_module("synth_import_race_pkg"))
+    stub = sys.modules["synth_import_race_pkg.slow_mod"]
+
+    results = []
+    errors = []
+    results_lock = threading.Lock()
+
+    def record(get):
+        try:
+            value = get()
+        except BaseException as exc:  # noqa: BLE001 - want any failure, not just ImportError
+            with results_lock:
+                errors.append(repr(exc))
+        else:
+            with results_lock:
+                results.append(value)
+
+    def from_import():
+        from synth_import_race_pkg.slow_mod import VALUE
+
+        return VALUE
+
+    def via_parent():
+        import synth_import_race_pkg
+
+        return synth_import_race_pkg.slow_mod.VALUE
+
+    loader = threading.Thread(target=record, args=(lambda: stub.VALUE,))
+    loader.start()
+
+    # Let the loader get into the module's body before the others start.
+    time.sleep(0.1)
+
+    others = [
+        threading.Thread(target=record, args=(get,))
+        for get in (from_import, via_parent) * 4
+    ]
+
+    for t in others:
+        t.start()
+    for t in [loader, *others]:
+        t.join()
+
+    return errors, results
+
+
+def test_lazy_import_import_system_race(tmp_path):
+    """
+    A module that is still loading in one thread must not be handed, half
+    initialised, to another thread that reaches it through the import system
+    (`from pkg.mod import name`) or through its parent package (`pkg.mod`).
+    Both must wait for the load to finish, as for a normal import.
+    """
+    body = "import time\n\ntime.sleep(0.3)\n\nVALUE = 42\n"
+    root = _make_synthetic_package(
+        str(tmp_path), "synth_import_race_pkg", "slow_mod", body
+    )
+
+    from multiprocessing import get_context
+
+    ctx = get_context("spawn")
+
+    with ctx.Pool(1) as pool:
+        errors, results = pool.apply(_import_system_race_worker, (root,))
+
+    assert errors == []
+    assert results == [42] * 9
+
+
 def _failed_load_retry_worker(root):
     """Runs in a fresh process. Registers a lazy stub for a submodule
     whose body raises on its first execution and succeeds on the second,
