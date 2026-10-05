@@ -75,6 +75,15 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   Ewald error tolerance. The result can be passed as the ``pme_alpha`` and ``pme_grid``
   map options, and the relative force errors can optionally be returned too.
 
+* Fixed a crash when loading files from several Python threads at once. Releases of the
+  GIL were shared between threads, so it could be restored on the wrong thread. Each
+  release now belongs to the thread that made it.
+
+* Fixed lazily imported modules being handed to other threads before they had finished
+  loading, which raised an ``ImportError`` when several threads used one for the first time,
+  e.g. by calling ``sire.load``. Other threads now wait for the load to finish, as for a
+  normal import.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

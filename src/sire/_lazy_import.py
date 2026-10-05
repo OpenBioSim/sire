@@ -9,6 +9,7 @@ This is a private module - not part of the public API, just an internal
 bootstrapping helper.
 """
 
+import importlib._bootstrap as _importlib_bootstrap
 import importlib.machinery as _importlib_machinery
 import importlib.util as _importlib_util
 import pkgutil as _pkgutil
@@ -188,7 +189,12 @@ class _LazyModule(_types.ModuleType):
 
             return self._lazy_real
 
-        with self._lazy_lock:
+        # Also hold the import system's own lock for this name, which, with
+        # spec._initializing set below, makes other threads importing it,
+        # e.g. `from .io import name`, wait until its body has run. It is
+        # taken first so that a circular import between threads raises a
+        # _DeadlockError, as for a normal import, rather than hanging.
+        with _importlib_bootstrap._ModuleLockManager(self._lazy_name), self._lazy_lock:
             # re-check now that we hold the lock - another thread may have
             # already finished loading while we were waiting for it
             if self._lazy_real is not None and self._lazy_owner is None:
@@ -264,16 +270,6 @@ class _LazyModule(_types.ModuleType):
 
                 _sys.modules[self._lazy_name] = real_module
 
-                # also fix up the attribute on the parent package, if there
-                # is one, so that e.g. `sire.maths` now points at the real
-                # module
-                if parent_name:
-                    parent = _sys.modules.get(parent_name)
-
-                    if parent is not None:
-                        setattr(parent, attr_name, real_module)
-                        parent_patched = True
-
                 # Record the (still-executing) real module *before* running
                 # its body - exactly what Python's own import system does,
                 # and important for the same reason: if executing the
@@ -283,7 +279,21 @@ class _LazyModule(_types.ModuleType):
                 # independent one.
                 self._lazy_real = real_module
 
-                spec.loader.exec_module(real_module)
+                spec._initializing = True
+                try:
+                    spec.loader.exec_module(real_module)
+                finally:
+                    spec._initializing = False
+
+                # Only now point the parent package's attribute, e.g.
+                # `sire.maths`, at the real module, as CPython does. Until
+                # then other threads reach this stub, which waits for the load.
+                if parent_name:
+                    parent = _sys.modules.get(parent_name)
+
+                    if parent is not None:
+                        setattr(parent, attr_name, real_module)
+                        parent_patched = True
 
                 # Fix up every pre-registered child of *this* module that
                 # its own body didn't already set as a real attribute (see
@@ -365,11 +375,11 @@ class _LazyModule(_types.ModuleType):
                 _sys.modules[self._lazy_name] = self
 
                 # Likewise, undo the parent-attribute fixup above if it
-                # already ran (it happens *before* exec_module(), so a
-                # failure inside exec_module() would otherwise leave the
-                # parent pointing at the broken module directly - a plain
-                # attribute, not this stub - so retrying via the parent
-                # would silently skip _load() altogether next time). Gated
+                # already ran (a failure after it, e.g. in the child fixup,
+                # would otherwise leave the parent pointing at the broken
+                # module directly - a plain attribute, not this stub - so
+                # retrying via the parent would silently skip _load()
+                # altogether next time). Gated
                 # on the parent_patched flag set above, rather than
                 # comparing the parent's current attribute against
                 # self._lazy_real - that comparison is wrong precisely when
