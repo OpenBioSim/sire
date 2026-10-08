@@ -255,6 +255,44 @@ def no_hbond_system(abfe_system):
     return mols
 
 
+def _tag_water(system, **properties):
+    """Return a copy of the system with the first water tagged with the properties."""
+    mols = system.clone()
+    cursor = mols["water"].molecules()[0].cursor()
+    for key, value in properties.items():
+        cursor[key] = value
+    mols.update(cursor.commit())
+    return mols
+
+
+@pytest.fixture(scope="module")
+def alchemical_ion_system(abfe_system):
+    """The test system with a water flagged as a perturbable alchemical ion."""
+    return _tag_water(abfe_system, is_perturbable=True, is_alchemical_ion=True)
+
+
+class TestAlchemicalIons:
+    @pytest.mark.parametrize("protocol", PROTOCOLS)
+    def test_alchemical_ion_ignored(self, alchemical_ion_system, protocol):
+        from sire.restraints import boresch_search, check_boresch_search
+
+        check_boresch_search(alchemical_ion_system, protocol=protocol)
+
+        restraints, _, _ = boresch_search(alchemical_ion_system, protocol=protocol)
+        lig_num = alchemical_ion_system.molecule(1).number()
+        atoms = alchemical_ion_system.atoms()
+        for idx in restraints.at(0).ligand_atoms():
+            assert atoms[idx].molecule().number() == lig_num
+
+    def test_multiple_perturbable_molecules_raises(self, abfe_system):
+        from sire.restraints import check_boresch_search
+
+        mols = _tag_water(abfe_system, is_perturbable=True)
+
+        with pytest.raises(ValueError, match="exactly one perturbable molecule"):
+            check_boresch_search(mols)
+
+
 class TestCheckBoreschSearch:
     @pytest.mark.parametrize("protocol", PROTOCOLS)
     def test_valid_system_passes(self, abfe_system, protocol):

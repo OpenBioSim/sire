@@ -84,6 +84,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   e.g. by calling ``sire.load``. Other threads now wait for the load to finish, as for a
   normal import.
 
+* Fixed ``sire.restraints.boresch_search()`` failing for charged ligands, since alchemical
+  ions used to keep the charge constant were counted as additional perturbable molecules.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
