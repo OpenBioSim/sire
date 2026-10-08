@@ -55,16 +55,22 @@ def _find_ligand(system):
     """
     Return the perturbable molecule and its non-ghost, non-H atom indices
     (lambda=0 state), validating that there is enough to build a restraint.
+    Alchemical ions, used to keep the charge constant, are ignored.
     """
     from ..legacy import Mol as _SireMol
 
-    pert_mols = system.molecules("property is_perturbable")
-    if pert_mols.num_molecules() != 1:
+    pert_mols = [
+        mol
+        for mol in system.molecules("property is_perturbable")
+        if not mol.has_property("is_alchemical_ion")
+    ]
+    if len(pert_mols) != 1:
         raise ValueError(
-            "System must contain exactly one perturbable molecule for Boresch "
-            f"restraint generation; found {pert_mols.num_molecules()}."
+            "System must contain exactly one perturbable molecule, excluding "
+            "alchemical ions, for Boresch restraint generation; found "
+            f"{len(pert_mols)}."
         )
-    pert_mol = pert_mols.molecule(0)
+    pert_mol = pert_mols[0]
 
     ghost_elem = _SireMol.Element(0)
     h_elem = _SireMol.Element("H")
@@ -404,7 +410,7 @@ def _boresch_search_rxrx(
 
     system : sire.system.System
         A Sire system with embedded trajectory frames. Must contain exactly
-        one perturbable molecule.
+        one perturbable molecule, excluding alchemical ions.
 
     temperature : str or GeneralUnit, optional
         Simulation temperature. Defaults to 298 K.
@@ -1007,7 +1013,7 @@ def _boresch_search_aldeghi(
 
     system : sire.system.System
         A Sire system with embedded trajectory frames. Must contain exactly
-        one perturbable molecule.
+        one perturbable molecule, excluding alchemical ions.
 
     temperature : str or GeneralUnit, optional
         Simulation temperature. Defaults to 298 K.
@@ -1459,7 +1465,8 @@ def boresch_search(
 
     system : sire.system.System
         A Sire system with embedded trajectory frames. Must contain exactly
-        one perturbable molecule. Used by both protocols.
+        one perturbable molecule, excluding alchemical ions. Used by both
+        protocols.
 
     protocol : str
         The restraint search protocol to use: ``"rxrx"`` (default) or
@@ -1609,7 +1616,8 @@ def check_boresch_search(system, protocol="rxrx"):
     ----------
 
     system : sire.system.System
-        A Sire system containing exactly one perturbable molecule.
+        A Sire system containing exactly one perturbable molecule, excluding
+        alchemical ions.
 
     protocol : str
         The restraint search protocol to check: ``"rxrx"`` (default) or
