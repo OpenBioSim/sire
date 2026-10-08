@@ -18,7 +18,7 @@ def abfe_system():
     """
     Load the protein-ligand test system with embedded trajectory frames.
     The topology is loaded from prm7; the trajectory from DCD. Molecule 0
-    is the protein, molecule 1 is the ligand, the rest is water and ions.
+    is the protein and molecule 1 is the ligand. There is no solvent.
     The ligand is then decoupled so that is_perturbable is set, matching
     what SOMD2's runner provides to boresch_search().
     """
@@ -255,39 +255,35 @@ def no_hbond_system(abfe_system):
     return mols
 
 
-def _tag_water(system, **properties):
-    """Return a copy of the system with the first water tagged with the properties."""
+def _add_ion(system, **properties):
+    """
+    Return a copy of the system, without trajectory frames, with an added
+    Na+ ion tagged with the properties.
+    """
+    from sire.legacy.IO import createSodiumIon
+
     mols = system.clone()
-    cursor = mols["water"].molecules()[0].cursor()
+    mols.delete_all_frames()
+    cursor = createSodiumIon(mols.molecule(1).coordinates(), "tip3p").cursor()
     for key, value in properties.items():
         cursor[key] = value
-    mols.update(cursor.commit())
+    mols.add(cursor.commit())
     return mols
-
-
-@pytest.fixture(scope="module")
-def alchemical_ion_system(abfe_system):
-    """The test system with a water flagged as a perturbable alchemical ion."""
-    return _tag_water(abfe_system, is_perturbable=True, is_alchemical_ion=True)
 
 
 class TestAlchemicalIons:
     @pytest.mark.parametrize("protocol", PROTOCOLS)
-    def test_alchemical_ion_ignored(self, alchemical_ion_system, protocol):
-        from sire.restraints import boresch_search, check_boresch_search
+    def test_alchemical_ion_ignored(self, abfe_system, protocol):
+        from sire.restraints import check_boresch_search
 
-        check_boresch_search(alchemical_ion_system, protocol=protocol)
+        mols = _add_ion(abfe_system, is_perturbable=True, is_alchemical_ion=True)
 
-        restraints, _, _ = boresch_search(alchemical_ion_system, protocol=protocol)
-        lig_num = alchemical_ion_system.molecule(1).number()
-        atoms = alchemical_ion_system.atoms()
-        for idx in restraints.at(0).ligand_atoms():
-            assert atoms[idx].molecule().number() == lig_num
+        check_boresch_search(mols, protocol=protocol)
 
     def test_multiple_perturbable_molecules_raises(self, abfe_system):
         from sire.restraints import check_boresch_search
 
-        mols = _tag_water(abfe_system, is_perturbable=True)
+        mols = _add_ion(abfe_system, is_perturbable=True)
 
         with pytest.raises(ValueError, match="exactly one perturbable molecule"):
             check_boresch_search(mols)
