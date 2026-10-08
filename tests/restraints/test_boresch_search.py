@@ -18,7 +18,7 @@ def abfe_system():
     """
     Load the protein-ligand test system with embedded trajectory frames.
     The topology is loaded from prm7; the trajectory from DCD. Molecule 0
-    is the protein, molecule 1 is the ligand, the rest is water and ions.
+    is the protein and molecule 1 is the ligand. There is no solvent.
     The ligand is then decoupled so that is_perturbable is set, matching
     what SOMD2's runner provides to boresch_search().
     """
@@ -253,6 +253,40 @@ def no_hbond_system(abfe_system):
             atom["element0"] = sr.mol.Element("C")
     mols.update(cursor.commit())
     return mols
+
+
+def _add_ion(system, **properties):
+    """
+    Return a copy of the system, without trajectory frames, with an added
+    Na+ ion tagged with the properties.
+    """
+    from sire.legacy.IO import createSodiumIon
+
+    mols = system.clone()
+    mols.delete_all_frames()
+    cursor = createSodiumIon(mols.molecule(1).coordinates(), "tip3p").cursor()
+    for key, value in properties.items():
+        cursor[key] = value
+    mols.add(cursor.commit())
+    return mols
+
+
+class TestAlchemicalIons:
+    @pytest.mark.parametrize("protocol", PROTOCOLS)
+    def test_alchemical_ion_ignored(self, abfe_system, protocol):
+        from sire.restraints import check_boresch_search
+
+        mols = _add_ion(abfe_system, is_perturbable=True, is_alchemical_ion=True)
+
+        check_boresch_search(mols, protocol=protocol)
+
+    def test_multiple_perturbable_molecules_raises(self, abfe_system):
+        from sire.restraints import check_boresch_search
+
+        mols = _add_ion(abfe_system, is_perturbable=True)
+
+        with pytest.raises(ValueError, match="exactly one perturbable molecule"):
+            check_boresch_search(mols)
 
 
 class TestCheckBoreschSearch:
