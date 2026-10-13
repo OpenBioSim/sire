@@ -660,6 +660,76 @@ def test_qmff_was_force_changed(ala_mols):
     assert lever.was_force_changed("qmff"), "qmff should be changed when lambda changes"
 
 
+def test_qm_cross_molecule_exceptions(ala_mols):
+    """
+    Make sure that the MM non-bonded interactions between QM atoms in
+    different molecules are scaled from fully on at lambda = 0 to fully
+    off at lambda = 1.
+    """
+
+    import math
+    import openmm
+
+    def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell=None, idx_mm=None):
+        return (0.0, xyz_qm, xyz_mm)
+
+    mols = ala_mols.clone()
+    qm_mols, engine = sr.qm.create_engine(
+        mols, mols["molidx 0 or molidx 1"].atoms(), callback, callback=None
+    )
+
+    d = qm_mols.dynamics(
+        timestep="1fs", constraint="none", qm_engine=engine, platform="cpu"
+    )
+
+    ctx = d._d._omm_mols
+    system = ctx.getSystem()
+
+    cljff = [f for f in system.getForces() if isinstance(f, openmm.NonbondedForce)][0]
+
+    num_atoms0 = qm_mols[0].num_atoms()
+    num_atoms1 = qm_mols[1].num_atoms()
+
+    cross_pairs = {
+        (i, j)
+        for i in range(num_atoms0)
+        for j in range(num_atoms0, num_atoms0 + num_atoms1)
+    }
+
+    def get_exceptions():
+        exceptions = {}
+        for k in range(cljff.getNumExceptions()):
+            i, j, q, sigma, epsilon = cljff.getExceptionParameters(k)
+            pair = (min(i, j), max(i, j))
+            if pair in cross_pairs:
+                exceptions[pair] = (
+                    q.value_in_unit(openmm.unit.elementary_charge**2),
+                    sigma.value_in_unit(openmm.unit.nanometer),
+                    epsilon.value_in_unit(openmm.unit.kilojoule_per_mole),
+                )
+        return exceptions
+
+    # The context is initialised at lambda = 1, so the pairs are switched off.
+    exceptions = get_exceptions()
+    assert set(exceptions.keys()) == cross_pairs
+    for q, sigma, epsilon in exceptions.values():
+        assert q == pytest.approx(0.0)
+        assert epsilon == pytest.approx(0.0, abs=1e-8)
+
+    # At lambda = 0 the pairs should have the full MM interaction.
+    ctx.set_lambda(0.0)
+    exceptions = get_exceptions()
+    for (i, j), (q, sigma, epsilon) in exceptions.items():
+        q0, sig0, eps0 = cljff.getParticleParameters(i)
+        q1, sig1, eps1 = cljff.getParticleParameters(j)
+        q0 = q0.value_in_unit(openmm.unit.elementary_charge)
+        q1 = q1.value_in_unit(openmm.unit.elementary_charge)
+        eps0 = eps0.value_in_unit(openmm.unit.kilojoule_per_mole)
+        eps1 = eps1.value_in_unit(openmm.unit.kilojoule_per_mole)
+        assert q == pytest.approx(q0 * q1)
+        assert epsilon == pytest.approx(math.sqrt(eps0 * eps1), abs=1e-8)
+
+
 def test_property_bases(ala_mols):
     """
     Make sure that the SireOpenMM property classes are exposed as

@@ -87,6 +87,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed ``sire.restraints.boresch_search()`` failing for charged ligands, since alchemical
   ions used to keep the charge constant were counted as additional perturbable molecules.
 
+* Fixed MM non-bonded interactions not being removed between QM atoms in different
+  molecules, e.g. when a QM water reacts with a QM ligand.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
