@@ -279,7 +279,8 @@ LambdaLever::LambdaLever(const LambdaLever &other)
       perturbable_maps(other.perturbable_maps),
       lambda_cache(other.lambda_cache),
       last_rest2_scale(-1.0),
-      last_qmff_lam(-1.0)
+      last_qmff_lam(-1.0),
+      qm_exception_idxs(other.qm_exception_idxs)
 {
 }
 
@@ -299,6 +300,7 @@ LambdaLever &LambdaLever::operator=(const LambdaLever &other)
         start_indices = other.start_indices;
         perturbable_maps = other.perturbable_maps;
         lambda_cache = other.lambda_cache;
+        qm_exception_idxs = other.qm_exception_idxs;
         Property::operator=(other);
     }
 
@@ -312,7 +314,8 @@ bool LambdaLever::operator==(const LambdaLever &other) const
            lambda_schedule == other.lambda_schedule and
            perturbable_mols == other.perturbable_mols and
            start_indices == other.start_indices and
-           perturbable_maps == other.perturbable_maps;
+           perturbable_maps == other.perturbable_maps and
+           qm_exception_idxs == other.qm_exception_idxs;
 }
 
 bool LambdaLever::operator!=(const LambdaLever &other) const
@@ -2047,6 +2050,47 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         }
     }
 
+    // scale the MM interactions between QM atoms in different molecules
+    // from fully on (MM, lambda = 0) to fully off (QM, lambda = 1)
+    if (cljff != nullptr and not qm_exception_idxs.isEmpty())
+    {
+        const double coul_scale = this->lambda_schedule.morph(
+            "clj", "charge_scale", 1.0, 0.0, lambda_value);
+        const double lj_scale = this->lambda_schedule.morph(
+            "clj", "lj_scale", 1.0, 0.0, lambda_value);
+
+        for (const auto &idx : qm_exception_idxs)
+        {
+            int atom0, atom1;
+            double old_charge, old_sigma, old_epsilon;
+            cljff->getExceptionParameters(idx, atom0, atom1,
+                                          old_charge, old_sigma, old_epsilon);
+
+            double q0, sig0, eps0;
+            double q1, sig1, eps1;
+            cljff->getParticleParameters(atom0, q0, sig0, eps0);
+            cljff->getParticleParameters(atom1, q1, sig1, eps1);
+
+            const double charge = coul_scale * q0 * q1;
+            double sigma = 0.5 * (sig0 + sig1);
+            double epsilon = lj_scale * std::sqrt(eps0 * eps1);
+
+            // stop OpenMM from turning this exception into an exclusion
+            if (charge == 0 and epsilon == 0)
+            {
+                sigma = 1e-9;
+                epsilon = 1e-9;
+            }
+
+            if (charge != old_charge or sigma != old_sigma or epsilon != old_epsilon)
+            {
+                cljff->setExceptionParameters(idx, atom0, atom1,
+                                              charge, sigma, epsilon);
+                has_changed_cljff = true;
+            }
+        }
+    }
+
     // update the parameters in the context for forces whose parameters changed
     if (has_changed_cljff and cljff)
         cljff->updateParametersInContext(context);
@@ -2681,6 +2725,14 @@ void LambdaLever::setConstraintIndicies(int mol_idx, const QVector<qint32> &cons
     mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
 
     this->perturbable_mols[mol_idx].setConstraintIndicies(constraint_idxs);
+}
+
+/** Set the indices of the NonbondedForce exceptions between QM atoms
+ *  in different molecules
+ */
+void LambdaLever::setQMExceptionIndicies(const QVector<qint32> &exception_idxs)
+{
+    this->qm_exception_idxs = exception_idxs;
 }
 
 /** Return all of the property maps used to find the perturbable properties
