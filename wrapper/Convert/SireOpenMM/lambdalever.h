@@ -139,6 +139,8 @@ namespace SireOpenMM
 
         void setConstraintIndicies(int idx, const QVector<qint32> &constraint_idxs);
 
+        void setQMExceptionIndicies(const QVector<qint32> &exception_idxs);
+
         void setSchedule(const SireCAS::LambdaSchedule &schedule);
 
         void addLever(const QString &lever_name);
@@ -231,6 +233,10 @@ namespace SireOpenMM
          *  non-empty these atoms are excluded from background-lrc (their LRC
          *  is handled by the gcmc-lrc CustomVolumeForce instead). */
         QSet<int> gcmc_water_atoms;
+
+        /** Indices of the NonbondedForce exceptions between QM atoms
+         *  in different molecules */
+        QVector<qint32> qm_exception_idxs;
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTION

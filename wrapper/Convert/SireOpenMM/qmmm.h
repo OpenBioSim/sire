@@ -32,6 +32,8 @@
 #include "OpenMM.h"
 #include "openmm/Force.h"
 
+#include <QVector>
+
 #include "sireglobal.h"
 
 #include "SireBase/property.h"
@@ -54,6 +56,9 @@ namespace SireOpenMM
         //! Set the lambda weighting factor.
         virtual void setLambda(double lambda) = 0;
 
+        //! Get the indices of the QM atoms.
+        virtual QVector<int> getAtoms() const = 0;
+
     protected:
         virtual OpenMM::ForceImpl *createImpl() const = 0;
     };
@@ -74,7 +79,7 @@ namespace SireOpenMM
         }
 
         //! Create a QM force object.
-        virtual QMForce* createForce() const=0;
+        virtual QMForce *createForce() const = 0;
 
         //! Get a null QM engine.
         static const NullQMEngine &null();
@@ -96,7 +101,7 @@ namespace SireOpenMM
         const char *what() const;
 
         //! Create a QM force object.
-        QMForce* createForce() const;
+        QMForce *createForce() const;
     };
 }
 
