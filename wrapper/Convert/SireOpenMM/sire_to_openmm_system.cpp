@@ -2982,6 +2982,67 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
     }
 
+    // add exceptions for QM atoms in different molecules, since these can't
+    // be removed via each molecule's intrascale. These are scaled by the lever.
+    if (qmff != 0 and cljff != 0)
+    {
+        const auto qm_atoms = qmff->getAtoms();
+
+        QVector<int> qm_mol_idxs(qm_atoms.count());
+
+        for (int i = 0; i < qm_atoms.count(); ++i)
+        {
+            int mol_idx = 0;
+
+            while (mol_idx + 1 < nmols and start_indexes[mol_idx + 1] <= qm_atoms[i])
+                mol_idx++;
+
+            qm_mol_idxs[i] = mol_idx;
+        }
+
+        QVector<qint32> qm_exception_idxs;
+
+        for (int i = 0; i < qm_atoms.count(); ++i)
+        {
+            for (int j = i + 1; j < qm_atoms.count(); ++j)
+            {
+                if (qm_mol_idxs[i] == qm_mol_idxs[j])
+                    continue;
+
+                const int atom0 = qm_atoms[i];
+                const int atom1 = qm_atoms[j];
+
+                double q0, sig0, eps0;
+                double q1, sig1, eps1;
+                cljff->getParticleParameters(atom0, q0, sig0, eps0);
+                cljff->getParticleParameters(atom1, q1, sig1, eps1);
+
+                const double charge = q0 * q1;
+                double sigma = 0.5 * (sig0 + sig1);
+                double epsilon = std::sqrt(eps0 * eps1);
+
+                // stop OpenMM from turning this exception into an exclusion
+                if (charge == 0 and epsilon == 0)
+                {
+                    sigma = 1e-9;
+                    epsilon = 1e-9;
+                }
+
+                qm_exception_idxs.append(cljff->addException(atom0, atom1,
+                                                             charge, sigma,
+                                                             epsilon, false));
+
+                if (ghost_ghostff != 0)
+                {
+                    ghost_ghostff->addExclusion(atom0, atom1);
+                    ghost_nonghostff->addExclusion(atom0, atom1);
+                }
+            }
+        }
+
+        lambda_lever.setQMExceptionIndicies(qm_exception_idxs);
+    }
+
     // Stage 6 is complete. We have set up all of the exceptions. The
     // total energy / force calculated for the system should now be
     // correct.
