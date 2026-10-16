@@ -16,8 +16,8 @@ Ways you can help include:
 
 When contributing, please keep in mind our [Code of Conduct](https://sire.openbiosim.org/code_of_conduct.html).
 
-Please also ensure that your contribution is compatible with our license. sire is licensed under the GPLv3 or later. 
-Please ensure your contribution is similarly licensed (i.e. GPLv3 or later for the C++ code, MIT, BSD, Apache or GPLv3 or 
+Please also ensure that your contribution is compatible with our license. sire is licensed under the LGPLv3 or later. 
+Please ensure your contribution is similarly licensed (i.e. LGPLv3 or later for the C++ code, MIT, BSD, Apache or LGPLv3 or 
 later for the Python code). Please ensure that your employer (if you are writing code as an employee) gives permission 
 for you to contribute your code.
 

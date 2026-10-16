@@ -14,7 +14,7 @@ build/python) in which you are encouraged to compile Sire.
 
 Full install instructions are provided in the INSTALL file.
 
-Sire is provided freely under the GPL (see the COPYING file) and
+Sire is provided freely under the LGPL (see the LICENSE file) and
 comes with NO WARRANTY and NO GUARANTEES. Sire is an
 experimental code and you should not rely on it for
 any commercial work.

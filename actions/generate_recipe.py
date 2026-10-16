@@ -401,7 +401,7 @@ def generate_recipe(data, features, git_remote, git_branch, git_version, git_num
     # About
     lines.append("about:")
     lines.append("  homepage: https://github.com/openbiosim/sire")
-    lines.append("  license: GPL-3.0-or-later")
+    lines.append("  license: LGPL-3.0-or-later")
     lines.append("  license_file: LICENSE")
     lines.append('  summary: "An advanced molecular modelling framework."')
     lines.append("  repository: https://github.com/openbiosim/sire")
