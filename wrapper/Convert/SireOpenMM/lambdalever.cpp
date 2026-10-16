@@ -2121,7 +2121,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             const double cutoff = ghost_ghostff->getCutoffDistance();
             const double rc3 = cutoff * cutoff * cutoff;
             const double rc9 = rc3 * rc3 * rc3;
-            const double four_pi = 4.0 * M_PI;
+            const double four_pi = 4.0 * SireMaths::pi;
 
             // Interaction group sets: ghost atoms and non-ghost atoms.
             std::set<int> ghost_set, dummy_set, nonghost_set;
@@ -2232,7 +2232,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             const double cutoff = cljff->getCutoffDistance();
             const double rc3 = cutoff * cutoff * cutoff;
             const double rc9 = rc3 * rc3 * rc3;
-            const double four_pi = 4.0 * M_PI;
+            const double four_pi = 4.0 * SireMaths::pi;
 
             // Classify particles by (sigma, epsilon); ghost atoms (epsilon=0),
             // virtual sites, and GCMC water atoms are skipped.

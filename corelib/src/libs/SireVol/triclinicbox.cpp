@@ -457,7 +457,7 @@ bool TriclinicBox::isPeriodic() const
 bool TriclinicBox::isCartesian() const
 {
     // Only cubic boxes are Cartesian.
-    return this->_alpha == M_PI_2 and this->_beta == M_PI_2 and this->_gamma == M_PI_2;
+    return this->_alpha == SireMaths::pi_over_two and this->_beta == SireMaths::pi_over_two and this->_gamma == SireMaths::pi_over_two;
 }
 
 /** Return the first box vector. */
@@ -487,21 +487,21 @@ const Matrix &TriclinicBox::rotationMatrix() const
 /** Return the angle between the second and third box vectors in degrees. */
 double TriclinicBox::alpha() const
 {
-    double rad2deg = 180 / M_PI;
+    double rad2deg = 180 / SireMaths::pi;
     return _alpha * rad2deg;
 }
 
 /** Return the angle between the first and third box vectors in degrees. */
 double TriclinicBox::beta() const
 {
-    double rad2deg = 180 / M_PI;
+    double rad2deg = 180 / SireMaths::pi;
     return _beta * rad2deg;
 }
 
 /** Return the angle between the second and first box vectors in degrees. */
 double TriclinicBox::gamma() const
 {
-    double rad2deg = 180 / M_PI;
+    double rad2deg = 180 / SireMaths::pi;
     return _gamma * rad2deg;
 }
 
