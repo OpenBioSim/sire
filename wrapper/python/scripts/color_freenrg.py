@@ -25,7 +25,7 @@ from pandas import Series, DataFrame
 parser = argparse.ArgumentParser(description="Extract residue-component free energies from Xswap simulations "
                                              "and use them to color-code residues in a protein structure",
                                  epilog="color_freenrg is built using Sire and is distributed "
-                                        "under the GPL. For more information please "
+                                        "under the LGPL. For more information please "
                                         "type "
                                         "'color_freenrg --description'",
                                  prog="color_freenrg")
@@ -241,4 +241,3 @@ for filename in glob.glob("%s/bound_mobile*.pdb" % outdir):
         print("%s written to %s..." % (c,newname), end="")
 
     print("\n")
-

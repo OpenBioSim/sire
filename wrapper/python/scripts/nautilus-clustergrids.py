@@ -17,7 +17,7 @@ import sys
 parser = argparse.ArgumentParser(
     description="Cluster grid points into centroids using densities from the grid and distance cutoffs for neighbour lists",
     epilog="nautilus-clustergrids is built using Sire, Numpy and mdtraj and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/nautilus",
     prog="nautilus",
 )

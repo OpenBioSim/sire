@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(
     description="Evaluates contribution of missing dispersion interactions"
     "to a free energy change",
     epilog="lj-tailcorrection is built using Sire and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org",
     prog="lj-tailcorrection",
 )

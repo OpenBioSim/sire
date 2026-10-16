@@ -117,7 +117,7 @@ if __name__ == "__main__":
         description="Analyse free energy files to calculate "
         "free energies, PMFs and to view convergence.",
         epilog="analyse_freenrg is built using Sire and is distributed "
-        "under the GPL. For more information please visit "
+        "under the LGPL. For more information please visit "
         "https://sire.openbiosim.org/analyse_freenrg",
         prog="analyse_freenrg",
     )

@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser(
     description="Perform molecular dynamics single topology free energy calculations "
     "using OpenMM",
     epilog="somd-freenrg is built using Sire and OpenMM and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org",
     prog="somd-freenrg",
 )

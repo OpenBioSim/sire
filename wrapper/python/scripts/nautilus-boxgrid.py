@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(
     description=" With given center and length of an edge (in Ang) look at grid points of interest "
     " Defined by a cube of grid points ",
     epilog="nautilus-boxgrid is built using Sire, Numpy and mdtraj and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/nautilus",
     prog="nautilus",
 )

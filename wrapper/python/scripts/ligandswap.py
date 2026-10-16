@@ -54,7 +54,7 @@ import sys
 parser = argparse.ArgumentParser(
     description="Calculate relative binding free " "energies using ligandswap",
     epilog="ligandswap is built using Sire and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/ligandswap",
     prog="ligandswap",
 )
