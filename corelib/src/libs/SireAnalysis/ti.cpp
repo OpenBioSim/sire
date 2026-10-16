@@ -48,25 +48,21 @@ using namespace SireMaths;
 
 namespace
 {
-    /** A single (x,y) datapoint used for the internal polynomial fit and
-        quadrature below. Previously this was SireAnalysis's copy of
-        "stREGRESS" from the third-party GPLv3 `regress` library
-        (third_party/regress.h) - reimplemented here to remove that
-        dependency. */
-    struct stREGRESS
+    /** A single (lambda, gradient) point used for the polynomial fit and
+        quadrature below */
+    struct GradPoint
     {
         double x;
         double y;
     };
 
-    /** GSL/regress's own safety cap on the maximum polynomial degree that
-        can be requested - preserved here for parity */
+    /** Maximum polynomial degree that can be requested for the fit */
     const unsigned int MAX_POLYNOMIAL_DEGREE = 10;
 
     /** Fit a polynomial of the given degree to the (x,y) data using
         least-squares (QR decomposition, via Eigen). Returns the
         coefficients in ascending order, coefficient of x^i at index i. */
-    std::vector<double> fitPolynomial(const std::list<stREGRESS> &data, unsigned int degree)
+    std::vector<double> fitPolynomial(const std::list<GradPoint> &data, unsigned int degree)
     {
         if (degree > MAX_POLYNOMIAL_DEGREE)
             degree = MAX_POLYNOMIAL_DEGREE;
@@ -117,7 +113,7 @@ namespace
     }
 
     /** Return the area under the (x,y) data using the trapezium rule */
-    double trapezoidalQuadrature(const std::list<stREGRESS> &data)
+    double trapezoidalQuadrature(const std::list<GradPoint> &data)
     {
         double area = 0.0;
 
@@ -302,32 +298,32 @@ void TIPMF::recalculate()
 
     // we will integrate these gradients using curve fitting to the underlying
     // gradients - see fitPolynomial()/trapezoidalQuadrature() above
-    std::list<stREGRESS> regress_grads;
-    std::list<stREGRESS> regress_grads_plus_endpoints;
-    std::list<stREGRESS> max_regress_grads;
-    std::list<stREGRESS> min_regress_grads;
-    std::list<stREGRESS> max_max_regress_grads;
-    std::list<stREGRESS> min_min_regress_grads;
+    std::list<GradPoint> fit_grads;
+    std::list<GradPoint> fit_grads_plus_endpoints;
+    std::list<GradPoint> max_fit_grads;
+    std::list<GradPoint> min_fit_grads;
+    std::list<GradPoint> max_max_fit_grads;
+    std::list<GradPoint> min_min_fit_grads;
     {
-        stREGRESS val;
+        GradPoint val;
 
         foreach (const DataPoint &grad, grads)
         {
             val.x = grad.x();
             val.y = grad.y();
 
-            regress_grads.push_back(val);
-            regress_grads_plus_endpoints.push_back(val);
+            fit_grads.push_back(val);
+            fit_grads_plus_endpoints.push_back(val);
 
             val.y = grad.y() + grad.yMinError();
-            max_regress_grads.push_back(val);
+            max_fit_grads.push_back(val);
             val.y = grad.y() + grad.yMaxError();
-            max_max_regress_grads.push_back(val);
+            max_max_fit_grads.push_back(val);
 
             val.y = grad.y() - grad.yMinError();
-            min_regress_grads.push_back(val);
+            min_fit_grads.push_back(val);
             val.y = grad.y() - grad.yMaxError();
-            min_min_regress_grads.push_back(val);
+            min_min_fit_grads.push_back(val);
         }
 
         // if the range extends before the first available gradient, then
@@ -339,17 +335,17 @@ void TIPMF::recalculate()
             val.x = range_min;
             val.y = grad.y();
 
-            regress_grads_plus_endpoints.push_front(val);
+            fit_grads_plus_endpoints.push_front(val);
 
             val.y = grad.y() + grad.yMinError();
-            max_regress_grads.push_front(val);
+            max_fit_grads.push_front(val);
             val.y = grad.y() + grad.yMaxError();
-            max_max_regress_grads.push_front(val);
+            max_max_fit_grads.push_front(val);
 
             val.y = grad.y() - grad.yMinError();
-            min_regress_grads.push_front(val);
+            min_fit_grads.push_front(val);
             val.y = grad.y() - grad.yMaxError();
-            min_min_regress_grads.push_front(val);
+            min_min_fit_grads.push_front(val);
         }
 
         // similarly, if the range extends beyond the last datapoint, then
@@ -361,26 +357,26 @@ void TIPMF::recalculate()
             val.x = range_max;
             val.y = grad.y();
 
-            regress_grads_plus_endpoints.push_back(val);
+            fit_grads_plus_endpoints.push_back(val);
 
             val.y = grad.y() + grad.yMinError();
-            max_regress_grads.push_back(val);
+            max_fit_grads.push_back(val);
             val.y = grad.y() + grad.yMaxError();
-            max_max_regress_grads.push_back(val);
+            max_max_fit_grads.push_back(val);
 
             val.y = grad.y() - grad.yMinError();
-            min_regress_grads.push_back(val);
+            min_fit_grads.push_back(val);
             val.y = grad.y() - grad.yMaxError();
-            min_min_regress_grads.push_back(val);
+            min_min_fit_grads.push_back(val);
         }
     }
 
     // get the coefficients of the polynomial
-    std::vector<double> coeffs = fitPolynomial(regress_grads, npoly);
-    std::vector<double> max_coeffs = fitPolynomial(max_regress_grads, npoly);
-    std::vector<double> max_max_coeffs = fitPolynomial(max_max_regress_grads, npoly);
-    std::vector<double> min_coeffs = fitPolynomial(min_regress_grads, npoly);
-    std::vector<double> min_min_coeffs = fitPolynomial(min_min_regress_grads, npoly);
+    std::vector<double> coeffs = fitPolynomial(fit_grads, npoly);
+    std::vector<double> max_coeffs = fitPolynomial(max_fit_grads, npoly);
+    std::vector<double> max_max_coeffs = fitPolynomial(max_max_fit_grads, npoly);
+    std::vector<double> min_coeffs = fitPolynomial(min_fit_grads, npoly);
+    std::vector<double> min_min_coeffs = fitPolynomial(min_min_fit_grads, npoly);
 
     // now calculate the values of this polynomial
     // across lambda to get the smoothed gradients
@@ -545,7 +541,7 @@ void TIPMF::recalculate()
             vals.append(DataPoint(x, y, 0, err, 0, max_err));
         }
 
-        quad_value = trapezoidalQuadrature(regress_grads_plus_endpoints);
+        quad_value = trapezoidalQuadrature(fit_grads_plus_endpoints);
     }
 
     setValues(vals);

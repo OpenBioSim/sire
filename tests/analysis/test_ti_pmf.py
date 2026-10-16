@@ -1,29 +1,11 @@
 """
 Regression tests for SireAnalysis::TIPMF (ti.cpp), which fits TI
-gradient-vs-lambda data to a polynomial and integrates it. This used to be
-implemented on top of the third_party/regress.{h,cpp} library (GPLv3,
-Conrad Shyu), now replaced with an Eigen-based least-squares fit; these
-tests give confidence that rewrite didn't change behaviour.
+gradient-vs-lambda data to a polynomial and integrates it.
 
-Only 3 of the old Regress class's methods were ever actually used by
-TIPMF::recalculate():
-  - the constructor/fit itself (classic normal-equations polynomial least
-    squares - a Vandermonde/moment matrix solved via Gaussian elimination)
-  - GetPolynomial() - feeds TIPMF::integral() (the last cumulative value of
-    an analytic power-rule integration of the fit, see ti.cpp ~L294-361) and
-    TIPMF::smoothedGradients() (the fit evaluated at ~101 points across the
-    range)
-  - DoQuadrature() - feeds TIPMF::quadrature(), a **plain trapezoidal rule
-    on the raw (possibly endpoint-extended) gradient points**, independent
-    of the polynomial fit entirely
-
-So there are two independent things to check against independent oracles:
-  - integral()/smoothedGradients() against numpy.polynomial.polynomial's own
-    least-squares polyfit (SVD-based, not the same algorithm as Regress's
-    Gaussian elimination on the normal equations, so compared with a loose-
-    ish tolerance rather than expecting bit-identical agreement - the new
-    Eigen-based fit uses a similarly more-stable method, not a reproduction
-    of Regress's exact algorithm)
+There are two independent things to check against independent oracles:
+  - integral()/smoothedGradients() against numpy.polynomial.polynomial's
+    least-squares polyfit (SVD-based, whereas ti.cpp uses an Eigen QR fit,
+    so compared with a loose tolerance rather than bit-identical agreement)
   - quadrature() against a direct, hand-written trapezoidal rule, replicating
     ti.cpp's endpoint-extension logic (if the integration range extends
     beyond the first/last raw gradient point, a synthetic point holding the

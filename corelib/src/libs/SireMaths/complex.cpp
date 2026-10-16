@@ -132,45 +132,37 @@ QString Complex::toString() const
     }
 }
 
-/** This function uses the rectangular cartesian components (x,y) to
-    return the complex number z = x + i y. */
+/** Return the complex number x + iy, given its rectangular components */
 Complex Complex::rect(double x, double y)
 {
     return Complex(x, y);
 }
 
-/** This function returns the complex number
-    z = r \exp(i \theta) = r (\cos(\theta) + i \sin(\theta))
-    from the polar representation (r,theta). */
+/** Return the complex number with modulus r and argument theta */
 Complex Complex::polar(double r, double theta)
 {
     return Complex(std::polar(r, theta));
 }
 
-/** This function sets the rectangular cartesian components (x,y) to
-    the complex number z = x + i y. */
+/** Set this number to x + iy */
 void Complex::setRectangular(double x, double y)
 {
     val = std::complex<double>(x, y);
 }
 
-/** This function sets the complex number to
-    z = r \exp(i \theta) = r (\cos(\theta) + i \sin(\theta))
-    from the polar representation (r,theta). */
+/** Set this number from its modulus r and argument theta */
 void Complex::setPolar(double r, double theta)
 {
     val = std::polar(r, theta);
 }
 
-/** This function sets the real part of the complex number, leaving the
-    imaginary part unchanged */
+/** Set the real part, keeping the imaginary part */
 void Complex::setReal(double x)
 {
     val.real(x);
 }
 
-/** This function sets the imaginary part of the complex number, leaving
-    the real part unchanged */
+/** Set the imaginary part, keeping the real part */
 void Complex::setImag(double y)
 {
     val.imag(y);
@@ -223,8 +215,7 @@ Complex &Complex::operator/=(const Complex &other)
     return *this;
 }
 
-/** This function returns the negative of the complex
-    number z, -z = (-x) + i(-y). */
+/** Return the negation of this number */
 Complex Complex::operator-() const
 {
     return Complex(-val);
@@ -278,31 +269,26 @@ Complex &Complex::operator/=(double r)
     return *this;
 }
 
-/** This function returns the argument of the complex number z,
-    \arg(z), where -\pi < \arg(z) <= \pi. */
+/** Return the argument (phase angle) of this number, in (-pi, pi] */
 double Complex::arg() const
 {
     return std::arg(val);
 }
 
-/** This function returns the magnitude of the complex number z, |z|. */
+/** Return the modulus |z| of this number */
 double Complex::abs() const
 {
     return std::abs(val);
 }
 
-/** This function returns the squared magnitude of the complex number z, |z|^2. */
+/** Return the squared modulus |z|^2 of this number */
 double Complex::abs2() const
 {
     return std::norm(val);
 }
 
-/** This function returns the natural logarithm of the magnitude of the
-    complex number z, \log|z|. It allows an accurate evaluation of \log|z|
-    when |z| is close to one. The direct evaluation of log(abs(z))
-    would lead to a loss of precision in this case, so this uses the same
-    factor-out-the-largest-component technique as the GSL routine this used
-    to call. */
+/** Return log|z|. Factoring out the larger component keeps this accurate
+    for |z| close to one, where log(abs(z)) would lose precision */
 double Complex::logAbs() const
 {
     double xabs = std::abs(val.real());
@@ -323,22 +309,19 @@ double Complex::logAbs() const
     return std::log(max) + 0.5 * std::log1p(u * u);
 }
 
-/** This function returns the complex conjugate of the complex
-    number z, z^* = x - i y. */
+/** Return the complex conjugate, x - iy */
 Complex Complex::conjugate() const
 {
     return Complex(std::conj(val));
 }
 
-/** This function returns the inverse, or reciprocal, of the
-    complex number z, 1/z = (x - i y)/(x^2 + y^2). */
+/** Return the reciprocal, 1/z */
 Complex Complex::inverse() const
 {
     return Complex(1.0 / val);
 }
 
-/** This function returns the negative of the complex
-    number z, -z = (-x) + i(-y). */
+/** Return the negation, -z */
 Complex Complex::negative() const
 {
     return Complex(-val);
@@ -441,16 +424,15 @@ namespace SireMaths
         return Complex(x) / z;
     }
 
-    /** This function returns the square root of the complex number z, \sqrt z.
-        The branch cut is the negative real axis. The result always lies in the
-        right half of the complex plane. */
+    /** Return the principal square root of z, which has a non-negative
+        real part. The branch cut lies along the negative real axis */
     Complex sqrt(const Complex &z)
     {
         return Complex(std::sqrt(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex square root of the real number x,
-        where x may be negative. */
+    /** Return the square root of the real number x, which is purely
+        imaginary for negative x */
     Complex sqrt_real(double x)
     {
         if (x >= 0.0)
@@ -459,21 +441,19 @@ namespace SireMaths
             return Complex(0.0, std::sqrt(-x));
     }
 
-    /** The function returns the complex number z raised to the complex power a,
-        z^a. This is computed as \exp(\log(z)*a) using complex logarithms and complex
-        exponentials. */
+    /** Return z raised to the complex power a */
     Complex pow(const Complex &z, const Complex &a)
     {
         return Complex(std::pow(std::complex<double>(z.real(), z.imag()), std::complex<double>(a.real(), a.imag())));
     }
 
-    /** This function returns the complex number z raised to the real power x, z^x. */
+    /** Return z raised to the real power x */
     Complex pow(const Complex &z, double x)
     {
         return Complex(std::pow(std::complex<double>(z.real(), z.imag()), x));
     }
 
-    /** This function returns the complex number z raised to an integer power n, z^n */
+    /** Return z raised to the integer power n */
     Complex pow(const Complex &z, int n)
     {
         if (n >= 0)
@@ -494,7 +474,7 @@ namespace SireMaths
             return Complex(1) / pow(z, -n);
     }
 
-    /** This function returns the complex number z raised to a rational power r, z^r */
+    /** Return z raised to the rational power r */
     Complex pow(const Complex &z, const Rational &r)
     {
         if (r.denominator() == 1)
@@ -503,42 +483,38 @@ namespace SireMaths
             return pow(z, SireMaths::toDouble(r));
     }
 
-    /** This function returns the real number x raised to the complex power z, x^z. */
+    /** Return the real number x raised to the complex power z */
     Complex pow(double x, const Complex &z)
     {
         return pow(Complex(x), z);
     }
 
-    /** This function returns the complex exponential of the complex number z,
-        \exp(z). */
+    /** Return e raised to the power z */
     Complex exp(const Complex &z)
     {
         return Complex(std::exp(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex natural logarithm (base e) of the complex
-        number z, \log(z). The branch cut is the negative real axis. */
+    /** Return the principal natural logarithm of z. The branch cut lies
+        along the negative real axis */
     Complex log(const Complex &z)
     {
         return Complex(std::log(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex base-10 logarithm of the complex number z,
-        \log_10 (z). */
+    /** Return the principal base-10 logarithm of z */
     Complex log10(const Complex &z)
     {
         return Complex(std::log10(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex base-b logarithm of the complex number z,
-       \log_b(z). This quantity is computed as the ratio \log(z)/\log(b). */
+    /** Return the logarithm of z to the complex base b, log(z)/log(b) */
     Complex log_b(const Complex &z, const Complex &b)
     {
         return log(z) / log(b);
     }
 
-    /** This function returns the complex sine of the complex number
-        z, \sin(z) = (\exp(iz) - \exp(-iz))/(2i). */
+    /** Return the sine of z */
     Complex sin(const Complex &z)
     {
         if (z.isReal())
@@ -547,8 +523,7 @@ namespace SireMaths
             return Complex(std::sin(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex cosine of the complex number
-        z, \cos(z) = (\exp(iz) + \exp(-iz))/2. */
+    /** Return the cosine of z */
     Complex cos(const Complex &z)
     {
         if (z.isReal())
@@ -557,8 +532,7 @@ namespace SireMaths
             return Complex(std::cos(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex tangent of the complex number z,
-        \tan(z) = \sin(z)/\cos(z). */
+    /** Return the tangent of z */
     Complex tan(const Complex &z)
     {
         if (z.isReal())
@@ -567,198 +541,173 @@ namespace SireMaths
             return Complex(std::tan(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex secant of the complex number z,
-        \sec(z) = 1/\cos(z). */
+    /** Return the secant of z, 1/cos(z) */
     Complex sec(const Complex &z)
     {
         return Complex(1.0) / cos(z);
     }
 
-    /** This function returns the complex cosecant of the complex number z,
-        \csc(z) = 1/\sin(z). */
+    /** Return the cosecant of z, 1/sin(z) */
     Complex csc(const Complex &z)
     {
         return Complex(1.0) / sin(z);
     }
 
-    /** This function returns the complex cotangent of the complex number z,
-        \cot(z) = 1/\tan(z). */
+    /** Return the cotangent of z, 1/tan(z) */
     Complex cot(const Complex &z)
     {
         return Complex(1.0) / tan(z);
     }
 
-    /** This function returns the complex arcsine of the complex number z,
-        \arcsin(z). The branch cuts are on the real axis, less than -1 and greater
-        than 1. */
+    /** Return the principal inverse sine of z. The branch cuts lie on the
+        real axis outside [-1, 1] */
     Complex arcsin(const Complex &z)
     {
         return Complex(std::asin(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex arcsine of the real number z,
-        \arcsin(z). For z between -1 and 1, the function returns a real
-        value in the range [-\pi/2,\pi/2]. For z less than -1 the result
-        has a real part of -\pi/2 and a positive imaginary part. For z greater
-        than 1 the result has a real part of \pi/2 and a negative imaginary part. */
+    /** Return the inverse sine of the real number z, which is complex
+        for |z| > 1 */
     Complex arcsin_real(double z)
     {
         return Complex(std::asin(std::complex<double>(z, 0.0)));
     }
 
-    /** This function returns the complex arccosine of the complex number z,
-        \arccos(z). The branch cuts are on the real axis, less than -1 and
-         greater than 1. */
+    /** Return the principal inverse cosine of z. The branch cuts lie on the
+        real axis outside [-1, 1] */
     Complex arccos(const Complex &z)
     {
         return Complex(std::acos(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex arccosine of the real number z,
-        \arccos(z). For z between -1 and 1, the function returns a real value in
-        the range [0,\pi]. For z less than -1 the result has a real part of \pi
-        and a negative imaginary part. For z greater than 1 the result is purely
-        imaginary and positive. */
+    /** Return the inverse cosine of the real number z, which is complex
+        for |z| > 1 */
     Complex arccos_real(double z)
     {
         return Complex(std::acos(std::complex<double>(z, 0.0)));
     }
 
-    /** This function returns the complex arctangent of the complex number z,
-        \arctan(z). The branch cuts are on the imaginary axis, below -i and above i. */
+    /** Return the principal inverse tangent of z. The branch cuts lie on the
+        imaginary axis outside [-i, i] */
     Complex arctan(const Complex &z)
     {
         return Complex(std::atan(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex arcsecant of the complex number z,
-        \arcsec(z) = \arccos(1/z). */
+    /** Return the inverse secant of z, arccos(1/z) */
     Complex arcsec(const Complex &z)
     {
         return arccos(Complex(1.0) / z);
     }
 
-    /** This function returns the complex arcsecant of the real number z,
-        \arcsec(z) = \arccos(1/z). */
+    /** Return the inverse secant of the real number z, arccos(1/z) */
     Complex arcsec_real(double z)
     {
         return arccos(Complex(1.0 / z));
     }
 
-    /** This function returns the complex arccosecant of the complex number z,
-        \arccsc(z) = \arcsin(1/z). */
+    /** Return the inverse cosecant of z, arcsin(1/z) */
     Complex arccsc(const Complex &z)
     {
         return arcsin(Complex(1.0) / z);
     }
 
-    /** This function returns the complex arccosecant of the real number z,
-        \arccsc(z) = \arcsin(1/z). */
+    /** Return the inverse cosecant of the real number z, arcsin(1/z) */
     Complex arccsc_real(double z)
     {
         return arcsin(Complex(1.0 / z));
     }
 
-    /** This function returns the complex arccotangent of the complex number z,
-        \arccot(z) = \arctan(1/z). */
+    /** Return the inverse cotangent of z, arctan(1/z) */
     Complex arccot(const Complex &z)
     {
         return arctan(Complex(1.0) / z);
     }
 
-    /** This function returns the complex hyperbolic sine of the complex number z,
-        \sinh(z) = (\exp(z) - \exp(-z))/2. */
+    /** Return the hyperbolic sine of z */
     Complex sinh(const Complex &z)
     {
         return Complex(std::sinh(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex hyperbolic cosine of the complex number z,
-        \cosh(z) = (\exp(z) + \exp(-z))/2.  */
+    /** Return the hyperbolic cosine of z */
     Complex cosh(const Complex &z)
     {
         return Complex(std::cosh(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex hyperbolic tangent of the complex number z,
-        \tanh(z) = \sinh(z)/\cosh(z). */
+    /** Return the hyperbolic tangent of z */
     Complex tanh(const Complex &z)
     {
         return Complex(std::tanh(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex hyperbolic secant of the complex number z,
-        \sech(z) = 1/\cosh(z). */
+    /** Return the hyperbolic secant of z, 1/cosh(z) */
     Complex sech(const Complex &z)
     {
         return Complex(1.0) / cosh(z);
     }
 
-    /** This function returns the complex hyperbolic cosecant of the complex number z,
-        \csch(z) = 1/\sinh(z). */
+    /** Return the hyperbolic cosecant of z, 1/sinh(z) */
     Complex csch(const Complex &z)
     {
         return Complex(1.0) / sinh(z);
     }
 
-    /** This function returns the complex hyperbolic cotangent of the complex number z,
-        \coth(z) = 1/\tanh(z). */
+    /** Return the hyperbolic cotangent of z, 1/tanh(z) */
     Complex coth(const Complex &z)
     {
         return Complex(1.0) / tanh(z);
     }
 
-    /** This function returns the complex hyperbolic arcsine of the complex number z,
-        \arcsinh(z). The branch cuts are on the imaginary axis, below -i and above i. */
+    /** Return the principal inverse hyperbolic sine of z. The branch cuts lie
+        on the imaginary axis outside [-i, i] */
     Complex arcsinh(const Complex &z)
     {
         return Complex(std::asinh(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex hyperbolic arccosine of the complex number z,
-        \arccosh(z). The branch cut is on the real axis, less than 1. */
+    /** Return the principal inverse hyperbolic cosine of z. The branch cut
+        lies on the real axis below 1 */
     Complex arccosh(const Complex &z)
     {
         return Complex(std::acosh(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex hyperbolic arccosine of the real number z,
-        \arccosh(z). */
+    /** Return the inverse hyperbolic cosine of the real number z, which is
+        complex for z < 1 */
     Complex arccosh_real(double z)
     {
         return Complex(std::acosh(std::complex<double>(z, 0.0)));
     }
 
-    /** This function returns the complex hyperbolic arctangent of the complex number z,
-        \arctanh(z). The branch cuts are on the real axis, less than -1 and greater than 1. */
+    /** Return the principal inverse hyperbolic tangent of z. The branch cuts
+        lie on the real axis outside [-1, 1] */
     Complex arctanh(const Complex &z)
     {
         return Complex(std::atanh(std::complex<double>(z.real(), z.imag())));
     }
 
-    /** This function returns the complex hyperbolic arctangent of the real number z,
-        \arctanh(z). */
+    /** Return the inverse hyperbolic tangent of the real number z, which is
+        complex for |z| > 1 */
     Complex arctanh_real(double z)
     {
         return Complex(std::atanh(std::complex<double>(z, 0.0)));
     }
 
-    /** This function returns the complex hyperbolic arcsecant of the complex number z,
-       \arcsech(z) = \arccosh(1/z). */
+    /** Return the inverse hyperbolic secant of z, arccosh(1/z) */
     Complex arcsech(const Complex &z)
     {
         return arccosh(Complex(1.0) / z);
     }
 
-    /** This function returns the complex hyperbolic arccosecant of the complex number z,
-        \arccsch(z) = \arcsinh(1/z). */
+    /** Return the inverse hyperbolic cosecant of z, arcsinh(1/z) */
     Complex arccsch(const Complex &z)
     {
         return arcsinh(Complex(1.0) / z);
     }
 
-    /** This function returns the complex hyperbolic arccotangent of the complex number z,
-        \arccoth(z) = \arctanh(1/z). */
+    /** Return the inverse hyperbolic cotangent of z, arctanh(1/z) */
     Complex arccoth(const Complex &z)
     {
         return arctanh(Complex(1.0) / z);

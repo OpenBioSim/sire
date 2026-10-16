@@ -27,54 +27,6 @@
 #ifndef SIRECAS_COMPLEX_H
 #define SIRECAS_COMPLEX_H
 
-/**
-The documentation for a lot of these functions is copied directly from the
-documentation of the gsl functions of the equivalent name.
-
-The copyright information for GSL is;
-
-########################################################################
-GSL
-
-More information about GSL can be found at the project homepage,
-http://www.gnu.org/software/gsl/.
-
-Printed copies of this manual can be purchased from Network Theory Ltd at
-http://www.network-theory.co.uk/gsl/manual/. The money raised from sales of the
-manual helps support the development of GSL.
-
-Copyright  1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 The GSL Team.
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.2 or any
-later version published by the Free Software Foundation; with the Invariant
-Sections being "GNU General Public License" and "Free Software Needs Free Documentation",
-the Front-Cover text being "A GNU Manual", and with the Back-Cover Text
-being (a) (see below). A copy of the license is included in the section
-entitled ?GNU Free Documentation License?.
-
-(a) The Back-Cover Text is: "You have freedom to copy and modify this GNU Manual,
-like GNU software."
-
-GSL Complex
-
-The functions described in this chapter provide support for complex numbers.
-The algorithms take care to avoid unnecessary intermediate underflows and overflows,
-allowing the functions to be evaluated over as much of the complex plane as possible.
-
-For multiple-valued functions the branch cuts have been chosen to follow the
-conventions of Abramowitz and Stegun in the Handbook of Mathematical Functions.
-The functions return principal values which are the same as those in GNU Calc,
-which in turn are the same as those in Common Lisp, The Language (Second Edition)1
-and the HP-28/48 series of calculators.
-
-The complex types are defined in the header file gsl_complex.h, while the
-corresponding complex functions and arithmetic operations are defined
-in gsl_complex_math.h.
-
-#######################################################################
-*/
-
 #include <QString>
 
 #include <complex>

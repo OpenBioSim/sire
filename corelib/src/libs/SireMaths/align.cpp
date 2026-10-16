@@ -481,7 +481,7 @@ namespace SireMaths
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         =======================
 
-        (note that the C++ implement that I have here is licensed under the GPL,
+        (note that the C++ implementation here is licensed under the LGPL,
          as stated at the top of this file)
     */
     Matrix kabasch(const QVector<Vector> &p, const QVector<Vector> &q)
@@ -604,7 +604,7 @@ namespace SireMaths
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         =======================
 
-        (note that the C++ implement that I have here is licensed under the GPL,
+        (note that the C++ implementation here is licensed under the LGPL,
          as stated at the top of this file)
     */
     Transform kabaschFit(const QVector<Vector> &p, const QVector<Vector> &q)
