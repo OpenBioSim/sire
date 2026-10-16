@@ -1,5 +1,5 @@
 
-// (C) Christopher Woods, GPL >= 3 License
+// (C) Christopher Woods, LGPL >= 3 License
 
 #include "boost/python.hpp"
 
