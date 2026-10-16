@@ -102,6 +102,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   MDAnalysis is not installed, ``determine_bond_orders=False`` raises an error and a failed
   ``determineBondOrders()`` emits a warning rather than silently leaving all bonds single.
 
+* Relicensed :mod:`sire` from the GPLv3+ to the LGPLv3+.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

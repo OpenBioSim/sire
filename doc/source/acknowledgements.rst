@@ -62,12 +62,12 @@ which can be found below. The software will be installed automatically
 as part of the installing the :mod:`sire` conda package, so you shouldn't
 have to do anything yourself.
 
-:mod:`sire` is itself distributed under the terms of the GPL version 3
-(or any later GPL license). The C++ source code is licensed
-under the GPL 3 or later, and this includes some optional GPLv2-licensed
-dependencies (e.g. `emle-engine <https://github.com/chemle/emle-engine>`__,
-conditionally imported for QM/MM calculations) which means that the entire
-package is licensed under GPL 3 or later.
+:mod:`sire` is itself distributed under the terms of the GNU Lesser
+General Public License, version 3 or (at your option) any later version
+(LGPLv3+). Some optional dependencies are licensed differently, e.g.
+`emle-engine <https://github.com/chemle/emle-engine>`__ (GPLv2), which is
+conditionally imported for QM/MM calculations if it is installed. These are
+not distributed with :mod:`sire` and are used under their own license terms.
 
 C++ Dependencies
 ================
@@ -87,7 +87,7 @@ Python
 The :mod:`sire` C++ library is wrapped up and made available for use within Python 3.
 This is used under the terms of the `PSF license <https://docs.python.org/3/license.html>`__,
 which is compatible with
-the GPLv3. The license allows both commercial and non-commercial use
+the LGPLv3. The license allows both commercial and non-commercial use
 without fee. You can find out more about Python and its license
 `from here <https://www.python.org/>`__.
 
@@ -99,7 +99,7 @@ the boost::python module that is used to wrap up the C++ code.
 This is used under the terms of the
 `Boost Software License <http://www.boost.org/users/license.html>`__,
 which allows both commercial and non-commercial
-use without fee. This is compatible with the GPLc3. You can find out
+use without fee. This is compatible with the LGPLv3. You can find out
 more about boost and its license `from here <http://www.boost.org/>`__.
 
 Py++
@@ -144,7 +144,7 @@ Eigen
 algebra routines (e.g. matrix eigendecomposition, SVD, and alignment/RMSD
 fitting). This is a header-only library used under the terms of the
 `Mozilla Public License 2.0 <https://www.mozilla.org/en-US/MPL/2.0/>`__, which
-is compatible with the GPL. More information about Eigen and its license can
+is compatible with the LGPL. More information about Eigen and its license can
 be `found here <https://eigen.tuxfamily.org/index.php?title=Main_Page#License>`__.
 
 NetCDF
@@ -153,7 +153,7 @@ NetCDF
 :mod:`sire` links to the `NetCDF <https://docs.unidata.ucar.edu/netcdf-c/current/copyright.html>`__
 library so that it can read/write Amber binary files. NetCDF
 is openly licensed under a BSD-style license, and is compatible
-with the GPL.
+with the LGPL.
 
 OpenMM
 ------
@@ -162,7 +162,7 @@ OpenMM
 dynamics (e.g. as part of the ``somd`` program), and also via an
 interconversion layer to switch between sire and OpenMM system representations.
 This is licensed under either the MIT or LGPL licenses,
-so compatible with the GPL.
+so compatible with the LGPL.
 
 eig3
 ----
@@ -349,6 +349,15 @@ It is used under a BSD-style license, given below.
 More information about MD5 libraries in general can be
 `found here <http://userpages.umbc.edu/~mabzug1/cs/md5/md5.html>`__.
 
+xdrfile
+-------
+
+:mod:`sire` bundles the xdrfile library by Erik Lindahl and David van der
+Spoel to read and write GROMACS XTC and TRR trajectory files. This is used
+under a BSD-style license. It also bundles ``xtc_seek`` from
+`MDAnalysis <https://www.mdanalysis.org>`__ to index the frames in XTC files,
+which is used under the terms of the LGPL v2.1 or later license.
+
 kabasch fitting
 ---------------
 
@@ -459,14 +468,14 @@ rich
 
 :mod:`sire` uses `rich <https://github.com/Textualize/rich>`__ to provide
 rich console output when printing. This is licensed under the
-GPL-compatible MIT license.
+LGPL-compatible MIT license.
 
 pandas
 ------
 
 :mod:`sire` uses `pandas <https://pandas.pydata.org/docs/>`__ to output
 data in DataFrames that can be more easily operated on and explored
-by users. Pandas is BSD-licensed, so compatible with the GPL.
+by users. Pandas is BSD-licensed, so compatible with the LGPL.
 
 MDAnalysis
 ----------
@@ -477,4 +486,4 @@ to RDKit and RDKit's own ``determineBondOrders`` algorithm fails (e.g. for
 molecules containing dummy atoms). This is a genuinely optional dependency -
 if MDAnalysis is not installed, this fallback is simply skipped. MDAnalysis
 is used under the terms of the LGPL v2.1 or later license (as of release
-2.8.0, the package as a whole is LGPLv3+, compatible with the GPL).
+2.8.0, the package as a whole is LGPLv3+).
