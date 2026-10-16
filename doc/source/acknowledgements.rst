@@ -431,38 +431,6 @@ molecular representations. This is used under the terms of the BSD3 license.
 Python Dependencies
 ===================
 
-ap (ascii plot)
----------------
-
-:mod:`sire` bundles the Python “ap” library for drawing ascii graphs.
-This is available as “Sire.Tools.ap”
-
-Version 0.9 written by M. Fouesneau is included, available
-freely from `GitHub here <https://github.com/mfouesneau/asciiplot>`__.
-The only change I've made is running this through Python's 2to3
-program to make this code work with Python 3.
-
-The header documentation reads;
-
-::
-
- Package that allows you to plot simple graphs in ASCII, a la matplotlib.
- This package is a inspired from Imri Goldberg's ASCII-Plotter 1.0
- (https://pypi.python.org/pypi/ASCII-Plotter/1.0)
- At a time I was enoyed by security not giving me direct access to my computer,
- and thus to quickly make figures from python, I looked at how I could make
- quick and dirty ASCII figures. But if I were to develop something, I wanted
- something that can be used with just python and possible standard-ish packages
- (numpy, scipy).
- So I came up with this package after many iterations based of ASCII-plotter.
- I added the feature to show multiple curves on one plot with different markers.
- And I also made the usage, close to matplotlib, such that there is a plot,
- hist, hist2d and imshow functions.
-
- TODO:
-     imshow does not plot axis yet.
-     make a correct documentation
-
 rich
 ----
 

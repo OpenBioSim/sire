@@ -986,11 +986,6 @@ install (DIRECTORY ${CMAKE_SOURCE_DIR}/templates
          USE_SOURCE_PERMISSIONS
         )
 
-install (DIRECTORY ${CMAKE_SOURCE_DIR}/share/build
-         DESTINATION ${SIRE_SHARE}
-         USE_SOURCE_PERMISSIONS
-        )
-
 # These commands are used to create an 'uninstall' target
 # (this is copied from the vtk.org wiki)
 configure_file(

@@ -11,11 +11,6 @@ import argparse
 import os
 import sys
 
-try:
-    numpy = Sire.try_import("numpy")
-    from Sire.Tools import ap
-except:
-    pass
 from Sire.Tools import OpenMMMD
 from Sire.Tools import readParams
 
@@ -108,8 +103,7 @@ if args.version:
     print("somd -- from Sire release version <%s>" % Sire.__version__)
     print(
         "This particular release can be downloaded here: "
-        "https://github.com/openbiosim/sire/releases/tag/v%s"
-        % Sire.__version__
+        "https://github.com/openbiosim/sire/releases/tag/v%s" % Sire.__version__
     )
     must_exit = True
 
@@ -159,9 +153,7 @@ if args.nmoves:
 
 if not (os.path.exists(coord_file) and os.path.exists(top_file)):
     parser.print_help()
-    print(
-        "\nPlease supply the name of an existing topology and coordinate file."
-    )
+    print("\nPlease supply the name of an existing topology and coordinate file.")
     if not os.path.exists(coord_file):
         print("(cannot find coordinate file %s)" % coord_file)
     if not os.path.exists(top_file):

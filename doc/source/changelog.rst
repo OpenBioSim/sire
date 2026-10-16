@@ -104,6 +104,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Relicensed :mod:`sire` from the GPLv3+ to the LGPLv3+.
 
+* Removed the unlicensed ``Sire.Tools.ap`` ascii plotting module, so ``analyse_freenrg``
+  no longer draws ascii convergence and PMF plots, and the legacy ``package_sire``
+  installer and its supporting scripts.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
