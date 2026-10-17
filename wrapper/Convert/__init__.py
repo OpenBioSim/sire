@@ -51,7 +51,6 @@ try:
         Sire's own source.
         """
         from rdkit import Chem
-        from MDAnalysis.converters.RDKitInferring import MDAnalysisInferrer
 
         mol = Chem.Mol(pickle)
 
@@ -64,7 +63,27 @@ try:
                 atom.SetNoImplicit(True)
             atom.SetIntProp("_MDAnalysis_index", i)
 
-        mol = MDAnalysisInferrer()(mol)
+        try:
+            from MDAnalysis.converters.RDKitInferring import MDAnalysisInferrer
+        except ImportError:
+            # MDAnalysis < 2.10, the newest available on Python 3.10, only
+            # has the inference steps as private functions.
+            from MDAnalysis.converters.RDKit import (
+                _infer_bo_and_charges,
+                _standardize_patterns,
+            )
+
+            mol.UpdatePropertyCache(strict=False)
+            _infer_bo_and_charges(mol)
+            mol = _standardize_patterns(mol)
+            order = sorted(
+                range(mol.GetNumAtoms()),
+                key=lambda i: mol.GetAtomWithIdx(i).GetIntProp("_MDAnalysis_index"),
+            )
+            mol = Chem.RenumberAtoms(mol, order)
+            Chem.SanitizeMol(mol)
+        else:
+            mol = MDAnalysisInferrer()(mol)
 
         return mol.ToBinary()
 
