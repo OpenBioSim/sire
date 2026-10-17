@@ -4,21 +4,20 @@
  *
  *  Copyright (C) 2009  Christopher Woods
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 3 of the License, or
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published
+ *  by the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- *  For full details of the license please see the COPYING file
+ *  For full details of the license please see the LICENSE file
  *  that should have come with this distribution.
  *
  *  You can contact the authors via the developer's mailing list
@@ -26,8 +25,10 @@
  *
 \*********************************************/
 
-#include "openmmmdintegrator.h"
+#include <cfloat>
+
 #include "ensemble.h"
+#include "openmmmdintegrator.h"
 
 #include "SireMol/atomcoords.h"
 #include "SireMol/atommasses.h"
@@ -494,10 +495,10 @@ void OpenMMMDIntegrator::initialise()
             const double surface_Tension = 0;
             OpenMM::MonteCarloMembraneBarostat::XYMode xymode = OpenMM::MonteCarloMembraneBarostat::XYIsotropic;
             OpenMM::MonteCarloMembraneBarostat::ZMode zmode = OpenMM::MonteCarloMembraneBarostat::ZFree;
-            OpenMM::MonteCarloMembraneBarostat * barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
+            OpenMM::MonteCarloMembraneBarostat *barostat = new OpenMM::MonteCarloMembraneBarostat(converted_Pressure, surface_Tension, converted_Temperature, xymode, zmode, MCBarostat_frequency);
             system_openmm->addForce(barostat);
         }
-        else    // normal barostat
+        else // normal barostat
         {
             OpenMM::MonteCarloBarostat *barostat =
                 new OpenMM::MonteCarloBarostat(converted_Pressure, converted_Temperature, MCBarostat_frequency);
@@ -696,7 +697,7 @@ void OpenMMMDIntegrator::initialise()
                 }
             system_index = system_index + 1;
         } // end of loop on atoms in molecule
-    }     // end of loop on molecules in workspace
+    } // end of loop on molecules in workspace
 
     int num_atoms_till_i = 0;
 

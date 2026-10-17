@@ -4,21 +4,20 @@
   *
   *  Copyright (C) 2014  Christopher Woods
   *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 3 of the License, or
+  *  This program is free software: you can redistribute it and/or modify
+  *  it under the terms of the GNU Lesser General Public License as published
+  *  by the Free Software Foundation, either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
   *  but WITHOUT ANY WARRANTY; without even the implied warranty of
   *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *  GNU Lesser General Public License for more details.
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  *  You should have received a copy of the GNU Lesser General Public License
+  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
   *
-  *  For full details of the license please see the COPYING file
+  *  For full details of the license please see the LICENSE file
   *  that should have come with this distribution.
   *
   *  You can contact the authors at https://sire.openbiosim.org
@@ -31,11 +30,6 @@
 #include "SireStream/datastream.h"
 
 #include "SireError/errors.h"
-
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
 
 #include <QElapsedTimer>
 
@@ -487,7 +481,7 @@ namespace SireMaths
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         =======================
 
-        (note that the C++ implement that I have here is licensed under the GPL,
+        (note that the C++ implementation here is licensed under the LGPL,
          as stated at the top of this file)
     */
     Matrix kabasch(const QVector<Vector> &p, const QVector<Vector> &q)
@@ -610,7 +604,7 @@ namespace SireMaths
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         =======================
 
-        (note that the C++ implement that I have here is licensed under the GPL,
+        (note that the C++ implementation here is licensed under the LGPL,
          as stated at the top of this file)
     */
     Transform kabaschFit(const QVector<Vector> &p, const QVector<Vector> &q)

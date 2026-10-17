@@ -29,7 +29,7 @@ parser = argparse.ArgumentParser(
     "and r2, r1, l1, and r1, l1, l2 are sufficiently far from collinear. If "
     "this is not the case, the numerical expression should be used.",
     epilog="boresch_analytical_correction is built using Sire and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org",
     prog="boresch_analytical_correction",
 )

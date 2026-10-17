@@ -19,7 +19,7 @@ import ast
 parser = argparse.ArgumentParser(
     description="Nautilus protocol is run with default settings.  Default settings are controlled within the nautilus-protocol.cfg file",
     epilog="nautilus-protocol is built using Sire, Numpy and mdtraj and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/nautilus",
     prog="nautilus",
 )

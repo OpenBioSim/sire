@@ -17,7 +17,7 @@ import sys
 parser = argparse.ArgumentParser(
     description="Generate grid files from cell files containing water parameters over a whole trajectory in a particular volume defined by a grid",
     epilog="nautilus-cell2grid is built using Sire, Numpy and mdtraj and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/nautilus",
     prog="nautilus",
 )

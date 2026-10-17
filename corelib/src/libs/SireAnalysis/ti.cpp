@@ -4,21 +4,20 @@
   *
   *  Copyright (C) 2013  Christopher Woods
   *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 3 of the License, or
+  *  This program is free software: you can redistribute it and/or modify
+  *  it under the terms of the GNU Lesser General Public License as published
+  *  by the Free Software Foundation, either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
   *  but WITHOUT ANY WARRANTY; without even the implied warranty of
   *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *  GNU Lesser General Public License for more details.
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  *  You should have received a copy of the GNU Lesser General Public License
+  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
   *
-  *  For full details of the license please see the COPYING file
+  *  For full details of the license please see the LICENSE file
   *  that should have come with this distribution.
   *
   *  You can contact the authors at https://sire.openbiosim.org
@@ -30,19 +29,108 @@
 #include "SireID/index.h"
 
 #include "SireError/errors.h"
+#include "SireMaths/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/registeralternativename.h"
 #include "SireStream/shareddatastream.h"
 
-#include "third_party/regress.h" // CONDITIONAL_INCLUDE
+#include <Eigen/Dense>
 
 #include <cmath>
+#include <list>
+#include <vector>
 
 #include "tostring.h"
 
 using namespace SireAnalysis;
 using namespace SireMaths;
+
+namespace
+{
+    /** A single (lambda, gradient) point used for the polynomial fit and
+        quadrature below */
+    struct GradPoint
+    {
+        double x;
+        double y;
+    };
+
+    /** Maximum polynomial degree that can be requested for the fit */
+    const unsigned int MAX_POLYNOMIAL_DEGREE = 10;
+
+    /** Fit a polynomial of the given degree to the (x,y) data using
+        least-squares (QR decomposition, via Eigen). Returns the
+        coefficients in ascending order, coefficient of x^i at index i. */
+    std::vector<double> fitPolynomial(const std::list<GradPoint> &data, unsigned int degree)
+    {
+        if (degree > MAX_POLYNOMIAL_DEGREE)
+            degree = MAX_POLYNOMIAL_DEGREE;
+
+        const int npoints = static_cast<int>(data.size());
+        const int ncoeffs = static_cast<int>(degree) + 1;
+
+        if (npoints < ncoeffs)
+            throw SireMaths::math_error(
+                QObject::tr("Cannot fit a polynomial of degree %1 to only %2 data points.").arg(degree).arg(npoints),
+                CODELOC);
+
+        Eigen::MatrixXd A(npoints, ncoeffs);
+        Eigen::VectorXd b(npoints);
+
+        int row = 0;
+
+        for (const auto &point : data)
+        {
+            double xpow = 1.0;
+
+            for (int col = 0; col < ncoeffs; ++col)
+            {
+                A(row, col) = xpow;
+                xpow *= point.x;
+            }
+
+            b(row) = point.y;
+            ++row;
+        }
+
+        Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr(A);
+
+        if (qr.rank() < ncoeffs)
+            throw SireMaths::math_error(QObject::tr("Cannot fit the polynomial as the fitting matrix is singular."),
+                                        CODELOC);
+
+        Eigen::VectorXd solution = qr.solve(b);
+
+        std::vector<double> coeffs(ncoeffs);
+
+        for (int col = 0; col < ncoeffs; ++col)
+        {
+            coeffs[col] = solution(col);
+        }
+
+        return coeffs;
+    }
+
+    /** Return the area under the (x,y) data using the trapezium rule */
+    double trapezoidalQuadrature(const std::list<GradPoint> &data)
+    {
+        double area = 0.0;
+
+        auto a = data.begin();
+        auto b = a;
+        ++b;
+
+        while (b != data.end())
+        {
+            area += (b->y + a->y) * 0.5 * (b->x - a->x);
+            a = b;
+            ++b;
+        }
+
+        return area;
+    }
+} // namespace
 using namespace SireID;
 using namespace SireBase;
 using namespace SireStream;
@@ -209,34 +297,33 @@ void TIPMF::recalculate()
     QVector<DataPoint> vals;
 
     // we will integrate these gradients using curve fitting to the underlying
-    // gradients - this uses the "regress" code in third_party/regress.h
-    //  (author Conrad Shyu)
-    std::list<stREGRESS> regress_grads;
-    std::list<stREGRESS> regress_grads_plus_endpoints;
-    std::list<stREGRESS> max_regress_grads;
-    std::list<stREGRESS> min_regress_grads;
-    std::list<stREGRESS> max_max_regress_grads;
-    std::list<stREGRESS> min_min_regress_grads;
+    // gradients - see fitPolynomial()/trapezoidalQuadrature() above
+    std::list<GradPoint> fit_grads;
+    std::list<GradPoint> fit_grads_plus_endpoints;
+    std::list<GradPoint> max_fit_grads;
+    std::list<GradPoint> min_fit_grads;
+    std::list<GradPoint> max_max_fit_grads;
+    std::list<GradPoint> min_min_fit_grads;
     {
-        stREGRESS val;
+        GradPoint val;
 
         foreach (const DataPoint &grad, grads)
         {
             val.x = grad.x();
             val.y = grad.y();
 
-            regress_grads.push_back(val);
-            regress_grads_plus_endpoints.push_back(val);
+            fit_grads.push_back(val);
+            fit_grads_plus_endpoints.push_back(val);
 
             val.y = grad.y() + grad.yMinError();
-            max_regress_grads.push_back(val);
+            max_fit_grads.push_back(val);
             val.y = grad.y() + grad.yMaxError();
-            max_max_regress_grads.push_back(val);
+            max_max_fit_grads.push_back(val);
 
             val.y = grad.y() - grad.yMinError();
-            min_regress_grads.push_back(val);
+            min_fit_grads.push_back(val);
             val.y = grad.y() - grad.yMaxError();
-            min_min_regress_grads.push_back(val);
+            min_min_fit_grads.push_back(val);
         }
 
         // if the range extends before the first available gradient, then
@@ -248,17 +335,17 @@ void TIPMF::recalculate()
             val.x = range_min;
             val.y = grad.y();
 
-            regress_grads_plus_endpoints.push_front(val);
+            fit_grads_plus_endpoints.push_front(val);
 
             val.y = grad.y() + grad.yMinError();
-            max_regress_grads.push_front(val);
+            max_fit_grads.push_front(val);
             val.y = grad.y() + grad.yMaxError();
-            max_max_regress_grads.push_front(val);
+            max_max_fit_grads.push_front(val);
 
             val.y = grad.y() - grad.yMinError();
-            min_regress_grads.push_front(val);
+            min_fit_grads.push_front(val);
             val.y = grad.y() - grad.yMaxError();
-            min_min_regress_grads.push_front(val);
+            min_min_fit_grads.push_front(val);
         }
 
         // similarly, if the range extends beyond the last datapoint, then
@@ -270,33 +357,26 @@ void TIPMF::recalculate()
             val.x = range_max;
             val.y = grad.y();
 
-            regress_grads_plus_endpoints.push_back(val);
+            fit_grads_plus_endpoints.push_back(val);
 
             val.y = grad.y() + grad.yMinError();
-            max_regress_grads.push_back(val);
+            max_fit_grads.push_back(val);
             val.y = grad.y() + grad.yMaxError();
-            max_max_regress_grads.push_back(val);
+            max_max_fit_grads.push_back(val);
 
             val.y = grad.y() - grad.yMinError();
-            min_regress_grads.push_back(val);
+            min_fit_grads.push_back(val);
             val.y = grad.y() - grad.yMaxError();
-            min_min_regress_grads.push_back(val);
+            min_min_fit_grads.push_back(val);
         }
     }
 
-    Regress regress(regress_grads, npoly);
-    Regress regress_plus_endpoints(regress_grads_plus_endpoints, npoly);
-    Regress max_regress(max_regress_grads, npoly);
-    Regress max_max_regress(max_max_regress_grads, npoly);
-    Regress min_regress(min_regress_grads, npoly);
-    Regress min_min_regress(min_min_regress_grads, npoly);
-
     // get the coefficients of the polynomial
-    std::vector<double> coeffs = regress.GetPolynomial();
-    std::vector<double> max_coeffs = max_regress.GetPolynomial();
-    std::vector<double> max_max_coeffs = max_max_regress.GetPolynomial();
-    std::vector<double> min_coeffs = min_regress.GetPolynomial();
-    std::vector<double> min_min_coeffs = min_min_regress.GetPolynomial();
+    std::vector<double> coeffs = fitPolynomial(fit_grads, npoly);
+    std::vector<double> max_coeffs = fitPolynomial(max_fit_grads, npoly);
+    std::vector<double> max_max_coeffs = fitPolynomial(max_max_fit_grads, npoly);
+    std::vector<double> min_coeffs = fitPolynomial(min_fit_grads, npoly);
+    std::vector<double> min_min_coeffs = fitPolynomial(min_min_fit_grads, npoly);
 
     // now calculate the values of this polynomial
     // across lambda to get the smoothed gradients
@@ -461,7 +541,7 @@ void TIPMF::recalculate()
             vals.append(DataPoint(x, y, 0, err, 0, max_err));
         }
 
-        quad_value = regress_plus_endpoints.DoQuadrature();
+        quad_value = trapezoidalQuadrature(fit_grads_plus_endpoints);
     }
 
     setValues(vals);

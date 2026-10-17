@@ -401,7 +401,7 @@ void printLicense()
     QString copying = f.readAll();
 
     printBox(QObject::tr("This program is licensed under the terms of the\n"
-                         "GNU General Public License (GPL) Version 2 or greater.\n\n"
+                         "GNU Lesser General Public License (LGPL) Version 3 or greater.\n\n"
                          "%1")
                  .arg(copying));
 }

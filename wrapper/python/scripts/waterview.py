@@ -31,7 +31,7 @@ parser = argparse.ArgumentParser(
     description="Visualise the distribution of water molecules in "
     "a binding site, both with and without a ligand present.",
     epilog="waterview is built using Sire and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/waterview",
     prog="waterview",
 )

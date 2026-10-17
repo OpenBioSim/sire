@@ -8,7 +8,6 @@
 # Add your script to this list
 set ( SCRIPTS
         __init__.py
-        ap.py
         AmberLoader.py
         BoreschAnalyticalCorrection.py
         BoreschNumericalCorrection.py

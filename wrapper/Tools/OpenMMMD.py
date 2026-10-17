@@ -45,7 +45,7 @@ import Sire.Stream
 
 __author__ = "Julien Michel, Gaetano Calabro, Antonia Mey, Hannes H Loeffler"
 __version__ = "0.2"
-__license__ = "GPL"
+__license__ = "LGPL"
 __maintainer__ = "Julien Michel"
 __email__ = "julien.michel@ed.ac.uk"
 __status__ = "Development"

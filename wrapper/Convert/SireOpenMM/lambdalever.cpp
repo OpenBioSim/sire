@@ -4,21 +4,20 @@
   *
   *  Copyright (C) 2023  Christopher Woods
   *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 3 of the License, or
+  *  This program is free software: you can redistribute it and/or modify
+  *  it under the terms of the GNU Lesser General Public License as published
+  *  by the Free Software Foundation, either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
   *  but WITHOUT ANY WARRANTY; without even the implied warranty of
   *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *  GNU Lesser General Public License for more details.
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  *  You should have received a copy of the GNU Lesser General Public License
+  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
   *
-  *  For full details of the license please see the COPYING file
+  *  For full details of the license please see the LICENSE file
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
@@ -2122,7 +2121,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             const double cutoff = ghost_ghostff->getCutoffDistance();
             const double rc3 = cutoff * cutoff * cutoff;
             const double rc9 = rc3 * rc3 * rc3;
-            const double four_pi = 4.0 * M_PI;
+            const double four_pi = 4.0 * SireMaths::pi;
 
             // Interaction group sets: ghost atoms and non-ghost atoms.
             std::set<int> ghost_set, dummy_set, nonghost_set;
@@ -2233,7 +2232,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             const double cutoff = cljff->getCutoffDistance();
             const double rc3 = cutoff * cutoff * cutoff;
             const double rc9 = rc3 * rc3 * rc3;
-            const double four_pi = 4.0 * M_PI;
+            const double four_pi = 4.0 * SireMaths::pi;
 
             // Classify particles by (sigma, epsilon); ghost atoms (epsilon=0),
             // virtual sites, and GCMC water atoms are skipped.

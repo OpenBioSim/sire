@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser(
     "35, 9535–9551. This is more robust than the analytical correction, which"
     "can result in substantial errors in certain regimes.",
     epilog="boresch_numerical_correction is built using Sire and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org",
     prog="boresch_numerical_correction",
 )

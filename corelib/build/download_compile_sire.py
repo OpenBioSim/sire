@@ -33,7 +33,7 @@ for arg in sys.argv[1:]:
             "    --no-execute      Only show the commands that will be run. Don't actually run anything."
         )
         print(
-            "\nSire is released under the GPL. For more information see https://sire.openbiosim.org"
+            "\nSire is released under the LGPL. For more information see https://sire.openbiosim.org"
         )
         sys.exit(0)
 
