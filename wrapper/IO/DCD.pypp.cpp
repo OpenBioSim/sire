@@ -2,8 +2,8 @@
 
 // (C) Christopher Woods, LGPL >= 3 License
 
-#include "boost/python.hpp"
 #include "DCD.pypp.hpp"
+#include "boost/python.hpp"
 
 namespace bp = boost::python;
 
@@ -81,7 +81,7 @@ namespace bp = boost::python;
 
 #include "dcd.h"
 
-SireIO::DCD __copy__(const SireIO::DCD &other){ return SireIO::DCD(other); }
+SireIO::DCD __copy__(const SireIO::DCD &other) { return SireIO::DCD(other); }
 
 #include "Helpers/copy.hpp"
 
@@ -93,278 +93,194 @@ SireIO::DCD __copy__(const SireIO::DCD &other){ return SireIO::DCD(other); }
 
 #include "Helpers/len.hpp"
 
-void register_DCD_class(){
+void register_DCD_class()
+{
 
     { //::SireIO::DCD
-        typedef bp::class_< SireIO::DCD, bp::bases< SireIO::MoleculeParser, SireBase::Property > > DCD_exposer_t;
-        DCD_exposer_t DCD_exposer = DCD_exposer_t( "DCD", "This class represents a DCD file reader.\n\nThe format is described here\n\nhttps:www.ks.uiuc.eduResearchvmdpluginsmolfiledcdplugin.html\n\nAuthor: Christopher Woods\n", bp::init< >("Constructor") );
-        bp::scope DCD_scope( DCD_exposer );
-        DCD_exposer.def( bp::init< QString const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("filename"), bp::arg("map")=SireBase::PropertyMap() ), "Construct by parsing the passed file") );
-        DCD_exposer.def( bp::init< QStringList const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("lines"), bp::arg("map")=SireBase::PropertyMap() ), "Construct by parsing the data in the passed text lines") );
-        DCD_exposer.def( bp::init< SireSystem::System const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("system"), bp::arg("map")=SireBase::PropertyMap() ), "Construct by extracting the necessary data from the passed System") );
-        DCD_exposer.def( bp::init< SireIO::DCD const & >(( bp::arg("other") ), "Copy constructor") );
+        typedef bp::class_<SireIO::DCD, bp::bases<SireIO::MoleculeParser, SireBase::Property>> DCD_exposer_t;
+        DCD_exposer_t DCD_exposer = DCD_exposer_t("DCD", "This class represents a DCD file reader.\n\nThe format is described here\n\nhttps:www.ks.uiuc.eduResearchvmdpluginsmolfiledcdplugin.html\n\nAuthor: Christopher Woods\n", bp::init<>("Constructor"));
+        bp::scope DCD_scope(DCD_exposer);
+        DCD_exposer.def(bp::init<QString const &, bp::optional<SireBase::PropertyMap const &>>((bp::arg("filename"), bp::arg("map") = SireBase::PropertyMap()), "Construct by parsing the passed file"));
+        DCD_exposer.def(bp::init<QStringList const &, bp::optional<SireBase::PropertyMap const &>>((bp::arg("lines"), bp::arg("map") = SireBase::PropertyMap()), "Construct by parsing the data in the passed text lines"));
+        DCD_exposer.def(bp::init<SireSystem::System const &, bp::optional<SireBase::PropertyMap const &>>((bp::arg("system"), bp::arg("map") = SireBase::PropertyMap()), "Construct by extracting the necessary data from the passed System"));
+        DCD_exposer.def(bp::init<SireIO::DCD const &>((bp::arg("other")), "Copy constructor"));
         { //::SireIO::DCD::construct
-        
-            typedef ::SireIO::MoleculeParserPtr ( ::SireIO::DCD::*construct_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
-            construct_function_type construct_function_value( &::SireIO::DCD::construct );
-            
-            DCD_exposer.def( 
-                "construct"
-                , construct_function_value
-                , ( bp::arg("filename"), bp::arg("map") )
-                , bp::release_gil_policy()
-                , "Return this parser constructed from the passed filename" );
-        
+
+            typedef ::SireIO::MoleculeParserPtr (::SireIO::DCD::*construct_function_type)(::QString const &, ::SireBase::PropertyMap const &) const;
+            construct_function_type construct_function_value(&::SireIO::DCD::construct);
+
+            DCD_exposer.def(
+                "construct", construct_function_value, (bp::arg("filename"), bp::arg("map")), bp::release_gil_policy(), "Return this parser constructed from the passed filename");
         }
         { //::SireIO::DCD::construct
-        
-            typedef ::SireIO::MoleculeParserPtr ( ::SireIO::DCD::*construct_function_type)( ::QStringList const &,::SireBase::PropertyMap const & ) const;
-            construct_function_type construct_function_value( &::SireIO::DCD::construct );
-            
-            DCD_exposer.def( 
-                "construct"
-                , construct_function_value
-                , ( bp::arg("lines"), bp::arg("map") )
-                , bp::release_gil_policy()
-                , "Return this parser constructed from the passed set of lines" );
-        
+
+            typedef ::SireIO::MoleculeParserPtr (::SireIO::DCD::*construct_function_type)(::QStringList const &, ::SireBase::PropertyMap const &) const;
+            construct_function_type construct_function_value(&::SireIO::DCD::construct);
+
+            DCD_exposer.def(
+                "construct", construct_function_value, (bp::arg("lines"), bp::arg("map")), bp::release_gil_policy(), "Return this parser constructed from the passed set of lines");
         }
         { //::SireIO::DCD::construct
-        
-            typedef ::SireIO::MoleculeParserPtr ( ::SireIO::DCD::*construct_function_type)( ::SireSystem::System const &,::SireBase::PropertyMap const & ) const;
-            construct_function_type construct_function_value( &::SireIO::DCD::construct );
-            
-            DCD_exposer.def( 
-                "construct"
-                , construct_function_value
-                , ( bp::arg("system"), bp::arg("map") )
-                , bp::release_gil_policy()
-                , "Return this parser constructed from the passed SireSystem::System" );
-        
+
+            typedef ::SireIO::MoleculeParserPtr (::SireIO::DCD::*construct_function_type)(::SireSystem::System const &, ::SireBase::PropertyMap const &) const;
+            construct_function_type construct_function_value(&::SireIO::DCD::construct);
+
+            DCD_exposer.def(
+                "construct", construct_function_value, (bp::arg("system"), bp::arg("map")), bp::release_gil_policy(), "Return this parser constructed from the passed SireSystem::System");
         }
         { //::SireIO::DCD::count
-        
-            typedef int ( ::SireIO::DCD::*count_function_type)(  ) const;
-            count_function_type count_function_value( &::SireIO::DCD::count );
-            
-            DCD_exposer.def( 
-                "count"
-                , count_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef int (::SireIO::DCD::*count_function_type)() const;
+            count_function_type count_function_value(&::SireIO::DCD::count);
+
+            DCD_exposer.def(
+                "count", count_function_value, bp::release_gil_policy(), "");
         }
         { //::SireIO::DCD::formatDescription
-        
-            typedef ::QString ( ::SireIO::DCD::*formatDescription_function_type)(  ) const;
-            formatDescription_function_type formatDescription_function_value( &::SireIO::DCD::formatDescription );
-            
-            DCD_exposer.def( 
-                "formatDescription"
-                , formatDescription_function_value
-                , bp::release_gil_policy()
-                , "Return a description of the file format" );
-        
+
+            typedef ::QString (::SireIO::DCD::*formatDescription_function_type)() const;
+            formatDescription_function_type formatDescription_function_value(&::SireIO::DCD::formatDescription);
+
+            DCD_exposer.def(
+                "formatDescription", formatDescription_function_value, bp::release_gil_policy(), "Return a description of the file format");
         }
         { //::SireIO::DCD::formatName
-        
-            typedef ::QString ( ::SireIO::DCD::*formatName_function_type)(  ) const;
-            formatName_function_type formatName_function_value( &::SireIO::DCD::formatName );
-            
-            DCD_exposer.def( 
-                "formatName"
-                , formatName_function_value
-                , bp::release_gil_policy()
-                , "Return the format name that is used to identify this file format within Sire" );
-        
+
+            typedef ::QString (::SireIO::DCD::*formatName_function_type)() const;
+            formatName_function_type formatName_function_value(&::SireIO::DCD::formatName);
+
+            DCD_exposer.def(
+                "formatName", formatName_function_value, bp::release_gil_policy(), "Return the format name that is used to identify this file format within Sire");
         }
         { //::SireIO::DCD::formatSuffix
-        
-            typedef ::QStringList ( ::SireIO::DCD::*formatSuffix_function_type)(  ) const;
-            formatSuffix_function_type formatSuffix_function_value( &::SireIO::DCD::formatSuffix );
-            
-            DCD_exposer.def( 
-                "formatSuffix"
-                , formatSuffix_function_value
-                , bp::release_gil_policy()
-                , "Return the suffixes that DCD files will typically have" );
-        
+
+            typedef ::QStringList (::SireIO::DCD::*formatSuffix_function_type)() const;
+            formatSuffix_function_type formatSuffix_function_value(&::SireIO::DCD::formatSuffix);
+
+            DCD_exposer.def(
+                "formatSuffix", formatSuffix_function_value, bp::release_gil_policy(), "Return the suffixes that DCD files will typically have");
         }
         { //::SireIO::DCD::getFrame
-        
-            typedef ::SireMol::Frame ( ::SireIO::DCD::*getFrame_function_type)( int ) const;
-            getFrame_function_type getFrame_function_value( &::SireIO::DCD::getFrame );
-            
-            DCD_exposer.def( 
-                "getFrame"
-                , getFrame_function_value
-                , ( bp::arg("i") )
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef ::SireMol::Frame (::SireIO::DCD::*getFrame_function_type)(int) const;
+            getFrame_function_type getFrame_function_value(&::SireIO::DCD::getFrame);
+
+            DCD_exposer.def(
+                "getFrame", getFrame_function_value, (bp::arg("i")), bp::release_gil_policy(), "");
         }
         { //::SireIO::DCD::isFrame
-        
-            typedef bool ( ::SireIO::DCD::*isFrame_function_type)(  ) const;
-            isFrame_function_type isFrame_function_value( &::SireIO::DCD::isFrame );
-            
-            DCD_exposer.def( 
-                "isFrame"
-                , isFrame_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef bool (::SireIO::DCD::*isFrame_function_type)() const;
+            isFrame_function_type isFrame_function_value(&::SireIO::DCD::isFrame);
+
+            DCD_exposer.def(
+                "isFrame", isFrame_function_value, bp::release_gil_policy(), "");
         }
         { //::SireIO::DCD::isTextFile
-        
-            typedef bool ( ::SireIO::DCD::*isTextFile_function_type)(  ) const;
-            isTextFile_function_type isTextFile_function_value( &::SireIO::DCD::isTextFile );
-            
-            DCD_exposer.def( 
-                "isTextFile"
-                , isTextFile_function_value
-                , bp::release_gil_policy()
-                , "This is not a text file" );
-        
+
+            typedef bool (::SireIO::DCD::*isTextFile_function_type)() const;
+            isTextFile_function_type isTextFile_function_value(&::SireIO::DCD::isTextFile);
+
+            DCD_exposer.def(
+                "isTextFile", isTextFile_function_value, bp::release_gil_policy(), "This is not a text file");
         }
         { //::SireIO::DCD::nAtoms
-        
-            typedef int ( ::SireIO::DCD::*nAtoms_function_type)(  ) const;
-            nAtoms_function_type nAtoms_function_value( &::SireIO::DCD::nAtoms );
-            
-            DCD_exposer.def( 
-                "nAtoms"
-                , nAtoms_function_value
-                , bp::release_gil_policy()
-                , "Return the number of atoms whose coordinates are contained in this restart file" );
-        
+
+            typedef int (::SireIO::DCD::*nAtoms_function_type)() const;
+            nAtoms_function_type nAtoms_function_value(&::SireIO::DCD::nAtoms);
+
+            DCD_exposer.def(
+                "nAtoms", nAtoms_function_value, bp::release_gil_policy(), "Return the number of atoms whose coordinates are contained in this restart file");
         }
         { //::SireIO::DCD::nFrames
-        
-            typedef int ( ::SireIO::DCD::*nFrames_function_type)(  ) const;
-            nFrames_function_type nFrames_function_value( &::SireIO::DCD::nFrames );
-            
-            DCD_exposer.def( 
-                "nFrames"
-                , nFrames_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef int (::SireIO::DCD::*nFrames_function_type)() const;
+            nFrames_function_type nFrames_function_value(&::SireIO::DCD::nFrames);
+
+            DCD_exposer.def(
+                "nFrames", nFrames_function_value, bp::release_gil_policy(), "");
         }
-        DCD_exposer.def( bp::self != bp::self );
+        DCD_exposer.def(bp::self != bp::self);
         { //::SireIO::DCD::operator=
-        
-            typedef ::SireIO::DCD & ( ::SireIO::DCD::*assign_function_type)( ::SireIO::DCD const & ) ;
-            assign_function_type assign_function_value( &::SireIO::DCD::operator= );
-            
-            DCD_exposer.def( 
-                "assign"
-                , assign_function_value
-                , ( bp::arg("other") )
-                , bp::return_self< >()
-                , "" );
-        
+
+            typedef ::SireIO::DCD &(::SireIO::DCD::*assign_function_type)(::SireIO::DCD const &);
+            assign_function_type assign_function_value(&::SireIO::DCD::operator=);
+
+            DCD_exposer.def(
+                "assign", assign_function_value, (bp::arg("other")), bp::return_self<>(), "");
         }
-        DCD_exposer.def( bp::self == bp::self );
+        DCD_exposer.def(bp::self == bp::self);
         { //::SireIO::DCD::operator[]
-        
-            typedef ::SireIO::DCD ( ::SireIO::DCD::*__getitem___function_type)( int ) const;
-            __getitem___function_type __getitem___function_value( &::SireIO::DCD::operator[] );
-            
-            DCD_exposer.def( 
-                "__getitem__"
-                , __getitem___function_value
-                , ( bp::arg("i") )
-                , "" );
-        
+
+            typedef ::SireIO::DCD (::SireIO::DCD::*__getitem___function_type)(int) const;
+            __getitem___function_type __getitem___function_value(&::SireIO::DCD::operator[]);
+
+            DCD_exposer.def(
+                "__getitem__", __getitem___function_value, (bp::arg("i")), "");
         }
         { //::SireIO::DCD::parse
-        
-            typedef ::SireIO::DCD ( *parse_function_type )( ::QString const & );
-            parse_function_type parse_function_value( &::SireIO::DCD::parse );
-            
-            DCD_exposer.def( 
-                "parse"
-                , parse_function_value
-                , ( bp::arg("filename") )
-                , bp::release_gil_policy()
-                , "Parse from the passed file" );
-        
+
+            typedef ::SireIO::DCD (*parse_function_type)(::QString const &);
+            parse_function_type parse_function_value(&::SireIO::DCD::parse);
+
+            DCD_exposer.def(
+                "parse", parse_function_value, (bp::arg("filename")), bp::release_gil_policy(), "Parse from the passed file");
         }
         { //::SireIO::DCD::size
-        
-            typedef int ( ::SireIO::DCD::*size_function_type)(  ) const;
-            size_function_type size_function_value( &::SireIO::DCD::size );
-            
-            DCD_exposer.def( 
-                "size"
-                , size_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef int (::SireIO::DCD::*size_function_type)() const;
+            size_function_type size_function_value(&::SireIO::DCD::size);
+
+            DCD_exposer.def(
+                "size", size_function_value, bp::release_gil_policy(), "");
         }
         { //::SireIO::DCD::toString
-        
-            typedef ::QString ( ::SireIO::DCD::*toString_function_type)(  ) const;
-            toString_function_type toString_function_value( &::SireIO::DCD::toString );
-            
-            DCD_exposer.def( 
-                "toString"
-                , toString_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef ::QString (::SireIO::DCD::*toString_function_type)() const;
+            toString_function_type toString_function_value(&::SireIO::DCD::toString);
+
+            DCD_exposer.def(
+                "toString", toString_function_value, bp::release_gil_policy(), "");
         }
         { //::SireIO::DCD::typeName
-        
-            typedef char const * ( *typeName_function_type )(  );
-            typeName_function_type typeName_function_value( &::SireIO::DCD::typeName );
-            
-            DCD_exposer.def( 
-                "typeName"
-                , typeName_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef char const *(*typeName_function_type)();
+            typeName_function_type typeName_function_value(&::SireIO::DCD::typeName);
+
+            DCD_exposer.def(
+                "typeName", typeName_function_value, bp::release_gil_policy(), "");
         }
         { //::SireIO::DCD::what
-        
-            typedef char const * ( ::SireIO::DCD::*what_function_type)(  ) const;
-            what_function_type what_function_value( &::SireIO::DCD::what );
-            
-            DCD_exposer.def( 
-                "what"
-                , what_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
+
+            typedef char const *(::SireIO::DCD::*what_function_type)() const;
+            what_function_type what_function_value(&::SireIO::DCD::what);
+
+            DCD_exposer.def(
+                "what", what_function_value, bp::release_gil_policy(), "");
         }
         { //::SireIO::DCD::writeToFile
-        
-            typedef ::QStringList ( ::SireIO::DCD::*writeToFile_function_type)( ::QString const & ) const;
-            writeToFile_function_type writeToFile_function_value( &::SireIO::DCD::writeToFile );
-            
-            DCD_exposer.def( 
-                "writeToFile"
-                , writeToFile_function_value
-                , ( bp::arg("filename") )
-                , bp::release_gil_policy()
-                , "Write this binary file filename" );
-        
-        }
-        DCD_exposer.staticmethod( "parse" );
-        DCD_exposer.staticmethod( "typeName" );
-        DCD_exposer.def( "__copy__", &__copy__<SireIO::DCD>);
-        DCD_exposer.def( "__deepcopy__", &__copy__<SireIO::DCD>);
-        DCD_exposer.def( "clone", &__copy__<SireIO::DCD>);
-        DCD_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireIO::DCD >,
-                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
-        DCD_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireIO::DCD >,
-                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
-        DCD_exposer.def_pickle(sire_pickle_suite< ::SireIO::DCD >());
-        DCD_exposer.def( "__str__", &__str__< ::SireIO::DCD > );
-        DCD_exposer.def( "__repr__", &__str__< ::SireIO::DCD > );
-        DCD_exposer.def( "__len__", &__len_size< ::SireIO::DCD > );
-    }
 
+            typedef ::QStringList (::SireIO::DCD::*writeToFile_function_type)(::QString const &) const;
+            writeToFile_function_type writeToFile_function_value(&::SireIO::DCD::writeToFile);
+
+            DCD_exposer.def(
+                "writeToFile", writeToFile_function_value, (bp::arg("filename")), bp::release_gil_policy(), "Write this binary file filename");
+        }
+        DCD_exposer.def(
+            "concatenate", &::SireIO::DCD::concatenate, (bp::arg("filenames"), bp::arg("output"), bp::arg("timestep")), "Concatenate the frames of the DCD files filenames into output, timestep\napart, one frame at a time and without needing the molecules");
+        DCD_exposer.staticmethod("concatenate");
+        DCD_exposer.staticmethod("parse");
+        DCD_exposer.staticmethod("typeName");
+        DCD_exposer.def("__copy__", &__copy__<SireIO::DCD>);
+        DCD_exposer.def("__deepcopy__", &__copy__<SireIO::DCD>);
+        DCD_exposer.def("clone", &__copy__<SireIO::DCD>);
+        DCD_exposer.def("__rlshift__", &__rlshift__QDataStream<::SireIO::DCD>,
+                        bp::return_internal_reference<1, bp::with_custodian_and_ward<1, 2>>());
+        DCD_exposer.def("__rrshift__", &__rrshift__QDataStream<::SireIO::DCD>,
+                        bp::return_internal_reference<1, bp::with_custodian_and_ward<1, 2>>());
+        DCD_exposer.def_pickle(sire_pickle_suite<::SireIO::DCD>());
+        DCD_exposer.def("__str__", &__str__<::SireIO::DCD>);
+        DCD_exposer.def("__repr__", &__str__<::SireIO::DCD>);
+        DCD_exposer.def("__len__", &__len_size<::SireIO::DCD>);
+    }
 }

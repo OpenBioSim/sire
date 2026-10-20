@@ -152,6 +152,34 @@ def test_trajectory_ignores_current_frame(tmpdir, ala_traj, format):
         assert_coords_equal(m[0], m2[0], 0.01)
 
 
+def test_dcd_concatenate(tmpdir, ala_traj):
+    mols = ala_traj.clone()
+
+    d = tmpdir.mkdir("test_dcd_concatenate")
+
+    top = sr.save(mols, d.join("top"), format=["PRMTOP"])
+
+    chunks = [
+        sr.save(mols.trajectory()[i : i + 2], d.join(f"chunk{i}"), format=["DCD"])[0]
+        for i in (0, 2, 4)
+    ]
+
+    output = str(d.join("traj.dcd"))
+    sr.legacy.IO.DCD.concatenate(chunks, output, 0.5 * sr.units.picosecond)
+
+    mols2 = sr.load(top + [output])
+
+    assert mols2.num_frames() == 6
+
+    for i in range(6):
+        m = mols.trajectory()[i].current()
+        m2 = mols2.trajectory()[i].current()
+
+        assert_coords_equal(m[0], m2[0], 0.001)
+        assert_space_equal(m.property("space"), m2.property("space"), 0.001)
+        assert m2.time().to(sr.units.picosecond) == pytest.approx(0.5 * i)
+
+
 def test_frame_names(tmpdir, ala_traj):
     mols = ala_traj.clone()
 

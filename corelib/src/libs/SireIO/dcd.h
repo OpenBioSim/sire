@@ -96,6 +96,9 @@ namespace SireIO
 
         static DCD parse(const QString &filename);
 
+        static void concatenate(const QStringList &filenames, const QString &output,
+                                const SireUnits::Dimension::Time &timestep);
+
         bool isFrame() const;
 
         int nFrames() const;

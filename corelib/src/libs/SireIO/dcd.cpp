@@ -1015,6 +1015,93 @@ DCD DCD::parse(const QString &filename)
     return DCD(filename);
 }
 
+/** Concatenate the frames of the DCD files 'filenames' into 'output', 'timestep'
+    apart, one frame at a time and without needing the molecules */
+void DCD::concatenate(const QStringList &filenames, const QString &output,
+                      const SireUnits::Dimension::Time &timestep)
+{
+    auto gil = SireBase::release_gil();
+
+    QList<DCDFile> inputs;
+    qint64 nframes = 0;
+
+    for (const auto &filename : filenames)
+    {
+        DCDFile input(filename);
+        input.open(QIODevice::ReadOnly);
+
+        if (not inputs.isEmpty() and input.nAtoms() != inputs.first().nAtoms())
+        {
+            throw SireError::incompatible_error(
+                QObject::tr("Cannot concatenate %1, which has %2 atoms, with %3, "
+                            "which has %4 atoms.")
+                    .arg(filename)
+                    .arg(input.nAtoms())
+                    .arg(filenames.first())
+                    .arg(inputs.first().nAtoms()),
+                CODELOC);
+        }
+
+        nframes += input.nFrames();
+        inputs.append(input);
+    }
+
+    if (nframes == 0)
+    {
+        throw SireError::invalid_arg(
+            QObject::tr("There are no frames to concatenate into %1.").arg(output),
+            CODELOC);
+    }
+
+    // The header records whether every frame has a periodic space.
+    bool is_periodic = false;
+
+    for (const auto &input : inputs)
+    {
+        if (input.nFrames() > 0)
+        {
+            is_periodic = input.readFrame(0).space().isPeriodic();
+            break;
+        }
+    }
+
+    DCDFile outfile(output);
+
+    if (not outfile.open(QIODevice::WriteOnly))
+    {
+        throw SireError::file_error(
+            QObject::tr("Could not open %1 to write the DCD file.").arg(output),
+            CODELOC);
+    }
+
+    outfile.setTimeStep(timestep);
+    outfile.writeHeader(nframes, inputs.first().nAtoms(), is_periodic);
+
+    for (int i = 0; i < inputs.count(); ++i)
+    {
+        const auto &input = inputs.at(i);
+
+        for (int j = 0; j < input.nFrames(); ++j)
+        {
+            const auto frame = input.readFrame(j);
+
+            if (frame.space().isPeriodic() != is_periodic)
+            {
+                throw SireError::incompatible_error(
+                    QObject::tr("Cannot concatenate %1, as its frames do not have "
+                                "the same type of space as those of %2.")
+                        .arg(filenames.at(i))
+                        .arg(filenames.first()),
+                    CODELOC);
+            }
+
+            outfile.writeFrame(frame);
+        }
+    }
+
+    outfile.close();
+}
+
 /** Internal function used to add the data from this parser into the passed System */
 void DCD::addToSystem(System &system, const PropertyMap &map) const
 {
