@@ -267,7 +267,7 @@ void register_DCD_class()
                 "writeToFile", writeToFile_function_value, (bp::arg("filename")), bp::release_gil_policy(), "Write this binary file filename");
         }
         DCD_exposer.def(
-            "concatenate", &::SireIO::DCD::concatenate, (bp::arg("filenames"), bp::arg("output"), bp::arg("timestep")), "Concatenate the frames of the DCD files filenames into output, timestep\napart, one frame at a time and without needing the molecules");
+            "concatenate", &::SireIO::DCD::concatenate, (bp::arg("filenames"), bp::arg("output"), bp::arg("timestep"), bp::arg("start") = SireUnits::Dimension::Time(0)), "Concatenate the frames of the DCD files filenames into output, timestep\napart from start, one frame at a time and without needing the molecules");
         DCD_exposer.staticmethod("concatenate");
         DCD_exposer.staticmethod("parse");
         DCD_exposer.staticmethod("typeName");

@@ -114,6 +114,8 @@ public:
     SireUnits::Dimension::Time getTimeStep() const;
     void setTimeStep(const SireUnits::Dimension::Time &timestep);
 
+    void setFirstFrame(qint64 first_frame);
+
     void close();
 
 private:
@@ -370,7 +372,7 @@ void DCDFile::writeHeader(int nframes, int natoms, bool has_periodic_space)
 
     // every value is zero, as we don't know what they are
     ints[0] = nframes;
-    // ints[1] = 0; // index of the first frame - we don't know this either...
+    ints[1] = istart;  // index of the first frame, which is zero unless set
     ints[2] = 1;       // number of timesteps between frames
     ints[3] = nframes; // number of timesteps written
     // ints[8] = 0; // nfixed is zero - everything will be treated as moving
@@ -398,6 +400,7 @@ void DCDFile::writeHeader(int nframes, int natoms, bool has_periodic_space)
 
     // bytes 52-79 - should all be zero - can re-use ints
     ints[0] = 0;
+    ints[1] = 0;
     ints[2] = 0;
     ints[3] = 0;
     line.writeInt32(ints, 7);
@@ -610,9 +613,7 @@ Frame DCDFile::readFrame(int frame, bool use_parallel) const
     auto coords = this->readCoordinates(frame);
     auto time = this->readTime(frame);
 
-    return Frame(this->readCoordinates(frame),
-                 this->readSpace(frame).read(),
-                 this->readTime(frame));
+    return Frame(coords, space.read(), time);
 }
 
 void DCDFile::writeFrame(const SireMol::Frame &frame, bool use_parallel)
@@ -740,6 +741,12 @@ SireUnits::Dimension::Time DCDFile::getTimeStep() const
 void DCDFile::setTimeStep(const SireUnits::Dimension::Time &t)
 {
     timestep = t.to(picosecond);
+}
+
+/** Set the index of the first frame, so frame i is at (first_frame + i) * timestep */
+void DCDFile::setFirstFrame(qint64 first_frame)
+{
+    istart = first_frame;
 }
 
 int DCDFile::nAtoms() const
@@ -1016,21 +1023,28 @@ DCD DCD::parse(const QString &filename)
 }
 
 /** Concatenate the frames of the DCD files 'filenames' into 'output', 'timestep'
-    apart, one frame at a time and without needing the molecules */
+    apart from 'start', one frame at a time and without needing the molecules */
 void DCD::concatenate(const QStringList &filenames, const QString &output,
-                      const SireUnits::Dimension::Time &timestep)
+                      const SireUnits::Dimension::Time &timestep,
+                      const SireUnits::Dimension::Time &start)
 {
     auto gil = SireBase::release_gil();
 
-    QList<DCDFile> inputs;
+    // Count the frames first, closing each file again so that only one
+    // input is open at a time.
     qint64 nframes = 0;
+    qint64 natoms = 0;
+    bool is_periodic = false;
+    bool have_frame = false;
 
-    for (const auto &filename : filenames)
+    for (int i = 0; i < filenames.count(); ++i)
     {
+        const auto &filename = filenames.at(i);
+
         DCDFile input(filename);
         input.open(QIODevice::ReadOnly);
 
-        if (not inputs.isEmpty() and input.nAtoms() != inputs.first().nAtoms())
+        if (i > 0 and input.nAtoms() != natoms)
         {
             throw SireError::incompatible_error(
                 QObject::tr("Cannot concatenate %1, which has %2 atoms, with %3, "
@@ -1038,12 +1052,20 @@ void DCD::concatenate(const QStringList &filenames, const QString &output,
                     .arg(filename)
                     .arg(input.nAtoms())
                     .arg(filenames.first())
-                    .arg(inputs.first().nAtoms()),
+                    .arg(natoms),
                 CODELOC);
         }
 
+        natoms = input.nAtoms();
+
+        // The header records whether every frame has a periodic space.
+        if (not have_frame and input.nFrames() > 0)
+        {
+            is_periodic = input.readFrame(0).space().isPeriodic();
+            have_frame = true;
+        }
+
         nframes += input.nFrames();
-        inputs.append(input);
     }
 
     if (nframes == 0)
@@ -1051,18 +1073,6 @@ void DCD::concatenate(const QStringList &filenames, const QString &output,
         throw SireError::invalid_arg(
             QObject::tr("There are no frames to concatenate into %1.").arg(output),
             CODELOC);
-    }
-
-    // The header records whether every frame has a periodic space.
-    bool is_periodic = false;
-
-    for (const auto &input : inputs)
-    {
-        if (input.nFrames() > 0)
-        {
-            is_periodic = input.readFrame(0).space().isPeriodic();
-            break;
-        }
     }
 
     DCDFile outfile(output);
@@ -1074,23 +1084,30 @@ void DCD::concatenate(const QStringList &filenames, const QString &output,
             CODELOC);
     }
 
+    // A DCD file can only start a whole number of frames from zero.
+    const double timestep_ps = timestep.to(picosecond);
+
+    if (timestep_ps > 0)
+        outfile.setFirstFrame(qRound64(start.to(picosecond) / timestep_ps));
+
     outfile.setTimeStep(timestep);
-    outfile.writeHeader(nframes, inputs.first().nAtoms(), is_periodic);
+    outfile.writeHeader(nframes, natoms, is_periodic);
 
-    for (int i = 0; i < inputs.count(); ++i)
+    for (const auto &filename : filenames)
     {
-        const auto &input = inputs.at(i);
+        DCDFile input(filename);
+        input.open(QIODevice::ReadOnly);
 
-        for (int j = 0; j < input.nFrames(); ++j)
+        for (int i = 0; i < input.nFrames(); ++i)
         {
-            const auto frame = input.readFrame(j);
+            const auto frame = input.readFrame(i);
 
             if (frame.space().isPeriodic() != is_periodic)
             {
                 throw SireError::incompatible_error(
                     QObject::tr("Cannot concatenate %1, as its frames do not have "
                                 "the same type of space as those of %2.")
-                        .arg(filenames.at(i))
+                        .arg(filename)
                         .arg(filenames.first()),
                     CODELOC);
             }

@@ -165,7 +165,9 @@ def test_dcd_concatenate(tmpdir, ala_traj):
     ]
 
     output = str(d.join("traj.dcd"))
-    sr.legacy.IO.DCD.concatenate(chunks, output, 0.5 * sr.units.picosecond)
+    sr.legacy.IO.DCD.concatenate(
+        chunks, output, 0.5 * sr.units.picosecond, 0.5 * sr.units.picosecond
+    )
 
     mols2 = sr.load(top + [output])
 
@@ -177,7 +179,7 @@ def test_dcd_concatenate(tmpdir, ala_traj):
 
         assert_coords_equal(m[0], m2[0], 0.001)
         assert_space_equal(m.property("space"), m2.property("space"), 0.001)
-        assert m2.time().to(sr.units.picosecond) == pytest.approx(0.5 * i)
+        assert m2.time().to(sr.units.picosecond) == pytest.approx(0.5 * (i + 1))
 
 
 def test_frame_names(tmpdir, ala_traj):
