@@ -51,11 +51,11 @@
 #include "SireBase/generalunitproperty.h"
 #include "SireBase/getinstalldir.h"
 #include "SireBase/parallel.h"
+#include "SireBase/progressbar.h"
+#include "SireBase/releasegil.h"
 #include "SireBase/stringproperty.h"
 #include "SireBase/timeproperty.h"
 #include "SireBase/unittest.h"
-#include "SireBase/releasegil.h"
-#include "SireBase/progressbar.h"
 
 #include "SireIO/errors.h"
 
@@ -66,10 +66,10 @@
 #include "sire_version.h"
 
 #include <QDataStream>
+#include <QDateTime>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
-#include <QDateTime>
 
 using namespace SireIO;
 using namespace SireIO::detail;
@@ -113,6 +113,8 @@ public:
 
     SireUnits::Dimension::Time getTimeStep() const;
     void setTimeStep(const SireUnits::Dimension::Time &timestep);
+
+    void setFirstFrame(qint64 first_frame);
 
     void close();
 
@@ -370,7 +372,7 @@ void DCDFile::writeHeader(int nframes, int natoms, bool has_periodic_space)
 
     // every value is zero, as we don't know what they are
     ints[0] = nframes;
-    // ints[1] = 0; // index of the first frame - we don't know this either...
+    ints[1] = istart;  // index of the first frame, which is zero unless set
     ints[2] = 1;       // number of timesteps between frames
     ints[3] = nframes; // number of timesteps written
     // ints[8] = 0; // nfixed is zero - everything will be treated as moving
@@ -398,6 +400,7 @@ void DCDFile::writeHeader(int nframes, int natoms, bool has_periodic_space)
 
     // bytes 52-79 - should all be zero - can re-use ints
     ints[0] = 0;
+    ints[1] = 0;
     ints[2] = 0;
     ints[3] = 0;
     line.writeInt32(ints, 7);
@@ -610,9 +613,7 @@ Frame DCDFile::readFrame(int frame, bool use_parallel) const
     auto coords = this->readCoordinates(frame);
     auto time = this->readTime(frame);
 
-    return Frame(this->readCoordinates(frame),
-                 this->readSpace(frame).read(),
-                 this->readTime(frame));
+    return Frame(coords, space.read(), time);
 }
 
 void DCDFile::writeFrame(const SireMol::Frame &frame, bool use_parallel)
@@ -740,6 +741,12 @@ SireUnits::Dimension::Time DCDFile::getTimeStep() const
 void DCDFile::setTimeStep(const SireUnits::Dimension::Time &t)
 {
     timestep = t.to(picosecond);
+}
+
+/** Set the index of the first frame, so frame i is at (first_frame + i) * timestep */
+void DCDFile::setFirstFrame(qint64 first_frame)
+{
+    istart = first_frame;
 }
 
 int DCDFile::nAtoms() const
@@ -884,7 +891,9 @@ DCD::DCD(const System &system, const PropertyMap &map)
     : ConcreteProperty<DCD, MoleculeParser>(system, map),
       nframes(1), frame_idx(0)
 {
-    current_frame = MoleculeParser::createFrame(system, map);
+    // A trajectory is written frame by frame from the system's trajectory
+    if (not this->writingTrajectory())
+        current_frame = MoleculeParser::createFrame(system, map);
 }
 
 /** Copy constructor */
@@ -1013,6 +1022,103 @@ DCD DCD::parse(const QString &filename)
     return DCD(filename);
 }
 
+/** Concatenate the frames of the DCD files 'filenames' into 'output', 'timestep'
+    apart from 'start', one frame at a time and without needing the molecules */
+void DCD::concatenate(const QStringList &filenames, const QString &output,
+                      const SireUnits::Dimension::Time &timestep,
+                      const SireUnits::Dimension::Time &start)
+{
+    auto gil = SireBase::release_gil();
+
+    // Count the frames first, closing each file again so that only one
+    // input is open at a time.
+    qint64 nframes = 0;
+    qint64 natoms = 0;
+    bool is_periodic = false;
+    bool have_frame = false;
+
+    for (int i = 0; i < filenames.count(); ++i)
+    {
+        const auto &filename = filenames.at(i);
+
+        DCDFile input(filename);
+        input.open(QIODevice::ReadOnly);
+
+        if (i > 0 and input.nAtoms() != natoms)
+        {
+            throw SireError::incompatible_error(
+                QObject::tr("Cannot concatenate %1, which has %2 atoms, with %3, "
+                            "which has %4 atoms.")
+                    .arg(filename)
+                    .arg(input.nAtoms())
+                    .arg(filenames.first())
+                    .arg(natoms),
+                CODELOC);
+        }
+
+        natoms = input.nAtoms();
+
+        // The header records whether every frame has a periodic space.
+        if (not have_frame and input.nFrames() > 0)
+        {
+            is_periodic = input.readFrame(0).space().isPeriodic();
+            have_frame = true;
+        }
+
+        nframes += input.nFrames();
+    }
+
+    if (nframes == 0)
+    {
+        throw SireError::invalid_arg(
+            QObject::tr("There are no frames to concatenate into %1.").arg(output),
+            CODELOC);
+    }
+
+    DCDFile outfile(output);
+
+    if (not outfile.open(QIODevice::WriteOnly))
+    {
+        throw SireError::file_error(
+            QObject::tr("Could not open %1 to write the DCD file.").arg(output),
+            CODELOC);
+    }
+
+    // A DCD file can only start a whole number of frames from zero.
+    const double timestep_ps = timestep.to(picosecond);
+
+    if (timestep_ps > 0)
+        outfile.setFirstFrame(qRound64(start.to(picosecond) / timestep_ps));
+
+    outfile.setTimeStep(timestep);
+    outfile.writeHeader(nframes, natoms, is_periodic);
+
+    for (const auto &filename : filenames)
+    {
+        DCDFile input(filename);
+        input.open(QIODevice::ReadOnly);
+
+        for (int i = 0; i < input.nFrames(); ++i)
+        {
+            const auto frame = input.readFrame(i);
+
+            if (frame.space().isPeriodic() != is_periodic)
+            {
+                throw SireError::incompatible_error(
+                    QObject::tr("Cannot concatenate %1, as its frames do not have "
+                                "the same type of space as those of %2.")
+                        .arg(filename)
+                        .arg(filenames.first()),
+                    CODELOC);
+            }
+
+            outfile.writeFrame(frame);
+        }
+    }
+
+    outfile.close();
+}
+
 /** Internal function used to add the data from this parser into the passed System */
 void DCD::addToSystem(System &system, const PropertyMap &map) const
 {
@@ -1046,6 +1152,9 @@ void DCD::addToSystem(System &system, const PropertyMap &map) const
 /** Return the number of atoms whose coordinates are contained in this restart file */
 int DCD::nAtoms() const
 {
+    if (this->writingTrajectory())
+        return this->savedSystem().nAtoms();
+
     return current_frame.nAtoms();
 }
 

@@ -198,7 +198,7 @@ def _resolve_path(path, directory=".", auto_unzip=True, silent=False):
                 return _resolve_path(filename, directory=directory, silent=silent)
             else:
                 raise IOError(
-                    f"Cannot overwrite {filename} as it is an " "existing directory!"
+                    f"Cannot overwrite {filename} as it is an existing directory!"
                 )
 
         if not silent:
@@ -527,6 +527,31 @@ def save_to_string(
     return MoleculeParser.parse(molecules, format, map=map).lines()
 
 
+def _is_trajectory_format(filename, format, map):
+    """
+    Internal function to return whether every file will be written by a
+    trajectory parser, which writes each frame from the trajectory rather
+    than from the current coordinates of the molecules
+    """
+    import os
+
+    trajectory_formats = {"DCD", "TRR", "XTC"}
+
+    if format is None:
+        if map.specified("fileformat"):
+            return False
+
+        # MoleculeParser uses everything after the first dot as the format.
+        parts = os.path.basename(filename).split(".", 1)
+
+        if len(parts) != 2:
+            return False
+
+        format = [parts[1]]
+
+    return all(f.upper() in trajectory_formats for f in format)
+
+
 def save(
     molecules,
     filename: _Union[str, _List[str]],
@@ -685,7 +710,15 @@ def save(
         if molecules._is_trajectory_iterator():
             # we are saving a trajectory - not just the molecules
             map = molecules._populate_map(map)
-            molecules = molecules.current()
+
+            # Trajectory formats write every frame from the trajectory itself,
+            # so the current frame only needs loading for other formats.
+            if molecules._view is not None and _is_trajectory_format(
+                filename, format, map
+            ):
+                molecules = molecules._view
+            else:
+                molecules = molecules.current()
 
     molecules = _to_legacy_system(molecules)
 
@@ -708,7 +741,7 @@ def load_test_files(files: _Union[_List[str], str], *args, map=None):
      sire.system.System
          The loaded molecules
     """
-    if not type(files) is list:
+    if type(files) is not list:
         files = [files]
 
     for arg in args:
@@ -940,8 +973,7 @@ def smarts(
         mol = mols
         if mol.num_atoms() == 0:
             raise ValueError(
-                "Failed to generate a molecule from the smarts string "
-                f"'{smarts[0]}'."
+                f"Failed to generate a molecule from the smarts string '{smarts[0]}'."
             )
     else:
         empty_mols = []

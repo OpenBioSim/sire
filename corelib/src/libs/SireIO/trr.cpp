@@ -47,13 +47,13 @@
 
 #include "SireBase/generalunitproperty.h"
 #include "SireBase/parallel.h"
-#include "SireBase/stringproperty.h"
-#include "SireBase/timeproperty.h"
 #include "SireBase/progressbar.h"
 #include "SireBase/releasegil.h"
+#include "SireBase/stringproperty.h"
+#include "SireBase/timeproperty.h"
 
-#include "SireIO/errors.h"
 #include "SireError/errors.h"
+#include "SireIO/errors.h"
 
 #include "SireStream/shareddatastream.h"
 
@@ -188,7 +188,9 @@ TRR::TRR(const System &system, const PropertyMap &map)
     : ConcreteProperty<TRR, MoleculeParser>(system, map),
       nframes(1), frame_idx(0)
 {
-    current_frame = MoleculeParser::createFrame(system, map);
+    // A trajectory is written frame by frame from the system's trajectory
+    if (not this->writingTrajectory())
+        current_frame = MoleculeParser::createFrame(system, map);
 }
 
 /** Copy constructor */
@@ -350,6 +352,9 @@ void TRR::addToSystem(System &system, const PropertyMap &map) const
 /** Return the number of atoms whose coordinates are contained in this restart file */
 int TRR::nAtoms() const
 {
+    if (this->writingTrajectory())
+        return this->savedSystem().nAtoms();
+
     return current_frame.nAtoms();
 }
 

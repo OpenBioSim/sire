@@ -108,6 +108,19 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   no longer draws ascii convergence and PMF plots, and the legacy ``package_sire``
   installer and its supporting scripts.
 
+* Release the GIL when updating a ``System`` or deleting its trajectory frames, and added a
+  private ``_free()`` method to ``System`` and ``SelectorMol`` that empties them, destroying
+  their contents with the GIL released. Freeing a large system's molecules no longer holds
+  up other Python threads, e.g. when several replicas are checkpointed in parallel.
+
+* Speed up saving trajectories in DCD, TRR or XTC format, which no longer copy the system
+  and load the current frame into it before writing the frames themselves.
+
+* Added ``DCD.concatenate()``, which joins DCD files into one, a frame at a time and without
+  a topology, with frames a given timestep apart from a given start time.
+
+* Fixed reading a DCD frame reading the coordinates, space and time from the file twice.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

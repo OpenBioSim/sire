@@ -34,26 +34,26 @@
 
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
-#include "SireBase/stringproperty.h"
 #include "SireBase/releasegil.h"
+#include "SireBase/stringproperty.h"
 
 #include "SireFF/ffdetail.h"
 #include "SireMM/mmdetail.h"
 
 #include "SireMol/core.h"
-#include "SireMol/molecule.h"
-#include "SireMol/moleditor.h"
-#include "SireMol/trajectory.h"
 #include "SireMol/mgname.h"
 #include "SireMol/mgnum.h"
+#include "SireMol/molecule.h"
+#include "SireMol/moleditor.h"
 #include "SireMol/molidx.h"
+#include "SireMol/trajectory.h"
 #include "SireMol/trajectoryaligner.h"
 
-#include "SireBase/timeproperty.h"
 #include "SireBase/parallel.h"
+#include "SireBase/progressbar.h"
 #include "SireBase/propertylist.h"
 #include "SireBase/releasegil.h"
-#include "SireBase/progressbar.h"
+#include "SireBase/timeproperty.h"
 
 #include "SireSystem/system.h"
 
@@ -3310,6 +3310,12 @@ const PropertyMap &MoleculeParser::propertyMap() const
 QString MoleculeParser::saveTitle() const
 {
     return saved_system.name().value();
+}
+
+/** Return the System being written */
+const System &MoleculeParser::savedSystem() const
+{
+    return saved_system;
 }
 
 Q_GLOBAL_STATIC(NullParser, nullParser)
