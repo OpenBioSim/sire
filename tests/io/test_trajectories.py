@@ -130,6 +130,28 @@ def test_trajectories(tmpdir, ala_traj):
         assert_coords_equal(m[0], m2[0], precision)
 
 
+@pytest.mark.parametrize("format", ["DCD", "TRR", "XTC"])
+def test_trajectory_ignores_current_frame(tmpdir, ala_traj, format):
+    mols = ala_traj.clone()
+
+    # The current coordinates aren't from any of the frames being saved.
+    mols.load_frame(100)
+
+    d = tmpdir.mkdir(f"test_trajectory_ignores_current_frame_{format}")
+
+    top = sr.save(mols, d.join("top"), format=["PRMTOP"])
+    traj = sr.save(mols.trajectory()[0:5], d.join("traj"), format=[format])
+
+    mols2 = sr.load(top + traj)
+
+    assert mols2.num_frames() == 5
+
+    for i in range(5):
+        m = mols.trajectory()[i].current()
+        m2 = mols2.trajectory()[i].current()
+        assert_coords_equal(m[0], m2[0], 0.01)
+
+
 def test_frame_names(tmpdir, ala_traj):
     mols = ala_traj.clone()
 
