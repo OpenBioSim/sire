@@ -105,12 +105,10 @@ class System:
     def _free_molecules(self):
         """
         Drop the cached molecules. These can hold the last references to old
-        versions of the molecules, so they are freed with the GIL released,
-        unless something else still refers to them.
+        versions of the molecules, so they are freed with the GIL released.
+        The cache is never handed out, so nothing else can refer to it.
         """
-        from sys import getrefcount
-
-        if self._molecules is not None and getrefcount(self._molecules) == 2:
+        if self._molecules is not None:
             self._molecules._free()
 
         self._molecules = None
@@ -119,7 +117,9 @@ class System:
         """
         Empty this System, freeing its contents with the GIL released. This
         is for a large System that is no longer needed, which would otherwise
-        be freed with the GIL held.
+        be freed with the GIL held. The underlying legacy System is emptied in
+        place, so nothing else may refer to it, e.g. one passed to System() or
+        returned by _to_legacy_system().
         """
         self._free_molecules()
         self._system._free()

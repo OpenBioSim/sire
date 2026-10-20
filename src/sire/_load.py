@@ -713,7 +713,9 @@ def save(
 
             # Trajectory formats write every frame from the trajectory itself,
             # so the current frame only needs loading for other formats.
-            if _is_trajectory_format(filename, format, map):
+            if molecules._view is not None and _is_trajectory_format(
+                filename, format, map
+            ):
                 molecules = molecules._view
             else:
                 molecules = molecules.current()

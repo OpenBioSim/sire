@@ -92,10 +92,8 @@ SireSystem::System __copy__(const SireSystem::System &other) { return SireSystem
 
 namespace
 {
-    /** Updating a system or deleting its frames touches every molecule, which
-        is slow for large systems. Nothing in either call touches Python, so
-        the GIL is dropped for the duration.
-    */
+    /** Updating a system or deleting its frames touches every molecule and
+        never uses Python, so the GIL is released for the duration. */
     template <class T>
     void update_no_gil(SireSystem::System &system, const T &molecules, bool auto_commit)
     {
@@ -116,10 +114,8 @@ namespace
         system.deleteAllFrames(map);
     }
 
-    /** Destroying a large system frees every molecule it holds the last
-        reference to. This empties the system, freeing its contents with the
-        GIL released.
-    */
+    /** Empty the system, destroying its contents with the GIL released,
+        since freeing every molecule of a large system is slow. */
     void free_no_gil(SireSystem::System &system)
     {
         std::unique_ptr<SireSystem::System> contents(new SireSystem::System(system));

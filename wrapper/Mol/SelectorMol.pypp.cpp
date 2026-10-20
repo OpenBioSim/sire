@@ -71,10 +71,8 @@ SireMol::SelectorMol __copy__(const SireMol::SelectorMol &other) { return SireMo
 
 namespace
 {
-    /** Destroying a large selection frees every molecule it holds the last
-        reference to. This empties the selection, freeing its contents with
-        the GIL released.
-    */
+    /** Empty the selection, destroying its contents with the GIL released,
+        since freeing every molecule of a large selection is slow. */
     void free_no_gil(SireMol::SelectorMol &mols)
     {
         std::unique_ptr<SireMol::SelectorMol> contents(new SireMol::SelectorMol(mols));
