@@ -90,6 +90,24 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed MM non-bonded interactions not being removed between QM atoms in different
   molecules, e.g. when a QM water reacts with a QM ligand.
 
+* Removed the GSL (GPLv3) dependency. Complex arithmetic, matrix operations and special
+  functions in ``SireMaths`` are now implemented with Eigen and ``std::complex``.
+
+* Removed the GPL-licensed ``regress`` third-party code from ``SireAnalysis``. The polynomial
+  regression used by ``TI`` is now implemented with Eigen.
+
+* Removed the GPL-derived MDAnalysis bond-order inference heuristic from ``SireRDKit``. The
+  fallback (used when RDKit's ``determineBondOrders()`` fails, or when
+  ``determine_bond_orders=False``) now calls MDAnalysis directly via a Python callback. If
+  MDAnalysis is not installed, ``determine_bond_orders=False`` raises an error and a failed
+  ``determineBondOrders()`` emits a warning rather than silently leaving all bonds single.
+
+* Relicensed :mod:`sire` from the GPLv3+ to the LGPLv3+.
+
+* Removed the unlicensed ``Sire.Tools.ap`` ascii plotting module, so ``analyse_freenrg``
+  no longer draws ascii convergence and PMF plots, and the legacy ``package_sire``
+  installer and its supporting scripts.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
@@ -1638,7 +1656,7 @@ This comprised 2495 commits, from developers
 `@fjclark <https://github.com/fjclark>`__,
 `@Steboss <https://github.com/Steboss>`__,
 `@nigel-palmer <https://github.com/nigel-palmer>`__,
-`@msuruzon <https://github.com/msuruzhon>`__ and
+`@msuruzhon <https://github.com/msuruzhon>`__ and
 `@kexul <https://github.com/kexul>`__.
 
 Here is the changelog for this stage of development.

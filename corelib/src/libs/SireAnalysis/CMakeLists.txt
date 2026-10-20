@@ -31,8 +31,6 @@ set ( SIREANALYSIS_SOURCES
       ti.cpp
       ticomponents.cpp
 
-      third_party/regress.cpp
-
       ${SIREANALYSIS_HEADERS}
     )
 

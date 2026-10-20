@@ -62,11 +62,12 @@ which can be found below. The software will be installed automatically
 as part of the installing the :mod:`sire` conda package, so you shouldn't
 have to do anything yourself.
 
-:mod:`sire` is itself distributed under the terms of the GPL version 3
-(or any later GPL license). The C++ source code is licensed
-under the GPL 3 or later, and linking with GPL3 dependencies
-(e.g. GSL) means that the entire package is licensed under GPL 3
-or later.
+:mod:`sire` is itself distributed under the terms of the GNU Lesser
+General Public License, version 3 or (at your option) any later version
+(LGPLv3+). Some optional dependencies are licensed differently, e.g.
+`emle-engine <https://github.com/chemle/emle-engine>`__ (GPLv2), which is
+conditionally imported for QM/MM calculations if it is installed. These are
+not distributed with :mod:`sire` and are used under their own license terms.
 
 C++ Dependencies
 ================
@@ -75,8 +76,8 @@ Qt 5
 ----
 
 :mod:`sire` is built on top of Qt.Core from Qt 5. This is used under the terms
-of the `LGPL 2 <http://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html>`__
-or later. :mod:`sire` does not modify Qt, so this license allows both
+of the `LGPL 3 <https://www.gnu.org/licenses/lgpl-3.0.en.html>`__.
+:mod:`sire` does not modify Qt, so this license allows both
 commercial and non-commercial use without fee. You can find out more
 about Qt and its license `from here <https://www.qt.io/terms-conditions/>`__.
 
@@ -86,7 +87,7 @@ Python
 The :mod:`sire` C++ library is wrapped up and made available for use within Python 3.
 This is used under the terms of the `PSF license <https://docs.python.org/3/license.html>`__,
 which is compatible with
-the GPLv3. The license allows both commercial and non-commercial use
+the LGPLv3. The license allows both commercial and non-commercial use
 without fee. You can find out more about Python and its license
 `from here <https://www.python.org/>`__.
 
@@ -98,7 +99,7 @@ the boost::python module that is used to wrap up the C++ code.
 This is used under the terms of the
 `Boost Software License <http://www.boost.org/users/license.html>`__,
 which allows both commercial and non-commercial
-use without fee. This is compatible with the GPLc3. You can find out
+use without fee. This is compatible with the LGPLv3. You can find out
 more about boost and its license `from here <http://www.boost.org/>`__.
 
 Py++
@@ -136,13 +137,15 @@ library for within-node
 parallelisation. This is licensed under the open source
 `Apache 2.0 license <https://www.threadingbuildingblocks.org/faq/10>`__.
 
-Gnu Scientific Library (GSL)
-----------------------------
+Eigen
+-----
 
-:mod:`sire` uses some of the routines from the Gnu Scientific Library.
-This is used under the terms of the `GPL v3 <http://www.gnu.org/copyleft/gpl.html>`__
-license. More information
-about GSL and its license can be `found here <http://www.gnu.org/software/gsl/>`__.
+:mod:`sire` uses `Eigen <https://eigen.tuxfamily.org>`__ for small dense linear
+algebra routines (e.g. matrix eigendecomposition, SVD, and alignment/RMSD
+fitting). This is a header-only library used under the terms of the
+`Mozilla Public License 2.0 <https://www.mozilla.org/en-US/MPL/2.0/>`__, which
+is compatible with the LGPL. More information about Eigen and its license can
+be `found here <https://eigen.tuxfamily.org/index.php?title=Main_Page#License>`__.
 
 NetCDF
 ------
@@ -150,7 +153,7 @@ NetCDF
 :mod:`sire` links to the `NetCDF <https://docs.unidata.ucar.edu/netcdf-c/current/copyright.html>`__
 library so that it can read/write Amber binary files. NetCDF
 is openly licensed under a BSD-style license, and is compatible
-with the GPL.
+with the LGPL.
 
 OpenMM
 ------
@@ -159,17 +162,7 @@ OpenMM
 dynamics (e.g. as part of the ``somd`` program), and also via an
 interconversion layer to switch between sire and OpenMM system representations.
 This is licensed under either the MIT or LGPL licenses,
-so compatible with the GPL.
-
-Regress
--------
-
-:mod:`sire` uses the linear least squares regression library, `regress`, for
-polynomial least squares fitting. This is used under the terms of
-the GPLv3 license.
-
-The source code for this module can be
-`found here <https://github.com/openbiosim/sire/blob/devel/corelib/src/libs/:mod:`sire`Analysis/third_party/regress.cpp>`__.
+so compatible with the LGPL.
 
 eig3
 ----
@@ -356,6 +349,15 @@ It is used under a BSD-style license, given below.
 More information about MD5 libraries in general can be
 `found here <http://userpages.umbc.edu/~mabzug1/cs/md5/md5.html>`__.
 
+xdrfile
+-------
+
+:mod:`sire` bundles the xdrfile library by Erik Lindahl and David van der
+Spoel to read and write GROMACS XTC and TRR trajectory files. This is used
+under a BSD-style license. It also bundles ``xtc_seek`` from
+`MDAnalysis <https://www.mdanalysis.org>`__ to index the frames in XTC files,
+which is used under the terms of the LGPL v2.1 or later license.
+
 kabasch fitting
 ---------------
 
@@ -390,17 +392,6 @@ available https://github.com/charnley/rmsd, and under license;
         (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         =======================
-
-mdanalysis
-----------
-
-I have written a C++ implementation of the ``_infer_bo_and_charges``
-algorithm from `mdanalysis <https://mdanalysis.org>`__.
-
-The algorithm is `described here <https://blog.matteoferla.com/2020/02/guess-bond-order-in-rdkit-by-number-of.html>`__
-and `here <https://docs.mdanalysis.org/2.0.0/_modules/MDAnalysis/converters/RDKit.html#_infer_bo_and_charges>`__.
-
-The code was written by Matteo Ferla and was released under the GPL.
 
 gemmi
 -----
@@ -440,48 +431,27 @@ molecular representations. This is used under the terms of the BSD3 license.
 Python Dependencies
 ===================
 
-ap (ascii plot)
----------------
-
-:mod:`sire` bundles the Python “ap” library for drawing ascii graphs.
-This is available as “Sire.Tools.ap”
-
-Version 0.9 written by M. Fouesneau is included, available
-freely from `GitHub here <https://github.com/mfouesneau/asciiplot>`__.
-The only change I've made is running this through Python's 2to3
-program to make this code work with Python 3.
-
-The header documentation reads;
-
-::
-
- Package that allows you to plot simple graphs in ASCII, a la matplotlib.
- This package is a inspired from Imri Goldberg's ASCII-Plotter 1.0
- (https://pypi.python.org/pypi/ASCII-Plotter/1.0)
- At a time I was enoyed by security not giving me direct access to my computer,
- and thus to quickly make figures from python, I looked at how I could make
- quick and dirty ASCII figures. But if I were to develop something, I wanted
- something that can be used with just python and possible standard-ish packages
- (numpy, scipy).
- So I came up with this package after many iterations based of ASCII-plotter.
- I added the feature to show multiple curves on one plot with different markers.
- And I also made the usage, close to matplotlib, such that there is a plot,
- hist, hist2d and imshow functions.
-
- TODO:
-     imshow does not plot axis yet.
-     make a correct documentation
-
 rich
 ----
 
 :mod:`sire` uses `rich <https://github.com/Textualize/rich>`__ to provide
 rich console output when printing. This is licensed under the
-GPL-compatible MIT license.
+LGPL-compatible MIT license.
 
 pandas
 ------
 
 :mod:`sire` uses `pandas <https://pandas.pydata.org/docs/>`__ to output
 data in DataFrames that can be more easily operated on and explored
-by users. Pandas is BSD-licensed, so compatible with the GPL.
+by users. Pandas is BSD-licensed, so compatible with the LGPL.
+
+MDAnalysis
+----------
+
+:mod:`sire` optionally uses `MDAnalysis <https://www.mdanalysis.org>`__,
+if it is installed, to infer bond orders and formal charges when converting
+to RDKit and RDKit's own ``determineBondOrders`` algorithm fails (e.g. for
+molecules containing dummy atoms). This is a genuinely optional dependency -
+if MDAnalysis is not installed, this fallback is simply skipped. MDAnalysis
+is used under the terms of the LGPL v2.1 or later license (as of release
+2.8.0, the package as a whole is LGPLv3+).

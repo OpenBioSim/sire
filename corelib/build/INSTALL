@@ -95,17 +95,6 @@ with these scripts, use "--help", e.g.
 
 :-> ~/sire.app/bin/waterswap --help
 
-E. DISTRIBUTING YOUR BINARY
-
-To package your installation of Sire up into a self-extracting
-executable, type
-
-:-> ~/sire.app/bin/package_sire
-
-This will build a "sire.run" package that can be used to install Sire
-on any machine that uses the same operating system, C and C++ library
-as that on which you compiled the binary.
-
 To get further help, please get in touch with the authors
 via the Sire mailing lists, or via the email links on the
 Sire website, https://sire.openbiosim.org

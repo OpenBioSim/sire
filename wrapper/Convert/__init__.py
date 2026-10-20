@@ -36,10 +36,67 @@ try:
         smiles_to_rdkit,
         smarts_to_rdkit,
         _register_smarts_search,
+        _set_bond_order_inference_callback,
     )
 
     _has_rdkit = True
     _register_smarts_search()
+
+    def _infer_bond_info_via_mdanalysis(pickle: bytes) -> bytes:
+        """
+        Callback registered with the C++ layer as the fallback used when
+        RDKit's own determineBondOrders() fails (e.g. dummy atoms present).
+        Calls the real MDAnalysis package to infer bond orders/formal
+        charges, rather than keeping a derived copy of its algorithm in
+        Sire's own source.
+        """
+        from rdkit import Chem
+
+        mol = Chem.Mol(pickle)
+
+        # All hydrogens are explicit. Without this, RDKit fills any missing
+        # valence with implicit hydrogens and MDAnalysis sees nothing to infer.
+        # The index property lets MDAnalysis restore the original atom order
+        # after its pattern standardisation step, which can renumber atoms.
+        for i, atom in enumerate(mol.GetAtoms()):
+            if atom.GetAtomicNum() > 1:
+                atom.SetNoImplicit(True)
+            atom.SetIntProp("_MDAnalysis_index", i)
+
+        try:
+            from MDAnalysis.converters.RDKitInferring import MDAnalysisInferrer
+        except ImportError:
+            # MDAnalysis < 2.10, the newest available on Python 3.10, only
+            # has the inference steps as private functions.
+            from MDAnalysis.converters.RDKit import (
+                _infer_bo_and_charges,
+                _standardize_patterns,
+            )
+
+            mol.UpdatePropertyCache(strict=False)
+            _infer_bo_and_charges(mol)
+            mol = _standardize_patterns(mol)
+            order = sorted(
+                range(mol.GetNumAtoms()),
+                key=lambda i: mol.GetAtomWithIdx(i).GetIntProp("_MDAnalysis_index"),
+            )
+            mol = Chem.RenumberAtoms(mol, order)
+            Chem.SanitizeMol(mol)
+        else:
+            mol = MDAnalysisInferrer()(mol)
+
+        return mol.ToBinary()
+
+    try:
+        import MDAnalysis  # noqa: F401
+
+        _set_bond_order_inference_callback(_infer_bond_info_via_mdanalysis)
+    except Exception:
+        # MDAnalysis is an optional soft dependency - if it isn't installed,
+        # simply don't register the callback. RDKit's own determineBondOrders
+        # is tried first regardless and normally succeeds; this is only a
+        # fallback for the rare cases (e.g. dummy atoms) where it doesn't.
+        pass
 
 except Exception as e:
     _rdkit_import_error = e

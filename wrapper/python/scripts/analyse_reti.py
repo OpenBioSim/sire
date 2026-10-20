@@ -38,7 +38,7 @@ parser = argparse.ArgumentParser(
     description="Analyse Sire restart files to get information "
     "about the replica exchange moves performed during the simulation.",
     epilog="analyse_reti is built using Sire and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/analyse_reti",
     prog="analyse_reti",
 )

@@ -4,21 +4,20 @@
   *
   *  Copyright (C) 2007  Christopher Woods
   *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 3 of the License, or
+  *  This program is free software: you can redistribute it and/or modify
+  *  it under the terms of the GNU Lesser General Public License as published
+  *  by the Free Software Foundation, either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
   *  but WITHOUT ANY WARRANTY; without even the implied warranty of
   *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *  GNU Lesser General Public License for more details.
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  *  You should have received a copy of the GNU Lesser General Public License
+  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
   *
-  *  For full details of the license please see the COPYING file
+  *  For full details of the license please see the LICENSE file
   *  that should have come with this distribution.
   *
   *  You can contact the authors at https://sire.openbiosim.org
@@ -458,7 +457,7 @@ bool TriclinicBox::isPeriodic() const
 bool TriclinicBox::isCartesian() const
 {
     // Only cubic boxes are Cartesian.
-    return this->_alpha == M_PI_2 and this->_beta == M_PI_2 and this->_gamma == M_PI_2;
+    return this->_alpha == SireMaths::pi_over_two and this->_beta == SireMaths::pi_over_two and this->_gamma == SireMaths::pi_over_two;
 }
 
 /** Return the first box vector. */
@@ -488,21 +487,21 @@ const Matrix &TriclinicBox::rotationMatrix() const
 /** Return the angle between the second and third box vectors in degrees. */
 double TriclinicBox::alpha() const
 {
-    double rad2deg = 180 / M_PI;
+    double rad2deg = 180 / SireMaths::pi;
     return _alpha * rad2deg;
 }
 
 /** Return the angle between the first and third box vectors in degrees. */
 double TriclinicBox::beta() const
 {
-    double rad2deg = 180 / M_PI;
+    double rad2deg = 180 / SireMaths::pi;
     return _beta * rad2deg;
 }
 
 /** Return the angle between the second and first box vectors in degrees. */
 double TriclinicBox::gamma() const
 {
-    double rad2deg = 180 / M_PI;
+    double rad2deg = 180 / SireMaths::pi;
     return _gamma * rad2deg;
 }
 

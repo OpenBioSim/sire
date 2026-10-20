@@ -4,21 +4,20 @@
   *
   *  Copyright (C) 2006  Christopher Woods
   *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 3 of the License, or
+  *  This program is free software: you can redistribute it and/or modify
+  *  it under the terms of the GNU Lesser General Public License as published
+  *  by the Free Software Foundation, either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
   *  but WITHOUT ANY WARRANTY; without even the implied warranty of
   *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *  GNU Lesser General Public License for more details.
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  *  You should have received a copy of the GNU Lesser General Public License
+  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
   *
-  *  For full details of the license please see the COPYING file
+  *  For full details of the license please see the LICENSE file
   *  that should have come with this distribution.
   *
   *  You can contact the authors at https://sire.openbiosim.org
@@ -27,56 +26,6 @@
 
 #ifndef SIRECAS_COMPLEX_H
 #define SIRECAS_COMPLEX_H
-
-/**
-The documentation for a lot of these functions is copied directly from the
-documentation of the gsl functions of the equivalent name.
-
-The copyright information for GSL is;
-
-########################################################################
-GSL
-
-More information about GSL can be found at the project homepage,
-http://www.gnu.org/software/gsl/.
-
-Printed copies of this manual can be purchased from Network Theory Ltd at
-http://www.network-theory.co.uk/gsl/manual/. The money raised from sales of the
-manual helps support the development of GSL.
-
-Copyright  1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 The GSL Team.
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.2 or any
-later version published by the Free Software Foundation; with the Invariant
-Sections being "GNU General Public License" and "Free Software Needs Free Documentation",
-the Front-Cover text being "A GNU Manual", and with the Back-Cover Text
-being (a) (see below). A copy of the license is included in the section
-entitled ?GNU Free Documentation License?.
-
-(a) The Back-Cover Text is: "You have freedom to copy and modify this GNU Manual,
-like GNU software."
-
-GSL Complex
-
-The functions described in this chapter provide support for complex numbers.
-The algorithms take care to avoid unnecessary intermediate underflows and overflows,
-allowing the functions to be evaluated over as much of the complex plane as possible.
-
-For multiple-valued functions the branch cuts have been chosen to follow the
-conventions of Abramowitz and Stegun in the Handbook of Mathematical Functions.
-The functions return principal values which are the same as those in GNU Calc,
-which in turn are the same as those in Common Lisp, The Language (Second Edition)1
-and the HP-28/48 series of calculators.
-
-The complex types are defined in the header file gsl_complex.h, while the
-corresponding complex functions and arithmetic operations are defined
-in gsl_complex_math.h.
-
-#######################################################################
-*/
-
-#include <gsl/gsl_complex.h>
 
 #include <QString>
 
@@ -102,19 +51,14 @@ namespace SireMaths
 
     /**
     This class represents a complex number to the same precision as 'double'.
-    This is merely a thin wrapper around the gsl_complex struct, and the
-    gsl_complex functions.
-
-    (indeed, this is publically derived from gsl_complex, so you can use
-    this class whereever you would normally use a gsl_complex)
+    Internally, it is backed by a std::complex<double>.
 
     @author Christopher Woods
     */
-    class SIREMATHS_EXPORT Complex : public gsl_complex
+    class SIREMATHS_EXPORT Complex
     {
     public:
         Complex(double r = 0.0, double i = 0.0);
-        Complex(const gsl_complex &complex);
 
         template <typename T>
         Complex(const std::complex<T> &stdcomplex);
@@ -194,6 +138,9 @@ namespace SireMaths
         Complex inverse() const;
 
         Complex negative() const;
+
+    private:
+        std::complex<double> val;
     };
 
     SIREMATHS_EXPORT Complex operator+(const Complex &z0, const Complex &z1);
@@ -255,7 +202,7 @@ namespace SireMaths
     /** Construct from a std::complex */
     template <typename T>
     Complex::Complex(const std::complex<T> &stdcomplex)
-        : gsl_complex(gsl_complex_rect(stdcomplex.real(), stdcomplex.imag()))
+        : val(stdcomplex.real(), stdcomplex.imag())
     {
     }
 

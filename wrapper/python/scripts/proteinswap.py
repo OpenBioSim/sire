@@ -56,7 +56,7 @@ parser = argparse.ArgumentParser(
     description="Calculate relative binding free "
     "energies using proteinswap",
     epilog="proteinswap is built using Sire and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/proteinswap",
     prog="proteinswap",
 )

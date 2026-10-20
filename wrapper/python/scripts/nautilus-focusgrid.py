@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser(
     "These coordinates are usually selected "
     "by using clustered densities of interest",
     epilog="nautilus-focusgrid is built using Sire, Numpy and mdtraj and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/nautilus",
     prog="nautilus",
 )

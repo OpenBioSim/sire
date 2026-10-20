@@ -17,7 +17,7 @@ import sys
 parser = argparse.ArgumentParser(
     description="Generate cell files from a passed trajectory",
     epilog="nautilus-regionproperties is built using Sire, Numpy and mdtraj and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/nautilus",
     prog="nautilus",
 )

@@ -2536,7 +2536,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             const double cutoff = cljff->getCutoffDistance();
             const double rc3 = cutoff * cutoff * cutoff;
             const double rc9 = rc3 * rc3 * rc3;
-            const double four_pi = 4.0 * M_PI;
+            const double four_pi = 4.0 * SireMaths::pi;
 
             // All GCMC waters (real + virtual buffer) are excluded from the background
             // LRC and tracked by n_w instead. Any water can be swapped in or out.

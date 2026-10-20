@@ -66,7 +66,7 @@ parser = argparse.ArgumentParser(
     "energies using Metropolis-Hastings and "
     "the Warshel free energy cycle",
     epilog="quantomm is built using Sire and is distributed "
-    "under the GPL. For more information please visit "
+    "under the LGPL. For more information please visit "
     "https://sire.openbiosim.org/waterswap",
     prog="quantomm",
 )

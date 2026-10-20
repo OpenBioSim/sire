@@ -4,21 +4,20 @@
   *
   *  Copyright (C) 2006  Christopher Woods
   *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 3 of the License, or
+  *  This program is free software: you can redistribute it and/or modify
+  *  it under the terms of the GNU Lesser General Public License as published
+  *  by the Free Software Foundation, either version 3 of the License, or
   *  (at your option) any later version.
   *
   *  This program is distributed in the hope that it will be useful,
   *  but WITHOUT ANY WARRANTY; without even the implied warranty of
   *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
+  *  GNU Lesser General Public License for more details.
   *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  *  You should have received a copy of the GNU Lesser General Public License
+  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
   *
-  *  For full details of the license please see the COPYING file
+  *  For full details of the license please see the LICENSE file
   *  that should have come with this distribution.
   *
   *  You can contact the authors at https://sire.openbiosim.org
@@ -47,8 +46,6 @@
 #pragma clang diagnostic pop
 #endif
 #endif // GCCXML_PARSE
-
-#include <gsl/gsl_sys.h>
 
 #include "constants.h"
 
@@ -434,21 +431,33 @@ namespace SireMaths
         return float(1.0) / std::sqrt(x);
     }
 
-    /** Return true if two numbers are equal. This uses gsl_fcmp
-        for the comparison, and the values must be equal to within
-        a range of 2*delta, where delta = 2^k * epsilon, where
-        k equals the maximum base-2 exponent of val0 and val1 as
-        calculated via frexp(). This should normally be a value
-        around 1e-6 */
+    /** Return true if two numbers are equal to within a range of 2*delta,
+        where delta = 2^k * epsilon, where k equals the maximum base-2
+        exponent of val0 and val1 as calculated via frexp(). This should
+        normally be a value around 1e-6.
+
+        This reimplements GSL's gsl_fcmp algorithm directly (val0/val1 are
+        equal iff their difference doesn't exceed delta, computed via
+        frexp/ldexp so the tolerance scales with the magnitude of the
+        values being compared, rather than being a fixed absolute epsilon). */
     SIRE_ALWAYS_INLINE bool areEqual(double val0, double val1, double epsilon)
     {
-        return not(gsl_fcmp(val0, val1, epsilon));
+        if (val0 == val1)
+            return true;
+
+        int exponent;
+        std::frexp(std::abs(val0) > std::abs(val1) ? val0 : val1, &exponent);
+
+        const double delta = std::ldexp(epsilon, exponent);
+        const double difference = val0 - val1;
+
+        return not(difference > delta or difference < -delta);
     }
 
     /** Return true if two numbers are equal */
     SIRE_ALWAYS_INLINE bool areEqual(double val0, double val1)
     {
-        return not(gsl_fcmp(val0, val1, 1e-6));
+        return areEqual(val0, val1, 1e-6);
     }
 
     /** Return true if this number is equal to zero */

@@ -756,7 +756,7 @@ if __name__ == "__main__":
                     "build_number": 0,
                     "channel": "local",
                     "size": 0,
-                    "license": "GPL-3.0-or-later",
+                    "license": "LGPL-3.0-or-later",
                     "subdir": platform_string,
                 }
                 metadata_file = os.path.join(
