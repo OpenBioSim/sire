@@ -47,15 +47,15 @@
 #include "SireUnits/units.h"
 
 #include "SireBase/generalunitproperty.h"
+#include "SireBase/getinstalldir.h"
 #include "SireBase/parallel.h"
-#include "SireBase/stringproperty.h"
-#include "SireBase/timeproperty.h"
 #include "SireBase/progressbar.h"
 #include "SireBase/releasegil.h"
-#include "SireBase/getinstalldir.h"
+#include "SireBase/stringproperty.h"
+#include "SireBase/timeproperty.h"
 
-#include "SireIO/errors.h"
 #include "SireError/errors.h"
+#include "SireIO/errors.h"
 
 #include "SireStream/shareddatastream.h"
 
@@ -1641,7 +1641,9 @@ AmberRst::AmberRst(const System &system, const PropertyMap &map)
     : ConcreteProperty<AmberRst, MoleculeParser>(system, map),
       nframes(1), frame_idx(0)
 {
-    current_frame = MoleculeParser::createFrame(system, map);
+    // A trajectory is written frame by frame from the system's trajectory
+    if (not this->writingTrajectory())
+        current_frame = MoleculeParser::createFrame(system, map);
 }
 
 /** Copy constructor */
@@ -1803,6 +1805,9 @@ void AmberRst::addToSystem(System &system, const PropertyMap &map) const
 /** Return the number of atoms whose coordinates are contained in this restart file */
 int AmberRst::nAtoms() const
 {
+    if (this->writingTrajectory())
+        return this->savedSystem().nAtoms();
+
     return current_frame.nAtoms();
 }
 

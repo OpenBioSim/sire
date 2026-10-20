@@ -320,6 +320,8 @@ namespace SireIO
 
         QString saveTitle() const;
 
+        const SireSystem::System &savedSystem() const;
+
     private:
         static MoleculeParserPtr _pvt_parse(const QString &filename, const PropertyMap &map);
 
