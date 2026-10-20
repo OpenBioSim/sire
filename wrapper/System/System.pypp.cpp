@@ -88,6 +88,8 @@ SireSystem::System __copy__(const SireSystem::System &other) { return SireSystem
 
 #include "Helpers/len.hpp"
 
+#include <memory>
+
 namespace
 {
     /** Updating a system or deleting its frames touches every molecule, which
@@ -113,6 +115,19 @@ namespace
         SireHelpers::ScopedGILRelease release_gil;
         system.deleteAllFrames(map);
     }
+
+    /** Destroying a large system frees every molecule it holds the last
+        reference to. This empties the system, freeing its contents with the
+        GIL released.
+    */
+    void free_no_gil(SireSystem::System &system)
+    {
+        std::unique_ptr<SireSystem::System> contents(new SireSystem::System(system));
+        system = SireSystem::System();
+
+        SireHelpers::ScopedGILRelease release_gil;
+        contents.reset();
+    }
 }
 
 void register_System_class()
@@ -124,6 +139,7 @@ void register_System_class()
         bp::scope System_scope(System_exposer);
         System_exposer.def(bp::init<QString const &>((bp::arg("name")), "Construct a named System"));
         System_exposer.def(bp::init<SireSystem::System const &>((bp::arg("other")), "Copy constructor"));
+        System_exposer.def("_free", &free_no_gil, "Empty this system, freeing its contents with the GIL released");
         { //::SireSystem::System::UID
 
             typedef ::QUuid const &(::SireSystem::System::*UID_function_type)() const;
