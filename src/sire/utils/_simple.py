@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from dataclasses import dataclass as _dataclass
 from dataclasses import field as _field
 from typing import List as _List

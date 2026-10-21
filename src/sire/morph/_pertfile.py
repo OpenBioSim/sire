@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["create_from_pertfile"]
 
 

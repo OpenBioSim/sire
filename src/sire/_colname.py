@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["colname", "colnames"]
 
 _col_funcs = None

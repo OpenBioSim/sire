@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from typing import List as _List
 
 __all__ = ["Cursor", "Cursors", "CursorsM"]
@@ -968,7 +970,7 @@ class Cursor:
                 return c
             except Exception:
                 raise TypeError(
-                    f"There is no residue that contains {self.type()}:" f"{self.id()}"
+                    f"There is no residue that contains {self.type()}:{self.id()}"
                 )
 
         self._update()
@@ -995,7 +997,7 @@ class Cursor:
                 return c
             except Exception:
                 raise TypeError(
-                    f"There is no chain that contains {self.type()}:" f"{self.id()}"
+                    f"There is no chain that contains {self.type()}:{self.id()}"
                 )
 
         self._update()
@@ -1022,7 +1024,7 @@ class Cursor:
                 return c
             except Exception:
                 raise TypeError(
-                    f"There is no segment that contains {self.type()}:" f"{self.id()}"
+                    f"There is no segment that contains {self.type()}:{self.id()}"
                 )
 
         self._update()
@@ -1057,8 +1059,7 @@ class Cursor:
 
         if "map" in kwargs:
             raise ValueError(
-                "The 'map' parameter is not allowed when creating a "
-                "Cursor for a bond"
+                "The 'map' parameter is not allowed when creating a Cursor for a bond"
             )
 
         return c
@@ -1075,8 +1076,7 @@ class Cursor:
 
         if "map" in kwargs:
             raise ValueError(
-                "The 'map' parameter is not allowed when creating a "
-                "Cursor for an angle"
+                "The 'map' parameter is not allowed when creating a Cursor for an angle"
             )
 
         return c
@@ -1175,7 +1175,7 @@ class Cursor:
 
         if self.is_internal():
             raise TypeError(
-                "An internal (bond/angle/dihedral/improper) does not have " "a name!"
+                "An internal (bond/angle/dihedral/improper) does not have a name!"
             )
 
         return self._view.name().value()
@@ -1186,7 +1186,7 @@ class Cursor:
 
         if self.is_internal():
             raise TypeError(
-                "An internal (bond/angle/dihedral/improper) does not have " "a name!"
+                "An internal (bond/angle/dihedral/improper) does not have a name!"
             )
 
         # get the type right...
@@ -1209,7 +1209,7 @@ class Cursor:
 
         if self.is_internal():
             raise TypeError(
-                "An internal (bond/angle/dihedral/improper) does not have " "a number!"
+                "An internal (bond/angle/dihedral/improper) does not have a number!"
             )
 
         try:
@@ -1223,7 +1223,7 @@ class Cursor:
 
         if self.is_internal():
             raise TypeError(
-                "An internal (bond/angle/dihedral/improper) does not have " "a number!"
+                "An internal (bond/angle/dihedral/improper) does not have a number!"
             )
 
         try:
@@ -1244,7 +1244,7 @@ class Cursor:
 
         if self.is_internal():
             raise TypeError(
-                "An internal (bond/angle/dihedral/improper) does not have " "an index!"
+                "An internal (bond/angle/dihedral/improper) does not have an index!"
             )
 
         return self._view.index().value()
@@ -1799,15 +1799,15 @@ class Cursors:
 
             if n <= 10:
                 for i in range(0, n):
-                    lines.append(f"{i+1}: {self._cursors[i]}")
+                    lines.append(f"{i + 1}: {self._cursors[i]}")
             else:
                 for i in range(0, 5):
-                    lines.append(f"{i+1}: {self._cursors[i]}")
+                    lines.append(f"{i + 1}: {self._cursors[i]}")
 
                 lines.append("...")
 
                 for i in range(n - 5, n):
-                    lines.append(f"{i+1}: {self._cursors[i]}")
+                    lines.append(f"{i + 1}: {self._cursors[i]}")
 
             lines = "\n".join(lines)
 
@@ -3496,15 +3496,15 @@ class CursorsM:
 
             if n <= 10:
                 for i in range(0, n):
-                    lines.append(f"{i+1}: {self._cursors[i]}")
+                    lines.append(f"{i + 1}: {self._cursors[i]}")
             else:
                 for i in range(0, 5):
-                    lines.append(f"{i+1}: {self._cursors[i]}")
+                    lines.append(f"{i + 1}: {self._cursors[i]}")
 
                 lines.append("...")
 
                 for i in range(n - 5, n):
-                    lines.append(f"{i+1}: {self._cursors[i]}")
+                    lines.append(f"{i + 1}: {self._cursors[i]}")
 
             lines = "\n".join(lines)
 

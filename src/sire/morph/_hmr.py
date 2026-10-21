@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["repartition_hydrogen_masses"]
 
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = [
     "Perturbation",
     "link_to_reference",
@@ -124,12 +126,12 @@ class Perturbation:
 
         if not mol.has_property(map["is_perturbable"]):
             raise ValueError(
-                "You can only create a `Perturbation` from a " "perturbable molecule!"
+                "You can only create a `Perturbation` from a perturbable molecule!"
             )
 
         if not mol.property(map["is_perturbable"]):
             raise ValueError(
-                "You can only create a `Perturbation` from a " "perturbable molecule!"
+                "You can only create a `Perturbation` from a perturbable molecule!"
             )
 
         # construct the perturbation objects that can move the

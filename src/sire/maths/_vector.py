@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from ..legacy.Maths import Vector as _Vector
 
 

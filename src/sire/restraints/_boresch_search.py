@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 Automatic Boresch restraint generation for ABFE simulations.
 """

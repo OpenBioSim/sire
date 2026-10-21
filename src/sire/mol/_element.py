@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["Element"]
 
 from ..legacy.Mol import Element

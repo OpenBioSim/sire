@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["Expression", "lam", "Symbol", "x", "y", "LambdaSchedule"]
 
 from ..legacy import CAS as _CAS

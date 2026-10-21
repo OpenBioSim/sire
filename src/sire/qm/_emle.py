@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["emle"]
 
 from ..legacy import Convert as _Convert

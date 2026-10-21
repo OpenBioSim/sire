@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = [
     "_to_smiles",
     "_to_smarts",

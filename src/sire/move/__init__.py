@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = []
 
 from ..legacy import Move as _Move

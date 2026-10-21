@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+
+
 def _zero_charge(mols, qm_atoms, map=None):
     """
     Zero the charge for the QM atoms in the system.

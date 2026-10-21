@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from typing import Union as _Union
 from typing import List as _List
 

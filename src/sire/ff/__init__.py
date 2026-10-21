@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = []
 
 # Need to import so the module is pythonized

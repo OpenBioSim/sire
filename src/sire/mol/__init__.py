@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = [
     "get_alignment",
     "is_water",

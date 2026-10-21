@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["Cartesian", "PeriodicBox", "TriclinicBox", "CoordGroup"]
 
 from ..legacy import Vol as _Vol

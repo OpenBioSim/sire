@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["CaseInsensitive", "CaseSensitive"]
 
 from ..legacy import ID as _ID
