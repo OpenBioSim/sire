@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Part of the Python API, so MIT rather than LGPL like the rest of wrapper.
+
 __all__ = [
     "_changed_atoms",
     "_changed_bonds",
