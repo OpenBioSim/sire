@@ -105,6 +105,14 @@ Changelog
 
    changelog
 
+License
+=======
+
+.. toctree::
+   :maxdepth: 1
+
+   license
+
 Acknowledgements
 ================
 .. toctree::
