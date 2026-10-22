@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["PageCache"]
 
 from ..legacy.Base import PageCache
@@ -24,7 +26,6 @@ def __fetch__(obj):
     """
     Fetch the object from the cache and return it
     """
-    from ..legacy.Qt import QByteArray
     from pickle import loads
 
     data = obj.__orig__fetch__()

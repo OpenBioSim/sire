@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = [
     "shrink_ghost_atoms",
     "replica_exchange",

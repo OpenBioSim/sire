@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["get_standard_state_correction"]
 
 import numpy as _np

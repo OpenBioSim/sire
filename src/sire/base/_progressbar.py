@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["ProgressBar"]
 
 from ..legacy.Base import ProgressBar as _ProgressBar

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["TrajectoryIterator"]
 
 # make sure that GeneralUnit has been modernised
@@ -723,7 +725,7 @@ class TrajectoryIterator:
         if self._view is None:
             return {}
 
-        if not type(func) is dict:
+        if type(func) is not dict:
             func = {"custom": func}
 
         import numpy as np

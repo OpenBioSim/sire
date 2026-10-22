@@ -62,9 +62,10 @@ which can be found below. The software will be installed automatically
 as part of the installing the :mod:`sire` conda package, so you shouldn't
 have to do anything yourself.
 
-:mod:`sire` is itself distributed under the terms of the GNU Lesser
-General Public License, version 3 or (at your option) any later version
-(LGPLv3+). Some optional dependencies are licensed differently, e.g.
+:mod:`sire` itself is distributed under the terms of the MIT License (the
+Python API) and the GNU Lesser General Public License, version 3 or (at your
+option) any later version (everything else). See the :doc:`license <license>`
+page for details. Some optional dependencies are licensed differently, e.g.
 `emle-engine <https://github.com/chemle/emle-engine>`__ (GPLv2), which is
 conditionally imported for QM/MM calculations if it is installed. These are
 not distributed with :mod:`sire` and are used under their own license terms.

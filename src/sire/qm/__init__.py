@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["create_engine", "emle", "zero_charge"]
 
 from .. import use_new_api as _use_new_api

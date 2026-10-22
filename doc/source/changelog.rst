@@ -121,6 +121,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed reading a DCD frame reading the coordinates, space and time from the file twice.
 
+* Relicensed the Python API, i.e. the Python source in ``src`` and the two Python files in
+  ``wrapper/Convert/SireOpenMM`` that implement its OpenMM layer, from the LGPLv3+ to the MIT
+  License. The rest of :mod:`sire` remains LGPLv3+.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

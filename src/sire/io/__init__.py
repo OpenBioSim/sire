@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["get_coords_array", "resolve_path"]
 
 from ..legacy import IO as _IO

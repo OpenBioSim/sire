@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = [
     "get_max_num_threads",
     "set_default_num_threads",

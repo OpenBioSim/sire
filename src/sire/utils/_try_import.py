@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["try_import", "try_import_from", "assert_imported", "have_imported"]
 
 _module_to_package = {}
@@ -156,7 +158,7 @@ def try_import(name, package_registry=_module_to_package, version=None):
     except Exception as e:
         error_string = str(e)
 
-    if not (package_registry is None):
+    if package_registry is not None:
         _install_package(name, package_registry, version=version)
         return try_import(name, package_registry=None)
 
@@ -206,7 +208,7 @@ def try_import_from(name, fromlist, package_registry=_module_to_package, version
         is_loaded = False
 
     if not is_loaded:
-        if not (package_registry is None):
+        if package_registry is not None:
             _install_package(name, package_registry, version=version)
             return try_import_from(name, fromlist, package_registry=None)
         else:

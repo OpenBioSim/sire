@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from typing import Union as _Union
 from typing import List as _List
 from typing import IO as _IO
@@ -201,17 +203,6 @@ class Console:
             return level is None
 
     @staticmethod
-    def _retrieve_name(variable):
-        # thanks to scohe001 on stackoverflow
-        # https://stackoverflow.com/questions/18425225/getting-the-name-of-a-variable-as-a-string
-        import inspect
-
-        callers_local_vars = inspect.currentframe().f_back.f_back.f_locals.items()
-        return [
-            var_name for var_name, var_val in callers_local_vars if var_val is variable
-        ][-1]
-
-    @staticmethod
     def debug(
         text: str,
         variables: _List[any] = None,
@@ -255,23 +246,18 @@ class Console:
             import inspect
 
             # get the local variables in the caller's scope
-            callers_local_vars = inspect.currentframe().f_back.f_locals.items()
+            callers_locals = list(inspect.currentframe().f_back.f_locals.items())
 
             table = Table(box=box.MINIMAL_DOUBLE_HEAD, style="on magenta")
             table.add_column("Name", justify="right", style="cyan", no_wrap=True)
             table.add_column("Value", justify="left", style="green")
 
             for variable in variables:
-                # get the name of the variable in the caller
-                try:
-                    # go for the last matching variable in the caller's scope
-                    name = [
-                        var_name
-                        for var_name, var_val in callers_local_vars
-                        if var_val is variable
-                    ][-1]
-                except Exception:
-                    name = "variable"
+                # use the last name bound to this object in the caller's scope
+                name = next(
+                    (k for k, v in reversed(callers_locals) if v is variable),
+                    "variable",
+                )
 
                 table.add_row(name, str(variable))
 

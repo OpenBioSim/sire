@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 A minimal, standard-library-only replacement for the third-party
 `lazy_import` package (GPLv3), used to defer importing submodules until

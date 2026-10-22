@@ -174,6 +174,26 @@ This is intended as a local development tweak only and shouldn't be committed,
 since ``actions/generate_recipe.py`` reads the ``[dependencies]`` section when
 generating the conda recipe, so the pin would also end up in our packages.
 
+License
+=======
+
+Sire is distributed under two licenses:
+
+* The Python API is licensed under the
+  `MIT License <https://opensource.org/license/mit>`__. This covers the
+  Python source in ``src/``, plus
+  ``wrapper/Convert/SireOpenMM/_perturbablemol.py`` and
+  ``wrapper/Convert/SireOpenMM/_sommcontext.py``. You are free to adapt,
+  extend, or include this code in your own projects, provided the copyright
+  and license notice is kept.
+* Everything else, including the C++ libraries and their Python wrappers, is
+  licensed under the
+  `GNU Lesser General Public License, version 3 or later <https://www.gnu.org/licenses/lgpl-3.0.en.html>`__
+  (LGPLv3+). You can use Sire as a library from software under any license,
+  but changes to these parts of Sire must be shared under the LGPL.
+
+See the `LICENSE <LICENSE>`__ file for the full terms.
+
 Support and Development
 =======================
 

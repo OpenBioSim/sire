@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = [
     "disable_backtrace_exceptions",
     "enable_backtrace_exceptions",

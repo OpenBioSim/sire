@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = [
     "biosimspace_to_sire",
     "gemmi_to_sire",

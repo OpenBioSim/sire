@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["Option"]
 
 from enum import Enum as _Enum

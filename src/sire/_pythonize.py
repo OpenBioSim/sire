@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["use_old_api", "use_new_api", "use_mixed_api"]
 
 

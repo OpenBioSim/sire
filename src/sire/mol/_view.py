@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 __all__ = ["view"]
 
 _nglview_import_error = None
@@ -196,9 +198,7 @@ if _has_nglview:
             except Exception as e:
                 from ..utils import Console
 
-                Console.warning(
-                    f"Unrecognised selection '{selection}'\n" f"Error is {e}"
-                )
+                Console.warning(f"Unrecognised selection '{selection}'\nError is {e}")
                 return "*"
 
         def add(self, selection, rep):
