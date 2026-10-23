@@ -374,8 +374,7 @@ QDataStream &operator>>(QDataStream &ds, BondRestraints &bndrests)
     {
         SharedDataStream sds(ds);
 
-        sds >> bndrests.r >> bndrests.use_pbc
-            >> static_cast<Restraints &>(bndrests);
+        sds >> bndrests.r >> bndrests.use_pbc >> static_cast<Restraints &>(bndrests);
     }
     else
         throw version_error(v, "1,2", r_bndrests, CODELOC);
@@ -503,11 +502,11 @@ QString BondRestraints::toString() const
         }
     }
 
-    return QObject::tr("BondRestraints( name=%1, size=%2, use_pbc=$3\n%4\n)")
-            .arg(this->name())
-            .arg(n)
-            .arg(this->use_pbc ? "true" : "false")
-            .arg(parts.join("\n"));
+    return QObject::tr("BondRestraints( name=%1, size=%2, use_pbc=%3\n%4\n)")
+        .arg(this->name())
+        .arg(n)
+        .arg(this->use_pbc ? "true" : "false")
+        .arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */
