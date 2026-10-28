@@ -139,6 +139,15 @@ class TestGenerateBoreschRestraint:
             deg = float(theta.to(sr.units.degrees))
             assert 10.0 < deg < 170.0
 
+    def test_anchor_triplets_not_collinear(self, boresch_result):
+        """The r1-r2-r3 and l1-l2-l3 angles must be away from 0° and 180°."""
+        restraints, _, start = boresch_result
+        r = restraints.at(0)
+        a = start.atoms()
+        for idxs in (list(r.receptor_atoms()), list(r.ligand_atoms())):
+            deg = float(sr.measure(*[a[i] for i in idxs]).to(sr.units.degrees))
+            assert 10.0 < deg < 170.0
+
     def test_force_constants_positive(self, boresch_result):
         restraints, _, _ = boresch_result
         r = restraints.at(0)

@@ -149,7 +149,8 @@ def _circular_mean_std(values):
 def _sample_dofs(system, pert_mol_num, sextuplets, n_frames):
     """
     Second trajectory pass: sample the six Boresch DOFs for every candidate
-    sextuplet. Returns arrays of shape (n_sextuplets, n_frames).
+    sextuplet, plus the anchor-internal angles that phiA and phiC depend on.
+    Returns arrays of shape (n_sextuplets, n_frames).
     """
     n_sext = len(sextuplets)
 
@@ -159,6 +160,8 @@ def _sample_dofs(system, pert_mol_num, sextuplets, n_frames):
     dof_pA = _np.zeros((n_sext, n_frames))  # phiA: r3-r2-r1-l1
     dof_pB = _np.zeros((n_sext, n_frames))  # phiB: r2-r1-l1-l2
     dof_pC = _np.zeros((n_sext, n_frames))  # phiC: r1-l1-l2-l3
+    ang_r = _np.zeros((n_sext, n_frames))  # r1-r2-r3
+    ang_l = _np.zeros((n_sext, n_frames))  # l1-l2-l3
 
     for f_idx, frame in enumerate(system.trajectory()):
         space = frame.space()
@@ -186,8 +189,10 @@ def _sample_dofs(system, pert_mol_num, sextuplets, n_frames):
             dof_pA[s_idx, f_idx] = float(_sr.measure(r3, r2, r1, l1).value())
             dof_pB[s_idx, f_idx] = float(_sr.measure(r2, r1, l1, l2).value())
             dof_pC[s_idx, f_idx] = float(_sr.measure(r1, l1, l2, l3).value())
+            ang_r[s_idx, f_idx] = float(_sr.measure(r1, r2, r3).value())
+            ang_l[s_idx, f_idx] = float(_sr.measure(l1, l2, l3).value())
 
-    return dof_r, dof_tA, dof_tB, dof_pA, dof_pB, dof_pC
+    return dof_r, dof_tA, dof_tB, dof_pA, dof_pB, dof_pC, ang_r, ang_l
 
 
 def _best_starting_frame(
@@ -838,7 +843,7 @@ def _boresch_search_rxrx(
     # -------------------------------------------------------------------------
     # 5. Second trajectory pass: sample all 6 DOFs for every valid sextuplet.
     # -------------------------------------------------------------------------
-    dof_r, dof_tA, dof_tB, dof_pA, dof_pB, dof_pC = _sample_dofs(
+    dof_r, dof_tA, dof_tB, dof_pA, dof_pB, dof_pC, ang_r, ang_l = _sample_dofs(
         system, pert_mol_num, valid_sextuplets, n_frames
     )
 
@@ -846,6 +851,8 @@ def _boresch_search_rxrx(
     # 6. Filter to the RXRX angle window (45-135 degrees), then reduce to the
     #    single ligand anchor atom closest to the ligand's centre of mass,
     #    and score the survivors sharing that anchor with Equation 1.
+    #    The r1-r2-r3 and l1-l2-l3 angles are also filtered, since phiA and
+    #    phiC are undefined when either is collinear.
     # -------------------------------------------------------------------------
     _min_angle = _np.deg2rad(45.0)
     _max_angle = _np.deg2rad(135.0)
@@ -853,14 +860,16 @@ def _boresch_search_rxrx(
     angle_ok_idxs = [
         s_idx
         for s_idx in range(len(valid_sextuplets))
-        if _min_angle < dof_tA[s_idx].mean() < _max_angle
-        and _min_angle < dof_tB[s_idx].mean() < _max_angle
+        if all(
+            _min_angle < a[s_idx].mean() < _max_angle
+            for a in (dof_tA, dof_tB, ang_r, ang_l)
+        )
     ]
 
     if not angle_ok_idxs:
         raise ValueError(
             "All hydrogen-bonded Boresch sextuplets were rejected because one or "
-            "both anchor angles have a mean outside the 45-135 degree RXRX window."
+            "more anchor angles have a mean outside the 45-135 degree RXRX window."
         )
 
     candidate_l1_idxs = {valid_sextuplets[s_idx]["l1_idx"] for s_idx in angle_ok_idxs}
@@ -1268,12 +1277,14 @@ def _boresch_search_aldeghi(
     # -------------------------------------------------------------------------
     # 5. Second trajectory pass: sample all 6 DOFs for every valid sextuplet.
     # -------------------------------------------------------------------------
-    dof_r, dof_tA, dof_tB, dof_pA, dof_pB, dof_pC = _sample_dofs(
+    dof_r, dof_tA, dof_tB, dof_pA, dof_pB, dof_pC, ang_r, ang_l = _sample_dofs(
         system, pert_mol_num, valid_sextuplets, n_frames
     )
 
     # -------------------------------------------------------------------------
     # 6. Score sextuplets by configurational volume; apply stability filter.
+    #    The r1-r2-r3 and l1-l2-l3 angles are also filtered, since phiA and
+    #    phiC are undefined when either is collinear.
     #
     # score ∝ r₀² · |sin θA₀| · |sin θB₀| · σr · σθA · σθB · σφA · σφB · σφC
     # (from Boresch et al. 2003, J. Phys. Chem. B, Eqn 32, lower = tighter)
@@ -1290,8 +1301,9 @@ def _boresch_search_aldeghi(
         mean_tA = dof_tA[s_idx].mean()
         mean_tB = dof_tB[s_idx].mean()
 
-        if not (
-            _min_angle < mean_tA < _max_angle and _min_angle < mean_tB < _max_angle
+        if not all(
+            _min_angle < a[s_idx].mean() < _max_angle
+            for a in (dof_tA, dof_tB, ang_r, ang_l)
         ):
             continue
 
@@ -1314,7 +1326,7 @@ def _boresch_search_aldeghi(
 
     if not scored:
         raise ValueError(
-            "All candidate Boresch sextuplets were rejected because one or both "
+            "All candidate Boresch sextuplets were rejected because one or more "
             "anchor angles have a mean near 0° or 180° (collinearity instability). "
             "Try increasing the cutoff or adjusting the receptor selection."
         )
