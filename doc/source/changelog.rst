@@ -125,6 +125,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   ``wrapper/Convert/SireOpenMM`` that implement its OpenMM layer, from the LGPLv3+ to the MIT
   License. The rest of :mod:`sire` remains LGPLv3+.
 
+* Fixed ``sire.restraints.boresch_search()`` not rejecting candidates whose r1-r2-r3 or
+  l1-l2-l3 anchor angles are near collinear, which leaves the phiA or phiC dihedral undefined.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
