@@ -140,13 +140,13 @@ class TestGenerateBoreschRestraint:
             assert 10.0 < deg < 170.0
 
     def test_anchor_triplets_not_collinear(self, boresch_result):
-        """The r1-r2-r3 and l1-l2-l3 angles must be away from 0° and 180°."""
+        """The r1-r2-r3 and l1-l2-l3 angles must be away from 180°."""
         restraints, _, start = boresch_result
         r = restraints.at(0)
         a = start.atoms()
         for idxs in (list(r.receptor_atoms()), list(r.ligand_atoms())):
             deg = float(sr.measure(*[a[i] for i in idxs]).to(sr.units.degrees))
-            assert 10.0 < deg < 170.0
+            assert deg < 160.0
 
     def test_force_constants_positive(self, boresch_result):
         restraints, _, _ = boresch_result
@@ -331,3 +331,16 @@ class TestCheckBoreschSearch:
 
         with pytest.raises(ValueError, match="protocol"):
             check_boresch_search(abfe_system, protocol="nonsense")
+
+
+def test_anchors_collinear():
+    """Exocyclic ring angles pass; a thermally bent nitrile angle is rejected."""
+    from sire.restraints._boresch_search import _anchors_collinear
+
+    rng = np.random.default_rng(42)
+    ring = np.deg2rad(rng.normal(135.0, 4.0, (1, 200)))
+    nitrile = np.deg2rad(180.0 - np.abs(rng.normal(0.0, 6.0, (1, 200))))
+
+    assert not _anchors_collinear(ring, ring, 0)
+    assert _anchors_collinear(ring, nitrile, 0)
+    assert _anchors_collinear(nitrile, ring, 0)
