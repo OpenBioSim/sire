@@ -348,8 +348,8 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
             editor.connect(bond.atom0(), bond.atom1())
         connectivity = editor.commit()
 
-        # Dictionary to store the MM1 atoms.
-        mm1_atoms = {}
+        # List of (QM, MM1) atom index pairs, one for each link atom.
+        mm1_atoms = []
 
         # Loop over the QM atoms and find any MM atoms that are bonded to them.
         for atom in qm_atoms:
@@ -370,34 +370,40 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
 
             # Store the list of MM atoms.
             if len(mm_atoms) > 0:
-                if len(mm_atoms) > 1:
-                    raise Exception(f"QM atom {idx} has more than one MM bond!")
-                else:
-                    # Get the element of the cut atom.
-                    link_elem = qm_mol[mm_atoms[0]].property(elem_prop)
+                abs_idx = mols.atoms().find(atom)
 
-                    # If the element is hydrogen, raise an exception.
-                    if elem == hydrogen:
-                        abs_idx = mols.atoms().find(atom)
-                        raise Exception(
-                            "Attempting replace a hydrogen with a link atom "
-                            f"(atom index {abs_idx})!"
-                        )
+                # If the element is hydrogen, raise an exception.
+                if elem == hydrogen:
+                    raise Exception(
+                        "Attempting replace a hydrogen with a link atom "
+                        f"(atom index {abs_idx})!"
+                    )
+
+                # Warn if multiple link atoms will be added to this QM atom.
+                if len(mm_atoms) > 1:
+                    _warnings.warn(
+                        f"QM atom (index {abs_idx}) is bonded to {len(mm_atoms)} "
+                        "MM atoms. Adding multiple link atoms to the same QM atom "
+                        "is not recommended!"
+                    )
+
+                for mm_atom in mm_atoms:
+                    # Get the element of the cut atom.
+                    link_elem = qm_mol[mm_atom].property(elem_prop)
 
                     # Warn if the link atom is not for a carbon-carbon bond.
                     if elem != carbon or link_elem != carbon:
-                        abs_idx = mols.atoms().find(atom)
                         _warnings.warn(
                             "Attempting to add a link atom for a non carbon-carbon "
                             f"bond (atom index {abs_idx})!"
                         )
 
                     # Store the link (MM1) atom.
-                    mm1_atoms[idx] = mm_atoms[0]
+                    mm1_atoms.append((idx, mm_atom))
 
         # Now work out the MM atoms that are bonded to the link atoms. (MM2 atoms.)
         mm2_atoms = {}
-        for qm_idx, mm1_idx in mm1_atoms.items():
+        for qm_idx, mm1_idx in mm1_atoms:
             if mm1_idx not in mm2_atoms:
                 bonds = connectivity.get_bonds(mm1_idx)
                 mm_bonds = []
@@ -432,7 +438,7 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
 
         # Convert MM1 to QM atom dictionary to absolute indices.
         mm1_to_qm_local = {}
-        for k, v in mm1_atoms.items():
+        for k, v in mm1_atoms:
             qm_idx = mols.atoms().find(qm_mol.atoms()[k])
             link_idx = mols.atoms().find(qm_mol.atoms()[v])
             # Make sure that we haven't assigned this link atom already.
@@ -451,7 +457,7 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
             mm1_to_mm2_local[link_idx] = mm_idx
 
         # Store the MM1 atom indices.
-        mm1_indices.append(list(mm1_atoms.values()))
+        mm1_indices.append([mm1_idx for _, mm1_idx in mm1_atoms])
 
         # Now work out the QM-MM1 bond distances based on the equilibrium
         # MM bond lengths.
@@ -467,7 +473,7 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
         r = _CAS.Symbol("r")
 
         # Loop over the link atoms.
-        for qm_idx, mm1_idx in mm1_atoms.items():
+        for qm_idx, mm1_idx in mm1_atoms:
             # Get the QM and MM1 atoms.
             qm_atom = qm_mol[qm_idx]
             mm1_atom = qm_mol[mm1_idx]
