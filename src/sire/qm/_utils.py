@@ -393,9 +393,10 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
 
                     # Warn if the link atom is not for a carbon-carbon bond.
                     if elem != carbon or link_elem != carbon:
+                        mm1_abs_idx = mols.atoms().find(qm_mol.atoms()[mm_atom])
                         _warnings.warn(
                             "Attempting to add a link atom for a non carbon-carbon "
-                            f"bond (atom index {abs_idx})!"
+                            f"bond (atom indices {abs_idx} and {mm1_abs_idx})!"
                         )
 
                     # Store the link (MM1) atom.

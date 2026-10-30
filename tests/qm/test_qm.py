@@ -107,6 +107,7 @@ def test_callback_function():
                 {6: 8, 10: 8},
                 {6: [4, 7], 10: [11, 12, 13]},
                 {6: 0.7522429261559697, 10: 0.7142857142857143},
+                [[6, 10]],
             ),
         ),
     ],
@@ -136,6 +137,11 @@ def test_link_atoms(ala_mols, selection, expected):
     assert mm1_to_qm == expected[0]
     assert mm1_to_mm2 == expected[1]
     assert bond_scale_factors == expected[2]
+
+    if len(expected) > 3:
+        assert [
+            sorted(idx.value() for idx in idxs) for idxs in mm1_indices
+        ] == expected[3]
 
 
 def test_link_atoms_non_carbon():
