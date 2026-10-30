@@ -128,6 +128,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed ``sire.restraints.boresch_search()`` not rejecting candidates whose r1-r2-r3 or
   l1-l2-l3 anchor angles are near collinear, which leaves the phiA or phiC dihedral undefined.
 
+* Allow QM atoms with more than one bond to the MM region, adding a link atom for each
+  QM-MM bond. A warning is raised, since multiple link atoms on the same QM atom are not
+  recommended.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

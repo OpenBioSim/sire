@@ -100,6 +100,16 @@ def test_callback_function():
                 {14: 0.7565543071161049},
             ),
         ),
+        (
+            # QM atom 8 is bonded to MM1 atoms 6 and 10.
+            "atomidx 8,9 or atomidx 14:22",
+            (
+                {6: 8, 10: 8},
+                {6: [4, 7], 10: [11, 12, 13]},
+                {6: 0.7522429261559697, 10: 0.7142857142857143},
+                [[6, 10]],
+            ),
+        ),
     ],
 )
 def test_link_atoms(ala_mols, selection, expected):
@@ -127,6 +137,11 @@ def test_link_atoms(ala_mols, selection, expected):
     assert mm1_to_qm == expected[0]
     assert mm1_to_mm2 == expected[1]
     assert bond_scale_factors == expected[2]
+
+    if len(expected) > 3:
+        assert [
+            sorted(idx.value() for idx in idxs) for idxs in mm1_indices
+        ] == expected[3]
 
 
 def test_link_atoms_non_carbon():
@@ -209,6 +224,21 @@ def test_link_atoms_unsupported(ala_mols, selection, match):
     qm_mol_to_atoms = _create_qm_mol_to_atoms(qm_atoms)
 
     with pytest.raises(Exception, match=match):
+        _get_link_atoms(ala_mols, qm_mol_to_atoms, _create_map({}))
+
+
+def test_link_atoms_multiple_warning(ala_mols):
+    """
+    Make sure that a warning is raised when a QM atom has multiple link atoms.
+    """
+
+    from sire.base import create_map as _create_map
+    from sire.qm._utils import _create_qm_mol_to_atoms, _get_link_atoms
+
+    qm_atoms = ala_mols[0]["atomidx 8,9 or atomidx 14:22"].atoms()
+    qm_mol_to_atoms = _create_qm_mol_to_atoms(qm_atoms)
+
+    with pytest.warns(UserWarning, match="multiple link atoms"):
         _get_link_atoms(ala_mols, qm_mol_to_atoms, _create_map({}))
 
 
@@ -478,10 +508,10 @@ def test_create_engine(ala_mols):
     assert nrg == 42
 
 
-def _check_link_atom_forces(qm_mols, engine, atol):
+def _check_link_atom_forces(qm_mols, engine, atol, indices=None):
     """
-    Compare the forces on the atoms around the residue 1 link atoms of the
-    alanine dipeptide to central finite differences of the total energy.
+    Compare the forces on the atoms around the link atoms of the alanine
+    dipeptide to central finite differences of the total energy.
     """
 
     import openmm
@@ -508,10 +538,13 @@ def _check_link_atom_forces(qm_mols, engine, atol):
         context.setPositions(pos * nm)
         return context.getState(getEnergy=True).getPotentialEnergy().value_in_unit(kj)
 
-    # MM1 atoms 4 and 16 are bonded to QM1 atoms 6 and 14, with MM2 atoms
-    # 1, 5 and 17, 18. Atom 10 is a QM control.
+    # By default, check the residue 1 link atoms: MM1 atoms 4 and 16 are bonded
+    # to QM1 atoms 6 and 14, with MM2 atoms 1, 5 and 17, 18. Atom 10 is a QM control.
+    if indices is None:
+        indices = [1, 4, 5, 6, 10, 14, 16, 17, 18]
+
     delta = 1e-4
-    for idx in [1, 4, 5, 6, 10, 14, 16, 17, 18]:
+    for idx in indices:
         fd_force = np.zeros(3)
         for k in range(3):
             pos = positions.copy()
@@ -524,8 +557,17 @@ def _check_link_atom_forces(qm_mols, engine, atol):
         assert np.allclose(forces[idx], fd_force, atol=atol)
 
 
+@pytest.mark.parametrize(
+    "selection, indices",
+    [
+        ("residx 1", None),
+        # QM1 atom 8 is bonded to MM1 atoms 6 and 10, with MM2 atoms 4, 7 and
+        # 11, 12, 13. Atom 14 is a QM control.
+        ("atomidx 8,9 or atomidx 14:22", [4, 6, 7, 8, 10, 11, 12, 13, 14]),
+    ],
+)
 @pytest.mark.parametrize("mechanical_embedding", [False, True])
-def test_link_atom_forces(ala_mols, mechanical_embedding):
+def test_link_atom_forces(ala_mols, selection, indices, mechanical_embedding):
     """
     Make sure that the forces on the QM1, MM1 and MM2 atoms around each link
     atom are the negative gradient of the QM energy.
@@ -565,15 +607,15 @@ def test_link_atom_forces(ala_mols, mechanical_embedding):
 
     qm_mols, engine = sr.qm.create_engine(
         mols,
-        mols[0]["residx 1"],
+        mols[0][selection],
         callback,
         mechanical_embedding=mechanical_embedding,
     )
 
-    _check_link_atom_forces(qm_mols, engine, atol=0.1)
+    _check_link_atom_forces(qm_mols, engine, atol=0.1, indices=indices)
 
     # Make sure that both link atoms were added to the QM region.
-    assert num_rows[-1] == mols[0]["residx 1"].num_atoms() + 2
+    assert num_rows[-1] == mols[0][selection].num_atoms() + 2
 
 
 @pytest.mark.skipif(not has_emle, reason="emle-engine is not installed")
