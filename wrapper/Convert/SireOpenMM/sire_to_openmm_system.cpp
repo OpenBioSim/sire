@@ -26,6 +26,7 @@
 #include "SireMM/boreschrestraints.h"
 #include "SireMM/cmapparameter.h"
 #include "SireMM/dihedralrestraints.h"
+#include "SireMM/flatbottombondrestraints.h"
 #include "SireMM/inversebondrestraints.h"
 #include "SireMM/morsepotentialrestraints.h"
 #include "SireMM/positionalrestraints.h"
@@ -435,6 +436,80 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
         custom_params[0] = 1.0;                                     // rho - always equal to 1 (scaled by lever)
         custom_params[1] = restraint.k().value() * internal_to_k;   // k
         custom_params[2] = restraint.r0().value() * internal_to_nm; // rb
+
+        restraintff->addBond(atom0_index, atom1_index, custom_params);
+    }
+}
+
+/** Add all of the flat-bottomed bond restraints from 'restraints' to the
+ *  passed system, which is acted on by the passed LambdaLever. The number
+ *  of real (non-anchor) atoms in the OpenMM::System is 'natoms'
+ */
+void _add_flat_bottom_bond_restraints(const SireMM::FlatBottomBondRestraints &restraints,
+                                      OpenMM::System &system, LambdaLever &lambda_lever,
+                                      int natoms, QVector<int> &real_atoms, int &force_group_counter)
+{
+    if (restraints.isEmpty())
+        return;
+
+    if (restraints.hasCentroidRestraints())
+    {
+        throw SireError::unsupported(QObject::tr(
+                                         "Centroid flat-bottomed bond restraints aren't yet supported..."),
+                                     CODELOC);
+    }
+
+    // harmonic outside of the flat-bottom region r0 +/- rfb, scaled by rho
+    const auto energy_expression = QString(
+                                       "rho*k*delta*delta;"
+                                       "delta=max(0, abs(r-r0)-rfb)")
+                                       .toStdString();
+
+    auto *restraintff = new OpenMM::CustomBondForce(energy_expression);
+    restraintff->setName("FlatBottomBondRestraintForce");
+
+    restraintff->addPerBondParameter("rho");
+    restraintff->addPerBondParameter("k");
+    restraintff->addPerBondParameter("r0");
+    restraintff->addPerBondParameter("rfb");
+
+    restraintff->setUsesPeriodicBoundaryConditions(restraints.usesPbc());
+
+    restraintff->setForceGroup(force_group_counter);
+    lambda_lever.addRestraintIndex(restraints.name(),
+                                   system.addForce(restraintff));
+    lambda_lever.setRestraintForceGroup(restraints.name(), force_group_counter++);
+
+    const auto atom_restraints = restraints.atomRestraints();
+
+    const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+    const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
+
+    std::vector<double> custom_params = {1.0, 0.0, 0.0, 0.0};
+
+    for (const auto &restraint : atom_restraints)
+    {
+        int atom0_index = real_atoms[restraint.atom0()];
+        int atom1_index = real_atoms[restraint.atom1()];
+
+        if (atom0_index < 0 or atom0_index >= natoms)
+            throw SireError::invalid_index(QObject::tr(
+                                               "Invalid particle index! %1 from %2")
+                                               .arg(atom0_index)
+                                               .arg(natoms),
+                                           CODELOC);
+
+        if (atom1_index < 0 or atom1_index >= natoms)
+            throw SireError::invalid_index(QObject::tr(
+                                               "Invalid particle index! %1 from %2")
+                                               .arg(atom1_index)
+                                               .arg(natoms),
+                                           CODELOC);
+
+        custom_params[0] = 1.0;                                      // rho - always equal to 1 (scaled by lever)
+        custom_params[1] = restraint.k().value() * internal_to_k;    // k
+        custom_params[2] = restraint.r0().value() * internal_to_nm;  // r0
+        custom_params[3] = restraint.rfb().value() * internal_to_nm; // rfb
 
         restraintff->addBond(atom0_index, atom1_index, custom_params);
     }
@@ -3167,6 +3242,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             {
                 _add_inverse_bond_restraints(prop.read().asA<SireMM::InverseBondRestraints>(),
                                              system, lambda_lever, start_index, real_atoms, force_group_counter);
+            }
+            else if (prop.read().isA<SireMM::FlatBottomBondRestraints>())
+            {
+                _add_flat_bottom_bond_restraints(prop.read().asA<SireMM::FlatBottomBondRestraints>(),
+                                                 system, lambda_lever, start_index, real_atoms, force_group_counter);
             }
             else if (prop.read().isA<SireMM::BoreschRestraints>())
             {

@@ -2,7 +2,6 @@
 
 // (C) Christopher Woods, LGPL >= 3 License
 
-
 #include "boost/python.hpp"
 
 #include "Helpers/clone_const_reference.hpp"
@@ -178,6 +177,10 @@
 #include "DoubleDistanceRestraint.pypp.hpp"
 
 #include "ExcludedPairs.pypp.hpp"
+
+#include "FlatBottomBondRestraint.pypp.hpp"
+
+#include "FlatBottomBondRestraints.pypp.hpp"
 
 #include "FourAtomFunction.pypp.hpp"
 
@@ -461,7 +464,8 @@ namespace bp = boost::python;
 
 #include "SireMM_properties.h"
 
-BOOST_PYTHON_MODULE(_MM){
+BOOST_PYTHON_MODULE(_MM)
+{
     register_SireMM_objects();
 
     register_SireMM_containers();
@@ -722,6 +726,10 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_ExcludedPairs_class();
 
+    register_FlatBottomBondRestraint_class();
+
+    register_FlatBottomBondRestraints_class();
+
     register_FourAtomFunction_class();
 
     register_FourAtomFunctions_class();
@@ -914,4 +922,3 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_Mover_SelectorImproper__class();
 }
-

@@ -132,6 +132,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   QM-MM bond. A warning is raised, since multiple link atoms on the same QM atom are not
   recommended.
 
+* Added flat-bottomed distance restraints via ``sire.restraints.flat_bottom_distance()``
+  and ``sire.restraints.flat_bottom_bond()``, matching the SOMD1 distance restraint potential.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

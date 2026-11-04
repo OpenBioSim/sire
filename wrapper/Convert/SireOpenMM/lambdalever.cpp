@@ -2586,7 +2586,8 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
     if (ff_type == "BondRestraintForce" or
         ff_type == "PositionalRestraintForce" or
         ff_type == "MorsePotentialRestraintForce" or
-        ff_type == "InverseBondRestraintForce")
+        ff_type == "InverseBondRestraintForce" or
+        ff_type == "FlatBottomBondRestraintForce")
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomBondForce *>(&ff),

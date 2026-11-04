@@ -13,6 +13,8 @@ __all__ = [
     "BondRestraints",
     "InverseBondRestraint",
     "InverseBondRestraints",
+    "FlatBottomBondRestraint",
+    "FlatBottomBondRestraints",
     "CMAPParameter",
     "Dihedral",
     "Improper",
@@ -48,6 +50,9 @@ BondRestraints = _MM.BondRestraints
 
 InverseBondRestraint = _MM.InverseBondRestraint
 InverseBondRestraints = _MM.InverseBondRestraints
+
+FlatBottomBondRestraint = _MM.FlatBottomBondRestraint
+FlatBottomBondRestraints = _MM.FlatBottomBondRestraints
 
 BoreschRestraint = _MM.BoreschRestraint
 BoreschRestraints = _MM.BoreschRestraints

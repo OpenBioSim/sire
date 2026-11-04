@@ -88,6 +88,90 @@ def test_openmm_distance_restraints(ala_mols, openmm_platform):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+@pytest.mark.parametrize(
+    "offset,rfb,expected_delta",
+    [
+        (0.0, 1.0, 0.0),
+        (0.5, 1.0, 0.0),
+        (-0.5, 1.0, 0.0),
+        (2.0, 0.5, 1.5),
+        (-2.0, 0.5, 1.5),
+        (1.0, 0.0, 1.0),
+    ],
+)
+def test_openmm_flat_bottom_distance_restraints(
+    ala_mols, offset, rfb, expected_delta, openmm_platform
+):
+    mols = ala_mols[0:2]
+
+    atom0 = mols[0][0]
+    atom1 = mols[-1][0]
+
+    r = sr.measure(atom0, atom1, ignore_space=True).value()
+    k = 10.0
+
+    restraints = sr.restraints.flat_bottom_distance(
+        mols,
+        atoms0=atom0,
+        atoms1=atom1,
+        r0=f"{r + offset} A",
+        k=f"{k} kcal mol-1 A-2",
+        rfb=f"{rfb} A",
+        use_pbc=False,
+    )
+
+    assert len(restraints) == 1
+    assert restraints[0].rfb() == sr.u(f"{rfb} A")
+
+    map = {"space": sr.vol.Cartesian(), "platform": openmm_platform}
+
+    d = mols.dynamics(restraints=restraints, map=map)
+    context = d.context()
+
+    for force in context.getSystem().getForces():
+        if force.getName() == "FlatBottomBondRestraintForce":
+            group = force.getForceGroup()
+            break
+    else:
+        assert False, "FlatBottomBondRestraintForce not found"
+
+    from openmm import unit
+
+    energy = (
+        context.getState(getEnergy=True, groups={group})
+        .getPotentialEnergy()
+        .value_in_unit(unit.kilojoule_per_mole)
+    )
+
+    expected = (k * expected_delta**2 * sr.units.kcal_per_mol).to(sr.units.kJ_per_mol)
+
+    assert energy == pytest.approx(expected, abs=1e-3)
+
+
+def test_flat_bottom_distance_restraint_api(ala_mols):
+    mols = ala_mols
+
+    restraints = sr.restraints.flat_bottom_bond(
+        mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A", rfb="1A"
+    )
+
+    assert not restraints.uses_pbc()
+    assert restraints[0].r0() == sr.u("5A")
+    assert restraints[0].rfb() == sr.u("1A")
+
+    combined = restraints + restraints
+    assert len(combined) == 2
+
+    with pytest.raises(Exception):
+        sr.restraints.flat_bottom_distance(
+            mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A", rfb="-1A"
+        )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
 def test_openmm_fixed_atoms(kigaki_mols, openmm_platform):
     mols = kigaki_mols
 

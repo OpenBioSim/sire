@@ -418,6 +418,16 @@ def test_vsite_restraints(solvated_neopentane_methane, openmm_platform):
             ),
         ),
         (
+            "flat_bottom_bond",
+            lambda system: sr.restraints.flat_bottom_bond(
+                system, atoms0=restr_atoms[0], atoms1=restr_atoms[2], rfb="0.5 A"
+            ),
+            "FlatBottomBondRestraintForce",
+            lambda force: (
+                force.getBondParameters(0)[:2] == [start_mol1 + 0, start_mol1 + 2]
+            ),
+        ),
+        (
             "morse_potential",
             lambda system: sr.restraints.morse_potential(
                 system,
