@@ -251,8 +251,7 @@ QDataStream &operator>>(QDataStream &ds, DihedralRestraints &dihrests)
     {
         SharedDataStream sds(ds);
 
-        sds >> dihrests.r >> dihrests.use_pbc
-            >> static_cast<Restraints &>(dihrests);
+        sds >> dihrests.r >> dihrests.use_pbc >> static_cast<Restraints &>(dihrests);
     }
     else
         throw version_error(v, "1,2", r_dihrests, CODELOC);
@@ -468,7 +467,7 @@ DihedralRestraints DihedralRestraints::operator+(const DihedralRestraint &restra
 {
     DihedralRestraints ret(*this);
     ret += restraint;
-    return *this;
+    return ret;
 }
 
 /** Add restraints onto the list */
@@ -483,7 +482,7 @@ DihedralRestraints DihedralRestraints::operator+(const DihedralRestraints &restr
 {
     DihedralRestraints ret(*this);
     ret += restraints;
-    return *this;
+    return ret;
 }
 
 /** Set whether or not periodic boundary conditions are to be used */
