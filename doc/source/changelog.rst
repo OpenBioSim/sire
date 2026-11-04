@@ -141,6 +141,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed an out-of-bounds read when converting restraints to OpenMM whose atom indices lie
   outside the system. An exception is now raised instead.
 
+* Fixed the bond, inverse bond and Morse potential centroid restraint constructors naming
+  the wrong atom when the two groups overlap, and reallocating the second group on every atom.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
