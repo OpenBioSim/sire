@@ -467,7 +467,7 @@ AngleRestraints AngleRestraints::operator+(const AngleRestraint &restraint) cons
 {
     AngleRestraints ret(*this);
     ret += restraint;
-    return *this;
+    return ret;
 }
 
 /** Add restraints onto the list */
@@ -482,7 +482,7 @@ AngleRestraints AngleRestraints::operator+(const AngleRestraints &restraints) co
 {
     AngleRestraints ret(*this);
     ret += restraints;
-    return *this;
+    return ret;
 }
 
 /** Set whether or not periodic boundary conditions are to be used */

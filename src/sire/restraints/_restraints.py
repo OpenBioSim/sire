@@ -6,6 +6,8 @@ __all__ = [
     "bond",
     "dihedral",
     "distance",
+    "flat_bottom_bond",
+    "flat_bottom_distance",
     "inverse_bond",
     "inverse_distance",
     "morse_potential",
@@ -1243,6 +1245,141 @@ def inverse_bond(*args, use_pbc=False, **kwargs):
     as a distance restraint
     """
     return inverse_distance(*args, use_pbc=use_pbc, **kwargs)
+
+
+def flat_bottom_distance(
+    mols,
+    atoms0,
+    atoms1,
+    r0=None,
+    k=None,
+    rfb=None,
+    use_pbc=None,
+    name=None,
+    map=None,
+):
+    """
+    Create a set of flat-bottomed distance restraints from all of the atoms
+    in 'atoms0' to all of the atoms in 'atoms1' where all atoms are
+    contained in the container 'mols', using the passed values of 'k',
+    equilibrium distance 'r0' and flat-bottom radius 'rfb'.
+
+    The restraint energy is zero when |r - r0| <= rfb, and is
+    k*(|r - r0| - rfb)**2 otherwise. Note that 'k' corresponds to half
+    the force constant.
+
+    These restraints will be per atom-atom distance. If a list of k, r0
+    and/or rfb values are passed, then different values could be used for
+    different atom-atom distances (assuming the same number as the number of
+    atom-atom distances). Otherwise, all atom-atom distances will use the
+    same parameters.
+
+    If r0 is None, then the current atom-atom distance for
+    each atom-atom pair will be used as the equilibium value.
+
+    If k is None, then a default value of 150 kcal mol-1 A-2 will be used.
+
+    If rfb is None, then a default value of 0 A will be used, i.e. a
+    standard harmonic distance restraint.
+    """
+    from .. import u
+    from ..base import create_map
+    from ..mm import FlatBottomBondRestraint, FlatBottomBondRestraints
+
+    map = create_map(map)
+
+    if k is None:
+        k = [u("150 kcal mol-1 A-2")]
+    elif type(k) is list:
+        k = [u(x) for x in k]
+    else:
+        k = [u(k)]
+
+    if rfb is None:
+        rfb = [u("0 A")]
+    elif type(rfb) is list:
+        rfb = [u(x) for x in rfb]
+    else:
+        rfb = [u(rfb)]
+
+    if use_pbc is not None:
+        if not isinstance(use_pbc, bool):
+            raise ValueError("'use_pbc' must be of type 'bool'")
+    else:
+        use_pbc = True
+
+    atoms0 = _to_atoms(mols, atoms0)
+    atoms1 = _to_atoms(mols, atoms1)
+
+    if atoms0.is_empty() or atoms1.is_empty():
+        raise ValueError("We need at least one atom in each group")
+
+    while len(atoms0) < len(atoms1):
+        atoms0 += atoms0[-1]
+
+    while len(atoms1) < len(atoms0):
+        atoms1 += atoms1[-1]
+
+    if r0 is None:
+        # calculate all of the current distances
+        from .. import measure
+
+        r0 = []
+        for atom0, atom1 in zip(atoms0, atoms1):
+            r0.append(measure(atom0, atom1))
+    elif type(r0) is list:
+        r0 = [u(x) for x in r0]
+    else:
+        r0 = [u(r0)]
+
+    mols = mols.atoms()
+
+    if name is None:
+        restraints = FlatBottomBondRestraints()
+    else:
+        restraints = FlatBottomBondRestraints(name=name)
+
+    for i, (atom0, atom1) in enumerate(zip(atoms0, atoms1)):
+        idxs0 = mols.find(atom0)
+        idxs1 = mols.find(atom1)
+
+        if type(idxs0) is int:
+            idxs0 = [idxs0]
+
+        if type(idxs1) is int:
+            idxs1 = [idxs1]
+
+        if len(idxs0) == 0:
+            raise KeyError(
+                f"Could not find atom {atom0} in the molecules. Please ensure "
+                "that 'mols' contains all of that atoms, or else we can't "
+                "add the flat-bottomed distance restraints."
+            )
+
+        if len(idxs1) == 0:
+            raise KeyError(
+                f"Could not find atom {atom1} in the molecules. Please ensure "
+                "that 'mols' contains all of that atoms, or else we can't "
+                "add the flat-bottomed distance restraints."
+            )
+
+        ik = k[min(i, len(k) - 1)]
+        ir0 = r0[min(i, len(r0) - 1)]
+        irfb = rfb[min(i, len(rfb) - 1)]
+
+        restraints.add(FlatBottomBondRestraint(idxs0[0], idxs1[0], ik, ir0, irfb))
+
+    restraints.set_uses_pbc(use_pbc)
+
+    return restraints
+
+
+def flat_bottom_bond(*args, use_pbc=False, **kwargs):
+    """
+    Synonym for flat_bottom_distance(), as a bond restraint is treated the
+    same as a distance restraint
+    """
+    return flat_bottom_distance(*args, use_pbc=use_pbc, **kwargs)
 
 
 def positional(

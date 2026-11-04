@@ -162,14 +162,14 @@ BondRestraint::BondRestraint(const QList<qint64> &atoms0,
                 throw SireError::invalid_arg(QObject::tr(
                                                  "You cannot have an overlap in atoms between the two groups. Atom "
                                                  "%1 appears in both!")
-                                                 .arg(sorted.at(0)),
+                                                 .arg(atom),
                                              CODELOC);
 
             atms1.append(atom);
         }
-
-        atms1.squeeze();
     }
+
+    atms1.squeeze();
 }
 
 /** Copy constructor */
@@ -672,7 +672,7 @@ BondRestraints BondRestraints::operator+(const BondRestraint &restraint) const
 {
     BondRestraints ret(*this);
     ret += restraint;
-    return *this;
+    return ret;
 }
 
 /** Add restraints onto the list */
@@ -687,7 +687,7 @@ BondRestraints BondRestraints::operator+(const BondRestraints &restraints) const
 {
     BondRestraints ret(*this);
     ret += restraints;
-    return *this;
+    return ret;
 }
 
 /** Set whether or not periodic boundary conditions are to be used */

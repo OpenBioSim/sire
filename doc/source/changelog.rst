@@ -132,6 +132,18 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   QM-MM bond. A warning is raised, since multiple link atoms on the same QM atom are not
   recommended.
 
+* Added flat-bottomed distance restraints via ``sire.restraints.flat_bottom_distance()``
+  and ``sire.restraints.flat_bottom_bond()``, matching the SOMD1 distance restraint potential.
+
+* Fixed ``operator+`` on the bond, inverse bond, angle, dihedral, Boresch, positional and
+  Morse potential restraint containers returning the unmodified left-hand operand.
+
+* Fixed an out-of-bounds read when converting restraints to OpenMM whose atom indices lie
+  outside the system. An exception is now raised instead.
+
+* Fixed the bond, inverse bond and Morse potential centroid restraint constructors naming
+  the wrong atom when the two groups overlap, and reallocating the second group on every atom.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

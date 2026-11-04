@@ -313,8 +313,7 @@ QDataStream &operator>>(QDataStream &ds, PositionalRestraints &posrests)
     {
         SharedDataStream sds(ds);
 
-        sds >> posrests.r >> posrests.use_pbc
-            >> static_cast<Restraints &>(posrests);
+        sds >> posrests.r >> posrests.use_pbc >> static_cast<Restraints &>(posrests);
     }
     else
         throw version_error(v, "1,2", r_posrests, CODELOC);
@@ -443,10 +442,10 @@ QString PositionalRestraints::toString() const
     }
 
     return QObject::tr("PositionalRestraints( name=%1, size=%2, use_pbc=%3\n%4\n)")
-            .arg(this->name())
-            .arg(n)
-            .arg(this->use_pbc ? "true" : "false")
-            .arg(parts.join("\n"));
+        .arg(this->name())
+        .arg(n)
+        .arg(this->use_pbc ? "true" : "false")
+        .arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */
@@ -612,7 +611,7 @@ PositionalRestraints PositionalRestraints::operator+(const PositionalRestraint &
 {
     PositionalRestraints ret(*this);
     ret += restraint;
-    return *this;
+    return ret;
 }
 
 /** Add restraints onto the list */
@@ -627,7 +626,7 @@ PositionalRestraints PositionalRestraints::operator+(const PositionalRestraints 
 {
     PositionalRestraints ret(*this);
     ret += restraints;
-    return *this;
+    return ret;
 }
 
 /** Set whether or not periodic boundary conditions are to be used */

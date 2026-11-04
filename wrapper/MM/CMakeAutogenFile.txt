@@ -203,6 +203,8 @@ set ( PYPP_SOURCES
        SelectorDihedral.pypp.cpp
        LJParameterName.pypp.cpp
        FourAtomFunctions.pypp.cpp
+       FlatBottomBondRestraint.pypp.cpp
+       FlatBottomBondRestraints.pypp.cpp
        AmberDihPart.pypp.cpp
        SelectorMBond.pypp.cpp
        InternalParameterNames.pypp.cpp

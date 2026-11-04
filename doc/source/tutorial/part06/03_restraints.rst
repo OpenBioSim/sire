@@ -288,6 +288,47 @@ BondRestraints( size=630
    the first atom in the first molecule and the oxygen atoms in all of
    the water molecules.
 
+Flat-Bottomed Distance Restraints
+---------------------------------
+
+The :func:`sire.restraints.flat_bottom_distance` or
+:func:`sire.restraints.flat_bottom_bond` functions create distance restraints
+with a flat-bottomed potential. The energy is zero while the distance ``r``
+is within ``rfb`` of the equilibrium distance ``r0``, and harmonic outside
+of this region, i.e. ``E = k * (|r - r0| - rfb) ** 2`` when ``|r - r0| > rfb``.
+This is useful when you want to keep atoms near each other while still
+allowing them to move freely over a range of distances.
+
+These functions take the same arguments as :func:`sire.restraints.distance`,
+plus the flat-bottom radius ``rfb``, e.g.
+
+>>> restraints = sr.restraints.flat_bottom_distance(mols, atoms0=0, atoms1=1,
+...                                                 rfb="0.5 A")
+>>> print(restraints)
+FlatBottomBondRestraints( name=restraint, size=1, use_pbc=true
+0: FlatBottomBondRestraint( 0 <=> 1, k=150 kcal mol-1 Å-2 : r0=1.09 Å : rfb=0.5 Å )
+)
+
+creates a restraint between atoms 0 and 1 that has no energy for distances
+between 0.59 Å and 1.59 Å. As before, ``r0`` defaults to the current distance
+between the atoms and ``k`` to 150 kcal mol-1 Å-2. If ``rfb`` is not set then
+it defaults to zero, giving a standard harmonic distance restraint.
+
+>>> restraints = sr.restraints.flat_bottom_bond(mols, atoms0=0, atoms1=1,
+...                                             k="100 kcal mol-1 A-2",
+...                                             r0="1.5 A", rfb="0.5 A")
+>>> print(restraints)
+FlatBottomBondRestraints( name=restraint, size=1, use_pbc=false
+0: FlatBottomBondRestraint( 0 <=> 1, k=100 kcal mol-1 Å-2 : r0=1.5 Å : rfb=0.5 Å )
+)
+
+.. note::
+
+   This is the same potential as the SOMD1 distance restraints, with
+   ``r0``, ``k`` and ``rfb`` corresponding to the ``reql``, ``kl`` and
+   ``Dl`` values in the ``distance restraints dictionary``, using the
+   same units.
+
 Angle or Dihedral Restraints
 ---------------------------
 
