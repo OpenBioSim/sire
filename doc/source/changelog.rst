@@ -138,6 +138,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed ``operator+`` on the bond, inverse bond, angle, dihedral, Boresch, positional and
   Morse potential restraint containers returning the unmodified left-hand operand.
 
+* Fixed an out-of-bounds read when converting restraints to OpenMM whose atom indices lie
+  outside the system. An exception is now raised instead.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

@@ -67,6 +67,22 @@ using SireSystem::ForceFieldInfo;
 
 using namespace SireOpenMM;
 
+/** Return the OpenMM particle index of the restrained atom at 'atom_idx',
+ *  raising an exception if it is outside the system.
+ */
+int _to_real_atom(qint64 atom_idx, const QVector<int> &real_atoms)
+{
+    if (atom_idx < 0 or atom_idx >= real_atoms.count())
+        throw SireError::invalid_index(QObject::tr(
+                                           "Restraint atom index %1 is out of range for a system "
+                                           "with %2 atoms.")
+                                           .arg(atom_idx)
+                                           .arg(real_atoms.count()),
+                                       CODELOC);
+
+    return real_atoms[atom_idx];
+}
+
 /** Add all of the Boresch restraints from 'restraints' to the
  *  passed systen, which is being acted on by the passed LambdaLever.
  *  The number of real (non-anchor) atoms in the OpenMM::System is 'natoms'
@@ -253,8 +269,8 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
 
         for (int i = 0; i < 3; ++i)
         {
-            particles[i] = real_atoms[restraint.receptorAtoms()[i]];
-            particles[i + 3] = real_atoms[restraint.ligandAtoms()[i]];
+            particles[i] = _to_real_atom(restraint.receptorAtoms()[i], real_atoms);
+            particles[i + 3] = _to_real_atom(restraint.ligandAtoms()[i], real_atoms);
 
             if (particles[i] < 0 or particles[i] >= natoms or
                 particles[i + 3] < 0 or particles[i + 3] >= natoms)
@@ -346,8 +362,8 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
 
     for (const auto &restraint : atom_restraints)
     {
-        int atom0_index = real_atoms[restraint.atom0()];
-        int atom1_index = real_atoms[restraint.atom1()];
+        int atom0_index = _to_real_atom(restraint.atom0(), real_atoms);
+        int atom1_index = _to_real_atom(restraint.atom1(), real_atoms);
 
         if (atom0_index < 0 or atom0_index >= natoms)
             throw SireError::invalid_index(QObject::tr(
@@ -416,8 +432,8 @@ void _add_inverse_bond_restraints(const SireMM::InverseBondRestraints &restraint
 
     for (const auto &restraint : atom_restraints)
     {
-        int atom0_index = real_atoms[restraint.atom0()];
-        int atom1_index = real_atoms[restraint.atom1()];
+        int atom0_index = _to_real_atom(restraint.atom0(), real_atoms);
+        int atom1_index = _to_real_atom(restraint.atom1(), real_atoms);
 
         if (atom0_index < 0 or atom0_index >= natoms)
             throw SireError::invalid_index(QObject::tr(
@@ -489,8 +505,8 @@ void _add_flat_bottom_bond_restraints(const SireMM::FlatBottomBondRestraints &re
 
     for (const auto &restraint : atom_restraints)
     {
-        int atom0_index = real_atoms[restraint.atom0()];
-        int atom1_index = real_atoms[restraint.atom1()];
+        int atom0_index = _to_real_atom(restraint.atom0(), real_atoms);
+        int atom1_index = _to_real_atom(restraint.atom1(), real_atoms);
 
         if (atom0_index < 0 or atom0_index >= natoms)
             throw SireError::invalid_index(QObject::tr(
@@ -567,8 +583,8 @@ void _add_morse_potential_restraints(const SireMM::MorsePotentialRestraints &res
 
     for (const auto &restraint : atom_restraints)
     {
-        int atom0_index = real_atoms[restraint.atom0()];
-        int atom1_index = real_atoms[restraint.atom1()];
+        int atom0_index = _to_real_atom(restraint.atom0(), real_atoms);
+        int atom1_index = _to_real_atom(restraint.atom1(), real_atoms);
 
         if (atom0_index < 0 or atom0_index >= natoms)
             throw SireError::invalid_index(QObject::tr(
@@ -666,7 +682,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     // we need to add all of the positions as anchor particles
     for (const auto &restraint : atom_restraints)
     {
-        int atom_index = real_atoms[restraint.atom()];
+        int atom_index = _to_real_atom(restraint.atom(), real_atoms);
 
         if (atom_index < 0 or atom_index >= natoms)
             throw SireError::invalid_index(QObject::tr(
@@ -803,7 +819,7 @@ void _add_rmsd_restraints(const SireMM::RMSDRestraints &restraints,
 
         for (int i = 0; i < n_particles; ++i)
         {
-            particles[i] = real_atoms[restraint.atoms()[i]];
+            particles[i] = _to_real_atom(restraint.atoms()[i], real_atoms);
         }
 
         // Extract reference positions and convert to correct units
@@ -892,7 +908,7 @@ void _add_angle_restraints(const SireMM::AngleRestraints &restraints,
 
         for (int i = 0; i < 3; ++i)
         {
-            particles[i] = real_atoms[restraint.atoms()[i]];
+            particles[i] = _to_real_atom(restraint.atoms()[i], real_atoms);
         }
 
         std::vector<double> parameters;
@@ -957,7 +973,7 @@ void _add_dihedral_restraints(const SireMM::DihedralRestraints &restraints,
 
         for (int i = 0; i < 4; ++i)
         {
-            particles[i] = real_atoms[restraint.atoms()[i]];
+            particles[i] = _to_real_atom(restraint.atoms()[i], real_atoms);
         }
 
         std::vector<double> parameters;

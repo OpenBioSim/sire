@@ -148,6 +148,21 @@ def test_openmm_flat_bottom_distance_restraints(
     assert energy == pytest.approx(expected, abs=1e-3)
 
 
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_restraint_atom_out_of_range(ala_mols, openmm_platform):
+    mols = ala_mols
+
+    restraints = sr.restraints.distance(
+        mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A"
+    )
+
+    with pytest.raises(Exception, match="out of range"):
+        mols[0:2].dynamics(restraints=restraints, platform=openmm_platform)
+
+
 def test_flat_bottom_distance_restraint_api(ala_mols):
     mols = ala_mols
 
