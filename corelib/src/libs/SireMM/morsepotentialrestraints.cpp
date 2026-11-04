@@ -90,9 +90,9 @@ MorsePotentialRestraint::MorsePotentialRestraint()
  *  using the specified force constant and well depth (dissociation energy)
  */
 MorsePotentialRestraint::MorsePotentialRestraint(qint64 atom0, qint64 atom1,
-                             const SireUnits::Dimension::HarmonicBondConstant &k,
-                             const SireUnits::Dimension::Length &r0,
-                             const SireUnits::Dimension::MolarEnergy &de)
+                                                 const SireUnits::Dimension::HarmonicBondConstant &k,
+                                                 const SireUnits::Dimension::Length &r0,
+                                                 const SireUnits::Dimension::MolarEnergy &de)
     : ConcreteProperty<MorsePotentialRestraint, Property>(),
       _k(k), _r0(r0), _de(de)
 {
@@ -115,63 +115,63 @@ MorsePotentialRestraint::MorsePotentialRestraint(qint64 atom0, qint64 atom1,
  *  and dissociation energy
  */
 MorsePotentialRestraint::MorsePotentialRestraint(const QList<qint64> &atoms0,
-    const QList<qint64> &atoms1,
-    const SireUnits::Dimension::HarmonicBondConstant &k,
-    const SireUnits::Dimension::Length &r0,
-    const SireUnits::Dimension::MolarEnergy &de)
-: ConcreteProperty<MorsePotentialRestraint, Property>(),
-_k(k), _r0(r0), _de(de)
+                                                 const QList<qint64> &atoms1,
+                                                 const SireUnits::Dimension::HarmonicBondConstant &k,
+                                                 const SireUnits::Dimension::Length &r0,
+                                                 const SireUnits::Dimension::MolarEnergy &de)
+    : ConcreteProperty<MorsePotentialRestraint, Property>(),
+      _k(k), _r0(r0), _de(de)
 {
-if (atoms0.isEmpty() or atoms1.isEmpty())
-return;
+    if (atoms0.isEmpty() or atoms1.isEmpty())
+        return;
 
-// remove duplicates
-atms0.reserve(atoms0.count());
+    // remove duplicates
+    atms0.reserve(atoms0.count());
 
-auto sorted = atoms0;
-std::sort(sorted.begin(), sorted.end());
+    auto sorted = atoms0;
+    std::sort(sorted.begin(), sorted.end());
 
-atms0.append(sorted.at(0));
+    atms0.append(sorted.at(0));
 
-for (const auto &atom : sorted)
-{
-if (atom != atms0.last())
-atms0.append(atom);
-}
+    for (const auto &atom : sorted)
+    {
+        if (atom != atms0.last())
+            atms0.append(atom);
+    }
 
-atms0.squeeze();
+    atms0.squeeze();
 
-// now the same for atoms1
-atms1.reserve(atoms1.count());
+    // now the same for atoms1
+    atms1.reserve(atoms1.count());
 
-sorted = atoms1;
-std::sort(sorted.begin(), sorted.end());
+    sorted = atoms1;
+    std::sort(sorted.begin(), sorted.end());
 
-if (atms0.indexOf(sorted.at(0)) != -1)
-throw SireError::invalid_arg(QObject::tr(
-                "You cannot have an overlap in atoms between the two groups. Atom "
-                "%1 appears in both!")
-                .arg(sorted.at(0)),
-            CODELOC);
+    if (atms0.indexOf(sorted.at(0)) != -1)
+        throw SireError::invalid_arg(QObject::tr(
+                                         "You cannot have an overlap in atoms between the two groups. Atom "
+                                         "%1 appears in both!")
+                                         .arg(sorted.at(0)),
+                                     CODELOC);
 
-atms1.append(sorted.at(0));
+    atms1.append(sorted.at(0));
 
-for (const auto &atom : sorted)
-{
-if (atom != atms1.last())
-{
-if (atms0.indexOf(atom) != -1)
-throw SireError::invalid_arg(QObject::tr(
-                        "You cannot have an overlap in atoms between the two groups. Atom "
-                        "%1 appears in both!")
-                        .arg(sorted.at(0)),
-                    CODELOC);
+    for (const auto &atom : sorted)
+    {
+        if (atom != atms1.last())
+        {
+            if (atms0.indexOf(atom) != -1)
+                throw SireError::invalid_arg(QObject::tr(
+                                                 "You cannot have an overlap in atoms between the two groups. Atom "
+                                                 "%1 appears in both!")
+                                                 .arg(sorted.at(0)),
+                                             CODELOC);
 
-atms1.append(atom);
-}
+            atms1.append(atom);
+        }
 
-atms1.squeeze();
-}
+        atms1.squeeze();
+    }
 }
 
 /** Copy constructor */
@@ -386,8 +386,7 @@ QDataStream &operator>>(QDataStream &ds, MorsePotentialRestraints &morser_morsep
     {
         SharedDataStream sds(ds);
 
-        sds >> morser_morsepotentialrests.r >> morser_morsepotentialrests.use_pbc
-            >> static_cast<Restraints &>(morser_morsepotentialrests);
+        sds >> morser_morsepotentialrests.r >> morser_morsepotentialrests.use_pbc >> static_cast<Restraints &>(morser_morsepotentialrests);
     }
     else
         throw version_error(v, "1,2", r_morsepotentialrests, CODELOC);
@@ -424,7 +423,7 @@ MorsePotentialRestraints::MorsePotentialRestraints(const QList<MorsePotentialRes
 }
 
 MorsePotentialRestraints::MorsePotentialRestraints(const QString &name,
-                               const MorsePotentialRestraint &restraint)
+                                                   const MorsePotentialRestraint &restraint)
     : ConcreteProperty<MorsePotentialRestraints, Restraints>(name)
 {
     if (not restraint.isNull())
@@ -432,7 +431,7 @@ MorsePotentialRestraints::MorsePotentialRestraints(const QString &name,
 }
 
 MorsePotentialRestraints::MorsePotentialRestraints(const QString &name,
-                               const QList<MorsePotentialRestraint> &restraints)
+                                                   const QList<MorsePotentialRestraint> &restraints)
     : ConcreteProperty<MorsePotentialRestraints, Restraints>(name)
 {
     for (const auto &restraint : restraints)
@@ -516,10 +515,10 @@ QString MorsePotentialRestraints::toString() const
     }
 
     return QObject::tr("MorsePotentialRestraints( name=%1, size=%2, use_pbc=%3\n%4\n)")
-            .arg(this->name())
-            .arg(n)
-            .arg(this->use_pbc ? "use_pbc=True" : "use_pbc=False")
-            .arg(parts.join("\n"));
+        .arg(this->name())
+        .arg(n)
+        .arg(this->use_pbc ? "use_pbc=True" : "use_pbc=False")
+        .arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */
@@ -685,7 +684,7 @@ MorsePotentialRestraints MorsePotentialRestraints::operator+(const MorsePotentia
 {
     MorsePotentialRestraints ret(*this);
     ret += restraint;
-    return *this;
+    return ret;
 }
 
 /** Add restraints onto the list */
@@ -700,7 +699,7 @@ MorsePotentialRestraints MorsePotentialRestraints::operator+(const MorsePotentia
 {
     MorsePotentialRestraints ret(*this);
     ret += restraints;
-    return *this;
+    return ret;
 }
 
 /** Set whether or not periodic boundary conditions are to be used */

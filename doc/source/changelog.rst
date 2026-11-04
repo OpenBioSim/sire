@@ -135,6 +135,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added flat-bottomed distance restraints via ``sire.restraints.flat_bottom_distance()``
   and ``sire.restraints.flat_bottom_bond()``, matching the SOMD1 distance restraint potential.
 
+* Fixed ``operator+`` on the bond, inverse bond, angle, dihedral, Boresch, positional and
+  Morse potential restraint containers returning the unmodified left-hand operand.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

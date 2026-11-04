@@ -672,7 +672,7 @@ BondRestraints BondRestraints::operator+(const BondRestraint &restraint) const
 {
     BondRestraints ret(*this);
     ret += restraint;
-    return *this;
+    return ret;
 }
 
 /** Add restraints onto the list */
@@ -687,7 +687,7 @@ BondRestraints BondRestraints::operator+(const BondRestraints &restraints) const
 {
     BondRestraints ret(*this);
     ret += restraints;
-    return *this;
+    return ret;
 }
 
 /** Set whether or not periodic boundary conditions are to be used */

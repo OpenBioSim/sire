@@ -90,8 +90,8 @@ InverseBondRestraint::InverseBondRestraint()
  *  using the specified force constant and flat-bottom well-width
  */
 InverseBondRestraint::InverseBondRestraint(qint64 atom0, qint64 atom1,
-                             const SireUnits::Dimension::HarmonicBondConstant &k,
-                             const SireUnits::Dimension::Length &r0)
+                                           const SireUnits::Dimension::HarmonicBondConstant &k,
+                                           const SireUnits::Dimension::Length &r0)
     : ConcreteProperty<InverseBondRestraint, Property>(),
       _k(k), _r0(r0)
 {
@@ -114,9 +114,9 @@ InverseBondRestraint::InverseBondRestraint(qint64 atom0, qint64 atom1,
  *  and flat-bottom well width
  */
 InverseBondRestraint::InverseBondRestraint(const QList<qint64> &atoms0,
-                             const QList<qint64> &atoms1,
-                             const SireUnits::Dimension::HarmonicBondConstant &k,
-                             const SireUnits::Dimension::Length &r0)
+                                           const QList<qint64> &atoms1,
+                                           const SireUnits::Dimension::HarmonicBondConstant &k,
+                                           const SireUnits::Dimension::Length &r0)
     : ConcreteProperty<InverseBondRestraint, Property>(),
       _k(k), _r0(r0)
 {
@@ -374,8 +374,7 @@ QDataStream &operator>>(QDataStream &ds, InverseBondRestraints &bndrests)
     {
         SharedDataStream sds(ds);
 
-        sds >> bndrests.r >> bndrests.use_pbc
-            >> static_cast<Restraints &>(bndrests);
+        sds >> bndrests.r >> bndrests.use_pbc >> static_cast<Restraints &>(bndrests);
     }
     else
         throw version_error(v, "1", r_bndrests, CODELOC);
@@ -412,7 +411,7 @@ InverseBondRestraints::InverseBondRestraints(const QList<InverseBondRestraint> &
 }
 
 InverseBondRestraints::InverseBondRestraints(const QString &name,
-                               const InverseBondRestraint &restraint)
+                                             const InverseBondRestraint &restraint)
     : ConcreteProperty<InverseBondRestraints, Restraints>(name)
 {
     if (not restraint.isNull())
@@ -420,7 +419,7 @@ InverseBondRestraints::InverseBondRestraints(const QString &name,
 }
 
 InverseBondRestraints::InverseBondRestraints(const QString &name,
-                               const QList<InverseBondRestraint> &restraints)
+                                             const QList<InverseBondRestraint> &restraints)
     : ConcreteProperty<InverseBondRestraints, Restraints>(name)
 {
     for (const auto &restraint : restraints)
@@ -504,10 +503,10 @@ QString InverseBondRestraints::toString() const
     }
 
     return QObject::tr("InverseBondRestraints( name=%1, size=%2, use_pbc=%3\n%4\n)")
-            .arg(this->name())
-            .arg(n)
-            .arg(this->use_pbc ? "true" : "false")
-            .arg(parts.join("\n"));
+        .arg(this->name())
+        .arg(n)
+        .arg(this->use_pbc ? "true" : "false")
+        .arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */
@@ -673,7 +672,7 @@ InverseBondRestraints InverseBondRestraints::operator+(const InverseBondRestrain
 {
     InverseBondRestraints ret(*this);
     ret += restraint;
-    return *this;
+    return ret;
 }
 
 /** Add restraints onto the list */
@@ -688,7 +687,7 @@ InverseBondRestraints InverseBondRestraints::operator+(const InverseBondRestrain
 {
     InverseBondRestraints ret(*this);
     ret += restraints;
-    return *this;
+    return ret;
 }
 
 /** Set whether or not periodic boundary conditions are to be used */

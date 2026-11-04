@@ -598,7 +598,7 @@ BoreschRestraints BoreschRestraints::operator+(const BoreschRestraint &restraint
 {
     BoreschRestraints ret(*this);
     ret += restraint;
-    return *this;
+    return ret;
 }
 
 /** Add restraints onto the list */
@@ -613,7 +613,7 @@ BoreschRestraints BoreschRestraints::operator+(const BoreschRestraints &restrain
 {
     BoreschRestraints ret(*this);
     ret += restraints;
-    return *this;
+    return ret;
 }
 
 /** Set whether or not periodic boundary conditions are to be used */
