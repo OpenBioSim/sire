@@ -145,7 +145,10 @@ def _get_lever_values(
 
         merged = {}
 
-        # only add in columns that change values
+        from math import isclose
+
+        # only add in columns that change values, ignoring round-off from
+        # morphing between identical end states
         for i in range(len(colnames)):
             column = columns[i]
 
@@ -153,7 +156,7 @@ def _get_lever_values(
                 changed = False
 
                 for j in range(1, len(column)):
-                    if column[j] != column[j - 1]:
+                    if not isclose(column[j], column[0], rel_tol=1e-12, abs_tol=1e-12):
                         changed = True
                         break
 

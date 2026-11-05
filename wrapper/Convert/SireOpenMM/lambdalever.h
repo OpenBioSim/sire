@@ -128,6 +128,8 @@ namespace SireOpenMM
 
         void setForceIndex(const QString &force, int index);
 
+        void setDependentForceIndex(const QString &force, int index);
+
         void addRestraintIndex(const QString &force, int index);
 
         int addPerturbableMolecule(const OpenMMMolecule &molecule,
@@ -136,6 +138,10 @@ namespace SireOpenMM
 
         void setExceptionIndicies(int idx, const QString &ff,
                                   const QVector<boost::tuple<int, int>> &exception_idxs);
+
+        void setGhostPairIndicies(int idx, const QVector<boost::tuple<qint32, qint32>> &ghost_pair_idxs);
+
+        void setRFExceptionIndicies(int idx, const QVector<boost::tuple<qint32, qint32>> &rf_exception_idxs);
 
         void setConstraintIndicies(int idx, const QVector<qint32> &constraint_idxs);
 

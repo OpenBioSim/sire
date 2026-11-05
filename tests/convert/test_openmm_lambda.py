@@ -722,3 +722,139 @@ def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
         d.set_lambda(lam_val)
         calc = d.current_potential_energy().value()
         assert calc == pytest.approx(nrg, abs=1e-4)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+@pytest.mark.parametrize(
+    "cutoff, cutoff_type, periodic",
+    [
+        ("none", None, False),
+        ("7.5 A", "RF", False),
+        ("10 A", "RF", True),
+        ("10 A", "PME", True),
+    ],
+)
+@pytest.mark.parametrize("swap_end_states", [False, True])
+@pytest.mark.parametrize("softening", ["zacharias", "taylor", "beutler"])
+def test_ring_break_end_state(
+    ring_break_constraints,
+    openmm_platform,
+    cutoff,
+    cutoff_type,
+    periodic,
+    swap_end_states,
+    softening,
+):
+    """
+    The energies at the end states of a ring-breaking perturbation match the
+    plain end-state molecules for any cutoff type and soft-core form: the
+    broken pair doesn't interact while it is bonded, and the pairs across the
+    broken bond are normal non-bonded pairs once it is broken. Swapping the
+    end states tests the ring-making case.
+    """
+    merge = ring_break_constraints.molecules("property is_perturbable")[0]
+
+    c = merge.cursor()
+    c["coordinates"] = c["coordinates0"]
+    c["coordinates1"] = c["coordinates0"]
+    merge = c.commit()
+
+    def get_end_state(state, remove_state):
+        c = merge.cursor()
+        for key in c.keys():
+            if key.endswith(state):
+                c[key.removesuffix(state)] = c[key]
+                del c[key]
+            elif key.endswith(remove_state):
+                del c[key]
+        c["is_perturbable"] = False
+        return c.commit()
+
+    space = ring_break_constraints.space() if periodic else sr.vol.Cartesian()
+
+    m = {
+        "platform": openmm_platform,
+        "constraint": "none",
+        "cutoff": cutoff,
+        "space": space,
+    }
+
+    if cutoff_type is not None:
+        m["cutoff_type"] = cutoff_type
+
+    nrg0 = sr.convert.to(get_end_state("0", "1"), "openmm", map=m).get_energy().value()
+    nrg1 = sr.convert.to(get_end_state("1", "0"), "openmm", map=m).get_energy().value()
+
+    if swap_end_states:
+        nrg0, nrg1 = nrg1, nrg0
+
+    m["swap_end_states"] = swap_end_states
+
+    if softening == "taylor":
+        m["use_taylor_softening"] = True
+    elif softening == "beutler":
+        m["use_beutler_softening"] = True
+
+    omm = sr.convert.to(merge, "openmm", map=m)
+
+    omm.set_lambda(0.0)
+    assert omm.get_energy().value() == pytest.approx(nrg0, abs=1e-2)
+
+    omm.set_lambda(1.0)
+    assert omm.get_energy().value() == pytest.approx(nrg1, abs=1e-2)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_unscaled_14_coulomb_end_state(merged_ethane_methanol, openmm_platform):
+    """
+    1-4 pairs with an unscaled Coulomb term but a scaled LJ term are still
+    exceptions, so the end states match the plain molecules with reaction
+    field.
+    """
+    from sire.legacy.MM import CLJNBPairs, CLJScaleFactor
+
+    merge = merged_ethane_methanol[0]
+
+    c = merge.cursor()
+    c["coordinates"] = c["coordinates0"]
+    c["coordinates1"] = c["coordinates0"]
+    nbpairs = CLJNBPairs(merge.property("connectivity"), CLJScaleFactor(1.0, 0.5))
+    c["intrascale0"] = nbpairs
+    c["intrascale1"] = nbpairs
+    merge = c.commit()
+
+    def get_end_state(state, remove_state):
+        c = merge.cursor()
+        for key in c.keys():
+            if key.endswith(state):
+                c[key.removesuffix(state)] = c[key]
+                del c[key]
+            elif key.endswith(remove_state):
+                del c[key]
+        c["is_perturbable"] = False
+        return c.commit()
+
+    m = {
+        "platform": openmm_platform,
+        "constraint": "none",
+        "cutoff": "7.5 A",
+        "cutoff_type": "RF",
+        "space": sr.vol.Cartesian(),
+    }
+
+    nrg0 = sr.convert.to(get_end_state("0", "1"), "openmm", map=m).get_energy().value()
+    nrg1 = sr.convert.to(get_end_state("1", "0"), "openmm", map=m).get_energy().value()
+
+    omm = sr.convert.to(merge, "openmm", map=m)
+
+    omm.set_lambda(0.0)
+    assert omm.get_energy().value() == pytest.approx(nrg0, abs=1e-3)
+
+    omm.set_lambda(1.0)
+    assert omm.get_energy().value() == pytest.approx(nrg1, abs=1e-3)

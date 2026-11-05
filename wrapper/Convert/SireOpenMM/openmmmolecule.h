@@ -100,6 +100,8 @@ namespace SireOpenMM
 
         QVector<boost::tuple<qint32, qint32>> getExceptionAtoms() const;
 
+        QVector<boost::tuple<qint32, qint32>> getGhostPairs() const;
+
         QVector<double> getChargeScales() const;
         QVector<double> getLJScales() const;
 
@@ -352,6 +354,16 @@ namespace SireOpenMM
         void setExceptionIndicies(const QString &name,
                                   const QVector<boost::tuple<int, int>> &exception_idxs);
 
+        QVector<boost::tuple<qint32, qint32>> getGhostPairAtoms() const;
+
+        QVector<boost::tuple<qint32, qint32>> getGhostPairIndicies() const;
+
+        void setGhostPairIndicies(const QVector<boost::tuple<qint32, qint32>> &ghost_pair_idxs);
+
+        QVector<boost::tuple<qint32, qint32>> getRFExceptionIndicies() const;
+
+        void setRFExceptionIndicies(const QVector<boost::tuple<qint32, qint32>> &rf_exception_idxs);
+
         void setConstraintIndicies(const QVector<qint32> &constraint_idxs);
 
         QVector<qint32> getConstraintIndicies() const;
@@ -432,6 +444,17 @@ namespace SireOpenMM
         /** The indicies of the added exceptions - only populated
          *  if this is a peturbable molecule */
         QHash<QString, QVector<boost::tuple<qint32, qint32>>> exception_idxs;
+
+        /** The interacting ghost/ghost pairs that aren't exceptions */
+        QVector<boost::tuple<qint32, qint32>> ghost_pair_atoms;
+
+        /** The indicies of each ghost/ghost pair in the non-bonded
+         *  and ghost/ghost bond forces */
+        QVector<boost::tuple<qint32, qint32>> ghost_pair_idxs;
+
+        /** The exceptions that are normal pairs in either end state, with the
+         *  index of each in the exception reaction field force */
+        QVector<boost::tuple<qint32, qint32>> rf_exception_idxs;
 
         /** All of the perturbable constraints - these include the r0 values
          *  for both end states
