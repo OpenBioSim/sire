@@ -42,15 +42,16 @@
 
 // COPIED FROM SO POST - https://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c
 
+#include <Python.h>
 #include <chrono>
-#include <cmath> // std::isnan, std::fpclassify
-#include <iostream>
+#include <cmath>   // std::isnan, std::fpclassify
 #include <iomanip> // std::setw
-#include <limits>
+#include <iostream>
 #include <limits.h> // CHAR_BIT
+#include <limits>
+#include <optional>
 #include <sstream>
 #include <stdint.h> // uint64_t
-#include <Python.h>
 
 inline auto is_ieee754_nan(double const x)
     -> bool
@@ -81,15 +82,17 @@ inline auto is_ieee754_nan(double const x)
     return (bits & exp_mask) == exp_mask and (bits & mantissa_mask) != 0;
 }
 
+#include "Helpers/scoped_gil_release.hpp"
+
+#include "lbgfs/lbfgs.h"
 #include "openmm/OpenMMException.h"
 #include "openmm/Platform.h"
 #include "openmm/VerletIntegrator.h"
-#include "lbgfs/lbfgs.h"
+#include <algorithm>
 #include <cmath>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #include "SireError/errors.h"
 
@@ -619,7 +622,9 @@ namespace SireOpenMM
                                     double starting_k, double ratchet_scale,
                                     double max_constraint_error, double timeout)
     {
-        PyThreadState *_save = PyEval_SaveThread();
+        // Restored on scope exit, so that exceptions reach Python with the GIL.
+        std::optional<SireHelpers::ScopedGILRelease> gil;
+        gil.emplace();
 
         if (max_iterations < 0)
         {
@@ -679,9 +684,12 @@ namespace SireOpenMM
         // flag for if we've done a hard reset
         bool have_hard_reset = false;
 
-        std::vector<OpenMM::Vec3> initial_pos;
+        // Start from the initial positions, so that a reset is possible even if
+        // the first energy evaluation fails.
+        std::vector<OpenMM::Vec3> initial_pos = starting_pos;
         double energy_before = 1e10;
         bool is_success = true;
+        bool is_invalid_energy = false;
 
         int max_linesearch = 100;
         const int max_linesearch_delta = 100;
@@ -729,7 +737,6 @@ namespace SireOpenMM
                 }
             }
 
-
             data.addLog(QString("Minimisation loop - %1 steps from %2").arg(data.getIteration()).arg(data.getMaxIterations()));
 
             try
@@ -741,6 +748,7 @@ namespace SireOpenMM
                 {
                     // something has gone wrong, so we need to restart
                     data.addLog("Infinite or NaN energy detected!");
+                    is_invalid_energy = true;
                     is_success = false;
                     throw std::exception();
                 }
@@ -808,6 +816,7 @@ namespace SireOpenMM
                     {
                         // something has gone wrong, so we need to restart
                         data.addLog("Infinite or NaN energy detected!");
+                        is_invalid_energy = true;
                         is_success = false;
                         throw std::exception();
                     }
@@ -864,6 +873,7 @@ namespace SireOpenMM
                     {
                         // we've hit a singularity, so we need to restart
                         data.addLog("Infinite or NaN energy detected!");
+                        is_invalid_energy = true;
                         throw std::exception();
                     }
 
@@ -1016,6 +1026,7 @@ namespace SireOpenMM
                 {
                     // something has gone wrong, so we need to restart
                     data.addLog("Infinite or NaN energy detected!");
+                    is_invalid_energy = true;
                     throw std::exception();
                 }
 
@@ -1090,7 +1101,7 @@ namespace SireOpenMM
             }
         }
 
-        PyEval_RestoreThread(_save);
+        gil.reset();
 
         if (is_success)
         {
@@ -1100,6 +1111,16 @@ namespace SireOpenMM
         else
         {
             data.addLog("Minimisation failed!");
+
+            if (is_invalid_energy)
+            {
+                bar.failure("Minimisation failed! Infinite or NaN energy!");
+                throw SireError::invalid_state(QObject::tr(
+                                                   "The minimiser could not minimise the system, since its energy "
+                                                   "is infinite or NaN. Check for overlapping atoms."),
+                                               CODELOC);
+            }
+
             bar.failure("Minimisation failed! Could not satisfy constraints!");
             throw SireError::invalid_state(QObject::tr(
                                                "Despite repeated attempts, the minimiser could not minimise the system "

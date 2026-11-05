@@ -90,3 +90,21 @@ def test_openmm_minimise_vacuum(kigaki_mols, openmm_platform):
     mols = mols.minimisation(platform=openmm_platform, vacuum=True).run(10).commit()
 
     assert not mols.property("space").is_periodic()
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_minimise_invalid_energy(ala_mols, openmm_platform):
+    # Two waters on top of each other give an energy that can't be evaluated.
+    # This should raise an exception rather than crash the interpreter.
+    mols = ala_mols.clone()
+    waters = mols.molecules("water")
+
+    cursor = waters[0].cursor()
+    cursor["coordinates"] = waters[1].property("coordinates")
+    mols.update(cursor.commit())
+
+    with pytest.raises(Exception, match="infinite or NaN"):
+        mols.minimisation(platform=openmm_platform).run(10)

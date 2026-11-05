@@ -148,6 +148,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   the SOMD1-matching change in 2026.1.0. It destabilised perturbable molecules with large
   ghost regions, such as partially mapped macrocycles.
 
+* Fixed a segmentation fault when the OpenMM minimiser raised an exception, since the GIL
+  wasn't restored before the exception reached Python. A system whose starting energy is
+  infinite or NaN now raises an error saying so, rather than an unrelated error about the
+  number of positions.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
