@@ -913,19 +913,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     auto bonds = params.bonds();
 
-    // Whether an atom's amber type changes between end states - used below
-    // to identify bonds that are part of the alchemical junction. Amber
-    // type, not charge, since charges can be redistributed across the whole
-    // ligand without affecting bonded parameters.
-    const auto params1_ambertypes = params1.amberTypes();
-
-    auto is_perturbing_atom = [&](int atom_idx) -> bool
-    {
-        const auto &cgatomidx = idx_to_cgatomidx_data[atom_idx];
-
-        return ambertypes.at(cgatomidx) != params1_ambertypes.at(cgatomidx);
-    };
-
     if (is_perturbable)
     {
         // add in any bonds that exist only in the other state
@@ -986,12 +973,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         // Whether the bond's own k/r0 change between end states.
         bool bond_is_perturbing = false;
 
-        // Whether the bond is part of the alchemical junction (touches a
-        // ghost or transmuting atom). SOMD1 constrains an unperturbing bond
-        // unconditionally only if it's part of the perturbation; ordinary
-        // unperturbed bonds elsewhere in the molecule are not affected.
-        bool bond_is_ghost_junction = false;
-
         if (is_perturbable)
         {
             const auto bondparam1 = params1.bonds().value(it.key()).first;
@@ -1008,7 +989,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             }
 
             bond_is_perturbing = (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3);
-            bond_is_ghost_junction = is_perturbing_atom(atom0) or is_perturbing_atom(atom1);
         }
 
         if (this_constraint_type == CONSTRAIN_AUTO_BONDS)
@@ -1032,10 +1012,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             should_constrain_bond = vibrational_period < auto_constraints_factor * timestep_in_fs;
         }
         else if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or
-                                              (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS)) or
-                                              (is_perturbable and not bond_is_perturbing and
-                                               bond_is_ghost_junction and
-                                               (this_constraint_type & CONSTRAIN_HBONDS))))
+                                              (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
         {
             should_constrain_bond = true;
 

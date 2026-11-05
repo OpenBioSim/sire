@@ -144,6 +144,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed the bond, inverse bond and Morse potential centroid restraint constructors naming
   the wrong atom when the two groups overlap, and reallocating the second group on every atom.
 
+* Stop constraining unperturbed heavy-atom bonds at the alchemical junction, reverting
+  the SOMD1-matching change in 2026.1.0. It destabilised perturbable molecules with large
+  ghost regions, such as partially mapped macrocycles.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

@@ -462,9 +462,9 @@ def test_cyclopropyl_anchor_bond_constraint(
     cyclopropyl_constraint_bug, openmm_platform
 ):
     """
-    Regression test for an unperturbed anchor bond (to two alternate
-    heavy-atom substituents) not being constrained under
-    "h-bonds-not-heavy-perturbed", unlike SOMD1.
+    Heavy-atom bonds at the alchemical junction aren't constrained under
+    "h-bonds-not-heavy-perturbed", since constraining them destabilises
+    perturbable molecules with large ghost regions. (SOMD1 constrains them.)
     """
     mols = sr.morph.link_to_reference(cyclopropyl_constraint_bug)
     mol = mols[0]
@@ -503,21 +503,49 @@ def test_cyclopropyl_anchor_bond_constraint(
 
         return found
 
-    found = get_anchor_constraints(d)
+    assert get_anchor_constraints(d) == {}
 
-    assert set(found.keys()) == substituent_idxs
-
-    # both anchor bonds should have the same, static length, matching
-    # SOMD1's value for this generic aromatic-C/sp3-C bond
-    for length in found.values():
-        assert length == pytest.approx(1.51234, abs=1e-3)
-
-    # the constraint should remain static (not lambda-dependent), since the
-    # bond's own parameters don't change between end states
     d.set_lambda(1.0)
-    found_at_1 = get_anchor_constraints(d)
 
-    assert found_at_1 == found
+    assert get_anchor_constraints(d) == {}
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+@pytest.mark.slow
+@pytest.mark.parametrize("lambda_value", [0.0, 1.0])
+def test_macrocycle_ghost_constraints(
+    macrocycle_ghost_constraints, openmm_platform, lambda_value
+):
+    """
+    A partially mapped macrocycle (OpenFE bayer_macrocycles brd4, 61a~25e),
+    solvated, with large ghost regions. This blew up within a few steps when
+    heavy-atom bonds at the alchemical junction were constrained.
+    """
+    if lambda_value == 0.0:
+        mols = sr.morph.link_to_reference(macrocycle_ghost_constraints)
+    else:
+        mols = sr.morph.link_to_perturbed(macrocycle_ghost_constraints)
+
+    mols = (
+        mols.minimisation(lambda_value=lambda_value, platform=openmm_platform)
+        .run()
+        .commit()
+    )
+
+    d = mols.dynamics(
+        timestep="2 fs",
+        lambda_value=lambda_value,
+        constraint="h-bonds",
+        perturbable_constraint="h-bonds-not-heavy-perturbed",
+        platform=openmm_platform,
+    )
+
+    d.run("1 ps", save_frequency=0, auto_fix_minimise=False)
+
+    assert d.current_potential_energy().value() < 0
 
 
 @pytest.mark.skipif(
