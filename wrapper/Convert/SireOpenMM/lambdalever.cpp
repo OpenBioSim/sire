@@ -1301,6 +1301,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
     auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
     auto ghost_14ff = this->getForce<OpenMM::CustomBondForce>("ghost-14", system);
+    auto ghost_pairff = this->getForce<OpenMM::CustomBondForce>("ghost/ghost-pairs", system);
     auto ring_breaking_ff = this->getForce<OpenMM::CustomBondForce>("ring-break", system);
     auto ring_making_ff = this->getForce<OpenMM::CustomBondForce>("ring-make", system);
     auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
@@ -1760,6 +1761,54 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     }
                 }
             }
+
+            // The hard Coulomb for the intramolecular ghost/ghost pairs is an
+            // exception, and the soft-core terms use the ghost/ghost levers.
+            const auto ghost_pair_idxs = perturbable_mol.getGhostPairIndicies();
+
+            if (not ghost_pair_idxs.isEmpty())
+            {
+                const auto ghost_pair_atoms = perturbable_mol.getGhostPairAtoms();
+
+                for (int j = 0; j < ghost_pair_atoms.count(); ++j)
+                {
+                    const auto atom0 = boost::get<0>(ghost_pair_atoms[j]);
+                    const auto atom1 = boost::get<1>(ghost_pair_atoms[j]);
+
+                    // match the per-particle REST2 scaling of the non-bonded forces
+                    const double scale = (perturbable_mol.isRest2(atom0) ? sqrt_rest2_scale : 1.0) *
+                                         (perturbable_mol.isRest2(atom1) ? sqrt_rest2_scale : 1.0);
+
+                    cljff->setExceptionParameters(
+                        boost::get<0>(ghost_pair_idxs[j]),
+                        atom0 + start_index, atom1 + start_index,
+                        scale * morphed_charges[atom0] * morphed_charges[atom1],
+                        1e-9, 1e-9);
+
+                    if (ghost_pairff != 0)
+                    {
+                        const auto p = get_exception(atom0, atom1,
+                                                     start_index, 1.0, 1.0,
+                                                     morphed_ghost_charges,
+                                                     morphed_ghost_sigmas,
+                                                     morphed_ghost_epsilons,
+                                                     morphed_ghost_alphas,
+                                                     morphed_ghost_kappas);
+
+                        std::vector<double> params = {
+                            boost::get<2>(p) * scale,
+                            boost::get<3>(p),
+                            4.0 * boost::get<4>(p) * scale,
+                            boost::get<5>(p),
+                            boost::get<6>(p)};
+
+                        ghost_pairff->setBondParameters(boost::get<1>(ghost_pair_idxs[j]),
+                                                        boost::get<0>(p),
+                                                        boost::get<1>(p),
+                                                        params);
+                    }
+                }
+            }
         }
 
         // Update CLJ exceptions for ring-breaking pairs.
@@ -2100,6 +2149,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             ghost_ghostff->updateParametersInContext(context);
         if (ghost_nonghostff)
             ghost_nonghostff->updateParametersInContext(context);
+        if (ghost_pairff)
+            ghost_pairff->updateParametersInContext(context);
     }
 
 #ifdef SIRE_USE_CUSTOMVOLUMEFORCE
@@ -2652,6 +2703,20 @@ void LambdaLever::setForceIndex(const QString &force,
     this->lambda_schedule.addForce(force);
 }
 
+/** Set the index of the force holding the intramolecular ghost/ghost pairs.
+ *  This is driven by the ghost/ghost levers, so isn't added to the schedule.
+ */
+void LambdaLever::setGhostPairForceIndex(int index)
+{
+    if (index < 0)
+        throw SireError::invalid_index(QObject::tr(
+                                           "This looks like an invalid index for the ghost/ghost pair force : %1")
+                                           .arg(index),
+                                       CODELOC);
+
+    this->name_to_ffidx.insert("ghost/ghost-pairs", index);
+}
+
 /** Add the index of a restraint force called 'restraint' in the
  *  OpenMM System. There can be multiple restraint forces with
  *  the same name
@@ -2715,6 +2780,16 @@ void LambdaLever::setExceptionIndicies(int mol_idx,
 {
     mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
     this->perturbable_mols[mol_idx].setExceptionIndicies(name, exception_idxs);
+}
+
+/** Set the indicies of the ghost/ghost pairs for the perturbable
+ *  molecule at index 'mol_idx'
+ */
+void LambdaLever::setGhostPairIndicies(int mol_idx,
+                                       const QVector<boost::tuple<qint32, qint32>> &ghost_pair_idxs)
+{
+    mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
+    this->perturbable_mols[mol_idx].setGhostPairIndicies(ghost_pair_idxs);
 }
 
 /** Set the constraint indicies for the perturbable molecule at

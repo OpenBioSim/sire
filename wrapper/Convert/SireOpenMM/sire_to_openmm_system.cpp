@@ -1575,6 +1575,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     ///
 
     OpenMM::CustomBondForce *ghost_14ff = 0;
+    OpenMM::CustomBondForce *ghost_pairff = 0;
     OpenMM::CustomBondForce *ring_breaking_ff = 0;
     OpenMM::CustomBondForce *ring_making_ff = 0;
     OpenMM::CustomNonbondedForce *ghost_ghostff = 0;
@@ -1826,6 +1827,19 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // periodic boundaries or cutoffs
         ghost_14ff->setUsesPeriodicBoundaryConditions(false);
 
+        // intramolecular ghost/ghost pairs, which have the same form as the
+        // ghost/ghost interaction but no cutoff
+        ghost_pairff = new OpenMM::CustomBondForce(nb14_expression);
+        ghost_pairff->setName("GhostGhostBondForce");
+
+        ghost_pairff->addPerBondParameter("q");
+        ghost_pairff->addPerBondParameter("sigma");
+        ghost_pairff->addPerBondParameter("four_epsilon");
+        ghost_pairff->addPerBondParameter("alpha");
+        ghost_pairff->addPerBondParameter("kappa");
+
+        ghost_pairff->setUsesPeriodicBoundaryConditions(false);
+
         if (use_beutler_softening)
         {
             // Beutler et al., Chem. Phys. Lett., 1994
@@ -1968,7 +1982,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
         ghost_ghostff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost/ghost", system.addForce(ghost_ghostff));
-        lambda_lever.setForceGroup("ghost/ghost", force_group_counter++);
+        lambda_lever.setForceGroup("ghost/ghost", force_group_counter);
+
+        // the intramolecular pairs are part of the ghost/ghost interaction
+        ghost_pairff->setForceGroup(force_group_counter++);
+        lambda_lever.setGhostPairForceIndex(system.addForce(ghost_pairff));
 
         ghost_nonghostff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost/non-ghost", system.addForce(ghost_nonghostff));
@@ -3044,6 +3062,50 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         if (is_perturbable)
         {
             auto pert_idx = idx_to_pert_idx.value(i, openmm_mols.count() + 1);
+
+            // Intramolecular ghost/ghost pairs are excluded from the cutoff
+            // ghost forces. The hard Coulomb is an exception, which has no
+            // cutoff, and the soft-core terms are in the ghost/ghost bond force.
+            const auto ghost_pairs = mol.getGhostPairs();
+
+            if (not ghost_pairs.isEmpty() and ghost_pairff != 0)
+            {
+                QVector<boost::tuple<qint32, qint32>> ghost_pair_idxs(ghost_pairs.count());
+
+                for (int j = 0; j < ghost_pairs.count(); ++j)
+                {
+                    const auto atom0 = boost::get<0>(ghost_pairs[j]);
+                    const auto atom1 = boost::get<1>(ghost_pairs[j]);
+
+                    const auto &clj0 = mol.cljs.at(atom0);
+                    const auto &clj1 = mol.cljs.at(atom1);
+
+                    const double charge = boost::get<0>(clj0) * boost::get<0>(clj1);
+                    double sigma = 0.5 * (boost::get<1>(clj0) + boost::get<1>(clj1));
+                    double four_epsilon = 4.0 * std::sqrt(boost::get<2>(clj0) * boost::get<2>(clj1));
+
+                    // cannot use zero params in case they are eagerly removed
+                    if (sigma == 0)
+                        sigma = 1e-9;
+
+                    const int idx = cljff->addException(atom0 + start_index, atom1 + start_index,
+                                                        charge, 1e-9, 1e-9, false);
+
+                    std::vector<double> params = {charge, sigma, four_epsilon,
+                                                  std::max(mol.alphas.at(atom0), mol.alphas.at(atom1)),
+                                                  std::max(mol.kappas.at(atom0), mol.kappas.at(atom1))};
+
+                    const int nbidx = ghost_pairff->addBond(atom0 + start_index, atom1 + start_index, params);
+
+                    ghost_ghostff->addExclusion(atom0 + start_index, atom1 + start_index);
+                    ghost_nonghostff->addExclusion(atom0 + start_index, atom1 + start_index);
+
+                    ghost_pair_idxs[j] = boost::make_tuple(idx, nbidx);
+                }
+
+                lambda_lever.setGhostPairIndicies(pert_idx, ghost_pair_idxs);
+            }
+
             lambda_lever.setExceptionIndicies(pert_idx,
                                               "clj", exception_idxs);
             if (rb_bond_count > 0)

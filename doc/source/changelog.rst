@@ -157,6 +157,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   unbonded at one end state. It was constrained if either atom was light at either end
   state, which blew up some ring-breaking simulations.
 
+* Calculate interactions between ghost atoms in the same molecule without a cutoff. They
+  were truncated at the cutoff, which made the energy discontinuous for molecules larger
+  than the cutoff when a schedule set ``kappa`` below 1, e.g. to decouple a ligand while
+  keeping its intramolecular interactions. Energies for other schedules change slightly,
+  since these interactions are no longer truncated.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
