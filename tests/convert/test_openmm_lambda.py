@@ -722,3 +722,69 @@ def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
         d.set_lambda(lam_val)
         calc = d.current_potential_energy().value()
         assert calc == pytest.approx(nrg, abs=1e-4)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+@pytest.mark.parametrize(
+    "cutoff, cutoff_type, periodic",
+    [
+        ("none", None, False),
+        ("7.5 A", "RF", False),
+        ("10 A", "RF", True),
+        ("10 A", "PME", True),
+    ],
+)
+@pytest.mark.parametrize("swap_end_states", [False, True])
+def test_ring_break_end_state(
+    ring_break_constraints,
+    openmm_platform,
+    cutoff,
+    cutoff_type,
+    periodic,
+    swap_end_states,
+):
+    """
+    Once the ring is broken, the pairs across the broken bond interact as
+    normal non-bonded pairs, so the energy matches the perturbed end state for
+    any cutoff type. Swapping the end states tests the ring-making case.
+    """
+    merge = ring_break_constraints.molecules("property is_perturbable")[0]
+
+    c = merge.cursor()
+    c["coordinates"] = c["coordinates0"]
+    c["coordinates1"] = c["coordinates0"]
+    merge = c.commit()
+
+    c = merge.cursor()
+    for key in c.keys():
+        if key.endswith("1"):
+            c[key.removesuffix("1")] = c[key]
+            del c[key]
+        elif key.endswith("0"):
+            del c[key]
+    c["is_perturbable"] = False
+    end1 = c.commit()
+
+    space = ring_break_constraints.space() if periodic else sr.vol.Cartesian()
+
+    m = {
+        "platform": openmm_platform,
+        "constraint": "none",
+        "cutoff": cutoff,
+        "space": space,
+    }
+
+    if cutoff_type is not None:
+        m["cutoff_type"] = cutoff_type
+
+    nrg1 = sr.convert.to(end1, "openmm", map=m).get_energy().value()
+
+    m["swap_end_states"] = swap_end_states
+
+    omm = sr.convert.to(merge, "openmm", map=m)
+    omm.set_lambda(0.0 if swap_end_states else 1.0)
+
+    assert omm.get_energy().value() == pytest.approx(nrg1, abs=1e-2)

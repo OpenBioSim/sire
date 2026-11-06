@@ -1577,6 +1577,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     OpenMM::CustomBondForce *ghost_14ff = 0;
     OpenMM::CustomBondForce *ghost_pairff = 0;
     OpenMM::CustomBondForce *ghost_pair_rff = 0;
+    OpenMM::CustomBondForce *ring_breaking_rff = 0;
+    OpenMM::CustomBondForce *ring_making_rff = 0;
+    OpenMM::CustomBondForce *exception_rff = 0;
     OpenMM::CustomBondForce *ring_breaking_ff = 0;
     OpenMM::CustomBondForce *ring_making_ff = 0;
     OpenMM::CustomNonbondedForce *ghost_ghostff = 0;
@@ -1853,8 +1856,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
         ghost_pairff->setUsesPeriodicBoundaryConditions(false);
 
-        // the hard Coulomb for these pairs is a NonbondedForce exception, which
-        // has no reaction field, so add the difference from a normal pair
+        // the hard Coulomb for intramolecular ghost/ghost and ring-breaking/making
+        // pairs is a NonbondedForce exception, which has no reaction field, so
+        // add the difference from a normal pair
         const auto nbmethod = cljff->getNonbondedMethod();
 
         if (nbmethod == OpenMM::NonbondedForce::CutoffPeriodic or
@@ -1865,15 +1869,33 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             const double krf = (eps - 1.0) / ((2.0 * eps + 1.0) * rc * rc * rc);
             const double crf = (3.0 * eps) / ((2.0 * eps + 1.0) * rc);
 
-            ghost_pair_rff = new OpenMM::CustomBondForce(
+            const auto rf_expression =
                 QString("138.9354558466661*q*select(step(r-%1), -1/r, %2*r^2-%3)")
                     .arg(rc, 0, 'g', 17)
                     .arg(krf, 0, 'g', 17)
                     .arg(crf, 0, 'g', 17)
-                    .toStdString());
-            ghost_pair_rff->setName("GhostGhostReactionFieldForce");
-            ghost_pair_rff->addPerBondParameter("q");
-            ghost_pair_rff->setUsesPeriodicBoundaryConditions(false);
+                    .toStdString();
+
+            auto create_rf_force = [&](const char *name)
+            {
+                auto ff = new OpenMM::CustomBondForce(rf_expression);
+                ff->setName(name);
+                ff->addPerBondParameter("q");
+                ff->setUsesPeriodicBoundaryConditions(false);
+                return ff;
+            };
+
+            ghost_pair_rff = create_rf_force("GhostGhostReactionFieldForce");
+
+            // exceptions that are normal pairs in an end state, e.g. pairs
+            // across a bond that is broken by a ring-breaking perturbation
+            exception_rff = create_rf_force("ExceptionReactionFieldForce");
+
+            if (ring_breaking_ff != 0)
+                ring_breaking_rff = create_rf_force("RingBreakingReactionFieldForce");
+
+            if (ring_making_ff != 0)
+                ring_making_rff = create_rf_force("RingMakingReactionFieldForce");
         }
 
         if (use_beutler_softening)
@@ -2066,6 +2088,24 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             ring_making_ff->setForceGroup(force_group_counter);
             lambda_lever.setForceIndex("ring-make", system.addForce(ring_making_ff));
             lambda_lever.setForceGroup("ring-make", force_group_counter++);
+        }
+
+        if (exception_rff != 0)
+        {
+            exception_rff->setForceGroup(lambda_lever.getForceGroup("clj"));
+            lambda_lever.setDependentForceIndex("clj-exceptions", system.addForce(exception_rff));
+        }
+
+        if (ring_breaking_rff != 0)
+        {
+            ring_breaking_rff->setForceGroup(lambda_lever.getForceGroup("clj"));
+            lambda_lever.setDependentForceIndex("clj-ring-break", system.addForce(ring_breaking_rff));
+        }
+
+        if (ring_making_rff != 0)
+        {
+            ring_making_rff->setForceGroup(lambda_lever.getForceGroup("clj"));
+            lambda_lever.setDependentForceIndex("clj-ring-make", system.addForce(ring_making_rff));
         }
     }
 
@@ -2869,6 +2909,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // Filled alongside exception_idxs; (-1,-1) for non-ring pairs.
         QVector<boost::tuple<int, int>> rb_exception_idxs;
         QVector<boost::tuple<int, int>> rm_exception_idxs;
+        QVector<boost::tuple<qint32, qint32>> rf_exception_idxs;
         int rb_bond_count = 0;
         int rm_bond_count = 0;
         if (is_perturbable)
@@ -3011,7 +3052,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     // LJ stays at 1e-9 throughout: the ring-break/make CustomBondForce
                     // provides the full softcore LJ. The Coulomb charge is initialised
                     // to the correct value for each direction so the NonbondedForce
-                    // carries the right hard Coulomb (including RF/PME) from the start.
+                    // carries the right hard Coulomb from the start (with a separate
+                    // reaction field correction).
                     // nbidx stays -1 (no ghost-14 bond for ring-break/make pairs).
 
                     if (is_ring_breaking and ring_breaking_ff != 0)
@@ -3032,10 +3074,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         // Use 1e-9 to prevent OpenMM from pruning the exception.
                         idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
                                                   1e-9, 1e-9, 1e-9, true);
-                        ring_breaking_ff->addBond(boost::get<0>(p),
-                                                  boost::get<1>(p),
-                                                  params_rb);
-                        rb_exception_idxs[j] = boost::make_tuple(idx, rb_bond_count);
+                        const int rb_idx = ring_breaking_ff->addBond(boost::get<0>(p),
+                                                                     boost::get<1>(p),
+                                                                     params_rb);
+                        // the reaction field correction shares the bond index
+                        if (ring_breaking_rff != 0)
+                            ring_breaking_rff->addBond(boost::get<0>(p), boost::get<1>(p), {1e-9});
+                        rb_exception_idxs[j] = boost::make_tuple(idx, rb_idx);
                         ++rb_bond_count;
                     }
                     else if (is_ring_making and ring_making_ff != 0)
@@ -3058,10 +3103,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                             init_charge = 1e-9;
                         idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
                                                   init_charge, 1e-9, 1e-9, true);
-                        ring_making_ff->addBond(boost::get<0>(p),
-                                                boost::get<1>(p),
-                                                params_rm);
-                        rm_exception_idxs[j] = boost::make_tuple(idx, rm_bond_count);
+                        const int rm_idx = ring_making_ff->addBond(boost::get<0>(p),
+                                                                   boost::get<1>(p),
+                                                                   params_rm);
+                        // the reaction field correction shares the bond index
+                        if (ring_making_rff != 0)
+                            ring_making_rff->addBond(boost::get<0>(p), boost::get<1>(p), {init_charge});
+                        rm_exception_idxs[j] = boost::make_tuple(idx, rm_idx);
                         ++rm_bond_count;
                     }
                     else
@@ -3085,6 +3133,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // these are the indexes of the exception in the
                 // non-bonded forcefields and also the ghost-14 forcefield
                 exception_idxs[j] = boost::make_tuple(idx, nbidx);
+
+                // an exception that is a normal pair in an end state needs the
+                // reaction field correction there
+                if (exception_rff != 0 and idx >= 0 and
+                    (coul_14_scale == 1.0 or boost::get<2>(mol.perturbed->exception_params[j]) == 1.0))
+                {
+                    const int rf_idx = exception_rff->addBond(boost::get<0>(p), boost::get<1>(p), {0.0});
+                    rf_exception_idxs.append(boost::make_tuple(j, rf_idx));
+                }
             }
             else
             {
@@ -3156,6 +3213,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
             lambda_lever.setExceptionIndicies(pert_idx,
                                               "clj", exception_idxs);
+
+            if (not rf_exception_idxs.isEmpty())
+                lambda_lever.setRFExceptionIndicies(pert_idx, rf_exception_idxs);
             if (rb_bond_count > 0)
                 lambda_lever.setExceptionIndicies(pert_idx,
                                                   "ring-break", rb_exception_idxs);

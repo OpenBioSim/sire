@@ -178,6 +178,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   interactions. With ``kappa`` fixed they were turned off, so a single-leg decoupling
   calculation, e.g. of a hydration free energy, missed the vacuum contribution.
 
+* Fixed the Coulomb interaction of the pair whose bond is broken or formed by a
+  ring-breaking perturbation, and of the pairs across that bond, when using reaction
+  field. They were calculated without the reaction field terms, so the end state where
+  the bond doesn't exist was wrong.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

@@ -140,6 +140,8 @@ namespace SireOpenMM
 
         void setGhostPairIndicies(int idx, const QVector<boost::tuple<qint32, qint32>> &ghost_pair_idxs);
 
+        void setRFExceptionIndicies(int idx, const QVector<boost::tuple<qint32, qint32>> &rf_exception_idxs);
+
         void setConstraintIndicies(int idx, const QVector<qint32> &constraint_idxs);
 
         void setQMExceptionIndicies(const QVector<qint32> &exception_idxs);

@@ -360,6 +360,10 @@ namespace SireOpenMM
 
         void setGhostPairIndicies(const QVector<boost::tuple<qint32, qint32>> &ghost_pair_idxs);
 
+        QVector<boost::tuple<qint32, qint32>> getRFExceptionIndicies() const;
+
+        void setRFExceptionIndicies(const QVector<boost::tuple<qint32, qint32>> &rf_exception_idxs);
+
         void setConstraintIndicies(const QVector<qint32> &constraint_idxs);
 
         QVector<qint32> getConstraintIndicies() const;
@@ -447,6 +451,10 @@ namespace SireOpenMM
         /** The indicies of each ghost/ghost pair in the non-bonded
          *  and ghost/ghost bond forces */
         QVector<boost::tuple<qint32, qint32>> ghost_pair_idxs;
+
+        /** The exceptions that are normal pairs in either end state, with the
+         *  index of each in the exception reaction field force */
+        QVector<boost::tuple<qint32, qint32>> rf_exception_idxs;
 
         /** All of the perturbable constraints - these include the r0 values
          *  for both end states

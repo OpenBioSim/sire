@@ -1303,6 +1303,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     auto ghost_14ff = this->getForce<OpenMM::CustomBondForce>("ghost-14", system);
     auto ghost_pairff = this->getForce<OpenMM::CustomBondForce>("ghost/ghost-pairs", system);
     auto ghost_pair_rff = this->getForce<OpenMM::CustomBondForce>("clj-ghost-pairs", system);
+    auto ring_breaking_rff = this->getForce<OpenMM::CustomBondForce>("clj-ring-break", system);
+    auto ring_making_rff = this->getForce<OpenMM::CustomBondForce>("clj-ring-make", system);
+    auto exception_rff = this->getForce<OpenMM::CustomBondForce>("clj-exceptions", system);
     auto ring_breaking_ff = this->getForce<OpenMM::CustomBondForce>("ring-break", system);
     auto ring_making_ff = this->getForce<OpenMM::CustomBondForce>("ring-make", system);
     auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
@@ -1763,6 +1766,38 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 }
             }
 
+            // Exceptions that are normal pairs in an end state need the reaction
+            // field correction there, interpolated with the charge scale lever.
+            const auto rf_exception_idxs = perturbable_mol.getRFExceptionIndicies();
+
+            if (exception_rff != 0 and not rf_exception_idxs.isEmpty())
+            {
+                const auto exception_atoms = perturbable_mol.getExceptionAtoms();
+                const auto charge_scales0 = perturbable_mol.getChargeScales0();
+                const auto charge_scales1 = perturbable_mol.getChargeScales1();
+
+                for (const auto &rf_idx : rf_exception_idxs)
+                {
+                    const int j = boost::get<0>(rf_idx);
+                    const auto atom0 = boost::get<0>(exception_atoms[j]);
+                    const auto atom1 = boost::get<1>(exception_atoms[j]);
+
+                    const double is_normal = schedule.morph("clj", "charge_scale",
+                                                            charge_scales0[j] == 1.0 ? 1.0 : 0.0,
+                                                            charge_scales1[j] == 1.0 ? 1.0 : 0.0,
+                                                            lambda_value);
+
+                    // match the REST2 scaling of the exception
+                    const double scale = (perturbable_mol.isRest2(atom0) and perturbable_mol.isRest2(atom1))
+                                             ? rest2_scale
+                                             : 1.0;
+
+                    exception_rff->setBondParameters(
+                        boost::get<1>(rf_idx), atom0 + start_index, atom1 + start_index,
+                        {is_normal * scale * morphed_charges[atom0] * morphed_charges[atom1]});
+                }
+            }
+
             // The hard Coulomb for the intramolecular ghost/ghost pairs is an
             // exception, and the soft-core terms use the ghost/ghost levers.
             const auto ghost_pair_idxs = perturbable_mol.getGhostPairIndicies();
@@ -1819,8 +1854,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         }
 
         // Update CLJ exceptions for ring-breaking pairs.
-        // The CLJ exception carries coul_kappa*q_a0*q_a1 for the hard Coulomb
-        // (including RF/PME long-range). coul_kappa is zero during
+        // The CLJ exception carries coul_kappa*q_a0*q_a1 for the hard Coulomb,
+        // with a separate correction for reaction field. coul_kappa is zero during
         // potential_swap/restraints_off/ring_open and ramps 0→1 in morph only,
         // so Coulomb only activates once the LJ softcore has already separated
         // the atoms. The CustomBondForce handles softcore LJ only (no q param).
@@ -1845,6 +1880,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 {
                     cljff->setExceptionParameters(clj_idx, rb_ea0, rb_ea1,
                                                   rb_new_charge, 1e-9, 1e-9);
+
+                    if (ring_breaking_rff != nullptr)
+                        ring_breaking_rff->setBondParameters(boost::get<1>(rb_exc[j]),
+                                                             rb_ea0, rb_ea1, {rb_new_charge});
+
                     has_changed_cljff = true;
                 }
             }
@@ -1871,6 +1911,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 {
                     cljff->setExceptionParameters(clj_idx, rm_ea0, rm_ea1,
                                                   rm_new_charge, 1e-9, 1e-9);
+
+                    if (ring_making_rff != nullptr)
+                        ring_making_rff->setBondParameters(boost::get<1>(rm_exc[j]),
+                                                           rm_ea0, rm_ea1, {rm_new_charge});
+
                     has_changed_cljff = true;
                 }
             }
@@ -2150,8 +2195,17 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     if (has_changed_cljff and cljff)
         cljff->updateParametersInContext(context);
 
-    if (has_changed_cljff and ghost_pair_rff)
-        ghost_pair_rff->updateParametersInContext(context);
+    if (has_changed_cljff)
+    {
+        if (ghost_pair_rff)
+            ghost_pair_rff->updateParametersInContext(context);
+        if (ring_breaking_rff)
+            ring_breaking_rff->updateParametersInContext(context);
+        if (ring_making_rff)
+            ring_making_rff->updateParametersInContext(context);
+        if (exception_rff)
+            exception_rff->updateParametersInContext(context);
+    }
 
     if (has_changed_ghostff)
     {
@@ -2801,6 +2855,16 @@ void LambdaLever::setGhostPairIndicies(int mol_idx,
 {
     mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
     this->perturbable_mols[mol_idx].setGhostPairIndicies(ghost_pair_idxs);
+}
+
+/** Set the exceptions that need a reaction field correction for the
+ *  perturbable molecule at index 'mol_idx'
+ */
+void LambdaLever::setRFExceptionIndicies(int mol_idx,
+                                         const QVector<boost::tuple<qint32, qint32>> &rf_exception_idxs)
+{
+    mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
+    this->perturbable_mols[mol_idx].setRFExceptionIndicies(rf_exception_idxs);
 }
 
 /** Set the constraint indicies for the perturbable molecule at

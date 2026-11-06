@@ -2967,6 +2967,7 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMole
       to_ghost_idxs(other.to_ghost_idxs), from_ghost_idxs(other.from_ghost_idxs),
       exception_atoms(other.exception_atoms), exception_idxs(other.exception_idxs),
       ghost_pair_atoms(other.ghost_pair_atoms), ghost_pair_idxs(other.ghost_pair_idxs),
+      rf_exception_idxs(other.rf_exception_idxs),
       perturbable_constraints(other.perturbable_constraints),
       constraint_idxs(other.constraint_idxs),
       start_atom_idx(other.start_atom_idx),
@@ -3004,6 +3005,7 @@ bool PerturbableOpenMMMolecule::operator==(const PerturbableOpenMMMolecule &othe
            to_ghost_idxs == other.to_ghost_idxs and from_ghost_idxs == other.from_ghost_idxs and
            exception_atoms == other.exception_atoms and exception_idxs == other.exception_idxs and
            ghost_pair_atoms == other.ghost_pair_atoms and ghost_pair_idxs == other.ghost_pair_idxs and
+           rf_exception_idxs == other.rf_exception_idxs and
            perturbable_constraints == other.perturbable_constraints and constraint_idxs == other.constraint_idxs and
            cmap_grid0 == other.cmap_grid0 and cmap_grid1 == other.cmap_grid1 and
            cmap_grid_sizes == other.cmap_grid_sizes and cmap_atoms == other.cmap_atoms;
@@ -3074,6 +3076,7 @@ PerturbableOpenMMMolecule &PerturbableOpenMMMolecule::operator=(const Perturbabl
 
         ghost_pair_atoms = other.ghost_pair_atoms;
         ghost_pair_idxs = other.ghost_pair_idxs;
+        rf_exception_idxs = other.rf_exception_idxs;
 
         perturbable_constraints = other.perturbable_constraints;
         constraint_idxs = other.constraint_idxs;
@@ -3359,6 +3362,32 @@ void PerturbableOpenMMMolecule::setGhostPairIndicies(const QVector<boost::tuple<
                                             CODELOC);
 
     this->ghost_pair_idxs = idxs;
+}
+
+/** Return the exceptions that are normal pairs in either end state, as
+ *  their index in the exceptions and in the exception reaction field force
+ */
+QVector<boost::tuple<qint32, qint32>> PerturbableOpenMMMolecule::getRFExceptionIndicies() const
+{
+    return this->rf_exception_idxs;
+}
+
+/** Set the exceptions that are normal pairs in either end state, as
+ *  their index in the exceptions and in the exception reaction field force
+ */
+void PerturbableOpenMMMolecule::setRFExceptionIndicies(const QVector<boost::tuple<qint32, qint32>> &idxs)
+{
+    for (const auto &idx : idxs)
+    {
+        if (boost::get<0>(idx) < 0 or boost::get<0>(idx) >= this->exception_atoms.count())
+            throw SireError::invalid_index(QObject::tr(
+                                               "Invalid exception index %1 for a molecule with %2 exceptions")
+                                               .arg(boost::get<0>(idx))
+                                               .arg(this->exception_atoms.count()),
+                                           CODELOC);
+    }
+
+    this->rf_exception_idxs = idxs;
 }
 
 /** Set the indexes of perturbable constraints in the System */
