@@ -121,6 +121,12 @@ def evaluate_xml_force(mols, xml, force):
         # Get the energy terms.
         terms = list(reversed(bond_force.get("energy").split(";")[1:-1]))
 
+        # The LJ term may be cut off, e.g. "coul_nrg+step(0.9-r)*lj_nrg".
+        import re
+
+        match = re.search(r"step\(([^-]+)-r\)", bond_force.get("energy").split(";")[0])
+        lj_cutoff = float(match.group(1)) if match else None
+
         # Get the parameters for this force.
         parameters = [p.get("name") for p in bond_force.find("PerBondParameters")]
 
@@ -157,6 +163,9 @@ def evaluate_xml_force(mols, xml, force):
             # Give energies units.
             coul_nrg = module.coul_nrg * kJ_per_mol
             lj_nrg = module.lj_nrg * kJ_per_mol
+
+            if lj_cutoff is not None and r > lj_cutoff:
+                lj_nrg = 0.0 * kJ_per_mol
 
             # Append the results for this bond.
             pairs.append((atom_i, atom_j))

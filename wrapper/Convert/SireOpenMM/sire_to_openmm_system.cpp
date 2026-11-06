@@ -1576,6 +1576,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     OpenMM::CustomBondForce *ghost_14ff = 0;
     OpenMM::CustomBondForce *ghost_pairff = 0;
+    OpenMM::CustomBondForce *ghost_pair_rff = 0;
     OpenMM::CustomBondForce *ring_breaking_ff = 0;
     OpenMM::CustomBondForce *ring_making_ff = 0;
     OpenMM::CustomNonbondedForce *ghost_ghostff = 0;
@@ -1828,8 +1829,20 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_14ff->setUsesPeriodicBoundaryConditions(false);
 
         // intramolecular ghost/ghost pairs, which have the same form as the
-        // ghost/ghost interaction but no cutoff
-        ghost_pairff = new OpenMM::CustomBondForce(nb14_expression);
+        // ghost/ghost interaction, but with the Coulomb term not cut off
+        auto ghost_pair_expression = nb14_expression;
+
+        if (cljff->getNonbondedMethod() != OpenMM::NonbondedForce::NoCutoff)
+        {
+            const auto lj_start = ghost_pair_expression.find(';');
+
+            ghost_pair_expression = QString("coul_nrg+step(%1-r)*lj_nrg;")
+                                        .arg(cljff->getCutoffDistance(), 0, 'g', 17)
+                                        .toStdString() +
+                                    ghost_pair_expression.substr(lj_start + 1);
+        }
+
+        ghost_pairff = new OpenMM::CustomBondForce(ghost_pair_expression);
         ghost_pairff->setName("GhostGhostBondForce");
 
         ghost_pairff->addPerBondParameter("q");
@@ -1839,6 +1852,29 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_pairff->addPerBondParameter("kappa");
 
         ghost_pairff->setUsesPeriodicBoundaryConditions(false);
+
+        // the hard Coulomb for these pairs is a NonbondedForce exception, which
+        // has no reaction field, so add the difference from a normal pair
+        const auto nbmethod = cljff->getNonbondedMethod();
+
+        if (nbmethod == OpenMM::NonbondedForce::CutoffPeriodic or
+            nbmethod == OpenMM::NonbondedForce::CutoffNonPeriodic)
+        {
+            const double rc = cljff->getCutoffDistance();
+            const double eps = cljff->getReactionFieldDielectric();
+            const double krf = (eps - 1.0) / ((2.0 * eps + 1.0) * rc * rc * rc);
+            const double crf = (3.0 * eps) / ((2.0 * eps + 1.0) * rc);
+
+            ghost_pair_rff = new OpenMM::CustomBondForce(
+                QString("138.9354558466661*q*select(step(r-%1), -1/r, %2*r^2-%3)")
+                    .arg(rc, 0, 'g', 17)
+                    .arg(krf, 0, 'g', 17)
+                    .arg(crf, 0, 'g', 17)
+                    .toStdString());
+            ghost_pair_rff->setName("GhostGhostReactionFieldForce");
+            ghost_pair_rff->addPerBondParameter("q");
+            ghost_pair_rff->setUsesPeriodicBoundaryConditions(false);
+        }
 
         if (use_beutler_softening)
         {
@@ -1986,7 +2022,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
         // the intramolecular pairs are part of the ghost/ghost interaction
         ghost_pairff->setForceGroup(force_group_counter++);
-        lambda_lever.setGhostPairForceIndex(system.addForce(ghost_pairff));
+        lambda_lever.setDependentForceIndex("ghost/ghost-pairs", system.addForce(ghost_pairff));
+
+        // the reaction field correction is part of the hard Coulomb
+        if (ghost_pair_rff != 0)
+        {
+            ghost_pair_rff->setForceGroup(lambda_lever.getForceGroup("clj"));
+            lambda_lever.setDependentForceIndex("clj-ghost-pairs", system.addForce(ghost_pair_rff));
+        }
 
         ghost_nonghostff->setForceGroup(force_group_counter);
         lambda_lever.setForceIndex("ghost/non-ghost", system.addForce(ghost_nonghostff));
@@ -3064,8 +3107,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             auto pert_idx = idx_to_pert_idx.value(i, openmm_mols.count() + 1);
 
             // Intramolecular ghost/ghost pairs are excluded from the cutoff
-            // ghost forces. The hard Coulomb is an exception, which has no
-            // cutoff, and the soft-core terms are in the ghost/ghost bond force.
+            // ghost forces. The hard Coulomb is an exception, corrected for
+            // reaction field, and the soft-core terms are in the ghost/ghost
+            // bond force.
             const auto ghost_pairs = mol.getGhostPairs();
 
             if (not ghost_pairs.isEmpty() and ghost_pairff != 0)
@@ -3096,6 +3140,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                                   std::max(mol.kappas.at(atom0), mol.kappas.at(atom1))};
 
                     const int nbidx = ghost_pairff->addBond(atom0 + start_index, atom1 + start_index, params);
+
+                    // both bond forces hold the same pairs, so share the index
+                    if (ghost_pair_rff != 0)
+                        ghost_pair_rff->addBond(atom0 + start_index, atom1 + start_index, {charge});
 
                     ghost_ghostff->addExclusion(atom0 + start_index, atom1 + start_index);
                     ghost_nonghostff->addExclusion(atom0 + start_index, atom1 + start_index);

@@ -127,7 +127,7 @@ namespace SireOpenMM
 
         void setForceIndex(const QString &force, int index);
 
-        void setGhostPairForceIndex(int index);
+        void setDependentForceIndex(const QString &force, int index);
 
         void addRestraintIndex(const QString &force, int index);
 

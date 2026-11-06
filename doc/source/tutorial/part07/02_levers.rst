@@ -150,9 +150,10 @@ In this case, as we have a perturbable system, the Force objects used are;
   that are ghosts in either end state. It uses parameters that are controlled
   by the ``charge``, ``sigma``, ``epsilon``, ``alpha`` and ``kappa`` levers.
   Interactions between ghost atoms in the same molecule are calculated
-  without a cutoff by an
+  by an
   `OpenMM::CustomBondForce <http://docs.openmm.org/latest/api-c++/generated/CustomBondForce.html>`__
-  in the same force group, which is controlled by the same levers.
+  in the same force group, in which the electrostatic term has no cutoff,
+  and which is controlled by the same levers.
 * ``ghost/non-ghost``: `OpenMM::CustomNonbondedForce <http://docs.openmm.org/latest/api-c++/generated/CustomNonbondedForce.html>`__.
   This models all of the electrostatic (coulomb) and van der Waals (Lennard-Jones)
   interactions between the ghost atoms and the non-ghost atoms in the system.

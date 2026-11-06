@@ -43,14 +43,16 @@ Ghost atoms are then added to three custom OpenMM Forces:
 
    Interactions between ghost atoms in the same molecule (other than
    excluded and 1-4 pairs) use the same energy function, but are
-   calculated by a CustomBondForce without a cutoff. This is in the same
-   force group as the ghost/ghost force, and is controlled by the same
-   levers. The "hard" electrostatic interaction for these pairs is added
-   to the NonBondedForce as an exception, which is a plain Coulomb
-   interaction with no cutoff, PME or reaction field correction. This
-   means that intramolecular interactions are never truncated, which
-   matters when ``kappa`` is less than 1 for molecules that are larger
-   than the cutoff.
+   calculated by a CustomBondForce in which the electrostatic term has
+   no cutoff. This is in the same force group as the ghost/ghost force,
+   and is controlled by the same levers. The "hard" electrostatic
+   interaction for these pairs is added to the NonBondedForce as an
+   exception. When reaction field is used, a further CustomBondForce in
+   the same force group as the NonBondedForce adds the difference between
+   the exception and a normal reaction field interaction. This means that
+   the end states are unchanged, while the intramolecular electrostatic
+   interactions are never truncated, which matters when ``kappa`` is less
+   than 1 for molecules that are larger than the cutoff.
 
 2. A CustomNonbondedForce called the "ghost/non-ghost" force. This uses a
    custom energy function to calculate the soft-core electrostatic and

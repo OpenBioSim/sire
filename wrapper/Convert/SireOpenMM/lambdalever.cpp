@@ -1302,6 +1302,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
     auto ghost_14ff = this->getForce<OpenMM::CustomBondForce>("ghost-14", system);
     auto ghost_pairff = this->getForce<OpenMM::CustomBondForce>("ghost/ghost-pairs", system);
+    auto ghost_pair_rff = this->getForce<OpenMM::CustomBondForce>("clj-ghost-pairs", system);
     auto ring_breaking_ff = this->getForce<OpenMM::CustomBondForce>("ring-break", system);
     auto ring_making_ff = this->getForce<OpenMM::CustomBondForce>("ring-make", system);
     auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
@@ -1779,11 +1780,17 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     const double scale = (perturbable_mol.isRest2(atom0) ? sqrt_rest2_scale : 1.0) *
                                          (perturbable_mol.isRest2(atom1) ? sqrt_rest2_scale : 1.0);
 
+                    const double charge = scale * morphed_charges[atom0] * morphed_charges[atom1];
+
                     cljff->setExceptionParameters(
                         boost::get<0>(ghost_pair_idxs[j]),
                         atom0 + start_index, atom1 + start_index,
-                        scale * morphed_charges[atom0] * morphed_charges[atom1],
-                        1e-9, 1e-9);
+                        charge, 1e-9, 1e-9);
+
+                    if (ghost_pair_rff != 0)
+                        ghost_pair_rff->setBondParameters(boost::get<1>(ghost_pair_idxs[j]),
+                                                          atom0 + start_index, atom1 + start_index,
+                                                          {charge});
 
                     if (ghost_pairff != 0)
                     {
@@ -2142,6 +2149,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // update the parameters in the context for forces whose parameters changed
     if (has_changed_cljff and cljff)
         cljff->updateParametersInContext(context);
+
+    if (has_changed_cljff and ghost_pair_rff)
+        ghost_pair_rff->updateParametersInContext(context);
 
     if (has_changed_ghostff)
     {
@@ -2703,18 +2713,19 @@ void LambdaLever::setForceIndex(const QString &force,
     this->lambda_schedule.addForce(force);
 }
 
-/** Set the index of the force holding the intramolecular ghost/ghost pairs.
- *  This is driven by the ghost/ghost levers, so isn't added to the schedule.
+/** Set the index of a force that is driven by the levers of another force,
+ *  so isn't added to the schedule.
  */
-void LambdaLever::setGhostPairForceIndex(int index)
+void LambdaLever::setDependentForceIndex(const QString &force, int index)
 {
     if (index < 0)
         throw SireError::invalid_index(QObject::tr(
-                                           "This looks like an invalid index for the ghost/ghost pair force : %1")
+                                           "This looks like an invalid index for force '%1' : %2")
+                                           .arg(force)
                                            .arg(index),
                                        CODELOC);
 
-    this->name_to_ffidx.insert("ghost/ghost-pairs", index);
+    this->name_to_ffidx.insert(force, index);
 }
 
 /** Add the index of a restraint force called 'restraint' in the
