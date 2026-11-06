@@ -738,6 +738,7 @@ def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
     ],
 )
 @pytest.mark.parametrize("swap_end_states", [False, True])
+@pytest.mark.parametrize("softening", ["zacharias", "taylor", "beutler"])
 def test_ring_break_end_state(
     ring_break_constraints,
     openmm_platform,
@@ -745,11 +746,14 @@ def test_ring_break_end_state(
     cutoff_type,
     periodic,
     swap_end_states,
+    softening,
 ):
     """
-    Once the ring is broken, the pairs across the broken bond interact as
-    normal non-bonded pairs, so the energy matches the perturbed end state for
-    any cutoff type. Swapping the end states tests the ring-making case.
+    The energies at the end states of a ring-breaking perturbation match the
+    plain end-state molecules for any cutoff type and soft-core form: the
+    broken pair doesn't interact while it is bonded, and the pairs across the
+    broken bond are normal non-bonded pairs once it is broken. Swapping the
+    end states tests the ring-making case.
     """
     merge = ring_break_constraints.molecules("property is_perturbable")[0]
 
@@ -758,15 +762,16 @@ def test_ring_break_end_state(
     c["coordinates1"] = c["coordinates0"]
     merge = c.commit()
 
-    c = merge.cursor()
-    for key in c.keys():
-        if key.endswith("1"):
-            c[key.removesuffix("1")] = c[key]
-            del c[key]
-        elif key.endswith("0"):
-            del c[key]
-    c["is_perturbable"] = False
-    end1 = c.commit()
+    def get_end_state(state, remove_state):
+        c = merge.cursor()
+        for key in c.keys():
+            if key.endswith(state):
+                c[key.removesuffix(state)] = c[key]
+                del c[key]
+            elif key.endswith(remove_state):
+                del c[key]
+        c["is_perturbable"] = False
+        return c.commit()
 
     space = ring_break_constraints.space() if periodic else sr.vol.Cartesian()
 
@@ -780,11 +785,23 @@ def test_ring_break_end_state(
     if cutoff_type is not None:
         m["cutoff_type"] = cutoff_type
 
-    nrg1 = sr.convert.to(end1, "openmm", map=m).get_energy().value()
+    nrg0 = sr.convert.to(get_end_state("0", "1"), "openmm", map=m).get_energy().value()
+    nrg1 = sr.convert.to(get_end_state("1", "0"), "openmm", map=m).get_energy().value()
+
+    if swap_end_states:
+        nrg0, nrg1 = nrg1, nrg0
 
     m["swap_end_states"] = swap_end_states
 
-    omm = sr.convert.to(merge, "openmm", map=m)
-    omm.set_lambda(0.0 if swap_end_states else 1.0)
+    if softening == "taylor":
+        m["use_taylor_softening"] = True
+    elif softening == "beutler":
+        m["use_beutler_softening"] = True
 
+    omm = sr.convert.to(merge, "openmm", map=m)
+
+    omm.set_lambda(0.0)
+    assert omm.get_energy().value() == pytest.approx(nrg0, abs=1e-2)
+
+    omm.set_lambda(1.0)
     assert omm.get_energy().value() == pytest.approx(nrg1, abs=1e-2)

@@ -1759,14 +1759,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             rb_expression = QString(
                                 "lj_nrg;"
-                                "lj_nrg=four_epsilon*sig6*(sig6-1);"
+                                "lj_nrg=(1-ring_break_alpha)*four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(%1*sigma^6 + r_safe^6);"
                                 "r_safe=max(r, 0.001);")
                                 .arg(taylor_power_expression("ring_break_alpha", taylor_power))
                                 .toStdString();
             rm_expression = QString(
                                 "lj_nrg;"
-                                "lj_nrg=four_epsilon*sig6*(sig6-1);"
+                                "lj_nrg=(1-ring_make_alpha)*four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(%1*sigma^6 + r_safe^6);"
                                 "r_safe=max(r, 0.001);")
                                 .arg(taylor_power_expression("ring_make_alpha", taylor_power))
@@ -1776,7 +1776,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             rb_expression = QString(
                                 "lj_nrg;"
-                                "lj_nrg=four_epsilon*sig6*(sig6-1);"
+                                "lj_nrg=(1-ring_break_alpha)*four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(((sigma*delta)+r_safe^2)^3);"
                                 "r_safe=max(r, 0.001);"
                                 "delta=%1*ring_break_alpha;")
@@ -1784,7 +1784,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                 .toStdString();
             rm_expression = QString(
                                 "lj_nrg;"
-                                "lj_nrg=four_epsilon*sig6*(sig6-1);"
+                                "lj_nrg=(1-ring_make_alpha)*four_epsilon*sig6*(sig6-1);"
                                 "sig6=(sigma^6)/(((sigma*delta)+r_safe^2)^3);"
                                 "r_safe=max(r, 0.001);"
                                 "delta=%1*ring_make_alpha;")

@@ -183,6 +183,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   field. They were calculated without the reaction field terms, so the end state where
   the bond doesn't exist was wrong.
 
+* Scale the Lennard-Jones interaction of the pair whose bond is broken or formed by a
+  ring-breaking perturbation by ``1 - alpha`` for the Zacharias and Taylor soft-core
+  forms, as for Beutler. Previously the bonded pair still had a softened Lennard-Jones
+  interaction in the end state where the bond exists.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
