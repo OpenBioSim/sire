@@ -169,6 +169,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   error when it times out, and repeated line search failures no longer retry until the
   timeout.
 
+* ``PerturbableOpenMMMolecule.get_lever_values()`` no longer reports levers whose values
+  only change by floating point round-off, e.g. bonded terms that are the same in both
+  end states.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
