@@ -3136,8 +3136,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
                 // an exception that is a normal pair in an end state needs the
                 // reaction field correction there
+                const auto &param1 = mol.perturbed->exception_params[j];
+
                 if (exception_rff != 0 and idx >= 0 and
-                    (coul_14_scale == 1.0 or boost::get<2>(mol.perturbed->exception_params[j]) == 1.0))
+                    ((coul_14_scale == 1.0 and lj_14_scale == 1.0) or
+                     (boost::get<2>(param1) == 1.0 and boost::get<3>(param1) == 1.0)))
                 {
                     const int rf_idx = exception_rff->addBond(boost::get<0>(p), boost::get<1>(p), {0.0});
                     rf_exception_idxs.append(boost::make_tuple(j, rf_idx));

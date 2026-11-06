@@ -1775,6 +1775,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 const auto exception_atoms = perturbable_mol.getExceptionAtoms();
                 const auto charge_scales0 = perturbable_mol.getChargeScales0();
                 const auto charge_scales1 = perturbable_mol.getChargeScales1();
+                const auto lj_scales0 = perturbable_mol.getLJScales0();
+                const auto lj_scales1 = perturbable_mol.getLJScales1();
 
                 for (const auto &rf_idx : rf_exception_idxs)
                 {
@@ -1782,9 +1784,13 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     const auto atom0 = boost::get<0>(exception_atoms[j]);
                     const auto atom1 = boost::get<1>(exception_atoms[j]);
 
+                    // a pair is only a normal pair if neither scale is applied
+                    const bool is_normal0 = charge_scales0[j] == 1.0 and lj_scales0[j] == 1.0;
+                    const bool is_normal1 = charge_scales1[j] == 1.0 and lj_scales1[j] == 1.0;
+
                     const double is_normal = schedule.morph("clj", "charge_scale",
-                                                            charge_scales0[j] == 1.0 ? 1.0 : 0.0,
-                                                            charge_scales1[j] == 1.0 ? 1.0 : 0.0,
+                                                            is_normal0 ? 1.0 : 0.0,
+                                                            is_normal1 ? 1.0 : 0.0,
                                                             lambda_value);
 
                     // match the REST2 scaling of the exception

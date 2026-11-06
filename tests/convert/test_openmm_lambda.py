@@ -805,3 +805,56 @@ def test_ring_break_end_state(
 
     omm.set_lambda(1.0)
     assert omm.get_energy().value() == pytest.approx(nrg1, abs=1e-2)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_unscaled_14_coulomb_end_state(merged_ethane_methanol, openmm_platform):
+    """
+    1-4 pairs with an unscaled Coulomb term but a scaled LJ term are still
+    exceptions, so the end states match the plain molecules with reaction
+    field.
+    """
+    from sire.legacy.MM import CLJNBPairs, CLJScaleFactor
+
+    merge = merged_ethane_methanol[0]
+
+    c = merge.cursor()
+    c["coordinates"] = c["coordinates0"]
+    c["coordinates1"] = c["coordinates0"]
+    nbpairs = CLJNBPairs(merge.property("connectivity"), CLJScaleFactor(1.0, 0.5))
+    c["intrascale0"] = nbpairs
+    c["intrascale1"] = nbpairs
+    merge = c.commit()
+
+    def get_end_state(state, remove_state):
+        c = merge.cursor()
+        for key in c.keys():
+            if key.endswith(state):
+                c[key.removesuffix(state)] = c[key]
+                del c[key]
+            elif key.endswith(remove_state):
+                del c[key]
+        c["is_perturbable"] = False
+        return c.commit()
+
+    m = {
+        "platform": openmm_platform,
+        "constraint": "none",
+        "cutoff": "7.5 A",
+        "cutoff_type": "RF",
+        "space": sr.vol.Cartesian(),
+    }
+
+    nrg0 = sr.convert.to(get_end_state("0", "1"), "openmm", map=m).get_energy().value()
+    nrg1 = sr.convert.to(get_end_state("1", "0"), "openmm", map=m).get_energy().value()
+
+    omm = sr.convert.to(merge, "openmm", map=m)
+
+    omm.set_lambda(0.0)
+    assert omm.get_energy().value() == pytest.approx(nrg0, abs=1e-3)
+
+    omm.set_lambda(1.0)
+    assert omm.get_energy().value() == pytest.approx(nrg1, abs=1e-3)
