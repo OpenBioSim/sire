@@ -758,18 +758,20 @@ void LambdaSchedule::addDecoupleStage(const QString &name, bool perturbed_is_dec
         this->setEquation(name, "ghost/ghost", "*", this->initial());
         this->setEquation(name, "ghost-14", "*", this->initial());
 
-        // kappa is fixed to 1.0
-        this->setEquation(name, "ghost/ghost", "kappa", 1.0);
-        this->setEquation(name, "ghost-14", "kappa", 1.0);
+        // stop subtracting the hard Coulomb as the charges in the
+        // NonbondedForce go to zero, so the intramolecular terms are kept
+        this->setEquation(name, "ghost/ghost", "kappa", 1.0 - this->lam());
+        this->setEquation(name, "ghost-14", "kappa", 1.0 - this->lam());
     }
     else
     {
         this->setEquation(name, "ghost/ghost", "*", this->final());
         this->setEquation(name, "ghost-14", "*", this->final());
 
-        // kappa is fixed to 1.0
-        this->setEquation(name, "ghost/ghost", "kappa", 1.0);
-        this->setEquation(name, "ghost-14", "kappa", 1.0);
+        // stop subtracting the hard Coulomb as the charges in the
+        // NonbondedForce go to zero, so the intramolecular terms are kept
+        this->setEquation(name, "ghost/ghost", "kappa", this->lam());
+        this->setEquation(name, "ghost-14", "kappa", this->lam());
     }
 }
 

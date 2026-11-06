@@ -115,6 +115,63 @@ def evaluate_xml_force(mols, xml, force):
     nrg_coul_list = []
     nrg_lj_list = []
 
+    def evaluate_bonds(bond_force):
+        """Evaluate the energy of each bond in a CustomBondForce."""
+
+        # Get the energy terms.
+        terms = list(reversed(bond_force.get("energy").split(";")[1:-1]))
+
+        # The LJ term may be cut off, e.g. "coul_nrg+step(0.9-r)*lj_nrg".
+        import re
+
+        match = re.search(r"step\(([^-]+)-r\)", bond_force.get("energy").split(";")[0])
+        lj_cutoff = float(match.group(1)) if match else None
+
+        # Get the parameters for this force.
+        parameters = [p.get("name") for p in bond_force.find("PerBondParameters")]
+
+        # Get all the bond parameters.
+        bonds = bond_force.find("Bonds").findall("Bond")
+
+        # Get the list of atoms.
+        atoms = mols.atoms()
+
+        # Loop over all bonds.
+        for bond in bonds:
+            # Get the atoms involved in the bond.
+            atom_i = atoms[int(bond.get("p1"))]
+            atom_j = atoms[int(bond.get("p2"))]
+
+            # Set the parameters for this bond.
+            for k, param in enumerate(parameters):
+                setattr(module, param, float(bond.get(f"param{k + 1}")))
+
+            # Get the distance between the particles.
+            r = measure(atom_i, atom_j).to(nanometer)
+
+            # Evaluate the energy term by term.
+            for term in terms:
+                # Replace any instances of ^ with **.
+                term = term.replace("^", "**")
+
+                # Split the term into the result and the expression.
+                result, expression = term.split("=")
+
+                # Evaluate the expression.
+                setattr(module, result, eval(expression))
+
+            # Give energies units.
+            coul_nrg = module.coul_nrg * kJ_per_mol
+            lj_nrg = module.lj_nrg * kJ_per_mol
+
+            if lj_cutoff is not None and r > lj_cutoff:
+                lj_nrg = 0.0 * kJ_per_mol
+
+            # Append the results for this bond.
+            pairs.append((atom_i, atom_j))
+            nrg_coul_list.append(coul_nrg)
+            nrg_lj_list.append(lj_nrg)
+
     # CustomNonbondedForce: ghost-ghost or ghost-nonghost.
     if name != "Ghost14BondForce":
         # Get the parameters for this force.
@@ -136,6 +193,8 @@ def evaluate_xml_force(mols, xml, force):
             .find("InteractionGroup")
             .find("Set2")
         ]
+
+        is_same_set = set(set1) == set(set2)
 
         # Get the exclusions.
         exclusions = [
@@ -173,8 +232,9 @@ def evaluate_xml_force(mols, xml, force):
                 # Get the index from set2.
                 j = set2[y]
 
-                # Ignore self-interaction.
-                if i == j:
+                # Ignore self-interaction, and count each pair once when
+                # the two sets are the same.
+                if i == j or (is_same_set and j < i):
                     continue
 
                 # Check if this pair is excluded.
@@ -217,49 +277,17 @@ def evaluate_xml_force(mols, xml, force):
                     nrg_coul_list.append(coul_nrg)
                     nrg_lj_list.append(lj_nrg)
 
+        # Intramolecular ghost/ghost pairs are computed without a cutoff
+        # in a separate CustomBondForce.
+        if name == "GhostGhostNonbondedForce":
+            for bond_force in tree.find("Forces"):
+                if bond_force.get("name") == "GhostGhostBondForce":
+                    evaluate_bonds(bond_force)
+                    break
+
     # CustomBondForce: ghost-14.
     else:
-        # Get the parameters for this force.
-        parameters = [p.get("name") for p in force.find("PerBondParameters")]
-
-        # Get all the bond parameters.
-        bonds = force.find("Bonds").findall("Bond")
-
-        # Get the list of atoms.
-        atoms = mols.atoms()
-
-        # Loop over all bonds.
-        for bond in bonds:
-            # Get the atoms involved in the bond.
-            atom_i = atoms[int(bond.get("p1"))]
-            atom_j = atoms[int(bond.get("p2"))]
-
-            # Set the parameters for this bond.
-            for k, param in enumerate(parameters):
-                setattr(module, param, float(bond.get(f"param{k + 1}")))
-
-            # Get the distance between the particles.
-            r = measure(atom_i, atom_j).to(nanometer)
-
-            # Evaluate the energy term by term.
-            for term in terms:
-                # Replace any instances of ^ with **.
-                term = term.replace("^", "**")
-
-                # Split the term into the result and the expression.
-                result, expression = term.split("=")
-
-                # Evaluate the expression.
-                setattr(module, result, eval(expression))
-
-            # Give energies units.
-            coul_nrg = module.coul_nrg * kJ_per_mol
-            lj_nrg = module.lj_nrg * kJ_per_mol
-
-            # Append the results for this bond.
-            pairs.append((atom_i, atom_j))
-            nrg_coul_list.append(coul_nrg)
-            nrg_lj_list.append(lj_nrg)
+        evaluate_bonds(force)
 
     # Return the results.
     return pairs, nrg_coul_list, nrg_lj_list

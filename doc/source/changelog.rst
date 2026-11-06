@@ -144,6 +144,50 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed the bond, inverse bond and Morse potential centroid restraint constructors naming
   the wrong atom when the two groups overlap, and reallocating the second group on every atom.
 
+* Stop constraining unperturbed heavy-atom bonds at the alchemical junction, reverting
+  the SOMD1-matching change in 2026.1.0. It destabilised perturbable molecules with large
+  ghost regions, such as partially mapped macrocycles.
+
+* Fixed a segmentation fault when the OpenMM minimiser raised an exception, since the GIL
+  wasn't restored before the exception reached Python. A system whose starting energy is
+  infinite or NaN now raises an error saying so, rather than an unrelated error about the
+  number of positions.
+
+* Never constrain a bond that is broken or formed by a perturbation, since its atoms are
+  unbonded at one end state. It was constrained if either atom was light at either end
+  state, which blew up some ring-breaking simulations.
+
+* Calculate interactions between ghost atoms in the same molecule without a cutoff. They
+  were truncated at the cutoff, which made the energy discontinuous for molecules larger
+  than the cutoff when a schedule set ``kappa`` below 1, e.g. to decouple a ligand while
+  keeping its intramolecular interactions. Energies for other schedules change slightly,
+  since these interactions are no longer truncated.
+
+* When the OpenMM minimiser fails, it now leaves the context at the last accepted positions,
+  or the starting positions if those have a lower energy, rather than at a rejected line
+  search trial point, which could make dynamics blow up immediately. It raises a timeout
+  error when it times out, and repeated line search failures no longer retry until the
+  timeout.
+
+* ``PerturbableOpenMMMolecule.get_lever_values()`` no longer reports levers whose values
+  only change by floating point round-off, e.g. bonded terms that are the same in both
+  end states.
+
+* Scale ``kappa`` with λ again in ``LambdaSchedule.standard_decouple()``, reverting the
+  change in 2025.1.0, so that the decoupled molecule keeps its intramolecular electrostatic
+  interactions. With ``kappa`` fixed they were turned off, so a single-leg decoupling
+  calculation, e.g. of a hydration free energy, missed the vacuum contribution.
+
+* Fixed the Coulomb interaction of the pair whose bond is broken or formed by a
+  ring-breaking perturbation, and of the pairs across that bond, when using reaction
+  field. They were calculated without the reaction field terms, so the end state where
+  the bond doesn't exist was wrong.
+
+* Scale the Lennard-Jones interaction of the pair whose bond is broken or formed by a
+  ring-breaking perturbation by ``1 - alpha`` for the Zacharias and Taylor soft-core
+  forms, as for Beutler. Previously the bonded pair still had a softened Lennard-Jones
+  interaction in the end state where the bond exists.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
