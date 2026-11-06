@@ -619,3 +619,57 @@ def test_asymmetric_constraints(merged_ethane_methanol):
 
     # Check the minimised potential energies are the same. (Post constraint projection.)
     assert isclose(nrg_forwards, nrg_backwards, rel_tol=1e-4)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+@pytest.mark.slow
+@pytest.mark.parametrize("lambda_value", [0.0, 1.0])
+def test_ring_break_constraints(ring_break_constraints, openmm_platform, lambda_value):
+    """
+    The bond broken by a ring-breaking perturbation (OpenFE scaffold_hopping
+    chk1, 1~17) is never constrained. One of its atoms becomes a hydrogen, so it
+    used to be constrained at lambda = 1, where it no longer exists, which blew up.
+    """
+    pert = ring_break_constraints.molecules("property is_perturbable")[0]
+
+    bonds = [
+        {
+            tuple(sorted((b.atom0().value(), b.atom1().value())))
+            for b in pert.property(f"connectivity{i}").get_bonds()
+        }
+        for i in (0, 1)
+    ]
+    broken = bonds[0] ^ bonds[1]
+    assert len(broken) == 1
+
+    if lambda_value == 0.0:
+        mols = sr.morph.link_to_reference(ring_break_constraints)
+    else:
+        mols = sr.morph.link_to_perturbed(ring_break_constraints)
+
+    mols = (
+        mols.minimisation(lambda_value=lambda_value, platform=openmm_platform)
+        .run()
+        .commit()
+    )
+
+    d = mols.dynamics(
+        timestep="1 fs",
+        lambda_value=lambda_value,
+        constraint="h-bonds",
+        perturbable_constraint="h-bonds-not-heavy-perturbed",
+        platform=openmm_platform,
+    )
+
+    constrained = {
+        tuple(sorted((c[0][0].index().value(), c[0][1].index().value())))
+        for c in d.get_constraints()
+        if c[0][0].molecule().number() == pert.number()
+    }
+
+    assert not (broken & constrained)
+
+    d.run("1 ps", save_frequency=0, auto_fix_minimise=False)

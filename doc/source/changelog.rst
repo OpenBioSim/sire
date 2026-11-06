@@ -153,6 +153,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   infinite or NaN now raises an error saying so, rather than an unrelated error about the
   number of positions.
 
+* Never constrain a bond that is broken or formed by a perturbation, since its atoms are
+  unbonded at one end state. It was constrained if either atom was light at either end
+  state, which blew up some ring-breaking simulations.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

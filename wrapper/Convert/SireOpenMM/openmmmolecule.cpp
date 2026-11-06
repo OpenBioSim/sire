@@ -973,6 +973,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         // Whether the bond's own k/r0 change between end states.
         bool bond_is_perturbing = false;
 
+        // Whether the bond exists at only one end state, i.e. it is broken or formed.
+        bool bond_is_broken_or_formed = false;
+
         if (is_perturbable)
         {
             const auto bondparam1 = params1.bonds().value(it.key()).first;
@@ -989,6 +992,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             }
 
             bond_is_perturbing = (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3);
+            bond_is_broken_or_formed = (k == 0 or k_1 == 0);
         }
 
         if (this_constraint_type == CONSTRAIN_AUTO_BONDS)
@@ -1036,6 +1040,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                     should_constrain_bond = true;
                 }
             }
+        }
+
+        // Never constrain a bond that is absent at one end state, since its atoms
+        // are unbonded there.
+        if (bond_is_broken_or_formed)
+        {
+            should_constrain_bond = false;
         }
 
         if (should_constrain_bond)

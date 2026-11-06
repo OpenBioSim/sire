@@ -244,6 +244,11 @@ def macrocycle_ghost_constraints():
 
 
 @pytest.fixture(scope="session")
+def ring_break_constraints():
+    return sr.load_test_files("ring_break_constraints.bss")
+
+
+@pytest.fixture(scope="session")
 def zero_lj_mols():
     return sr.load_test_files("zero_lj.prm7", "zero_lj.rst7")
 
