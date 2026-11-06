@@ -173,6 +173,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   only change by floating point round-off, e.g. bonded terms that are the same in both
   end states.
 
+* Scale ``kappa`` with λ again in ``LambdaSchedule.standard_decouple()``, reverting the
+  change in 2025.1.0, so that the decoupled molecule keeps its intramolecular electrostatic
+  interactions. With ``kappa`` fixed they were turned off, so a single-leg decoupling
+  calculation, e.g. of a hydration free energy, missed the vacuum contribution.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

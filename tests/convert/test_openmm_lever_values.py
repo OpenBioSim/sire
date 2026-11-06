@@ -23,4 +23,5 @@ def test_unchanged_levers_not_reported():
         "clj-epsilon-1",
         "clj-epsilon-7",
         "clj-alpha-1",
+        "ghost/ghost-kappa-1",
     ]

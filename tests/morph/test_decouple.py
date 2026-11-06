@@ -93,25 +93,18 @@ def test_decouple(ala_mols, openmm_platform):
 )
 def test_decouple_intramolecular_cutoff(ala_mols, openmm_platform):
     """
-    Intramolecular ghost/ghost interactions don't use the cutoff, so a
-    decoupled molecule that keeps them matches the molecule in vacuum.
+    The decouple schedule keeps the intramolecular interactions, which don't
+    use the cutoff, so the decoupled molecule matches the molecule in vacuum.
     """
     mol = ala_mols[0]
 
     dmol = sr.morph.decouple(mol)
 
-    # Keep the intramolecular interactions at full strength.
-    schedule = sr.cas.LambdaSchedule.standard_decouple()
-    schedule.set_equation(
-        stage="decouple", force="ghost/ghost", lever="kappa", equation=0
-    )
-    schedule.set_equation(stage="decouple", force="ghost-14", lever="kappa", equation=0)
-
     # The cutoff is shorter than the molecule.
     d = dmol.dynamics(
         platform=openmm_platform,
         cutoff="4 A",
-        schedule=schedule,
+        schedule=dmol.property("schedule"),
         lambda_value=1.0,
         map={"space": ala_mols.space()},
     )
