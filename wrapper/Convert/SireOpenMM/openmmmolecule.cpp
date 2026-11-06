@@ -913,19 +913,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     auto bonds = params.bonds();
 
-    // Whether an atom's amber type changes between end states - used below
-    // to identify bonds that are part of the alchemical junction. Amber
-    // type, not charge, since charges can be redistributed across the whole
-    // ligand without affecting bonded parameters.
-    const auto params1_ambertypes = params1.amberTypes();
-
-    auto is_perturbing_atom = [&](int atom_idx) -> bool
-    {
-        const auto &cgatomidx = idx_to_cgatomidx_data[atom_idx];
-
-        return ambertypes.at(cgatomidx) != params1_ambertypes.at(cgatomidx);
-    };
-
     if (is_perturbable)
     {
         // add in any bonds that exist only in the other state
@@ -986,11 +973,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         // Whether the bond's own k/r0 change between end states.
         bool bond_is_perturbing = false;
 
-        // Whether the bond is part of the alchemical junction (touches a
-        // ghost or transmuting atom). SOMD1 constrains an unperturbing bond
-        // unconditionally only if it's part of the perturbation; ordinary
-        // unperturbed bonds elsewhere in the molecule are not affected.
-        bool bond_is_ghost_junction = false;
+        // Whether the bond exists at only one end state, i.e. it is broken or formed.
+        bool bond_is_broken_or_formed = false;
 
         if (is_perturbable)
         {
@@ -1008,7 +992,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             }
 
             bond_is_perturbing = (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3);
-            bond_is_ghost_junction = is_perturbing_atom(atom0) or is_perturbing_atom(atom1);
+            bond_is_broken_or_formed = (k == 0 or k_1 == 0);
         }
 
         if (this_constraint_type == CONSTRAIN_AUTO_BONDS)
@@ -1032,10 +1016,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             should_constrain_bond = vibrational_period < auto_constraints_factor * timestep_in_fs;
         }
         else if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or
-                                              (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS)) or
-                                              (is_perturbable and not bond_is_perturbing and
-                                               bond_is_ghost_junction and
-                                               (this_constraint_type & CONSTRAIN_HBONDS))))
+                                              (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
         {
             should_constrain_bond = true;
 
@@ -1059,6 +1040,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                     should_constrain_bond = true;
                 }
             }
+        }
+
+        // Never constrain a bond that is absent at one end state, since its atoms
+        // are unbonded there.
+        if (bond_is_broken_or_formed)
+        {
+            should_constrain_bond = false;
         }
 
         if (should_constrain_bond)
@@ -2634,6 +2622,107 @@ QVector<boost::tuple<qint32, qint32>> OpenMMMolecule::getExceptionAtoms() const
     return exception_atoms;
 }
 
+/** Return the pairs of ghost atoms in this molecule that interact but are
+ *  not exceptions, in molecule-local indexes. These are computed without a
+ *  cutoff, since they are intramolecular.
+ */
+QVector<boost::tuple<qint32, qint32>> OpenMMMolecule::getGhostPairs() const
+{
+    QVector<boost::tuple<qint32, qint32>> pairs;
+
+    QSet<qint32> ghost_set = from_ghost_idxs;
+    ghost_set.unite(to_ghost_idxs);
+
+    if (ghost_set.count() < 2)
+        return pairs;
+
+    QSet<QPair<qint32, qint32>> exceptions;
+
+    for (const auto &param : exception_params)
+    {
+        const auto atom0 = boost::get<0>(param);
+        const auto atom1 = boost::get<1>(param);
+        exceptions.insert(qMakePair(std::min(atom0, atom1), std::max(atom0, atom1)));
+    }
+
+    // virtual sites are excluded from their parent atom and its other sites
+    QHash<qint32, qint32> vs_parent;
+
+    if (has_vs)
+    {
+        for (int i = 0; i < this->nAtoms(); ++i)
+        {
+            const auto atom_vs = vs_parents.property(std::to_string(i).c_str()).asAnArray();
+
+            for (int j = 0; j < atom_vs.size(); ++j)
+            {
+                vs_parent.insert(this->nAtoms() + atom_vs.at(j).asAnInteger(), i);
+            }
+        }
+    }
+
+    // pairs in different bonded fragments keep using the minimum image
+    // convention, so stay in the cutoff forces
+    QVector<qint32> fragment(this->nAtoms());
+
+    for (int i = 0; i < this->nAtoms(); ++i)
+        fragment[i] = i;
+
+    auto find_fragment = [&](qint32 atom)
+    {
+        while (fragment[atom] != atom)
+        {
+            fragment[atom] = fragment[fragment[atom]];
+            atom = fragment[atom];
+        }
+
+        return atom;
+    };
+
+    for (const auto &bond : bond_params)
+    {
+        const auto root0 = find_fragment(boost::get<0>(bond));
+        const auto root1 = find_fragment(boost::get<1>(bond));
+
+        if (root0 != root1)
+            fragment[root0] = root1;
+    }
+
+    auto ghosts = ghost_set.values();
+    std::sort(ghosts.begin(), ghosts.end());
+
+    for (int i = 0; i < ghosts.count(); ++i)
+    {
+        const auto atom0 = ghosts[i];
+
+        for (int j = i + 1; j < ghosts.count(); ++j)
+        {
+            const auto atom1 = ghosts[j];
+
+            // to and from ghosts never interact
+            if ((from_ghost_idxs.contains(atom0) and to_ghost_idxs.contains(atom1)) or
+                (to_ghost_idxs.contains(atom0) and from_ghost_idxs.contains(atom1)))
+                continue;
+
+            if (exceptions.contains(qMakePair(atom0, atom1)))
+                continue;
+
+            const auto parent0 = vs_parent.value(atom0, atom0);
+            const auto parent1 = vs_parent.value(atom1, atom1);
+
+            if (parent0 == parent1)
+                continue;
+
+            if (find_fragment(parent0) != find_fragment(parent1))
+                continue;
+
+            pairs.append(boost::make_tuple(atom0, atom1));
+        }
+    }
+
+    return pairs;
+}
+
 /** Return all of the coulomb intramolecular scale factors (nbscl)
  *  in exception order for this molecule
  */
@@ -2788,6 +2877,7 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
     charge_scl1 = mol.perturbed->getChargeScales();
 
     exception_atoms = mol.getExceptionAtoms();
+    ghost_pair_atoms = mol.getGhostPairs();
 
     lj_scl0 = mol.getLJScales();
     lj_scl1 = mol.perturbed->getLJScales();
@@ -2876,6 +2966,8 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMole
       lj_scl0(other.lj_scl0), lj_scl1(other.lj_scl1),
       to_ghost_idxs(other.to_ghost_idxs), from_ghost_idxs(other.from_ghost_idxs),
       exception_atoms(other.exception_atoms), exception_idxs(other.exception_idxs),
+      ghost_pair_atoms(other.ghost_pair_atoms), ghost_pair_idxs(other.ghost_pair_idxs),
+      rf_exception_idxs(other.rf_exception_idxs),
       perturbable_constraints(other.perturbable_constraints),
       constraint_idxs(other.constraint_idxs),
       start_atom_idx(other.start_atom_idx),
@@ -2912,6 +3004,8 @@ bool PerturbableOpenMMMolecule::operator==(const PerturbableOpenMMMolecule &othe
            lj_scl0 == other.lj_scl0 and lj_scl1 == other.lj_scl1 and
            to_ghost_idxs == other.to_ghost_idxs and from_ghost_idxs == other.from_ghost_idxs and
            exception_atoms == other.exception_atoms and exception_idxs == other.exception_idxs and
+           ghost_pair_atoms == other.ghost_pair_atoms and ghost_pair_idxs == other.ghost_pair_idxs and
+           rf_exception_idxs == other.rf_exception_idxs and
            perturbable_constraints == other.perturbable_constraints and constraint_idxs == other.constraint_idxs and
            cmap_grid0 == other.cmap_grid0 and cmap_grid1 == other.cmap_grid1 and
            cmap_grid_sizes == other.cmap_grid_sizes and cmap_atoms == other.cmap_atoms;
@@ -2979,6 +3073,10 @@ PerturbableOpenMMMolecule &PerturbableOpenMMMolecule::operator=(const Perturbabl
 
         exception_atoms = other.exception_atoms;
         exception_idxs = other.exception_idxs;
+
+        ghost_pair_atoms = other.ghost_pair_atoms;
+        ghost_pair_idxs = other.ghost_pair_idxs;
+        rf_exception_idxs = other.rf_exception_idxs;
 
         perturbable_constraints = other.perturbable_constraints;
         constraint_idxs = other.constraint_idxs;
@@ -3233,6 +3331,63 @@ void PerturbableOpenMMMolecule::setExceptionIndicies(const QString &name,
                                             CODELOC);
 
     this->exception_idxs.insert(name, exception_idxs);
+}
+
+/** Return the molecule-local indices of the interacting ghost/ghost
+ *  pairs that aren't exceptions
+ */
+QVector<boost::tuple<qint32, qint32>> PerturbableOpenMMMolecule::getGhostPairAtoms() const
+{
+    return this->ghost_pair_atoms;
+}
+
+/** Return the global indexes of the ghost/ghost pairs in the non-bonded
+ *  and ghost/ghost bond forces
+ */
+QVector<boost::tuple<qint32, qint32>> PerturbableOpenMMMolecule::getGhostPairIndicies() const
+{
+    return this->ghost_pair_idxs;
+}
+
+/** Set the global indexes of the ghost/ghost pairs in the non-bonded
+ *  and ghost/ghost bond forces
+ */
+void PerturbableOpenMMMolecule::setGhostPairIndicies(const QVector<boost::tuple<qint32, qint32>> &idxs)
+{
+    if (idxs.count() != this->ghost_pair_atoms.count())
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The number of ghost pair indicies (%1) does not match the number of ghost pairs (%2)")
+                                                .arg(idxs.count())
+                                                .arg(this->ghost_pair_atoms.count()),
+                                            CODELOC);
+
+    this->ghost_pair_idxs = idxs;
+}
+
+/** Return the exceptions that are normal pairs in either end state, as
+ *  their index in the exceptions and in the exception reaction field force
+ */
+QVector<boost::tuple<qint32, qint32>> PerturbableOpenMMMolecule::getRFExceptionIndicies() const
+{
+    return this->rf_exception_idxs;
+}
+
+/** Set the exceptions that are normal pairs in either end state, as
+ *  their index in the exceptions and in the exception reaction field force
+ */
+void PerturbableOpenMMMolecule::setRFExceptionIndicies(const QVector<boost::tuple<qint32, qint32>> &idxs)
+{
+    for (const auto &idx : idxs)
+    {
+        if (boost::get<0>(idx) < 0 or boost::get<0>(idx) >= this->exception_atoms.count())
+            throw SireError::invalid_index(QObject::tr(
+                                               "Invalid exception index %1 for a molecule with %2 exceptions")
+                                               .arg(boost::get<0>(idx))
+                                               .arg(this->exception_atoms.count()),
+                                           CODELOC);
+    }
+
+    this->rf_exception_idxs = idxs;
 }
 
 /** Set the indexes of perturbable constraints in the System */

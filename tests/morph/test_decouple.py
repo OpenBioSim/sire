@@ -91,6 +91,79 @@ def test_decouple(ala_mols, openmm_platform):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+@pytest.mark.parametrize("cutoff_type", ["PME", "RF"])
+def test_decouple_intramolecular_cutoff(ala_mols, openmm_platform, cutoff_type):
+    """
+    The decouple schedule keeps the intramolecular interactions, and their
+    electrostatics aren't cut off, so the decoupled molecule matches the
+    molecule in vacuum, apart from the LJ beyond the cutoff.
+    """
+    import math
+
+    from openmm import unit
+
+    mol = ala_mols[0]
+
+    dmol = sr.morph.decouple(mol)
+
+    # The cutoff is shorter than the molecule.
+    cutoff = 0.4
+    d = dmol.dynamics(
+        platform=openmm_platform,
+        cutoff=f"{10 * cutoff} A",
+        cutoff_type=cutoff_type,
+        schedule=dmol.property("schedule"),
+        lambda_value=1.0,
+        map={"space": ala_mols.space()},
+    )
+
+    d_vac = mol.dynamics(platform=openmm_platform, vacuum=True, cutoff="none")
+
+    # The LJ energy of the non-excluded, non-1-4 pairs beyond the cutoff.
+    context = d_vac.context()
+    nbforce = [
+        f for f in context.getSystem().getForces() if f.getName() == "NonbondedForce"
+    ][0]
+    positions = context.getState(getPositions=True).getPositions(asNumpy=True)
+    positions = positions.value_in_unit(unit.nanometer)
+
+    exceptions = set()
+    for i in range(nbforce.getNumExceptions()):
+        p1, p2, *_ = nbforce.getExceptionParameters(i)
+        exceptions.add((min(p1, p2), max(p1, p2)))
+
+    params = [
+        nbforce.getParticleParameters(i) for i in range(nbforce.getNumParticles())
+    ]
+
+    lj_tail = 0.0
+    for i in range(len(params)):
+        for j in range(i + 1, len(params)):
+            r = math.dist(positions[i], positions[j])
+            if r <= cutoff or (i, j) in exceptions:
+                continue
+            sigma = 0.5 * (params[i][1] + params[j][1]).value_in_unit(unit.nanometer)
+            epsilon = math.sqrt(
+                params[i][2].value_in_unit(unit.kilojoule_per_mole)
+                * params[j][2].value_in_unit(unit.kilojoule_per_mole)
+            )
+            sr6 = (sigma / r) ** 6
+            lj_tail += 4.0 * epsilon * (sr6 * sr6 - sr6)
+
+    # Convert from kJ/mol to kcal/mol.
+    lj_tail /= 4.184
+
+    assert lj_tail != pytest.approx(0.0, abs=1e-2)
+
+    assert d.current_potential_energy().value() == pytest.approx(
+        d_vac.current_potential_energy().value() - lj_tail, abs=1e-2
+    )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
 def test_annihilate(ala_mols, openmm_platform):
     mol = ala_mols[0]
 

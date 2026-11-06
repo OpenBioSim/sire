@@ -204,11 +204,21 @@ def test_rest2(mols, rest2_selection, excluded_atoms, request):
             excluded_nonbonded_indices.append(i)
     exception_params_initial = []
     excluded_exceptions = []
+    exception_atoms = []
     for i in range(force.getNumExceptions()):
         x, y, chargeProd, sigma, epsilon = force.getExceptionParameters(i)
         exception_params_initial.append((chargeProd, epsilon))
+        exception_atoms.append((x, y))
         if x in excluded_atoms or y in excluded_atoms:
             excluded_exceptions.append(i)
+
+    # Intramolecular ghost/ghost pairs keep the per-particle REST2 scaling.
+    ghost_pairs = set()
+    for f in omm_system.getForces():
+        if f.getName() == "GhostGhostBondForce":
+            for i in range(f.getNumBonds()):
+                x, y, _ = f.getBondParameters(i)
+                ghost_pairs.add((x, y))
 
     # Handle custom forces for pertubable molecules.
     if is_perturbable:
@@ -342,7 +352,13 @@ def test_rest2(mols, rest2_selection, excluded_atoms, request):
     for i in range(len(exception_params_initial)):
         charge, epsilon = exception_params_initial[i]
         charge_modified, epsilon_modified = exception_params_modified[i]
-        if i in excluded_exceptions:
+        if exception_atoms[i] in ghost_pairs:
+            x, y = exception_atoms[i]
+            factor = (1.0 if x in excluded_atoms else scale**0.5) * (
+                1.0 if y in excluded_atoms else scale**0.5
+            )
+            assert isclose(charge_modified._value, charge._value * factor)
+        elif i in excluded_exceptions:
             # This exception is not in the REST2 region so is unchanged.
             assert isclose(charge_modified._value, charge._value)
             assert isclose(epsilon_modified._value, epsilon._value)
