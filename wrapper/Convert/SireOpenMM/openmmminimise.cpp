@@ -680,6 +680,7 @@ namespace SireOpenMM
         // Get the initial positions before any minimisation, so that
         // we can reset to these in case anything goes majorly wrong
         auto starting_pos = context.getState(OpenMM::State::Positions).getPositions();
+        const double starting_energy = context.getState(OpenMM::State::Energy).getPotentialEnergy();
 
         // flag for if we've done a hard reset
         bool have_hard_reset = false;
@@ -690,9 +691,11 @@ namespace SireOpenMM
         double energy_before = 1e10;
         bool is_success = true;
         bool is_invalid_energy = false;
+        bool is_timed_out = false;
 
         int max_linesearch = 100;
         const int max_linesearch_delta = 100;
+        const int max_linesearch_limit = 1000;
 
         // Store the starting time.
         auto start_time = std::chrono::high_resolution_clock::now();
@@ -711,6 +714,7 @@ namespace SireOpenMM
                     if (elapsed_time > timeout)
                     {
                         data.addLog("Minimisation timed out!");
+                        is_timed_out = true;
                         break;
                     }
 
@@ -799,6 +803,7 @@ namespace SireOpenMM
                     {
                         data.addLog("Minimisation timed out!");
                         is_success = false;
+                        is_timed_out = true;
                         break;
                     }
 
@@ -825,6 +830,13 @@ namespace SireOpenMM
                     data.aboutToStart();
                     auto result = lbfgs(num_particles * 3, x, &fx, evaluate, progress, &data, &param);
 
+                    // the context and fx hold the last trial point, which L-BFGS may
+                    // have rejected, so re-evaluate at the accepted point
+                    {
+                        std::vector<lbfgsfloatval_t> g(num_particles * 3);
+                        fx = evaluate(&data, x, g.data(), num_particles * 3, 0.0);
+                    }
+
                     data.addLog(QString("...completed %1 iterations").arg(data.getIteration() - last_it));
 
                     bool should_break = false;
@@ -837,11 +849,21 @@ namespace SireOpenMM
 
                         if (result == LBFGSERR_MAXIMUMLINESEARCH)
                         {
-                            // increase the max line by max_linesearch_delta and try again
-                            max_linesearch += max_linesearch_delta;
-                            data.addLog(QString("Increasing the maximum line search to %1").arg(max_linesearch));
-                            // immediately try again
-                            should_continue = true;
+                            if (max_linesearch >= max_linesearch_limit)
+                            {
+                                // the energy surface is likely discontinuous
+                                data.addLog("Reached the line search limit!");
+                                should_break = true;
+                            }
+                            else
+                            {
+                                // increase the max line by max_linesearch_delta and try again
+                                max_linesearch += max_linesearch_delta;
+                                param.max_linesearch = max_linesearch;
+                                data.addLog(QString("Increasing the maximum line search to %1").arg(max_linesearch));
+                                // immediately try again
+                                should_continue = true;
+                            }
                         }
                         else if (result == LBFGSERR_INVALIDPARAMETERS)
                         {
@@ -1111,6 +1133,25 @@ namespace SireOpenMM
         else
         {
             data.addLog("Minimisation failed!");
+
+            // keep the last accepted positions, unless they are no better than the start
+            const auto final_energy = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+
+            if (std::isinf(final_energy) or std::isnan(final_energy) or is_ieee754_nan(final_energy) or
+                final_energy >= starting_energy)
+            {
+                data.addLog("Restoring the starting positions.");
+                context.setPositions(starting_pos);
+            }
+
+            if (is_timed_out)
+            {
+                bar.failure("Minimisation failed! Timed out!");
+                throw SireError::invalid_state(QObject::tr(
+                                                   "The minimiser did not converge within the timeout of %1 seconds.")
+                                                   .arg(timeout),
+                                               CODELOC);
+            }
 
             if (is_invalid_energy)
             {

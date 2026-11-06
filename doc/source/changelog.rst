@@ -163,6 +163,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   keeping its intramolecular interactions. Energies for other schedules change slightly,
   since these interactions are no longer truncated.
 
+* When the OpenMM minimiser fails, it now leaves the context at the last accepted positions,
+  or the starting positions if those have a lower energy, rather than at a rejected line
+  search trial point, which could make dynamics blow up immediately. It raises a timeout
+  error when it times out, and repeated line search failures no longer retry until the
+  timeout.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
