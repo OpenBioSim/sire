@@ -97,14 +97,18 @@ def test_openmm_minimise_vacuum(kigaki_mols, openmm_platform):
     reason="openmm support is not available",
 )
 def test_openmm_minimise_invalid_energy(ala_mols, openmm_platform):
-    # Two waters on top of each other give an energy that can't be evaluated.
-    # This should raise an exception rather than crash the interpreter.
-    mols = ala_mols.clone()
-    waters = mols.molecules("water")
+    # A NaN position makes the minimiser fail. It should raise an exception
+    # rather than crash the interpreter. (The message depends on the platform.)
+    import math
 
-    cursor = waters[0].cursor()
-    cursor["coordinates"] = waters[1].property("coordinates")
-    mols.update(cursor.commit())
+    from openmm import Vec3, unit
 
-    with pytest.raises(Exception, match="infinite or NaN"):
-        mols.minimisation(platform=openmm_platform).run(10)
+    m = ala_mols.minimisation(platform=openmm_platform)
+
+    context = m._d._omm_mols
+    positions = context.getState(getPositions=True).getPositions()
+    positions[0] = Vec3(math.nan, math.nan, math.nan) * unit.nanometer
+    context.setPositions(positions)
+
+    with pytest.raises(Exception):
+        m.run(10)
