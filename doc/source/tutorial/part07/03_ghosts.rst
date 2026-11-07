@@ -68,6 +68,15 @@ Ghost atoms are then added to three custom OpenMM Forces:
    interaction and subtracts this from the total (to remove the real-space
    contribution that was calculated in the standard OpenMM NonBondedForce).
 
+.. note::
+
+   The ghost/ghost and ghost/non-ghost forces are truncated at the
+   cutoff. When ``kappa`` is less than 1, these forces include a bare
+   Coulomb term that is discontinuous at the cutoff, which can cause
+   minimisation and dynamics to fail. Only use values of ``kappa`` less
+   than 1 for interactions within a molecule, which are calculated
+   without a cutoff.
+
 When ``use_dispersion_correction=True`` and the system uses a periodic
 cutoff, two additional ``CustomVolumeForce`` objects are added:
 
