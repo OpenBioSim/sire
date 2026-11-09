@@ -73,14 +73,18 @@ configargparse = "*"
 ipywidgets = "*"
 kcombu_bss = "*"
 lomap2 = "*"
+networkx = "*"
 nglview = "*"
-openff-interchange-base = "*"
+openff-interchange-base = ">=0.5.0"
 openff-toolkit-base = "*"
 parmed = "*"
 py3dmol = "*"
+pyarrow = "*"
 pydot = "*"
 pyyaml = "*"
+rdkit = "*"
 # somd2
+filelock = "*"
 loguru = "*"
 numba = "*"
 nvidia-ml-py = "*"
@@ -100,6 +104,8 @@ pycuda = "*"
 [feature.obs.target.linux-aarch64.dependencies]
 gromacs = "*"
 openff-nagl = "*"
+# loch
+pyopencl = "*"
 # ambertools, alchemlyb, mdtraj, mdanalysis not available on linux-aarch64
 
 [feature.obs.target.osx-arm64.dependencies]
