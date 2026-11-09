@@ -80,8 +80,8 @@ if (${SIRE_USE_OPENMM})
     # Create the library that holds all of the class wrappers
     add_library (SireOpenMM ${SIREOPENMM_SOURCES})
 
-    # MSVC needs C++20 to compile the libtorch headers.
-    if (MSVC AND TORCH_FOUND)
+    # The libtorch headers require C++20.
+    if (TORCH_FOUND)
         set_target_properties(SireOpenMM PROPERTIES CXX_STANDARD 20)
     endif()
 
