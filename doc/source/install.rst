@@ -92,16 +92,16 @@ And then... Install sire into a new environment
 We recommend that :mod:`sire` is installed into a new (clean) environment.
 This minimises the risk of failures caused by incompatible dependencies.
 
-Sire is currently packaged for Python 3.10, 3.11 and Python 3.12. We will start
-by creating a Python 3.12 environment that we will call ``openbiosim``.
+Sire is currently packaged for Python 3.12, 3.13 and Python 3.14. We will start
+by creating a Python 3.14 environment that we will call ``openbiosim``.
 
 .. code-block:: bash
 
-   $ conda create -n openbiosim "python<3.13"
+   $ conda create -n openbiosim "python<3.15"
 
 .. note::
 
-   We use ``python<3.13`` as this will install the most recent 3.12
+   We use ``python<3.15`` as this will install the most recent 3.14
    release of python.
 
 We can now install :mod:`sire` into that environment by typing
