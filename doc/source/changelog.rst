@@ -188,6 +188,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   forms, as for Beutler. Previously the bonded pair still had a softened Lennard-Jones
   interaction in the end state where the bond exists.
 
+* Added support for Python 3.13 and 3.14, and dropped support for Python 3.10 and 3.11.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
