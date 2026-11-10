@@ -321,109 +321,87 @@ PropertyPtr ConnectivityBase::_pvt_makeCompatibleWith(const MoleculeInfoData &mo
 {
     try
     {
-        if (not atommatcher.changesOrder(this->info(), molinfo))
+        if (atommatcher.changesOrder(this->info(), molinfo))
         {
-            // the order of the atoms remains the same - this means that the
-            // AtomIdx indicies are still valid
-            Connectivity ret;
-            ret.connected_atoms = connected_atoms;
-            ret.connected_atoms.resize(molinfo.nAtoms());
-            ret.connected_res = connected_res;
-            ret.connected_res.resize(molinfo.nResidues());
-            ret.bond_props = bond_props;
-            ret.minfo = MoleculeInfo(molinfo);
-            return ret;
-        }
+            const QHash<AtomIdx, AtomIdx> matched_atoms = atommatcher.match(this->info(), molinfo);
 
-        QHash<AtomIdx, AtomIdx> matched_atoms = atommatcher.match(this->info(), molinfo);
-
-        // see if there is any actual change - if not, then we can just return
-        bool same_mapping = true;
-
-        for (auto it = matched_atoms.begin(); it != matched_atoms.end(); ++it)
-        {
-            if (it.key() != it.value())
+            for (auto it = matched_atoms.constBegin(); it != matched_atoms.constEnd(); ++it)
             {
-                same_mapping = false;
-                break;
+                if (it.key() != it.value())
+                    return this->_pvt_makeCompatibleWith(molinfo, matched_atoms);
             }
         }
 
-        if (same_mapping)
+        // the AtomIdx indices are unchanged, but atoms may have been removed
+        // from the end, so references to them must go
+        Connectivity ret;
+        ret.connected_atoms = connected_atoms;
+        ret.connected_atoms.resize(molinfo.nAtoms());
+        ret.connected_res = connected_res;
+        ret.connected_res.resize(molinfo.nResidues());
+        ret.bond_props = bond_props;
+        ret.minfo = MoleculeInfo(molinfo);
+
+        if (ret.minfo.nAtoms() < this->minfo.nAtoms())
         {
-            Connectivity ret;
-            ret.connected_atoms = connected_atoms;
-            ret.connected_atoms.resize(molinfo.nAtoms());
-            ret.connected_res = connected_res;
-            ret.connected_res.resize(molinfo.nResidues());
-            ret.bond_props = bond_props;
-            ret.minfo = MoleculeInfo(molinfo);
+            const int nats = ret.minfo.nAtoms();
+            const int nres = ret.minfo.nResidues();
 
-            if (ret.minfo.nAtoms() < this->minfo.nAtoms())
+            for (int i = 0; i < ret.connected_atoms.count(); ++i)
             {
-                const int nats = ret.minfo.nAtoms();
-                const int nres = ret.minfo.nResidues();
+                QSet<AtomIdx> &connected = ret.connected_atoms[i];
 
-                // atoms have been removed, so need to remove any references
-                // to atoms that no longer exist
-                for (int i = 0; i < ret.connected_atoms.count(); ++i)
+                for (auto it = connected.begin(); it != connected.end();)
                 {
-                    QSet<AtomIdx> &connected = ret.connected_atoms[i];
-
-                    for (auto it = connected.begin(); it != connected.end();)
+                    if (it->value() >= nats)
                     {
-                        if (it->value() >= nats)
-                        {
-                            it = connected.erase(it);
-                        }
-                        else
-                        {
-                            ++it;
-                        }
-                    }
-                }
-
-                for (int i = 0; i < ret.connected_res.count(); ++i)
-                {
-                    QSet<ResIdx> &connected = ret.connected_res[i];
-
-                    for (auto it = connected.begin(); it != connected.end();)
-                    {
-                        if (it->value() >= nres)
-                        {
-                            it = connected.erase(it);
-                        }
-                        else
-                        {
-                            ++it;
-                        }
-                    }
-                }
-
-                // remove any bond properties that refer to atoms that no longer exist
-                for (auto it = ret.bond_props.begin(); it != ret.bond_props.end();)
-                {
-                    if (it.key().atom0 >= static_cast<quint32>(nats) or it.key().atom1 >= static_cast<quint32>(nats))
-                    {
-                        it = ret.bond_props.erase(it);
+                        it = connected.erase(it);
                     }
                     else
                     {
                         ++it;
                     }
                 }
-
-                // clear the angle, dihedral and improper properties as
-                // these are too complex to make compatible
-                ret.ang_props.clear();
-                ret.dih_props.clear();
-                ret.imp_props.clear();
             }
 
-            return ret;
+            for (int i = 0; i < ret.connected_res.count(); ++i)
+            {
+                QSet<ResIdx> &connected = ret.connected_res[i];
+
+                for (auto it = connected.begin(); it != connected.end();)
+                {
+                    if (it->value() >= nres)
+                    {
+                        it = connected.erase(it);
+                    }
+                    else
+                    {
+                        ++it;
+                    }
+                }
+            }
+
+            // remove any bond properties that refer to atoms that no longer exist
+            for (auto it = ret.bond_props.begin(); it != ret.bond_props.end();)
+            {
+                if (it.key().atom0 >= static_cast<quint32>(nats) or it.key().atom1 >= static_cast<quint32>(nats))
+                {
+                    it = ret.bond_props.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
+            // clear the angle, dihedral and improper properties as
+            // these are too complex to make compatible
+            ret.ang_props.clear();
+            ret.dih_props.clear();
+            ret.imp_props.clear();
         }
-        else
-            return this->_pvt_makeCompatibleWith(molinfo, matched_atoms);
+
+        return ret;
     }
     catch (const SireError::exception &e)
     {

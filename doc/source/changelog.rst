@@ -198,6 +198,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   take an optional ``max_ring_size`` argument, defaulting to 12, which is now the largest ring
   size matched. Previously the three-atom overload also matched 13-membered rings.
 
+* Fixed ``Connectivity.make_compatible_with`` keeping bonds to removed atoms when the atom
+  matcher doesn't change the order of the atoms, e.g. ``AtomIdxMatcher``.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
