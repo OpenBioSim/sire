@@ -340,6 +340,9 @@ PropertyPtr ConnectivityBase::_pvt_makeCompatibleWith(const MoleculeInfoData &mo
         ret.connected_res = connected_res;
         ret.connected_res.resize(molinfo.nResidues());
         ret.bond_props = bond_props;
+        ret.ang_props = ang_props;
+        ret.dih_props = dih_props;
+        ret.imp_props = imp_props;
         ret.minfo = MoleculeInfo(molinfo);
 
         if (ret.minfo.nAtoms() < this->minfo.nAtoms())

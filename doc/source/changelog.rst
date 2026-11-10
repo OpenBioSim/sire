@@ -201,6 +201,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed ``Connectivity.make_compatible_with`` keeping bonds to removed atoms when the atom
   matcher doesn't change the order of the atoms, e.g. ``AtomIdxMatcher``.
 
+* Fixed angle, dihedral and improper properties being dropped from the connectivity when
+  the molecule was edited without changing the order of its atoms, e.g. renaming an atom.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
