@@ -190,6 +190,14 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added support for Python 3.13 and 3.14, and dropped support for Python 3.10 and 3.11.
 
+* Fixed ``Connectivity.in_ring`` missing rings with more than 12 atoms. The one- and two-atom
+  overloads now find ring systems with Tarjan's algorithm, so there is no size limit. The
+  two-atom overload now returns whether the atoms are in the same ring, rather than whether
+  there is more than one path between them, so atoms in separate rings joined by a bond or a
+  spiro atom are no longer reported as in a ring together. The three- and four-atom overloads
+  take an optional ``max_ring_size`` argument, defaulting to 12, which is now the largest ring
+  size matched. Previously the three-atom overload also matched 13-membered rings.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

@@ -31,6 +31,8 @@
 #include <QSet>
 #include <QVector>
 
+#include <memory>
+
 #include <boost/tuple/tuple.hpp>
 
 #include "bondhunter.h"
@@ -173,17 +175,18 @@ namespace SireMol
 
         bool inRing(AtomIdx atom) const;
         bool inRing(AtomIdx atom0, AtomIdx atom1) const;
-        bool inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2) const;
-        bool inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3) const;
+        bool inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, int max_ring_size = 12) const;
+        bool inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3, int max_ring_size = 12) const;
 
         bool inRing(const AtomID &atom) const;
         bool inRing(const AtomID &atom0, const AtomID &atom1) const;
-        bool inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2) const;
-        bool inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3) const;
+        bool inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, int max_ring_size = 12) const;
+        bool inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3,
+                    int max_ring_size = 12) const;
 
         bool inRing(const BondID &bond) const;
-        bool inRing(const AngleID &angle) const;
-        bool inRing(const DihedralID &dihedral) const;
+        bool inRing(const AngleID &angle, int max_ring_size = 12) const;
+        bool inRing(const DihedralID &dihedral, int max_ring_size = 12) const;
 
         int nConnections() const;
         int nConnections(AtomIdx atomidx) const;
@@ -353,6 +356,8 @@ namespace SireMol
         SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
                                                       const QHash<AtomIdx, AtomIdx> &map) const;
 
+        void _pvt_clearRingSystems();
+
         /** The which atoms are connected to which other atoms
             in this molecule */
         QVector<QSet<AtomIdx>> connected_atoms;
@@ -380,6 +385,11 @@ namespace SireMol
 
         QList<QList<AtomIdx>> _pvt_findPaths(AtomIdx cursor, const AtomIdx end_atom, QSet<AtomIdx> &done,
                                              int max_length = -1) const;
+
+        std::shared_ptr<const QVector<QVector<int>>> _pvt_ringSystems() const;
+
+        /** Cached ring systems of each atom, cleared when connected_atoms changes */
+        mutable std::shared_ptr<const QVector<QVector<int>>> ring_systems;
 
         void traceRoute(AtomIdx start, QSet<AtomIdx> &root, QSet<AtomIdx> &group) const;
 
