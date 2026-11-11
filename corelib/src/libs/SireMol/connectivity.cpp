@@ -217,6 +217,8 @@ QDataStream &operator>>(QDataStream &ds, ConnectivityBase &conbase)
     else
         throw version_error(v, "1,2", r_conbase, CODELOC);
 
+    conbase._pvt_clearRingSystems();
+
     return ds;
 }
 
@@ -269,7 +271,7 @@ ConnectivityBase::ConnectivityBase(const MoleculeData &moldata) : MolViewPropert
 ConnectivityBase::ConnectivityBase(const ConnectivityBase &other)
     : MolViewProperty(other), connected_atoms(other.connected_atoms), connected_res(other.connected_res),
       bond_props(other.bond_props), ang_props(other.ang_props), dih_props(other.dih_props), imp_props(other.imp_props),
-      minfo(other.minfo)
+      minfo(other.minfo), ring_systems(std::atomic_load(&other.ring_systems))
 {
 }
 
@@ -290,6 +292,8 @@ ConnectivityBase &ConnectivityBase::operator=(const ConnectivityBase &other)
         dih_props = other.dih_props;
         imp_props = other.imp_props;
         minfo = other.minfo;
+
+        std::atomic_store(&ring_systems, std::atomic_load(&other.ring_systems));
     }
 
     return *this;
@@ -318,109 +322,90 @@ PropertyPtr ConnectivityBase::_pvt_makeCompatibleWith(const MoleculeInfoData &mo
 {
     try
     {
-        if (not atommatcher.changesOrder(this->info(), molinfo))
+        if (atommatcher.changesOrder(this->info(), molinfo))
         {
-            // the order of the atoms remains the same - this means that the
-            // AtomIdx indicies are still valid
-            Connectivity ret;
-            ret.connected_atoms = connected_atoms;
-            ret.connected_atoms.resize(molinfo.nAtoms());
-            ret.connected_res = connected_res;
-            ret.connected_res.resize(molinfo.nResidues());
-            ret.bond_props = bond_props;
-            ret.minfo = MoleculeInfo(molinfo);
-            return ret;
-        }
+            const QHash<AtomIdx, AtomIdx> matched_atoms = atommatcher.match(this->info(), molinfo);
 
-        QHash<AtomIdx, AtomIdx> matched_atoms = atommatcher.match(this->info(), molinfo);
-
-        // see if there is any actual change - if not, then we can just return
-        bool same_mapping = true;
-
-        for (auto it = matched_atoms.begin(); it != matched_atoms.end(); ++it)
-        {
-            if (it.key() != it.value())
+            for (auto it = matched_atoms.constBegin(); it != matched_atoms.constEnd(); ++it)
             {
-                same_mapping = false;
-                break;
+                if (it.key() != it.value())
+                    return this->_pvt_makeCompatibleWith(molinfo, matched_atoms);
             }
         }
 
-        if (same_mapping)
+        // the AtomIdx indices are unchanged, but atoms may have been removed
+        // from the end, so references to them must go
+        Connectivity ret;
+        ret.connected_atoms = connected_atoms;
+        ret.connected_atoms.resize(molinfo.nAtoms());
+        ret.connected_res = connected_res;
+        ret.connected_res.resize(molinfo.nResidues());
+        ret.bond_props = bond_props;
+        ret.ang_props = ang_props;
+        ret.dih_props = dih_props;
+        ret.imp_props = imp_props;
+        ret.minfo = MoleculeInfo(molinfo);
+
+        if (ret.minfo.nAtoms() < this->minfo.nAtoms())
         {
-            Connectivity ret;
-            ret.connected_atoms = connected_atoms;
-            ret.connected_atoms.resize(molinfo.nAtoms());
-            ret.connected_res = connected_res;
-            ret.connected_res.resize(molinfo.nResidues());
-            ret.bond_props = bond_props;
-            ret.minfo = MoleculeInfo(molinfo);
+            const int nats = ret.minfo.nAtoms();
+            const int nres = ret.minfo.nResidues();
 
-            if (ret.minfo.nAtoms() < this->minfo.nAtoms())
+            for (int i = 0; i < ret.connected_atoms.count(); ++i)
             {
-                const int nats = ret.minfo.nAtoms();
-                const int nres = ret.minfo.nResidues();
+                QSet<AtomIdx> &connected = ret.connected_atoms[i];
 
-                // atoms have been removed, so need to remove any references
-                // to atoms that no longer exist
-                for (int i = 0; i < ret.connected_atoms.count(); ++i)
+                for (auto it = connected.begin(); it != connected.end();)
                 {
-                    QSet<AtomIdx> &connected = ret.connected_atoms[i];
-
-                    for (auto it = connected.begin(); it != connected.end();)
+                    if (it->value() >= nats)
                     {
-                        if (it->value() >= nats)
-                        {
-                            it = connected.erase(it);
-                        }
-                        else
-                        {
-                            ++it;
-                        }
-                    }
-                }
-
-                for (int i = 0; i < ret.connected_res.count(); ++i)
-                {
-                    QSet<ResIdx> &connected = ret.connected_res[i];
-
-                    for (auto it = connected.begin(); it != connected.end();)
-                    {
-                        if (it->value() >= nres)
-                        {
-                            it = connected.erase(it);
-                        }
-                        else
-                        {
-                            ++it;
-                        }
-                    }
-                }
-
-                // remove any bond properties that refer to atoms that no longer exist
-                for (auto it = ret.bond_props.begin(); it != ret.bond_props.end();)
-                {
-                    if (it.key().atom0 >= static_cast<quint32>(nats) or it.key().atom1 >= static_cast<quint32>(nats))
-                    {
-                        it = ret.bond_props.erase(it);
+                        it = connected.erase(it);
                     }
                     else
                     {
                         ++it;
                     }
                 }
-
-                // clear the angle, dihedral and improper properties as
-                // these are too complex to make compatible
-                ret.ang_props.clear();
-                ret.dih_props.clear();
-                ret.imp_props.clear();
             }
 
-            return ret;
+            for (int i = 0; i < ret.connected_res.count(); ++i)
+            {
+                QSet<ResIdx> &connected = ret.connected_res[i];
+
+                for (auto it = connected.begin(); it != connected.end();)
+                {
+                    if (it->value() >= nres)
+                    {
+                        it = connected.erase(it);
+                    }
+                    else
+                    {
+                        ++it;
+                    }
+                }
+            }
+
+            // remove any bond properties that refer to atoms that no longer exist
+            for (auto it = ret.bond_props.begin(); it != ret.bond_props.end();)
+            {
+                if (it.key().atom0 >= static_cast<quint32>(nats) or it.key().atom1 >= static_cast<quint32>(nats))
+                {
+                    it = ret.bond_props.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
+            // clear the angle, dihedral and improper properties as
+            // these are too complex to make compatible
+            ret.ang_props.clear();
+            ret.dih_props.clear();
+            ret.imp_props.clear();
         }
-        else
-            return this->_pvt_makeCompatibleWith(molinfo, matched_atoms);
+
+        return ret;
     }
     catch (const SireError::exception &e)
     {
@@ -1137,52 +1122,179 @@ QList<QList<AtomIdx>> ConnectivityBase::findPaths(const AtomID &atom0, const Ato
     return this->findPaths(minfo.atomIdx(atom0), minfo.atomIdx(atom1), max_length);
 }
 
-// We only consider rings consisting of less than 12 atoms.
-const int MAX_RING_SIZE = 12;
+/** Return the IDs of the ring systems (biconnected components of more than
+    two atoms) containing each atom, found with Tarjan's algorithm */
+std::shared_ptr<const QVector<QVector<int>>> ConnectivityBase::_pvt_ringSystems() const
+{
+    auto cached = std::atomic_load(&ring_systems);
 
-/** This function returns whether or not the atom is in a ring. */
+    if (cached)
+        return cached;
+
+    const int nats = connected_atoms.count();
+
+    QVector<QVector<int>> systems(nats);
+    QVector<int> disc(nats, -1);
+    QVector<int> low(nats, 0);
+    QVector<QPair<int, int>> edges;
+
+    struct Frame
+    {
+        int atom;
+        int parent;
+        QSet<AtomIdx>::const_iterator it;
+    };
+
+    QVector<Frame> stack;
+    int counter = 0;
+    int nsystems = 0;
+
+    for (int root = 0; root < nats; ++root)
+    {
+        if (disc[root] != -1)
+            continue;
+
+        disc[root] = low[root] = counter++;
+        stack.append(Frame{root, -1, connected_atoms[root].constBegin()});
+
+        while (not stack.isEmpty())
+        {
+            Frame &frame = stack.last();
+            const int u = frame.atom;
+
+            if (frame.it != connected_atoms[u].constEnd())
+            {
+                const int v = frame.it->value();
+                ++frame.it;
+
+                if (disc[v] == -1)
+                {
+                    edges.append(qMakePair(u, v));
+                    disc[v] = low[v] = counter++;
+                    stack.append(Frame{v, u, connected_atoms[v].constBegin()});
+                }
+                else if (v != frame.parent and disc[v] < disc[u])
+                {
+                    edges.append(qMakePair(u, v));
+                    low[u] = qMin(low[u], disc[v]);
+                }
+            }
+            else
+            {
+                const int parent = frame.parent;
+                stack.removeLast();
+
+                if (parent == -1)
+                    continue;
+
+                low[parent] = qMin(low[parent], low[u]);
+
+                if (low[u] >= disc[parent])
+                {
+                    // parent is an articulation point (or the root), so the
+                    // edges above (parent, u) on the stack form a component
+                    QSet<int> atoms;
+
+                    while (true)
+                    {
+                        const auto edge = edges.takeLast();
+                        atoms.insert(edge.first);
+                        atoms.insert(edge.second);
+
+                        if (edge.first == parent and edge.second == u)
+                            break;
+                    }
+
+                    if (atoms.count() > 2)
+                    {
+                        for (const auto &atom : atoms)
+                        {
+                            systems[atom].append(nsystems);
+                        }
+
+                        nsystems += 1;
+                    }
+                }
+            }
+        }
+    }
+
+    auto result = std::make_shared<const QVector<QVector<int>>>(std::move(systems));
+
+    // keep the first result if another thread got there first
+    if (std::atomic_compare_exchange_strong(&ring_systems, &cached, result))
+        return result;
+
+    return cached;
+}
+
+/** Clear the cached ring systems, which must be done whenever connected_atoms changes */
+void ConnectivityBase::_pvt_clearRingSystems()
+{
+    std::atomic_store(&ring_systems, std::shared_ptr<const QVector<QVector<int>>>());
+}
+
+/** This function returns whether or not the atom is in a ring of any size */
 bool ConnectivityBase::inRing(AtomIdx atom) const
 {
-    // Loop over all atoms connected to this atom.
-    for (const auto &atm : this->connectionsTo(atom))
-    {
-        // Find all of the paths between the two atoms.
-        QList<QList<AtomIdx>> paths = findPaths(atom, atm, MAX_RING_SIZE);
+    atom = atom.map(minfo.nAtoms());
 
-        // The atom is part of a ring.
-        if (paths.count() > 1)
+    return not this->_pvt_ringSystems()->at(atom.value()).isEmpty();
+}
+
+/** This function returns whether or not the two passed atoms are in the same
+    ring of any size */
+bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1) const
+{
+    atom0 = atom0.map(minfo.nAtoms());
+    atom1 = atom1.map(minfo.nAtoms());
+
+    if (atom0 == atom1)
+        return false;
+
+    const auto systems = this->_pvt_ringSystems();
+
+    const auto &systems1 = systems->at(atom1.value());
+
+    for (const auto &system : systems->at(atom0.value()))
+    {
+        if (systems1.contains(system))
             return true;
     }
 
-    // If we get this far, then the atom isn't part of a ring.
     return false;
 }
 
-/** This function returns whether or not the two passed atoms are connected */
-bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1) const
+/** Return whether two of the passed paths between the same end atoms form a
+    ring of at most max_ring_size atoms that contains all of 'atoms' */
+static bool paths_form_ring(const QList<QList<AtomIdx>> &paths, const QList<AtomIdx> &atoms, int max_ring_size)
 {
-    QList<QList<AtomIdx>> paths = findPaths(atom0, atom1, MAX_RING_SIZE);
-
-    // if there is more than one path between the atoms then they must
-    // be part of a ring
-    return (paths.count() > 1);
-}
-
-/** This function returns whether or not the three passed atoms are connected
-    via a ring */
-bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2) const
-{
-    QList<QList<AtomIdx>> paths = findPaths(atom0, atom2, MAX_RING_SIZE);
-
-    atom1 = atom1.map(minfo.nAtoms());
-
-    if (paths.count() > 1)
+    for (int i = 0; i < paths.count(); ++i)
     {
-        // the three are part of the same ring if any of the paths contains
-        // atom1
-        foreach (const QList<AtomIdx> &path, paths)
+        const auto &path0 = paths.at(i);
+
+        for (int j = i + 1; j < paths.count(); ++j)
         {
-            if (path.contains(atom1))
+            const auto &path1 = paths.at(j);
+
+            const int ring_size = path0.count() + path1.count() - 2;
+
+            if (ring_size > max_ring_size)
+                continue;
+
+            bool is_ring = true;
+
+            for (int k = 1; is_ring and k < path0.count() - 1; ++k)
+            {
+                is_ring = not path1.contains(path0.at(k));
+            }
+
+            for (int k = 0; is_ring and k < atoms.count(); ++k)
+            {
+                is_ring = path0.contains(atoms.at(k)) or path1.contains(atoms.at(k));
+            }
+
+            if (is_ring)
                 return true;
         }
     }
@@ -1190,41 +1302,30 @@ bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2) const
     return false;
 }
 
-/** This function returns whether or not the four passed atoms are connected
-    via a same ring */
-bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3) const
+/** This function returns whether or not the three passed atoms are in the
+    same ring of at most max_ring_size atoms */
+bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, int max_ring_size) const
 {
-    QList<QList<AtomIdx>> paths = findPaths(atom0, atom3, MAX_RING_SIZE);
+    if (max_ring_size < 3 or not(this->inRing(atom0, atom1) and this->inRing(atom1, atom2)))
+        return false;
 
-    atom1 = atom1.map(minfo.nAtoms());
-    atom2 = atom2.map(minfo.nAtoms());
+    const auto paths = findPaths(atom0, atom2, max_ring_size);
 
-    if (paths.count() > 1)
-    {
-        // the four are part of the same ring if atom1 and atom2 are contained
-        // in any of the paths
-        bool have_atom1 = false;
-        bool have_atom2 = false;
+    return paths_form_ring(paths, {AtomIdx(atom1.map(minfo.nAtoms()))}, max_ring_size);
+}
 
-        foreach (const QList<AtomIdx> &path, paths)
-        {
-            if (path.contains(atom1))
-            {
-                have_atom1 = true;
-                if (have_atom2)
-                    return this->inRing(atom1, atom2);
-            }
+/** This function returns whether or not the four passed atoms are in the
+    same ring of at most max_ring_size atoms */
+bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3, int max_ring_size) const
+{
+    if (max_ring_size < 3 or
+        not(this->inRing(atom0, atom1) and this->inRing(atom1, atom2) and this->inRing(atom2, atom3)))
+        return false;
 
-            if (path.contains(atom2))
-            {
-                have_atom2 = true;
-                if (have_atom1)
-                    return this->inRing(atom1, atom2);
-            }
-        }
-    }
+    const auto paths = findPaths(atom0, atom3, max_ring_size);
 
-    return false;
+    return paths_form_ring(paths, {AtomIdx(atom1.map(minfo.nAtoms())), AtomIdx(atom2.map(minfo.nAtoms()))},
+                           max_ring_size);
 }
 
 /** This function returns whether or not the atom is in a ring */
@@ -1233,25 +1334,27 @@ bool ConnectivityBase::inRing(const AtomID &atom) const
     return this->inRing(info().atomIdx(atom));
 }
 
-/** This function returns whether or not the two passed atoms are connected
-    via a ring */
+/** This function returns whether or not the two passed atoms are in the same
+    ring of any size */
 bool ConnectivityBase::inRing(const AtomID &atom0, const AtomID &atom1) const
 {
     return this->inRing(info().atomIdx(atom0), info().atomIdx(atom1));
 }
 
-/** This function returns whether or not the three passed atoms are connected
-    via a ring */
-bool ConnectivityBase::inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2) const
+/** This function returns whether or not the three passed atoms are in the
+    same ring of at most max_ring_size atoms */
+bool ConnectivityBase::inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, int max_ring_size) const
 {
-    return this->inRing(info().atomIdx(atom0), info().atomIdx(atom1), info().atomIdx(atom2));
+    return this->inRing(info().atomIdx(atom0), info().atomIdx(atom1), info().atomIdx(atom2), max_ring_size);
 }
 
-/** This function returns whether or not the two passed atoms are connected
-    via a ring */
-bool ConnectivityBase::inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3) const
+/** This function returns whether or not the four passed atoms are in the
+    same ring of at most max_ring_size atoms */
+bool ConnectivityBase::inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3,
+                              int max_ring_size) const
 {
-    return this->inRing(info().atomIdx(atom0), info().atomIdx(atom1), info().atomIdx(atom2), info().atomIdx(atom3));
+    return this->inRing(info().atomIdx(atom0), info().atomIdx(atom1), info().atomIdx(atom2), info().atomIdx(atom3),
+                        max_ring_size);
 }
 
 /** This function returns whether or not the two atoms in the passed bond
@@ -1262,17 +1365,17 @@ bool ConnectivityBase::inRing(const BondID &bond) const
 }
 
 /** This function returns whether or not the three atoms in the passed angle
-    are all part of the same ring */
-bool ConnectivityBase::inRing(const AngleID &angle) const
+    are all part of the same ring of at most max_ring_size atoms */
+bool ConnectivityBase::inRing(const AngleID &angle, int max_ring_size) const
 {
-    return this->inRing(angle.atom0(), angle.atom1(), angle.atom2());
+    return this->inRing(angle.atom0(), angle.atom1(), angle.atom2(), max_ring_size);
 }
 
 /** This function returns whether or not the four atoms in the passed dihedral
-    are all part of the same ring */
-bool ConnectivityBase::inRing(const DihedralID &dihedral) const
+    are all part of the same ring of at most max_ring_size atoms */
+bool ConnectivityBase::inRing(const DihedralID &dihedral, int max_ring_size) const
 {
-    return this->inRing(dihedral.atom0(), dihedral.atom1(), dihedral.atom2(), dihedral.atom3());
+    return this->inRing(dihedral.atom0(), dihedral.atom1(), dihedral.atom2(), dihedral.atom3(), max_ring_size);
 }
 
 /** This is a recursive function that traces all atoms that can trace their bonding
@@ -4046,6 +4149,8 @@ ConnectivityEditor &ConnectivityEditor::connect(AtomIdx atom0, AtomIdx atom1)
     connected_atoms_array[atomidx0].insert(atomidx1);
     connected_atoms_array[atomidx1].insert(atomidx0);
 
+    this->_pvt_clearRingSystems();
+
     if (info().isWithinResidue(atomidx0) and info().isWithinResidue(atomidx1))
     {
         QSet<ResIdx> *connected_res_array = connected_res.data();
@@ -4106,6 +4211,8 @@ ConnectivityEditor &ConnectivityEditor::disconnect(AtomIdx atom0, AtomIdx atom1)
 
         connected_atoms[atomidx0].remove(atomidx1);
         connected_atoms[atomidx1].remove(atomidx0);
+
+        this->_pvt_clearRingSystems();
 
         // remove any properties associated with this bond
         this->bond_props.remove(SireMol::detail::IDPair(atomidx0, atomidx1));
@@ -4219,6 +4326,8 @@ ConnectivityEditor &ConnectivityEditor::disconnectAll()
     bond_props.clear();
     connected_atoms.clear();
     connected_res.clear();
+
+    this->_pvt_clearRingSystems();
 
     if (info().nAtoms() > 0)
     {
