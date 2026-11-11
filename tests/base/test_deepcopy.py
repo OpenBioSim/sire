@@ -1,18 +1,20 @@
 import copy
 
 import pytest
-import sire as sr
 
 
 @pytest.mark.parametrize(
-    "obj",
+    "create",
     [
-        sr.u("1 ps"),
-        sr.legacy.Mol.AtomIdx(3),
-        sr.cas.LambdaSchedule.standard_morph(),
+        lambda sr: sr.u("1 ps"),
+        lambda sr: sr.legacy.Mol.AtomIdx(3),
+        lambda sr: sr.cas.LambdaSchedule.standard_morph(),
     ],
 )
-def test_deepcopy(obj):
+def test_deepcopy(create):
+    import sire as sr
+
+    obj = create(sr)
     other = copy.deepcopy(obj)
     assert other == obj
     assert other is not obj
@@ -26,5 +28,7 @@ def test_deepcopy_openmm():
 
 
 def test_deepcopy_container():
+    import sire as sr
+
     d = {"time": sr.u("2 ps"), "atoms": [sr.legacy.Mol.AtomIdx(1)]}
     assert copy.deepcopy(d) == d
