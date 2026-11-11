@@ -1257,12 +1257,7 @@ bool ConnectivityBase::inRing(AtomIdx atom) const
 {
     atom = atom.map(minfo.nAtoms());
 
-    const auto systems = this->_pvt_ringSystems();
-
-    if (atom.value() >= systems->count())
-        return false;
-
-    return not systems->at(atom.value()).isEmpty();
+    return not this->_pvt_ringSystems()->at(atom.value()).isEmpty();
 }
 
 /** This function returns whether or not the two passed atoms are in the same
@@ -1276,9 +1271,6 @@ bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1) const
         return false;
 
     const auto systems = this->_pvt_ringSystems();
-
-    if (atom0.value() >= systems->count() or atom1.value() >= systems->count())
-        return false;
 
     const auto &systems1 = systems->at(atom1.value());
 
@@ -1332,7 +1324,7 @@ static bool paths_form_ring(const QList<QList<AtomIdx>> &paths, const QList<Atom
     same ring of at most max_ring_size atoms */
 bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, int max_ring_size) const
 {
-    if (max_ring_size < 3)
+    if (max_ring_size < 3 or not(this->inRing(atom0, atom1) and this->inRing(atom1, atom2)))
         return false;
 
     const auto paths = findPaths(atom0, atom2, max_ring_size);
@@ -1344,7 +1336,8 @@ bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, int m
     same ring of at most max_ring_size atoms */
 bool ConnectivityBase::inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3, int max_ring_size) const
 {
-    if (max_ring_size < 3)
+    if (max_ring_size < 3 or
+        not(this->inRing(atom0, atom1) and this->inRing(atom1, atom2) and this->inRing(atom2, atom3)))
         return false;
 
     const auto paths = findPaths(atom0, atom3, max_ring_size);
