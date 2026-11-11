@@ -23,6 +23,27 @@ def _upper_split(data):
     yield buff
 
 
+def _deepcopy(self, memo):
+    """
+    Deep copy a wrapped object, which is the same as a copy since these
+    objects copy by value.
+    """
+    return self.__copy__()
+
+
+def _fix_deepcopy(C) -> None:
+    """
+    Make copy.deepcopy work for a wrapped class. The generated wrappers bind
+    __deepcopy__ to the one-argument __copy__, but copy.deepcopy also passes
+    a memo dictionary.
+    """
+    if hasattr(C, "__copy__"):
+        try:
+            C.__deepcopy__ = _deepcopy
+        except Exception:
+            pass
+
+
 def _pythonize(C, delete_old: bool = True) -> None:
     """Pythonize the passed class. This will rename the functions
     so that they better match the Python style
@@ -52,6 +73,8 @@ def _pythonize(C, delete_old: bool = True) -> None:
         for CLS in C:
             _pythonize(CLS)
         return
+
+    _fix_deepcopy(C)
 
     import re
 
@@ -251,6 +274,11 @@ def _load_new_api_modules(delete_old: bool = True, is_base: bool = False):
         _pythonize(Convert._SireOpenMM.PyQMForce, delete_old=delete_old)
         _pythonize(Convert._SireOpenMM.TorchQMEngine, delete_old=delete_old)
         _pythonize(Convert._SireOpenMM.TorchQMForce, delete_old=delete_old)
+
+        import inspect
+
+        for _, cls in inspect.getmembers(Convert._SireOpenMM, inspect.isclass):
+            _fix_deepcopy(cls)
 
     from ._lazy_import import force_load
 

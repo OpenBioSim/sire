@@ -204,6 +204,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed angle, dihedral and improper properties being dropped from the connectivity when
   the molecule was edited without changing the order of its atoms, e.g. renaming an atom.
 
+* Fixed ``copy.deepcopy`` failing for wrapped classes, e.g. ``GeneralUnit``, since the
+  generated wrappers bound ``__deepcopy__`` to the one-argument ``__copy__``, while
+  ``copy.deepcopy`` also passes a memo dictionary.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
