@@ -200,6 +200,5 @@ QList<Factor> DoubleFunc::expand(const Symbol &symbol) const
 /** Return a has for the function */
 uint DoubleFunc::hash() const
 {
-    qDebug() << CODELOC;
     return (magic() << 16) | (ex0.hash() & 0x0000FF00) | (ex1.hash() & 0x000000FF);
 }
