@@ -105,6 +105,7 @@ pycuda = "*"
 gromacs = "*"
 openff-nagl = "*"
 # loch
+pycuda = "*"
 pyopencl = "*"
 # ambertools, alchemlyb, mdtraj, mdanalysis not available on linux-aarch64
 
