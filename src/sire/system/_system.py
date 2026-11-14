@@ -836,7 +836,8 @@ class System:
         from ..units import picosecond
         from ..base import wrap
 
-        if time == 0:
+        # A zero time loses its units, e.g. when round-tripping System.time().
+        if time == 0 or (hasattr(time, "value") and time.value() == 0):
             time = wrap(0 * picosecond)
         else:
             if not hasattr(time, "has_same_units"):
