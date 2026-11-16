@@ -211,6 +211,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed ``System.set_time`` rejecting a zero time returned by ``System.time``, since a zero
   ``GeneralUnit`` has no units.
 
+* Fixed converting a molecule to RDKit hanging, or aborting on Python 3.13 and later, when the
+  conversion emitted a warning, e.g. when bond orders couldn't be inferred. The console didn't
+  release the GIL after importing its Python implementation.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

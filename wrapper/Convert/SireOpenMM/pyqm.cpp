@@ -34,7 +34,9 @@
 #include "openmm/serialization/SerializationNode.h"
 #include "openmm/serialization/SerializationProxy.h"
 
+#include "Helpers/scoped_gil_acquire.hpp"
 #include "SireError/errors.h"
+
 #include "SireMaths/vector.h"
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -50,16 +52,6 @@ using namespace SireVol;
 // The delta used to place virtual point charges either side of the MM2
 // atoms, in Angstrom.
 static const double VIRTUAL_PC_DELTA = 0.01;
-
-class GILLock
-{
-public:
-    GILLock() { state_ = PyGILState_Ensure(); }
-    ~GILLock() { PyGILState_Release(state_); }
-
-private:
-    PyGILState_STATE state_;
-};
 
 /////////
 ///////// Implementation of PyQMCallback
@@ -159,7 +151,7 @@ PyQMCallback::call(
 {
 
     // Acquire GIL before calling Python code.
-    GILLock lock;
+    SireHelpers::ScopedGILAcquire gil;
 
     if (this->is_method)
     {
@@ -216,7 +208,7 @@ PyQMCallback::call4(
     QVector<int> idx_mm) const
 {
     // Acquire GIL before calling Python code.
-    GILLock lock;
+    SireHelpers::ScopedGILAcquire gil;
 
     bp::object result;
     try
