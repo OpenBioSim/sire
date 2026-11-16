@@ -4,6 +4,8 @@
 #include "SireBase/console.h"
 #include "SireBase/releasegil.h"
 
+#include "Helpers/scoped_gil_acquire.hpp"
+
 #include <QDebug>
 
 static bool _is_ipython = false;
@@ -282,65 +284,23 @@ public:
     {
         if (pyconsole)
         {
-            PyGILState_STATE gilstate = PyGILState_Ensure();
+            SireHelpers::ScopedGILAcquire gil;
             Py_DECREF(pyconsole);
-            delete pyconsole;
             pyconsole = 0;
-            PyGILState_Release(gilstate);
         }
     }
 
     void debug(const QString &message) const
     {
-        const_cast<ConsoleImpl *>(this)->get_pyconsole();
-
-        if (pyconsole)
+        if (not this->call("debug", message))
         {
-            PyGILState_STATE gilstate = PyGILState_Ensure();
-
-            PyObject *result = PyObject_CallMethod(pyconsole, "debug", "s", message.toUtf8().constData());
-
-            if (result == 0)
-            {
-                qDebug() << "UNABLE TO CALL DEBUG";
-                qDebug() << message;
-            }
-            else
-            {
-                Py_DECREF(result);
-            }
-
-            PyGILState_Release(gilstate);
-        }
-        else
-        {
-            qDebug() << "NO PYCONSOLE";
             qDebug() << message;
         }
     }
 
     void warning(const QString &message) const
     {
-        const_cast<ConsoleImpl *>(this)->get_pyconsole();
-
-        if (pyconsole)
-        {
-            PyGILState_STATE gilstate = PyGILState_Ensure();
-
-            PyObject *result = PyObject_CallMethod(pyconsole, "warning", "s", message.toUtf8().constData());
-
-            if (result == 0)
-            {
-                qWarning() << message;
-            }
-            else
-            {
-                Py_DECREF(result);
-            }
-
-            PyGILState_Release(gilstate);
-        }
-        else
+        if (not this->call("warning", message))
         {
             qWarning() << message;
         }
@@ -348,26 +308,7 @@ public:
 
     void error(const QString &message) const
     {
-        const_cast<ConsoleImpl *>(this)->get_pyconsole();
-
-        if (pyconsole)
-        {
-            PyGILState_STATE gilstate = PyGILState_Ensure();
-
-            PyObject *result = PyObject_CallMethod(pyconsole, "error", "s", message.toUtf8().constData());
-
-            if (result == 0)
-            {
-                qCritical() << message;
-            }
-            else
-            {
-                Py_DECREF(result);
-            }
-
-            PyGILState_Release(gilstate);
-        }
-        else
+        if (not this->call("error", message))
         {
             qCritical() << message;
         }
@@ -375,47 +316,48 @@ public:
 
     void info(const QString &message) const
     {
-        const_cast<ConsoleImpl *>(this)->get_pyconsole();
-
-        if (pyconsole)
+        if (not this->call("info", message))
         {
-            PyGILState_STATE gilstate = PyGILState_Ensure();
-
-            PyObject *result = PyObject_CallMethod(pyconsole, "info", "s", message.toUtf8().constData());
-
-            if (result == 0)
-            {
-                qInfo() << "UNABLE TO CALL INFO";
-                qInfo() << message;
-            }
-            else
-            {
-                Py_DECREF(result);
-            }
-
-            PyGILState_Release(gilstate);
-        }
-        else
-        {
-            qInfo() << "NO PYCONSOLE";
             qInfo() << message;
         }
     }
 
 private:
+    /** Call the named method of the Python console with the message,
+     *  returning whether it succeeded. */
+    bool call(const char *method, const QString &message) const
+    {
+        SireHelpers::ScopedGILAcquire gil;
+
+        const_cast<ConsoleImpl *>(this)->get_pyconsole();
+
+        if (not pyconsole)
+            return false;
+
+        PyObject *result = PyObject_CallMethod(pyconsole, method, "s", message.toUtf8().constData());
+
+        if (result == 0)
+        {
+            PyErr_Clear();
+            return false;
+        }
+
+        Py_DECREF(result);
+        return true;
+    }
+
+    /** Import the Python console. This must be called with the GIL held. */
     void get_pyconsole()
     {
         if (pyconsole)
             return;
 
-        PyGILState_STATE gilstate = PyGILState_Ensure();
-
         PyObject *sire_utils = PyImport_ImportModule("sire.utils");
 
         if (sire_utils == 0)
         {
+            PyErr_Clear();
             qWarning() << "COULD NOT IMPORT SIRE.UTILS";
-            PyGILState_Release(gilstate);
             return;
         }
 
@@ -425,9 +367,8 @@ private:
 
         if (pyconsole == 0)
         {
+            PyErr_Clear();
             qWarning() << "Could not import Console from sire.utils";
-            PyGILState_Release(gilstate);
-            return;
         }
     }
 
