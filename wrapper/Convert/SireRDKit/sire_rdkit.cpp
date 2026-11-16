@@ -15,6 +15,8 @@
 
 #include "boost/python.hpp"
 
+#include "Helpers/scoped_gil_acquire.hpp"
+
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
@@ -63,19 +65,6 @@ using SireMol::SelectorMol;
 
 namespace bp = boost::python;
 
-// RAII wrapper to acquire/release the Python GIL before calling back into
-// Python from arbitrary C++ contexts (including non-Python-created threads).
-// Same pattern as wrapper/Convert/SireOpenMM/pyqm.cpp's GILLock.
-class GILLock
-{
-public:
-    GILLock() { state_ = PyGILState_Ensure(); }
-    ~GILLock() { PyGILState_Release(state_); }
-
-private:
-    PyGILState_STATE state_;
-};
-
 namespace SireRDKit
 {
     // Optional Python callback used as a fallback for RDKit bond-order/
@@ -105,7 +94,7 @@ namespace SireRDKit
         if (bond_order_inference_callback == nullptr or bond_order_inference_callback->is_none())
             return false;
 
-        GILLock lock;
+        SireHelpers::ScopedGILAcquire gil;
 
         try
         {

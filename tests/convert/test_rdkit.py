@@ -273,3 +273,37 @@ def test_rdkit_sdf_tags(tagged_sdf):
     # check that the data is the same on the rdkit molecule
     for prop in rdmol.GetPropNames():
         assert rdmol.GetProp(prop) == rdmol2.GetProp(prop)
+
+
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
+def test_rdkit_console_warning_without_gil():
+    """
+    Make sure that a console warning raised during conversion, which runs
+    without the GIL, doesn't hang or abort the interpreter. The conversion
+    runs in a separate process, since the failure is a deadlock.
+    """
+    import subprocess
+    import sys
+    import textwrap
+
+    # Hiding MDAnalysis makes bond-order inference of a molecule with dummy
+    # atoms fail, so the converter emits a warning.
+    script = textwrap.dedent(
+        """
+        import sys
+        sys.modules["MDAnalysis"] = None
+
+        import sire as sr
+
+        mols = sr.morph.link_to_perturbed(sr.load_test_files("merged_molecule.s3"))
+        sr.convert.to_rdkit(mols.molecules("property is_perturbable")[0])
+        """
+    )
+
+    result = subprocess.run(
+        [sys.executable, "-c", script], capture_output=True, text=True, timeout=300
+    )
+    assert result.returncode == 0, result.stderr
