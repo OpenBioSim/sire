@@ -277,6 +277,7 @@ try:
 
         use_andersen = False
         temperature = None
+        is_langevin_middle = False
 
         if isinstance(integrator, str):
             from ...options import Integrator
@@ -304,6 +305,7 @@ try:
                     integrator = openmm.LangevinMiddleIntegrator(
                         temperature, friction, timestep
                     )
+                    is_langevin_middle = True
 
                 elif integrator == "langevin":
                     integrator = openmm.LangevinIntegrator(
@@ -340,6 +342,7 @@ try:
                 )
 
                 temperature = ensemble.temperature().to(kelvin) * openmm.unit.kelvin
+                is_langevin_middle = True
         elif openmm.Integrator not in type(integrator).mro():
             raise TypeError(
                 f"Cannot cast the integrator {integrator} to the correct "
@@ -382,8 +385,61 @@ try:
 
         # Next, convert the sire system to an openmm system
 
+        use_cupotential = (
+            map.specified("use_cupotential")
+            and map["use_cupotential"].value().as_boolean()
+        )
+
+        convert_map = map
+
+        if use_cupotential:
+            # The cuPotential plugin must be loaded so OpenMM can find its CUDA kernels.
+            try:
+                import nv_openmm_plugin
+            except Exception as e:
+                raise ImportError(
+                    "cuPotential was requested, but the cuPotential OpenMM "
+                    f"plugin (nv_openmm_plugin) could not be loaded: {e}"
+                )
+
+            if (
+                map.specified("precision")
+                and map.get_string("precision").lower() == "double"
+            ):
+                raise ValueError(
+                    "cuPotential doesn't support double precision. Use 'mixed' "
+                    "or 'single' precision."
+                )
+
+            # cuPotential only supports its own PME tolerance.
+            if not map.specified("tolerance"):
+                map.set("tolerance", 5e-4)
+
+        # The cuPotential integrator and barostat replace OpenMM's when using
+        # the Langevin middle integrator.
+        use_cupotential_integrator = use_cupotential and is_langevin_middle
+
+        if use_cupotential_integrator:
+            # The cuPotential integrator removes centre of mass motion itself,
+            # so the CMMotionRemover must not be added to the system.
+            com_frequency = 0
+
+            if map.specified("com_reset_frequency"):
+                from ...base import PropertyMap
+
+                com_frequency = max(0, map["com_reset_frequency"].value().as_integer())
+                convert_map = PropertyMap(map)
+                convert_map.unset("com_reset_frequency")
+
+            integrator = nv_openmm_plugin.LangevinMiddleIntegrator(
+                temperature.value_in_unit(openmm.unit.kelvin),
+                friction.value_in_unit(openmm.unit.picosecond**-1),
+                timestep.value_in_unit(openmm.unit.picosecond),
+                com_frequency,
+            )
+
         # system must be an openmm.System() or else we will crash!
-        openmm_metadata = _sire_to_openmm_system(system, mols, map)
+        openmm_metadata = _sire_to_openmm_system(system, mols, convert_map)
 
         # If we want temperature controlled by an Andersen thermostat
         # then add this here
@@ -406,7 +462,13 @@ try:
 
             pressure = ensemble.pressure().to(atm) * openmm.unit.atmosphere
 
-            if surface_tension is not None:
+            if surface_tension is None and use_cupotential_integrator:
+                barostat = nv_openmm_plugin.MonteCarloBarostat(
+                    pressure.value_in_unit(openmm.unit.bar),
+                    temperature.value_in_unit(openmm.unit.kelvin),
+                    barostat_freq,
+                )
+            elif surface_tension is not None:
                 barostat = openmm.MonteCarloMembraneBarostat(
                     pressure,
                     surface_tension,

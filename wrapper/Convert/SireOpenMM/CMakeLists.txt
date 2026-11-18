@@ -39,6 +39,32 @@ if (${SIRE_USE_OPENMM})
         message(STATUS "OpenMM CustomVolumeForce not found (requires OpenMM >= 8.3) - LJ dispersion correction support disabled")
     endif()
 
+    # Optional NVIDIA cuPotential support. SIRE_CUPOTENTIAL_DIR is the plugins/openmm
+    # directory of a cuPotential source tree in which the plugin has been built.
+    # Clear cached results, so reconfiguring without SIRE_CUPOTENTIAL_DIR disables support.
+    unset(CUPOTENTIAL_INCLUDE_DIR CACHE)
+    unset(CUPOTENTIAL_LIBRARY CACHE)
+    if (DEFINED ENV{SIRE_CUPOTENTIAL_DIR})
+        set(CUPOTENTIAL_DIR "$ENV{SIRE_CUPOTENTIAL_DIR}")
+        find_path(CUPOTENTIAL_INCLUDE_DIR nvopenmm/NonbondedForce.h
+                  PATHS "${CUPOTENTIAL_DIR}/cpp/openmmapi/include" NO_DEFAULT_PATH)
+        find_library(CUPOTENTIAL_LIBRARY OpenMMNvidia
+                     PATHS "${CUPOTENTIAL_DIR}/build/cpp" "${CUPOTENTIAL_DIR}/python/nv_openmm_plugin/lib"
+                     NO_DEFAULT_PATH)
+        if (CUPOTENTIAL_INCLUDE_DIR AND CUPOTENTIAL_LIBRARY)
+            message(STATUS "cuPotential support enabled: ${CUPOTENTIAL_LIBRARY}")
+            include_directories(${CUPOTENTIAL_INCLUDE_DIR})
+            add_definitions("-DSIRE_USE_CUPOTENTIAL")
+            set(CUPOTENTIAL_LIBRARIES "${CUPOTENTIAL_LIBRARY}")
+            get_filename_component(CUPOTENTIAL_LIBRARY_DIR "${CUPOTENTIAL_LIBRARY}" DIRECTORY)
+        else()
+            message(FATAL_ERROR "SIRE_CUPOTENTIAL_DIR is set, but the cuPotential headers or "
+                                "libOpenMMNvidia could not be found under ${CUPOTENTIAL_DIR}. "
+                                "It should be the absolute path of the plugins/openmm directory "
+                                "of a cuPotential tree in which the plugin has been built.")
+        endif()
+    endif()
+
     # Check to see if Torch support has been disabled.
     if (NOT DEFINED ENV{SIRE_NO_TORCH})
         find_package(Torch)
@@ -111,7 +137,13 @@ if (${SIRE_USE_OPENMM})
                           ${Boost_LIBRARIES}
                           ${OpenMM_LIBRARIES}
                           ${TORCH_LIBRARIES}
+                          ${CUPOTENTIAL_LIBRARIES}
                           )
+
+    # Find the cuPotential plugin library without needing LD_LIBRARY_PATH.
+    if (CUPOTENTIAL_LIBRARY_DIR)
+        set_property(TARGET SireOpenMM APPEND PROPERTY INSTALL_RPATH "${CUPOTENTIAL_LIBRARY_DIR}")
+    endif()
 
     include( LimitSirePythonExportSymbols )
     export_this_symbol_only( "init_SireOpenMM" "_init_SireOpenMM" )

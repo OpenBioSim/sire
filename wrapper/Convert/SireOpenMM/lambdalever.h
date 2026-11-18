@@ -129,6 +129,8 @@ namespace SireOpenMM
 
         void setDependentForceIndex(const QString &force, int index);
 
+        void removeForceIndex(int index);
+
         void addRestraintIndex(const QString &force, int index);
 
         int addPerturbableMolecule(const OpenMMMolecule &molecule,

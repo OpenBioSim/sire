@@ -467,10 +467,16 @@ class SOMMContext(_Context):
         # Store the OpenMM system.
         omm_system = self.getSystem()
 
-        # Get the NonBonded force.
+        # Get the NonBonded force, which may be cuPotential's equivalent.
+        import sys
+
+        nonbonded_types = (openmm.NonbondedForce,)
+        if "nv_openmm_plugin" in sys.modules:
+            nonbonded_types += (sys.modules["nv_openmm_plugin"].NonbondedForce,)
+
         nonbonded_force = None
         for force in omm_system.getForces():
-            if isinstance(force, openmm.NonbondedForce):
+            if isinstance(force, nonbonded_types):
                 nonbonded_force = force
                 break
         if nonbonded_force is None:

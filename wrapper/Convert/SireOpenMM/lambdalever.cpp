@@ -35,9 +35,88 @@
 
 #include "tostring.h"
 
+#ifdef SIRE_USE_CUPOTENTIAL
+#include "nvopenmm/NonbondedForce.h"
+#endif
+
 using namespace SireOpenMM;
 using namespace SireCAS;
 using namespace SireBase;
+
+#ifdef SIRE_USE_CUPOTENTIAL
+#define CLJ_CALL(call) (nv != nullptr ? nv->call : stock->call)
+#else
+#define CLJ_CALL(call) (stock->call)
+#endif
+
+namespace
+{
+    /** Forwards the parameter API used by the lever to the "clj" force, which is
+     *  either an OpenMM::NonbondedForce or a cuPotential NvOpenMM::NonbondedForce. */
+    class CLJForce
+    {
+    public:
+        explicit CLJForce(OpenMM::Force &force)
+        {
+            stock = dynamic_cast<OpenMM::NonbondedForce *>(&force);
+#ifdef SIRE_USE_CUPOTENTIAL
+            if (stock == nullptr)
+                nv = dynamic_cast<NvOpenMM::NonbondedForce *>(&force);
+            if (stock == nullptr and nv == nullptr)
+#else
+            if (stock == nullptr)
+#endif
+                throw SireError::invalid_cast(QObject::tr(
+                                                  "Cannot cast the force called 'clj' to a NonbondedForce. "
+                                                  "We think it is a %1.")
+                                                  .arg(QString::fromStdString(force.getName())),
+                                              CODELOC);
+        }
+
+        int getNumParticles() const
+        {
+            return CLJ_CALL(getNumParticles());
+        }
+
+        double getCutoffDistance() const
+        {
+            return CLJ_CALL(getCutoffDistance());
+        }
+
+        void getParticleParameters(int i, double &q, double &sig, double &eps) const
+        {
+            CLJ_CALL(getParticleParameters(i, q, sig, eps));
+        }
+
+        void setParticleParameters(int i, double q, double sig, double eps)
+        {
+            CLJ_CALL(setParticleParameters(i, q, sig, eps));
+        }
+
+        void getExceptionParameters(int i, int &a0, int &a1, double &qq, double &sig, double &eps) const
+        {
+            CLJ_CALL(getExceptionParameters(i, a0, a1, qq, sig, eps));
+        }
+
+        void setExceptionParameters(int i, int a0, int a1, double qq, double sig, double eps)
+        {
+            CLJ_CALL(setExceptionParameters(i, a0, a1, qq, sig, eps));
+        }
+
+        void updateParametersInContext(OpenMM::Context &context)
+        {
+            CLJ_CALL(updateParametersInContext(context));
+        }
+
+    private:
+        OpenMM::NonbondedForce *stock = nullptr;
+#ifdef SIRE_USE_CUPOTENTIAL
+        NvOpenMM::NonbondedForce *nv = nullptr;
+#endif
+    };
+}
+
+#undef CLJ_CALL
 
 //////
 ////// Implementation of MolLambdaCache
@@ -1297,7 +1376,13 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     // get copies of the forcefields in which the parameters will be changed
     auto qmff = this->getForce<QMForce>("qmff", system);
-    auto cljff = this->getForce<OpenMM::NonbondedForce>("clj", system);
+    std::unique_ptr<CLJForce> clj_force;
+    {
+        const int clj_idx = this->getForceIndex("clj");
+        if (clj_idx >= 0)
+            clj_force.reset(new CLJForce(system.getForce(clj_idx)));
+    }
+    CLJForce *cljff = clj_force.get();
     auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
     auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
     auto ghost_14ff = this->getForce<OpenMM::CustomBondForce>("ghost-14", system);
@@ -2786,6 +2871,40 @@ void LambdaLever::setDependentForceIndex(const QString &force, int index)
                                        CODELOC);
 
     this->name_to_ffidx.insert(force, index);
+}
+
+/** Forget the force at 'index' after it has been removed from the System,
+ *  shifting the indices of all later forces down by one.
+ */
+void LambdaLever::removeForceIndex(int index)
+{
+    for (auto it = name_to_ffidx.begin(); it != name_to_ffidx.end();)
+    {
+        if (it.value() == index)
+        {
+            it = name_to_ffidx.erase(it);
+            continue;
+        }
+
+        if (it.value() > index)
+            it.value() -= 1;
+
+        ++it;
+    }
+
+    for (auto it = name_to_restraintidx.begin(); it != name_to_restraintidx.end();)
+    {
+        if (it.value() == index)
+        {
+            it = name_to_restraintidx.erase(it);
+            continue;
+        }
+
+        if (it.value() > index)
+            it.value() -= 1;
+
+        ++it;
+    }
 }
 
 /** Add the index of a restraint force called 'restraint' in the

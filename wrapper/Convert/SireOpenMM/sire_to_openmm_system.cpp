@@ -58,6 +58,10 @@
 
 #include <QDebug>
 
+#ifdef SIRE_USE_CUPOTENTIAL
+#include "nvopenmm/NonbondedForce.h"
+#endif
+
 using SireBase::PropertyMap;
 using SireCAS::LambdaSchedule;
 using SireMol::Molecule;
@@ -1035,6 +1039,64 @@ void _set_pme_parameters(OpenMM::NonbondedForce &cljff,
 
     cljff.setPMEParameters(alpha, nx, ny, nz);
 }
+
+#ifdef SIRE_USE_CUPOTENTIAL
+/** Replace the "clj" NonbondedForce in 'system' with a cuPotential
+ *  NvOpenMM::NonbondedForce converted from it. The new force is appended
+ *  to the System and the lever's force indices are updated to match.
+ */
+void _convert_clj_to_cupotential(OpenMM::System &system,
+                                 LambdaLever &lambda_lever)
+{
+    const int clj_idx = lambda_lever.getForceIndex("clj");
+
+    if (clj_idx < 0)
+        return;
+
+    const auto *cljff = dynamic_cast<const OpenMM::NonbondedForce *>(&system.getForce(clj_idx));
+
+    if (cljff == nullptr)
+        throw SireError::invalid_cast(QObject::tr(
+                                          "The 'clj' force is not an OpenMM::NonbondedForce, so it "
+                                          "cannot be converted for cuPotential."),
+                                      CODELOC);
+
+    if (cljff->getNonbondedMethod() != OpenMM::NonbondedForce::PME)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "cuPotential requires PME electrostatics in a periodic space. "
+                                                "Use cutoff_type='pme', or disable 'use_cupotential'."),
+                                            CODELOC);
+
+    double alpha;
+    int nx, ny, nz;
+    cljff->getPMEParameters(alpha, nx, ny, nz);
+
+    if (alpha != 0 or nx != 0 or ny != 0 or nz != 0)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "cuPotential chooses its own PME parameters, so explicit "
+                                                "'pme_alpha', 'pme_grid' or 'pme_spacing' values (e.g. from "
+                                                "PME tuning) cannot be used with 'use_cupotential'."),
+                                            CODELOC);
+
+    const double tolerance = cljff->getEwaldErrorTolerance();
+
+    if (std::abs(tolerance - NvOpenMM::NonbondedForce::ForceErrorTolerance) > 1e-12)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "cuPotential requires a PME tolerance of %1, but %2 was "
+                                                "requested. Remove the 'tolerance' option, or set it to %1.")
+                                                .arg(NvOpenMM::NonbondedForce::ForceErrorTolerance)
+                                                .arg(tolerance),
+                                            CODELOC);
+
+    auto *nvff = new NvOpenMM::NonbondedForce(*cljff, NvOpenMM::NonbondedForce::AutoBoxSafety,
+                                              NvOpenMM::NonbondedForce::Prolate);
+    nvff->setName("CuPotentialNonbondedForce");
+
+    system.removeForce(clj_idx);
+    lambda_lever.removeForceIndex(clj_idx);
+    lambda_lever.setForceIndex("clj", system.addForce(nvff));
+}
+#endif
 
 /** Set the coulomb and LJ cutoff in the passed NonbondedForce,
  *  based on the information in the passed ForceFieldInfo.
@@ -3468,6 +3530,20 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                              system, lambda_lever, start_index, real_atoms, force_group_counter);
             }
         }
+    }
+
+    // Replace the completed clj force with cuPotential's equivalent, if requested.
+    if (map.specified("use_cupotential") and map["use_cupotential"].value().asABoolean())
+    {
+#ifdef SIRE_USE_CUPOTENTIAL
+        _convert_clj_to_cupotential(system, lambda_lever);
+#else
+        throw SireError::unsupported(QObject::tr(
+                                         "'use_cupotential' was requested, but this version of Sire was "
+                                         "built without cuPotential support. Rebuild with "
+                                         "SIRE_CUPOTENTIAL_DIR set."),
+                                     CODELOC);
+#endif
     }
 
     ///

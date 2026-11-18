@@ -53,6 +53,18 @@ def tune_pme(
     import numpy as np
     from openmm import NonbondedForce, unit
 
+    from ...base import create_map
+
+    cupo_map = create_map(map)
+    if (
+        cupo_map.specified("use_cupotential")
+        and cupo_map["use_cupotential"].value().as_boolean()
+    ):
+        raise ValueError(
+            "PME tuning can't be used with 'use_cupotential', since cuPotential "
+            "chooses its own PME parameters."
+        )
+
     d = mols.dynamics(map=map, **kwargs)
     context = d._d._omm_mols
 

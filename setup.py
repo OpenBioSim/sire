@@ -365,6 +365,12 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     bindir = _get_bin_dir()
     cmake = os.path.join(bindir, cmake)
 
+    # CMake runs in the build directory, so resolve a relative path from here.
+    if "SIRE_CUPOTENTIAL_DIR" in os.environ:
+        os.environ["SIRE_CUPOTENTIAL_DIR"] = os.path.abspath(
+            os.environ["SIRE_CUPOTENTIAL_DIR"]
+        )
+
     if "CONDA_BUILD" in os.environ and os.environ["CONDA_BUILD"] == "1":
         conda_build = True
     else:

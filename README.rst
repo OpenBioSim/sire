@@ -174,6 +174,55 @@ This is intended as a local development tweak only and shouldn't be committed,
 since ``actions/generate_recipe.py`` reads the ``[dependencies]`` section when
 generating the conda recipe, so the pin would also end up in our packages.
 
+Experimental NVIDIA cuPotential support
+---------------------------------------
+
+Sire can optionally use the `NVIDIA cuPotential <https://github.com/NVIDIA/cuPotential>`__
+OpenMM plugin, which replaces OpenMM's PME ``NonbondedForce``, Langevin middle
+integrator and Monte Carlo barostat with faster equivalents. This requires a
+source build of Sire against a built copy of the plugin. The plugin's own
+updates of parameters in the context are currently slow, which removes most of
+the speed-up for alchemical simulations that sample energies at many lambda
+values (see `this issue <https://github.com/NVIDIA/cuPotential/issues/2>`__).
+For now, we recommend using the
+`feature_update_range <https://github.com/lohedges/cuPotential/tree/feature_update_range>`__
+branch of our fork, which fixes this.
+
+First, build the plugin. ``run_build`` expects OpenMM to be installed in
+``/opt/openmm``, so set ``OPENMM`` in ``plugins/openmm/run_build`` to the
+prefix of the environment that you'll build Sire in, which also needs to
+contain ``swig``. The script downloads the cuPotential runtime library itself:
+
+.. code-block:: bash
+
+    git clone -b feature_update_range https://github.com/lohedges/cuPotential.git
+    cd cuPotential/plugins/openmm
+    ./run_build
+
+Next, export ``SIRE_CUPOTENTIAL_DIR`` as the ``plugins/openmm`` directory of
+the plugin, not the root of the repository, before building Sire as above:
+
+.. code-block:: bash
+
+    export SIRE_CUPOTENTIAL_DIR=/path/to/cuPotential/plugins/openmm
+    python setup.py install
+
+The build output reports ``cuPotential support enabled`` when the plugin is
+found. The plugin's Python module also needs to be importable at runtime:
+
+.. code-block:: bash
+
+    export PYTHONPATH=/path/to/cuPotential/plugins/openmm/python:$PYTHONPATH
+
+To use cuPotential, pass ``use_cupotential`` in the map when creating a
+dynamics object. This requires the CUDA platform, PME, and single or mixed
+precision. The cuPotential integrator and barostat are used with the
+``langevin_middle`` integrator, which is the default:
+
+.. code-block:: python
+
+    d = mols.dynamics(platform="cuda", map={"use_cupotential": True})
+
 License
 =======
 

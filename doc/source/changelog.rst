@@ -215,6 +215,16 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   conversion emitted a warning, e.g. when bond orders couldn't be inferred. The console didn't
   release the GIL after importing its Python implementation.
 
+* Added optional support for NVIDIA cuPotential. When Sire is built with
+  ``SIRE_CUPOTENTIAL_DIR`` set, the ``use_cupotential`` option replaces the PME
+  ``NonbondedForce`` with cuPotential's GPU-accelerated equivalent, using its prolate
+  electrostatics, which is driven by the ``LambdaLever`` as before. With the
+  ``langevin_middle`` integrator, cuPotential's ``LangevinMiddleIntegrator`` and
+  ``MonteCarloBarostat`` are also used in place of OpenMM's. REST2 is supported for both
+  perturbable and non-perturbable atoms, while ``tune_pme`` raises an error since
+  cuPotential chooses its own PME parameters and tolerance. The plugin library is added to
+  the RPATH, so ``LD_LIBRARY_PATH`` doesn't need to be set.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
