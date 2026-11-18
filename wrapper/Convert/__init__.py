@@ -196,6 +196,99 @@ try:
 
         return sire_mols
 
+    def _unsupported_cupotential_constraints(system, mols, map):
+        """
+        Return the atoms of each constraint group that cuPotential's integrator
+        can't solve at either end state. It only supports rigid three-site water,
+        and one to three atoms constrained to a central atom with one length and
+        one mass.
+        """
+        from collections import defaultdict
+
+        import openmm
+
+        nm = openmm.unit.nanometer
+        dalton = openmm.unit.dalton
+
+        mass = [
+            system.getParticleMass(i).value_in_unit(dalton)
+            for i in range(system.getNumParticles())
+        ]
+
+        # Constraint lengths at the two end states, keyed by atom pair.
+        lengths = {}
+        for i in range(system.getNumConstraints()):
+            a, b, r = system.getConstraintParameters(i)
+            if mass[a] == 0 and mass[b] == 0:
+                continue
+            r = r.value_in_unit(nm)
+            lengths[(min(a, b), max(a, b))] = (r, r)
+
+        try:
+            pert_mols = mols.molecules("property is_perturbable")
+        except Exception:
+            pert_mols = []
+
+        atoms = mols.atoms() if len(pert_mols) > 0 else None
+
+        for mol in pert_mols:
+            pert_mol = mol.perturbation().to_openmm(map=map)
+            for (atom0, atom1), r0, r1 in pert_mol.changed_constraints(to_pandas=False):
+                a, b = atoms.find(atom0), atoms.find(atom1)
+                key = (min(a, b), max(a, b))
+                # Treat a constraint that can't be matched as unsupported.
+                if key not in lengths:
+                    return [list(key)]
+                lengths[key] = (r0, r1)
+
+        neighbours = defaultdict(set)
+        for a, b in lengths:
+            neighbours[a].add(b)
+            neighbours[b].add(a)
+
+        def same(values):
+            return all(abs(v - values[0]) <= 1e-8 * abs(values[0]) for v in values)
+
+        def supported(group):
+            pairs = [(a, b) for a in group for b in neighbours[a] if a < b]
+            if len(group) == 3 and len(pairs) == 3:
+                for state in (0, 1):
+                    r = sorted(lengths[pair][state] for pair in pairs)
+                    if not (same(r[:2]) or same(r[1:])):
+                        return False
+                return True
+            centres = [a for a in group if len(neighbours[a]) == len(group) - 1]
+            if not centres or len(group) > 4:
+                return False
+            centre = centres[0]
+            outer = [a for a in group if a != centre]
+            if any(len(neighbours[a]) != 1 for a in outer):
+                return False
+            if not same([mass[a] for a in outer]):
+                return False
+            for state in (0, 1):
+                r = [lengths[(min(centre, a), max(centre, a))][state] for a in outer]
+                if not same(r):
+                    return False
+            return True
+
+        unsupported = []
+        seen = set()
+        for start in neighbours:
+            if start in seen:
+                continue
+            group, stack = set(), [start]
+            while stack:
+                atom = stack.pop()
+                if atom not in group:
+                    group.add(atom)
+                    stack.extend(neighbours[atom])
+            seen |= group
+            if not supported(group):
+                unsupported.append(sorted(group))
+
+        return unsupported
+
     def sire_to_openmm(mols, map):
         import openmm
 
@@ -420,6 +513,8 @@ try:
         use_cupotential_integrator = use_cupotential and is_langevin_middle
 
         if use_cupotential_integrator:
+            openmm_integrator = integrator
+
             # The cuPotential integrator removes centre of mass motion itself,
             # so the CMMotionRemover must not be added to the system.
             com_frequency = 0
@@ -440,6 +535,26 @@ try:
 
         # system must be an openmm.System() or else we will crash!
         openmm_metadata = _sire_to_openmm_system(system, mols, convert_map)
+
+        if use_cupotential_integrator:
+            unsupported = _unsupported_cupotential_constraints(
+                system, mols, convert_map
+            )
+
+            if unsupported:
+                _warnings.warn(
+                    "cuPotential's integrator can't solve "
+                    f"{len(unsupported)} constraint group(s), e.g. atoms "
+                    f"{unsupported[0]}, since it needs the atoms constrained to a "
+                    "central atom to share one length and mass at both end states. "
+                    "OpenMM's integrator and barostat will be used instead, with "
+                    "cuPotential's nonbonded force. For perturbed hydrogens, setting "
+                    "'perturbable_constraint' to 'h_bonds_not_perturbed' avoids this."
+                )
+                integrator = openmm_integrator
+                if com_frequency > 0:
+                    system.addForce(openmm.CMMotionRemover(com_frequency))
+                use_cupotential_integrator = False
 
         # If we want temperature controlled by an Andersen thermostat
         # then add this here

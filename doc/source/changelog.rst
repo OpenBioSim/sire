@@ -220,7 +220,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   ``NonbondedForce`` with cuPotential's GPU-accelerated equivalent, using its prolate
   electrostatics, which is driven by the ``LambdaLever`` as before. With the
   ``langevin_middle`` integrator, cuPotential's ``LangevinMiddleIntegrator`` and
-  ``MonteCarloBarostat`` are also used in place of OpenMM's. REST2 is supported for both
+  ``MonteCarloBarostat`` are also used in place of OpenMM's, unless its integrator can't
+  solve the system's constraints at either end state, e.g. for a perturbed hydrogen on a
+  methyl group, when OpenMM's are used with a warning. REST2 is supported for both
   perturbable and non-perturbable atoms, while ``tune_pme`` raises an error since
   cuPotential chooses its own PME parameters and tolerance. The plugin library is added to
   the RPATH, so ``LD_LIBRARY_PATH`` doesn't need to be set.
