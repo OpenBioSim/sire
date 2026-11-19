@@ -1714,10 +1714,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                         // is this interaction between an to/from ghost atom?
                         const auto to_from_ghost = (from_ghost0 and to_ghost1) or (from_ghost1 and to_ghost0);
 
+                        // to/from ghosts never interact, so have no Coulomb
                         cljff->setExceptionParameters(
                             boost::get<0>(idxs[j]),
                             boost::get<0>(p), boost::get<1>(p),
-                            boost::get<2>(p) * scale, 1e-9, 1e-9);
+                            to_from_ghost ? 0.0 : boost::get<2>(p) * scale, 1e-9, 1e-9);
 
                         // exclude 14s for to/from ghost interactions
                         if (not to_from_ghost and ghost_14ff != 0)
