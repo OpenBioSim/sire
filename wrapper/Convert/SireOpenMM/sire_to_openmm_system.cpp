@@ -3048,17 +3048,19 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     is_ring_breaking = false;
                     is_ring_making = false;
 
-                    // don't include the LJ term, as this is calculated
-                    // elsewhere - note that we need to use 1e-9 to
-                    // make sure that OpenMM doesn't eagerly remove
-                    // this, and cause "changed excluded atoms" warnings
-                    idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
-                                              boost::get<2>(p), 1e-9,
-                                              1e-9, true);
-
                     // Whether this is a to/from ghost interaction.
                     auto to_from_ghost = (from_ghost_idxs.contains(atom0) and to_ghost_idxs.contains(atom1)) or
                                          (from_ghost_idxs.contains(atom1) and to_ghost_idxs.contains(atom0));
+
+                    // don't include the LJ term, as this is calculated
+                    // elsewhere - note that we need to use 1e-9 to
+                    // make sure that OpenMM doesn't eagerly remove
+                    // this, and cause "changed excluded atoms" warnings.
+                    // To/from ghosts never interact, and have no ghost-14
+                    // term to soften their Coulomb, so it is zeroed.
+                    idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
+                                              to_from_ghost ? 0.0 : boost::get<2>(p),
+                                              1e-9, 1e-9, true);
 
                     // Whether a ghost-14 slot is needed is decided here, once,
                     // for the lifetime of the OpenMM::CustomBondForce - bonds

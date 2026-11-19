@@ -571,3 +571,48 @@ def test_openmm_ghost_14_bug(ghost_14_bug, openmm_platform):
     for key in pairs:
         assert params0[key][2] < params_mid[key][2] < params1[key][2]
         assert params1[key][2] > 0.1
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+@pytest.mark.parametrize("fixture", ["merged_zan_ose", "ghost_14_bug"])
+def test_openmm_to_from_ghost_exceptions(fixture, openmm_platform, request):
+    """
+    To and from ghost atoms never interact, so exceptions between them, e.g. 1-4
+    pairs through a shared anchor, must have no Coulomb at any lambda.
+    """
+    from openmm import NonbondedForce
+
+    mols = sr.morph.link_to_reference(request.getfixturevalue(fixture))
+    mol = mols.molecules("property is_perturbable")[0]
+
+    elem0 = mol.property("element0")
+    elem1 = mol.property("element1")
+    from_ghosts = {i for i in range(mol.num_atoms()) if elem1[i].symbol() == "Xx"}
+    to_ghosts = {i for i in range(mol.num_atoms()) if elem0[i].symbol() == "Xx"}
+
+    d = mol.dynamics(platform=openmm_platform)
+
+    def nonbonded(d):
+        return [
+            f
+            for f in d.context().getSystem().getForces()
+            if isinstance(f, NonbondedForce)
+        ][0]
+
+    nb = nonbonded(d)
+    to_from = {frozenset((a, b)) for a in from_ghosts for b in to_ghosts}
+    pairs = [
+        k
+        for k in range(nb.getNumExceptions())
+        if frozenset(nb.getExceptionParameters(k)[:2]) in to_from
+    ]
+    assert len(pairs) > 0
+
+    for lam in (0.0, 0.5, 1.0):
+        d.set_lambda(lam)
+        nb = nonbonded(d)
+        for k in pairs:
+            assert nb.getExceptionParameters(k)[2]._value == 0.0
