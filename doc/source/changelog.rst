@@ -227,6 +227,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   cuPotential chooses its own PME parameters and tolerance. The plugin library is added to
   the RPATH, so ``LD_LIBRARY_PATH`` doesn't need to be set.
 
+* Fixed exceptions between to and from ghost atoms, e.g. 1-4 pairs through a shared
+  anchor, keeping a hard Coulomb interaction at intermediate lambda. Overlapping
+  vanishing and appearing groups could collapse onto each other and crash.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
