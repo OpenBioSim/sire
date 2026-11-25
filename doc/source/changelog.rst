@@ -235,6 +235,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   factors, rather than every pair of atoms. This makes it practical for merges of large
   molecules such as proteins.
 
+* Fixed the ``SparseMatrix`` hash function returning 0 for almost every key, which put
+  all entries in a single bucket and made lookups and inserts linear in the number of
+  entries. This slowed ``CLJNBPairs`` operations on molecules with large CutGroups.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
