@@ -377,13 +377,11 @@ namespace SireIO
 
     Vector cross(const Vector &v0, const Vector &v1);
 
-    //! Merge the CLJNBPairs (intrascale) of two molecules into a perturbable
-    /*! merged molecule's end-state intrascales.
+    //! Patch the connectivity-derived end-state intrascales of a merged
+    /*! molecule with the per-pair scale factors of the original molecules.
 
-        Expands nb0 from molecule0's atom index space into the merged
-        molecule's space (preserving actual per-pair scale factors, including
-        force-field-specific overrides such as GLYCAM funct=2 pairs), then
-        calls CLJNBPairs::merge to produce intrascale0 and intrascale1.
+        Pairs in intra0 (intra1) that differ from nb0 (nb1) take the original
+        value. Only pairs that aren't (1,1) in at least one matrix are checked.
 
         \param nb0
             The CLJNBPairs for molecule0 in its original atom index space.
