@@ -311,6 +311,41 @@ def test_clock_and_energy_trajectory_swap(ala_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+@pytest.mark.parametrize(
+    "delete, expected",
+    [
+        (lambda m: m.delete_all_frames(), [5, 5, 5]),
+        (lambda m: m.delete_frame(0), [5, 9, 13]),
+    ],
+)
+def test_frames_saved_after_delete(ala_mols, delete, expected):
+    """
+    Frames must still be saved after frames are deleted between dynamics blocks.
+    """
+
+    from sire.base import ProgressBar
+
+    ProgressBar.set_silent()
+
+    mols = ala_mols.clone()
+    mols.delete_all_frames()
+
+    d = mols.dynamics(timestep="1fs", platform="Reference")
+
+    num_frames = []
+
+    for _ in range(3):
+        d.run("5fs", frame_frequency="1fs", energy_frequency=0)
+        num_frames.append(d.commit().num_frames())
+        delete(d._d._sire_mols)
+
+    assert num_frames == expected
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
 def test_energy_cache_cleared_after_dynamics(ala_mols):
     """
     The context's energy cache must be invalidated after every dynamics block,
