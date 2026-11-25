@@ -34,8 +34,8 @@
 #include "sireglobal.h"
 
 #include "SireStream/datastream.h"
-#include "SireStream/shareddatastream.h"
 #include "SireStream/magic_error.h"
+#include "SireStream/shareddatastream.h"
 
 #include "SireError/errors.h"
 
@@ -110,7 +110,7 @@ namespace SireBase
 
         inline uint qHash(const Index &idx)
         {
-            return (idx.i << 16) & (idx.j | 0x0000FFFF);
+            return ::qHash((quint64(idx.i) << 32) | idx.j);
         }
 
     } // end of namespace detail
