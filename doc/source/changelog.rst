@@ -239,6 +239,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   all entries in a single bucket and made lookups and inserts linear in the number of
   entries. This slowed ``CLJNBPairs`` operations on molecules with large CutGroups.
 
+* Fixed new trajectory frames being lost after deleting a single frame from a system,
+  since ``System::deleteFrame`` didn't reset the live system trajectory.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 

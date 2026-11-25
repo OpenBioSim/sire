@@ -92,7 +92,7 @@ nvidia-ml-py = "*"
 [feature.obs.target.linux-64.dependencies]
 # biosimspace
 ambertools = ">=22"
-gromacs = "*"
+gromacs = ">=2025"
 alchemlyb = "*"
 mdtraj = "*"
 mdanalysis = ">=2.10.0"
@@ -102,7 +102,7 @@ pyopencl = "*"
 pycuda = "*"
 
 [feature.obs.target.linux-aarch64.dependencies]
-gromacs = "*"
+gromacs = ">=2025"
 openff-nagl = "*"
 # loch
 pycuda = "*"
