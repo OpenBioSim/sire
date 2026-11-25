@@ -51,9 +51,9 @@
 #include "SireMol/partialmolecule.h"
 #include "SireMol/selectormol.h"
 
+#include "SireBase/lazyevaluator.h"
 #include "SireBase/savestate.h"
 #include "SireBase/timeproperty.h"
-#include "SireBase/lazyevaluator.h"
 
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
@@ -4082,6 +4082,7 @@ void System::deleteFrame(int frame, const SireBase::PropertyMap &map)
 {
     this->accept();
     this->mustNowRecalculateFromScratch();
+    this->system_trajectory = 0;
     MolGroupsBase::deleteFrame(frame, map);
 }
 
