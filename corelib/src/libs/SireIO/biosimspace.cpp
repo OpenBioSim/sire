@@ -29,6 +29,8 @@
 
 #include <boost/tuple/tuple.hpp>
 
+#include <functional>
+
 #include "SireBase/getinstalldir.h"
 
 #include "SireError/errors.h"
@@ -1781,32 +1783,105 @@ namespace SireIO
         // this is a no-op. For force fields with non-default per-pair values
         // (e.g. GLYCAM funct=2 (1,1) instead of global sf14 for 1-4 pairs)
         // it replaces the base value with the correct per-pair value.
+        const CLJScaleFactor unscaled(1, 1);
+
+        // Visit each atom pair that isn't (1,1), since only these can differ.
+        auto visit_scaled = [&](const CLJNBPairs &pairs, const std::function<void(int, int)> &visit)
+        {
+            const auto &info = pairs.info();
+            const int ncg = info.nCutGroups();
+
+            auto atom = [&](int cg, int i)
+            { return info.atomIdx(CGAtomIdx(CGIdx(cg), SireID::Index(i))).value(); };
+
+            for (int icg = 0; icg < ncg; ++icg)
+            {
+                const int nats0 = info.nAtoms(CGIdx(icg));
+
+                for (int jcg = icg; jcg < ncg; ++jcg)
+                {
+                    const auto &block = pairs.get(CGIdx(icg), CGIdx(jcg));
+
+                    if (block.defaultValue() == unscaled)
+                    {
+                        for (const auto &element : block.nonDefaultElements())
+                        {
+                            const int i = std::get<0>(element);
+                            const int j = std::get<1>(element);
+
+                            if ((icg != jcg or j >= i) and std::get<2>(element) != unscaled)
+                                visit(atom(icg, i), atom(jcg, j));
+                        }
+
+                        continue;
+                    }
+
+                    const int nats1 = info.nAtoms(CGIdx(jcg));
+
+                    for (int i = 0; i < nats0; ++i)
+                    {
+                        for (int j = (icg == jcg ? i : 0); j < nats1; ++j)
+                        {
+                            if (block.get(i, j) != unscaled)
+                                visit(atom(icg, i), atom(jcg, j));
+                        }
+                    }
+                }
+            }
+        };
+
         auto patch = [&](const CLJNBPairs &nb, CLJNBPairs &nb_merged,
                          const QHash<AtomIdx, AtomIdx> &mapping)
         {
-            // Iterate only over the mapped atoms rather than all atoms in nb.
-            // This is O(k²) in the number of mapped atoms k, which is always
-            // ≤ nb.nAtoms() and can be much smaller.
-            const QList<AtomIdx> keys = mapping.keys();
-            const int k = keys.size();
+            const auto &info = nb.info();
+            const auto &merged_info = nb_merged.info();
 
-            for (int i = 0; i < k; ++i)
+            const int nats = info.nAtoms();
+            const int merged_nats = merged_info.nAtoms();
+
+            QVector<int> to_merged(nats, -1);
+            QVector<int> from_merged(merged_nats, -1);
+
+            for (auto it = mapping.constBegin(); it != mapping.constEnd(); ++it)
             {
-                const AtomIdx ai = keys.at(i);
-                const AtomIdx merged_ai = mapping.value(ai);
+                const int atom = it.key().map(nats);
+                const int merged_atom = it.value().map(merged_nats);
 
-                for (int j = i; j < k; ++j)
-                {
-                    const AtomIdx aj = keys.at(j);
-                    const AtomIdx merged_aj = mapping.value(aj);
-
-                    const CLJScaleFactor nb_sf = nb.get(ai, aj);
-                    const CLJScaleFactor base_sf = nb_merged.get(merged_ai, merged_aj);
-
-                    if (nb_sf.coulomb() != base_sf.coulomb() or nb_sf.lj() != base_sf.lj())
-                        nb_merged.set(merged_ai, merged_aj, nb_sf);
-                }
+                to_merged[atom] = merged_atom;
+                from_merged[merged_atom] = atom;
             }
+
+            auto check_pair = [&](int atom0, int atom1)
+            {
+                const int merged0 = to_merged[atom0];
+                const int merged1 = to_merged[atom1];
+
+                if (merged0 < 0 or merged1 < 0)
+                    return;
+
+                const auto &cgatom0 = info.cgAtomIdx(AtomIdx(atom0));
+                const auto &cgatom1 = info.cgAtomIdx(AtomIdx(atom1));
+                const auto &merged_cgatom0 = merged_info.cgAtomIdx(AtomIdx(merged0));
+                const auto &merged_cgatom1 = merged_info.cgAtomIdx(AtomIdx(merged1));
+
+                const CLJScaleFactor nb_sf = nb.get(cgatom0, cgatom1);
+
+                if (nb_sf != nb_merged.get(merged_cgatom0, merged_cgatom1))
+                    nb_merged.set(merged_cgatom0, merged_cgatom1, nb_sf);
+            };
+
+            // Take a copy so the scan isn't affected by the patching.
+            const CLJNBPairs base = nb_merged;
+
+            visit_scaled(nb, check_pair);
+
+            visit_scaled(base, [&](int merged0, int merged1)
+                         {
+                const int atom0 = from_merged[merged0];
+                const int atom1 = from_merged[merged1];
+
+                if (atom0 >= 0 and atom1 >= 0)
+                    check_pair(atom0, atom1); });
         };
 
         patch(nb0, intra0, mol0_merged_mapping);

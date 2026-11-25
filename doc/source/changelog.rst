@@ -231,6 +231,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   anchor, keeping a hard Coulomb interaction at intermediate lambda. Overlapping
   vanishing and appearing groups could collapse onto each other and crash.
 
+* Sped up ``SireIO::patchIntrascale`` by only checking atom pairs with non-default scale
+  factors, rather than every pair of atoms. This makes it practical for merges of large
+  molecules such as proteins.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
