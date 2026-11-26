@@ -25,6 +25,7 @@
   *
 \*********************************************/
 
+#include <algorithm>
 #include <limits>
 #include <mutex>
 
@@ -608,6 +609,9 @@ double PyQMForceImpl::computeForce(
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
 {
+    // OpenMM reuses this buffer between calls, so clear stale forces.
+    std::fill(forces.begin(), forces.end(), OpenMM::Vec3());
+
     // If this is the first step, then setup information for the neighbour list.
     if (this->step_count == 0)
     {

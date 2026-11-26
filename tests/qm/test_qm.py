@@ -508,6 +508,70 @@ def test_create_engine(ala_mols):
     assert nrg == 42
 
 
+def test_qm_force_cleared_outside_cutoff(ala_mols):
+    """
+    Make sure that an MM atom leaving the QM cutoff doesn't keep its previous
+    QM/MM force.
+    """
+
+    import openmm
+
+    # Zero energy, with a unit x-force on every MM atom within the cutoff.
+    def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm, cell=None, idx_mm=None):
+        forces_mm = np.zeros((len(xyz_mm), 3))
+        forces_mm[:, 0] = 1.0
+        return (0.0, np.zeros((len(xyz_qm), 3)).tolist(), forces_mm.tolist())
+
+    mols = ala_mols.clone()
+
+    qm_mols, engine = sr.qm.create_engine(
+        mols,
+        mols[0],
+        callback,
+        callback=None,
+        cutoff="12 A",
+        switch_width=0,
+    )
+
+    d = qm_mols.dynamics(
+        timestep="1fs",
+        constraint="none",
+        qm_engine=engine,
+        cutoff_type="pme",
+        cutoff="7.5 A",
+        platform="reference",
+    )
+
+    context = d.context()
+
+    group = next(
+        f.getForceGroup()
+        for f in context.getSystem().getForces()
+        if f.getName() == "QMForce"
+    )
+
+    nm = openmm.unit.nanometer
+    kj = openmm.unit.kilojoule_per_mole
+
+    # The oxygen of the first water.
+    idx = mols[0].num_atoms()
+    water = [idx + i for i in range(mols[1].num_atoms())]
+
+    inside = context.getState(getPositions=True).getPositions(asNumpy=True)
+    inside = inside.value_in_unit(nm)
+    outside = inside.copy()
+    outside[water, 1] += 1.0
+
+    def force_x(pos):
+        context.setPositions(pos * nm)
+        state = context.getState(getForces=True, groups={group})
+        return state.getForces(asNumpy=True).value_in_unit(kj / nm)[idx, 0]
+
+    assert force_x(outside) == 0.0
+    assert force_x(inside) != 0.0
+    assert force_x(outside) == 0.0
+
+
 def _check_link_atom_forces(qm_mols, engine, atol, indices=None):
     """
     Compare the forces on the atoms around the link atoms of the alanine

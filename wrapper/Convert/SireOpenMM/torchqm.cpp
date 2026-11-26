@@ -32,6 +32,7 @@
 #include <torch/csrc/autograd/autograd.h>
 #endif
 
+#include <algorithm>
 #include <limits>
 
 #include "SireError/errors.h"
@@ -410,6 +411,9 @@ double TorchQMForceImpl::computeForce(
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
 {
+    // OpenMM reuses this buffer between calls, so clear stale forces.
+    std::fill(forces.begin(), forces.end(), OpenMM::Vec3());
+
     // Get the platform name from the context.
     const auto platform = context.getPlatform().getName();
 
