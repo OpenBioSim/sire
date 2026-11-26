@@ -32,6 +32,7 @@
 #include <torch/csrc/autograd/autograd.h>
 #endif
 
+#include <algorithm>
 #include <limits>
 
 #include "SireError/errors.h"
@@ -410,6 +411,9 @@ double TorchQMForceImpl::computeForce(
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
 {
+    // OpenMM reuses this buffer between calls, so clear stale forces.
+    std::fill(forces.begin(), forces.end(), OpenMM::Vec3());
+
     // Get the platform name from the context.
     const auto platform = context.getPlatform().getName();
 
@@ -997,7 +1001,8 @@ double TorchQMForceImpl::computeForce(
             {
                 // r_hat points from the nearest QM atom to the MM atom.
                 const Vector mm_vec(xyz_mm[3 * i], xyz_mm[3 * i + 1], xyz_mm[3 * i + 2]);
-                const Vector r_hat = (mm_vec - nearest_qm_vecs[i]).normalise();
+                const Vector r_hat =
+                    (space.getMinimumImage(mm_vec, nearest_qm_vecs[i]) - nearest_qm_vecs[i]).normalise();
                 // dE_dq is in Hartree/e; dsdr is in 1/Å; multiply by HARTREE_TO_KJ_MOL*10
                 // to convert to kJ/mol/nm, matching the units of forces_qm/forces_mm.
                 const double correction = -dE_dq[i].item<float>() * HARTREE_TO_KJ_MOL * 10.0 * charges_unscaled[i] * dsdr;

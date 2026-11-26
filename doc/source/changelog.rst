@@ -242,6 +242,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed new trajectory frames being lost after deleting a single frame from a system,
   since ``System::deleteFrame`` didn't reset the live system trajectory.
 
+* Fixed MM atoms keeping a stale QM/MM force after leaving the QM cutoff, since the
+  ``PyQMForce`` and ``TorchQMForce`` force buffers weren't cleared between evaluations.
+
+* Fixed the QM/MM charge redistribution force direction using the raw separation
+  between an MM atom and its nearest QM atom, rather than the minimum image, giving
+  wrong forces for MM atoms interacting across a periodic boundary.
+
 `2026.2.0 <https://github.com/openbiosim/sire/compare/2026.1.0...2026.2.0>`__ - September 2026
 ----------------------------------------------------------------------------------------------
 
