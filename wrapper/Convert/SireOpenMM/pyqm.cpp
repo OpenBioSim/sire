@@ -1072,7 +1072,8 @@ double PyQMForceImpl::computeForce(
             {
                 // r_hat points from the nearest QM atom to the MM atom.
                 const Vector mm_vec(xyz_mm[i][0], xyz_mm[i][1], xyz_mm[i][2]);
-                const Vector r_hat = (mm_vec - nearest_qm_vecs[i]).normalise();
+                const Vector r_hat =
+                    (space.getMinimumImage(mm_vec, nearest_qm_vecs[i]) - nearest_qm_vecs[i]).normalise();
                 // dE_dcharges_mm is in kJ/mol/e (converted in Python); dsdr is in 1/Å;
                 // multiply by 10 to convert kJ/mol/Å → kJ/mol/nm (OpenMM units).
                 const double correction =
